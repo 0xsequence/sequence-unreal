@@ -1,11 +1,13 @@
 #pragma once
 
+
 enum ErrorType
 {
-	ErrNotFound,
-	ErrEmptyResponse,
-	ErrUnsupportedMethodOnChain,
-	ErrRequestFail,
+	NotFound,
+	ResponseParseError,
+	EmptyResponse,
+	UnsupportedMethodOnChain,
+	RequestFail,
 };
 
 class SequenceError
@@ -15,3 +17,5 @@ public:
 	FString Message;
 	ErrorType Type;
 };
+
+template<typename T> using TResult = TValueOrError<T, SequenceError>;

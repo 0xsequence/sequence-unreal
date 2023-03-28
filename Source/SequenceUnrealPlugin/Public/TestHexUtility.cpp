@@ -6,12 +6,15 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestHexUtility, "Public.TestHexUtility",
 
 bool TestHexUtility::RunTest(const FString& Parameters)
 {
-	if(!IntToHexString(1).GetValue().Equals("0x1"))
+	auto hexString = IntToHexString(0x256);
+	UE_LOG(LogTemp, Display, TEXT("Hex String is %s"), *hexString);
+	
+	if(HexStringToInt(hexString) != 0x256)
 	{
 		return false;
 	}
 
-	if(HexStringToInt("2629ad1f").GetValue() != 640265503)
+	if(HexStringToInt("2629ad1f").GetValue() != 0x2629ad1f)
 	{
 		return false;
 	}
