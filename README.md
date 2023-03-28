@@ -1,3 +1,3 @@
-Sequence Unreal SDK
-===================
+Sequence Unreal Plugin
+======================
 
