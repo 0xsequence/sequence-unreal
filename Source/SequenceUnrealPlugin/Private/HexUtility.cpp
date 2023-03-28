@@ -1,72 +1,84 @@
 #include "HexUtility.h"
 
-TOptional<FString> IntToHexString(uint64 Num)
+FString IntToHexString(uint64 Num)
 {
 	if(Num == 0)
 	{
-		return TOptional<FString>("0x0");
+		return "0x0";
 	}
 	
 	FString String = "";
 
 	while (Num > 0)
 	{
-		auto Remainder = Num % 16;
+		auto Remainder = Num & 0xf;
 
 		auto Numeral = IntToHexLetter(Remainder);
 
-		if(!Numeral.IsSet())
-		{
-			return TOptional<FString>();
-		}
-
-		String = Numeral.GetValue() + String;
+		String = Numeral + String;
 		
 		Num -= Remainder;
-		Num /= 16;
+		Num = Num >> 4;
 	}
 	
 	return "0x" + String;
 }
 
-TOptional<FString> IntToHexLetter(uint Num)
+FString IntToHexLetter(uint8 Num)
 {
+	Num &= 0xf;
+	
 	if(Num <= 9)
 	{
 		return FString::FromInt(Num);
 	}
 
-	if(Num == 10)
+	if(Num == 0xa)
 	{
-		return TOptional<FString>("a");
+		return "a";
 	}
 
-	if(Num == 11)
+	if(Num == 0xb)
 	{
-		return TOptional<FString>("b");
+		return "b";
 	}
 
-	if(Num == 12)
+	if(Num == 0xc)
 	{
-		return TOptional<FString>("c");
+		return "c";
 	}
 
-	if(Num == 13)
+	if(Num == 0xd)
 	{
-		return TOptional<FString>("d");
+		return "d";
 	}
 
-	if(Num == 14)
+	if(Num == 0xe)
 	{
-		return TOptional<FString>("e");
+		return "e";
 	}
 
-	if(Num == 15)
+	if(Num == 0xf)
 	{
-		return TOptional<FString>("f");
+		return "f";
 	}
 
-	return TOptional<FString>();
+	// Should be impossible to get here
+	return "";
+}
+
+FString Hash256ToHexString(Hash256 Hash)
+{
+	FString String = "0x";
+	
+	for(auto i = 0; i < 32; i++)
+	{
+		uint8 Byte = Hash[i];
+
+		String = String + IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+	}
+
+	return String;
 }
 
 TOptional<uint32> HexLetterToInt(TCHAR Hex)

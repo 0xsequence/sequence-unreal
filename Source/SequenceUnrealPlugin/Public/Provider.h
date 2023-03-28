@@ -8,6 +8,7 @@
 #include "Errors.h"
 #include "UObject/Object.h"
 #include "Http.h"
+#include "Types.h"
 
 enum EBlockTag
 {
@@ -26,12 +27,20 @@ FString TagToString(EBlockTag Tag);
 class Provider
 {
 	FString Url;
-	FString GetBlockByNumberHelper(FString Number);
+	TResult<TSharedPtr<FJsonObject>> GetBlockByNumberHelper(FString Number);
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
+	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
+	TResult<FString> ExtractStringResult(FString JsonRaw);
+	TResult<uint32> ExtractUInt32Result(FString JsonRaw);
+	FString SendRPC(FString Content);
 	
 public:
 	Provider(FString Url);
-	FString BlockByNumber(uint16 Number);
-	FString BlockByNumber(EBlockTag Tag);
-	TValueOrError<uint32, SequenceError> ChainId();
+	TResult<TSharedPtr<FJsonObject>> BlockByNumber(uint16 Number);
+	TResult<TSharedPtr<FJsonObject>> BlockByNumber(EBlockTag Tag);
+	TResult<TSharedPtr<FJsonObject>> BlockByHash(Hash256 Hash);
+	TResult<uint32> BlockNumber();
+	TResult<uint32> ChainId();
 };
+
+

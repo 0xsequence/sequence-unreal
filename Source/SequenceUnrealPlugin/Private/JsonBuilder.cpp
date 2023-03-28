@@ -1,13 +1,28 @@
 #include "JsonBuilder.h"
 
+FString ConvertString(const FString Value)
+{
+	return "\"" + Value + "\"";
+}
+
+FString ConvertInt(const int Value)
+{
+	return FString::FromInt(Value);
+}
+
+FString ConvertBool(const bool Value)
+{
+	return Value ? "true" : "false";
+}
+
 FJsonBuilder* FJsonBuilder::AddField(const FString Name, const FString Value)
 {
 	if(!StringValue.Equals(""))
 	{
-		StringValue += ", ";
+		StringValue = StringValue + ", ";
 	}
 
-	StringValue += Name + ":" + Value;
+	StringValue = StringValue + Name + ":" + Value;
 	return this;
 }
 
@@ -39,54 +54,51 @@ FString FJsonBuilder::ToString() const
 	return "{" + StringValue + "}";
 }
 
-FString FJsonBuilder::ConvertString(const FString Value)
+FJsonBuilder* FJsonBuilder::ToPtr()
 {
-	return "\"" + Value + "\"";
+	return this;
 }
 
-FString FJsonBuilder::ConvertInt(const int Value)
-{
-	return FString::FromInt(Value);
-}
 
-FString FJsonBuilder::ConvertBool(const bool Value)
-{
-	return Value ? "true" : "false";
-}
 
 FJsonArray::FJsonArray(FJsonBuilder* Parent, const FString Name) : Name(Name), Parent(Parent)
 {
 	StringValue = "";
 }
 
+FJsonArray* FJsonArray::ToPtr()
+{
+	return this;
+}
+
 FJsonArray* FJsonArray::AddValue(FString Value)
 {
 	if(!StringValue.Equals(""))
 	{
-		StringValue += ", ";
+		StringValue = StringValue + ", ";
 	}
-	StringValue += Value;
+	StringValue = StringValue + Value;
 	return this;
 }
 
 FJsonArray* FJsonArray::AddString(FString Value)
 {
-	return AddValue(FJsonBuilder::ConvertString(Value));
+	return AddValue(ConvertString(Value));
 }
 
 FJsonArray* FJsonArray::AddBool(bool Value)
 {
-	return  AddValue(FJsonBuilder::ConvertBool(Value));
+	return  AddValue(ConvertBool(Value));
 }
 
 FJsonArray* FJsonArray::AddInt(int Value)
 {
-	return AddValue(FJsonBuilder::ConvertInt(Value));
+	return AddValue(ConvertInt(Value));
 }
 
 FJsonBuilder* FJsonArray::EndArray() const
 {
-	Parent->AddField(FJsonBuilder::ConvertString(Name), "[" + StringValue + "]");
+	Parent->AddField(ConvertString(Name), "[" + StringValue + "]");
 	return Parent;
 }
 

@@ -28,26 +28,18 @@ FString TagToString(EBlockTag Tag)
 	return "";
 }
 
-FString Provider::GetBlockByNumberHelper(FString Number)
+TResult<TSharedPtr<FJsonObject>> Provider::GetBlockByNumberHelper(FString Number)
 {
-	const auto Content = FJsonBuilder()
-		.AddString("jsonrpc", "2.0")
+	const auto Content = FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
 		->AddInt("id", 1)
 		->AddString("method", "eth_getBlockByNumber")
-		->AddArray("params")
-			.AddValue(Number)
+		->AddArray("params").ToPtr()
+			->AddValue(Number)
 			->AddBool(true)
-		->EndArray()
+			->EndArray()
 		->ToString();
-	
-	return NewObject<URequestHandler>()
-		->PrepareRequest()
-		->WithUrl(Url)
-		->WithHeader("Content-type", "application/json")
-		->WithVerb("POST")
-		->WithContentAsString(Content)
-		->Process()
-		->GetContentAsString();
+	return ExtractJsonObjectResult(SendRPC(Content));
 }
 
 TSharedPtr<FJsonObject> Provider::Parse(FString JsonRaw)
@@ -63,29 +55,49 @@ TSharedPtr<FJsonObject> Provider::Parse(FString JsonRaw)
 	return nullptr;
 }
 
-Provider::Provider(FString Url) : Url(Url)
+TResult<TSharedPtr<FJsonObject>> Provider::ExtractJsonObjectResult(FString JsonRaw)
 {
-}
-
-FString Provider::BlockByNumber(uint16 Id)
-{
-	return GetBlockByNumberHelper(FJsonBuilder::ConvertString(IntToHexString(Id).GetValue()));
-}
-
-FString Provider::BlockByNumber(EBlockTag Tag)
-{
-	return GetBlockByNumberHelper(FJsonBuilder::ConvertString(TagToString(Tag)));
-}
-
-TValueOrError<uint32, SequenceError> Provider::ChainId()
-{
-	const auto Content = FJsonBuilder()
-		.AddString("jsonrpc", "2.0")
-		->AddInt("id", 1)
-		->AddString("method", "eth_chainId")
-		->ToString();
+	auto Json = Parse(JsonRaw);
 	
-	auto ResponseContent = NewObject<URequestHandler>()
+	if(!Json)
+	{
+		return MakeError(SequenceError(EmptyResponse, "Could not extract response"));
+	}
+
+	return MakeValue(Json->GetObjectField("result"));
+}
+
+TResult<FString> Provider::ExtractStringResult(FString JsonRaw)
+{
+	auto Json = Parse(JsonRaw);
+	
+	if(!Json)
+	{
+		return MakeError(SequenceError(EmptyResponse, "Could not extract response"));
+	}
+
+	return MakeValue(Json->GetStringField("result"));
+}
+
+TResult<uint32> Provider::ExtractUInt32Result(FString JsonRaw)
+{
+	auto Result = ExtractStringResult(JsonRaw);
+	if(!Result.HasValue())
+	{
+		return MakeError(Result.GetError());
+	}
+	
+	auto Convert =  HexStringToInt(Result.GetValue());
+	if(!Convert.IsSet())
+	{
+		return MakeError(SequenceError(ResponseParseError, "Couldn't convert \"" + Result.GetValue() + "\" to a number."));
+	}
+	return MakeValue(Convert.GetValue());
+}
+
+FString Provider::SendRPC(FString Content)
+{
+	auto responseContent = NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
@@ -94,23 +106,56 @@ TValueOrError<uint32, SequenceError> Provider::ChainId()
 		->Process()
 		->GetContentAsString();
 
-	auto JSON = Parse(ResponseContent);
+	UE_LOG(LogTemp, Display, TEXT("Received response: %s"), *responseContent);
 
-	if(!JSON)
-	{
-		return MakeError(SequenceError(ErrRequestFail, "Couldn't parse " + ResponseContent));
-	}
+	return responseContent;
+}
 
-	auto Result = JSON->GetStringField("result");
+Provider::Provider(FString Url) : Url(Url)
+{
+}
+
+TResult<TSharedPtr<FJsonObject>>  Provider::BlockByNumber(uint16 Id)
+{
+	return GetBlockByNumberHelper(ConvertString(IntToHexString(Id)));
+}
+
+TResult<TSharedPtr<FJsonObject>> Provider::BlockByNumber(EBlockTag Tag)
+{
+	return GetBlockByNumberHelper(ConvertString(TagToString(Tag)));
+}
+
+TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
+{
 	
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *Result);
+	const auto Content = FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
+		->AddInt("id", 1)
+		->AddString("method", "eth_getBlockByHash")
+		->AddArray("params").ToPtr()
+			->AddString(Hash256ToHexString(Hash))
+			->AddBool(true)
+			->EndArray()
+		->ToString();
+	return ExtractJsonObjectResult(SendRPC(Content));
+}
 
-	auto Convert =  HexStringToInt(Result);
+TResult<uint32> Provider::BlockNumber()
+{
+	const auto Content = FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
+		->AddInt("id", 1)
+		->AddString("method", "eth_blockNumber")
+		->ToString();
+	return ExtractUInt32Result(SendRPC(Content));
+}
 
-	if(!Convert.IsSet())
-	{
-		return MakeError(SequenceError(ErrRequestFail, "Couldn't convert \"" + Result + "\" to a number."));
-	}
-	
-	return MakeValue(Convert.GetValue());
+TValueOrError<uint32, SequenceError> Provider::ChainId()
+{
+	const auto Content = FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
+		->AddInt("id", 1)
+		->AddString("method", "eth_chainId")
+		->ToString();
+	return ExtractUInt32Result(SendRPC(Content));
 }
