@@ -6,10 +6,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestHexUtility, "Public.TestHexUtility",
 
 bool TestHexUtility::RunTest(const FString& Parameters)
 {
-	auto hexString = IntToHexString(0x256);
-	UE_LOG(LogTemp, Display, TEXT("Hex String is %s"), *hexString);
+	auto HexString = IntToHexString(0x256);
 	
-	if(HexStringToInt(hexString) != 0x256)
+	if(HexStringToInt(HexString) != 0x256)
 	{
 		return false;
 	}
@@ -17,6 +16,23 @@ bool TestHexUtility::RunTest(const FString& Parameters)
 	if(HexStringToInt("2629ad1f").GetValue() != 0x2629ad1f)
 	{
 		return false;
+	}
+
+	{
+		auto Hash = HexStringToHash256("0x5");
+
+		if(Hash == nullptr)
+		{
+			return false;
+		}
+
+		auto String = Hash256ToHexString(Hash);
+		Hash = HexStringToHash256(String);
+			
+		if(!Hash256ToHexString(Hash).Equals(String))
+		{
+			return false;
+		}
 	}
 	
 	// Make the test pass by returning true, or fail by returning false.
