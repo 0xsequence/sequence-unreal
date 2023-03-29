@@ -67,17 +67,17 @@ FString IntToHexLetter(uint8 Num)
 	return "";
 }
 
-FString Hash256ToHexString(Hash256 Hash)
+FString Hash256ToHexString(const Hash256 Hash)
 {
 	FString String = "0x";
 	
 	for(auto i = 0; i < 32; i++)
 	{
-		uint8 Byte = Hash[i];
+		const uint8 Byte = Hash[i];
 
-		String = String + IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+		auto Added =  IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+		String = String + Added;
 	}
-
 	return String;
 }
 
@@ -146,4 +146,49 @@ TOptional<uint32> HexStringToInt(FString Hex)
 	}
 
 	return Sum;
+}
+
+Hash256 HexStringToHash256(FString Hex)
+{
+	Hash256 Hash = new uint8[32];
+	for(int i = 0; i < 32; i++)
+	{
+		Hash[i] = 0x00;
+	}
+	
+	auto Offset = 0;
+	if(Hex.StartsWith("0x"))
+	{
+		Offset = 2;
+	}
+
+	if(Hex.Len() % 2 == 1)
+	{
+		Hex.InsertAt(Offset, '0');
+	}
+	
+	for(int Counter = 0; Counter < 32; Counter++)
+	{
+		
+		if(Hex.Len() - 1 - 2 * Counter < Offset)
+		{
+			break;
+		}
+		
+		auto Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
+		TOptional<uint32> Upper;
+		Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
+
+		if(!Lower.IsSet() || !Upper.IsSet())
+		{
+			return nullptr;
+		}
+
+		auto LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
+		auto UpperVal = Lower.GetValue() & 0x0000000F;
+		auto Pos = 31 - Counter;
+		Hash[Pos] = LowerVal + UpperVal;
+	}
+
+	return Hash;	
 }
