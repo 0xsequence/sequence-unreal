@@ -111,6 +111,25 @@ FString Provider::SendRPC(FString Content)
 	return responseContent;
 }
 
+TResult<uint32> Provider::TransactionCountHelper(Hash256 Hash, FString Number)
+{
+	const auto Content = RPCBuilder("eth_getTransactionCount")
+		->AddArray("params").ToPtr()
+			->AddString(Hash256ToHexString(Hash))
+			->AddValue(Number)
+			->EndArray()
+		->ToString();
+	return ExtractUInt32Result(SendRPC(Content));
+}
+
+FJsonBuilder* Provider::RPCBuilder(const FString MethodName)
+{
+	return FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
+		->AddInt("id", 1)
+		->AddString("method", MethodName);
+}
+
 Provider::Provider(FString Url) : Url(Url)
 {
 }
@@ -127,11 +146,7 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByNumber(EBlockTag Tag)
 
 TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
 {
-	
-	const auto Content = FJsonBuilder().ToPtr()
-		->AddString("jsonrpc", "2.0")
-		->AddInt("id", 1)
-		->AddString("method", "eth_getBlockByHash")
+	const auto Content = RPCBuilder("eth_getBlockByHash")
 		->AddArray("params").ToPtr()
 			->AddString(Hash256ToHexString(Hash))
 			->AddBool(true)
@@ -142,20 +157,42 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
 
 TResult<uint32> Provider::BlockNumber()
 {
-	const auto Content = FJsonBuilder().ToPtr()
-		->AddString("jsonrpc", "2.0")
-		->AddInt("id", 1)
-		->AddString("method", "eth_blockNumber")
-		->ToString();
+	const auto Content = RPCBuilder("eth_blockNumber")->ToString();
 	return ExtractUInt32Result(SendRPC(Content));
+}
+
+TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(Hash256 Hash)
+{
+	const auto Content = RPCBuilder("eth_getTransactionByHash")
+		->AddArray("params").ToPtr()
+			->AddString(Hash256ToHexString(Hash))
+			->EndArray()
+		->ToString();
+	return ExtractJsonObjectResult(SendRPC(Content));
+}
+
+TResult<uint32> Provider::TransactionCount(Hash256 Hash, uint16 Number)
+{
+	return TransactionCountHelper(Hash, ConvertInt(Number));
+}
+
+TResult<uint32> Provider::TransactionCount(Hash256 Hash, EBlockTag Tag)
+{
+	return TransactionCountHelper(Hash, ConvertString(TagToString(Tag)));
+}
+
+TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(Hash256 Hash)
+{
+	const auto Content = RPCBuilder("eth_getTransactionReceipt")
+		->AddArray("params").ToPtr()
+			->AddString(Hash256ToHexString(Hash))
+			->EndArray()
+		->ToString();
+	return ExtractJsonObjectResult(SendRPC(Content));
 }
 
 TValueOrError<uint32, SequenceError> Provider::ChainId()
 {
-	const auto Content = FJsonBuilder().ToPtr()
-		->AddString("jsonrpc", "2.0")
-		->AddInt("id", 1)
-		->AddString("method", "eth_chainId")
-		->ToString();
+	const auto Content = RPCBuilder("eth_chainId")->ToString();
 	return ExtractUInt32Result(SendRPC(Content));
 }

@@ -67,20 +67,6 @@ FString IntToHexLetter(uint8 Num)
 	return "";
 }
 
-FString Hash256ToHexString(const Hash256 Hash)
-{
-	FString String = "0x";
-	
-	for(auto i = 0; i < 32; i++)
-	{
-		const uint8 Byte = Hash[i];
-
-		auto Added =  IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
-		String = String + Added;
-	}
-	return String;
-}
-
 TOptional<uint32> HexLetterToInt(TCHAR Hex)
 {
 	switch (Hex)
@@ -148,14 +134,30 @@ TOptional<uint32> HexStringToInt(FString Hex)
 	return Sum;
 }
 
-Hash256 HexStringToHash256(FString Hex)
+FString HashToHexString(uint8 Size, uint8* Hash)
 {
-	Hash256 Hash = new uint8[32];
-	for(int i = 0; i < 32; i++)
+	FString String = "0x";
+	
+	for(auto i = 0; i < Size; i++)
+	{
+		const uint8 Byte = Hash[i];
+
+		auto Added =  IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+		String = String + Added;
+	}
+	return String;
+}
+
+uint8* HexStringToHash(uint8 Size, FString Hex)
+{
+	Hash256 Hash = new uint8[Size];
+	// Set it to 0s
+	for(int i = 0; i < Size; i++)
 	{
 		Hash[i] = 0x00;
 	}
-	
+
+	// Compensation for 0x
 	auto Offset = 0;
 	if(Hex.StartsWith("0x"))
 	{
@@ -167,7 +169,7 @@ Hash256 HexStringToHash256(FString Hex)
 		Hex.InsertAt(Offset, '0');
 	}
 	
-	for(int Counter = 0; Counter < 32; Counter++)
+	for(int Counter = 0; Counter < Size; Counter++)
 	{
 		
 		if(Hex.Len() - 1 - 2 * Counter < Offset)
@@ -186,9 +188,29 @@ Hash256 HexStringToHash256(FString Hex)
 
 		auto LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
 		auto UpperVal = Lower.GetValue() & 0x0000000F;
-		auto Pos = 31 - Counter;
+		auto Pos = Size - 1 - Counter;
 		Hash[Pos] = LowerVal + UpperVal;
 	}
 
 	return Hash;	
+}
+
+FString Hash256ToHexString(const Hash256 Hash)
+{
+	return HashToHexString(GHash256_Size, Hash);
+}
+
+Hash256 HexStringToHash256(FString Hex)
+{
+	return HexStringToHash(GHash256_Size, Hex);
+}
+
+FString AddressToHexString(Address Addr)
+{
+	return HashToHexString(GAddress_Size, Addr);
+}
+
+Address HexStringToAddress(FString Hex)
+{
+	return HexStringToHash(GAddress_Size, Hex);
 }
