@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class SEQUENCEUNREALPLUGIN_API URequestHandler : public UObject
+class SEQUENCEPLUGIN_API URequestHandler : public UObject
 {
 	GENERATED_BODY()
 	FHttpRequestPtr Request;
