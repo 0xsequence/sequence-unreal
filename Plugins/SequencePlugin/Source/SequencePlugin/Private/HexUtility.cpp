@@ -195,22 +195,31 @@ uint8* HexStringToHash(uint8 Size, FString Hex)
 	return Hash;	
 }
 
+FBigNum HexStringToBigNum(const FString Hex)
+{
+	const uint8 Size = (Hex.Len() / 2) + (Hex.Len() % 2);
+	
+	return FBigNum {
+		HexStringToHash(Size, Hex), Size
+	};
+}
+
 FString Hash256ToHexString(const Hash256 Hash)
 {
-	return HashToHexString(GHash256_Size, Hash);
+	return HashToHexString(GHash256ByteLength, Hash);
 }
 
 Hash256 HexStringToHash256(FString Hex)
 {
-	return HexStringToHash(GHash256_Size, Hex);
+	return HexStringToHash(GHash256ByteLength, Hex);
 }
 
 FString AddressToHexString(Address Addr)
 {
-	return HashToHexString(GAddress_Size, Addr);
+	return HashToHexString(GAddressByteLength, Addr);
 }
 
 Address HexStringToAddress(FString Hex)
 {
-	return HexStringToHash(GAddress_Size, Hex);
+	return HexStringToHash(GAddressByteLength, Hex);
 }

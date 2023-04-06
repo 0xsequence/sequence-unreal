@@ -1,10 +1,11 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=434d1f0e_002Ddf09_002D4217_002D8233_002D5a6d174730bd/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="HttpSimpleTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=53a1a783_002D0bab_002D47da_002Daa79_002Dfe3149fbd6c2/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="HttpSimpleTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;UnrealTest::4E21AB8D-6B90-129F-4E33-9395568F4DAA::::Public.HttpSimpleTest&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=58598b8e_002D7128_002D4594_002D84f6_002D6d8041ccc17f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="HttpSimpleTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fd657657_002Da77f_002D4bea_002D88cf_002D7590d236fce6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="HttpSimpleTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;UnrealTest::4E21AB8D-6B90-129F-4E33-9395568F4DAA::::Public.HttpSimpleTest&lt;/TestId&gt;
   &lt;/TestAncestor&gt;

@@ -8,8 +8,8 @@ FString ConvertBool(bool Value);
 class FJsonArray;
 class FJsonBuilder
 {
-	FString StringValue;
 public:
+	FString StringValue;
 	FString ToString() const;
 	FJsonBuilder* ToPtr();
 	FJsonBuilder* AddField(FString Name, FString Value); // Adds the value raw

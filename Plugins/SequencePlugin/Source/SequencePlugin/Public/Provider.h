@@ -35,7 +35,7 @@ class Provider
 	TResult<uint32> ExtractUInt32Result(FString JsonRaw);
 	FString SendRPC(FString Content);
 	TResult<uint32> TransactionCountHelper(Address Addr, FString Number);
-	static FJsonBuilder* RPCBuilder(FString MethodName);
+	static FJsonBuilder RPCBuilder(FString MethodName);
 	
 public:
 	Provider(FString Url);
