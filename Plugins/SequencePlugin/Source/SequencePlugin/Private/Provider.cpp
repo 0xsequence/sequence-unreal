@@ -113,7 +113,7 @@ FString Provider::SendRPC(FString Content)
 
 TResult<uint32> Provider::TransactionCountHelper(Hash256 Hash, FString Number)
 {
-	const auto Content = RPCBuilder("eth_getTransactionCount")
+	const auto Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Hash256ToHexString(Hash))
 			->AddValue(Number)
@@ -122,9 +122,9 @@ TResult<uint32> Provider::TransactionCountHelper(Hash256 Hash, FString Number)
 	return ExtractUInt32Result(SendRPC(Content));
 }
 
-FJsonBuilder* Provider::RPCBuilder(const FString MethodName)
+FJsonBuilder Provider::RPCBuilder(const FString MethodName)
 {
-	return FJsonBuilder().ToPtr()
+	return *FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")
 		->AddInt("id", 1)
 		->AddString("method", MethodName);
@@ -146,7 +146,7 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByNumber(EBlockTag Tag)
 
 TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
 {
-	const auto Content = RPCBuilder("eth_getBlockByHash")
+	const auto Content = RPCBuilder("eth_getBlockByHash").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Hash256ToHexString(Hash))
 			->AddBool(true)
@@ -157,13 +157,13 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
 
 TResult<uint32> Provider::BlockNumber()
 {
-	const auto Content = RPCBuilder("eth_blockNumber")->ToString();
+	const auto Content = RPCBuilder("eth_blockNumber").ToString();
 	return ExtractUInt32Result(SendRPC(Content));
 }
 
 TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(Hash256 Hash)
 {
-	const auto Content = RPCBuilder("eth_getTransactionByHash")
+	const auto Content = RPCBuilder("eth_getTransactionByHash").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Hash256ToHexString(Hash))
 			->EndArray()
@@ -183,7 +183,7 @@ TResult<uint32> Provider::TransactionCount(Hash256 Hash, EBlockTag Tag)
 
 TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(Hash256 Hash)
 {
-	const auto Content = RPCBuilder("eth_getTransactionReceipt")
+	const auto Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Hash256ToHexString(Hash))
 			->EndArray()
@@ -193,6 +193,6 @@ TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(Hash256 Hash)
 
 TValueOrError<uint32, SequenceError> Provider::ChainId()
 {
-	const auto Content = RPCBuilder("eth_chainId")->ToString();
+	const auto Content = RPCBuilder("eth_chainId").ToString();
 	return ExtractUInt32Result(SendRPC(Content));
 }
