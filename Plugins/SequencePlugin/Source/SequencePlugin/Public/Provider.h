@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Errors.h"
+#include "Header.h"
 #include "UObject/Object.h"
 #include "Http.h"
 #include "JsonBuilder.h"
@@ -43,6 +44,8 @@ public:
 	TResult<TSharedPtr<FJsonObject>> BlockByNumber(EBlockTag Tag);
 	TResult<TSharedPtr<FJsonObject>> BlockByHash(Hash256 Hash);
 	TResult<uint32> BlockNumber();
+
+	TResult<FHeader> HeaderByNumber();
 
 	TResult<TSharedPtr<FJsonObject>> TransactionByHash(Hash256 Hash);
 	TResult<uint32> TransactionCount(Address Addr, uint16 Number);

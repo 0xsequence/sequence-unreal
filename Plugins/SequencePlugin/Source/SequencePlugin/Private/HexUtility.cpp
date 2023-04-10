@@ -67,51 +67,51 @@ FString IntToHexLetter(uint8 Num)
 	return "";
 }
 
-TOptional<uint32> HexLetterToInt(TCHAR Hex)
+TOptional<uint8> HexLetterToInt(TCHAR Hex)
 {
 	switch (Hex)
 	{
 		case '0':
-			return TOptional<uint32>(0);
+			return TOptional<uint8>(0);
 		case '1':
-			return TOptional<uint32>(1);
+			return TOptional<uint8>(1);
 		case '2':
-			return TOptional<uint32>(2);
+			return TOptional<uint8>(2);
 		case '3':
-			return TOptional<uint32>(3);
+			return TOptional<uint8>(3);
 		case '4':
-			return TOptional<uint32>(4);
+			return TOptional<uint8>(4);
 		case '5':
-			return TOptional<uint32>(5);
+			return TOptional<uint8>(5);
 		case '6':
-			return TOptional<uint32>(6);
+			return TOptional<uint8>(6);
 		case '7':
-			return TOptional<uint32>(7);
+			return TOptional<uint8>(7);
 		case '8':
-			return TOptional<uint32>(8);
+			return TOptional<uint8>(8);
 		case '9':
-			return TOptional<uint32>(9);
+			return TOptional<uint8>(9);
 		case 'a':
-			return TOptional<uint32>(10);
+			return TOptional<uint8>(10);
 		case 'b':
-			return TOptional<uint32>(11);
+			return TOptional<uint8>(11);
 		case 'c':
-			return TOptional<uint32>(12);
+			return TOptional<uint8>(12);
 		case 'd':
-			return TOptional<uint32>(13);
+			return TOptional<uint8>(13);
 		case 'e':
-			return TOptional<uint32>(14);
+			return TOptional<uint8>(14);
 		case 'f':
-			return TOptional<uint32>(15);
+			return TOptional<uint8>(15);
 		default:
-			return TOptional<uint32>();
+			return TOptional<uint8>();
 	}
 }
 
-TOptional<uint32> HexStringToInt(FString Hex)
+TOptional<uint64> HexStringToInt64(FString Hex)
 {
-	uint32 Sum = 0;
-	uint32 Offset = 0; // Compensates for 0x prefix
+	uint64 Sum = 0;
+	uint64 Offset = 0; // Compensates for 0x prefix
 
 	if(Hex.StartsWith("0x"))
 	{
@@ -125,10 +125,11 @@ TOptional<uint32> HexStringToInt(FString Hex)
 
 		if(!Convert.IsSet())
 		{
-			return TOptional<uint32>();
+			return TOptional<uint64>();
 		}
 
-		Sum += Convert.GetValue() << 4 * Counter;
+		uint64 converted = Convert.GetValue();
+		Sum += converted << 4 * Counter;
 	}
 
 	return Sum;
@@ -178,7 +179,7 @@ uint8* HexStringToHash(uint8 Size, FString Hex)
 		}
 		
 		auto Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
-		TOptional<uint32> Upper;
+		TOptional<uint8> Upper;
 		Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
 
 		if(!Lower.IsSet() || !Upper.IsSet())

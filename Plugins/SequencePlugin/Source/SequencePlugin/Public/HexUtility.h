@@ -3,8 +3,8 @@
 
 FString IntToHexString(uint64 Num);
 FString IntToHexLetter(uint8 Num);
-TOptional<uint32> HexLetterToInt(FString Hex);
-TOptional<uint32> HexStringToInt(FString Hex);
+TOptional<uint8> HexLetterToInt(FString Hex);
+TOptional<uint64> HexStringToInt64(FString Hex);
 
 FString HashToHexString(uint8 Size, uint8* Hash);
 uint8* HexStringToHash(uint8 Size, FString Hex);
