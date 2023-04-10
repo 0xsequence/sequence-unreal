@@ -8,12 +8,12 @@ bool TestHexUtility::RunTest(const FString& Parameters)
 {
 	auto HexString = IntToHexString(0x256);
 	
-	if(HexStringToInt(HexString) != 0x256)
+	if(HexStringToInt64(HexString) != 0x256)
 	{
 		return false;
 	}
 
-	if(HexStringToInt("2629ad1f").GetValue() != 0x2629ad1f)
+	if(HexStringToInt64("2629ad1f").GetValue() != 0x2629ad1f)
 	{
 		return false;
 	}

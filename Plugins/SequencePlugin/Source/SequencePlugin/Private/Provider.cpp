@@ -87,7 +87,7 @@ TResult<uint32> Provider::ExtractUInt32Result(FString JsonRaw)
 		return MakeError(Result.GetError());
 	}
 	
-	auto Convert =  HexStringToInt(Result.GetValue());
+	auto Convert =  HexStringToInt64(Result.GetValue());
 	if(!Convert.IsSet())
 	{
 		return MakeError(SequenceError(ResponseParseError, "Couldn't convert \"" + Result.GetValue() + "\" to a number."));
