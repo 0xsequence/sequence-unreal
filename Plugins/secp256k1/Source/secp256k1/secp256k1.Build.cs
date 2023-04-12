@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class SequencePlugin : ModuleRules
+public class secp256k1 : ModuleRules
 {
-	public SequencePlugin(ReadOnlyTargetRules Target) : base(Target)
+	public secp256k1(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -25,7 +25,9 @@ public class SequencePlugin : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "HTTP", "Json", "secp256k1Library",
+				"Core",
+				"secp256k1Library",
+				"Projects"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -34,10 +36,6 @@ public class SequencePlugin : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

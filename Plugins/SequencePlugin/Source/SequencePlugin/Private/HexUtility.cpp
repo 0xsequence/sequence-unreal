@@ -135,7 +135,7 @@ TOptional<uint64> HexStringToInt64(FString Hex)
 	return Sum;
 }
 
-FString HashToHexString(uint8 Size, uint8* Hash)
+FString HashToHexString(ByteLength Size, uint8* Hash)
 {
 	FString String = "0x";
 	
@@ -149,7 +149,7 @@ FString HashToHexString(uint8 Size, uint8* Hash)
 	return String;
 }
 
-uint8* HexStringToHash(uint8 Size, FString Hex)
+uint8* HexStringToHash(ByteLength Size, FString Hex)
 {
 	Hash256 Hash = new uint8[Size];
 	// Set it to 0s

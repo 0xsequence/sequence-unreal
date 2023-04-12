@@ -21,4 +21,4 @@ struct FHeader
 	FBigNum BaseFee;
 };
 
-FHeader MakeHeader(FJsonObject Json);
+FHeader JsonToHeader(FJsonObject *Json);
