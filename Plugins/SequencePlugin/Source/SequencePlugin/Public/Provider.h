@@ -7,7 +7,6 @@
 #include "CoreMinimal.h"
 #include "Errors.h"
 #include "Header.h"
-#include "UObject/Object.h"
 #include "Http.h"
 #include "JsonBuilder.h"
 #include "Types.h"
@@ -37,6 +36,7 @@ class Provider
 	FString SendRPC(FString Content);
 	TResult<uint32> TransactionCountHelper(Address Addr, FString Number);
 	static FJsonBuilder RPCBuilder(FString MethodName);
+	TResult<FHeader> HeaderByNumberHelper(FString Number);
 	
 public:
 	Provider(FString Url);
@@ -45,7 +45,9 @@ public:
 	TResult<TSharedPtr<FJsonObject>> BlockByHash(Hash256 Hash);
 	TResult<uint32> BlockNumber();
 
-	TResult<FHeader> HeaderByNumber();
+	TResult<FHeader> HeaderByNumber(uint16 Number);
+	TResult<FHeader> HeaderByNumber(EBlockTag Tag);
+	TResult<FHeader> HeaderByHash(Hash256 Hash);
 
 	TResult<TSharedPtr<FJsonObject>> TransactionByHash(Hash256 Hash);
 	TResult<uint32> TransactionCount(Address Addr, uint16 Number);

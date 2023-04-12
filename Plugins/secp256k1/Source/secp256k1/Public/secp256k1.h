@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FSequencePluginModule : public IModuleInterface
+class Fsecp256k1Module : public IModuleInterface
 {
 public:
 

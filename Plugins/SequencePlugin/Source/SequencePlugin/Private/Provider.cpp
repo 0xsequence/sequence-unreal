@@ -2,12 +2,12 @@
 
 
 #include "Provider.h"
-
 #include "HexUtility.h"
 #include "HttpManager.h"
 #include "JsonBuilder.h"
 #include "JsonObjectConverter.h"
 #include "RequestHandler.h"
+#include "Header.h"
 
 FString TagToString(EBlockTag Tag)
 {
@@ -159,6 +159,31 @@ TResult<uint32> Provider::BlockNumber()
 {
 	const auto Content = RPCBuilder("eth_blockNumber").ToString();
 	return ExtractUInt32Result(SendRPC(Content));
+}
+
+TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
+{
+	const auto Content = GetBlockByNumberHelper(Number);
+
+	if(Content.HasError())
+	{
+		return MakeError(Content.GetError());
+	}
+
+	auto Obj = Content.GetValue();
+	auto Header = JsonToHeader(&*Obj);
+
+	return MakeValue(Header);
+}
+
+TResult<FHeader> Provider::HeaderByNumber(uint16 Number)
+{
+	return HeaderByNumberHelper(ConvertInt(Number));
+}
+
+TResult<FHeader> Provider::HeaderByNumber(EBlockTag Tag)
+{
+	return HeaderByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
 TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(Hash256 Hash)

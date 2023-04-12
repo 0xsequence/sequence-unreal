@@ -6,8 +6,8 @@ FString IntToHexLetter(uint8 Num);
 TOptional<uint8> HexLetterToInt(FString Hex);
 TOptional<uint64> HexStringToInt64(FString Hex);
 
-FString HashToHexString(uint8 Size, uint8* Hash);
-uint8* HexStringToHash(uint8 Size, FString Hex);
+FString HashToHexString(ByteLength Size, uint8* Hash);
+uint8* HexStringToHash(ByteLength Size, FString Hex);
 FBigNum HexStringToBigNum(FString Hex); // Hex String to Number of arbitrary size
 
 FString Hash256ToHexString(Hash256 Hash);

@@ -1,17 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "SequencePlugin.h"
+#include "secp256k1.h"
 #include "Core.h"
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
-#include "secp256k1.h"
 
-#define LOCTEXT_NAMESPACE "FSequencePluginModule"
+#define LOCTEXT_NAMESPACE "Fsecp256k1Module"
+#include "secp256k1Library/secp256k1.h"
 
-void FSequencePluginModule::StartupModule()
+void Fsecp256k1Module::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-		// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 
 	// Get the base directory of this plugin
 	FString BaseDir = IPluginManager::Get().FindPlugin("secp256k1")->GetBaseDir();
@@ -58,11 +57,8 @@ void FSequencePluginModule::StartupModule()
 	}
 }
 
-void FSequencePluginModule::ShutdownModule()
+void Fsecp256k1Module::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
-
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
@@ -73,4 +69,4 @@ void FSequencePluginModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FSequencePluginModule, SequencePlugin)
+IMPLEMENT_MODULE(Fsecp256k1Module, secp256k1)
