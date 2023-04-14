@@ -1,7 +1,7 @@
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
 #include "Provider.h"
-#include "secp256k1Library/secp256k1.h"
+#include "secp256k1Library/secp256k1/secp256k1.h"l
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpSimpleTest, "Public.HttpSimpleTest",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
