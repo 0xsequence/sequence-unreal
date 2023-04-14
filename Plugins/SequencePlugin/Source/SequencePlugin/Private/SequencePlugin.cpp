@@ -4,7 +4,7 @@
 #include "Core.h"
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
-#include "secp256k1Library/secp256k1.h"
+#include "secp256k1Library/secp256k1//secp256k1.h"
 
 #define LOCTEXT_NAMESPACE "FSequencePluginModule"
 
