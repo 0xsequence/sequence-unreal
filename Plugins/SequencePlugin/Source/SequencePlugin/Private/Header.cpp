@@ -2,7 +2,7 @@
 #include "Types.h"
 #include "HexUtility.h"
 
-FHeader JsonToHeader(FJsonObject *Json)
+FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
 {
 	Hash256 ParentHash = HexStringToHash256(Json->GetStringField("parentHash"));
 	Hash256 UncleHash = HexStringToHash256(Json->GetStringField("sha3Uncles"));

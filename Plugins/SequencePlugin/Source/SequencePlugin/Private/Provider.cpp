@@ -171,14 +171,14 @@ TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
 	}
 
 	auto Obj = Content.GetValue();
-	auto Header = JsonToHeader(&*Obj);
+	auto Header = JsonToHeader(Obj);
 
 	return MakeValue(Header);
 }
 
-TResult<FHeader> Provider::HeaderByNumber(uint16 Number)
+TResult<FHeader> Provider::HeaderByNumber(uint16 Id)
 {
-	return HeaderByNumberHelper(ConvertInt(Number));
+	return HeaderByNumberHelper(ConvertString(IntToHexString(Id)));
 }
 
 TResult<FHeader> Provider::HeaderByNumber(EBlockTag Tag)

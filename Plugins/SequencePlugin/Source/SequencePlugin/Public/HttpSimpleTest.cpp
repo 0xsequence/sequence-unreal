@@ -1,7 +1,10 @@
+#include <cstdlib>
+
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
 #include "Provider.h"
-#include "secp256k1Library/secp256k1/secp256k1.h"l
+#include "secp256k1Library/secp256k1/secp256k1.h"
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpSimpleTest, "Public.HttpSimpleTest",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -31,10 +34,14 @@ bool HttpSimpleTest::RunTest(const FString& Parameters)
 	//LogIfError(provider.TransactionCount(addr, Latest));
 	LogIfError("HeaderByNumber", provider.HeaderByNumber(1));
 	LogIfError("HeaderByNumber", provider.HeaderByNumber(Latest));
-	
 
-	
-	delete[] hash;
+	uint8_t x = 5;
+	Hash256 y = new uint8_t[32];
+
+	Keccak256::getHash(&x, 1, y);
+
+	FString h = Hash256ToHexString(y);
+	UE_LOG(LogTemp, Display, TEXT("RESULT: %s"), *h);
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

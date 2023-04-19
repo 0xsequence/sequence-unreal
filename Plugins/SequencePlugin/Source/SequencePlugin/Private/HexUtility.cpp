@@ -143,7 +143,7 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 	{
 		const uint8 Byte = Hash[i];
 
-		auto Added =  IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+		auto Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
 		String = String + Added;
 	}
 	return String;

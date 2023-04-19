@@ -22,6 +22,7 @@ public class secp256k1Library : ModuleRules
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
+	        PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "Mac", "Release", "libProtoBuf.a"));
 	        PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "Mac", "Release", "libTrustWalletCore.a"));
             PublicDelayLoadDLLs.Add(Path.Combine(ModuleDirectory, "Mac", "Release", "libsecp256k1.2.0.2.dylib"));
             RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/secp256k1Library/Mac/Release/libsecp256k1.2.0.2.dylib");
