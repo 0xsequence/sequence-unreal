@@ -45,7 +45,7 @@ public:
 	TResult<TSharedPtr<FJsonObject>> BlockByHash(Hash256 Hash);
 	TResult<uint32> BlockNumber();
 
-	TResult<FHeader> HeaderByNumber(uint16 Number);
+	TResult<FHeader> HeaderByNumber(uint16 Id);
 	TResult<FHeader> HeaderByNumber(EBlockTag Tag);
 	TResult<FHeader> HeaderByHash(Hash256 Hash);
 

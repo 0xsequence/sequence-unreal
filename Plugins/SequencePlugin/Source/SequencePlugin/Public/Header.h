@@ -21,4 +21,4 @@ struct FHeader
 	FBigNum BaseFee;
 };
 
-FHeader JsonToHeader(FJsonObject *Json);
+FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);
