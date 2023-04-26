@@ -10,15 +10,15 @@ struct FHeader
 	Hash256 TxHash;
 	Hash256 ReceiptHash;
 	Bloom Bloom;
-	FBigNum Difficulty;
-	FBigNum Number;
+	FBinaryData Difficulty;
+	FBinaryData Number;
 	uint64 GasLimit;
 	uint64 GasUsed;
 	uint64 Time;
-	FBigNum ExtraData;
+	FBinaryData ExtraData;
 	Hash256 MixDigest;
 	BlockNonce Nonce;
-	FBigNum BaseFee;
+	FBinaryData BaseFee;
 };
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);

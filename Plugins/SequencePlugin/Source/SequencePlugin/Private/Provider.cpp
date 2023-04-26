@@ -106,7 +106,7 @@ FString Provider::SendRPC(FString Content)
 		->Process()
 		->GetContentAsString();
 
-	UE_LOG(LogTemp, Display, TEXT("Received response: %s"), *responseContent);
+	// UE_LOG(LogTemp, Display, TEXT("Received response: %s"), *responseContent);
 
 	return responseContent;
 }
@@ -171,9 +171,36 @@ TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
 	}
 
 	auto Obj = Content.GetValue();
+
+	if(Obj == nullptr)
+	{
+		return MakeError(SequenceError(EmptyResponse, "Json response is null"));
+	}
+	
 	auto Header = JsonToHeader(Obj);
 
 	return MakeValue(Header);
+}
+
+TResult<BlockNonce> Provider::NonceAtHelper(FString Number)
+{
+	const auto Content = GetBlockByNumberHelper(Number);
+
+	if(Content.HasError())
+	{
+		return MakeError(Content.GetError());
+	}
+
+	auto Obj = Content.GetValue();
+
+	if(Obj == nullptr)
+	{
+		return MakeError(SequenceError(EmptyResponse, "Response is null"));
+	}
+	
+	auto Hex = Obj->GetStringField("nonce");
+
+	return MakeValue(HexStringToHash(GBlockNonceByteLength, Hex));
 }
 
 TResult<FHeader> Provider::HeaderByNumber(uint16 Id)
@@ -184,6 +211,21 @@ TResult<FHeader> Provider::HeaderByNumber(uint16 Id)
 TResult<FHeader> Provider::HeaderByNumber(EBlockTag Tag)
 {
 	return HeaderByNumberHelper(ConvertString(TagToString(Tag)));
+}
+
+TResult<FHeader> Provider::HeaderByHash(Hash256 Hash)
+{
+	const auto Content = BlockByHash(Hash);
+
+	if(Content.HasError())
+	{
+		return MakeError(Content.GetError());
+	}
+
+	auto Obj = Content.GetValue();
+	auto Header = JsonToHeader(Obj);
+
+	return MakeValue(Header);
 }
 
 TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(Hash256 Hash)
@@ -214,6 +256,16 @@ TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(Hash256 Hash)
 			->EndArray()
 		->ToString();
 	return ExtractJsonObjectResult(SendRPC(Content));
+}
+
+TResult<BlockNonce> Provider::NonceAt(uint16 Number)
+{
+	return NonceAtHelper(ConvertInt(Number));
+}
+
+TResult<BlockNonce> Provider::NonceAt(EBlockTag Tag)
+{
+	return NonceAtHelper(ConvertString(TagToString(Tag)));
 }
 
 TValueOrError<uint32, SequenceError> Provider::ChainId()
