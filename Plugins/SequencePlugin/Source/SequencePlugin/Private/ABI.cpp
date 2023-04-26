@@ -84,6 +84,8 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 	{
 		
 	}
+
+	return FBinaryData{};
 }
 
 FBinaryData String_to_UTF8(FString String)
