@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.0.1",
-    "hardhat": "^2.13.0",
+    "hardhat": "^2.14.0",
     "wait-on": "^7.0.1"
   },
   "config": {

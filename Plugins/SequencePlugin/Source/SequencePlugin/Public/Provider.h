@@ -37,6 +37,7 @@ class Provider
 	TResult<uint32> TransactionCountHelper(Address Addr, FString Number);
 	static FJsonBuilder RPCBuilder(FString MethodName);
 	TResult<FHeader> HeaderByNumberHelper(FString Number);
+	TResult<BlockNonce> NonceAtHelper(FString Number);
 	
 public:
 	Provider(FString Url);
@@ -53,6 +54,11 @@ public:
 	TResult<uint32> TransactionCount(Address Addr, uint16 Number);
 	TResult<uint32> TransactionCount(Address Addr, EBlockTag Tag);
 	TResult<TSharedPtr<FJsonObject>> TransactionReceipt(Hash256 Hash);
+	
+	TResult<BlockNonce> NonceAt(uint16 Number);
+	TResult<BlockNonce> NonceAt(EBlockTag Tag);
+
+	
 	
 	TResult<uint32> ChainId();
 };

@@ -196,11 +196,11 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 	return Hash;	
 }
 
-FBigNum HexStringToBigNum(const FString Hex)
+FBinaryData HexStringtoBinary(const FString Hex)
 {
 	const uint8 Size = (Hex.Len() / 2) + (Hex.Len() % 2);
 	
-	return FBigNum {
+	return FBinaryData {
 		HexStringToHash(Size, Hex), Size
 	};
 }
