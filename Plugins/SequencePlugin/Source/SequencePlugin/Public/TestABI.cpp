@@ -1,4 +1,5 @@
 #include "ABI.h"
+#include "HexUtility.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
@@ -6,18 +7,50 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
 
 bool TestABI::RunTest(const FString& Parameters)
 {
-	uint8 Number = 21;
-	auto NumberArg = FABIArg{STATIC, 1, &Number};
+	uint8 Number1 = 1;
+	auto NumberArg1 = FABIArg{STATIC, 1, &Number1};
 
-	FString String = "test";
-	auto UTFString = String_to_UTF8(String);
-	auto StringArg = FABIArg{STRING, UTFString.ByteLength, &UTFString.Data};
+	uint8 Number2 = 2;
+	auto NumberArg2 = FABIArg{ STATIC, 1, &Number2};
 
-	auto ArrayArg = FABIArg{ARRAY, 2, new void*[2]{&NumberArg, &StringArg}};
+	uint8 Number3 = 3;
+	auto NumberArg3 = FABIArg{ STATIC, 1, &Number3};
+
+	FString String1 = "one";
+	auto UTFString1 = String_to_UTF8(String1);
+	auto StringArg1 = FABIArg{STRING, UTFString1.ByteLength, &UTFString1.Data};
 	
-	FString BlockNum = FString::FromInt(ArrayArg.GetBlockNum());
+	FString String2 = "two";
+	auto UTFString2 = String_to_UTF8(String2);
+	auto StringArg2 = FABIArg{STRING, UTFString2.ByteLength, &UTFString2.Data};
+	
+	FString String3 = "one";
+	auto UTFString3 = String_to_UTF8(String3);
+	auto StringArg3 = FABIArg{STRING, UTFString3.ByteLength, &UTFString3.Data};
+
+	auto ArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&NumberArg1, &NumberArg2}};
+	auto ArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&NumberArg3}};
+	auto ArrayArg3 = FABIArg{ARRAY, 2, new void*[2]{&ArrayArg1, &ArrayArg2}};
+	auto ArrayArg4 = FABIArg{ARRAY, 3, new void*[3]{&StringArg1, &StringArg2, &StringArg3}};
+
+	FABIArg** Args = new FABIArg*[2];
+	Args[0] = &ArrayArg3;
+	Args[1] = &ArrayArg4;
+
+	auto BlockNumInt = ArrayArg3.GetBlockNum() + ArrayArg4.GetBlockNum();
+	FString BlockNum = FString::FromInt(BlockNumInt);
 	
 	UE_LOG(LogTemp, Display, TEXT("RESULT: %s"), *BlockNum);
+
+	auto Obj = ABI::Encode("test", Args, 2);
+
+	UE_LOG(LogTemp, Display, TEXT("BINARY: %s"), *HashToHexString(Obj.ByteLength, Obj.Data));
+
+	for(auto i = 0; i < BlockNumInt; i++)
+	{
+		auto Addr = GMethodIdByteLength + GBlockByteLength * i;
+		UE_LOG(LogTemp, Display, TEXT("BINARY: %s"), *HashToHexString(GBlockByteLength, &Obj.Data[Addr]));
+	}
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

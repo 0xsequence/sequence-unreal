@@ -15,7 +15,7 @@ enum EABIArgType
 struct FABIArg
 {
 	EABIArgType Type;
-	uint8 Length; // For RAW types, this is the number of bytes. For Arrays, this is the number of entries.
+	uint32 Length; // For RAW types, this is the number of bytes. For Arrays, this is the number of entries.
 	void* Data;
 
 	uint8 GetBlockNum() const;
@@ -25,9 +25,10 @@ struct FABIArg
 class ABI
 {
 public:
-	FBinaryData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
-	FString Decode();
+	static FBinaryData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
+	static FString Decode();
 };
 
 FBinaryData String_to_UTF8(FString String);
 FString UTF8_to_String(FBinaryData BinaryData);
+void CopyUInt32(uint8* Ptr, uint32 Data);
