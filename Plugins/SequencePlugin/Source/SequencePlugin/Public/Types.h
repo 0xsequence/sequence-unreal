@@ -26,7 +26,7 @@ using BlockNonce = Hash; // 8 bytes, 64 bits
 struct FBinaryData
 {
 	uint8* Data;
-	uint8 ByteLength;
+	uint32 ByteLength;
 };
 
 
