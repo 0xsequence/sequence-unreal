@@ -12,13 +12,13 @@ public class secp256k1Library : ModuleRules
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
 			// Add the import library
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "x64", "Release", "ExampleLibrary.lib"));
+			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "x64", "Release", "secp256k1.lib"));
 
 			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add("ExampleLibrary.dll");
+			PublicDelayLoadDLLs.Add(Path.Combine(ModuleDirectory, "x64", "Release", "secp256k1.dll"));
 
 			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add("$(PluginDir)/Binaries/ThirdParty/secp256k1Library/Win64/ExampleLibrary.dll");
+			RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/secp256k1Library/x64/Release/secp256k1.dll");
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
