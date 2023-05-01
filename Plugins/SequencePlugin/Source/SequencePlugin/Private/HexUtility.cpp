@@ -1,3 +1,6 @@
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4146)
+#pragma warning(disable: 4104)
 #include "HexUtility.h"
 
 FString IntToHexString(uint64 Num)
