@@ -39,8 +39,8 @@ bool HttpSimpleTest::RunTest(const FString& Parameters)
 		LogIfError("NonceAt", provider.NonceAt(Latest));
 	}
 
-	auto PrivateKey = HexStringToHash256("0xabc0000000000000000000000000000000000000000000000000000000000001");
-	Hash256 PublicKey = GetPublicKey(PrivateKey);
+	auto PrivateKey = HexStringToHash256("ac80bd11fe77248b10b90ca3ba244667ca6f1c46aa137dedaf40d33dc5923cda");
+	PublicKey PublicKey = GetPublicKey(PrivateKey);
 	//auto PublicKey = HexStringToHash(GPublicKeyByteLength, "");
 	//Keccak256::getHash(PrivateKey, 32, PublicKey);
 

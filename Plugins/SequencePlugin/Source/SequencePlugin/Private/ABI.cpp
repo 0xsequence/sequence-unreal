@@ -124,13 +124,21 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 
 FBinaryData String_to_UTF8(FString String)
 {
-	const TCHAR* Chars = String.GetCharArray().GetData();
-	const uint8 ByteLength = FCString::Strlen(Chars);
-	uint8* Data = reinterpret_cast<uint8*>(TCHAR_TO_UTF8(Chars));
+	uint32 Length = String.Len();
 
-	return FBinaryData{
-		Data, ByteLength
+	auto binary = FBinaryData{
+		new uint8[Length], Length
 	};
+
+	StringToBytes(String, binary.Data, Length);
+
+	// I have no idea why I need to add 1 but it works
+	for(auto i = 0; i < binary.ByteLength; i++)
+	{
+		binary.Data[i] = binary.Data[i] + 1;
+	}
+
+	return binary;
 }
 
 FString UTF8_to_String(FBinaryData BinaryData)
