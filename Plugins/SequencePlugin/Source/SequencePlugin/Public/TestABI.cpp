@@ -18,26 +18,33 @@ bool TestABI::RunTest(const FString& Parameters)
 
 	FString String1 = "one";
 	auto UTFString1 = String_to_UTF8(String1);
-	auto StringArg1 = FABIArg{STRING, UTFString1.ByteLength, &UTFString1.Data};
+	auto StringArg1 = FABIArg{STRING, UTFString1.ByteLength, UTFString1.Data};
 	
 	FString String2 = "two";
 	auto UTFString2 = String_to_UTF8(String2);
-	auto StringArg2 = FABIArg{STRING, UTFString2.ByteLength, &UTFString2.Data};
+	auto StringArg2 = FABIArg{STRING, UTFString2.ByteLength, UTFString2.Data};
 	
 	FString String3 = "one";
 	auto UTFString3 = String_to_UTF8(String3);
-	auto StringArg3 = FABIArg{STRING, UTFString3.ByteLength, &UTFString3.Data};
+	auto StringArg3 = FABIArg{STRING, UTFString3.ByteLength, UTFString3.Data};
 
 	auto ArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&NumberArg1, &NumberArg2}};
 	auto ArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&NumberArg3}};
 	auto ArrayArg3 = FABIArg{ARRAY, 2, new void*[2]{&ArrayArg1, &ArrayArg2}};
 	auto ArrayArg4 = FABIArg{ARRAY, 3, new void*[3]{&StringArg1, &StringArg2, &StringArg3}};
 
-	FABIArg** Args = new FABIArg*[2];
-	Args[0] = &ArrayArg3;
-	Args[1] = &ArrayArg4;
+	auto BinData = HexStringtoBinary("0x77");
+	auto BinArg = FABIArg{BYTES, BinData.ByteLength, BinData.Data};
 
-	auto BlockNumInt = ArrayArg3.GetBlockNum() + ArrayArg4.GetBlockNum();
+	UE_LOG(LogTemp, Display, TEXT("Text: %s"), *UTF8_to_String(FBinaryData{
+		static_cast<uint8*>(StringArg1.Data), StringArg1.Length
+	}));
+	
+	FABIArg** Args = new FABIArg*[2];
+	Args[0] = &BinArg;
+	Args[1] = &StringArg1;
+	
+	auto BlockNumInt = (*Args[0]).GetBlockNum() + (*Args[1]).GetBlockNum();
 	FString BlockNum = FString::FromInt(BlockNumInt);
 	
 	UE_LOG(LogTemp, Display, TEXT("RESULT: %s"), *BlockNum);

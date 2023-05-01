@@ -9,6 +9,7 @@ TOptional<uint64> HexStringToInt64(FString Hex);
 FString HashToHexString(ByteLength Size, uint8* Hash);
 uint8* HexStringToHash(ByteLength Size, FString Hex);
 FBinaryData HexStringtoBinary(FString Hex); // Hex String to Number of arbitrary size
+FString BinaryToHexString(FBinaryData Binary);
 
 FString Hash256ToHexString(Hash256 Hash);
 Hash256 HexStringToHash256(FString Hex);

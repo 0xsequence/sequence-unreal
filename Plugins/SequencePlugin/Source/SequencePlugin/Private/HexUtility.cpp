@@ -91,16 +91,22 @@ TOptional<uint8> HexLetterToInt(TCHAR Hex)
 			return TOptional<uint8>(8);
 		case '9':
 			return TOptional<uint8>(9);
+		case 'A':
 		case 'a':
 			return TOptional<uint8>(10);
+		case 'B':
 		case 'b':
 			return TOptional<uint8>(11);
+		case 'C':
 		case 'c':
 			return TOptional<uint8>(12);
+		case 'D':
 		case 'd':
 			return TOptional<uint8>(13);
+		case 'E':
 		case 'e':
 			return TOptional<uint8>(14);
+		case 'F':
 		case 'f':
 			return TOptional<uint8>(15);
 		default:
@@ -198,11 +204,19 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 
 FBinaryData HexStringtoBinary(const FString Hex)
 {
-	const uint8 Size = (Hex.Len() / 2) + (Hex.Len() % 2);
+	auto HexCopy = FString(Hex);
+	HexCopy.RemoveFromStart("0x");
+	
+	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
 	
 	return FBinaryData {
-		HexStringToHash(Size, Hex), Size
+		HexStringToHash(Size, HexCopy), Size
 	};
+}
+
+FString BinaryToHexString(FBinaryData Binary)
+{
+	return HashToHexString(Binary.ByteLength, Binary.Data);
 }
 
 FString Hash256ToHexString(const Hash256 Hash)

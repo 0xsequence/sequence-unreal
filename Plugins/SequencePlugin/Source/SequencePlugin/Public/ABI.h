@@ -9,7 +9,7 @@ enum EABIArgType
 	STATIC, // Integers, bytes, and hashes
 	BYTES,
 	STRING,
-	ARRAY
+	ARRAY,
 };
 
 struct FABIArg
