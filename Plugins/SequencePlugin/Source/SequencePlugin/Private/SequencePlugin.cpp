@@ -1,5 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4146)
+#pragma warning(disable: 4104)
+#pragma warning(disable: 4101)
 #include "SequencePlugin.h"
 #include "Core.h"
 #include "Modules/ModuleManager.h"

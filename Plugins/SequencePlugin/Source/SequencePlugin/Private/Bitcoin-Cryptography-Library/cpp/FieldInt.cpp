@@ -5,7 +5,9 @@
  * https://www.nayuki.io/page/bitcoin-cryptography-library
  * https://github.com/nayuki/Bitcoin-Cryptography-Library
  */
-
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4146)
+#pragma warning(disable: 4104)
 #include <cassert>
 #include <cstring>
 #include "AsmX8664.hpp"

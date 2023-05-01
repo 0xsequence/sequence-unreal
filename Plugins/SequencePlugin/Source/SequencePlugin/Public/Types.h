@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Dom/JsonObject.h"
 using ByteLength = uint32;
 using Hash = uint8*;
 
