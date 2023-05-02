@@ -25,3 +25,11 @@ void ASequence_BKND_Manager::Tick(float DeltaTime)
 
 }
 
+/*
+	Simple Testing Function for setting up bi directional communication
+*/
+int32 ASequence_BKND_Manager::Setup(int32 setup_prop)
+{
+	return setup_prop + 1;//this ensures that stuff is going back and forth properly
+}
+
