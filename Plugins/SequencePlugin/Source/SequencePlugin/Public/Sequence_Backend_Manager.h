@@ -18,6 +18,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FString Setup();
 
+	UFUNCTION(BlueprintCallable)
+		FString Testing_Address_Generation();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
