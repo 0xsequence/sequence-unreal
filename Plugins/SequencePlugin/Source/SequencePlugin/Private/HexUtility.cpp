@@ -146,7 +146,7 @@ TOptional<uint64> HexStringToInt64(FString Hex)
 
 FString HashToHexString(ByteLength Size, uint8* Hash)
 {
-	FString String = "0x";
+	FString String = "";
 	
 	for(auto i = 0; i < Size; i++)
 	{
@@ -155,6 +155,9 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 		auto Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
 		String = String + Added;
 	}
+
+	//String.RemoveFromStart("0x");
+
 	return String;
 }
 
