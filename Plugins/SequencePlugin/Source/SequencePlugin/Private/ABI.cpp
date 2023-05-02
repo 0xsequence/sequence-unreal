@@ -60,8 +60,6 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		CopyUInt32(HeadPtr, Offset * GBlockByteLength);
 		*Head = &HeadPtr[1 * GBlockByteLength];
 		CopyUInt32(TailPtr, this->Length);
-
-
 		
 		auto RawData = static_cast<uint8*>(this->Data);
 
@@ -127,8 +125,8 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 	}
 
 	// Free calculation data
-	delete Signature;
-	delete Msg.Data;
+	delete [] Signature;
+	delete [] Msg.Data;
 	
 	uint8* HeadPtr = &Blocks[GMethodIdByteLength];
 	uint8* Start = HeadPtr;
