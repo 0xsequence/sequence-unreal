@@ -41,8 +41,8 @@ bool TestABI::RunTest(const FString& Parameters)
 	}));
 	
 	FABIArg** Args = new FABIArg*[2];
-	Args[0] = &BinArg;
-	Args[1] = &StringArg1;
+	Args[0] = &ArrayArg3;
+	Args[1] = &ArrayArg4;
 	
 	auto BlockNumInt = (*Args[0]).GetBlockNum() + (*Args[1]).GetBlockNum();
 	FString BlockNum = FString::FromInt(BlockNumInt);
