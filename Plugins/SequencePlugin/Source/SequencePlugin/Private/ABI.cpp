@@ -3,6 +3,8 @@
 #pragma warning(disable: 4104)
 #include "ABI.h"
 
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+
 uint8 FABIArg::GetBlockNum() const
 {
 	if(this->Type == STATIC)
@@ -58,14 +60,19 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		CopyUInt32(HeadPtr, Offset * GBlockByteLength);
 		*Head = &HeadPtr[1 * GBlockByteLength];
 		CopyUInt32(TailPtr, this->Length);
+
+
 		
+		auto RawData = static_cast<uint8*>(this->Data);
+
+		UE_LOG(LogTemp, Display, TEXT("I am encoding a string at %i"), RawData);
+		UE_LOG(LogTemp, Display, TEXT("The value at that address is %i"), RawData[0]);
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
-			auto RawData = static_cast<uint8*>(this->Data);
 			TailPtr[GBlockByteLength + i] = RawData[i];
 		}
-
+		
 		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
 		return;
 	}
@@ -77,7 +84,7 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		CopyUInt32(TailPtr, this->Length);
 		
 		auto SubHead = &TailPtr[GBlockByteLength];
-		auto SubTail = &TailPtr[GMethodIdByteLength + GBlockByteLength * this->Length];
+		auto SubTail = &TailPtr[GBlockByteLength * (this->Length + 1)];
 
 		FABIArg** Arr = static_cast<FABIArg**>(this->Data);
 		
@@ -109,6 +116,19 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 	{
 		Blocks[i] = 0;
 	}
+
+	auto Signature = new uint8[GKeccakHashLength];
+	auto Msg = String_to_UTF8(Method);
+	Keccak256::getHash(Msg.Data, Msg.ByteLength, Signature);
+
+	for(auto i = 0; i < GMethodIdByteLength; i++)
+	{
+		Blocks[i] = Signature[i];
+	}
+
+	// Free calculation data
+	delete Signature;
+	delete Msg.Data;
 	
 	uint8* HeadPtr = &Blocks[GMethodIdByteLength];
 	uint8* Start = HeadPtr;
