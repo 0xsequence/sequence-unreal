@@ -31,45 +31,22 @@ void ASequence_Backend_Manager::Tick(float DeltaTime)
 
 }
 
-template<typename T>
-FString Get_Response(TResult<T> Result)
-{
-
-	FString OutputString;
-	TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-	FJsonSerializer::Serialize(Result.GetValue().ToSharedRef(), Writer);
-	return OutputString;
-}
-
+/*
+* Used to setup the backend manager for usage
+* retuns FString ("Complete Message")
+*/
 FString ASequence_Backend_Manager::Setup()
 {
-	//Private Key 32 bytes long
-	//ac80bd11fe77248b10b90ca3ba244667ca6f1c46aa137dedaf40d33dc5923cda
-	//Public Key that we want for the above private key (64 bytes long)
-	//4466d87ce078ee7e1760312c6fffade074794b4ed60ad4331185728a63354d97368955d50a0804b6d455ce049039ed825dc9ecde5087ee830266d59a088197b4
-	//this is a simple test to generate a public key from a private key and see the results in editor
-	FString result = "Test Failed";
-	//Create a hashed 32byte private key (hard set for now)
-	auto PrivateKey = HexStringToHash256("ac80bd11fe77248b10b90ca3ba244667ca6f1c46aa137dedaf40d33dc5923cda");
-	FString hard_pub_key = "4466d87ce078ee7e1760312c6fffade074794b4ed60ad4331185728a63354d97368955d50a0804b6d455ce049039ed825dc9ecde5087ee830266d59a088197b4";
-	PublicKey PublicKey = GetPublicKey(PrivateKey);
-	
-	//go from hash to hex!
-	FString gen_pub_key = *HashToHexString(GPublicKeyByteLength,PublicKey);
-
-	//check if they match
-	if (gen_pub_key.Compare(hard_pub_key) == 0)
-	{
-		result = "Test Passed";//update test if passed
-	}
-
-	//log
-	
-	UE_LOG(LogTemp, Display, TEXT("Generated Public Key: %s"), (*HashToHexString(GPublicKeyByteLength, PublicKey)));
-	UE_LOG(LogTemp, Display, TEXT("HardCoded Public Key: %s"), *hard_pub_key);
-	return result;
+	return "Setup Complete";
 }
 
+/*
+* Used to test an indivual private key, to see how it's generated public key compares to a CORRECT
+* pre computed and and how the generated address from the generated public key compares to a precomputed
+* CORRECT address
+* returns true IFF gen_public_key matches the hard_public_key &&
+* gen_address matches hard_address
+*/
 bool ASequence_Backend_Manager::test_address_gen(FString prvt_k, FString hrd_pblc_k, FString hrd_addr)
 {
 	bool bResult = false;
@@ -104,6 +81,10 @@ bool ASequence_Backend_Manager::test_address_gen(FString prvt_k, FString hrd_pbl
 	return bResult;
 }
 
+/*
+* Used to test the public key generation and address generation in accordance with
+* the test chain!
+*/
 FString ASequence_Backend_Manager::Testing_Address_Generation()
 {
 	FString Result = "Test Failed";
