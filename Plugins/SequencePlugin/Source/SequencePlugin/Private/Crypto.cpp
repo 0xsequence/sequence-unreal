@@ -25,6 +25,6 @@ Address GetAddress(PrivateKey PublicKey)
 		addr[i] = Hash[i + 12];
 	}
 
-	//delete [] Hash;
+	delete [] Hash;
 	return addr;
 }
