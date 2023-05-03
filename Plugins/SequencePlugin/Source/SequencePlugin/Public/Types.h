@@ -15,8 +15,6 @@ using PublicKey = Hash; // 64 byte key
 constexpr ByteLength GPrivateKeyByteLength = 32;
 using PrivateKey = Hash; // 32 byte key
 
-constexpr ByteLength GKeccakHashLength = 32;
-
 constexpr ByteLength GBloomByteLength = 256;
 using Bloom = Hash; // 256 bytes, 2048 bits
 

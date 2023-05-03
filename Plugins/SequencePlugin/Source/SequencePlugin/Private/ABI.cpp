@@ -43,9 +43,10 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 
 	if(this->Type == STATIC)
 	{
+		auto RawData = static_cast<uint8*>(this->Data);
+		
 		for(auto i = 0; i < this->Length; i++)
 		{
-			auto RawData = static_cast<uint8*>(this->Data);
 			HeadPtr[GBlockByteLength - this->Length + i] = RawData[i];
 		}
 		
@@ -62,9 +63,6 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		CopyUInt32(TailPtr, this->Length);
 		
 		auto RawData = static_cast<uint8*>(this->Data);
-
-		UE_LOG(LogTemp, Display, TEXT("I am encoding a string at %i"), RawData);
-		UE_LOG(LogTemp, Display, TEXT("The value at that address is %i"), RawData[0]);
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
@@ -97,6 +95,69 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 	}
 }
 
+void FABIArg::Decode(uint8* Start, uint8** Head, uint8** Tail)
+{
+	auto HeadPtr = *Head;
+	auto TailPtr = *Tail;
+	
+	if(this->Type == STATIC)
+	{
+		auto RawData = static_cast<uint8*>(this->Data);
+		
+		for(auto i = 0; i < this->Length; i++)
+		{
+			RawData[this->Length - 1 - i] = HeadPtr[GBlockByteLength - 1 - i];
+		}
+
+		*Head = &HeadPtr[1 * GBlockByteLength];
+		return;
+	}
+
+	auto Offset = (TailPtr - Start) / GBlockByteLength;
+
+	if(this->Type == STRING || this->Type == ARRAY)
+	{
+		CopyUInt32(HeadPtr, Offset * GBlockByteLength);
+		*Head = &HeadPtr[1 * GBlockByteLength];
+		CopyUInt32(TailPtr, this->Length);
+		
+		auto RawData = static_cast<uint8*>(this->Data);
+		
+		for(auto i = 0; i < GBlockByteLength; i++)
+		{
+			auto Entry = TailPtr[GBlockByteLength + i];
+
+			if(Entry == 0) return;
+			
+			RawData[i] = Entry;
+		}
+		
+		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
+		return;
+	}
+
+	if(this->Type == ARRAY)
+	{
+		CopyUInt32(HeadPtr, Offset * GBlockByteLength);
+		*Head = &HeadPtr[1 * GBlockByteLength];
+		CopyUInt32(TailPtr, this->Length);
+		
+		auto SubHead = &TailPtr[GBlockByteLength];
+		auto SubTail = &TailPtr[GBlockByteLength * (this->Length + 1)];
+
+		FABIArg** Arr = static_cast<FABIArg**>(this->Data);
+		
+		for(auto i = 0; i < this->Length; i++)
+		{
+			FABIArg Item = *Arr[i];
+			Item.Decode(&TailPtr[GBlockByteLength], &SubHead, &SubTail);
+		}
+
+		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
+		return;
+	}
+}
+
 FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
@@ -115,7 +176,7 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 		Blocks[i] = 0;
 	}
 
-	auto Signature = new uint8[GKeccakHashLength];
+	Hash256 Signature = new uint8[GHash256ByteLength];
 	auto Msg = String_to_UTF8(Method);
 	Keccak256::getHash(Msg.Data, Msg.ByteLength, Signature);
 
@@ -141,6 +202,19 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 	return FBinaryData{
 		Blocks, TotalByteLength
 	};
+}
+
+void ABI::Decode(FBinaryData Data, FABIArg** Args, uint8 ArgNum)
+{
+	uint8* HeadPtr = &Data.Data[GMethodIdByteLength];
+	uint8* Start = HeadPtr;
+	uint8* TailPtr = &Data.Data[GMethodIdByteLength + GBlockByteLength * ArgNum];
+
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		auto Arg = Args[i];
+		Arg->Decode(Start, &HeadPtr, &TailPtr);
+	}
 }
 
 FBinaryData String_to_UTF8(FString String)
