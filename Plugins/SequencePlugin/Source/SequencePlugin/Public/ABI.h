@@ -20,13 +20,14 @@ struct FABIArg
 
 	uint8 GetBlockNum() const;
 	void Encode(uint8* Start, uint8** Head, uint8** Tail);
+	void Decode(uint8* Start, uint8** Head, uint8** Tail);
 };
 
 class ABI
 {
 public:
 	static FBinaryData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
-	static FString Decode();
+	static void Decode(FBinaryData Data, FABIArg** Args, uint8 ArgNum);
 };
 
 FBinaryData String_to_UTF8(FString String);
