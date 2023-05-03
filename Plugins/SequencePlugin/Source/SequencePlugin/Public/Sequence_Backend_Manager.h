@@ -18,6 +18,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FString Setup();
 
+	bool test_address_gen(FString prvt_k, FString hrd_pblc_k, FString hrd_addr);
+
 	UFUNCTION(BlueprintCallable)
 		FString Testing_Address_Generation();
 protected:
