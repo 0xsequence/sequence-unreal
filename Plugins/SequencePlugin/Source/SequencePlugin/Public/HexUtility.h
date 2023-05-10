@@ -16,3 +16,5 @@ Hash256 HexStringToHash256(FString Hex);
 
 FString AddressToHexString(Address Addr);
 Address HexStringToAddress(FString Hex);
+
+FString TrimHex(FString Hex);

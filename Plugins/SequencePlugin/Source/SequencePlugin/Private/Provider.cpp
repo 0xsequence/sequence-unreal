@@ -268,6 +268,17 @@ TResult<BlockNonce> Provider::NonceAt(EBlockTag Tag)
 	return NonceAtHelper(ConvertString(TagToString(Tag)));
 }
 
+void Provider::SendRawTransaction(FString data)
+{
+	const auto Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddString(data)
+			->EndArray()
+		->ToString();
+
+	SendRPC(Content);
+}
+
 TValueOrError<uint32, SequenceError> Provider::ChainId()
 {
 	const auto Content = RPCBuilder("eth_chainId").ToString();

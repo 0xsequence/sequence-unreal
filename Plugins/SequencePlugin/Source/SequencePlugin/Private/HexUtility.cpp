@@ -244,3 +244,17 @@ Address HexStringToAddress(FString Hex)
 {
 	return HexStringToHash(GAddressByteLength, Hex);
 }
+
+FString TrimHex(FString Hex)
+{
+	FString HexCopy = FString(Hex);
+	
+	HexCopy.RemoveFromStart("0x");
+
+	while(HexCopy[0] == '0')
+	{
+		HexCopy.RemoveFromStart("0");
+	}
+
+	return HexCopy;
+}
