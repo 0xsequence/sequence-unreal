@@ -62,12 +62,18 @@ bool TestTransaction::RunTest(const FString& Parameters)
 	}
 
 	auto EncodedSigningData = RLP::Encode(item); // RLP Encoder creates data to be hashed
+
+	// Trying something from https://eips.ethereum.org/EIPS/eip-191
+	// The first character is a placeholder that has to be replaced with x19
+	auto Msg = "XEthereum Signed Message:\n" + FString::FromInt(EncodedSigningData.ByteLength) + BinaryToHexString(EncodedSigningData);
+	auto EncodedMsg = String_to_UTF8(Msg);
+	EncodedMsg.Data[0] = 0x19;
 	
 	// signing hash
 	// Verify using https://emn178.github.io/online-tools/keccak_256.html
 	// Looks correct to me - Jan
 	Hash256 SigningHash = new uint8[GHash256ByteLength];
-	Keccak256::getHash(EncodedSigningData.Data, EncodedSigningData.ByteLength, SigningHash);
+	Keccak256::getHash(EncodedMsg.Data, EncodedMsg.ByteLength, SigningHash);
 
 	//signing transaction
 	PrivateKey Privkey = HexStringToHash(GPrivateKeyByteLength, PRIVATE_KEY);
