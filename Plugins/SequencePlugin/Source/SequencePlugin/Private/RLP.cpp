@@ -69,6 +69,11 @@ void RLPItem::Encode(uint8* HeadPtr)
 	if(this->Type == BINARY)
 	{
 		auto RawData = static_cast<uint8*>(this->Data);
+
+		if(this->Length == 1 && RawData[0] == 0)
+		{
+			HeadPtr[0] = 0x80; // We serialize 0x0 as an empty string 
+		}
 		
 		if(this->Length == 1 && RawData[0] <= 127)
 		{
@@ -162,7 +167,13 @@ RLPItem Itemize(RLPItem* Items, uint32 Length)
 }
 FBinaryData RLP::Encode(RLPItem Item)
 {
-	const auto Length = Item.CalculateLength();
+	auto Length = Item.CalculateLength();
+
+	// Bugfix?
+	if(Length > 56) {
+		Length += 1;
+	}
+	
 	uint8* Data = new uint8[Length];
 	Item.Encode(Data);
 	return FBinaryData
