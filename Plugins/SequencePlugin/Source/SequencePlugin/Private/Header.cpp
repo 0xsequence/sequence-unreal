@@ -1,25 +1,27 @@
 #include "Header.h"
+
+#include "BinaryData.h"
 #include "Types.h"
 #include "HexUtility.h"
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
 {
-	Hash256 ParentHash = HexStringToHash256(Json->GetStringField("parentHash"));
-	Hash256 UncleHash = HexStringToHash256(Json->GetStringField("sha3Uncles"));
-	Address Coinbase = nullptr;
-	Hash256 Root = HexStringToHash256(Json->GetStringField("stateRoot"));
-	Hash256 TxHash = HexStringToHash256(Json->GetStringField("transactionsRoot"));
-	Hash256 ReceiptHash = HexStringToHash256(Json->GetStringField("receiptsRoot"));
-	Bloom Bloom = HexStringToHash(GBloomByteLength, Json->GetStringField("logsBloom"));
-	FBinaryData Difficulty = HexStringtoBinary(Json->GetStringField("difficulty"));
-	FBinaryData Number = HexStringtoBinary(Json->GetStringField("number"));
+	FHash256 ParentHash = FHash256::From(Json->GetStringField("parentHash"));
+	FHash256 UncleHash =  FHash256::From(Json->GetStringField("sha3Uncles"));
+	FAddress Coinbase = FAddress::New(); // TODO 
+	FHash256 Root = FHash256::From(Json->GetStringField("stateRoot"));
+	FHash256 TxHash = FHash256::From(Json->GetStringField("transactionsRoot"));
+	FHash256 ReceiptHash = FHash256::From(Json->GetStringField("receiptsRoot"));
+	FBloom Bloom = FBloom::From(Json->GetStringField("logsBloom"));
+	FNonUniformData Difficulty = HexStringToBinary(Json->GetStringField("difficulty"));
+	FNonUniformData Number = HexStringToBinary(Json->GetStringField("number"));
 	uint64 GasLimit = HexStringToInt64(Json->GetStringField("gasLimit")).Get(0);
 	uint64 GasUsed = HexStringToInt64(Json->GetStringField("gasUsed")).Get(0);
 	uint64 Time = HexStringToInt64(Json->GetStringField("timestamp")).Get(0);
-	FBinaryData ExtraData = HexStringtoBinary(Json->GetStringField("extraData"));
-	Hash256 MixDigest = HexStringToHash256(Json->GetStringField("mixHash"));
-	BlockNonce Nonce = HexStringToHash(GBlockNonceByteLength, Json->GetStringField("nonce"));
-	FBinaryData BaseFee = FBinaryData{nullptr, 0};
+	FNonUniformData ExtraData = HexStringToBinary(Json->GetStringField("extraData"));
+	FHash256 MixDigest = FHash256::From(Json->GetStringField("mixHash"));
+	FBlockNonce Nonce = FBlockNonce::From(Json->GetStringField("nonce"));
+	FNonUniformData BaseFee = FNonUniformData{nullptr, 0};
 
 	return FHeader{
 		ParentHash, UncleHash, Coinbase, Root, TxHash, ReceiptHash, Bloom, Difficulty, Number, GasLimit, GasUsed, Time, ExtraData, MixDigest, Nonce, BaseFee

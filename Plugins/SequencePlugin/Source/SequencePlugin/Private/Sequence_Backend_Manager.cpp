@@ -52,11 +52,12 @@ bool ASequence_Backend_Manager::test_address_gen(FString prvt_k, FString hrd_pbl
 	bool bResult = false;
 
 	//gen the public key one that's usable and the other for printing / testing!
-	FString gen_pblc_k_V = *HashToHexString(GPublicKeyByteLength, GetPublicKey(HexStringToHash256(prvt_k)));
-	Hash gen_pblc_key_H = GetPublicKey(HexStringToHash256(prvt_k));
+	auto PrivKey = FPrivateKey::From(prvt_k);
+	FPublicKey gen_pblc_key_H = GetPublicKey(PrivKey);
+	FString gen_pblc_k_V = gen_pblc_key_H.ToHex();
 
-	Hash addr_H = GetAddress(gen_pblc_key_H);
-	FString addr_V = *HashToHexString(20, addr_H);
+	FAddress addr_H = GetAddress(gen_pblc_key_H);
+	FString addr_V = addr_H.ToHex();
 	UE_LOG(LogTemp, Display, TEXT("=========================================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Private Key: %s"), *prvt_k);
 	UE_LOG(LogTemp, Display, TEXT("Public Gen Key: %s"), *gen_pblc_k_V);

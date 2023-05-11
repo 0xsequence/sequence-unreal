@@ -1,4 +1,5 @@
 #pragma once
+#include "BinaryData.h"
 #include "Types.h"
 
 ByteLength GetByteLength(uint32 Length);
@@ -21,12 +22,13 @@ struct RLPItem
 };
 
 RLPItem Itemize(FString String);
-RLPItem Itemize(FBinaryData Data);
+RLPItem Itemize(FBinaryData &Data);
+RLPItem Itemize(FNonUniformData Data);
 RLPItem Itemize(Hash Hash, ByteLength Length);
 RLPItem Itemize(RLPItem* Items, uint32 Length);
 
 class RLP
 {
 public:
-	static FBinaryData Encode(RLPItem Item);
+	static FNonUniformData Encode(RLPItem Item);
 };

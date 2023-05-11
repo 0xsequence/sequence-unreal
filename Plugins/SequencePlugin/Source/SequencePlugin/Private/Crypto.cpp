@@ -1,27 +1,29 @@
 #include "Crypto.h"
+
+#include "BinaryData.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/CurvePoint.hpp"
 
-PublicKey GetPublicKey(PrivateKey PrivateKey)
+FPublicKey GetPublicKey(FPrivateKey PrivateKey)
 {
-	auto PrivKey = Uint256(PrivateKey);
+	auto PrivKey = Uint256(PrivateKey.Arr);
 	auto PubKey = CurvePoint::privateExponentToPublicPoint(PrivKey);
-	PublicKey PublicKey = new uint8[GPublicKeyByteLength];	
-	PubKey.x.getBigEndianBytes(PublicKey);
-	PubKey.y.getBigEndianBytes(&PublicKey[GPublicKeyByteLength / 2]);
+	FPublicKey PublicKey = FPublicKey::New();
+	PubKey.x.getBigEndianBytes(PublicKey.Arr);
+	PubKey.y.getBigEndianBytes(&PublicKey.Arr[FPublicKey::Size / 2]);
 	return PublicKey;
 }
 
-Address GetAddress(PrivateKey PublicKey)
+FAddress GetAddress(FPublicKey PublicKey)
 {
-	Hash256 Hash = new uint8[GHash256ByteLength];
-	Keccak256::getHash(PublicKey, GPublicKeyByteLength, Hash);
-	Address addr = new uint8[GAddressByteLength];
-	for(auto i = 0; i < GAddressByteLength; i++)
+	auto Hash = FHash256::New();
+	Keccak256::getHash(PublicKey.Arr, FPublicKey::Size, Hash.Arr);
+	FAddress Address = FAddress::New();
+	for(auto i = 0; i < FAddress::Size; i++)
 	{
-		addr[i] = Hash[i + 12];
+		Address.Arr[i] = Hash.Arr[i + 12];
 	}
 
-	delete [] Hash;
-	return addr;
+	Hash.Destroy();
+	return Address;
 }

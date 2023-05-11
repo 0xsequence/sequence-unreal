@@ -3,6 +3,7 @@
 #pragma warning(disable: 4104)
 #include "ABI.h"
 
+#include "BinaryData.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
 uint8 FABIArg::GetBlockNum() const
@@ -158,7 +159,7 @@ void FABIArg::Decode(uint8* Start, uint8** Head, uint8** Tail)
 	}
 }
 
-FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
+FNonUniformData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
 	
@@ -176,18 +177,18 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 		Blocks[i] = 0;
 	}
 
-	Hash256 Signature = new uint8[GHash256ByteLength];
+	auto Signature = FHash256::New();
 	auto Msg = String_to_UTF8(Method);
-	Keccak256::getHash(Msg.Data, Msg.ByteLength, Signature);
+	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
 
 	for(auto i = 0; i < GMethodIdByteLength; i++)
 	{
-		Blocks[i] = Signature[i];
+		Blocks[i] = Signature.Arr[i];
 	}
 
 	// Free calculation data
-	delete [] Signature;
-	delete [] Msg.Data;
+	Signature.Destroy();
+	Msg.Destroy();
 	
 	uint8* HeadPtr = &Blocks[GMethodIdByteLength];
 	uint8* Start = HeadPtr;
@@ -199,16 +200,16 @@ FBinaryData ABI::Encode(FString Method, FABIArg** Args, uint8 ArgNum)
 		Arg->Encode(Start, &HeadPtr, &TailPtr);
 	}
 
-	return FBinaryData{
+	return FNonUniformData{
 		Blocks, TotalByteLength
 	};
 }
 
-void ABI::Decode(FBinaryData Data, FABIArg** Args, uint8 ArgNum)
+void ABI::Decode(FNonUniformData Data, FABIArg** Args, uint8 ArgNum)
 {
-	uint8* HeadPtr = &Data.Data[GMethodIdByteLength];
+	uint8* HeadPtr = &Data.Arr[GMethodIdByteLength];
 	uint8* Start = HeadPtr;
-	uint8* TailPtr = &Data.Data[GMethodIdByteLength + GBlockByteLength * ArgNum];
+	uint8* TailPtr = &Data.Arr[GMethodIdByteLength + GBlockByteLength * ArgNum];
 
 	for(auto i = 0; i < ArgNum; i++)
 	{
@@ -217,31 +218,31 @@ void ABI::Decode(FBinaryData Data, FABIArg** Args, uint8 ArgNum)
 	}
 }
 
-FBinaryData String_to_UTF8(FString String)
+FNonUniformData String_to_UTF8(FString String)
 {
 	uint32 Length = String.Len();
 
-	auto binary = FBinaryData{
+	auto binary = FNonUniformData{
 		new uint8[Length], Length
 	};
 
-	StringToBytes(String, binary.Data, Length);
+	StringToBytes(String, binary.Arr, Length);
 
 	// I have no idea why I need to add 1 but it works
-	for(auto i = 0; i < binary.ByteLength; i++)
+	for(auto i = 0; i < binary.GetLength(); i++)
 	{
-		binary.Data[i] = binary.Data[i] + 1;
+		binary.Arr[i] = binary.Arr[i] + 1;
 	}
 
 	return binary;
 }
 
-FString UTF8_to_String(FBinaryData BinaryData)
+FString UTF8_to_String(FNonUniformData BinaryData)
 {
 	TArray<uint8> Buffer;
-	for(auto i = 0; i < BinaryData.ByteLength; i++)
+	for(auto i = 0; i < BinaryData.GetLength(); i++)
 	{
-		Buffer.Add(BinaryData.Data[i]);
+		Buffer.Add(BinaryData.Arr[i]);
 	}
 	Buffer.Add('\0');
 	return reinterpret_cast<const char*>(Buffer.GetData());

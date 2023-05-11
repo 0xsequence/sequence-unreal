@@ -1,4 +1,5 @@
 #pragma once
+#include "BinaryData.h"
 #include "Types.h"
 
 inline uint8 GMethodIdByteLength = 4;
@@ -26,10 +27,10 @@ struct FABIArg
 class ABI
 {
 public:
-	static FBinaryData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
-	static void Decode(FBinaryData Data, FABIArg** Args, uint8 ArgNum);
+	static FNonUniformData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
+	static void Decode(FNonUniformData Data, FABIArg** Args, uint8 ArgNum);
 };
 
-FBinaryData String_to_UTF8(FString String);
-FString UTF8_to_String(FBinaryData BinaryData);
+FNonUniformData String_to_UTF8(FString String);
+FString UTF8_to_String(FNonUniformData BinaryData);
 void CopyUInt32(uint8* Ptr, uint32 Data);
