@@ -1,4 +1,5 @@
 #pragma once
+#include "BinaryData.h"
 #include "Types.h"
 
 class Crypto
@@ -7,5 +8,5 @@ public:
 	
 };
 
-PublicKey GetPublicKey(PrivateKey PrivateKey);
-Address GetAddress(PrivateKey PublicKey);
+FPublicKey GetPublicKey(FPrivateKey PrivateKey);
+FAddress GetAddress(FPublicKey PublicKey);

@@ -22,8 +22,8 @@ void LogIfError(FString Name, TResult<T> Result)
 bool HttpSimpleTest::RunTest(const FString& Parameters)
 {
 	auto provider = Provider("http://localhost:8545/");
-	Hash256 hash = HexStringToHash256("0xabc0000000000000000000000000000000000000000000000000000000000001");
-	Address addr = HexStringToAddress("0x1099542D7dFaF6757527146C0aB9E70A967f71C0");
+	auto hash = FHash256::From(HexStringToBinary("0xabc0000000000000000000000000000000000000000000000000000000000001").Arr);
+	auto addr = FAddress::From(HexStringToBinary("0x1099542D7dFaF6757527146C0aB9E70A967f71C0").Arr);
 
 	LogIfError("BlockByNumber", provider.BlockByNumber(1));
 	LogIfError("BlockByNumber", provider.BlockByNumber(Latest));
@@ -37,22 +37,22 @@ bool HttpSimpleTest::RunTest(const FString& Parameters)
 	LogIfError("NonceAt", provider.NonceAt(1));
 	LogIfError("NonceAt", provider.NonceAt(Latest));
 
-	auto PrivateKey = HexStringToHash256("0xabc0000000000000000000000000000000000000000000000000000000000001");
-	PublicKey PublicKey = GetPublicKey(PrivateKey);
+	auto PrivateKey = FPrivateKey::From(HexStringToBinary("0xabc0000000000000000000000000000000000000000000000000000000000001").Arr);
+	FPublicKey PublicKey = GetPublicKey(PrivateKey);
 	//auto PublicKey = HexStringToHash(GPublicKeyByteLength, "");
 	//Keccak256::getHash(PrivateKey, 32, PublicKey);
 
 	auto item = Itemize(new RLPItem[]
 	{
-		Itemize(HexStringtoBinary("0x09")), // Nonce
-		Itemize(HexStringtoBinary("0x4A817C800")), // GasPrice
-		Itemize(HexStringtoBinary("0x5208")), // GasLimit
-		Itemize(addr, GAddressByteLength), // To
-		Itemize(HexStringtoBinary("0xDE0B6B3A7640000")), // Value
-		Itemize(HexStringtoBinary("")), // Data
-		Itemize(HexStringtoBinary("0x1")), // V
-		Itemize(HexStringtoBinary("0x")), // R 
-		Itemize(HexStringtoBinary("0x")), // S
+		Itemize(HexStringToBinary("0x09")), // Nonce
+		Itemize(HexStringToBinary("0x4A817C800")), // GasPrice
+		Itemize(HexStringToBinary("0x5208")), // GasLimit
+		Itemize(addr), // To
+		Itemize(HexStringToBinary("0xDE0B6B3A7640000")), // Value
+		Itemize(HexStringToBinary("")), // Data
+		Itemize(HexStringToBinary("0x1")), // V
+		Itemize(HexStringToBinary("0x")), // R 
+		Itemize(HexStringToBinary("0x")), // S
 	}, 9);
 	auto EncodedSigningData = RLP::Encode(item);
 	

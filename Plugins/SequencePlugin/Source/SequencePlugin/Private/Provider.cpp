@@ -2,6 +2,8 @@
 
 
 #include "Provider.h"
+
+#include "BinaryData.h"
 #include "HexUtility.h"
 #include "HttpManager.h"
 #include "JsonBuilder.h"
@@ -111,11 +113,11 @@ FString Provider::SendRPC(FString Content)
 	return responseContent;
 }
 
-TResult<uint32> Provider::TransactionCountHelper(Hash256 Hash, FString Number)
+TResult<uint32> Provider::TransactionCountHelper(FAddress Address, FString Number)
 {
 	const auto Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddString(Hash256ToHexString(Hash))
+			->AddString(Address.ToHex())
 			->AddValue(Number)
 			->EndArray()
 		->ToString();
@@ -144,11 +146,11 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByNumber(EBlockTag Tag)
 	return GetBlockByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(Hash256 Hash)
+TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getBlockByHash").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddString(Hash256ToHexString(Hash))
+			->AddString(Hash.ToHex())
 			->AddBool(true)
 			->EndArray()
 		->ToString();
@@ -182,7 +184,7 @@ TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
 	return MakeValue(Header);
 }
 
-TResult<BlockNonce> Provider::NonceAtHelper(FString Number)
+TResult<FBlockNonce> Provider::NonceAtHelper(FString Number)
 {
 	const auto Content = GetBlockByNumberHelper(Number);
 
@@ -199,8 +201,7 @@ TResult<BlockNonce> Provider::NonceAtHelper(FString Number)
 	}
 	
 	auto Hex = Obj->GetStringField("nonce");
-
-	return MakeValue(HexStringToHash(GBlockNonceByteLength, Hex));
+	return MakeValue(FBlockNonce::From(HexStringToHash(FBlockNonce::Size, Hex)));
 }
 
 TResult<FHeader> Provider::HeaderByNumber(uint16 Id)
@@ -213,7 +214,7 @@ TResult<FHeader> Provider::HeaderByNumber(EBlockTag Tag)
 	return HeaderByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
-TResult<FHeader> Provider::HeaderByHash(Hash256 Hash)
+TResult<FHeader> Provider::HeaderByHash(FHash256 Hash)
 {
 	const auto Content = BlockByHash(Hash);
 
@@ -228,42 +229,42 @@ TResult<FHeader> Provider::HeaderByHash(Hash256 Hash)
 	return MakeValue(Header);
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(Hash256 Hash)
+TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getTransactionByHash").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddString(Hash256ToHexString(Hash))
+			->AddString(Hash.ToHex())
 			->EndArray()
 		->ToString();
 	return ExtractJsonObjectResult(SendRPC(Content));
 }
 
-TResult<uint32> Provider::TransactionCount(Hash256 Hash, uint16 Number)
+TResult<uint32> Provider::TransactionCount(FAddress Addr, uint16 Number)
 {
-	return TransactionCountHelper(Hash, ConvertInt(Number));
+	return TransactionCountHelper(Addr, ConvertInt(Number));
 }
 
-TResult<uint32> Provider::TransactionCount(Hash256 Hash, EBlockTag Tag)
+TResult<uint32> Provider::TransactionCount(FAddress Addr, EBlockTag Tag)
 {
-	return TransactionCountHelper(Hash, ConvertString(TagToString(Tag)));
+	return TransactionCountHelper(Addr, ConvertString(TagToString(Tag)));
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(Hash256 Hash)
+TResult<TSharedPtr<FJsonObject>> Provider::TransactionReceipt(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddString(Hash256ToHexString(Hash))
+			->AddString(Hash.ToHex())
 			->EndArray()
 		->ToString();
 	return ExtractJsonObjectResult(SendRPC(Content));
 }
 
-TResult<BlockNonce> Provider::NonceAt(uint16 Number)
+TResult<FBlockNonce> Provider::NonceAt(uint16 Number)
 {
 	return NonceAtHelper(ConvertInt(Number));
 }
 
-TResult<BlockNonce> Provider::NonceAt(EBlockTag Tag)
+TResult<FBlockNonce> Provider::NonceAt(EBlockTag Tag)
 {
 	return NonceAtHelper(ConvertString(TagToString(Tag)));
 }

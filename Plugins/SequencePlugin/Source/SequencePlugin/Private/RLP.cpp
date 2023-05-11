@@ -1,6 +1,7 @@
 #include "RLP.h"
 
 #include "ABI.h"
+#include "BinaryData.h"
 
 ByteLength GetByteLength(uint32 Length)
 {
@@ -147,9 +148,14 @@ RLPItem Itemize(FString String)
 	return Itemize(String_to_UTF8(String));
 }
 
-RLPItem Itemize(FBinaryData Data)
+RLPItem Itemize(FBinaryData &Data)
 {
-	return Itemize(Data.Data, Data.ByteLength);
+	return Itemize(Data.Arr, Data.GetLength());
+}
+
+RLPItem Itemize(FNonUniformData Data)
+{
+	return Itemize(Data.Arr, Data.GetLength());
 }
 
 RLPItem Itemize(Hash Hash, ByteLength Length)
@@ -165,7 +171,7 @@ RLPItem Itemize(RLPItem* Items, uint32 Length)
 		LIST, Length, 0, Items,
 	};
 }
-FBinaryData RLP::Encode(RLPItem Item)
+FNonUniformData RLP::Encode(RLPItem Item)
 {
 	auto Length = Item.CalculateLength();
 
@@ -176,7 +182,7 @@ FBinaryData RLP::Encode(RLPItem Item)
 	
 	uint8* Data = new uint8[Length];
 	Item.Encode(Data);
-	return FBinaryData
+	return FNonUniformData
 	{
 		Data, Length
 	};

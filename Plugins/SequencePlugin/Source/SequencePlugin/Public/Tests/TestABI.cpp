@@ -18,15 +18,15 @@ bool TestABI::RunTest(const FString& Parameters)
 
 	FString String1 = "one";
 	auto UTFString1 = String_to_UTF8(String1);
-	auto StringArg1 = FABIArg{STRING, UTFString1.ByteLength, UTFString1.Data};
+	auto StringArg1 = FABIArg{STRING, UTFString1.GetLength(), UTFString1.Arr};
 	
 	FString String2 = "two";
 	auto UTFString2 = String_to_UTF8(String2);
-	auto StringArg2 = FABIArg{STRING, UTFString2.ByteLength, UTFString2.Data};
+	auto StringArg2 = FABIArg{STRING, UTFString2.GetLength(), UTFString2.Arr};
 	
 	FString String3 = "one";
 	auto UTFString3 = String_to_UTF8(String3);
-	auto StringArg3 = FABIArg{STRING, UTFString3.ByteLength, UTFString3.Data};
+	auto StringArg3 = FABIArg{STRING, UTFString3.GetLength(), UTFString3.Arr};
 
 	auto ArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&NumberArg1, &NumberArg2}};
 	auto ArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&NumberArg3}};
@@ -44,12 +44,12 @@ bool TestABI::RunTest(const FString& Parameters)
 
 	auto Obj = ABI::Encode("test", Args, 2);
 	
-	UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Data[0]));
+	UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
 	
 	for(auto i = 0; i < BlockNumInt; i++)
 	{
 		auto Addr = GMethodIdByteLength + GBlockByteLength * i;
-		UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Data[Addr]));
+		UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
 	}
 
 	// DECODING STUBS
@@ -64,15 +64,15 @@ bool TestABI::RunTest(const FString& Parameters)
 
 	FString DecodeString1 = "";
 	auto DecodeUTFString1 = String_to_UTF8(String1);
-	auto DecodeStringArg1 = FABIArg{STRING, UTFString1.ByteLength, UTFString1.Data};
+	auto DecodeStringArg1 = FABIArg{STRING, UTFString1.GetLength(), UTFString1.Arr};
 	
 	FString DecodeString2 = "";
 	auto DecodeUTFString2 = String_to_UTF8(String2);
-	auto DecodeStringArg2 = FABIArg{STRING, UTFString2.ByteLength, UTFString2.Data};
+	auto DecodeStringArg2 = FABIArg{STRING, UTFString2.GetLength(), UTFString2.Arr};
 	
 	FString DecodeString3 = "";
 	auto DecodeUTFString3 = String_to_UTF8(String3);
-	auto DecodeStringArg3 = FABIArg{STRING, UTFString3.ByteLength, UTFString3.Data};
+	auto DecodeStringArg3 = FABIArg{STRING, UTFString3.GetLength(), UTFString3.Arr};
 
 	auto DecodeArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&DecodeNumberArg1, &DecodeNumberArg2}};
 	auto DecodeArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&DecodeNumberArg3}};

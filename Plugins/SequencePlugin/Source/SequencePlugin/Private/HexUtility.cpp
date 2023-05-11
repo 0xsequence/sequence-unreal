@@ -163,7 +163,7 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 
 uint8* HexStringToHash(ByteLength Size, FString Hex)
 {
-	Hash256 Hash = new uint8[Size];
+	Hash Hash = new uint8[Size];
 	// Set it to 0s
 	for(int i = 0; i < Size; i++)
 	{
@@ -208,42 +208,7 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 	return Hash;	
 }
 
-FBinaryData HexStringtoBinary(const FString Hex)
-{
-	auto HexCopy = FString(Hex);
-	HexCopy.RemoveFromStart("0x");
-	
-	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
-	
-	return FBinaryData {
-		HexStringToHash(Size, HexCopy), Size
-	};
-}
 
-FString BinaryToHexString(FBinaryData Binary)
-{
-	return HashToHexString(Binary.ByteLength, Binary.Data);
-}
-
-FString Hash256ToHexString(const Hash256 Hash)
-{
-	return HashToHexString(GHash256ByteLength, Hash);
-}
-
-Hash256 HexStringToHash256(FString Hex)
-{
-	return HexStringToHash(GHash256ByteLength, Hex);
-}
-
-FString AddressToHexString(Address Addr)
-{
-	return HashToHexString(GAddressByteLength, Addr);
-}
-
-Address HexStringToAddress(FString Hex)
-{
-	return HexStringToHash(GAddressByteLength, Hex);
-}
 
 FString TrimHex(FString Hex)
 {
@@ -258,3 +223,5 @@ FString TrimHex(FString Hex)
 
 	return HexCopy;
 }
+
+

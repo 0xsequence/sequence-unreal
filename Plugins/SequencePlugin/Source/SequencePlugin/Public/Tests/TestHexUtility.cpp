@@ -1,3 +1,4 @@
+#include "BinaryData.h"
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
 
@@ -19,17 +20,17 @@ bool TestHexUtility::RunTest(const FString& Parameters)
 	}
 
 	{
-		auto Hash = HexStringToHash256("0x5");
+		auto Hash = HexStringToBinary("0x5");
 
-		if(Hash == nullptr)
+		if(Hash.Arr == nullptr)
 		{
 			return false;
 		}
 
-		auto String = Hash256ToHexString(Hash);
-		Hash = HexStringToHash256(String);
+		auto String = Hash.ToHex();
+		Hash = HexStringToBinary(String);
 			
-		if(!Hash256ToHexString(Hash).Equals(String))
+		if(!Hash.ToHex().Equals(String))
 		{
 			return false;
 		}

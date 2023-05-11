@@ -1,24 +1,25 @@
 #pragma once
+#include "BinaryData.h"
 #include "Types.h"
 
 struct FHeader
 {
-	Hash256 ParentHash;
-	Hash256 UncleHash;
-	Address Coinbase;
-	Hash256 Root;
-	Hash256 TxHash;
-	Hash256 ReceiptHash;
-	Bloom Bloom;
-	FBinaryData Difficulty;
-	FBinaryData Number;
+	FHash256 ParentHash;
+	FHash256 UncleHash;
+	FAddress Coinbase;
+	FHash256 Root;
+	FHash256 TxHash;
+	FHash256 ReceiptHash;
+	FBloom Bloom;
+	FNonUniformData Difficulty;
+	FNonUniformData Number;
 	uint64 GasLimit;
 	uint64 GasUsed;
 	uint64 Time;
-	FBinaryData ExtraData;
-	Hash256 MixDigest;
-	BlockNonce Nonce;
-	FBinaryData BaseFee;
+	FNonUniformData ExtraData;
+	FHash256 MixDigest;
+	FBlockNonce Nonce;
+	FNonUniformData BaseFee;
 };
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);
