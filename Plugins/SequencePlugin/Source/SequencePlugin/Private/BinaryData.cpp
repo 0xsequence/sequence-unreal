@@ -1,6 +1,8 @@
 #include "BinaryData.h"
 #include "HexUtility.h"
 
+// There is a decent bit of code duplication here but I don't anticipate this code to change much
+
 void FBinaryData::Destroy()
 {
 	delete this->Arr;

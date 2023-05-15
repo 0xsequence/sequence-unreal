@@ -14,9 +14,9 @@ bool TestTransaction::RunTest(const FString& Parameters)
 {
 
 	// constants for the transaction
-	auto NONCE = "4";
+	auto NONCE = "1";
 	auto GASPRICE= "1"; // "0x4A817C800";
-	auto GASLIMIT = "2000000";
+	auto GASLIMIT = "2000000"; // Has to be high enough for it to serialize properly? // TODO LOOK AT THIS
 	auto TO = "3535353535353535353535353535353535353535";
 	auto VALUE = "1"; // 0xDE0B6B3A7640000;
 	auto PRIVATE_KEY = FPrivateKey::From("abc0000000000000000000000000000000000000000000000000000000000001");
