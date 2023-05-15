@@ -10,9 +10,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(SomeTransactionTests, "Public.Tests.SomeTransac
 bool SomeTransactionTests::RunTest(const FString& Parameters)
 {
 	// constants for the transaction
-	auto NONCE = FBlockNonce::From("4");
-	auto GASPRICE= HexStringToBinary("1"); // "0x4A817C800";
-	auto GASLIMIT = HexStringToBinary("2000000");
+	auto NONCE = FBlockNonce::From("5");
+	auto GASPRICE= HexStringToBinary("12"); // "0x4A817C800";
+	auto GASLIMIT = HexStringToBinary("200000");
 	auto TO = FAddress::From("3535353535353535353535353535353535353535");
 	auto VALUE = HexStringToBinary("1"); // 0xDE0B6B3A7640000;
 	auto PRIVATE_KEY = FPrivateKey::From("abc0000000000000000000000000000000000000000000000000000000000001");

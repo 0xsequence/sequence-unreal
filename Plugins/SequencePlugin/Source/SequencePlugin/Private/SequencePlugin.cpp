@@ -7,7 +7,6 @@
 #include "Core.h"
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
-#include "secp256k1Library/secp256k1//secp256k1.h"
 
 #define LOCTEXT_NAMESPACE "FSequencePluginModule"
 
@@ -33,21 +32,6 @@ void FSequencePluginModule::StartupModule()
 
 	if (ExampleLibraryHandle)
 	{
-		unsigned char msg_hash[32] = {
-			0x31, 0x5F, 0x5B, 0xDB, 0x76, 0xD0, 0x78, 0xC4,
-			0x3B, 0x8A, 0xC0, 0x06, 0x4E, 0x4A, 0x01, 0x64,
-			0x61, 0x2B, 0x1F, 0xCE, 0x77, 0xC8, 0x69, 0x34,
-			0x5B, 0xFC, 0x94, 0xC7, 0x58, 0x94, 0xED, 0xD3,
-		};
-		unsigned char seckey[32];
-		unsigned char randomize[32];
-		unsigned char compressed_pubkey[33];
-		unsigned char serialized_signature[64];
-		size_t len;
-		int is_signature_valid, is_signature_valid2;
-		int return_val;
-		secp256k1_pubkey pubkey;
-		secp256k1_ecdsa_signature sig;
 	}
 	else
 	{

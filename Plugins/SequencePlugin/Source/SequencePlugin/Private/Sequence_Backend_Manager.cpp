@@ -6,7 +6,6 @@
 #include "Misc/AutomationTest.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
-#include "secp256k1Library/secp256k1/secp256k1.h"
 #include "Crypto.h"
 
 // Sets default values
