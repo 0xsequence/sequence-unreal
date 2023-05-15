@@ -15,28 +15,6 @@ void FSequencePluginModule::StartupModule()
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 		// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 
-	// Get the base directory of this plugin
-	FString BaseDir = IPluginManager::Get().FindPlugin("SequencePlugin")->GetBaseDir();
-
-	// Add on the relative location of the third party dll and load it
-	FString LibraryPath;
-#if PLATFORM_WINDOWS
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/secp256k1Library/Win64/libsecp256k1.2.0.1.dll"));
-#elif PLATFORM_MAC
-    LibraryPath = FPaths::Combine(*BaseDir, TEXT("Source/ThirdParty/secp256k1Library/Mac/Release/libsecp256k1.2.0.2.dylib"));
-#elif PLATFORM_LINUX
-	LibraryPath = FPaths::Combine(*BaseDir, TEXT("Binaries/ThirdParty/secp256k1Library/Linux/x86_64-unknown-linux-gnu/libsecp256k1.2.0.1.so"));
-#endif // PLATFORM_WINDOWS
-
-	ExampleLibraryHandle = !LibraryPath.IsEmpty() ? FPlatformProcess::GetDllHandle(*LibraryPath) : nullptr;
-
-	if (ExampleLibraryHandle)
-	{
-	}
-	else
-	{
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("ThirdPartyLibraryError", "Failed to load example third party library"));
-	}
 }
 
 void FSequencePluginModule::ShutdownModule()
