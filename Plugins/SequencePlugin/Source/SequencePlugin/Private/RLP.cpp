@@ -2,6 +2,7 @@
 
 #include "ABI.h"
 #include "BinaryData.h"
+#include "HexUtility.h"
 
 ByteLength GetByteLength(uint32 Length)
 {
@@ -36,17 +37,22 @@ ByteLength RLPItem::CalculateLength()
 			LengthSum += Arg.CalculateLength();
 		}
 		
-		if(this->Length <= 55)
+		if(this->LengthSum <= 55)
 		{
 			return 1 + LengthSum;
 		}
-		
+
 		return 1 + GetByteLength(LengthSum) + LengthSum;
 	}
 	
 	if(this->Type == BINARY)
 	{
 		auto RawData = static_cast<uint8*>(this->Data);
+
+		if(this->Length == 0) // Shouldn't happen 
+		{
+			return 1;
+		}
 		
 		if(this->Length == 1 && RawData[0] <= 127)
 		{
@@ -85,7 +91,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 		if(this->Length <= 55)
 		{
 			HeadPtr[0] = 0x80 + this->Length;
-
+			
 			for(auto i = 0; i < this->Length; i++)
 			{
 				HeadPtr[1 + i] = RawData[i];
@@ -95,11 +101,13 @@ void RLPItem::Encode(uint8* HeadPtr)
 
 		auto LengthByteLength = GetByteLength(this->Length);
 
+		
+
 		HeadPtr[0] = 0xb7 + LengthByteLength;
 
 		for(auto i = 0; i < LengthByteLength; i++)
 		{
-			HeadPtr[1 + i] = reinterpret_cast<uint8*>(&this->Length)[i];
+			HeadPtr[1 + i] = 0xFF & (this->Length >> 8 * (LengthByteLength - 1 - i));
 		}
 
 		for(auto i = 0; i < this->Length; i++)
@@ -125,10 +133,10 @@ void RLPItem::Encode(uint8* HeadPtr)
 		{
 			auto LengthByteLength = GetByteLength(LengthSum);
 			HeadPtr[0] = 0xf7 + LengthByteLength;
-
+			
 			for(auto i = 0; i < LengthByteLength; i++)
 			{
-				HeadPtr[1 + i] = reinterpret_cast<uint8*>(&LengthSum)[i];
+				HeadPtr[1 + i] = 0xFF & (LengthSum >> 8 * (LengthByteLength - 1 - i));
 			}
 
 			DataOffset += LengthByteLength;
@@ -176,9 +184,9 @@ FNonUniformData RLP::Encode(RLPItem Item)
 	auto Length = Item.CalculateLength();
 
 	// Bugfix?
-	if(Length > 56) {
-		Length += 1;
-	}
+	//if(Length > 56) {
+	//	Length += 1;
+	//}
 	
 	uint8* Data = new uint8[Length];
 	Item.Encode(Data);
