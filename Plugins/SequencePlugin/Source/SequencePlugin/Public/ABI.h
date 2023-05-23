@@ -13,6 +13,8 @@ enum EABIArgType
 	ARRAY,
 };
 
+FString TypeToString(EABIArgType Type);
+
 struct FABIArg
 {
 	EABIArgType Type;
@@ -21,16 +23,32 @@ struct FABIArg
 
 	uint8 GetBlockNum() const;
 	void Encode(uint8* Start, uint8** Head, uint8** Tail);
-	void Decode(uint8* Start, uint8** Head, uint8** Tail);
+	FABIArg Decode(uint8* TrueStart, uint8* Start, uint8* Head);
+	FNonUniformData ToBinary() const;
+	FString ToHex() const;
+	FString ToString() const;
+	uint8 ToUint8() const;
+	FABIArg* ToArr() const;
+	void Log();
+
+	// Free Data
+	void Destroy();
+
+	static FABIArg Empty(EABIArgType Type); // initializes it without data
+
+	// Creates data; must be destroyed
+	static FABIArg New(FString Value);
+	static FABIArg New(uint8 Value);
+	static FABIArg New(uint32 Value);
+	static FABIArg New(FABIArg* Array, uint32 Length); 
 };
 
 class ABI
 {
 public:
-	static FNonUniformData Encode(FString Method, FABIArg** Args, uint8 ArgNum);
-	static void Decode(FNonUniformData Data, FABIArg** Args, uint8 ArgNum);
+	static FNonUniformData Encode(FString Method, FABIArg* Args, uint8 ArgNum);
+	static void Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
 };
 
-FNonUniformData String_to_UTF8(FString String);
-FString UTF8_to_String(FNonUniformData BinaryData);
-void CopyUInt32(uint8* Ptr, uint32 Data);
+void CopyInUint32(uint8* BlockPtr, uint32 Value);
+uint32 CopyOutUint32(uint8* BlockPtr);

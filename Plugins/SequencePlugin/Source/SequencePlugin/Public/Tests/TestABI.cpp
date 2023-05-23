@@ -7,81 +7,90 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
 
 bool TestABI::RunTest(const FString& Parameters)
 {
+	auto LOG_ENCODED = true;
+	auto LOG_DECODED = true;
+
+	// DATA
+	
 	uint8 Number1 = 1;
-	auto NumberArg1 = FABIArg{STATIC, 1, &Number1};
+	auto NumberArg1 = FABIArg::New(Number1);
 
 	uint8 Number2 = 2;
-	auto NumberArg2 = FABIArg{ STATIC, 1, &Number2};
+	auto NumberArg2 = FABIArg::New(Number2);
 
 	uint8 Number3 = 3;
-	auto NumberArg3 = FABIArg{ STATIC, 1, &Number3};
+	auto NumberArg3 = FABIArg::New(Number3);
 
 	FString String1 = "one";
-	auto UTFString1 = String_to_UTF8(String1);
-	auto StringArg1 = FABIArg{STRING, UTFString1.GetLength(), UTFString1.Arr};
+	auto StringArg1 = FABIArg::New(String1);
 	
 	FString String2 = "two";
-	auto UTFString2 = String_to_UTF8(String2);
-	auto StringArg2 = FABIArg{STRING, UTFString2.GetLength(), UTFString2.Arr};
+	auto StringArg2 = FABIArg::New(String2);
 	
 	FString String3 = "one";
-	auto UTFString3 = String_to_UTF8(String3);
-	auto StringArg3 = FABIArg{STRING, UTFString3.GetLength(), UTFString3.Arr};
+	auto StringArg3 = FABIArg::New(String3);
 
-	auto ArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&NumberArg1, &NumberArg2}};
-	auto ArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&NumberArg3}};
-	auto ArrayArg3 = FABIArg{ARRAY, 2, new void*[2]{&ArrayArg1, &ArrayArg2}};
-	auto ArrayArg4 = FABIArg{ARRAY, 3, new void*[3]{&StringArg1, &StringArg2, &StringArg3}};
+	auto ArrayArg1 = FABIArg::New(new FABIArg[2]{NumberArg1, NumberArg2}, 2);
+	auto ArrayArg2 = FABIArg::New(new FABIArg[1]{NumberArg3}, 1);
+	auto ArrayArg3 = FABIArg::New(new FABIArg[2]{ArrayArg1, ArrayArg2}, 2);
+	auto ArrayArg4 = FABIArg::New(new FABIArg[3]{StringArg1, StringArg2, StringArg3}, 3);
 	
-	FABIArg** Args = new FABIArg*[2];
-	Args[0] = &ArrayArg3;
-	Args[1] = &ArrayArg4;
-
+	FABIArg* Args = new FABIArg[2]{ArrayArg3, ArrayArg4};
+	
 	// ENCODING
-	
-	auto BlockNumInt = (*Args[0]).GetBlockNum() + (*Args[1]).GetBlockNum();
+	auto BlockNumInt = (Args[0]).GetBlockNum() + (Args[1]).GetBlockNum();
 	FString BlockNum = FString::FromInt(BlockNumInt);
-
 	auto Obj = ABI::Encode("test", Args, 2);
 	
-	UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
-	
-	for(auto i = 0; i < BlockNumInt; i++)
+	if(LOG_ENCODED)
 	{
-		auto Addr = GMethodIdByteLength + GBlockByteLength * i;
-		UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
+		for(auto i = 0; i < BlockNumInt; i++)
+		{
+			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
+			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+		}
 	}
 
 	// DECODING STUBS
-	uint8 DecodeNumber1 = 0;
-	auto DecodeNumberArg1 = FABIArg{STATIC, 1, &Number1};
+	auto DecodeNumberArg1 = FABIArg::Empty(STATIC);
 
-	uint8 DecodeNumber2 = 0;
-	auto DecodeNumberArg2 = FABIArg{ STATIC, 1, &Number2};
+	auto DecodeStringArg1 = FABIArg::Empty(STRING);
 
-	uint8 DecodeNumber3 = 0;
-	auto DecodeNumberArg3 = FABIArg{ STATIC, 1, &Number3};
-
-	FString DecodeString1 = "";
-	auto DecodeUTFString1 = String_to_UTF8(String1);
-	auto DecodeStringArg1 = FABIArg{STRING, UTFString1.GetLength(), UTFString1.Arr};
+	auto DecodeArrayArg1 = FABIArg{ARRAY, 1, new FABIArg[2]{DecodeNumberArg1}};
+	auto DecodeArrayArg3 = FABIArg{ARRAY, 1, new FABIArg[2]{DecodeArrayArg1}};
+	auto DecodeArrayArg4 = FABIArg{ARRAY, 1, new FABIArg[3]{DecodeStringArg1}};
 	
-	FString DecodeString2 = "";
-	auto DecodeUTFString2 = String_to_UTF8(String2);
-	auto DecodeStringArg2 = FABIArg{STRING, UTFString2.GetLength(), UTFString2.Arr};
+	FABIArg* DecodeArgs = new FABIArg[]{DecodeArrayArg3, DecodeArrayArg4};
 	
-	FString DecodeString3 = "";
-	auto DecodeUTFString3 = String_to_UTF8(String3);
-	auto DecodeStringArg3 = FABIArg{STRING, UTFString3.GetLength(), UTFString3.Arr};
+	ABI::Decode(Obj, DecodeArgs, 2);
 
-	auto DecodeArrayArg1 = FABIArg{ARRAY, 2, new void*[2]{&DecodeNumberArg1, &DecodeNumberArg2}};
-	auto DecodeArrayArg2 = FABIArg{ARRAY, 1, new void*[1]{&DecodeNumberArg3}};
-	auto DecodeArrayArg3 = FABIArg{ARRAY, 2, new void*[2]{&DecodeArrayArg1, &DecodeArrayArg2}};
-	auto DecodeArrayArg4 = FABIArg{ARRAY, 3, new void*[3]{&DecodeStringArg1, &DecodeStringArg2, &DecodeStringArg3}};
-	
-	FABIArg** DecodeArgs = new FABIArg*[2];
-	DecodeArgs[0] = &DecodeArrayArg3;
-	DecodeArgs[1] = &DecodeArrayArg4;
+	auto Arr1 = DecodeArgs[0];
+	auto Arr2 = DecodeArgs[1];
+
+	UE_LOG(LogTemp, Display, TEXT(" Arr 1 of size %i at %i"), Arr1.Length, (uint64) Arr1.Data);
+	UE_LOG(LogTemp, Display, TEXT(" Arr 2 of size %i at %i"), Arr2.Length, (uint64) Arr2.Data);
+
+	for(auto i = 0; i < Arr1.Length; i++)
+	{
+		auto NumArr = Arr1.ToArr()[0];
+
+		UE_LOG(LogTemp, Display, TEXT("Num Arr of size %i at %i"), NumArr.Length, (uint64) NumArr.Data);
+		
+		for(auto j = 0; j < NumArr.Length; j++)
+		{
+			auto Num = NumArr.ToArr()[0];
+
+			UE_LOG(LogTemp, Display, TEXT("Num Arg at offset %i"), (uint64) Num.Data);
+		}
+	}
+
+	for(auto i = 0; i < Arr2.Length; i++)
+	{
+		auto StringArg = Arr2.ToArr()[i];
+		
+		UE_LOG(LogTemp, Display, TEXT("String Arg %i is %s"), i, *StringArg.ToString());
+	}
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

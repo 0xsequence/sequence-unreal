@@ -153,7 +153,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 
 RLPItem Itemize(FString String)
 {
-	return Itemize(String_to_UTF8(String));
+	return Itemize(StringToUTF8(String));
 }
 
 RLPItem Itemize(FBinaryData &Data)

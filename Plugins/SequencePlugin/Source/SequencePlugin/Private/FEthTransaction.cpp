@@ -1,4 +1,4 @@
-#include "Transaction.h"
+#include "FEthTransaction.h"
 
 #include "BinaryData.h"
 #include "Crypto.h"
@@ -9,12 +9,13 @@
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
 
-Transaction::Transaction(FBlockNonce Nonce, FNonUniformData GasPrice, FNonUniformData GasLimit, FAddress To,
-	FNonUniformData Value, FNonUniformData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To), Value(Value), Data(Data), V(nullptr, 0)
+FEthTransaction::FEthTransaction(FBlockNonce Nonce, FNonUniformData GasPrice, FNonUniformData GasLimit, FAddress To,
+	FNonUniformData Value, FNonUniformData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
+	                                               Value(Value), Data(Data), V(nullptr, 0), R(FHash256{}), S(FHash256{})
 {
 }
 
-void Transaction::Sign(FPrivateKey PrivateKey, int ChainID)
+void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 {
 	auto NonceStr = TrimHex(Nonce.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
@@ -60,7 +61,7 @@ void Transaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	this->S = MyS;
 }
 
-FNonUniformData Transaction::GetSignedTransaction(FPrivateKey PrivateKey, int ChainID)
+FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int ChainID)
 {
 	this->Sign(PrivateKey, ChainID);
 

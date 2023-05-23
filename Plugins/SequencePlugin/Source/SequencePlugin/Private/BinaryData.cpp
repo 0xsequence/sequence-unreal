@@ -5,7 +5,7 @@
 
 void FBinaryData::Destroy()
 {
-	delete this->Arr;
+	delete [] this->Arr;
 }
 
 FString FBinaryData::ToHex()
@@ -16,6 +16,13 @@ FString FBinaryData::ToHex()
 FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)
 {
 	this->Arr = Arr;
+}
+
+FNonUniformData FNonUniformData::Copy()
+{
+	auto NewArr = new uint8[Length];
+	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	return FNonUniformData{NewArr, Length};
 }
 
 const ByteLength FNonUniformData::GetLength()
@@ -194,6 +201,44 @@ FBlockNonce FBlockNonce::From(FString Str)
 const ByteLength FBlockNonce::GetLength()
 {
 	return Size;
+}
+
+FNonUniformData StringToUTF8(FString String)
+{
+	uint32 Length = String.Len();
+
+	auto binary = FNonUniformData{
+		new uint8[Length], Length
+	};
+
+	StringToBytes(String, binary.Arr, Length);
+
+	// I have no idea why I need to add 1 but it works
+	for(auto i = 0; i < binary.GetLength(); i++)
+	{
+		binary.Arr[i] = binary.Arr[i] + 1;
+	}
+
+	return binary;
+}
+
+FString UTF8ToString(FNonUniformData BinaryData)
+{
+	TArray<uint8> Buffer;
+	for(auto i = 0; i < BinaryData.GetLength(); i++)
+	{
+		Buffer.Add(BinaryData.Arr[i]);
+	}
+	Buffer.Add('\0');
+	return reinterpret_cast<const char*>(Buffer.GetData());
+}
+
+FNonUniformData FUniformData::Copy()
+{
+	auto Length = GetLength();
+	auto NewArr = new uint8[Length];
+	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	return FNonUniformData{NewArr, Length};
 }
 
 FNonUniformData HexStringToBinary(const FString Hex)
