@@ -1,7 +1,7 @@
 #include "BinaryData.h"
 #include "HexUtility.h"
 #include "Provider.h"
-#include "Transaction.h"
+#include "FEthTransaction.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SomeTransactionTests, "Public.Tests.SomeTransactionTests",
@@ -21,7 +21,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 	
 	auto provider = Provider("http://localhost:8545/");
 	provider.SendRawTransaction("0x" +
-		Transaction{
+		FEthTransaction{
 			NONCE,
 			GASPRICE,
 			GASLIMIT,
