@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "Page.h"
 #include "TokenBalance.h"
-#include "GetBalanceUpdatesReturn.generated.h"
+#include "GetTokenBalancesReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetBalanceUpdatesReturn
+struct FGetTokenBalancesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

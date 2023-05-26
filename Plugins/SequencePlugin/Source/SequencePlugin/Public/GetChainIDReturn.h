@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GetEtherBalanceArgs.generated.h"
+#include "GetChainIDReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetEtherBalanceArgs
+struct FGetChainIDReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString accountAddress;
+        int64 chainID;
 };
