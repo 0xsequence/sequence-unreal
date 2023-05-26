@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "Page.h"
-#include "GetTokenSuppliesArgs.generated.h"
+#include "GetBalanceUpdatesArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTokenSuppliesArgs
+struct FGetBalanceUpdatesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
-        bool includeMetaData;
+        int32 lastUpdateID;
     UPROPERTY()
         FPage page;
 };
