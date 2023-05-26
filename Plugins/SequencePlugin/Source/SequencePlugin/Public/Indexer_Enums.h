@@ -4,7 +4,7 @@
 #include "Indexer_Enums.generated.h"
 
 UENUM(BlueprintType)
-enum ContractType
+enum EContractType
 {
 	//Unreal Disallows duplicate enumeration values within separate enums so I use a cmlCase Suffix to differentiate
 	UNKOWN_CT UMETA(DisplayName = "UNKNOWN_ContractType"),
@@ -18,7 +18,7 @@ enum ContractType
 };
 
 UENUM(BlueprintType)
-enum EventLogType
+enum EEventLogType
 {
 	UNKOWN_ELT UMETA(DisplayName = "UNKOWN_Event_Log_Type"),
 	BLOCK_ADDED UMETA(DisplayName = "BLOCK_ADDED"),
@@ -26,7 +26,7 @@ enum EventLogType
 };
 
 UENUM(BlueprintType)
-enum EventLogDataType
+enum EEventLogDataType
 {
 	UNKNOWN_ELDT UMETA(DisplayName = "UNKOWN_Event_Log_Data_Type"),
 	TOKEN_TRANSFER UMETA(DisplayName = "TOKEN_TRANSFER"),
@@ -34,7 +34,7 @@ enum EventLogDataType
 };
 
 UENUM(BlueprintType)
-enum TxnTransferType
+enum ETxnTransferType
 {
 	UNKNOWN_TTT UMETA(DisplayName = "UNKOWN_Transaction_Transfer_Type"),
 	SEND UMETA(DisplayName = "SEND"),
@@ -42,7 +42,7 @@ enum TxnTransferType
 };
 
 UENUM(BlueprintType)
-enum SortOrder
+enum ESortOrder
 {
 	DESC UMETA(DisplayName = "Descending"),
 	ASC UMETA(DisplayName = "Ascending")

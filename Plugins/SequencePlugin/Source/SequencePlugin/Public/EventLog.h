@@ -12,7 +12,7 @@ public:
     UPROPERTY()
         int64 id;
     UPROPERTY()
-        EventLogType type;
+        TEnumAsByte<EEventLogType> type;
     UPROPERTY()
         int64 blockNumber;
     UPROPERTY()
@@ -20,7 +20,7 @@ public:
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
-        ContractType contractType;
+        TEnumAsByte<EContractType> contractType;
     UPROPERTY()
         FString txnHash;
     UPROPERTY()
@@ -28,7 +28,7 @@ public:
     UPROPERTY()
         int64 txnLogIndex;
     UPROPERTY()
-        EventLogDataType logDataType;
+        TEnumAsByte<EEventLogDataType> logDataType;
     UPROPERTY()
         FString ts;
     UPROPERTY()

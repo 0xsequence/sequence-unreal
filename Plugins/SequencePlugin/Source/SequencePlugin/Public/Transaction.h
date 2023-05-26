@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TxnTransfer.h"
 #include "Transaction.generated.h"
 
 USTRUCT(BlueprintType)

@@ -18,7 +18,7 @@ public:
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
-        ContractType contractType;
+        TEnumAsByte<EContractType> contractType;
     UPROPERTY()
         FString fromAddress;
     UPROPERTY()

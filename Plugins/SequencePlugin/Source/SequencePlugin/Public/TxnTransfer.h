@@ -11,11 +11,11 @@ struct FTxnTransfer
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        TxnTransferType transferType;
+        TEnumAsByte<ETxnTransferType> transferType;
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
-        ContractType contractType;
+        TEnumAsByte<EContractType> contractType;
     UPROPERTY()
         FString from;
     UPROPERTY()

@@ -8,8 +8,8 @@ struct FGetTokenSuppliesMapArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
-        TMap<FString, TArray<FString>> tokenMap;
+  //  UPROPERTY()
+      //  TMap<FString, TArray<FString>> tokenMap;
     UPROPERTY()
         bool includeMetaData;
 };
