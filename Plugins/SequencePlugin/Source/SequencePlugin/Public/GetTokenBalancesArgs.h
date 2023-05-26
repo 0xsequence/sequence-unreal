@@ -5,7 +5,7 @@
 #include "GetTokenBalancesArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTokenBalanceArgs
+struct FGetTokenBalancesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
