@@ -10,7 +10,7 @@ struct FContractInfo
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 chainID;
+        int64 chainId;
     UPROPERTY()
         FString address;
     UPROPERTY()
