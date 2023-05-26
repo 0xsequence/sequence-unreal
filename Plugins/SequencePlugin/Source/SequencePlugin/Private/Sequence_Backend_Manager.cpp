@@ -132,3 +132,11 @@ FString ASequence_Backend_Manager::Testing_Address_Generation()
 
 	return Result;
 }
+
+void ASequence_Backend_Manager::Testing_Indexer()
+{
+	UIndexer *indexer = NewObject<UIndexer>();//Create an object using templates!!!!
+	UE_LOG(LogTemp, Display, TEXT("Indexer tests starting\n"));
+	indexer->testing();
+	UE_LOG(LogTemp, Display, TEXT("Indexer tests Done"));
+}

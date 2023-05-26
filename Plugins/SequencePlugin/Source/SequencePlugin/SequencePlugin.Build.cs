@@ -39,6 +39,8 @@ public class SequencePlugin : ModuleRules
 				"Slate",
 				"SlateCore",
 				"Projects",
+                "Json",
+                "JsonUtilities",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
