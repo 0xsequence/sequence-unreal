@@ -36,3 +36,6 @@
 #include "Version.h"
 #include "VersionReturn.h"
 #include "WebRPCError.h"
+#include "AttributeMap.h"
+#include "TokenSupplyList.h"
+#include "TokenList.h"
