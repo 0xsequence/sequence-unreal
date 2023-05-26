@@ -20,8 +20,8 @@ public:
         FString image;
     UPROPERTY()
         float decimals;
-    UPROPERTY()
-        TMap<FString, UObject> properties;
+ //   UPROPERTY()
+   //     TMap<FString, *UObject> properties;
     UPROPERTY()
         FString video;
     UPROPERTY()
@@ -34,6 +34,6 @@ public:
         FString background_color;
     UPROPERTY()
         FString animation_url;
-    UPROPERTY()
-        TArray<TMap<FString, UObject>> attributes;
+   // UPROPERTY()
+      //  TArray<TMap<FString, UObject>> attributes;
 };

@@ -14,9 +14,9 @@ public:
     UPROPERTY()
         FString column;
     UPROPERTY()
-        UObject before;
+        UObject *before;
     UPROPERTY()
-        UObject after;//not sure what these are for yet!
+        UObject *after;//not sure what these are for yet!
     UPROPERTY()
         TArray<FSortBy> sort;
     UPROPERTY()

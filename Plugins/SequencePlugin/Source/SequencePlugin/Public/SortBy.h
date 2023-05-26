@@ -12,5 +12,5 @@ public:
     UPROPERTY()
         FString column;
     UPROPERTY()
-        SortOrder order;
+        TEnumAsByte<ESortOrder> order;
 };

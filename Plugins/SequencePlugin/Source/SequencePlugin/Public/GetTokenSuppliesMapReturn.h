@@ -9,6 +9,6 @@ struct FGetTokenSuppliesMapReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
-        TMap<FString, TArray<FTokenSupply>> supplies;
+   // UPROPERTY()
+      //  TMap<FString, TArray<FTokenSupply>> supplies;
 };

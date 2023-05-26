@@ -14,7 +14,7 @@ public:
     UPROPERTY()
         FPage page;
     UPROPERTY()
-        ContractType contractType;
+        TEnumAsByte<EContractType> contractType;
     UPROPERTY()
         TArray<FTokenSupply> tokenIDs;
 };

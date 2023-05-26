@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Struct_Data.h"
-#include "Indexer_Enums.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
