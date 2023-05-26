@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Indexer.h"
 #include "Sequence_Backend_Manager.generated.h"
-
 UCLASS()
 class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor
 {
@@ -37,6 +37,9 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable)
 		FString Testing_Address_Generation();
+
+	UFUNCTION(BlueprintCallable)
+		void Testing_Indexer();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
