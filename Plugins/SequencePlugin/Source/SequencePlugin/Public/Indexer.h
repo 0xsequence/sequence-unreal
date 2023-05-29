@@ -44,31 +44,38 @@ public:
 
 	void testing();
 
-	template <typename T> bool Test_Func(FString json_in, FString type);
+	/*
+		Used to remove all \n, \r, \t and spaces from a json string for testing!
+		@param firstParam (The already made json object in FString form)
+		@ret void (this is inline so all effects are carried on the presented obj.
+	*/
+	void Remove_Json_SNRT_INLINE(FString * json_string_in);
+
+	template <typename T> bool Test_Json_Parsing(FString json_in, FString type);
 
 	UIndexer();
 	UIndexer(FString args);
 
 	bool Ping(int64 chainID);
 
-	int32 Version(int64 chainID);
+	FVersion Version(int64 chainID);
 
 	//need to assess task structure
-	void RunTimeStatus(int64 chainID);
+	FRuntimeStatus RunTimeStatus(int64 chainID);
 
 	int64 GetChainID(int64 chainID);//?
 
-	void GetEtherBalance(int64 chainID, FString accountAddr);
+	FEtherBalance GetEtherBalance(int64 chainID, FString accountAddr);
 
-	void GetTokenBalances(int64 chainID, FString args);
+	FGetTokenBalancesReturn GetTokenBalances(int64 chainID, FString args);
 
-	void GetTokenSupplies(int64 chainID, FString args);
+	FGetTokenSuppliesReturn GetTokenSupplies(int64 chainID, FString args);
 
-	void GetTokenSuppliesMap(int64 chainID, FString args);
+	FGetTokenSuppliesMapReturn GetTokenSuppliesMap(int64 chainID, FString args);
 
-	void GetBalanceUpdates(int64 chainID, FString args);
+	FGetBalanceUpdatesReturn GetBalanceUpdates(int64 chainID, FString args);
 
-	void GetTransactionHistory(int64 chainID, FString args);
+	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FString args);
 
 //end of public functions
 
