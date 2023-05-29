@@ -44,6 +44,8 @@ public:
 
 	void testing();
 
+	template <typename T> bool Test_Func(FString json_in, FString type);
+
 	UIndexer();
 	UIndexer(FString args);
 
