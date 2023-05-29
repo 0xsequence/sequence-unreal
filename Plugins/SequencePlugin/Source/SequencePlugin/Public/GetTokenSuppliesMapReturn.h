@@ -12,4 +12,5 @@ struct FGetTokenSuppliesMapReturn
 public:
    UPROPERTY()
       TMap<FString, FTokenSupplyList> supplies;
+
 };
