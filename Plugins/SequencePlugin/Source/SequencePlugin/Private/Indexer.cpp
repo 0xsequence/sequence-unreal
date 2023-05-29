@@ -122,8 +122,6 @@ template < typename T> FString UIndexer::BuildArgs(T struct_in)
 	return result;
 }
 
-
-
 template<typename T> T UIndexer::BuildResponse(FString text)
 {
 	//Take the FString and convert it to a JSON object first!
@@ -134,6 +132,9 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	//There are 3 special cases for this function all 3 involve nested data structures,
 	//since unreal doesn't support nested TArray's and TMap's we need to look out for this nesting and handle it seperate from here!
 	//calls for parsing
+
+	//this won't work as alot of our data structs are nested with NON primitive data!
+
 	if (typeid(T) == typeid(FGetTokenSuppliesMapReturn))
 	{
 
@@ -209,10 +210,11 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 void UIndexer::testing()
 {
 	bool res = true;
-	FString json_0 = "{\"age\":69,\"name\":\"struct_0_JSON\"}";
-	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
+	FString json_0 = "{\"webrpcVersion\":\"69\",\"schemaVersion\":\"069\",\"schemaHash\":\"#realdata#\",\"appVersion\":\"1\"}";
+	res &= Test_Json_Parsing<FVersion>(json_0, "FVersion");
 
-
+	//simple token map return test!
+	FString json_TMR = "{\"dictionary\": [ \"key_one\": []]}";
 
 	if (res)
 	{
