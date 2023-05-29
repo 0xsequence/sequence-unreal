@@ -48,16 +48,17 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 
 	if (http_post_req->ProcessRequest())//hoping this is a blocking call alternatively I can use the delegates to make this async!
 	{//success
-		//const uint8 * c_ptr = http_post_req->GetContent();
-		//response = BytesToString(c_ptr, http_post_req->GetContent().Num());
-		//http_post_req->GetContent().ToString();
-		//this is where we can process the response!
-
-		//need an actual parser here! no easy converting from TArray<uint8> to FString for some reason?
+		for (uint8 i : http_post_req->GetContent())//Here I process the response 1 byte at a time!
+		{
+			const uint8 * i_ptr = &i;
+			FString data_byte = BytesToString(i_ptr,1);
+			response.Append(data_byte);
+		}
 	}
 	else
 	{//failed
-
+		UE_LOG(LogTemp, Warning, TEXT("[Error Parsing response from Sequence Server]"));
+		response = "[Error Response]";
 	}
 	return response;
 }
@@ -190,6 +191,8 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 
 	FString* o_ptr = &out;
 	this->Remove_Json_SNRT_INLINE(o_ptr);//removes spaces, /n, /r, /t
+	FString* in_ptr = &json_in;
+	this->Remove_Json_SNRT_INLINE(in_ptr);
 
 	UE_LOG(LogTemp, Display, TEXT("resulting jsonString: %s"), *out);
 
@@ -210,11 +213,8 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 void UIndexer::testing()
 {
 	bool res = true;
-	FString json_0 = "{\"webrpcVersion\":\"69\",\"schemaVersion\":\"069\",\"schemaHash\":\"#realdata#\",\"appVersion\":\"1\"}";
-	res &= Test_Json_Parsing<FVersion>(json_0, "FVersion");
-
-	//simple token map return test!
-	FString json_TMR = "{\"dictionary\": [ \"key_one\": []]}";
+	FString json_0 = "{\"data\":{\"age\":69,\"name\":\"nested_struct_1\"}}";
+	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
 
 	if (res)
 	{
