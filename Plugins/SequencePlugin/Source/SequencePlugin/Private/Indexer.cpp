@@ -82,6 +82,48 @@ void UIndexer::Remove_Json_SNRT_INLINE(FString * json_string_in)
 	(*json_string_in).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
 }
 
+/*
+	Here we take in a struct and convert it straight into a json object String
+	@Param (T) Struct_in the struct we are converting to a json object string
+	@Return the JSON Object String
+*/
+template < typename T> FString UIndexer::BuildArgs(T struct_in)
+{
+	FString result = "[FAILED TO PARSE]";
+	//There are 3 special cases for this function all 3 involve nested data structures,
+	//since unreal doesn't support nested TArray's and TMap's we need to look out for this nesting and handle it seperate from here!
+	//calls for parsing
+	if (typeid(T) == typeid(FGetTokenSuppliesMapReturn))
+	{
+
+	}
+	else if (typeid(T) == typeid(FGetTokenSuppliesMapArgs))
+	{
+
+	}
+	else if (typeid(T) == typeid(FTokenMetaData))
+	{
+
+	}
+	else//handle all othercases like normal as they make use of primitives or other ustructs
+	{
+		try
+		{
+			if (!FJsonObjectConverter::UStructToJsonObjectString<T>(struct_in, result))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
+			}
+		}
+		catch (...)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create FString from UStruct\n"));
+		}
+	}
+	return result;
+}
+
+
+
 template<typename T> T UIndexer::BuildResponse(FString text)
 {
 	//Take the FString and convert it to a JSON object first!
@@ -90,31 +132,45 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	T ret_struct;
 
 	//There are 3 special cases for this function all 3 involve nested data structures,
-	//since unreal doesn't support nested TArray's and TMap's we need to look at out for this nested
+	//since unreal doesn't support nested TArray's and TMap's we need to look out for this nesting and handle it seperate from here!
 	//calls for parsing
+	if (typeid(T) == typeid(FGetTokenSuppliesMapReturn))
+	{
 
-	try //Try catch is no longer working for reasons?
-	{
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-		}
 	}
-	catch (...)
+	else if (typeid(T) == typeid(FGetTokenSuppliesMapArgs))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
 
-	try
-	{
-		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
-		}
 	}
-	catch (...)
+	else if (typeid(T) == typeid(FTokenMetaData))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create UStruct from Json object\n"));
+
+	}
+	else//handle all othercases like normal as they make use of primitives or other ustructs
+	{
+		try
+		{
+			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
+			}
+		}
+		catch (...)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+		}
+
+		try
+		{
+			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
+			}
+		}
+		catch (...)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create UStruct from Json object\n"));
+		}
 	}
 
 	return ret_struct;
@@ -129,7 +185,7 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 	T built_response = BuildResponse<T>(json_in);
 
 	FString out;
-	FJsonObjectConverter::UStructToJsonObjectString<T>(built_response,out);
+	FJsonObjectConverter::UStructToJsonObjectString<T>(built_response, out);
 
 	FString* o_ptr = &out;
 	this->Remove_Json_SNRT_INLINE(o_ptr);//removes spaces, /n, /r, /t
@@ -150,14 +206,22 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 	return result;
 }
 
-
 void UIndexer::testing()
 {
+	bool res = true;
 	FString json_0 = "{\"age\":69,\"name\":\"struct_0_JSON\"}";
-	FString json_1 = "{\"age\":96,\"name\":\"struct_1_JSON\"}";
+	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
 
-	bool var = Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
 
+
+	if (res)
+	{
+		UE_LOG(LogTemp, Display, TEXT("\n[Tests Passed]\n"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("\n[Tests failed]\n"));
+	}
 }
 
 bool UIndexer::Ping(int64 chainID)
@@ -187,33 +251,32 @@ int64 UIndexer::GetChainID(int64 chainID)
 
 FEtherBalance UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 {
-	//we may need to parse to a json string that gets thrown in as an arguement here!
 	FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", accountAddr));
 	return response.balance;
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
-FGetTokenBalancesReturn UIndexer::GetTokenBalances(int64 chainID, FString args)
+FGetTokenBalancesReturn UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args)
 {
-	return BuildResponse<FGetTokenBalancesReturn>(HTTPPost(chainID, "GetTokenBalances", args));
+	return BuildResponse<FGetTokenBalancesReturn>(HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args)));
 }
 
-FGetTokenSuppliesReturn UIndexer::GetTokenSupplies(int64 chainID, FString args)
+FGetTokenSuppliesReturn UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesReturn>(HTTPPost(chainID,"GetTokenSupplies",args));
+	return BuildResponse<FGetTokenSuppliesReturn>(HTTPPost(chainID,"GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args)));
 }
 
-FGetTokenSuppliesMapReturn UIndexer::GetTokenSuppliesMap(int64 chainID, FString args)
+FGetTokenSuppliesMapReturn UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesMapReturn>(HTTPPost(chainID,"GetTokenSuppliesMap",args));
+	return BuildResponse<FGetTokenSuppliesMapReturn>(HTTPPost(chainID,"GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args)));
 }
 
-FGetBalanceUpdatesReturn UIndexer::GetBalanceUpdates(int64 chainID, FString args)
+FGetBalanceUpdatesReturn UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args)
 {
-	return BuildResponse<FGetBalanceUpdatesReturn>(HTTPPost(chainID,"GetBalanceUpdates",args));
+	return BuildResponse<FGetBalanceUpdatesReturn>(HTTPPost(chainID,"GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args)));
 }
 
-FGetTransactionHistoryReturn UIndexer::GetTransactionHistory(int64 chainID, FString args)
+FGetTransactionHistoryReturn UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
 {
-	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID,"GetTransactionHistory",args));
+	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID,"GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args)));
 }

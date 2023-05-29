@@ -28,13 +28,34 @@ private:
 
 //private functions
 	
+	/*
+		Creates the URL from a given chainID and endpoint
+	*/
 	FString Url(int64 chainID, FString endpoint);
 
+	/*
+		Returns the host name
+	*/
 	FString HostName(int64 chainID);
 
+	/*
+		Used to send an HTTPPost req to a the sequence app
+		@return the content of the post response
+	*/
 	FString HTTPPost(int64 chainID, FString endpoint, FString args);
 
+	/*
+	Here we take in text and convert it to a Struct of type T if possible
+	@return a Struct of type T
+	*/
 	template < typename T > T BuildResponse(FString text);
+
+	/*
+	Here we take in a struct and convert it straight into a json object String
+	@Param (T) Struct_in the struct we are converting to a json object string
+	@Return the JSON Object String
+*/
+	template < typename T> FString BuildArgs(T struct_in);
 
 //end of private functions
 
@@ -42,6 +63,9 @@ public:
 
 //public functions
 
+	/*
+		Used for testing out the core components of the indexer
+	*/
 	void testing();
 
 	/*
@@ -51,43 +75,68 @@ public:
 	*/
 	void Remove_Json_SNRT_INLINE(FString * json_string_in);
 
+	/*
+		Used for testing json parsing
+	*/
 	template <typename T> bool Test_Json_Parsing(FString json_in, FString type);
 
+	/*
+		General purpose constuctor
+	*/
 	UIndexer();
-	UIndexer(FString args);
 
+	/*
+		Used to get a ping back from the sequence app
+	*/
 	bool Ping(int64 chainID);
 
+	/*
+		Used to get version data back from the sequence app
+	*/
 	FVersion Version(int64 chainID);
 
-	//need to assess task structure
+	/*
+		Used to get the runtime status of the sequence app
+	*/
 	FRuntimeStatus RunTimeStatus(int64 chainID);
 
-	int64 GetChainID(int64 chainID);//?
+	/*
+		Used to get the chainID from the sequence app
+	*/
+	int64 GetChainID(int64 chainID);
 
+	/*
+		Used to get the Ether balance from the sequence app
+		@param 1st the ChainID
+		@param 2nd the accountAddr we want to get the balance for
+		@return the Balance
+	*/
 	FEtherBalance GetEtherBalance(int64 chainID, FString accountAddr);
 
-	FGetTokenBalancesReturn GetTokenBalances(int64 chainID, FString args);
+	/*
+		Gets the token balances from the sequence app
+	*/
+	FGetTokenBalancesReturn GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args);
 
-	FGetTokenSuppliesReturn GetTokenSupplies(int64 chainID, FString args);
+	/*
+		gets the token supplies from the sequence app
+	*/
+	FGetTokenSuppliesReturn GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args);
 
-	FGetTokenSuppliesMapReturn GetTokenSuppliesMap(int64 chainID, FString args);
+	/*
+		gets the token supplies map from the sequence app
+	*/
+	FGetTokenSuppliesMapReturn GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args);
+	
+	/*
+		Get the balance updates from the sequence app
+	*/
+	FGetBalanceUpdatesReturn GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args);
 
-	FGetBalanceUpdatesReturn GetBalanceUpdates(int64 chainID, FString args);
-
-	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FString args);
+	/*
+		get transaction history from the sequence app
+	*/
+	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
 
 //end of public functions
-
-
 };
-
-//templated functions
-/*
-template<class T>
-inline T UIndexer::BuildResponse(FString text)
-{
-
-	return T();
-}
-*/
