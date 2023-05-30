@@ -47,8 +47,15 @@ private:
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
 	@return a Struct of type T
+	
+	NOTE: Because unreal doesn't support nested Tarrays and Tmaps I had to use special implementations
+	for some data structures inorder for them to parse properly
 	*/
 	template < typename T > T BuildResponse(FString text);
+	template <> FStruct_0 BuildResponse(FString text);
+	template <> FGetTokenSuppliesMapReturn BuildResponse(FString text);
+	template <> FGetTokenSuppliesMapArgs BuildResponse(FString text);
+	template <> FTokenMetaData BuildResponse(FString text);
 
 	/*
 	Here we take in a struct and convert it straight into a json object String
