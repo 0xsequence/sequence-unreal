@@ -10,5 +10,5 @@ struct FStruct_0
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FStruct_1 data;
+        TMap<FString,FStruct_1> data_map;
 };
