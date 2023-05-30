@@ -182,7 +182,6 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 {
 	UE_LOG(LogTemp, Display, TEXT("====================================================================="));
 	UE_LOG(LogTemp, Display, TEXT("JSON Type %s"), *type);
-	UE_LOG(LogTemp, Display, TEXT("JSON_in %s"), *json_in);
 
 	T built_response = BuildResponse<T>(json_in);
 
@@ -194,6 +193,7 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 	FString* in_ptr = &json_in;
 	this->Remove_Json_SNRT_INLINE(in_ptr);
 
+	UE_LOG(LogTemp, Display, TEXT("JSON_in %s"), *json_in);
 	UE_LOG(LogTemp, Display, TEXT("resulting jsonString: %s"), *out);
 
 	bool result = (out.ToLower().Compare(json_in.ToLower()) == 0);
@@ -213,9 +213,8 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 void UIndexer::testing()
 {
 	bool res = true;
-	FString json_0 = "{\"data\":{\"age\":69,\"name\":\"nested_struct_1\"}}";
+	FString json_0 = "{\"data_map\": {\"key_1\": {\"age\":1, \"name\":\"john\"}, \"key_2\":{\"age\":31, \"name\":\"3john\"}, \"key_3\":{\"age\":331, \"name\":\"33john\"}} }";
 	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
-
 	if (res)
 	{
 		UE_LOG(LogTemp, Display, TEXT("\n[Tests Passed]\n"));
