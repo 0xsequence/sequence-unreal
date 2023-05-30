@@ -40,4 +40,26 @@ public:
 			}
 		}
     };
+
+	FString Get()
+	{
+		TSharedPtr<FJsonObject> json;
+		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create("{ \"tokenMap\": {} }"), json);
+		//we need to create key value pairs to insert into json out!
+		TArray<FString> keys;
+		tokenMap.GetKeys(keys);
+
+		for (auto key : keys)//go through the keys!
+		{
+			TSharedPtr<FJsonObject> j_out = FJsonObjectConverter::UStructToJsonObject<FTokenList>(*tokenMap.Find(key));
+			json.Get()->GetObjectField("tokenMap").Get()->SetArrayField(key, j_out.Get()->GetArrayField("token_list"));
+		}
+
+		//lastly convert from a json object to a FString
+		FString out;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&out);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+
+		return out;
+	};
 };

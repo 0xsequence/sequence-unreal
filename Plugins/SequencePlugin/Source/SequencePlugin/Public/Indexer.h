@@ -63,6 +63,11 @@ private:
 	@Return the JSON Object String
 */
 	template < typename T> FString BuildArgs(T struct_in);
+	template <> FString BuildArgs(FStruct_0 text);
+	template <> FString BuildArgs(FGetTokenSuppliesMapReturn text);
+	template <> FString BuildArgs(FGetTokenSuppliesMapArgs text);
+	template <> FString BuildArgs(FTokenMetaData text);
+
 
 //end of private functions
 
