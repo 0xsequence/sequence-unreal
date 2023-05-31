@@ -40,6 +40,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void Testing_Indexer();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
