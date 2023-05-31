@@ -9,5 +9,5 @@ struct FStruct_1
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()//only visible in C++
-        TArray<int32> int_data;
+        TMap<FString,int32> int_data;
 };
