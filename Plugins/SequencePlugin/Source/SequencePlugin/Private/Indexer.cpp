@@ -283,7 +283,8 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 void UIndexer::testing()
 {
 	bool res = true;
-	FString json_0 = "{\"list\":[[0,1],[3,5],[7,8]]}";
+	//FString json_0 = "{\"list\":[[0,1],[3,5],[7,8]]}";
+	FString json_0 = "{ \"list\": [ {\"key1\":1}, {\"key2\":2}, {\"key3\":3} ] }";
 	//FString json_0 = "{ \"map\": { \"key1\":[0,1,2] , \"key2\":[3,4,5] , \"key3\":[6,7,8] } }";
 	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
 	if (res)

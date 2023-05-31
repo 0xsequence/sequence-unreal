@@ -60,5 +60,44 @@ public:
         }
     };
 
+    FString Get()
+    {
+        FString out = "{\"attributes\":[";
+
+        for (auto i : attributes)
+        {//Here we append to the returning json object with our own data.
+            FString json_obj_str;
+            FJsonObjectConverter::UStructToJsonObjectString<FAttributeMap>(i, json_obj_str);
+
+            json_obj_str.RemoveSpacesInline();
+            FString srch_prefix = TEXT("{\"attribute_map\":");
+            FString srch_n = TEXT("\n");
+            FString srch_r = TEXT("\r");
+            FString srch_t = TEXT("\t");
+            FString replace = TEXT("");
+
+            const TCHAR* srch_ptr = *srch_prefix;
+            const TCHAR* rep_ptr = *replace;
+            const TCHAR* srch_ptr_n = *srch_n;
+            const TCHAR* srch_ptr_r = *srch_r;
+            const TCHAR* srch_ptr_t = *srch_t;
+
+            (json_obj_str).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
+            (json_obj_str).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
+            (json_obj_str).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
+
+            //we've removed all the excess data now we need clean it up
+            //{\"attribute_map\": data }
+            (json_obj_str).ReplaceInline(srch_ptr, rep_ptr, ESearchCase::IgnoreCase);//remove \t
+            json_obj_str.LeftChopInline(1);//remove the tailing }
+            out.Append(json_obj_str);
+            out.Append(",");
+        }
+        out.LeftChopInline(1);//easy way of removing the trailing "," without if's
+        out.Append("]}");
+
+        return out;
+    };
+
     
 };
