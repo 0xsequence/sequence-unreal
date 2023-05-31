@@ -63,7 +63,7 @@ public:
 	};
 	*/
 
-
+	//This is a test of <TArray<TMap<FString,data>>
 	FStruct_0(FJsonObject json_in)
 	{//need to manually parse this so we get a proper json result!
 		TArray<TSharedPtr<FJsonValue>> data = json_in.GetArrayField("list");
@@ -83,7 +83,8 @@ public:
 		}
 	};
 
-
+	//This operates independent of the nested data inside and should be generified and used in the other
+	//custom getters from now as I feel this is more reliable and simplier to understand.
 	FString Get()
 	{
 		FString out = "{\"list\":[";
