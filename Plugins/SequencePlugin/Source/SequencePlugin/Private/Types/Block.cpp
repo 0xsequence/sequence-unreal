@@ -1,4 +1,6 @@
 #include "Block.h"
+#include "Types/Block.h"
+
 #include "Json.h"
 
 FBlock::~FBlock()

@@ -117,7 +117,7 @@ TOptional<uint8> HexLetterToInt(TCHAR Hex)
 	}
 }
 
-TOptional<uint64> HexStringToInt64(FString Hex)
+TOptional<uint64> HexStringToUint64(FString Hex)
 {
 	uint64 Sum = 0;
 	uint64 Offset = 0; // Compensates for 0x prefix
@@ -212,6 +212,11 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 
 FString TrimHex(FString Hex)
 {
+	if(Hex.Len() == 0)
+	{
+		return "0";
+	}
+	
 	FString HexCopy = FString(Hex);
 	
 	HexCopy.RemoveFromStart("0x");
@@ -219,6 +224,11 @@ FString TrimHex(FString Hex)
 	while(HexCopy[0] == '0')
 	{
 		HexCopy.RemoveFromStart("0");
+		
+		if(HexCopy.Len() == 0)
+		{
+			return "0";
+		}
 	}
 
 	return HexCopy;

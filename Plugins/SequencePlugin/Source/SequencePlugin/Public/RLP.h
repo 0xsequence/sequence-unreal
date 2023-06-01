@@ -1,6 +1,6 @@
 #pragma once
-#include "BinaryData.h"
-#include "Types.h"
+#include "Types/BinaryData.h"
+#include "Types/Types.h"
 
 ByteLength GetByteLength(uint32 Length);
 

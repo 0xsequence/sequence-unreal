@@ -5,12 +5,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BinaryData.h"
+#include "Types/BinaryData.h"
 #include "Errors.h"
-#include "Header.h"
+#include "Types/Header.h"
 #include "Http.h"
 #include "JsonBuilder.h"
-#include "Types.h"
+#include "Types/FTransactionReceipt.h"
+#include "Types/Types.h"
+
+struct ContractCall;
 
 enum EBlockTag
 {
@@ -33,35 +36,39 @@ class Provider
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
-	TResult<uint32> ExtractUInt32Result(FString JsonRaw);
+	TResult<uint64> ExtractUIntResult(FString JsonRaw);
 	FString SendRPC(FString Content);
-	TResult<uint32> TransactionCountHelper(FAddress Address, FString Number);
+	TResult<uint64> TransactionCountHelper(FAddress Address, FString Number);
 	static FJsonBuilder RPCBuilder(FString MethodName);
 	TResult<FHeader> HeaderByNumberHelper(FString Number);
 	TResult<FBlockNonce> NonceAtHelper(FString Number);
+	TResult<FNonUniformData> CallHelper(ContractCall ContractCall, FString Number);
 	
 public:
 	Provider(FString Url);
-	TResult<TSharedPtr<FJsonObject>> BlockByNumber(uint16 Number);
+	TResult<TSharedPtr<FJsonObject>> BlockByNumber(uint64 Number);
 	TResult<TSharedPtr<FJsonObject>> BlockByNumber(EBlockTag Tag);
 	TResult<TSharedPtr<FJsonObject>> BlockByHash(FHash256 Hash);
-	TResult<uint32> BlockNumber();
+	TResult<uint64> BlockNumber();
 
-	TResult<FHeader> HeaderByNumber(uint16 Id);
+	TResult<FHeader> HeaderByNumber(uint64 Id);
 	TResult<FHeader> HeaderByNumber(EBlockTag Tag);
 	TResult<FHeader> HeaderByHash(FHash256 Hash);
 
 	TResult<TSharedPtr<FJsonObject>> TransactionByHash(FHash256 Hash);
-	TResult<uint32> TransactionCount(FAddress Addr, uint16 Number);
-	TResult<uint32> TransactionCount(FAddress Addr, EBlockTag Tag);
-	TResult<TSharedPtr<FJsonObject>> TransactionReceipt(FHash256 Hash);
+	TResult<uint64> TransactionCount(FAddress Addr, uint64 Number);
+	TResult<uint64> TransactionCount(FAddress Addr, EBlockTag Tag);
+	TResult<FTransactionReceipt> TransactionReceipt(FHash256 Hash);
 	
-	TResult<FBlockNonce> NonceAt(uint16 Number);
+	TResult<FBlockNonce> NonceAt(uint64 Number);
 	TResult<FBlockNonce> NonceAt(EBlockTag Tag);
 
 	void SendRawTransaction(FString data);
 	
-	TResult<uint32> ChainId();
+	TResult<uint64> ChainId();
+
+	TResult<FNonUniformData> Call(ContractCall ContractCall, uint64 Number);
+	TResult<FNonUniformData> Call(ContractCall ContractCall, EBlockTag Number);
 };
 
 

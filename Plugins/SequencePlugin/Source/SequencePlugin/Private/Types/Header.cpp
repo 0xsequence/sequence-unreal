@@ -1,7 +1,5 @@
-#include "Header.h"
-
-#include "BinaryData.h"
-#include "Types.h"
+#include "Types/Header.h"
+#include "Types/BinaryData.h"
 #include "HexUtility.h"
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
@@ -15,9 +13,9 @@ FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
 	FBloom Bloom = FBloom::From(Json->GetStringField("logsBloom"));
 	FNonUniformData Difficulty = HexStringToBinary(Json->GetStringField("difficulty"));
 	FNonUniformData Number = HexStringToBinary(Json->GetStringField("number"));
-	uint64 GasLimit = HexStringToInt64(Json->GetStringField("gasLimit")).Get(0);
-	uint64 GasUsed = HexStringToInt64(Json->GetStringField("gasUsed")).Get(0);
-	uint64 Time = HexStringToInt64(Json->GetStringField("timestamp")).Get(0);
+	uint64 GasLimit = HexStringToUint64(Json->GetStringField("gasLimit")).Get(0);
+	uint64 GasUsed = HexStringToUint64(Json->GetStringField("gasUsed")).Get(0);
+	uint64 Time = HexStringToUint64(Json->GetStringField("timestamp")).Get(0);
 	FNonUniformData ExtraData = HexStringToBinary(Json->GetStringField("extraData"));
 	FHash256 MixDigest = FHash256::From(Json->GetStringField("mixHash"));
 	FBlockNonce Nonce = FBlockNonce::From(Json->GetStringField("nonce"));

@@ -1,7 +1,7 @@
 #include "RLP.h"
 
 #include "ABI.h"
-#include "BinaryData.h"
+#include "Types/BinaryData.h"
 #include "HexUtility.h"
 
 ByteLength GetByteLength(uint32 Length)
@@ -77,9 +77,10 @@ void RLPItem::Encode(uint8* HeadPtr)
 	{
 		auto RawData = static_cast<uint8*>(this->Data);
 
-		if(this->Length == 1 && RawData[0] == 0)
+		if(this->Length == 1 && RawData[0] == 0x00)
 		{
-			HeadPtr[0] = 0x80; // We serialize 0x0 as an empty string 
+			HeadPtr[0] = 0x80; // We serialize 0x0 as an empty string
+			return;
 		}
 		
 		if(this->Length == 1 && RawData[0] <= 127)
@@ -100,8 +101,6 @@ void RLPItem::Encode(uint8* HeadPtr)
 		}
 
 		auto LengthByteLength = GetByteLength(this->Length);
-
-		
 
 		HeadPtr[0] = 0xb7 + LengthByteLength;
 
