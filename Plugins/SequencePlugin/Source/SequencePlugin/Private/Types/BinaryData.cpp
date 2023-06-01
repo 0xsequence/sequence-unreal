@@ -1,7 +1,19 @@
-#include "BinaryData.h"
+#include "Types/BinaryData.h"
 #include "HexUtility.h"
 
 // There is a decent bit of code duplication here but I don't anticipate this code to change much
+
+uint8* BlankArray(ByteLength size)
+{
+	auto Arr = new uint8[size];
+
+	for(auto i = 0; i < size; i++)
+	{
+		Arr[i] = 0x00;
+	}
+
+	return Arr;
+}
 
 void FBinaryData::Destroy()
 {
@@ -10,7 +22,17 @@ void FBinaryData::Destroy()
 
 FString FBinaryData::ToHex()
 {
+	if(Arr == nullptr)
+	{
+		return "";
+	}
+	
 	return HashToHexString(GetLength(), Arr);
+}
+
+void FBinaryData::Renew()
+{
+	this->Arr = BlankArray(this->GetLength());
 }
 
 FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)
@@ -28,6 +50,14 @@ FNonUniformData FNonUniformData::Copy()
 const ByteLength FNonUniformData::GetLength()
 {
 	return this->Length;
+}
+
+FNonUniformData FNonUniformData::Trim()
+{
+	auto trimmed = Trimmed(*this);
+	delete [] this->Arr;
+	this->Arr = trimmed.Arr;
+	return trimmed;
 }
 
 
@@ -48,7 +78,13 @@ FNonUniformData Trimmed(FBinaryData& Data)
 		}
 	}
 
-	const ByteLength NewLength = Data.GetLength() - empty_count;
+	ByteLength NewLength = Data.GetLength() - empty_count;
+
+	if(NewLength == 0)
+	{
+		return FNonUniformData{new uint8[1]{0x00}, 1};
+	}
+	
 	const auto NewData = new uint8[NewLength];
 
 	for(auto i = 0; i < NewLength; i++)
@@ -62,7 +98,7 @@ FNonUniformData Trimmed(FBinaryData& Data)
 FHash256 FHash256::New()
 {
 	auto Data = FHash256{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 
@@ -86,7 +122,7 @@ const ByteLength FHash256::GetLength()
 FAddress FAddress::New()
 {
 	auto Data = FAddress{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 
@@ -110,7 +146,7 @@ const ByteLength FAddress::GetLength()
 FPublicKey FPublicKey::New()
 {
 	auto Data = FPublicKey{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 
@@ -134,7 +170,7 @@ const ByteLength FPublicKey::GetLength()
 FPrivateKey FPrivateKey::New()
 {
 	auto Data = FPrivateKey{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 
@@ -158,7 +194,7 @@ const ByteLength FPrivateKey::GetLength()
 FBloom FBloom::New()
 {
 	auto Data = FBloom{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 
@@ -182,7 +218,7 @@ const ByteLength FBloom::GetLength()
 FBlockNonce FBlockNonce::New()
 {
 	auto Data = FBlockNonce{};
-	Data.Arr = new uint8[Data.GetLength()];
+	Data.Renew();
 	return Data;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "Types.h"
 
-
+uint8* BlankArray(ByteLength size);
 
 struct FBinaryData
 {
@@ -10,6 +10,7 @@ struct FBinaryData
 	virtual const ByteLength GetLength() = 0;
 	void Destroy();
 	FString ToHex();
+	void Renew(); // Makes new blank array. Clean up the old one!
 };
 
 // Number of arbitrary length
@@ -20,6 +21,7 @@ struct FNonUniformData : FBinaryData
 	FNonUniformData(uint8* Arr, ByteLength Length);
 	FNonUniformData Copy(); // This creates new data that must be freed
 	virtual const ByteLength GetLength() override;
+	FNonUniformData Trim(); // Destroys itself
 };
 
 // Returns returns data with leading 0x00 bytes trimmed

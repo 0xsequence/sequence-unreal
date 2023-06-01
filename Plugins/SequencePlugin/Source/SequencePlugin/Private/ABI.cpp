@@ -3,7 +3,7 @@
 #pragma warning(disable: 4104)
 #include "ABI.h"
 
-#include "BinaryData.h"
+#include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
@@ -161,6 +161,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			auto SubHead = &DataPtr[GBlockByteLength * (i + 1)];
 			Arr[i].Type = ModelArg.Type;
 
+			// Must preserve our model
 			if(ModelArg.Type == ARRAY)
 			{
 				Arr[i].Data = new FABIArg{*static_cast<FABIArg*>(ModelArg.Data)};

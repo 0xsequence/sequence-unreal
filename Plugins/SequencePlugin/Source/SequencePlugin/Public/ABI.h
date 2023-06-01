@@ -1,6 +1,6 @@
 #pragma once
-#include "BinaryData.h"
-#include "Types.h"
+#include "Types/BinaryData.h"
+#include "Types/Types.h"
 
 inline uint8 GMethodIdByteLength = 4;
 inline uint8 GBlockByteLength = 32;

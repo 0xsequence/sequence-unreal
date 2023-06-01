@@ -1,6 +1,6 @@
 #include "FEthTransaction.h"
 
-#include "BinaryData.h"
+#include "Types/BinaryData.h"
 #include "Crypto.h"
 #include "HexUtility.h"
 #include "RLP.h"
@@ -21,12 +21,14 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
 
 	auto trimmed_nonce = Trimmed(Nonce);
+
+	UE_LOG(LogTemp, Display, TEXT("My trimmed nonce is %s"), *trimmed_nonce.ToHex());
 	
 	auto EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
 	{
 		Itemize(trimmed_nonce), // Nonce
-		Itemize(GasPrice), // GasPrice
-		Itemize(GasLimit), // GasLimit
+		Itemize(GasPrice.Trim()), // GasPrice
+		Itemize(GasLimit.Trim()), // GasLimit
 		Itemize(To), // To
 		Itemize(Value), // Value
 		Itemize(Data), // Data
@@ -61,6 +63,34 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	this->S = MyS;
 }
 
+FHash256 FEthTransaction::GetTransactionHash(int ChainID)
+{
+	auto NonceStr = TrimHex(Nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
+
+	auto trimmed_nonce = Trimmed(Nonce);
+	
+	auto EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
+	{
+		Itemize(trimmed_nonce), // Nonce
+		Itemize(GasPrice.Trim()), // GasPrice
+		Itemize(GasLimit.Trim()), // GasLimit
+		Itemize(To), // To
+		Itemize(Value), // Value
+		Itemize(Data), // Data
+		Itemize(HexStringToBinary(IntToHexString(ChainID))), // V
+		Itemize(HexStringToBinary("")), // R 
+		Itemize(HexStringToBinary("")), // S
+	}, 9));
+
+	trimmed_nonce.Destroy();
+
+	auto SigningHash = FHash256::New();
+	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
+
+	return SigningHash;
+}
+
 FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int ChainID)
 {
 	this->Sign(PrivateKey, ChainID);
@@ -71,8 +101,8 @@ FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, in
 	return RLP::Encode(Itemize(new RLPItem[]
 	{
 		Itemize(HexStringToBinary(NonceStr)), // Nonce
-		Itemize(GasPrice), // GasPrice
-		Itemize(GasLimit), // GasLimit
+		Itemize(GasPrice.Trim()), // GasPrice
+		Itemize(GasLimit.Trim()), // GasLimit
 		Itemize(To), // To
 		Itemize(Value), // Value
 		Itemize(Data), // Data
@@ -80,4 +110,17 @@ FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, in
 		Itemize(R), // R 
 		Itemize(S), // S
 	}, 9));
+}
+
+void FEthTransaction::Log()
+{
+	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *Nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Gasprice: %s"), *GasPrice.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Gaslimit: %s"), *GasLimit.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Address: %s"), *To.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Value: %s"), *Value.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Data: %s"), *Data.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("V: %s"), *V.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("R: %s"), *R.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("S: %s"), *S.ToHex());
 }

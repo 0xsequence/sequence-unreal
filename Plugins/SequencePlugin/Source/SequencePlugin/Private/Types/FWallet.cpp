@@ -1,4 +1,4 @@
-#include "FWallet.h"
+#include "Types/FWallet.h"
 
 FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
 {
