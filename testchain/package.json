@@ -22,5 +22,9 @@
     "ganacheGasPrice": "20000000000",
     "etherBalance": "100000",
     "extra": ""
+  },
+  "dependencies": {
+    "http-proxy-middleware": "^2.0.6",
+    "proxy-middleware": "^0.15.0"
   }
 }

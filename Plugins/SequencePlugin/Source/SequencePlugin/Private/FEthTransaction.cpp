@@ -29,7 +29,7 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 		Itemize(trimmed_nonce), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
-		Itemize(To), // To
+		Itemize(Trimmed(To)), // To
 		Itemize(Value), // Value
 		Itemize(Data), // Data
 		Itemize(HexStringToBinary(IntToHexString(ChainID))), // V
@@ -57,6 +57,7 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("S: %s"), *MyS.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("PRIVATE KEY: %s"), *PrivateKey.ToHex());
 
 	this->V = HexStringToBinary(IntToHexString(BigV));
 	this->R = MyR;
@@ -75,7 +76,7 @@ FHash256 FEthTransaction::GetTransactionHash(int ChainID)
 		Itemize(trimmed_nonce), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
-		Itemize(To), // To
+		Itemize(Trimmed(To)), // To
 		Itemize(Value), // Value
 		Itemize(Data), // Data
 		Itemize(HexStringToBinary(IntToHexString(ChainID))), // V
@@ -103,7 +104,7 @@ FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, in
 		Itemize(HexStringToBinary(NonceStr)), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
-		Itemize(To), // To
+		Itemize(Trimmed(To)), // To
 		Itemize(Value), // Value
 		Itemize(Data), // Data
 		Itemize(V), // V

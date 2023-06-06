@@ -1,11 +1,22 @@
 // see https://hardhat.org/hardhat-network/docs/reference#config
 module.exports = {
-  solidity: "0.8.17",
+  solidity: {
+    version: "0.8.17",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+	details: {
+	  yul: true,
+	},
+      },
+    },
+  },
 
   networks: {
     hardhat: {
       mining: {
-        auto: false,
+        auto: true,
         interval: 1000
       },
 
@@ -16,6 +27,7 @@ module.exports = {
         { privateKey: '0xabc0000000000000000000000000000000000000000000000000000000000004', balance: '1000000000000000000000000000000000000' },
         { privateKey: '0xabc0000000000000000000000000000000000000000000000000000000000005', balance: '1000000000000000000000000000000000000' },
         { privateKey: '0xabc0000000000000000000000000000000000000000000000000000000000006', balance: '1000000000000000000000000000000000000' },
+        { privateKey: '0xdc04c5399f82306ec4b4d654a342f40e2e0620fe39950d967e1e574b32d4dd36', balance: '1000000000000000000000000000000000000' },
       ],
 
       gas: 10000000000000,

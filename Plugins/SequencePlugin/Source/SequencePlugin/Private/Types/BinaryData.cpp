@@ -239,6 +239,20 @@ const ByteLength FBlockNonce::GetLength()
 	return Size;
 }
 
+void FBlockNonce::Increment()
+{
+	for(auto i = 0; i < GetLength(); i--)
+	{
+		auto index = GetLength() - 1 - i;
+		this->Arr[index] += 1;
+
+		if(this->Arr[index] != 0x00)
+		{
+			return;
+		}
+	}
+}
+
 FNonUniformData StringToUTF8(FString String)
 {
 	uint32 Length = String.Len();

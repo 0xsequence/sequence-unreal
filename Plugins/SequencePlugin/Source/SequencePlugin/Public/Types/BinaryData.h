@@ -91,5 +91,6 @@ struct FBlockNonce : FUniformData
 	static FBlockNonce From(uint8* Arr);
 	static FBlockNonce From(FString Str);
 	virtual const ByteLength GetLength() override;
+	void Increment();
 };
 
