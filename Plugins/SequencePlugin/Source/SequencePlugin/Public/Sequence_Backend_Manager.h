@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void Testing_Indexer();
 
+	UFUNCTION(BlueprintCallable)
+		void Copy_To_Clipboard(FString data);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -140,3 +140,12 @@ void ASequence_Backend_Manager::Testing_Indexer()
 	indexer->testing();
 	UE_LOG(LogTemp, Display, TEXT("Indexer tests Done"));
 }
+
+
+/*
+	Used to copy data to the systems clipboard!
+*/
+void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
+{
+	FPlatformMisc::ClipboardCopy(*data);
+}
