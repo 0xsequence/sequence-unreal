@@ -91,17 +91,17 @@ void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
 template < typename T> FString UIndexer::BuildArgs(T struct_in)
 {
 	FString result = "[FAILED TO PARSE]";
-	try
-	{
+	//try
+	//{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(struct_in, result))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create FString from UStruct\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create FString from UStruct\n"));
+	//}
 	return result;
 }
 
@@ -135,29 +135,29 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	//Then take the json object we make and convert it to a USTRUCT of type T then we return that!
 	T ret_struct;
 
-	try//first we create the json_object as we need this in all cases
-	{
+	//try//first we create the json_object as we need this in all cases
+	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+	//}
 
-	try
-	{
+	//try
+	//{
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create UStruct from Json object\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create UStruct from Json object\n"));
+	//}
 
 	return ret_struct;
 }
@@ -168,17 +168,17 @@ template<> FStruct_0 UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	try//first we create the json_object as we need this in all cases
-	{
+	//try//first we create the json_object as we need this in all cases
+	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+	//}
 	FStruct_0 data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
@@ -187,17 +187,17 @@ template<> FGetTokenSuppliesMapReturn UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	try//first we create the json_object as we need this in all cases
-	{
+	//try//first we create the json_object as we need this in all cases
+	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+	//}
 	FGetTokenSuppliesMapReturn data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
@@ -206,17 +206,17 @@ template<> FGetTokenSuppliesMapArgs UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	try//first we create the json_object as we need this in all cases
-	{
+	//try//first we create the json_object as we need this in all cases
+	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+	//}
 	FGetTokenSuppliesMapArgs data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
@@ -225,17 +225,17 @@ template<> FTokenMetaData UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	try//first we create the json_object as we need this in all cases
-	{
+	//try//first we create the json_object as we need this in all cases
+	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	}
-	catch (...)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	}
+	//}
+	//catch (...)
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
+	//}
 	FTokenMetaData data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
