@@ -147,5 +147,5 @@ void ASequence_Backend_Manager::Testing_Indexer()
 */
 void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
 {
-	FPlatformMisc::ClipboardCopy(*data);
+	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( ,(need some hololens platform instead?)
 }
