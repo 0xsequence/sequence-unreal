@@ -19,7 +19,7 @@ public:
 	* Used to setup the backend manager for usage
 	* retuns FString ("Complete Message")
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, CATEGORY="Setup")
 		FString Setup();
 
 	/*
@@ -35,13 +35,13 @@ public:
 	* Used to test the public key generation and address generation in accordance with
 	* the test chain!
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, CATEGORY="TESTING")
 		FString Testing_Address_Generation();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, CATEGORY="TESTING")
 		void Testing_Indexer();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
 		void Copy_To_Clipboard(FString data);
 
 protected:
