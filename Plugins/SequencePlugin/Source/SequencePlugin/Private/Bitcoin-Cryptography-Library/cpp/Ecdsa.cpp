@@ -13,10 +13,79 @@
 #include "Ecdsa.hpp"
 #include "FieldInt.hpp"
 #include "Sha256.hpp"
+#include "Types/BinaryData.h"
 
 using std::uint8_t;
 using std::uint32_t;
 
+
+bool Ecdsa::sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uint256 &nonce, Uint256 &outR, Uint256 &outS, uint16 &recoveryParameter) {
+	/* 
+	 * Algorithm pseudocode:
+	 * if (nonce outside range [1, order-1]) return false
+	 * p = nonce * G
+	 * r = p.x % order
+	 * if (r == 0) return false
+	 * s = nonce^-1 * (msgHash + r * privateKey) % order
+	 * if (s == 0) return false
+	 *  v = p.y & 1
+	 *	if (s > order / 2) v = v ^ 1
+	 * s = min(s, order - s)
+	 */
+	countOps(functionOps);
+	int recoveryBit = 0;
+	const Uint256 &order = CurvePoint::ORDER;
+	const Uint256 &zero = Uint256::ZERO;
+	if (nonce == zero || nonce >= order)
+		return false;
+	countOps(2 * arithmeticOps);
+	
+	const CurvePoint p = CurvePoint::privateExponentToPublicPoint(nonce);
+	Uint256 y(p.y);
+	Uint256 r(p.x);
+	r.subtract(order, static_cast<uint32_t>(r >= order));
+
+	auto MyY = FHash256::New();
+	y.getBigEndianBytes(MyY.Arr);
+	
+	if (r == zero)
+		return false;
+	assert(r < order);
+	countOps(1 * arithmeticOps);
+	countOps(1 * uint256CopyOps);
+	countOps(1 * curvepointCopyOps);
+	
+	Uint256 s = r;
+	const Uint256 z(msgHash.value);
+	multiplyModOrder(s, privateKey);
+	uint32_t carry = s.add(z);
+	s.subtract(order, carry | static_cast<uint32_t>(s >= order));
+	countOps(1 * arithmeticOps);
+	countOps(2 * uint256CopyOps);
+	
+	Uint256 kInv = nonce;
+	kInv.reciprocal(order);
+	multiplyModOrder(s, kInv);
+	if (s == zero)
+		return false;
+	countOps(1 * arithmeticOps);
+	countOps(1 * uint256CopyOps);
+
+	//calculate recovery parameter
+	recoveryBit+=(MyY.Arr[FHash256::Size - 1] % 2);
+	Uint256 n_div_2 = CurvePoint::ORDER;
+	n_div_2.shiftRight1();
+	if(s > n_div_2) recoveryBit = recoveryBit^1;
+	
+	Uint256 negS = order;
+	negS.subtract(s);
+	s.replace(negS, static_cast<uint32_t>(negS < s));  // To ensure low S values for BIP 62
+	outR = r;
+	outS = s;
+	recoveryParameter = recoveryBit;
+	countOps(3 * uint256CopyOps);
+	return true;
+}
 
 bool Ecdsa::sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uint256 &nonce, Uint256 &outR, Uint256 &outS) {
 	/* 
@@ -72,6 +141,13 @@ bool Ecdsa::sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uin
 	return true;
 }
 
+bool Ecdsa::signWithHmacNonce(const Uint256 &privateKey, const Sha256Hash &msgHash, Uint256 &outR, Uint256 &outS,uint16 &recoveryParameter) {
+	uint8_t privkeyBytes[Uint256::NUM_WORDS * 4];
+	privateKey.getBigEndianBytes(privkeyBytes);
+	const Sha256Hash hmac = Sha256::getHmac(privkeyBytes, sizeof(privkeyBytes), msgHash.value, Sha256Hash::HASH_LEN);
+	const Uint256 nonce(hmac.value);
+	return sign(privateKey, msgHash, nonce, outR, outS, recoveryParameter);
+}
 
 bool Ecdsa::signWithHmacNonce(const Uint256 &privateKey, const Sha256Hash &msgHash, Uint256 &outR, Uint256 &outS) {
 	uint8_t privkeyBytes[Uint256::NUM_WORDS * 4];
