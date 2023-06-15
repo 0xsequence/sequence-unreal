@@ -26,12 +26,14 @@ class Ecdsa final {
 	// All successful executions are constant-time with respect to the input values; in order words
 	// one successful execution is indistinguishable from another one based on side channel information.
 	public: static bool sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uint256 &nonce, Uint256 &outR, Uint256 &outS);
+	public: static bool sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uint256 &nonce, Uint256 &outR, Uint256 &outS, uint16 &recoveryParameter);
 	
 	
 	// Computes a deterministic nonce based on the HMAC-SHA-256 of the message hash with the private key,
 	// and then performs ECDSA signing. Returns true iff signing is successful (with overwhelming probability).
 	// This has the same constant-time behavior as sign().
 	public: static bool signWithHmacNonce(const Uint256 &privateKey, const Sha256Hash &msgHash, Uint256 &outR, Uint256 &outS);
+	public: static bool signWithHmacNonce(const Uint256 &privateKey, const Sha256Hash &msgHash, Uint256 &outR, Uint256 &outS, uint16 &recoveryParameter);
 	
 	
 	// Checks whether the given signature, message, and public key are valid together. The public key point

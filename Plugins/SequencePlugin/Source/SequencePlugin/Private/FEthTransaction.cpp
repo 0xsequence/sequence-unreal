@@ -46,13 +46,15 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	FAddress Addr = GetAddress(PublicKey);
 	auto MyR = FHash256::New();
 	auto MyS = FHash256::New();
+	auto MyY = FHash256::New();
 	Uint256 BigR, BigS;
-
-	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS);
+	uint16 recoveryParameter;
+	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS, recoveryParameter);
 	BigR.getBigEndianBytes(MyR.Arr);
 	BigS.getBigEndianBytes(MyS.Arr);
-	uint16 BigV = (MyR.Arr[FHash256::Size - 1] % 2) + ChainID * 2 + 35;
-
+	
+	const uint16 BigV = ChainID * 2 + 35 + recoveryParameter;
+	UE_LOG(LogTemp, Display, TEXT("Recovery Bit: %d"), recoveryParameter);
 	UE_LOG(LogTemp, Display, TEXT("ENCODED SIGNING DATA: %s"), *EncodedSigningData.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
