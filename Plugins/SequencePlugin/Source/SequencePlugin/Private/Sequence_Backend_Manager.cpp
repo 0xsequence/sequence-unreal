@@ -147,5 +147,10 @@ void ASequence_Backend_Manager::Testing_Indexer()
 */
 void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
 {
-	FPlatformMisc::ClipboardCopy(*data);
+	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
+	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
+
+	//this function call is straight up not implemented :(
+	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
+
 }
