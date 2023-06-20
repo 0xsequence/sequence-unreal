@@ -51,7 +51,7 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 		for (uint8 i : http_post_req->GetContent())//Here I process the response 1 byte at a time!
 		{
 			const uint8* i_ptr = &i;
-			FString data_byte = BytesToString(i_ptr, 1);
+			FString data_byte = BytesToString(i_ptr, 1);//totally broken ref to backend for proper implementation!
 			response.Append(data_byte);
 		}
 	}
