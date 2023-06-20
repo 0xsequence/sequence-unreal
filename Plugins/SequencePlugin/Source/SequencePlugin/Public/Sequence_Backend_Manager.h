@@ -41,8 +41,26 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY="TESTING")
 		void Testing_Indexer();
 
+	/*
+	* Used to send data to clipboard for ease of use!
+	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
 		void Copy_To_Clipboard(FString data);
+
+	/*
+	* Used to get data from clipboard for ease of use
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+		FString Get_From_Clipboard();
+
+	/*
+	* Used to initiate a passwordless signin!
+	* @param FString email (email in)
+	* @return the Oob code to be displayed for the user to enter on the site login!
+	* NOTE: for the code we are expecting 6 digits!
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+		FString Signin(FString email);
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,5 +69,35 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	void signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void get_blk_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void get_hsh_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	bool ready = false;
+	FString recv_block_num;
+	int32 recv_id;
+	FString recv_block_hsh;
+	FString user_email;
+	void post_json_request(FString url, FString json, void (ASequence_Backend_Manager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+	
+	FString create_blk_req();
+	FString create_hsh_req(FString blk_num, int32 id);
+
+	FString prvt_key;
+	FString pblc_key;
+
+	TArray<FString> hex_data;//this may be useless now
+
+	FString create_req_body(FString email);
+
+	FString create_intent(FString email);
+
+	FString setup_random_wallet();//returns the public key!
+
+	FString get_main_url();
+	FString get_continue_url();
+	FString get_signin_url();
 
 };
