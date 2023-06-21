@@ -110,17 +110,7 @@ template <> FString UIndexer::BuildArgs(FStruct_0 struct_in)
 	return struct_in.Get();
 }
 
-template <> FString UIndexer::BuildArgs(FGetTokenSuppliesMapReturn struct_in)
-{
-	return struct_in.Get();
-}
-
 template <> FString UIndexer::BuildArgs(FGetTokenSuppliesMapArgs struct_in)
-{
-	return struct_in.Get();
-}
-
-template <> FString UIndexer::BuildArgs(FTokenMetaData struct_in)
 {
 	return struct_in.Get();
 }
@@ -163,21 +153,6 @@ template<> FStruct_0 UIndexer::BuildResponse(FString text)
 	return data;
 }
 
-//template<> FGetTransactionHistoryReturn UIndexer::BuildResponse(FString text)
-//{
-	//TSharedPtr<FJsonObject> json_step;
-
-	//need custom serialization step to!
-
-	//if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-	//}
-
-	//FGetTransactionHistoryReturn data;// (*json_step.Get());//use our custom constructor instead!
-	//return data;
-//}
-
 template<> FGetTokenSuppliesMapReturn UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
@@ -201,19 +176,6 @@ template<> FGetTokenSuppliesMapArgs UIndexer::BuildResponse(FString text)
 		}
 
 	FGetTokenSuppliesMapArgs data(*json_step.Get());//use our custom constructor instead!
-	return data;
-}
-
-template<> FTokenMetaData UIndexer::BuildResponse(FString text)
-{
-	TSharedPtr<FJsonObject> json_step;
-
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-		}
-
-	FTokenMetaData data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
 
@@ -308,6 +270,8 @@ UTexture2D* UIndexer::get_image_data(FString URL)
 	http_post_req->SetURL(URL);
 	http_post_req->ProcessRequest();
 
+	//going forward these calls must be made ASYNC otherwise we will be constantly stalling at the start for
+	//very long periods of time look at setting up a dynamic approach to solve this properly
 	double LastTime = FPlatformTime::Seconds();
 	while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
 	{
@@ -364,12 +328,10 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 			img = UTexture2D::CreateTransient(width, height, pxl_format);
 			if (!img) return NULL;//nothing to do if it doesn't load!
 
-			//void* TextureData = img->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);//this is deprecated
 			void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
 			img->GetPlatformData()->Mips[0].BulkData.Unlock();
-			//img->PlatformData->Mips[0].BulkData.Unlock();//this is deprecated
-			//Update!
+
 			img->UpdateResource();
 		}
 	}
