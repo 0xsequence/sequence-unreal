@@ -39,7 +39,7 @@ public:
 		FString Testing_Address_Generation();
 
 	UFUNCTION(BlueprintCallable, CATEGORY="TESTING")
-		void Testing_Indexer();
+		TArray<UTexture2D*> Testing_Indexer();
 
 	/*
 	* Used to send data to clipboard for ease of use!

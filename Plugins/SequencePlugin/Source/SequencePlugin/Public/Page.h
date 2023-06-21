@@ -10,7 +10,7 @@ struct FPage
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int32 page;
+        int32 page = 0;
     UPROPERTY()
         FString column;
     UPROPERTY()

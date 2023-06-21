@@ -8,6 +8,10 @@
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
+#include "HttpManager.h"
+#include "Engine/Texture2D.h"
+#include "IImageWrapper.h"
+#include "IImageWrapperModule.h"
 #include "Indexer.generated.h"
 /**
  * 
@@ -21,7 +25,6 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 private:
 	//need static data here!
 
-	//not sure what this path is supposed to go to?
 	const FString PATH = "/rpc/Indexer/";
 
 	TMap<int64, FString> Indexernames;
@@ -56,6 +59,7 @@ private:
 	template <> FGetTokenSuppliesMapReturn BuildResponse(FString text);
 	template <> FGetTokenSuppliesMapArgs BuildResponse(FString text);
 	template <> FTokenMetaData BuildResponse(FString text);
+	//template<> FGetTransactionHistoryReturn UIndexer::BuildResponse(FString text);//anything that touches the nested listings needs to be custom!
 
 	/*
 	Here we take in a struct and convert it straight into a json object String
@@ -68,7 +72,6 @@ private:
 	template <> FString BuildArgs(FGetTokenSuppliesMapArgs text);
 	template <> FString BuildArgs(FTokenMetaData text);
 
-
 //end of private functions
 
 public:
@@ -78,7 +81,13 @@ public:
 	/*
 		Used for testing out the core components of the indexer
 	*/
-	void testing();
+	TArray<UTexture2D*> testing();
+
+	UTexture2D* get_image_data(FString URL);
+
+	UTexture2D* build_image_data(TArray<uint8> img_data, FString URL);
+
+	EImageFormat get_image_format(FString URL);
 
 	/*
 		Used to remove all \n, \r, \t and spaces from a json string for testing!

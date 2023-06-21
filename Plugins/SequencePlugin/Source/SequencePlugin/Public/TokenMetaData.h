@@ -22,8 +22,8 @@ public:
         FString image;
     UPROPERTY()
         float decimals;
-    UPROPERTY()
-        TMap<FString, UObject*> properties;
+    //UPROPERTY()
+       // TMap<FString, UObject*> properties; //these are both producing errors!
     UPROPERTY()
         FString video;
     UPROPERTY()
@@ -36,8 +36,8 @@ public:
         FString background_color;
     UPROPERTY()
         FString animation_url;
-    UPROPERTY()
-        TArray<FAttributeMap> attributes;
+    //UPROPERTY()
+        //TArray<FAttributeMap> attributes; // these are both producing errors
 
     FTokenMetaData() {};
 
@@ -55,7 +55,7 @@ public:
             //now convert this to a FStruct_1 then add it in!
             if (FJsonObjectConverter::JsonObjectToUStruct<FAttributeMap>(json_step.ToSharedRef(), &w_in))
             {
-                attributes.Add(w_in);//now add our custom structure in
+              //  attributes.Add(w_in);//now add our custom structure in
             }
         }
     };
@@ -63,8 +63,8 @@ public:
     FString Get()
     {
         FString out = "{\"attributes\":[";
-
-        for (auto i : attributes)
+        /*
+       for (auto i : attributes)
         {//Here we append to the returning json object with our own data.
             FString json_obj_str;
             FJsonObjectConverter::UStructToJsonObjectString<FAttributeMap>(i, json_obj_str);
@@ -95,7 +95,7 @@ public:
         }
         out.LeftChopInline(1);//easy way of removing the trailing "," without if's
         out.Append("]}");
-
+        */
         return out;
     };
 

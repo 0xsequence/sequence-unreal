@@ -7,6 +7,7 @@
 UIndexer::UIndexer()
 {
 	this->Indexernames.Add(TPair<int64, FString>(1337, "testchain"));//there are others listed but we don't have them yet
+	this->Indexernames.Add(TPair<int64, FString>(137,"polygon"));//need to verify that this is polygons chain id!
 }
 
 /*
@@ -19,7 +20,6 @@ FString UIndexer::Url(int64 chainID, FString endPoint)
 	out_url.Append(endPoint);
 	return out_url;
 }
-
 
 /*
 	Get hostname directing to specific chainID
@@ -40,26 +40,32 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 	FString response = "[NO RESPONSE]";
 	//Now we create the post request
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+
 	http_post_req->SetVerb("POST");
 	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	http_post_req->SetHeader("Accept", "application/json");
 	http_post_req->SetURL(this->Url(chainID, endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
 
-	if (http_post_req->ProcessRequest())//hoping this is a blocking call alternatively I can use the delegates to make this async!
-	{//success
-		for (uint8 i : http_post_req->GetContent())//Here I process the response 1 byte at a time!
-		{
-			const uint8* i_ptr = &i;
-			FString data_byte = BytesToString(i_ptr, 1);//totally broken ref to backend for proper implementation!
-			response.Append(data_byte);
-		}
+	http_post_req->ProcessRequest();
+
+	double LastTime = FPlatformTime::Seconds();
+	while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
 	}
-	else
-	{//failed
-		UE_LOG(LogTemp, Warning, TEXT("[Error Parsing response from Sequence Server]"));
-		response = "[Error Response]";
-	}
+
+	response = http_post_req.Get().GetResponse().Get()->GetContentAsString();
+
+	UE_LOG(LogTemp, Display, TEXT("Args in: %s"), *args);
+
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
+
+	//need to clean the response of null data!
+
 	return response;
 }
 
@@ -91,17 +97,10 @@ void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
 template < typename T> FString UIndexer::BuildArgs(T struct_in)
 {
 	FString result = "[FAILED TO PARSE]";
-	//try
-	//{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(struct_in, result))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create FString from UStruct\n"));
-	//}
 	return result;
 }
 
@@ -113,17 +112,17 @@ template <> FString UIndexer::BuildArgs(FStruct_0 struct_in)
 
 template <> FString UIndexer::BuildArgs(FGetTokenSuppliesMapReturn struct_in)
 {
-	return "";
+	return struct_in.Get();
 }
 
 template <> FString UIndexer::BuildArgs(FGetTokenSuppliesMapArgs struct_in)
 {
-	return "result";
+	return struct_in.Get();
 }
 
 template <> FString UIndexer::BuildArgs(FTokenMetaData struct_in)
 {
-	return "result";
+	return struct_in.Get();
 }
 //end of specific cases
 
@@ -135,30 +134,17 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	//Then take the json object we make and convert it to a USTRUCT of type T then we return that!
 	T ret_struct;
 
-	//try//first we create the json_object as we need this in all cases
-	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	//}
 
-	//try
-	//{
+		//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
+		
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create UStruct from Json object\n"));
-	//}
-
 	return ret_struct;
 }
 
@@ -168,36 +154,39 @@ template<> FStruct_0 UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	//try//first we create the json_object as we need this in all cases
-	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	//}
+
 	FStruct_0 data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
+
+//template<> FGetTransactionHistoryReturn UIndexer::BuildResponse(FString text)
+//{
+	//TSharedPtr<FJsonObject> json_step;
+
+	//need custom serialization step to!
+
+	//if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
+	//{
+		//UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
+	//}
+
+	//FGetTransactionHistoryReturn data;// (*json_step.Get());//use our custom constructor instead!
+	//return data;
+//}
 
 template<> FGetTokenSuppliesMapReturn UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	//try//first we create the json_object as we need this in all cases
-	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	//}
+
 	FGetTokenSuppliesMapReturn data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
@@ -206,17 +195,11 @@ template<> FGetTokenSuppliesMapArgs UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	//try//first we create the json_object as we need this in all cases
-	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	//}
+
 	FGetTokenSuppliesMapArgs data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
@@ -225,23 +208,17 @@ template<> FTokenMetaData UIndexer::BuildResponse(FString text)
 {
 	TSharedPtr<FJsonObject> json_step;
 
-	//try//first we create the json_object as we need this in all cases
-	//{
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-	//}
-	//catch (...)
-	//{
-		//UE_LOG(LogTemp, Display, TEXT("Exception thrown trying to create json object from text\n"));
-	//}
+
 	FTokenMetaData data(*json_step.Get());//use our custom constructor instead!
 	return data;
 }
 
 //specific end
-
+//0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9 peter's public addr
 template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString type)
 {
 	UE_LOG(LogTemp, Display, TEXT("====================================================================="));
@@ -280,21 +257,122 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 	return result;
 }
 
-void UIndexer::testing()
+TArray<UTexture2D*> UIndexer::testing()
 {
 	bool res = true;
-	//FString json_0 = "{\"list\":[[0,1],[3,5],[7,8]]}";
-	FString json_0 = "{ \"list\": [ {\"key1\":1}, {\"key2\":2}, {\"key3\":3} ] }";
-	//FString json_0 = "{ \"map\": { \"key1\":[0,1,2] , \"key2\":[3,4,5] , \"key3\":[6,7,8] } }";
-	res &= Test_Json_Parsing<FStruct_0>(json_0, "FStruct_0");
-	if (res)
+	TArray<UTexture2D*> ret;
+	FGetTransactionHistoryArgs args;// ("0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
+	FTransactionHistoryFilter filter;
+
+	FGetTokenBalancesArgs t_args;
+	t_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
+
+	filter.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
+	args.filter = filter;
+	args.includeMetaData = true;
+
+	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args);
+
+	
+	UTexture2D* fetched_img = NULL;
+	for (auto i : data.transactions)//all txn's
 	{
-		UE_LOG(LogTemp, Display, TEXT("\n[Tests Passed]\n"));
+		for (auto j : i.transfers)//goes through transfers of a transaction!
+		{
+			fetched_img = get_image_data(j.contractInfo.extensions.ogImage);
+			if(fetched_img != NULL)
+				ret.Add(fetched_img);//this will hammer the call to see how it will behave
+			TArray<FString> keys;
+			j.tokenMetaData.GetKeys(keys);
+			for (auto key : keys)//the metadata of a transfer!
+			{
+				auto data_e = j.tokenMetaData.Find(key);
+				fetched_img = get_image_data(data_e->image);
+				if (fetched_img != NULL)
+					ret.Add(fetched_img);//this will hammer the call to see how it will behave
+			}
+		}
+	}
+
+	UE_LOG(LogTemp, Display, TEXT("Img amount %d"),ret.Num());
+
+	return ret;
+}
+
+UTexture2D* UIndexer::get_image_data(FString URL)
+{
+	UE_LOG(LogTemp, Display, TEXT("Img from URL: %s"),*URL);
+	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	UTexture2D * ret = NULL;
+	http_post_req->SetVerb("GET");
+	http_post_req->SetURL(URL);
+	http_post_req->ProcessRequest();
+
+	double LastTime = FPlatformTime::Seconds();
+	while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	if (http_post_req.Get().GetResponse()) 
+	{
+		UE_LOG(LogTemp, Display, TEXT("Response Received processing img"));
+		TArray<uint8> img_data = http_post_req.Get().GetResponse().Get()->GetContent();
+		ret = build_image_data(img_data,URL);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("\n[Tests failed]\n"));
+		UE_LOG(LogTemp, Error, TEXT("Response INVALID!"));
 	}
+	return ret;
+}
+
+EImageFormat UIndexer::get_image_format(FString URL)
+{
+	EImageFormat fmt = EImageFormat::Invalid;
+
+	if (URL.Contains(".jpg", ESearchCase::IgnoreCase))
+		fmt = EImageFormat::JPEG;
+	else if (URL.Contains(".png", ESearchCase::IgnoreCase))
+		fmt = EImageFormat::PNG;
+	else if (URL.Contains(".bmp", ESearchCase::IgnoreCase))
+		fmt = EImageFormat::BMP;
+	return fmt;
+}
+
+UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
+{
+	int32 width = 0, height = 0;
+	UTexture2D* img = NULL;
+	EPixelFormat pxl_format = PF_B8G8R8A8;
+
+	EImageFormat img_format = get_image_format(URL);//get the image format nicely!
+
+	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(img_format);
+	
+	if (ImageWrapper && ImageWrapper.Get()->SetCompressed(img_data.GetData(),img_data.Num()))
+	{
+		TArray64<uint8>  Uncompressed;
+		if (ImageWrapper.Get()->GetRaw(Uncompressed))
+		{
+			width = ImageWrapper.Get()->GetWidth();
+			height = ImageWrapper.Get()->GetHeight();
+
+			img = UTexture2D::CreateTransient(width, height, pxl_format);
+			if (!img) return NULL;//nothing to do if it doesn't load!
+
+			void* TextureData = img->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);//this is deprecated
+			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
+			img->PlatformData->Mips[0].BulkData.Unlock();//this is deprecated
+			//Update!
+			img->UpdateResource();
+		}
+	}
+	return img;
 }
 
 bool UIndexer::Ping(int64 chainID)
