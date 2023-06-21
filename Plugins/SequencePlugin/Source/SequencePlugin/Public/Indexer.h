@@ -58,7 +58,6 @@ private:
 	template <> FStruct_0 BuildResponse(FString text);
 	template <> FGetTokenSuppliesMapReturn BuildResponse(FString text);
 	template <> FGetTokenSuppliesMapArgs BuildResponse(FString text);
-	template <> FTokenMetaData BuildResponse(FString text);
 	//template<> FGetTransactionHistoryReturn UIndexer::BuildResponse(FString text);//anything that touches the nested listings needs to be custom!
 
 	/*
@@ -68,9 +67,7 @@ private:
 */
 	template < typename T> FString BuildArgs(T struct_in);
 	template <> FString BuildArgs(FStruct_0 text);
-	template <> FString BuildArgs(FGetTokenSuppliesMapReturn text);
 	template <> FString BuildArgs(FGetTokenSuppliesMapArgs text);
-	template <> FString BuildArgs(FTokenMetaData text);
 
 //end of private functions
 
