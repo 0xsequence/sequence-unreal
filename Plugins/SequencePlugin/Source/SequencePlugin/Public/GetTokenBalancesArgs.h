@@ -11,6 +11,39 @@ struct FGetTokenBalancesArgs
 public:
     UPROPERTY()
         FString accountAddress;
+};
+
+USTRUCT(BlueprintType)
+struct FGetTokenBalancesArgs_AC
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY()
+        FString accountAddress;
+    UPROPERTY()
+        FString contractAddress;
+};
+
+USTRUCT(BlueprintType)
+struct FGetTokenBalancesArgs_ACI
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY()
+        FString accountAddress;
+    UPROPERTY()
+         FString contractAddress;
+     UPROPERTY()
+         bool includeMetaData;
+};
+
+USTRUCT(BlueprintType)
+struct FGetTokenBalancesArgs_ACIP
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY()
+        FString accountAddress;
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
