@@ -224,7 +224,7 @@ FString ASequence_Backend_Manager::setup_random_wallet()
 	for (int i = 0; i < 64; i++)
 	{
 		FMath::RandInit(time_in_seconds);//init based on time to get some pseudo random data!
-		FString rand_data = this->hex_data[FMath::RandRange(0,this->hex_data.Num())];
+		FString rand_data = this->hex_data[FMath::RandRange(0,this->hex_data.Num()-1)];
 		lcl_prv_key.Append(rand_data);
 	}
 

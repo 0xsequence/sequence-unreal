@@ -348,7 +348,6 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 	int32 width = 0, height = 0;
 	UTexture2D* img = NULL;
 	EPixelFormat pxl_format = PF_B8G8R8A8;
-
 	EImageFormat img_format = get_image_format(URL);//get the image format nicely!
 
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
@@ -365,9 +364,11 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 			img = UTexture2D::CreateTransient(width, height, pxl_format);
 			if (!img) return NULL;//nothing to do if it doesn't load!
 
-			void* TextureData = img->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);//this is deprecated
+			//void* TextureData = img->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);//this is deprecated
+			void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
-			img->PlatformData->Mips[0].BulkData.Unlock();//this is deprecated
+			img->GetPlatformData()->Mips[0].BulkData.Unlock();
+			//img->PlatformData->Mips[0].BulkData.Unlock();//this is deprecated
 			//Update!
 			img->UpdateResource();
 		}
