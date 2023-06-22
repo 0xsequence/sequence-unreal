@@ -1,5 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,7 +11,9 @@
 #include "Engine/Texture2D.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
+#include "Sequence_Backend_Manager.h"
 #include "Indexer.generated.h"
+
 /**
  * 
  */
@@ -24,8 +25,8 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 
 private:
 	const FString PATH = "/rpc/Indexer/";
-
 	TMap<int64, FString> Indexernames;
+	ASequence_Backend_Manager * bck_mngr;
 
 //private functions
 	
@@ -66,6 +67,8 @@ private:
 public:
 
 //public functions
+
+	void setup(ASequence_Backend_Manager* manager_ref);
 
 	/*
 		Used for testing out the core components of the indexer
@@ -119,9 +122,9 @@ public:
 		Used to get the Ether balance from the sequence app
 		@param 1st the ChainID
 		@param 2nd the accountAddr we want to get the balance for
-		@return the Balance
+		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	FEtherBalance GetEtherBalance(int64 chainID, FString accountAddr);
+	void GetEtherBalance(int64 chainID, FString accountAddr);
 
 	/*
 		Gets the token balances from the sequence app
@@ -147,6 +150,14 @@ public:
 		get transaction history from the sequence app
 	*/
 	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
+
+	void async_request(FString url, FString json, void (UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+
+	
+
+	//async handlers
+	private:
+		void get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 //end of public functions
 };

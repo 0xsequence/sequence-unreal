@@ -175,6 +175,11 @@ template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString 
 	return result;
 }
 
+void UIndexer::setup(ASequence_Backend_Manager* manager_ref)
+{
+	this->bck_mngr = manager_ref;
+}
+
 TArray<UTexture2D*> UIndexer::testing()
 {
 	bool res = true;
@@ -192,7 +197,7 @@ TArray<UTexture2D*> UIndexer::testing()
 	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args);
 	UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
 
-	FEtherBalance eth_data = GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
+	GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
 	UE_LOG(LogTemp, Display, TEXT("Done testing eth balance\n"));
 
 	FGetTokenBalancesArgs bln_args;
@@ -328,13 +333,14 @@ int64 UIndexer::GetChainID(int64 chainID)
 	return response.chainID;
 }
 
-FEtherBalance UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
+void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString json_arg = "{\"accountAddress\":\"";
 	json_arg += accountAddr;
 	json_arg += "\"}";
-	FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
-	return response.balance;
+	//FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
+	this->Url(chainID, "GetEtherBalance");
+	this->async_request(this->Url(chainID, "GetEtherBalance"), json_arg, &UIndexer::get_ether_handler);
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
@@ -361,4 +367,39 @@ FGetBalanceUpdatesReturn UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceU
 FGetTransactionHistoryReturn UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
 {
 	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args)));
+}
+
+void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
+{
+	FString response = "[FAILURE]";
+	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetHeader("Content-Type", "application/json");
+	http_post_req->SetURL(url);
+	http_post_req->SetContentAsString(json);
+	http_post_req->OnProcessRequestComplete().BindUObject(this, handler);//here we pass in one of our handler functions to do the processing!
+	http_post_req->ProcessRequest();
+}
+
+void UIndexer::get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString rep_content = "[error]";
+	if (bWasSuccessful)
+	{//Parse the json response
+		Response = Request.Get()->GetResponse();
+		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+		FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(rep_content);//build our response!
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
+		this->bck_mngr->update_ether_balance(response.balance.balanceWei);//let the backend know we are done!
+	}
+	else
+	{
+		switch (Request->GetStatus()) {
+		case EHttpRequestStatus::Failed_ConnectionError:
+			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
+		default:
+			UE_LOG(LogTemp, Error, TEXT("Request failed."));
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 }
