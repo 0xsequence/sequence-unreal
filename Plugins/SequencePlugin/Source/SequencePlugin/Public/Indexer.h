@@ -55,10 +55,6 @@ private:
 	for some data structures inorder for them to parse properly
 	*/
 	template < typename T > T BuildResponse(FString text);
-	template <> FStruct_0 BuildResponse(FString text);
-	template <> FGetTokenSuppliesMapReturn BuildResponse(FString text);
-	template <> FGetTokenSuppliesMapArgs BuildResponse(FString text);
-	//template<> FGetTransactionHistoryReturn UIndexer::BuildResponse(FString text);//anything that touches the nested listings needs to be custom!
 
 	/*
 	Here we take in a struct and convert it straight into a json object String
