@@ -15,4 +15,6 @@ public:
         int32 lastUpdateID;
     UPROPERTY()
         FPage page;
+    bool customGetter = false;
+    FString Get() { return""; };
 };
