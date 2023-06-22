@@ -128,55 +128,21 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
 		}
-
 		//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
-		
-		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
+		if (ret_struct.customConstructor) 
+		{//use the custom constructor!
+			ret_struct.construct(*json_step.Get());
 		}
+		else
+		{//use unreal parsing!
+			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
+			}
+		}
+		ret_struct.setup(*json_step.Get());//now for the edge cases we will manually inject the data where it needs to be!
+
 	return ret_struct;
-}
-
-//specific start
-
-template<> FStruct_0 UIndexer::BuildResponse(FString text)
-{
-	TSharedPtr<FJsonObject> json_step;
-
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-		}
-
-	FStruct_0 data(*json_step.Get());//use our custom constructor instead!
-	return data;
-}
-
-template<> FGetTokenSuppliesMapReturn UIndexer::BuildResponse(FString text)
-{
-	TSharedPtr<FJsonObject> json_step;
-
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-		}
-
-	FGetTokenSuppliesMapReturn data(*json_step.Get());//use our custom constructor instead!
-	return data;
-}
-
-template<> FGetTokenSuppliesMapArgs UIndexer::BuildResponse(FString text)
-{
-	TSharedPtr<FJsonObject> json_step;
-
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
-		}
-
-	FGetTokenSuppliesMapArgs data(*json_step.Get());//use our custom constructor instead!
-	return data;
 }
 
 //specific end

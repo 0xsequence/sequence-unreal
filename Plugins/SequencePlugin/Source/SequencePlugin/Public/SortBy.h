@@ -13,4 +13,13 @@ public:
         FString column;
     UPROPERTY()
         TEnumAsByte<ESortOrder> order;
+
+    void setup(FJsonObject json_in)
+    {
+        if (!json_in.TryGetField("column"))
+            column = json_in.GetStringField("column");
+
+        if (!json_in.TryGetField("order"))
+            order = ESortOrder(json_in.GetIntegerField("order"));
+    }
 };

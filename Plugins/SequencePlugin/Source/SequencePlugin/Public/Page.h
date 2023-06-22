@@ -10,17 +10,53 @@ struct FPage
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int32 page = 0;
+    int32 page = 0;
     UPROPERTY()
-        FString column;
+    FString column;
     UPROPERTY()
-        UObject *before;
+    FString before;//based on observations from what I'm getting these are strings!
     UPROPERTY()
-        UObject *after;//not sure what these are for yet!
+    FString after;
     UPROPERTY()
-        TArray<FSortBy> sort;
+    TArray<FSortBy> sort;
     UPROPERTY()
-        int32 pageSize = 50;
+    int32 pageSize = 50;
     UPROPERTY()
-        bool more;
+    bool more;
+
+    void setup(FJsonObject json_in)
+    {
+        /*
+        if (json_in.TryGetField("more") != nullptr)
+            more = json_in.GetBoolField("more");
+
+        if (json_in.TryGetField("pageSize") != nullptr)
+            pageSize = json_in.GetIntegerField("pageSize");
+
+        if (json_in.TryGetField("after") != nullptr)
+            after = *json_in.GetStringField("after");
+
+        if (json_in.TryGetField("before") != nullptr)
+            after = *json_in.GetStringField("before");
+
+        if (json_in.TryGetField("column") != nullptr)
+            column = json_in.GetStringField("column");
+
+        if (json_in.TryGetField("page") != nullptr)
+            page = json_in.GetIntegerField("page");
+
+        if (json_in.TryGetField("sort") != nullptr)
+        {
+            TArray<TSharedPtr<FJsonValue>> list = json_in.GetArrayField("sort");
+
+            for (int32 i = 0; i < list.Num(); i++)
+            {
+                sort.Add(FSortBy());//create new struct!
+                sort[i].setup(*list[i].Get()->AsObject().Get());//do manual setup!
+            }
+
+        }
+        */
+
+    }
 };
