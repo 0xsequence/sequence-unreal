@@ -6,6 +6,7 @@
 #include "Misc/AutomationTest.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
+#include "Indexer.h"
 #include "Crypto.h"
 
 // Sets default values
@@ -29,6 +30,9 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("d");
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
+
+	this->indexer = NewObject<UIndexer>();
+	this->indexer->setup(this);//pass the indexer a ref. to ourselves so it can let us know when stuff is done!
 }
 
 void ASequence_Backend_Manager::signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -138,6 +142,11 @@ FString ASequence_Backend_Manager::Signin(FString email)
 	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
 
 	return "";
+}
+
+void ASequence_Backend_Manager::get_ether_balance()
+{
+	this->indexer->GetEtherBalance(glb_ChainID,glb_PublicAddress);
 }
 
 // Called when the game starts or when spawned
@@ -405,17 +414,13 @@ FString ASequence_Backend_Manager::Testing_Address_Generation()
 	{
 		Result = "Test Passed";
 	}
-
 	return Result;
 }
 
 TArray<UTexture2D*> ASequence_Backend_Manager::Testing_Indexer()
 {
-	UIndexer *indexer = NewObject<UIndexer>();//Create an object using templates!!!!
-	//UE_LOG(LogTemp, Display, TEXT("Indexer tests starting\n"));
-	TArray<UTexture2D*> ret = indexer->testing();
+	TArray<UTexture2D*> ret = this->indexer->testing();
 	return ret;
-	//UE_LOG(LogTemp, Display, TEXT("Indexer tests Done"));
 }
 
 

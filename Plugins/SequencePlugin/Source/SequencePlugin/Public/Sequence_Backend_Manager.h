@@ -4,14 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Indexer.h"
+#include "Http.h"
 #include "Sequence_Backend_Manager.generated.h"
+
+class UIndexer;
+
 UCLASS()
 class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	FString glb_PublicAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
+	int64 glb_ChainID = 137;
 	
-public:	
+public:
 	// Sets default values for this actor's properties
 	ASequence_Backend_Manager();
 
@@ -62,6 +69,18 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Signin(FString email);
 
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent,CATEGORY = "FUNCTION")
+		void update_ether_balance(int64 ether_balance);//DO NOT ADD A BODY HERE THIS IS MEANT TO BE OVERRIDDEN IN BP'S
+
+	/*
+	* This is meant to initiate an ASYNC request with the backend
+	* it will call update_wei when it completes where the child class of
+	* Sequence_Backend_Manager will override the matching update...func in Blueprints and be able to do something
+	* with that data
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+		void get_ether_balance();//uses the signed in account address
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -100,4 +119,5 @@ private:
 	FString get_continue_url();
 	FString get_signin_url();
 
+	UIndexer * indexer;//indexer ref!
 };
