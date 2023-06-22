@@ -11,6 +11,9 @@ struct FGetTokenBalancesArgs
 public:
     UPROPERTY()
         FString accountAddress;
+
+    bool customGetter = false;
+    FString Get() { return""; };
 };
 
 USTRUCT(BlueprintType)
@@ -22,6 +25,9 @@ public:
         FString accountAddress;
     UPROPERTY()
         FString contractAddress;
+
+    bool customGetter = false;
+    FString Get() {};
 };
 
 USTRUCT(BlueprintType)
@@ -35,6 +41,9 @@ public:
          FString contractAddress;
      UPROPERTY()
          bool includeMetaData;
+
+     bool customGetter = false;
+     FString Get() {};
 };
 
 USTRUCT(BlueprintType)
@@ -50,4 +59,7 @@ public:
         bool includeMetaData;
     UPROPERTY()
         FPage page;
+
+    bool customGetter = false;
+    FString Get() {};
 };

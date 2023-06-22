@@ -23,8 +23,6 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 	GENERATED_BODY()
 
 private:
-	//need static data here!
-
 	const FString PATH = "/rpc/Indexer/";
 
 	TMap<int64, FString> Indexernames;
@@ -60,10 +58,8 @@ private:
 	Here we take in a struct and convert it straight into a json object String
 	@Param (T) Struct_in the struct we are converting to a json object string
 	@Return the JSON Object String
-*/
+	*/
 	template < typename T> FString BuildArgs(T struct_in);
-	template <> FString BuildArgs(FStruct_0 text);
-	template <> FString BuildArgs(FGetTokenSuppliesMapArgs text);
 
 //end of private functions
 

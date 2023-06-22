@@ -13,9 +13,13 @@ public:
     UPROPERTY()
         FTransactionHistoryFilter filter;
     //UPROPERTY()
-       // FPage page;
+      // FPage page;
     UPROPERTY()
         bool includeMetaData = false;
+
+    bool customGetter = false;
+    FString Get() {return"";};
+
     FGetTransactionHistoryArgs() {};
 
     FGetTransactionHistoryArgs(FString addr_in)

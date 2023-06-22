@@ -46,7 +46,6 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 	http_post_req->SetHeader("Accept", "application/json");
 	http_post_req->SetURL(this->Url(chainID, endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
-
 	http_post_req->ProcessRequest();
 
 	double LastTime = FPlatformTime::Seconds();
@@ -63,9 +62,6 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 	UE_LOG(LogTemp, Display, TEXT("Args in: %s"), *args);
 
 	UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
-
-	//need to clean the response of null data!
-
 	return response;
 }
 
@@ -97,24 +93,19 @@ void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
 template < typename T> FString UIndexer::BuildArgs(T struct_in)
 {
 	FString result = "[FAILED TO PARSE]";
+	if (struct_in.customGetter)
+	{
+		result = struct_in.Get();
+	}
+	else
+	{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(struct_in, result))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
+	}
 	return result;
 }
-
-//start of specific cases
-template <> FString UIndexer::BuildArgs(FStruct_0 struct_in)
-{
-	return struct_in.Get();
-}
-
-template <> FString UIndexer::BuildArgs(FGetTokenSuppliesMapArgs struct_in)
-{
-	return struct_in.Get();
-}
-//end of specific cases
 
 //generic
 template<typename T> T UIndexer::BuildResponse(FString text)
@@ -145,7 +136,6 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	return ret_struct;
 }
 
-//specific end
 //0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9 peter's public addr
 template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString type)
 {
@@ -200,8 +190,18 @@ TArray<UTexture2D*> UIndexer::testing()
 	args.includeMetaData = true;
 
 	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args);
+	UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
 
-	
+	FEtherBalance eth_data = GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
+	UE_LOG(LogTemp, Display, TEXT("Done testing eth balance\n"));
+
+	FGetTokenBalancesArgs bln_args;
+	bln_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
+	FGetTokenBalancesReturn bln_ret = GetTokenBalances(137, bln_args);
+	UE_LOG(LogTemp, Display, TEXT("Done testing get token balances\n"));
+
+
+	/*
 	UTexture2D* fetched_img = NULL;
 	for (auto i : data.transactions)//all txn's
 	{
@@ -221,7 +221,7 @@ TArray<UTexture2D*> UIndexer::testing()
 			}
 		}
 	}
-
+	*/
 	UE_LOG(LogTemp, Display, TEXT("Img amount %d"),ret.Num());
 
 	return ret;
@@ -316,7 +316,6 @@ FVersion UIndexer::Version(int64 chainID)
 	return response.version;
 }
 
-//need to assess task structure
 FRuntimeStatus UIndexer::RunTimeStatus(int64 chainID)
 {
 	FRuntimeStatusReturn response = BuildResponse<FRuntimeStatusReturn>(HTTPPost(chainID, "RuntimeStatus", ""));
@@ -330,8 +329,11 @@ int64 UIndexer::GetChainID(int64 chainID)
 }
 
 FEtherBalance UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
-{
-	FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", accountAddr));
+{//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
+	FString json_arg = "{\"accountAddress\":\"";
+	json_arg += accountAddr;
+	json_arg += "\"}";
+	FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
 	return response.balance;
 }
 

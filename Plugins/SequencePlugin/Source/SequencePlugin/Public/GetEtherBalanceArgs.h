@@ -10,4 +10,7 @@ struct FGetEtherBalanceArgs
 public:
     UPROPERTY()
         FString accountAddress;
+
+    bool customGetter = false;
+    FString Get() {};
 };
