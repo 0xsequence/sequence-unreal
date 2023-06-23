@@ -35,6 +35,128 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->indexer->setup(this);//pass the indexer a ref. to ourselves so it can let us know when stuff is done!
 }
 
+// Called when the game starts or when spawned
+void ASequence_Backend_Manager::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+// Called every frame
+void ASequence_Backend_Manager::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+//SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+
+/*
+* Initiates the passwordless signin process
+*/
+FString ASequence_Backend_Manager::Signin(FString email)
+{
+	this->user_email = email;
+	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
+
+	return "";
+}
+
+/*
+	Used to copy data to the systems clipboard!
+*/
+void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
+{
+	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
+	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
+
+	//this function call is straight up not implemented :(
+	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
+}
+
+FString ASequence_Backend_Manager::Get_From_Clipboard()
+{
+	FString* ret;
+	FString ret_data;
+	ret = &ret_data;
+	FPlatformMisc::ClipboardPaste(*ret);//get data from the clip board!
+	//again platform misc is deprecated :( but until the generic platform clipboard functions are
+	//actually implemented this is the best I can do for the time being.
+	return ret_data;
+}
+
+//SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+
+//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
+
+void ASequence_Backend_Manager::get_ether_balance()
+{
+	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress);
+}
+
+void ASequence_Backend_Manager::inc_request_count()
+{
+	this->req_count++;
+}
+
+void ASequence_Backend_Manager::dec_request_count()
+{
+	this->req_count = FMath::Max(0, this->req_count-1);
+	if (req_count == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Done Fetching Images sending them to front!"));
+		this->update_transaction_imgs(this->fetched_imgs);
+	}
+}
+
+void ASequence_Backend_Manager::get_transaction_imgs()
+{
+	//first thing we need to do is actually get the transaction data!
+	FGetTransactionHistoryArgs args;
+	FTransactionHistoryFilter filter;
+	filter.accountAddress = this->glb_PublicAddress;
+	args.filter = filter;
+	args.includeMetaData = true;
+	FGetTransactionHistoryReturn ret =  this->indexer->GetTransactionHistory(this->glb_ChainID,args);
+	UObjectHandler *req_handler = NewObject<UObjectHandler>();//create our handler!
+	req_handler->setup_raw_handler(0, &UObjectHandler::img_handler, this);
+	//a req_handler can only handle 1 request at a time :(
+
+	for (auto i : ret.transactions)//all txn's
+	{
+		for (auto j : i.transfers)//goes through transfers of a transaction!
+		{
+			if (req_handler->request_raw(j.contractInfo.extensions.ogImage))
+				inc_request_count();
+			TArray<FString> keys;
+			j.tokenMetaData.GetKeys(keys);
+			for (auto key : keys)//the metadata of a transfer!
+			{
+				auto data_e = j.tokenMetaData.Find(key);
+				if (req_handler->request_raw(data_e->image))
+					inc_request_count();
+			}
+		}
+	}
+}
+
+void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
+{
+	if (img_to_add != NULL) 
+	{
+		this->fetched_imgs.Add(img_to_add);
+		dec_request_count();
+		UE_LOG(LogTemp, Display, TEXT("Image Data Received!"));
+	}
+	else
+	{
+		dec_request_count();//in the event of null data we need to dec too
+		UE_LOG(LogTemp, Error, TEXT("Image Data Received but processed to NULL :("));
+	}
+}
+
+//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
+
+//PRIVATE HANDLERS//
+
 void ASequence_Backend_Manager::signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
@@ -52,7 +174,6 @@ void ASequence_Backend_Manager::signin_handler(FHttpRequestPtr Request, FHttpRes
 			UE_LOG(LogTemp, Error, TEXT("Request failed."));
 		}
 	}
-	
 	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 }
 
@@ -118,6 +239,8 @@ void ASequence_Backend_Manager::get_hsh_handler(FHttpRequestPtr Request, FHttpRe
 	post_json_request(get_signin_url(), create_req_body(this->user_email), &ASequence_Backend_Manager::signin_handler);
 }
 
+//PRIVATE HANDLERS//
+
 FString ASequence_Backend_Manager::create_blk_req()
 {
 	return "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":43,\"jsonrpc\":\"2.0\"}";
@@ -131,34 +254,6 @@ FString ASequence_Backend_Manager::create_hsh_req(FString blk_num,int32 id)
 	ret.Append(", \"jsonrpc\":\"2.0\"}");
 	UE_LOG(LogTemp, Display, TEXT("Hsh Payload: %s"), *ret);
 	return ret;
-}
-
-/*
-* Initiates the passwordless signin process
-*/
-FString ASequence_Backend_Manager::Signin(FString email)
-{
-	this->user_email = email;
-	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
-
-	return "";
-}
-
-void ASequence_Backend_Manager::get_ether_balance()
-{
-	this->indexer->GetEtherBalance(glb_ChainID,glb_PublicAddress);
-}
-
-// Called when the game starts or when spawned
-void ASequence_Backend_Manager::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-// Called every frame
-void ASequence_Backend_Manager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ASequence_Backend_Manager::post_json_request(FString url, FString json,void (ASequence_Backend_Manager::*handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
@@ -315,14 +410,9 @@ FString ASequence_Backend_Manager::get_signin_url()
 	FBase64::Decode(signin_url, result);
 	return result;
 }
-/*
-* Used to setup the backend manager for usage
-* retuns FString ("Complete Message")
-*/
-FString ASequence_Backend_Manager::Setup()
-{
-	return "Setup Complete";
-}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TESTING FUNCTIONS
 
 /*
 * Used to test an indivual private key, to see how it's generated public key compares to a CORRECT
@@ -422,28 +512,5 @@ TArray<UTexture2D*> ASequence_Backend_Manager::Testing_Indexer()
 	TArray<UTexture2D*> ret = this->indexer->testing();
 	return ret;
 }
-
-
-/*
-	Used to copy data to the systems clipboard!
-*/
-void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
-{
-	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
-	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
-
-	//this function call is straight up not implemented :(
-	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
-
-}
-
-FString ASequence_Backend_Manager::Get_From_Clipboard()
-{
-	FString *ret;
-	FString ret_data;
-	ret = &ret_data;
-	FPlatformMisc::ClipboardPaste(*ret);//get data from the clip board!
-	//again platform misc is deprecated :( but until the generic platform clipboard functions are
-	//actually implemented this is the best I can do for the time being.
-	return ret_data;
-}
+//TESTING FUNCTIONS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////

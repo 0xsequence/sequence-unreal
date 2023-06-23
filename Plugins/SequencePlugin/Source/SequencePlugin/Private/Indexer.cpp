@@ -232,6 +232,8 @@ TArray<UTexture2D*> UIndexer::testing()
 	return ret;
 }
 
+
+
 UTexture2D* UIndexer::get_image_data(FString URL)
 {
 	UE_LOG(LogTemp, Display, TEXT("Img from URL: %s"),*URL);
@@ -340,7 +342,9 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 	json_arg += "\"}";
 	//FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
 	this->Url(chainID, "GetEtherBalance");
-	this->async_request(this->Url(chainID, "GetEtherBalance"), json_arg, &UIndexer::get_ether_handler);
+	//this->async_request(this->Url(chainID, "GetEtherBalance"), json_arg, &UIndexer::get_ether_handler);
+	FName handler = "get_ether_handler_2";
+	this->async_request_test(this->Url(chainID, "GetEtherBalance"), json_arg, 7, &UIndexer::get_ether_handler);
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
@@ -381,6 +385,18 @@ void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler
 	http_post_req->ProcessRequest();
 }
 
+void UIndexer::async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
+{
+	FString response = "[FAILURE]";
+	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetHeader("Content-Type", "application/json");
+	http_post_req->SetURL(url);
+	http_post_req->SetContentAsString(json);
+	//http_post_req->OnProcessRequestComplete().BindRaw(this,handler);
+	//http_post_req->ProcessRequest();
+}
+
 void UIndexer::get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
@@ -389,7 +405,6 @@ void UIndexer::get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Respo
 		Response = Request.Get()->GetResponse();
 		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
 		FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(rep_content);//build our response!
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 		this->bck_mngr->update_ether_balance(response.balance.balanceWei);//let the backend know we are done!
 	}
 	else
