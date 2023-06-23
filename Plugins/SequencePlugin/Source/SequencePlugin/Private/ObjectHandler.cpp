@@ -3,17 +3,15 @@
 #include "ObjectHandler.h"
 #include "Sequence_Backend_Manager.h"
 
-void UObjectHandler::setup_string_handler(int32 i_index, string_handler handler_in, UObject * this_ref)
+void UObjectHandler::setup_string_handler(string_handler handler_in, UObject * this_ref)
 {
-	this->insertion_index = i_index;
 	this->main_string_handler = handler_in;
 	this->main_this_ref = this_ref;
 	this->string_handler_ready = true;//ready to be used!
 }
 
-void UObjectHandler::setup_raw_handler(int32 i_index, raw_handler handler_in, UObject * this_ref)
+void UObjectHandler::setup_raw_handler(raw_handler handler_in, UObject * this_ref)
 {
-	this->insertion_index = i_index;
 	this->main_raw_handler = handler_in;
 	this->main_this_ref = this_ref;
 	this->raw_handler_ready = true;//ready to be used!
@@ -56,7 +54,18 @@ void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePt
 	}
 }
 
-bool UObjectHandler::request_json(FString URL, FString json_args)
+void UObjectHandler::add_to_insertion_indices(FString URL, int32 i_index)
+{
+	if (i_index >= 0)
+		this->insertion_indices.Add(TTuple<FString,int32>(URL,i_index));
+}
+
+void UObjectHandler::remove_from_insertion_indices(FString URL)
+{
+	this->insertion_indices.Remove(URL);//if this key is present get rid of it!
+}
+
+bool UObjectHandler::request_json_base(FString URL, FString json_args)
 {
 	UE_LOG(LogTemp, Display, TEXT("Fetching JSON From: %s"), *URL);
 	FString response = "[NO RESPONSE]";
@@ -72,15 +81,37 @@ bool UObjectHandler::request_json(FString URL, FString json_args)
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;
 }
 
-bool UObjectHandler::request_raw(FString URL)
+bool UObjectHandler::request_raw_base(FString URL)
 {
-	UE_LOG(LogTemp, Display , TEXT("Fetching Raw From: %s"),*URL);
+	UE_LOG(LogTemp, Display, TEXT("Fetching Raw From: %s"), *URL);
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
-	http_post_req->OnProcessRequestComplete().BindUObject(this,&UObjectHandler::handle_request_raw);
+	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::handle_request_raw);
 	http_post_req->ProcessRequest();
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;
+}
+
+bool UObjectHandler::request_json(FString URL, FString json_args)
+{
+	return request_json_base(URL, json_args);
+}
+
+bool UObjectHandler::request_json_indexed(FString URL, FString json_args, int32 index)
+{
+	this->add_to_insertion_indices(URL, index);
+	return this->request_json_base(URL, json_args);
+}
+
+bool UObjectHandler::request_raw(FString URL)
+{
+	return this->request_raw_base(URL);
+}
+
+bool UObjectHandler::request_raw_indexed(FString URL, int32 index)
+{
+	this->add_to_insertion_indices(URL, index);
+	return this->request_raw(URL);
 }
 
 void UObjectHandler::img_handler(TArray<uint8> response,FString URL)

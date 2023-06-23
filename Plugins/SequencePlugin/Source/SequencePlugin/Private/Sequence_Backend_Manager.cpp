@@ -117,8 +117,8 @@ void ASequence_Backend_Manager::get_transaction_imgs()
 	args.includeMetaData = true;
 	FGetTransactionHistoryReturn ret =  this->indexer->GetTransactionHistory(this->glb_ChainID,args);
 	UObjectHandler *req_handler = NewObject<UObjectHandler>();//create our handler!
-	req_handler->setup_raw_handler(0, &UObjectHandler::img_handler, this);
-	//a req_handler can only handle 1 request at a time :(
+	req_handler->setup_raw_handler(&UObjectHandler::img_handler, this);
+	//a req_handler can handle many requests at a time now! :)
 
 	for (auto i : ret.transactions)//all txn's
 	{
