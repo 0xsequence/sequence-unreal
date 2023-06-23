@@ -12,6 +12,7 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 #include "Sequence_Backend_Manager.h"
+#include "ObjectHandler.h"
 #include "Indexer.generated.h"
 
 /**
@@ -151,12 +152,16 @@ public:
 	*/
 	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
 
+	/*
+	* Used for making Async requests!
+	*/
 	void async_request(FString url, FString json, void (UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
 
-	
+	void async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
 
 	//async handlers
 	private:
+
 		void get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 //end of public functions
