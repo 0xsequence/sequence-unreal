@@ -10,10 +10,10 @@
 #include "Types/Header.h"
 #include "Http.h"
 #include "JsonBuilder.h"
-#include "Types/FTransactionReceipt.h"
+#include "Types/TransactionReceipt.h"
 #include "Types/Types.h"
 
-struct ContractCall;
+struct FContractCall;
 
 enum EBlockTag
 {
@@ -42,7 +42,7 @@ class Provider
 	static FJsonBuilder RPCBuilder(FString MethodName);
 	TResult<FHeader> HeaderByNumberHelper(FString Number);
 	TResult<FBlockNonce> NonceAtHelper(FString Number);
-	TResult<FNonUniformData> CallHelper(ContractCall ContractCall, FString Number);
+	TResult<FNonUniformData> CallHelper(FContractCall ContractCall, FString Number);
 	
 public:
 	Provider(FString Url);
@@ -67,8 +67,8 @@ public:
 	
 	TResult<uint64> ChainId();
 
-	TResult<FNonUniformData> Call(ContractCall ContractCall, uint64 Number);
-	TResult<FNonUniformData> Call(ContractCall ContractCall, EBlockTag Number);
+	TResult<FNonUniformData> Call(FContractCall ContractCall, uint64 Number);
+	TResult<FNonUniformData> Call(FContractCall ContractCall, EBlockTag Number);
 };
 
 

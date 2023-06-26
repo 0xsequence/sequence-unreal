@@ -296,17 +296,17 @@ TResult<uint64> Provider::ChainId()
 	return ExtractUIntResult(SendRPC(Content));
 }
 
-TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, uint64 Number)
+TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, uint64 Number)
 {
 	return CallHelper(ContractCall, ConvertInt(Number));
 }
 
-TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, EBlockTag Number)
+TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, EBlockTag Number)
 {
 	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
 }
 
-TResult<FNonUniformData> Provider::CallHelper(ContractCall ContractCall, FString Number)
+TResult<FNonUniformData> Provider::CallHelper(FContractCall ContractCall, FString Number)
 {
 	const auto Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()

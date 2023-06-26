@@ -1,5 +1,4 @@
-#include "FEthTransaction.h"
-
+#include "EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "Crypto.h"
 #include "HexUtility.h"
@@ -51,12 +50,13 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS);
 	BigR.getBigEndianBytes(MyR.Arr);
 	BigS.getBigEndianBytes(MyS.Arr);
-	uint16 BigV = (MyR.Arr[FHash256::Size - 1] % 2) + ChainID * 2 + 35;
+	uint64 BigV = (MyR.Arr[FHash256::Size - 1] % 2) + ChainID * 2 + 35;
 
 	UE_LOG(LogTemp, Display, TEXT("ENCODED SIGNING DATA: %s"), *EncodedSigningData.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("S: %s"), *MyS.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("V: %s"), *IntToHexString(35));
 	UE_LOG(LogTemp, Display, TEXT("PRIVATE KEY: %s"), *PrivateKey.ToHex());
 
 	this->V = HexStringToBinary(IntToHexString(BigV));
