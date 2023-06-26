@@ -308,16 +308,13 @@ TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, EBlockTag Num
 
 TResult<FNonUniformData> Provider::CallHelper(ContractCall ContractCall, FString Number)
 {
-
-	const FString params = "{\"to\": \"0x81b35475847c79ce03e9ce407d93a40475b6a166\", \"data\":\"0xe18a7b9200000000000000000000000081b35475847c79ce03e9ce407d93a40475b6a166\"}";
-	
 	const auto Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddValue(params)
+			->AddValue(ContractCall.GetJson())
 			->AddValue(Number)
 			->EndArray()
 		->ToString();
-	UE_LOG(LogTemp, Display, TEXT("My NONCE value is %s"), *Content);
+	UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
 	auto Data = ExtractStringResult(SendRPC(Content));
 
 	if(Data.HasError())
@@ -326,4 +323,5 @@ TResult<FNonUniformData> Provider::CallHelper(ContractCall ContractCall, FString
 	}
 	
 	return MakeValue(HexStringToBinary(Data.GetValue()));
+	
 }

@@ -4,6 +4,11 @@
 #include "Provider.h"
 #include "Misc/AutomationTest.h"
 #include "Types/ContractCall.h"
+#include "Coders/AddressCoder.h"
+#include "ABI.h"
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+#include "ABI.h"
+#include "Types/ABITypes.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCall, "Public.Tests.TestCall",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -63,24 +68,63 @@ bool TestCall::RunTest(const FString& Parameters)
 	auto publicKey = GetPublicKey(PRIVATE_KEY);
 	auto from = GetAddress(publicKey);
 	auto contractAddress = FAddress::From("0x81b35475847c79ce03e9ce407d93a40475b6a166");
-	auto data = FHash256::From("0xe18a7b9200000000000000000000000081b35475847c79ce03e9ce407d93a40475b6a166");
 
 	auto chain_id = provider.ChainId().GetValue();
 	auto TransactionHash = GetKeccakHash(SignedTransaction);
 
 	UE_LOG(LogTemp, Display, TEXT("From: %s"), *from.ToHex());
 
+
+	//TODO: remove this
+	const FString stringArg = "0x81b35475847c79ce03e9ce407d93a40475b6a166";
+	auto arg = FABIArg::New(stringArg);
+	auto Obj = ABI::Encode("cupcakeBalances(address)", new FABIArg[1]{arg}, 1);
+
+	auto Signature = FHash256::New();
+	auto Msg = StringToUTF8("cupcakeBalances(address)");
+	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
+	
+	auto addressEncoder = AddressCoder();
+	auto encodedMethod = Signature.ToHex().Left(8);
+	auto encodedAddress = addressEncoder.Encode("0x81b35475847c79ce03e9ce407d93a40475b6a166");
+	UE_LOG(LogTemp, Display, TEXT("Encode method: %s"), *encodedMethod);
+	//remove above
+
+	auto mAbiEncoder = ABI();
+	auto mArgs = TArray<MyProperty*>();
+	AddressProperty myAddressProperty = AddressProperty("0x81b35475847c79ce03e9ce407d93a40475b6a166");
+	mArgs.Add(&myAddressProperty);
+	auto encodedData = mAbiEncoder.MyEncode("cupcakeBalances(address)", mArgs);
+	UE_LOG(LogTemp, Display, TEXT("Final encoding data: %s"), *encodedData);
+	
 	provider.Call(ContractCall{
 		TOptional<FAddress>(),
 		contractAddress,
 		TOptional<uint64>(),
 		TOptional<uint64>(),
 		TOptional<uint64>(),
-		TOptional<FHash256>(data),
+		TOptional<FString>(encodedData),
 	}, EBlockTag::Latest);
 
-	provider.TransactionReceipt(TransactionHash);
+	/* testing contract calls remove after*/
+	auto abiEncoder = ABI();
+	auto args = TArray<MyProperty*>();
+	UE_LOG(LogTemp, Display, TEXT("Encode2 method: %s"), *encodedMethod);
+	AddressProperty mAddressProperty = AddressProperty("0x81b35475847c79ce03e9ce407d93a40475b6a166");
+	BooleanProperty mBoolProperty = BooleanProperty(false);
+	NumberProperty mNumberProperty = NumberProperty(FHash256::From("0x10"));
+	args.Add(&mAddressProperty);
+	args.Add(&mBoolProperty);
+	args.Add(&mNumberProperty);
+	auto retval = abiEncoder.MyEncode("cupcakeBalances(address)", args);
+	UE_LOG(LogTemp, Display, TEXT("Encoder message is: %s"), *retval);
+
+	auto fixedByteCoder = FixedByteCoder();
+	auto x = fixedByteCoder.Encode("abc");
+	
+	//provider.TransactionReceipt(TransactionHash);
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;
 }
+

@@ -323,6 +323,31 @@ FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
 	};
 }
 
+
+
+FString ABI::MyEncode(FString Method, TArray<MyProperty*> Args)
+{
+
+	auto Signature = FHash256::New();
+	auto Msg = StringToUTF8(Method);
+	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
+
+	const FString EncodedMethod = Signature.ToHex().Left(8);;
+	FString EncodedArgs = "";
+
+	//verify that the args match the method signature (do after)
+
+	for (int i = 0; i < Args.Num(); i++) {
+		EncodedArgs += Args[i]->encode();
+	}
+
+	return EncodedMethod + EncodedArgs;
+}
+
+
+
+
+
 void ABI::Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
@@ -354,3 +379,4 @@ uint32 CopyOutUint32(uint8* BlockPtr)
 
 	return Value;
 }
+

@@ -8,9 +8,7 @@ struct ContractCall
 	TOptional<uint64> Gas;
 	TOptional<uint64> GasPrice;
 	TOptional<uint64> Value;
-	TOptional<FHash256> Data;
+	TOptional<FString> Data;
 
 	FString GetJson();
 };
-
-
