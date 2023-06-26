@@ -15,6 +15,8 @@ public:
     UPROPERTY()
         bool includeMetaData;
 
+	bool customGetter = true;
+
     FGetTokenSuppliesMapArgs() {};
 
     FGetTokenSuppliesMapArgs(FJsonObject json_in)

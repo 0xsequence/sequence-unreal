@@ -15,5 +15,5 @@ struct FAttributeMap
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        TMap<FString, UObject*> attribute_map;
+        TMap<FString, UObject*> attribute_map;//this will probably need to be stored as is as well!
 };

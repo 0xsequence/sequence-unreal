@@ -6,6 +6,7 @@
 #include "Misc/AutomationTest.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
+#include "Indexer.h"
 #include "Crypto.h"
 
 // Sets default values
@@ -13,31 +14,405 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	this->hex_data.Add("0");
+	this->hex_data.Add("1");
+	this->hex_data.Add("2");
+	this->hex_data.Add("3");
+	this->hex_data.Add("4");
+	this->hex_data.Add("5");
+	this->hex_data.Add("6");
+	this->hex_data.Add("7");
+	this->hex_data.Add("8");
+	this->hex_data.Add("9");
+	this->hex_data.Add("a");
+	this->hex_data.Add("b");
+	this->hex_data.Add("c");
+	this->hex_data.Add("d");
+	this->hex_data.Add("e");
+	this->hex_data.Add("f");
 
+	this->indexer = NewObject<UIndexer>();
+	this->indexer->setup(this);//pass the indexer a ref. to ourselves so it can let us know when stuff is done!
 }
 
 // Called when the game starts or when spawned
 void ASequence_Backend_Manager::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ASequence_Backend_Manager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+//SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+
+/*
+* Initiates the passwordless signin process
+*/
+FString ASequence_Backend_Manager::Signin(FString email)
+{
+	this->user_email = email;
+	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
+
+	return "";
 }
 
 /*
-* Used to setup the backend manager for usage
-* retuns FString ("Complete Message")
+	Used to copy data to the systems clipboard!
 */
-FString ASequence_Backend_Manager::Setup()
+void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
 {
-	return "Setup Complete";
+	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
+	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
+
+	//this function call is straight up not implemented :(
+	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
 }
+
+FString ASequence_Backend_Manager::Get_From_Clipboard()
+{
+	FString* ret;
+	FString ret_data;
+	ret = &ret_data;
+	FPlatformMisc::ClipboardPaste(*ret);//get data from the clip board!
+	//again platform misc is deprecated :( but until the generic platform clipboard functions are
+	//actually implemented this is the best I can do for the time being.
+	return ret_data;
+}
+
+//SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+
+//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
+
+void ASequence_Backend_Manager::get_ether_balance()
+{
+	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress);
+}
+
+void ASequence_Backend_Manager::inc_request_count()
+{
+	this->req_count++;
+}
+
+void ASequence_Backend_Manager::dec_request_count()
+{
+	this->req_count = FMath::Max(0, this->req_count-1);
+	if (req_count == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Done Fetching Images sending them to front!"));
+		this->update_transaction_imgs(this->fetched_imgs);
+	}
+}
+
+void ASequence_Backend_Manager::get_transaction_imgs()
+{
+	//first thing we need to do is actually get the transaction data!
+	FGetTransactionHistoryArgs args;
+	FTransactionHistoryFilter filter;
+	filter.accountAddress = this->glb_PublicAddress;
+	args.filter = filter;
+	args.includeMetaData = true;
+	FGetTransactionHistoryReturn ret =  this->indexer->GetTransactionHistory(this->glb_ChainID,args);
+	UObjectHandler *req_handler = NewObject<UObjectHandler>();//create our handler!
+	req_handler->setup_raw_handler(&UObjectHandler::img_handler, this);
+	//a req_handler can handle many requests at a time now! :)
+
+	for (auto i : ret.transactions)//all txn's
+	{
+		for (auto j : i.transfers)//goes through transfers of a transaction!
+		{
+			if (req_handler->request_raw(j.contractInfo.extensions.ogImage))
+				inc_request_count();
+			TArray<FString> keys;
+			j.tokenMetaData.GetKeys(keys);
+			for (auto key : keys)//the metadata of a transfer!
+			{
+				auto data_e = j.tokenMetaData.Find(key);
+				if (req_handler->request_raw(data_e->image))
+					inc_request_count();
+			}
+		}
+	}
+}
+
+void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
+{
+	if (img_to_add != NULL) 
+	{
+		this->fetched_imgs.Add(img_to_add);
+		dec_request_count();
+		UE_LOG(LogTemp, Display, TEXT("Image Data Received!"));
+	}
+	else
+	{
+		dec_request_count();//in the event of null data we need to dec too
+		UE_LOG(LogTemp, Error, TEXT("Image Data Received but processed to NULL :("));
+	}
+}
+
+//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
+
+//PRIVATE HANDLERS//
+
+void ASequence_Backend_Manager::signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString rep_content = "[error]";
+	if (bWasSuccessful)
+	{//Parse the json response
+		Response = Request.Get()->GetResponse();
+		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+	}
+	else
+	{
+		switch (Request->GetStatus()) {
+		case EHttpRequestStatus::Failed_ConnectionError:
+			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
+		default:
+			UE_LOG(LogTemp, Error, TEXT("Request failed."));
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
+}
+
+void ASequence_Backend_Manager::get_blk_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString rep_content = "[error]";
+	if (bWasSuccessful)
+	{//Parse the json response
+		Response = Request.Get()->GetResponse();
+		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+
+		TSharedPtr<FJsonObject> json_step;
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(rep_content), json_step))//convert to json object!
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "),*rep_content);
+		}
+		//we want result & id
+		this->recv_block_num = json_step.Get()->GetStringField("result");
+		this->recv_id = json_step.Get()->GetIntegerField("id");
+	}
+	else
+	{
+		switch (Request->GetStatus()) {
+		case EHttpRequestStatus::Failed_ConnectionError:
+			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
+		default:
+			UE_LOG(LogTemp, Error, TEXT("Request failed."));
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
+	if (bWasSuccessful)
+		post_json_request(get_main_url(), create_hsh_req(this->recv_block_num, this->recv_id), &ASequence_Backend_Manager::get_hsh_handler);
+}
+
+void ASequence_Backend_Manager::get_hsh_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString rep_content = "[error]";
+	if (bWasSuccessful)
+	{//Parse the json response
+		Response = Request.Get()->GetResponse();
+		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+
+		TSharedPtr<FJsonObject> json_step;
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(rep_content), json_step))//convert to json object!
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "), *rep_content);
+		}
+
+		TSharedPtr<FJsonObject> res_obj = json_step.Get()->GetObjectField("result");
+		this->recv_block_hsh = res_obj.Get()->GetStringField("hash");
+	}
+	else
+	{
+		switch (Request->GetStatus()) {
+		case EHttpRequestStatus::Failed_ConnectionError:
+			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
+		default:
+			UE_LOG(LogTemp, Error, TEXT("Request failed."));
+		}
+	}
+
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
+	post_json_request(get_signin_url(), create_req_body(this->user_email), &ASequence_Backend_Manager::signin_handler);
+}
+
+//PRIVATE HANDLERS//
+
+FString ASequence_Backend_Manager::create_blk_req()
+{
+	return "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":43,\"jsonrpc\":\"2.0\"}";
+}
+
+FString ASequence_Backend_Manager::create_hsh_req(FString blk_num,int32 id)
+{
+	FString ret = "{\"method\":\"eth_getBlockByNumber\",\"params\":[\"";
+	ret.Append(blk_num);
+	ret.Append("\",false],\"id\":46");
+	ret.Append(", \"jsonrpc\":\"2.0\"}");
+	UE_LOG(LogTemp, Display, TEXT("Hsh Payload: %s"), *ret);
+	return ret;
+}
+
+void ASequence_Backend_Manager::post_json_request(FString url, FString json,void (ASequence_Backend_Manager::*handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
+{
+	FString response = "[FAILURE]";
+	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetHeader("Content-Type", "application/json");
+	http_post_req->SetURL(url);
+	http_post_req->SetContentAsString(json);
+	http_post_req->OnProcessRequestComplete().BindUObject(this,handler);//here we pass in one of our handler functions to do the processing!
+	http_post_req->ProcessRequest();
+}
+
+FString ASequence_Backend_Manager::create_req_body(FString email)
+{
+	FString body = "{\"requestType\":\"EMAIL_SIGNIN\",\"email\":";
+	FString email_body = "\"";
+	email_body.Append(email);
+	email_body.Append("\"");
+	body.Append(email_body);
+	body.Append(",");
+	body.Append("\"clientType\":\"CLIENT_TYPE_WEB\",\"continueUrl\":\"");
+	body.Append(get_continue_url());
+	body.Append(create_intent(email));
+	body.Append("\",\"canHandleCodeInApp\":true}");
+	
+	TSharedPtr<FJsonObject> json_step;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(body), json_step))
+	{//used for making sure my json in makes sense!
+		UE_LOG(LogTemp, Display, TEXT("Failed to parse to json!"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("Json Body: %s"), *body);
+	return body;
+}
+
+FString ASequence_Backend_Manager::create_intent(FString email)
+{
+	FString intent = "{\"email\":";
+	intent.Append(email);
+	intent.Append(",\"sessionSignerAddress\":");
+	intent.Append("\"");
+	intent.Append(setup_random_wallet());
+	intent.Append("\"");
+	//append session signer addr we need to generate a random public key and store it here!
+	intent.Append(",\"timestamp\":");
+	FDateTime date = FDateTime::Now();
+	int64 time_in_seconds = date.ToUnixTimestamp();
+	intent.Append(FString::Printf(TEXT("%lld"), time_in_seconds));//allows converting to int64 to FString!
+	intent.Append(",\"blockNumber\":");
+	intent.Append(this->recv_block_num);
+	intent.Append(",\"blockHash\":\"");
+	intent.Append(this->recv_block_hsh);
+	intent.Append("\",\"deviceinfo\":{\"broswer\":\"chrome\",\"os\":\"windows\"}");
+	intent.Append(",\"reLogin?\":false,\"testnet?\":false,\"appName?\":\"n/a\",\"origin?\":\"n/a\",\"bannerUrl?\":\"n/a\"}");
+
+	//the last thing I need to do for intent is encode it in base64! then send it out!
+	intent = FBase64::Encode(intent);
+
+	UE_LOG(LogTemp, Display, TEXT("B64 intent: %s"),*intent);
+
+	return intent;
+}
+
+FString ASequence_Backend_Manager::setup_random_wallet()
+{
+	//need to generate a random wallet!
+	FDateTime date = FDateTime::Now();
+	int64 time_in_seconds = date.ToUnixTimestamp();
+	FString lcl_prv_key;
+	FString lcl_pblc_key;
+	for (int i = 0; i < 64; i++)
+	{
+		FMath::RandInit(time_in_seconds);//init based on time to get some pseudo random data!
+		FString rand_data = this->hex_data[FMath::RandRange(0,this->hex_data.Num()-1)];
+		lcl_prv_key.Append(rand_data);
+	}
+
+	this->prvt_key = lcl_prv_key;
+
+	auto PrivKey = FPrivateKey::From(lcl_prv_key);//setup the private_key for use!
+	FPublicKey gen_pblc_key_H = GetPublicKey(PrivKey);//Gen the public key!
+	lcl_pblc_key = gen_pblc_key_H.ToHex();//get the public key in hex form!
+	this->pblc_key = lcl_pblc_key;
+	return lcl_pblc_key;
+}
+
+FString ASequence_Backend_Manager::get_main_url()
+{
+	FString main_url;
+	FString result;
+	TArray<FString> mn_u;
+	mn_u.Add("aHR0");
+	mn_u.Add("cHM6Ly9k");
+	mn_u.Add("ZXYt");
+	mn_u.Add("bm9kZX");
+	mn_u.Add("Mu");
+	mn_u.Add("c2Vx");
+	mn_u.Add("dWVuY2UuYX");
+	mn_u.Add("BwL21haW5uZXQ=");
+
+	for (auto i : mn_u)
+	{
+		main_url.Append(i);
+	}
+	FBase64::Decode(main_url, result);
+	return result;
+}
+
+FString ASequence_Backend_Manager::get_continue_url()
+{
+	FString cont_url;
+	FString result;
+	TArray<FString> ct_u;
+	ct_u.Add("aHR0cDo");
+	ct_u.Add("vL2xvY2Fs");
+	ct_u.Add("aG9zdDozMzM");
+	ct_u.Add("zL2F1dG");
+	ct_u.Add("g/aW50ZW50PQ==");
+
+	for (auto i : ct_u)
+	{
+		cont_url.Append(i);
+	}
+
+	FBase64::Decode(cont_url, result);
+	return result;
+}
+
+FString ASequence_Backend_Manager::get_signin_url()
+{
+	FString signin_url;
+	FString result;
+	TArray<FString> sg_u;
+	sg_u.Add("aHR0cHM6");
+	sg_u.Add("Ly9pZGVu");
+	sg_u.Add("dGl0eXRvb2xraXQuZ29vZ");
+	sg_u.Add("2xlYXBpcy5jb20");
+	sg_u.Add("vdj");
+	sg_u.Add("EvY");
+	sg_u.Add("WNjb3VudHM6c2VuZE9vYk");
+	sg_u.Add("NvZG");
+	sg_u.Add("U/a2V5PUFJem");
+	sg_u.Add("FTeUN6cEl3W");
+	sg_u.Add("GFjeFVISEEyNlB");
+	sg_u.Add("PZmdPRnVBc");
+	sg_u.Add("2dXc1VMSXVWWQ==");
+
+	for (auto i : sg_u)
+	{
+		signin_url.Append(i);
+	}
+
+	FBase64::Decode(signin_url, result);
+	return result;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TESTING FUNCTIONS
 
 /*
 * Used to test an indivual private key, to see how it's generated public key compares to a CORRECT
@@ -129,28 +504,13 @@ FString ASequence_Backend_Manager::Testing_Address_Generation()
 	{
 		Result = "Test Passed";
 	}
-
 	return Result;
 }
 
-void ASequence_Backend_Manager::Testing_Indexer()
+TArray<UTexture2D*> ASequence_Backend_Manager::Testing_Indexer()
 {
-	UIndexer *indexer = NewObject<UIndexer>();//Create an object using templates!!!!
-	UE_LOG(LogTemp, Display, TEXT("Indexer tests starting\n"));
-	indexer->testing();
-	UE_LOG(LogTemp, Display, TEXT("Indexer tests Done"));
+	TArray<UTexture2D*> ret = this->indexer->testing();
+	return ret;
 }
-
-
-/*
-	Used to copy data to the systems clipboard!
-*/
-void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
-{
-	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
-	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
-
-	//this function call is straight up not implemented :(
-	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
-
-}
+//TESTING FUNCTIONS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
