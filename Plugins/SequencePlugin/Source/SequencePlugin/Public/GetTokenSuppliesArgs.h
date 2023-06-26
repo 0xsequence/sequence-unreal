@@ -15,4 +15,7 @@ public:
         bool includeMetaData;
     UPROPERTY()
         FPage page;
+
+    bool customGetter = false;
+    FString Get() { return""; };
 };

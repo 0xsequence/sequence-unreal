@@ -1,5 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,7 +7,14 @@
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
+#include "HttpManager.h"
+#include "Engine/Texture2D.h"
+#include "IImageWrapper.h"
+#include "IImageWrapperModule.h"
+#include "Sequence_Backend_Manager.h"
+#include "ObjectHandler.h"
 #include "Indexer.generated.h"
+
 /**
  * 
  */
@@ -19,12 +25,9 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 	GENERATED_BODY()
 
 private:
-	//need static data here!
-
-	//not sure what this path is supposed to go to?
 	const FString PATH = "/rpc/Indexer/";
-
 	TMap<int64, FString> Indexernames;
+	ASequence_Backend_Manager * bck_mngr;
 
 //private functions
 	
@@ -52,22 +55,13 @@ private:
 	for some data structures inorder for them to parse properly
 	*/
 	template < typename T > T BuildResponse(FString text);
-	template <> FStruct_0 BuildResponse(FString text);
-	template <> FGetTokenSuppliesMapReturn BuildResponse(FString text);
-	template <> FGetTokenSuppliesMapArgs BuildResponse(FString text);
-	template <> FTokenMetaData BuildResponse(FString text);
 
 	/*
 	Here we take in a struct and convert it straight into a json object String
 	@Param (T) Struct_in the struct we are converting to a json object string
 	@Return the JSON Object String
-*/
+	*/
 	template < typename T> FString BuildArgs(T struct_in);
-	template <> FString BuildArgs(FStruct_0 text);
-	template <> FString BuildArgs(FGetTokenSuppliesMapReturn text);
-	template <> FString BuildArgs(FGetTokenSuppliesMapArgs text);
-	template <> FString BuildArgs(FTokenMetaData text);
-
 
 //end of private functions
 
@@ -75,10 +69,18 @@ public:
 
 //public functions
 
+	void setup(ASequence_Backend_Manager* manager_ref);
+
 	/*
 		Used for testing out the core components of the indexer
 	*/
-	void testing();
+	TArray<UTexture2D*> testing();
+
+	UTexture2D* get_image_data(FString URL);
+
+	UTexture2D* build_image_data(TArray<uint8> img_data, FString URL);
+
+	EImageFormat get_image_format(FString URL);
 
 	/*
 		Used to remove all \n, \r, \t and spaces from a json string for testing!
@@ -121,9 +123,9 @@ public:
 		Used to get the Ether balance from the sequence app
 		@param 1st the ChainID
 		@param 2nd the accountAddr we want to get the balance for
-		@return the Balance
+		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	FEtherBalance GetEtherBalance(int64 chainID, FString accountAddr);
+	void GetEtherBalance(int64 chainID, FString accountAddr);
 
 	/*
 		Gets the token balances from the sequence app
@@ -149,6 +151,18 @@ public:
 		get transaction history from the sequence app
 	*/
 	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
+
+	/*
+	* Used for making Async requests!
+	*/
+	void async_request(FString url, FString json, void (UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+
+	void async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+
+	//async handlers
+	private:
+
+		void get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 //end of public functions
 };
