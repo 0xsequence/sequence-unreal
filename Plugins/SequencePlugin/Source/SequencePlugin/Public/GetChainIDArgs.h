@@ -9,4 +9,7 @@ struct FGetChainIDArgs
     GENERATED_USTRUCT_BODY()
 public:
     //this guy is a nothing burger?
+
+    bool customGetter = false;
+    FString Get() {};
 };

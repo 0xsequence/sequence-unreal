@@ -18,4 +18,12 @@ struct FTokenSupplyList
 public:
     UPROPERTY()
         TArray<FTokenSupply> token_supply_list;
+
+    void setup(TArray<TSharedPtr<FJsonValue>> json_in)
+    {
+        for (int32 i = 0; i < token_supply_list.Num(); i++)
+        {
+            token_supply_list[i].setup(*json_in[i].Get()->AsObject());
+        }
+    }
 };
