@@ -5,12 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Http.h"
+#include "ObjectHandler.h"
+#include "Backend.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
 
 UCLASS()
-class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor
+class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor, public IBackend
 {
 	GENERATED_BODY()
 
@@ -36,9 +38,13 @@ private:
 	TArray<UTexture2D*> fetched_imgs;
 	int32 req_count;
 	//ASYNC storage//
+
+	UObjectHandler * request_handler;
+
 private:
 	void inc_request_count();
 	void dec_request_count();
+	void reset_request_count();
 
 public:
 	// Sets default values for this actor's properties
@@ -100,6 +106,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "ASYNC")
 		void get_transaction_imgs();
+
+	void get_txn_imgs_manager();
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
