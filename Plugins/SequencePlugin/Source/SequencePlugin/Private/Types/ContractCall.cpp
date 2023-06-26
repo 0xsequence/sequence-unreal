@@ -11,7 +11,7 @@ FString ContractCall::GetJson()
 	if(Gas.IsSet()) json.AddString("gas", FString::FromInt(Gas.GetValue()));
 	if(GasPrice.IsSet()) json.AddString("gasPrice", FString::FromInt(GasPrice.GetValue()));
 	if(Value.IsSet()) json.AddString("value", FString::FromInt(Value.GetValue()));
-	if(Data.IsSet()) json.AddString("data", "0x" + Data.GetValue().ToHex());
+	if(Data.IsSet()) json.AddString("data", "0x" + Data.GetValue());
 
 	return json.ToString();
 }
