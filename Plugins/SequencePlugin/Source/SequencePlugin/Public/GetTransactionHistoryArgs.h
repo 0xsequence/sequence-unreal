@@ -12,8 +12,20 @@ struct FGetTransactionHistoryArgs
 public:
     UPROPERTY()
         FTransactionHistoryFilter filter;
+    //UPROPERTY()
+      // FPage page;
     UPROPERTY()
-        FPage page;
-    UPROPERTY()
-        bool includeMetaData;
+        bool includeMetaData = false;
+
+    bool customGetter = false;
+    FString Get() {return"";};
+
+    FGetTransactionHistoryArgs() {};
+
+    FGetTransactionHistoryArgs(FString addr_in)
+    {
+        FTransactionHistoryFilter filter_data;
+        filter_data.accountAddress = addr_in;
+        this->filter = filter;
+    };
 };

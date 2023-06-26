@@ -13,10 +13,33 @@ struct FGetTokenSuppliesMapReturn
 public:
    UPROPERTY()
       TMap<FString, FTokenSupplyList> supplies;
+   bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
 
-   FGetTokenSuppliesMapReturn() {};
+   void setup(FJsonObject json_in)
+   {
+	   if (json_in.TryGetField("supplies") != nullptr)
+	   {
+		   TArray<FString> des_keys;
+		   supplies.GetKeys(des_keys);
 
-   FGetTokenSuppliesMapReturn(FJsonObject json_in) 
+		   TSharedPtr<FJsonObject> supply_src = json_in.GetObjectField("supplies");
+		   TMap<FString,TSharedPtr<FJsonValue>> src_map = supply_src.Get()->Values;
+		   TArray<FString> src_keys;
+		   src_map.GetKeys(src_keys);
+		   for (auto i : des_keys)
+		   {
+			   for (auto j : src_keys)
+			   {
+				   if (i.ToLower().Compare(j.ToLower()) == 0)
+				   {
+					   supplies.Find(i)->setup(src_map.Find(i)->Get()->AsArray());
+				   }//if
+			   }//for j
+		   }//for i
+	   }//if valid
+   }//setup
+
+   void construct(FJsonObject json_in) 
    {//need to manually parse this so we get a proper json result!
 	  TSharedPtr<FJsonObject> data = json_in.GetObjectField("supplies");//Get the object we need
 	  TMap<FString, TSharedPtr<FJsonValue>> data_map = data.Get()->Values;//get it's map!

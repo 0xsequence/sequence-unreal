@@ -10,18 +10,18 @@ struct FTransactionHistoryFilter
 public:
     UPROPERTY()
         FString accountAddress;
-    UPROPERTY()
-        FString contractAddress;
-    UPROPERTY()
-        TArray<FString> accountAddresses;
-    UPROPERTY()
-        TArray<FString> contractAddresses;
-    UPROPERTY()
-        TArray<FString> transactionHashes;
-    UPROPERTY()
-        TArray<FString> metaTransactionIDs;
-    UPROPERTY()
-        int32 fromBlock;
-    UPROPERTY()
-        int32 toBlock;
+    //UPROPERTY()
+      //  FString contractAddress;
+    //UPROPERTY()
+      //  TArray<FString> accountAddresses;
+    //UPROPERTY()
+      //  TArray<FString> contractAddresses;
+    //UPROPERTY()
+      //  TArray<FString> transactionHashes;
+    //UPROPERTY()
+     //   TArray<FString> metaTransactionIDs;
+   // UPROPERTY()
+     //   int32 fromBlock;
+    //UPROPERTY()
+      //  int32 toBlock;
 };

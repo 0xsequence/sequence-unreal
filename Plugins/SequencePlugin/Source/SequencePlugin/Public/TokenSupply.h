@@ -20,4 +20,10 @@ public:
         FContractInfo contractInfo;
     UPROPERTY()
         FTokenMetaData tokenMetaData;
+
+    void setup(FJsonObject json_in)
+    {
+        if (json_in.TryGetField("tokenMetaData") != nullptr)
+            tokenMetaData.setup(json_in.GetObjectField("tokenMetaData"));
+    }
 };
