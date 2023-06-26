@@ -1,7 +1,7 @@
 #pragma once
 #include "BinaryData.h"
 
-struct ContractCall
+struct FContractCall
 {
 	TOptional<FAddress> From;
 	FAddress To;

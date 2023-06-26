@@ -1,4 +1,4 @@
-#include "Types/FTransactionReceipt.h"
+#include "Types/TransactionReceipt.h"
 
 #include "HexUtility.h"
 
