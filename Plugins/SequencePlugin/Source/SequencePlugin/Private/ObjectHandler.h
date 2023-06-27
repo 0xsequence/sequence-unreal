@@ -33,7 +33,7 @@ private:
 	UObject* main_this_ref = NULL;
 	TMap<FString, int32> insertion_indices;//we can associate URL's with insertion indices!
 	//note 2GB is the limit because of int32 size limits!
-	const int32 max_cache_size = 1 * 1024 * 1024;//max size in bytes! 256 bytes is what i have this set to for now!
+	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
 	int32 current_cache_size = 0;//in bytes we want this as accurate as possible!
 	TMap<FString, FRawData> cache;//a Map of URL's and rawData
 
@@ -69,8 +69,20 @@ private:
 	*/
 	bool check_raw_cache(FString URL,TArray<uint8>*raw_data);
 
+	/*
+	* adds raw data to cache if the it can fit in the cache,
+	* if it can't we will remove data at random until we can fit this new
+	* data in
+	* @param URL the url we got the data from
+	* @param raw_data the raw byte data from the given url
+	*/
 	void add_to_cache(FString URL, TArray<uint8> raw_data);
 
+	/*
+	* Simple check to see if the cache can accomadate additional bytes
+	* @param byte_count_to_add the amount of byte data we would like to add to the cache
+	* @return true if we can add it else false
+	*/
 	bool can_add_to_cache(int32 byte_count_to_add);
 
 public:
@@ -152,6 +164,15 @@ public:
 
 private:
 	//helper functions for handling requests data! specifically image data!
+	/*
+	* Used to build a texture2d from raw byte data, we include the URL
+	* for format identification purposes
+	* @return the generated texture2d
+	*/
 	UTexture2D* build_img_data(TArray<uint8> img_data,FString URL);
+
+	/*
+	* Used to get the img format out of a url
+	*/
 	EImageFormat get_img_format(FString URL);
 };
