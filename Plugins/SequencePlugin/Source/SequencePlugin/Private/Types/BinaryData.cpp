@@ -17,10 +17,14 @@ uint8* BlankArray(ByteLength size)
 
 void FBinaryData::Destroy()
 {
-	delete [] this->Arr;
+	if(this->Arr != nullptr)
+	{
+		delete [] this->Arr;
+		this->Arr = nullptr;
+	}
 }
 
-FString FBinaryData::ToHex()
+const FString FBinaryData::ToHex()
 {
 	if(Arr == nullptr)
 	{
@@ -33,6 +37,11 @@ FString FBinaryData::ToHex()
 void FBinaryData::Renew()
 {
 	this->Arr = BlankArray(this->GetLength());
+}
+
+FNonUniformData FNonUniformData::Empty()
+{
+	return FNonUniformData{nullptr, 0};
 }
 
 FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)

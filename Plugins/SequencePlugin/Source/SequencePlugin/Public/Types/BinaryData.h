@@ -9,7 +9,7 @@ struct FBinaryData
 	uint8* Arr;
 	virtual const ByteLength GetLength() = 0;
 	void Destroy();
-	FString ToHex();
+	const FString ToHex();
 	void Renew(); // Makes new blank array. Clean up the old one!
 };
 
@@ -17,6 +17,7 @@ struct FBinaryData
 // Must be deallocated
 struct FNonUniformData : FBinaryData
 {
+	static FNonUniformData Empty();
 	ByteLength Length;
 	FNonUniformData(uint8* Arr, ByteLength Length);
 	FNonUniformData Copy(); // This creates new data that must be freed
@@ -36,6 +37,7 @@ FString UTF8ToString(FNonUniformData BinaryData);
 struct FUniformData : FBinaryData
 {
 	FNonUniformData Copy(); // This creates new data that must be freed
+	operator FNonUniformData() { return Copy(); }
 }; // Data with set sizes
 
 // Basic Binary Types
