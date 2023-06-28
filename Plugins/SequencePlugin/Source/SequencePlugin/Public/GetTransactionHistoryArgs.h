@@ -18,7 +18,7 @@ public:
         bool includeMetaData = false;
 
     bool customGetter = false;
-    FString Get() {return"";};
+    FString Get() { return ""; }
 
     FGetTransactionHistoryArgs() {};
 
@@ -26,6 +26,6 @@ public:
     {
         FTransactionHistoryFilter filter_data;
         filter_data.accountAddress = addr_in;
-        this->filter = filter;
+        this->filter = filter_data;
     };
 };
