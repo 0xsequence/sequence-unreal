@@ -1,6 +1,5 @@
 #include "ABI/ABITypes.h"
 #include "ABI/ABI.h"
-#include "IOS/Accessibility/IOSAccessibilityElement.h"
 
 FABIStringProperty::FABIStringProperty(): TABIPropertyWithValue(), BinaryData(FNonUniformData::Empty())
 {}
@@ -82,13 +81,13 @@ FABIProperty* FABIIntProperty::Copy()
 	return new FABIIntProperty(value);
 }
 
-FABIUIntProperty::FABIUIntProperty(): TABIPropertyWithValue<unsigned>(0)
+FABIUInt32Property::FABIUInt32Property(): TABIPropertyWithValue<unsigned>(0)
 {}
 
-FABIUIntProperty::FABIUIntProperty(uint32 InitialValue): TABIPropertyWithValue(InitialValue)
+FABIUInt32Property::FABIUInt32Property(uint32 InitialValue): TABIPropertyWithValue(InitialValue)
 {}
 
-FABIArg FABIUIntProperty::Serialize()
+FABIArg FABIUInt32Property::Serialize()
 {
 	const auto ArgData = NewEmptyBlock();
 	const auto CopyData = static_cast<uint8*>(static_cast<void*>(&value));
@@ -103,7 +102,7 @@ FABIArg FABIUIntProperty::Serialize()
 	};
 }
 
-void FABIUIntProperty::Deserialize(FABIArg Arg)
+void FABIUInt32Property::Deserialize(FABIArg Arg)
 {
 	const auto Data = static_cast<uint8*>(Arg.Data);
 	const auto DataPointer = static_cast<void*>(&Data[GBlockByteLength - 4]);
@@ -111,9 +110,9 @@ void FABIUIntProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIUIntProperty::Copy()
+FABIProperty* FABIUInt32Property::Copy()
 {
-	return new FABIUIntProperty(value);
+	return new FABIUInt32Property(value);
 }
 
 FABIBooleanProperty::FABIBooleanProperty(): TABIPropertyWithValue<bool>(false)
@@ -229,44 +228,6 @@ FABIProperty* FABIAddressProperty::Copy()
 	return new FABIAddressProperty(FAddress::From(value.ToHex()));
 }
 
-template <typename T>
-FABIArrayProperty<T>::FABIArrayProperty(): TABIPropertyWithValue<TArray<T>*>(T())
-{
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIArrayProperty must derive from FABIProperty");
-}
 
-template <typename T>
-FABIArrayProperty<T>::FABIArrayProperty(TArray<T>* initialValue): TABIPropertyWithValue<TArray<T>*>(initialValue)
-{
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIArrayProperty must derive from FABIProperty");
-}
 
-template <typename T>
-FABIArg FABIArrayProperty<T>::Serialize()
-{
-	auto Length = this->value.Num();
-	const auto Args = new FABIArg[2];
-    
-	for(auto i = 0; i < Length; i++)
-	{
-		Args[i] = (*this->value)[i].Serialize();
-	}
-
-	return FABIArg{ARRAY, Length, Args};
-}
-
-template <typename T>
-void FABIArrayProperty<T>::Deserialize(FABIArg arg)
-{
-	const FABIArg* Args = static_cast<const FABIArg*>(arg.Data);
-
-    
-}
-
-template <typename T>
-FABIProperty* FABIArrayProperty<T>::Copy()
-{
-	auto Array = new TArray<TABIPropertyWithValue<T>>();
-	return new FABIArrayProperty<T>();
-}
 
