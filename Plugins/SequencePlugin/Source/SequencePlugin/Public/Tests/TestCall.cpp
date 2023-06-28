@@ -116,7 +116,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	args.Add(&mAddressProperty);
 	args.Add(&mBoolProperty);
 	args.Add(&mNumberProperty);
-	auto retval = abiEncoder.MyEncode("cupcakeBalances(address)", args);
+	auto retval = abiEncoder.MyEncode("cupcakeBalances(address,bool,uint256)", args);
 	UE_LOG(LogTemp, Display, TEXT("Encoder message is: %s"), *retval);
 
 	auto fixedByteCoder = FixedByteCoder();
@@ -128,3 +128,5 @@ bool TestCall::RunTest(const FString& Parameters)
 	return true;
 }
 
+
+//e18a7b9200000000000000000000000081b35475847c79ce03e9ce407d93a40475b6a16600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010
