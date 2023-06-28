@@ -33,6 +33,7 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 
 	this->indexer = NewObject<UIndexer>();
 	this->indexer->setup(this);//pass the indexer a ref. to ourselves so it can let us know when stuff is done!
+	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
 // Called when the game starts or when spawned
@@ -92,6 +93,11 @@ void ASequence_Backend_Manager::get_ether_balance()
 	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress);
 }
 
+void ASequence_Backend_Manager::reset_request_count()
+{
+	this->req_count = 0;
+}
+
 void ASequence_Backend_Manager::inc_request_count()
 {
 	this->req_count++;
@@ -107,35 +113,60 @@ void ASequence_Backend_Manager::dec_request_count()
 	}
 }
 
-void ASequence_Backend_Manager::get_transaction_imgs()
+void ASequence_Backend_Manager::get_txn_imgs_manager()
 {
+	this->reset_request_count();
+	this->fetched_imgs.Empty();
 	//first thing we need to do is actually get the transaction data!
 	FGetTransactionHistoryArgs args;
 	FTransactionHistoryFilter filter;
 	filter.accountAddress = this->glb_PublicAddress;
 	args.filter = filter;
 	args.includeMetaData = true;
-	FGetTransactionHistoryReturn ret =  this->indexer->GetTransactionHistory(this->glb_ChainID,args);
-	UObjectHandler *req_handler = NewObject<UObjectHandler>();//create our handler!
-	req_handler->setup_raw_handler(&UObjectHandler::img_handler, this);
-	//a req_handler can handle many requests at a time now! :)
+	FGetTransactionHistoryReturn ret = this->indexer->GetTransactionHistory(this->glb_ChainID, args);
+	UObjectHandler* req_handler = this->request_handler;//use our request handler!
+	req_handler->setup_raw_handler(&UObjectHandler::img_handler, this, true);
+	//a req_handler can handle many requests at a time now! :) & now with caching for even faster responses!
+
+	TArray<FString> req_urls;
 
 	for (auto i : ret.transactions)//all txn's
 	{
 		for (auto j : i.transfers)//goes through transfers of a transaction!
 		{
-			if (req_handler->request_raw(j.contractInfo.extensions.ogImage))
-				inc_request_count();
+			req_urls.Add(j.contractInfo.logoURI);//add this too!
+
+			req_urls.Add(j.contractInfo.extensions.ogImage);
 			TArray<FString> keys;
 			j.tokenMetaData.GetKeys(keys);
 			for (auto key : keys)//the metadata of a transfer!
 			{
 				auto data_e = j.tokenMetaData.Find(key);
-				if (req_handler->request_raw(data_e->image))
-					inc_request_count();
+				req_urls.Add(data_e->image);
 			}
 		}
+	}//url fetching
+
+	this->req_count = req_urls.Num();
+
+	for (auto i : req_urls)
+	{
+		//may need to use defferred processing to avoid stalls otherwise there will be a big hitch if we have a series of cache hits
+		if (!req_handler->request_raw(i))
+			this->dec_request_count();
 	}
+}
+
+
+
+void ASequence_Backend_Manager::get_transaction_imgs()
+{
+	//testing async stuff
+//	AsyncTask(ENamedThreads::AnyThread, [this]()
+	//{
+			// This code will run asynchronously, without freezing the game thread
+			this->get_txn_imgs_manager();
+	//});
 }
 
 void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)

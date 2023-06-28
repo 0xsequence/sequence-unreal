@@ -341,6 +341,14 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 	json_arg += accountAddr;
 	json_arg += "\"}";
 	//FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
+//new get eth balance call? PROBLEM since params is a json array and they can contain multiple differing data types unreal won't be able to store it in any other form
+// 	   other than json array meaning to get what we need we'd need to re write how the indexer works currently :(
+	//Request
+//'{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x407d73d8a49eeb85d32cf465507dd71d507100c1", "latest"],"id":1}'
+
+	//Response
+//{"id":1 , "jsonrpc" : "2.0" , "result" : "0x0234c8a3397aab58" }
+
 	this->Url(chainID, "GetEtherBalance");
 	//this->async_request(this->Url(chainID, "GetEtherBalance"), json_arg, &UIndexer::get_ether_handler);
 	FName handler = "get_ether_handler_2";
