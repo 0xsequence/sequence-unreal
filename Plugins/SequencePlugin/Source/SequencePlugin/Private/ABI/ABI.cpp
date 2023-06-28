@@ -304,6 +304,8 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 		BlockNum += Arg.GetBlockNum();
 	}
 
+	UE_LOG(LogTemp, Display, TEXT("Blocknum is %i"), BlockNum);
+
 	uint32 TotalByteLength = (GMethodIdByteLength + GBlockByteLength * BlockNum);
 	uint8* Blocks = new uint8[TotalByteLength];
 

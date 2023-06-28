@@ -67,10 +67,10 @@ public:
     virtual FABIProperty* Copy() override;
 };
 
-class FABIUIntProperty : public TABIPropertyWithValue<uint32> {
+class FABIUInt32Property : public TABIPropertyWithValue<uint32> {
 public:
-    FABIUIntProperty();
-    FABIUIntProperty(uint32 InitialValue);
+    FABIUInt32Property();
+    FABIUInt32Property(uint32 InitialValue);
     virtual FABIArg Serialize() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
@@ -103,16 +103,3 @@ public:
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };
-
-
-template<typename T>
-class FABIArrayProperty : public TABIPropertyWithValue<TArray<T>*>
-{
-public:
-    FABIArrayProperty();
-    FABIArrayProperty(TArray<T> *initialValue);
-    virtual FABIArg Serialize() override;
-    virtual void Deserialize(FABIArg arg) override;
-    virtual FABIProperty* Copy() override;
-};
-
