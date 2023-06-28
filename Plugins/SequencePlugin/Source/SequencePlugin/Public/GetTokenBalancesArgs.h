@@ -13,7 +13,7 @@ public:
         FString accountAddress;
 
     bool customGetter = false;
-    FString Get() { return""; };
+    FString Get() { return ""; }
 };
 
 USTRUCT(BlueprintType)
@@ -27,7 +27,7 @@ public:
         FString contractAddress;
 
     bool customGetter = false;
-    FString Get() {};
+    FString Get() { return ""; }
 };
 
 USTRUCT(BlueprintType)
@@ -43,7 +43,7 @@ public:
          bool includeMetaData;
 
      bool customGetter = false;
-     FString Get() {};
+    FString Get() { return ""; }
 };
 
 USTRUCT(BlueprintType)
@@ -61,5 +61,5 @@ public:
         FPage page;
 
     bool customGetter = false;
-    FString Get() {};
+    FString Get() { return ""; }
 };
