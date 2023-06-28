@@ -1,11 +1,27 @@
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4146)
 #pragma warning(disable: 4104)
-#include "ABI.h"
+#include "ABI/ABI.h"
 
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+
+FNonUniformData NewEmptyBlock()
+{
+	auto block = FNonUniformData
+	{
+		new uint8[GBlockByteLength],
+		GBlockByteLength
+	};
+
+	for(auto i = 0; i < GBlockByteLength; i++)
+	{
+		block.Arr[i] = 0x00;
+	}
+
+	return block;
+}
 
 FString TypeToString(EABIArgType Type)
 {
@@ -76,6 +92,7 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
+			// UE_LOG(LogTemp, Display, TEXT("the raw data at %i is %i"), i, RawData[i]);
 			TailPtr[GBlockByteLength + i] = RawData[i];
 		}
 		
@@ -277,7 +294,7 @@ FABIArg FABIArg::New(FABIArg* Array, uint32 Length)
 	return FABIArg{ARRAY, Length, Array};
 }
 
-FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
+FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
 	
@@ -323,32 +340,20 @@ FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
 	};
 }
 
-
-
-FString ABI::MyEncode(FString Method, TArray<MyProperty*> Args)
+FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
 {
+	const auto Size = Args.Num();
+	FABIArg Arr[Size];
 
-	auto Signature = FHash256::New();
-	auto Msg = StringToUTF8(Method);
-	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
-
-	const FString EncodedMethod = Signature.ToHex().Left(8);;
-	FString EncodedArgs = "";
-
-	//verify that the args match the method signature (do after)
-
-	for (int i = 0; i < Args.Num(); i++) {
-		EncodedArgs += Args[i]->encode();
+	for(auto i = 0; i < Size; i++)
+	{
+		Arr[i] = Args[i]->Serialize();
 	}
 
-	return EncodedMethod + EncodedArgs;
+	return EncodeArgs(Method, Arr, Size);
 }
 
-
-
-
-
-void ABI::Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{

@@ -5,10 +5,9 @@
 #include "Misc/AutomationTest.h"
 #include "Types/ContractCall.h"
 #include "Coders/AddressCoder.h"
-#include "ABI.h"
+#include "ABI/ABI.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "ABI.h"
-#include "Types/ABITypes.h"
+#include "ABI/ABITypes.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCall, "Public.Tests.TestCall",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -78,7 +77,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	//TODO: remove this
 	const FString stringArg = "0x81b35475847c79ce03e9ce407d93a40475b6a166";
 	auto arg = FABIArg::New(stringArg);
-	auto Obj = ABI::Encode("cupcakeBalances(address)", new FABIArg[1]{arg}, 1);
+	auto Obj = ABI::EncodeArgs("cupcakeBalances(address)", new FABIArg[1]{arg}, 1);
 
 	auto Signature = FHash256::New();
 	auto Msg = StringToUTF8("cupcakeBalances(address)");
@@ -91,6 +90,9 @@ bool TestCall::RunTest(const FString& Parameters)
 	//remove above
 
 	auto mAbiEncoder = ABI();
+
+	/*
+	
 	auto mArgs = TArray<MyProperty*>();
 	AddressProperty myAddressProperty = AddressProperty("0x81b35475847c79ce03e9ce407d93a40475b6a166");
 	mArgs.Add(&myAddressProperty);
@@ -106,7 +108,11 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<FString>(encodedData),
 	}, EBlockTag::Latest);
 
+	*/
+
 	/* testing contract calls remove after*/
+
+	/*
 	auto abiEncoder = ABI();
 	auto args = TArray<MyProperty*>();
 	UE_LOG(LogTemp, Display, TEXT("Encode2 method: %s"), *encodedMethod);
@@ -123,6 +129,8 @@ bool TestCall::RunTest(const FString& Parameters)
 	auto x = fixedByteCoder.Encode("abc");
 	
 	//provider.TransactionReceipt(TransactionHash);
+
+	*/
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

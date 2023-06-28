@@ -1,4 +1,4 @@
-#include "ABI.h"
+#include "ABI/ABI.h"
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
 
@@ -40,7 +40,7 @@ bool TestABI::RunTest(const FString& Parameters)
 	// ENCODING
 	auto BlockNumInt = (Args[0]).GetBlockNum() + (Args[1]).GetBlockNum();
 	FString BlockNum = FString::FromInt(BlockNumInt);
-	auto Obj = ABI::Encode("test", Args, 2);
+	auto Obj = ABI::EncodeArgs("test", Args, 2);
 	
 	if(LOG_ENCODED)
 	{
@@ -63,7 +63,7 @@ bool TestABI::RunTest(const FString& Parameters)
 	
 	FABIArg* DecodeArgs = new FABIArg[]{DecodeArrayArg3, DecodeArrayArg4};
 	
-	ABI::Decode(Obj, DecodeArgs, 2);
+	ABI::DecodeArgs(Obj, DecodeArgs, 2);
 
 	auto Arr1 = DecodeArgs[0];
 	auto Arr2 = DecodeArgs[1];
