@@ -3,6 +3,7 @@
 #include "Coders/BooleanCoder.h"
 #include "Coders/FixedByteCoder.h"
 #include "Coders/NumberCoder.h"
+#include "Coders/StringCoder.h"
 
 class MyProperty {
 public:
@@ -46,6 +47,12 @@ class FixedByteProperty : public PropertyWithValue<FString, FixedByteCoder> {
     
 public:
     FixedByteProperty(FString initialValue): PropertyWithValue(initialValue) {}
+};
+
+class StringProperty : public PropertyWithValue<FString, StringCoder> {
+    
+public:
+    StringProperty(FString initialValue): PropertyWithValue(initialValue) {}
 };
 
 /*
