@@ -1,7 +1,7 @@
 #include "ABI/ABI.h"
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
-#include <cassert>
+#include "ABI/ABITypes.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
