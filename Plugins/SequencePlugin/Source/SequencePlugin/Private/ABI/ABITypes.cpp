@@ -1,4 +1,6 @@
 #include "ABI/ABITypes.h"
+
+#include "HexUtility.h"
 #include "ABI/ABI.h"
 
 FABIStringProperty::FABIStringProperty(): TABIPropertyWithValue(), BinaryData(FNonUniformData::Empty())
@@ -47,16 +49,15 @@ FABIProperty* FABIStringProperty::Copy()
 	return new FABIStringProperty(value);
 }
 
-FABIIntProperty::FABIIntProperty(): TABIPropertyWithValue(0)
+FABIInt32Property::FABIInt32Property(): TABIPropertyWithValue(0)
 {}
 
-FABIIntProperty::FABIIntProperty(const int32 InitialValue): TABIPropertyWithValue(InitialValue)
+FABIInt32Property::FABIInt32Property(const int32 InitialValue): TABIPropertyWithValue(InitialValue)
 {}
 
-FABIArg FABIIntProperty::Serialize()
+FABIArg FABIInt32Property::Serialize()
 {
 	const auto ArgData = NewEmptyBlock();
-	const auto CopyData = static_cast<uint8*>(static_cast<void*>(&value));
 
 	// Negative Numbers
 	if(value < 0)
@@ -67,27 +68,31 @@ FABIArg FABIIntProperty::Serialize()
 		}
 	}
 
-	ArgData.Arr[GBlockByteLength - 4] = CopyData[0];
-	ArgData.Arr[GBlockByteLength - 3] = CopyData[1];
-	ArgData.Arr[GBlockByteLength - 2] = CopyData[2];
-	ArgData.Arr[GBlockByteLength - 1] = CopyData[3];
+	ArgData.Arr[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
+	ArgData.Arr[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
+	ArgData.Arr[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
+	ArgData.Arr[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
 	
 	return FABIArg{
 		STATIC, GBlockByteLength, ArgData.Arr
 	};
 }
 
-void FABIIntProperty::Deserialize(FABIArg Arg)
+void FABIInt32Property::Deserialize(FABIArg Arg)
 {
 	const auto Data = static_cast<uint8*>(Arg.Data);
-	const auto DataPointer = static_cast<void*>(&Data[GBlockByteLength - 4]);
-	SetValue(*static_cast<int32*>(DataPointer)); // We reinterpret the data at the pointer to be an int32
+	SetValue(
+		(0xFF000000 & (Data[GBlockByteLength - 4] << 24)) |
+		(0x00FF0000 & (Data[GBlockByteLength - 3] << 16)) |
+		(0x0000FF00 & (Data[GBlockByteLength - 2] << 8)) |
+		(0x000000FF & (Data[GBlockByteLength - 1] << 0))
+	);
 	Arg.Destroy();
 }
 
-FABIProperty* FABIIntProperty::Copy()
+FABIProperty* FABIInt32Property::Copy()
 {
-	return new FABIIntProperty(value);
+	return new FABIInt32Property(value);
 }
 
 FABIUInt32Property::FABIUInt32Property(): TABIPropertyWithValue<unsigned>(0)
@@ -99,12 +104,11 @@ FABIUInt32Property::FABIUInt32Property(uint32 InitialValue): TABIPropertyWithVal
 FABIArg FABIUInt32Property::Serialize()
 {
 	const auto ArgData = NewEmptyBlock();
-	const auto CopyData = static_cast<uint8*>(static_cast<void*>(&value));
 
-	ArgData.Arr[GBlockByteLength - 4] = CopyData[3];
-	ArgData.Arr[GBlockByteLength - 3] = CopyData[2];
-	ArgData.Arr[GBlockByteLength - 2] = CopyData[1];
-	ArgData.Arr[GBlockByteLength - 1] = CopyData[0];
+	ArgData.Arr[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
+	ArgData.Arr[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
+	ArgData.Arr[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
+	ArgData.Arr[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
 	
 	return FABIArg{
 		STATIC, GBlockByteLength, ArgData.Arr
@@ -114,8 +118,12 @@ FABIArg FABIUInt32Property::Serialize()
 void FABIUInt32Property::Deserialize(FABIArg Arg)
 {
 	const auto Data = static_cast<uint8*>(Arg.Data);
-	const auto DataPointer = static_cast<void*>(&Data[GBlockByteLength - 4]);
-	SetValue(*static_cast<uint32*>(DataPointer)); // We reinterpret the data at the pointer to be a uint32
+	SetValue(
+		(0xFF000000 & (Data[GBlockByteLength - 4] << 24)) |
+		(0x00FF0000 & (Data[GBlockByteLength - 3] << 16)) |
+		(0x0000FF00 & (Data[GBlockByteLength - 2] << 8)) |
+		(0x000000FF & (Data[GBlockByteLength - 1] << 0))
+	);
 	Arg.Destroy();
 }
 
