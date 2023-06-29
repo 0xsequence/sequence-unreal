@@ -1,58 +1,85 @@
 #include "ABI/ABI.h"
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
+#include <cassert>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
+bool EncoderTest(FABIProperty* MProperty, const FString& MethodSig, const FString& CorrectVal)
+{
+	TArray<FABIProperty*> Properties;
+	Properties.Push(MProperty);
+	const FString encoding = ABI::Encode(MethodSig, Properties).ToHex();
+	UE_LOG(LogTemp, Display, TEXT("String encoding: %s"), *encoding);
+	return true;
+	return encoding.Equals(CorrectVal);
+}
+
 bool TestABI::RunTest(const FString& Parameters)
 {
-
-	 
 	 //Test 1
 	 //TestUint256(uint256)
 	 //TestUint256(15)
 	 //0x6a6040e8000000000000000000000000000000000000000000000000000000000000000f
-
+	auto P1 = FABIUInt32Property(15);
+	if(!EncoderTest(&P1, FString("TestUint256(uint256)"), FString("6a6040e8000000000000000000000000000000000000000000000000000000000000000f"))) return false;
+	
 	//Test 2
 	//TestInt256(int256)
 	//TestInt256(-15)
 	//0x42166d6afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
-
+	auto P2 = FABIIntProperty(15);
+	if(!EncoderTest(&P2, FString("TestInt256(int256)"), FString("42166d6afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
+	
 	//Test 3
 	//TestUint(uint)
 	//TestUint(15)
 	//0x949df7cd000000000000000000000000000000000000000000000000000000000000000f
+	auto P3 = FABIUInt32Property(15);
+	if(!EncoderTest(&P3, FString("TestUint(uint)"), FString("949df7cd000000000000000000000000000000000000000000000000000000000000000f"))) return false;
 
 	//Test 4
 	//Testint(int)
 	//Testint(-15)
 	//0x87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
-
+	auto P4 = FABIIntProperty(-15);
+	if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
+	
 	//Test 5
 	//TestUint256(uint256)
 	//TestUint256(150000000000000)
 	//0x6a6040e80000000000000000000000000000000000000000000000000000886c98b76000
-
+	//auto P5 = FABIUInt32Property(150000000000000);
+	//if(!EncoderTest(&P5, FString("TestUint256(uint256)"), FString("6a6040e80000000000000000000000000000000000000000000000000000886c98b76000"))) return false;
+	
 	//Test 6
 	//TestInt256(int256)
 	//TestInt256(-150000000000000)
 	//0x42166d6affffffffffffffffffffffffffffffffffffffffffffffffffff77936748a000
-
+	//auto P6 = FABIIntProperty(-150000000000000);
+	//if(!EncoderTest(&P6, FString("TestInt256(int256)"), FString("42166d6affffffffffffffffffffffffffffffffffffffffffffffffffff77936748a000"))) return false;
+	
 	//Test 7
 	//TestAddress(address)
 	//TestAddress(0x71C7656EC7ab88b098defB751B7401B5f6d8976F)
 	//0xb447d16100000000000000000000000071c7656ec7ab88b098defb751b7401b5f6d8976f
+	auto P7 = FABIAddressProperty(FAddress::From("71C7656EC7ab88b098defB751B7401B5f6d8976F"));
+	if(!EncoderTest(&P7, FString("TestAddress(address)"), FString("b447d16100000000000000000000000071c7656ec7ab88b098defb751b7401b5f6d8976f"))) return false;
 
 	//Test 8
 	//TestBool(bool)
 	//TestBool(true)
 	//0x05aca3060000000000000000000000000000000000000000000000000000000000000001
+	auto P8 = FABIBooleanProperty(true);
+	if(!EncoderTest(&P8, FString("TestBool(bool)"), FString("05aca3060000000000000000000000000000000000000000000000000000000000000001"))) return false;
 
 	//Test 9
 	//TestBool(bool)
 	//TestBool(false)
 	//0x05aca3060000000000000000000000000000000000000000000000000000000000000000
+	auto P9 = FABIBooleanProperty(false);
+	if(!EncoderTest(&P9, FString("TestBool(bool)"), FString("05aca3060000000000000000000000000000000000000000000000000000000000000000"))) return false;
 
 	//Test 10
 	//TestFixedByte(bytes10)
@@ -73,7 +100,8 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestString(string)
 	//TestString("abcdef")
 	//0x4979abcc000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000066162636465660000000000000000000000000000000000000000000000000000
-
+	
+	
 	//Test 14
 	//TestBytes(bytes)
 	//TestBytes("abcdeabcde")
