@@ -158,7 +158,7 @@ FABIArg FABIBytesProperty::Serialize()
 {
 	const auto Data = new uint8[value.Length];
 
-	for(auto i = 0; i < value.Length; i++)
+	for(uint32 i = 0; i < value.Length; i++)
 	{
 		Data[i] = value.Arr[i];
 	}
@@ -173,7 +173,7 @@ void FABIBytesProperty::Deserialize(FABIArg Arg)
 	const auto CopyData = static_cast<uint8*>(Arg.Data);
 	const auto Data = new uint8[Arg.Length];
 
-	for(auto i = 0; i < Arg.Length; i++)
+	for(uint32 i = 0; i < Arg.Length; i++)
 	{
 		Data[i] = CopyData[i];
 	}
