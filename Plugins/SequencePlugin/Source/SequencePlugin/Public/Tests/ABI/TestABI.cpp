@@ -85,6 +85,9 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestFixedByte(bytes10)
 	//TestFixedByte("abcdeabcde")
 	//0xb8b97ccc6162636465616263646500000000000000000000000000000000000000000000
+	auto P10 = FABIBytesProperty(false);
+	if(!EncoderTest(&P9, FString("TestBool(bool)"), FString("05aca3060000000000000000000000000000000000000000000000000000000000000000"))) return false;
+
 
 	//Test 11
 	//TestStaticFixedArray(uint256[5])
