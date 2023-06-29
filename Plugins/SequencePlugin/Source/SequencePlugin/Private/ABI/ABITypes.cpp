@@ -58,6 +58,15 @@ FABIArg FABIIntProperty::Serialize()
 	const auto ArgData = NewEmptyBlock();
 	const auto CopyData = static_cast<uint8*>(static_cast<void*>(&value));
 
+	// Negative Numbers
+	if(value < 0)
+	{
+		for(auto i = 0; i < GBlockByteLength; i++)
+		{
+			ArgData.Arr[i] = 0xFF;
+		}
+	}
+
 	ArgData.Arr[GBlockByteLength - 4] = CopyData[0];
 	ArgData.Arr[GBlockByteLength - 3] = CopyData[1];
 	ArgData.Arr[GBlockByteLength - 2] = CopyData[2];
@@ -92,10 +101,10 @@ FABIArg FABIUInt32Property::Serialize()
 	const auto ArgData = NewEmptyBlock();
 	const auto CopyData = static_cast<uint8*>(static_cast<void*>(&value));
 
-	ArgData.Arr[GBlockByteLength - 4] = CopyData[0];
-	ArgData.Arr[GBlockByteLength - 3] = CopyData[1];
-	ArgData.Arr[GBlockByteLength - 2] = CopyData[2];
-	ArgData.Arr[GBlockByteLength - 1] = CopyData[3];
+	ArgData.Arr[GBlockByteLength - 4] = CopyData[3];
+	ArgData.Arr[GBlockByteLength - 3] = CopyData[2];
+	ArgData.Arr[GBlockByteLength - 2] = CopyData[1];
+	ArgData.Arr[GBlockByteLength - 1] = CopyData[0];
 	
 	return FABIArg{
 		STATIC, GBlockByteLength, ArgData.Arr

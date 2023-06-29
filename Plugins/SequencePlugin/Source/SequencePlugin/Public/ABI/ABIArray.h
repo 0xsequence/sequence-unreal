@@ -13,7 +13,6 @@ public:
 	virtual FABIProperty* Copy() override;
 };
 
-
 template <typename T>
 FABIArg FABIArrayProperty<T>::Serialize()
 {

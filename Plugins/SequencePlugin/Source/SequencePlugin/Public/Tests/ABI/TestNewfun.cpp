@@ -16,18 +16,18 @@ bool TestNewfun::RunTest(const FString& Parameters)
 		STATIC, FAddress::Size, addy.Arr
 	};
 	addy_arg.Log();
-	FABIArg* Args = new FABIArg[2]{FABIArg::New("davedaveda"), addy_arg};
+	FABIArg* Args = new FABIArg[2]{FABIArg::New(static_cast<uint32>(15)), addy_arg};
 
 	auto BlockNumInt = Args[0].GetBlockNum() + Args[1].GetBlockNum();
-	auto s = ABI::EncodeArgs("newFun(string,address)", Args, 2);
+	auto s = ABI::EncodeArgs("newFun(int,address)", Args, 2);
 	UE_LOG(LogTemp, Display, TEXT("%s"), *s.ToHex());
 
-	auto StringProp = FABIStringProperty("davedaveda");
+	auto StringProp = FABIUInt32Property(15);
 	auto AddressProp = FABIAddressProperty(addy);
 	TArray<FABIProperty*> Properties;
 	Properties.Push(&StringProp);
 	Properties.Push(&AddressProp);
-	s = ABI::Encode("newFun(string,address)", Properties);
+	s = ABI::Encode("newFun(int,address)", Properties);
 	UE_LOG(LogTemp, Display, TEXT("%s"), *s.ToHex());
 
 	if(false)
