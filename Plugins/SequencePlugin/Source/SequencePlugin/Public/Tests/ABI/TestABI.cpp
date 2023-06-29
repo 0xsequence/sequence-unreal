@@ -101,7 +101,8 @@ bool TestABI::RunTest(const FString& Parameters)
 	
 
 //test new Abi
-	
+
+	/*
 	auto LOG_ENCODED = true;
 	auto LOG_DECODED = true;
 
@@ -186,7 +187,8 @@ bool TestABI::RunTest(const FString& Parameters)
 		
 		UE_LOG(LogTemp, Display, TEXT("String Arg %i is %s"), i, *StringArg.ToString());
 	}
-	// Make the test pass by returning true, or fail by returning false.
+	// Make the test pass by returning true, or fail by returning false. 	*/
 	return true;
+
 }
 

@@ -24,7 +24,7 @@ FABIArg FABIArrayProperty<T>::Serialize()
 		Args[i] = (*this->value)[i].Serialize();
 	}
 
-	return FABIArg{ARRAY, Length, Args};
+	return FABIArg{ARRAY, (uint32)Length, Args};
 }
 
 template <typename T>
