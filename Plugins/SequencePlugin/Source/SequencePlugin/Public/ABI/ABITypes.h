@@ -58,10 +58,10 @@ public:
     virtual FABIProperty* Copy() override;
 };
 
-class FABIIntProperty : public TABIPropertyWithValue<int32> {
+class FABIInt32Property : public TABIPropertyWithValue<int32> {
 public:
-    FABIIntProperty();
-    FABIIntProperty(const int32 InitialValue);
+    FABIInt32Property();
+    FABIInt32Property(const int32 InitialValue);
     virtual FABIArg Serialize() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;

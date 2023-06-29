@@ -32,7 +32,14 @@ void FABIArrayProperty<T>::Deserialize(FABIArg Arg)
 {
 	const FABIArg* Args = static_cast<const FABIArg*>(Arg.Data);
 
-    
+	this->value = new TArray<T>{};
+
+    for(auto i = 0; i < Arg.Length; i++)
+    {
+    	this->value->Push(T());
+    	FABIProperty* Prop = &(*this->value)[i];
+    	Prop->Deserialize(Args[i]);
+    }
 }
 
 template <typename T>

@@ -22,7 +22,7 @@ bool TestNewfun::RunTest(const FString& Parameters)
 	auto s = ABI::EncodeArgs("newFun(int,address)", Args, 2);
 	UE_LOG(LogTemp, Display, TEXT("%s"), *s.ToHex());
 
-	auto StringProp = FABIUInt32Property(15);
+	auto StringProp = FABIInt32Property(-1);
 	auto AddressProp = FABIAddressProperty(addy);
 	TArray<FABIProperty*> Properties;
 	Properties.Push(&StringProp);

@@ -49,6 +49,8 @@ bool TestNewABI::RunTest(const FString& Parameters)
 			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
 		}
 	}
+
+	
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

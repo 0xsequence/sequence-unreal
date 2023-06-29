@@ -21,8 +21,8 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestInt256(int256)
 	//TestInt256(15)
 	//0x42166d6a000000000000000000000000000000000000000000000000000000000000000f
-	auto P0 = FABIIntProperty(15);
-	//if(!EncoderTest(&P0, FString("TestInt256(int256)"), FString("42166d6a000000000000000000000000000000000000000000000000000000000000000f"))) return false;
+	auto P0 = FABIInt32Property(15);
+	if(!EncoderTest(&P0, FString("TestInt256(int256)"), FString("42166d6a000000000000000000000000000000000000000000000000000000000000000f"))) return false;
 	
 	
 	 //Test 1 
@@ -30,14 +30,14 @@ bool TestABI::RunTest(const FString& Parameters)
 	 //TestUint256(15)
 	 //0x6a6040e8000000000000000000000000000000000000000000000000000000000000000f
 	auto P1 = FABIUInt32Property(15);
-	//if(!EncoderTest(&P1, FString("TestUint256(uint256)"), FString("6a6040e8000000000000000000000000000000000000000000000000000000000000000f"))) return false;
+	if(!EncoderTest(&P1, FString("TestUint256(uint256)"), FString("6a6040e8000000000000000000000000000000000000000000000000000000000000000f"))) return false;
 	
 	//Test 2 (wrong)
 	//TestInt256(int256)
 	//TestInt256(-15)
 	//0x42166d6afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
-	auto P2 = FABIIntProperty(-15);
-	//if(!EncoderTest(&P2, FString("TestInt256(int256)"), FString("42166d6afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
+	auto P2 = FABIInt32Property(-15);
+	if(!EncoderTest(&P2, FString("TestInt256(int256)"), FString("42166d6afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
 	
 	//Test 3 
 	//TestUint(uint)
@@ -50,8 +50,8 @@ bool TestABI::RunTest(const FString& Parameters)
 	//Testint(int)
 	//Testint(-15)
 	//0x87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
-	auto P4 = FABIIntProperty(-15);
-	//if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
+	auto P4 = FABIInt32Property(-15);
+	if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
 	
 	//Test 5
 	//TestUint256(uint256)
