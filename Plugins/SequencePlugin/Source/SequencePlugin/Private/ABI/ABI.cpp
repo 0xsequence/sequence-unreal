@@ -343,13 +343,12 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
 {
 	const auto Size = Args.Num();
-	FABIArg Arr[Size];
+	FABIArg* Arr = new FABIArg[Size];
 
 	for(auto i = 0; i < Size; i++)
 	{
-		Arr[i] = Args[i]->Serialize();
+		Arr[i] = (Args[i]->Serialize());
 	}
-
 	return EncodeArgs(Method, Arr, Size);
 }
 
