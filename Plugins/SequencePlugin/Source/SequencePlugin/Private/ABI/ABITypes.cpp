@@ -3,20 +3,17 @@
 #include "HexUtility.h"
 #include "ABI/ABI.h"
 
-FABIStringProperty::FABIStringProperty(): TABIPropertyWithValue(), BinaryData(FNonUniformData::Empty())
+FABIStringProperty::FABIStringProperty(): TABIPropertyWithValue()
 {}
 
-FABIStringProperty::FABIStringProperty(FString InitialValue): TABIPropertyWithValue(InitialValue), BinaryData(StringToUTF8(InitialValue))
+FABIStringProperty::FABIStringProperty(FString InitialValue): TABIPropertyWithValue(InitialValue)
 {
 }
 
-FABIStringProperty::~FABIStringProperty()
-{
-	delete [] BinaryData.Arr;
-}
 
 FABIArg FABIStringProperty::Serialize()
 {
+	auto BinaryData = StringToUTF8(value);
 	return FABIArg {
 		STRING,
 		BinaryData.Length,
@@ -24,15 +21,17 @@ FABIArg FABIStringProperty::Serialize()
 	};
 }
 
+FABIArg FABIStringProperty::BlankArg()
+{
+	return FABIArg {
+		STRING, 0, nullptr
+	};
+}
+
 void FABIStringProperty::Deserialize(FABIArg Arg)
 {
-	ByteLength Length = 0;
 	const auto Data = static_cast<uint8*>(Arg.Data);
-	
-	while(Data[Length] != 0x00)
-	{
-		Length += 1;
-	}
+	ByteLength Length = Arg.Length;
 
 	const auto StringData = FNonUniformData
 	{
@@ -78,6 +77,13 @@ FABIArg FABIInt32Property::Serialize()
 	};
 }
 
+FABIArg FABIInt32Property::BlankArg()
+{
+	return FABIArg{
+		STATIC, 0, nullptr
+	};
+}
+
 void FABIInt32Property::Deserialize(FABIArg Arg)
 {
 	const auto Data = static_cast<uint8*>(Arg.Data);
@@ -112,6 +118,13 @@ FABIArg FABIUInt32Property::Serialize()
 	
 	return FABIArg{
 		STATIC, GBlockByteLength, ArgData.Arr
+	};
+}
+
+FABIArg FABIUInt32Property::BlankArg()
+{
+	return FABIArg{
+		STATIC, 0, nullptr
 	};
 }
 
@@ -152,6 +165,13 @@ FABIArg FABIBooleanProperty::Serialize()
 	};
 }
 
+FABIArg FABIBooleanProperty::BlankArg()
+{
+	return FABIArg{
+		STATIC, 0, nullptr
+	};
+}
+
 void FABIBooleanProperty::Deserialize(FABIArg Arg)
 {
 	const auto Data = static_cast<uint8*>(Arg.Data);
@@ -182,6 +202,13 @@ FABIArg FABIBytesProperty::Serialize()
 
 	return FABIArg{
 		BYTES, value.Length, Data
+	};
+}
+
+FABIArg FABIBytesProperty::BlankArg()
+{
+	return FABIArg{
+		BYTES, 0, nullptr
 	};
 }
 
@@ -223,6 +250,13 @@ FABIArg FABIAddressProperty::Serialize()
 
 	return FABIArg{
 		STATIC, FAddress::Size, ArgData.Arr
+	};
+}
+
+FABIArg FABIAddressProperty::BlankArg()
+{
+	return FABIArg{
+		STATIC, 0, nullptr
 	};
 }
 

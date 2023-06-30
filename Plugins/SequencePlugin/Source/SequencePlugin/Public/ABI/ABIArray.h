@@ -9,6 +9,7 @@ public:
 	FABIArrayProperty();
 	FABIArrayProperty(TArray<T> *initialValue);
 	virtual FABIArg Serialize() override;
+	virtual FABIArg BlankArg() override;
 	virtual void Deserialize(FABIArg Arg) override;
 	virtual FABIProperty* Copy() override;
 };
@@ -17,7 +18,7 @@ template <typename T>
 FABIArg FABIArrayProperty<T>::Serialize()
 {
 	auto Length = (*this->value).Num();
-	const auto Args = new FABIArg[2];
+	const auto Args = new FABIArg[Length];
     
 	for(auto i = 0; i < Length; i++)
 	{
@@ -25,6 +26,12 @@ FABIArg FABIArrayProperty<T>::Serialize()
 	}
 
 	return FABIArg{ARRAY, (uint32)Length, Args};
+}
+
+template <typename T>
+FABIArg FABIArrayProperty<T>::BlankArg()
+{
+	return FABIArg{ARRAY, 1, new FABIArg{T().BlankArg()}};
 }
 
 template <typename T>

@@ -11,6 +11,7 @@ class FABIProperty {
 public:
     virtual ~FABIProperty() = default;
     virtual FABIArg Serialize() = 0;
+    virtual FABIArg BlankArg() = 0;
     virtual void Deserialize(FABIArg Arg) = 0;
     virtual FABIProperty* Copy() = 0;
 };
@@ -48,12 +49,11 @@ void TABIPropertyWithValue<T>::SetValue(T t)
 }
 
 class FABIStringProperty : public TABIPropertyWithValue<FString> {
-    FNonUniformData BinaryData;
 public:
     FABIStringProperty();
     FABIStringProperty(FString InitialValue);
-    ~FABIStringProperty();
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };
@@ -63,6 +63,7 @@ public:
     FABIInt32Property();
     FABIInt32Property(const int32 InitialValue);
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };
@@ -72,6 +73,7 @@ public:
     FABIUInt32Property();
     FABIUInt32Property(uint32 InitialValue);
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 }; 
@@ -81,6 +83,7 @@ public:
     FABIBooleanProperty();
     FABIBooleanProperty(bool bInitialValue);
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };
@@ -90,6 +93,7 @@ public:
     FABIBytesProperty();
     FABIBytesProperty(FNonUniformData InitialValue);
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };
@@ -100,6 +104,7 @@ public:
     FABIAddressProperty();
     FABIAddressProperty(FAddress Address);
     virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
     virtual FABIProperty* Copy() override;
 };

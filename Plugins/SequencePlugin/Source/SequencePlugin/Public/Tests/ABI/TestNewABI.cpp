@@ -24,7 +24,7 @@ bool TestNewABI::RunTest(const FString& Parameters)
 	FString String2 = "two";
 	auto StringProp2 = FABIStringProperty(String2);
 	
-	FString String3 = "one";
+	FString String3 = "three";
 	auto StringProp3 = FABIStringProperty(String3);
 
 	auto ArrayProp1 = FABIArrayProperty<FABIUInt32Property>(new TArray{NumberProp1, NumberProp2});
@@ -50,6 +50,25 @@ bool TestNewABI::RunTest(const FString& Parameters)
 		}
 	}
 
+	TArray<FABIProperty*> DecodeProperties;
+	auto Arr1 = FABIArrayProperty<FABIArrayProperty<FABIUInt32Property>>{};
+	auto Arr2 = FABIArrayProperty<FABIStringProperty>{};
+	DecodeProperties.Push(&Arr1);
+	DecodeProperties.Push(&Arr2);
+	ABI::Decode(Obj, DecodeProperties);
+
+	for(auto Prop : *Arr1.GetValue())
+	{
+		for(auto InnerProp : *Prop.GetValue())
+		{
+			UE_LOG(LogTemp, Display, TEXT("The Value of the int is %i"), InnerProp.GetValue());
+		}
+	}
+
+	for(auto Prop : *Arr2.GetValue())
+	{
+		UE_LOG(LogTemp, Display, TEXT("The vlaue of teh string is %s"), *Prop.GetValue());
+	}
 	
 	
 	// Make the test pass by returning true, or fail by returning false.
