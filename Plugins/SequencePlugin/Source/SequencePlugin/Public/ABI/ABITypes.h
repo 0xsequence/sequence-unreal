@@ -10,7 +10,6 @@ public:
     virtual FABIArg Serialize() = 0;
     virtual FABIArg BlankArg() = 0;
     virtual void Deserialize(FABIArg Arg) = 0;
-    virtual FABIProperty* Copy() = 0;
 };
 
 template<typename T>
@@ -52,7 +51,6 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 };
 
 class FABIInt32Property : public TABIPropertyWithValue<int32> {
@@ -62,7 +60,6 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 };
 
 class FABIUInt32Property : public TABIPropertyWithValue<uint32> {
@@ -72,7 +69,6 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 }; 
 
 class FABIBooleanProperty : public TABIPropertyWithValue<bool> {
@@ -82,7 +78,6 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 };
 
 class FABIBytesProperty : public TABIPropertyWithValue<FNonUniformData> {
@@ -92,7 +87,6 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 };
 
 class FABIAddressProperty : public TABIPropertyWithValue<FAddress>
@@ -103,5 +97,4 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-    virtual FABIProperty* Copy() override;
 };

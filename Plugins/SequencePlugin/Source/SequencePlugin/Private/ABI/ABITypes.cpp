@@ -43,11 +43,6 @@ void FABIStringProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIStringProperty::Copy()
-{
-	return new FABIStringProperty(value);
-}
-
 FABIInt32Property::FABIInt32Property(): TABIPropertyWithValue(0)
 {}
 
@@ -96,11 +91,6 @@ void FABIInt32Property::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIInt32Property::Copy()
-{
-	return new FABIInt32Property(value);
-}
-
 FABIUInt32Property::FABIUInt32Property(): TABIPropertyWithValue<unsigned>(0)
 {}
 
@@ -140,11 +130,6 @@ void FABIUInt32Property::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIUInt32Property::Copy()
-{
-	return new FABIUInt32Property(value);
-}
-
 FABIBooleanProperty::FABIBooleanProperty(): TABIPropertyWithValue<bool>(false)
 {}
 
@@ -177,11 +162,6 @@ void FABIBooleanProperty::Deserialize(FABIArg Arg)
 	const auto Data = static_cast<uint8*>(Arg.Data);
 	SetValue(Data[GBlockByteLength - 1] == 0x01);
 	Arg.Destroy();
-}
-
-FABIProperty* FABIBooleanProperty::Copy()
-{
-	return new FABIBooleanProperty(value);
 }
 
 FABIBytesProperty::FABIBytesProperty(): TABIPropertyWithValue<FNonUniformData>(FNonUniformData::Empty())
@@ -228,11 +208,6 @@ void FABIBytesProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIBytesProperty::Copy()
-{
-	return new FABIBytesProperty(value.Copy());
-}
-
 FABIAddressProperty::FABIAddressProperty(): TABIPropertyWithValue(FAddress{})
 {}
 
@@ -273,12 +248,3 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 	SetValue(Address);
 	Arg.Destroy();
 }
-
-FABIProperty* FABIAddressProperty::Copy()
-{
-	return new FABIAddressProperty(FAddress::From(value.ToHex()));
-}
-
-
-
-
