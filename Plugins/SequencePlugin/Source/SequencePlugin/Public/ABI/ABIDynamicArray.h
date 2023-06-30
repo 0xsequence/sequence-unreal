@@ -41,7 +41,7 @@ void FABIDynamicArrayProperty<T>::Deserialize(FABIArg Arg)
 
 	this->value = new TArray<T>{};
 
-    for(auto i = 0; i < Arg.Length; i++)
+    for(uint32 i = 0; i < Arg.Length; i++)
     {
     	this->value->Push(T());
     	FABIProperty* Prop = &(*this->value)[i];
