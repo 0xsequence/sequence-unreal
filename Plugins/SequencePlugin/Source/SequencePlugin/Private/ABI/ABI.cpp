@@ -294,6 +294,29 @@ FABIArg FABIArg::New(FABIArg* Array, uint32 Length)
 	return FABIArg{ARRAY, Length, Array};
 }
 
+void ABI::ParseMethod(FString& Method)
+{
+	FString searchText1 = "int,";
+	FString replaceText1 = "int256,";
+	Method.ReplaceInline(*searchText1, *replaceText1, ESearchCase::CaseSensitive);
+	FString searchText2 = "int[";
+	FString replaceText2 = "int256[";
+	Method.ReplaceInline(*searchText2, *replaceText2, ESearchCase::CaseSensitive);
+	FString searchText3 = "int)";
+	FString replaceText3 = "int256)";
+	Method.ReplaceInline(*searchText3, *replaceText3, ESearchCase::CaseSensitive);
+	FString searchText4 = "fixed,";
+	FString replaceText4 = "fixed128x18,";
+	Method.ReplaceInline(*searchText4, *replaceText4, ESearchCase::CaseSensitive);
+	FString searchText5 = "fixed[";
+	FString replaceText5 = "fixed128x18[";
+	Method.ReplaceInline(*searchText5, *replaceText5, ESearchCase::CaseSensitive);
+	FString searchText6 = "fixed)";
+	FString replaceText6 = "fixed128x18)";
+	Method.ReplaceInline(*searchText6, *replaceText6, ESearchCase::CaseSensitive);
+
+}
+
 FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
@@ -313,7 +336,11 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 	}
 
 	auto Signature = FHash256::New();
+	ParseMethod(Method);
+	UE_LOG(LogTemp, Display, TEXT("Parsed method: %s"), *Method);
+	
 	auto Msg = StringToUTF8(Method);
+	
 	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
 
 	for(auto i = 0; i < GMethodIdByteLength; i++)

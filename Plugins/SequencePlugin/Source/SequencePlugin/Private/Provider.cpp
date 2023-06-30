@@ -296,7 +296,7 @@ TResult<uint64> Provider::ChainId()
 	return ExtractUIntResult(SendRPC(Content));
 }
 
-TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, uint64 Number)
+TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, uint64 Number) //check if eth_call
 {
 	return CallHelper(ContractCall, ConvertInt(Number));
 }

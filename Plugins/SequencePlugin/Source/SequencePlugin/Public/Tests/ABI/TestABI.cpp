@@ -17,7 +17,7 @@ bool EncoderTest(FABIProperty* MProperty, const FString& MethodSig, const FStrin
 
 bool TestABI::RunTest(const FString& Parameters)
 {
-	//Test 0 (bad)
+	//Test 0 
 	//TestInt256(int256)
 	//TestInt256(15)
 	//0x42166d6a000000000000000000000000000000000000000000000000000000000000000f
@@ -46,21 +46,21 @@ bool TestABI::RunTest(const FString& Parameters)
 	auto P3 = FABIUInt32Property(15);
 	//if(!EncoderTest(&P3, FString("TestUint(uint)"), FString("949df7cd000000000000000000000000000000000000000000000000000000000000000f"))) return false;
 
-	//Test 4
+	//Test 4 
 	//Testint(int)
 	//Testint(-15)
 	//0x87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
 	auto P4 = FABIInt32Property(-15);
 	if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
 	
-	//Test 5
+	//Test 5 (ask Peter of larger types)
 	//TestUint256(uint256)
 	//TestUint256(150000000000000)
 	//0x6a6040e80000000000000000000000000000000000000000000000000000886c98b76000
 	//auto P5 = FABIUInt32Property(150000000000000);
 	//if(!EncoderTest(&P5, FString("TestUint256(uint256)"), FString("6a6040e80000000000000000000000000000000000000000000000000000886c98b76000"))) return false;
 	
-	//Test 6
+	//Test 6 (ask Peter of larger types)
 	//TestInt256(int256)
 	//TestInt256(-150000000000000)
 	//0x42166d6affffffffffffffffffffffffffffffffffffffffffffffffffff77936748a000

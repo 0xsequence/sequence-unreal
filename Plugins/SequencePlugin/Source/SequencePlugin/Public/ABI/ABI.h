@@ -49,6 +49,7 @@ struct FABIArg
 class ABI
 {
 public:
+	static void ParseMethod(FString& Method);
 	static FNonUniformData EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum);
 	static FNonUniformData Encode(FString Method, TArray<FABIProperty*> &Args);
 	static FString MyEncode(FString Method, TArray<FABIProperty*> Args);
