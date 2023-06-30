@@ -2,7 +2,7 @@
 #include "ABI/ABI.h"
 #include "Misc/AutomationTest.h"
 #include "ABI/ABITypes.h"
-#include "ABI/ABIArray.h"
+#include "ABI/ABIDynamicArray.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestNewABI, "Public.Tests.TestNewABI",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -27,10 +27,10 @@ bool TestNewABI::RunTest(const FString& Parameters)
 	FString String3 = "three";
 	auto StringProp3 = FABIStringProperty(String3);
 
-	auto ArrayProp1 = FABIArrayProperty<FABIUInt32Property>(new TArray{NumberProp1, NumberProp2});
-	auto ArrayProp2 = FABIArrayProperty<FABIUInt32Property>(new TArray{NumberProp3});
-	auto ArrayProp3 = FABIArrayProperty<FABIArrayProperty<FABIUInt32Property>>(new TArray{ArrayProp1, ArrayProp2});
-	auto ArrayProp4 = FABIArrayProperty<FABIStringProperty>(new TArray{StringProp1, StringProp2, StringProp3});
+	auto ArrayProp1 = FABIDynamicArrayProperty<FABIUInt32Property>(new TArray{NumberProp1, NumberProp2});
+	auto ArrayProp2 = FABIDynamicArrayProperty<FABIUInt32Property>(new TArray{NumberProp3});
+	auto ArrayProp3 = FABIDynamicArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>>(new TArray{ArrayProp1, ArrayProp2});
+	auto ArrayProp4 = FABIDynamicArrayProperty<FABIStringProperty>(new TArray{StringProp1, StringProp2, StringProp3});
 	
 	TArray<FABIProperty*> Properties;
     Properties.Push(&ArrayProp3);
@@ -51,8 +51,8 @@ bool TestNewABI::RunTest(const FString& Parameters)
 	}
 
 	TArray<FABIProperty*> DecodeProperties;
-	auto Arr1 = FABIArrayProperty<FABIArrayProperty<FABIUInt32Property>>{};
-	auto Arr2 = FABIArrayProperty<FABIStringProperty>{};
+	auto Arr1 = FABIDynamicArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>>{};
+	auto Arr2 = FABIDynamicArrayProperty<FABIStringProperty>{};
 	DecodeProperties.Push(&Arr1);
 	DecodeProperties.Push(&Arr2);
 	ABI::Decode(Obj, DecodeProperties);
@@ -67,7 +67,7 @@ bool TestNewABI::RunTest(const FString& Parameters)
 
 	for(auto Prop : *Arr2.GetValue())
 	{
-		UE_LOG(LogTemp, Display, TEXT("The vlaue of teh string is %s"), *Prop.GetValue());
+		UE_LOG(LogTemp, Display, TEXT("The Value of the string is %s"), *Prop.GetValue());
 	}
 	
 	

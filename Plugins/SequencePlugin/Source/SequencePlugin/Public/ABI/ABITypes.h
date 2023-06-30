@@ -1,9 +1,6 @@
 #pragma once
-#include "Coders/AddressCoder.h"
-#include "Coders/BooleanCoder.h"
-#include "Coders/FixedByteCoder.h"
-#include "Coders/NumberCoder.h"
-#include <type_traits>
+
+#include "Types/BinaryData.h"
 
 struct FABIArg;
 
