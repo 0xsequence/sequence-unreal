@@ -3,11 +3,11 @@
 #include "ABI/ABITypes.h"
 
 template<typename T>
-class FABIArrayProperty : public TABIPropertyWithValue<TArray<T>*>
+class FABIDynamicArrayProperty : public TABIPropertyWithValue<TArray<T>*>
 {
 public:
-	FABIArrayProperty();
-	FABIArrayProperty(TArray<T> *initialValue);
+	FABIDynamicArrayProperty();
+	FABIDynamicArrayProperty(TArray<T> *initialValue);
 	virtual FABIArg Serialize() override;
 	virtual FABIArg BlankArg() override;
 	virtual void Deserialize(FABIArg Arg) override;
@@ -15,7 +15,7 @@ public:
 };
 
 template <typename T>
-FABIArg FABIArrayProperty<T>::Serialize()
+FABIArg FABIDynamicArrayProperty<T>::Serialize()
 {
 	auto Length = (*this->value).Num();
 	const auto Args = new FABIArg[Length];
@@ -25,17 +25,17 @@ FABIArg FABIArrayProperty<T>::Serialize()
 		Args[i] = (*this->value)[i].Serialize();
 	}
 
-	return FABIArg{ARRAY, (uint32)Length, Args};
+	return FABIArg{ARRAY, static_cast<uint32>(Length), Args};
 }
 
 template <typename T>
-FABIArg FABIArrayProperty<T>::BlankArg()
+FABIArg FABIDynamicArrayProperty<T>::BlankArg()
 {
 	return FABIArg{ARRAY, 1, new FABIArg{T().BlankArg()}};
 }
 
 template <typename T>
-void FABIArrayProperty<T>::Deserialize(FABIArg Arg)
+void FABIDynamicArrayProperty<T>::Deserialize(FABIArg Arg)
 {
 	const FABIArg* Args = static_cast<const FABIArg*>(Arg.Data);
 
@@ -50,20 +50,20 @@ void FABIArrayProperty<T>::Deserialize(FABIArg Arg)
 }
 
 template <typename T>
-FABIProperty* FABIArrayProperty<T>::Copy()
+FABIProperty* FABIDynamicArrayProperty<T>::Copy()
 {
 	auto Array = new TArray<TABIPropertyWithValue<T>>();
-	return new FABIArrayProperty<T>();
+	return new FABIDynamicArrayProperty<T>();
 }
 
 template <typename T>
-FABIArrayProperty<T>::FABIArrayProperty(): TABIPropertyWithValue<TArray<T>*>(nullptr)
+FABIDynamicArrayProperty<T>::FABIDynamicArrayProperty(): TABIPropertyWithValue<TArray<T>*>(nullptr)
 {
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIArrayProperty must derive from FABIProperty");
+	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIDynamicArrayProperty must derive from FABIProperty");
 }
 
 template <typename T>
-FABIArrayProperty<T>::FABIArrayProperty(TArray<T>* initialValue): TABIPropertyWithValue<TArray<T>*>(initialValue)
+FABIDynamicArrayProperty<T>::FABIDynamicArrayProperty(TArray<T>* initialValue): TABIPropertyWithValue<TArray<T>*>(initialValue)
 {
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIArrayProperty must derive from FABIProperty");
+	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIDynamicArrayProperty must derive from FABIProperty");
 }

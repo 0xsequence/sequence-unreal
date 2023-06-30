@@ -80,7 +80,7 @@ FABIArg FABIInt32Property::Serialize()
 FABIArg FABIInt32Property::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -124,7 +124,7 @@ FABIArg FABIUInt32Property::Serialize()
 FABIArg FABIUInt32Property::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -168,7 +168,7 @@ FABIArg FABIBooleanProperty::Serialize()
 FABIArg FABIBooleanProperty::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -243,20 +243,20 @@ FABIArg FABIAddressProperty::Serialize()
 {
 	FNonUniformData ArgData = NewEmptyBlock();
 
-	for(auto i = 0; i < FAddress::Size; i++)
+	for(auto i = 0; i < FAddress::GetSize(); i++)
 	{
 		ArgData.Arr[i] = value.Arr[i];
 	}
 
 	return FABIArg{
-		STATIC, FAddress::Size, ArgData.Arr
+		STATIC, FAddress::GetSize(), ArgData.Arr
 	};
 }
 
 FABIArg FABIAddressProperty::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -265,7 +265,7 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 	const auto CopyData = static_cast<uint8*>(Arg.Data);
 	const auto Address = FAddress::New();
 
-	for(auto i = 0; i < FAddress::Size; i++)
+	for(auto i = 0; i < FAddress::GetSize(); i++)
 	{
 		Address.Arr[i] = CopyData[i];
 	}
