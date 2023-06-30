@@ -348,6 +348,8 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 		Blocks[i] = Signature.Arr[i];
 	}
 
+	//UE_LOG(LogTemp, Display, TEXT("%s"), *Signature.ToHex());
+
 	// Free calculation data
 	Signature.Destroy();
 	Msg.Destroy();
@@ -389,6 +391,23 @@ void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 	}
 }
 
+void ABI::Decode(FNonUniformData Data, TArray<FABIProperty*>& Args)
+{
+	const auto Size = Args.Num();
+	FABIArg* Arr = new FABIArg[Size];
+
+	for(auto i = 0; i < Size; i++)
+	{
+		Arr[i] = (Args[i]->BlankArg());
+	}
+	
+	DecodeArgs(Data, Arr, Size);
+
+	for(auto i = 0; i < Size; i++)
+	{
+		Args[i]->Deserialize(Arr[i]);
+	}
+}
 
 
 void CopyInUint32(uint8* BlockPtr, uint32 Value)

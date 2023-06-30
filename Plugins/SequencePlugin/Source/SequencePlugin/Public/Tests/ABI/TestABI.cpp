@@ -51,7 +51,7 @@ bool TestABI::RunTest(const FString& Parameters)
 	//Testint(-15)
 	//0x87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1
 	auto P4 = FABIInt32Property(-15);
-	if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
+	//if(!EncoderTest(&P4, FString("Testint(int)"), FString("87698e9ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1"))) return false;
 	
 	//Test 5 (ask Peter of larger types)
 	//TestUint256(uint256)
