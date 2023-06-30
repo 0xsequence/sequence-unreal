@@ -52,7 +52,6 @@ public:
 	static void ParseMethod(FString& Method);
 	static FNonUniformData EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum);
 	static FNonUniformData Encode(FString Method, TArray<FABIProperty*> &Args);
-	static FString MyEncode(FString Method, TArray<FABIProperty*> Args);
 	static void DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
 	static void Decode(FNonUniformData Data, TArray<FABIProperty*> &Args);
 };
