@@ -11,7 +11,6 @@ public:
 	virtual FABIArg Serialize() override;
 	virtual FABIArg BlankArg() override;
 	virtual void Deserialize(FABIArg Arg) override;
-	virtual FABIProperty* Copy() override;
 };
 
 template <typename T>
@@ -47,13 +46,6 @@ void FABIDynamicArrayProperty<T>::Deserialize(FABIArg Arg)
     	FABIProperty* Prop = &(*this->value)[i];
     	Prop->Deserialize(Args[i]);
     }
-}
-
-template <typename T>
-FABIProperty* FABIDynamicArrayProperty<T>::Copy()
-{
-	auto Array = new TArray<TABIPropertyWithValue<T>>();
-	return new FABIDynamicArrayProperty<T>();
 }
 
 template <typename T>

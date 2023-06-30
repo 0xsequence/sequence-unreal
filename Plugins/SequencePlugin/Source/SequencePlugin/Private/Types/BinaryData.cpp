@@ -120,7 +120,7 @@ FHash256 FHash256::From(uint8* Arr)
 
 FHash256 FHash256::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FAddress FAddress::New()
@@ -139,7 +139,7 @@ FAddress FAddress::From(uint8* Arr)
 
 FAddress FAddress::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FPublicKey FPublicKey::New()
@@ -158,7 +158,7 @@ FPublicKey FPublicKey::From(uint8* Arr)
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 
@@ -178,7 +178,7 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FBloom FBloom::New()
@@ -197,7 +197,7 @@ FBloom FBloom::From(uint8* Arr)
 
 FBloom FBloom::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FBlockNonce FBlockNonce::New()
@@ -216,7 +216,7 @@ FBlockNonce FBlockNonce::From(uint8* Arr)
 
 FBlockNonce FBlockNonce::From(FString Str)
 {
-	return From(HexStringToHash(StaticLength(), Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 void FBlockNonce::Increment()
