@@ -35,7 +35,7 @@ uint8 FABIArg::GetBlockNum() const
 {
 	if(this->Type == STATIC)
 	{
-		return 1;
+		return (this->Length + GBlockByteLength - 1) / GBlockByteLength;
 	} 
 
 	auto BlockCount = 2;
@@ -127,10 +127,9 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 	
 	if(this->Type == STATIC)
 	{
-		this->Length = 1;
-		this->Data = new uint8[GBlockByteLength];
+		this->Data = new uint8[this->Length];
 
-		for(auto i = 0; i < GBlockByteLength; i++)
+		for(auto i = 0; i < this->Length; i++)
 		{
 			static_cast<uint8*>(this->Data)[i] = Head[i];
 		}
@@ -177,6 +176,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			auto SubStart = &DataPtr[GBlockByteLength];
 			auto SubHead = &DataPtr[GBlockByteLength * (i + 1)];
 			Arr[i].Type = ModelArg.Type;
+			Arr[i].Length = ModelArg.Length;
 
 			// Must preserve our model
 			if(ModelArg.Type == ARRAY)

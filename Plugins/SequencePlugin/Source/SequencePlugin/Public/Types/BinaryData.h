@@ -34,65 +34,77 @@ FString UTF8ToString(FNonUniformData BinaryData);
 
 // UNIFORM DATA TYPES
 
+template<ByteLength Size>
 struct FUniformData : FBinaryData
 {
+	static const ByteLength GetSize();
+	virtual const ByteLength GetLength() override;
 	FNonUniformData Copy(); // This creates new data that must be freed
 	operator FNonUniformData() { return Copy(); }
 }; // Data with set sizes
 
-// Basic Binary Types
-struct FHash256 : FUniformData
+template <ByteLength Size>
+const ByteLength FUniformData<Size>::GetSize()
 {
-	static constexpr ByteLength Size = 32;
+	return Size;
+}
+
+template <ByteLength Size>
+const ByteLength FUniformData<Size>::GetLength()
+{
+	return Size;
+}
+
+template <ByteLength Size>
+FNonUniformData FUniformData<Size>::Copy()
+{
+	auto Length = GetLength();
+	auto NewArr = new uint8[Length];
+	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	return FNonUniformData{NewArr, Length};
+}
+
+// Basic Binary Types
+struct FHash256 : FUniformData<32>
+{
 	static FHash256 New(); // This creates new data that must be freed
 	static FHash256 From(uint8* Arr);
 	static FHash256 From(FString Str);
-	virtual const ByteLength GetLength() override;
 };
 
-struct FAddress : FUniformData
+struct FAddress : FUniformData<20>
 {
-	static constexpr ByteLength Size = 20;
 	static FAddress New(); // This creates new data that must be freed
 	static FAddress From(uint8* Arr);
 	static FAddress From(FString Str);
-	virtual const ByteLength GetLength() override;
 };
 
-struct FPublicKey : FUniformData
+struct FPublicKey : FUniformData<64>
 {
-	static constexpr ByteLength Size = 64;
 	static FPublicKey New(); // This creates new data that must be freed
 	static FPublicKey From(uint8* Arr);
 	static FPublicKey From(FString Str);
-	virtual const ByteLength GetLength() override;
 };
 
-struct FPrivateKey : FUniformData
+struct FPrivateKey : FUniformData<32>
 {
-	static constexpr ByteLength Size = 32;
 	static FPrivateKey New(); // This creates new data that must be freed
 	static FPrivateKey From(uint8* Arr);
 	static FPrivateKey From(FString Str);
-	virtual const ByteLength GetLength() override;
 };
 
-struct FBloom : FUniformData
+struct FBloom : FUniformData<256>
 {
-	static constexpr ByteLength Size = 256;
 	static FBloom New(); // This creates new data that must be freed
 	static FBloom From(uint8* Arr);
 	static FBloom From(FString Str);
-	virtual const ByteLength GetLength() override;
 };
 
-struct FBlockNonce : FUniformData
+struct FBlockNonce : FUniformData<8>
 {
-	static constexpr ByteLength Size = 8;
 	static FBlockNonce New(); // This creates new data that must be freed
 	static FBlockNonce From(uint8* Arr);
 	static FBlockNonce From(FString Str);
-	virtual const ByteLength GetLength() override;
 	void Increment();
 };
 

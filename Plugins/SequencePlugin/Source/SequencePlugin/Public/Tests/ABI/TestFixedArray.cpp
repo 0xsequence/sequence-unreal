@@ -1,13 +1,14 @@
+#include "Misc/AutomationTest.h"
 #include "HexUtility.h"
 #include "ABI/ABI.h"
-#include "Misc/AutomationTest.h"
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"
+#include "ABI/ABIFixedArray.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestNewABI, "Public.Tests.TestNewABI",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestFixedArray, "Public.Tests.ABI.TestFixedArray",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
-bool TestNewABI::RunTest(const FString& Parameters)
+bool TestFixedArray::RunTest(const FString& Parameters)
 {
 	uint32 Number1 = 1;
 	auto NumberProp1 = FABIUInt32Property(Number1);
@@ -29,8 +30,8 @@ bool TestNewABI::RunTest(const FString& Parameters)
 
 	auto ArrayProp1 = FABIDynamicArrayProperty<FABIUInt32Property>(new TArray{NumberProp1, NumberProp2});
 	auto ArrayProp2 = FABIDynamicArrayProperty<FABIUInt32Property>(new TArray{NumberProp3});
-	auto ArrayProp3 = FABIDynamicArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>>(new TArray{ArrayProp1, ArrayProp2});
-	auto ArrayProp4 = FABIDynamicArrayProperty<FABIStringProperty>(new TArray{StringProp1, StringProp2, StringProp3});
+	auto ArrayProp3 = FABIFixedArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>, 2>(new FABIDynamicArrayProperty<FABIUInt32Property>[]{ArrayProp1, ArrayProp2});
+	auto ArrayProp4 = FABIFixedArrayProperty<FABIStringProperty, 3>(new FABIStringProperty[]{StringProp1, StringProp2, StringProp3});
 	
 	TArray<FABIProperty*> Properties;
     Properties.Push(&ArrayProp3);
@@ -49,24 +50,26 @@ bool TestNewABI::RunTest(const FString& Parameters)
 			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
 		}
 	}
-
+	
 	TArray<FABIProperty*> DecodeProperties;
-	auto Arr1 = FABIDynamicArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>>{};
-	auto Arr2 = FABIDynamicArrayProperty<FABIStringProperty>{};
+	auto Arr1 = FABIFixedArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>, 2>{};
+	auto Arr2 = FABIFixedArrayProperty<FABIStringProperty, 3>{};
 	DecodeProperties.Push(&Arr1);
 	DecodeProperties.Push(&Arr2);
 	ABI::Decode(Obj, DecodeProperties);
 
-	for(auto Prop : *Arr1.GetValue())
+	for(auto i = 0; i < 2; i++)
 	{
+		auto Prop = Arr1.GetValue()[i];
 		for(auto InnerProp : *Prop.GetValue())
 		{
 			UE_LOG(LogTemp, Display, TEXT("The Value of the int is %i"), InnerProp.GetValue());
 		}
 	}
 
-	for(auto Prop : *Arr2.GetValue())
+	for(auto i = 0; i < 3; i++)
 	{
+		auto Prop = Arr2.GetValue()[i];
 		UE_LOG(LogTemp, Display, TEXT("The Value of the string is %s"), *Prop.GetValue());
 	}
 	

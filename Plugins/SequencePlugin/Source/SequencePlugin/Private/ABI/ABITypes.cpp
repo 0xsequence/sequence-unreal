@@ -43,11 +43,6 @@ void FABIStringProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIStringProperty::Copy()
-{
-	return new FABIStringProperty(value);
-}
-
 FABIInt32Property::FABIInt32Property(): TABIPropertyWithValue(0)
 {}
 
@@ -80,7 +75,7 @@ FABIArg FABIInt32Property::Serialize()
 FABIArg FABIInt32Property::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -94,11 +89,6 @@ void FABIInt32Property::Deserialize(FABIArg Arg)
 		(0x000000FF & (Data[GBlockByteLength - 1] << 0))
 	);
 	Arg.Destroy();
-}
-
-FABIProperty* FABIInt32Property::Copy()
-{
-	return new FABIInt32Property(value);
 }
 
 FABIUInt32Property::FABIUInt32Property(): TABIPropertyWithValue<unsigned>(0)
@@ -124,7 +114,7 @@ FABIArg FABIUInt32Property::Serialize()
 FABIArg FABIUInt32Property::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -138,11 +128,6 @@ void FABIUInt32Property::Deserialize(FABIArg Arg)
 		(0x000000FF & (Data[GBlockByteLength - 1] << 0))
 	);
 	Arg.Destroy();
-}
-
-FABIProperty* FABIUInt32Property::Copy()
-{
-	return new FABIUInt32Property(value);
 }
 
 FABIBooleanProperty::FABIBooleanProperty(): TABIPropertyWithValue<bool>(false)
@@ -168,7 +153,7 @@ FABIArg FABIBooleanProperty::Serialize()
 FABIArg FABIBooleanProperty::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -177,11 +162,6 @@ void FABIBooleanProperty::Deserialize(FABIArg Arg)
 	const auto Data = static_cast<uint8*>(Arg.Data);
 	SetValue(Data[GBlockByteLength - 1] == 0x01);
 	Arg.Destroy();
-}
-
-FABIProperty* FABIBooleanProperty::Copy()
-{
-	return new FABIBooleanProperty(value);
 }
 
 FABIBytesProperty::FABIBytesProperty(): TABIPropertyWithValue<FNonUniformData>(FNonUniformData::Empty())
@@ -228,11 +208,6 @@ void FABIBytesProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIProperty* FABIBytesProperty::Copy()
-{
-	return new FABIBytesProperty(value.Copy());
-}
-
 FABIAddressProperty::FABIAddressProperty(): TABIPropertyWithValue(FAddress{})
 {}
 
@@ -243,20 +218,20 @@ FABIArg FABIAddressProperty::Serialize()
 {
 	FNonUniformData ArgData = NewEmptyBlock();
 
-	for(auto i = 0; i < FAddress::Size; i++)
+	for(auto i = 0; i < FAddress::GetSize(); i++)
 	{
 		ArgData.Arr[i] = value.Arr[i];
 	}
 
 	return FABIArg{
-		STATIC, FAddress::Size, ArgData.Arr
+		STATIC, FAddress::GetSize(), ArgData.Arr
 	};
 }
 
 FABIArg FABIAddressProperty::BlankArg()
 {
 	return FABIArg{
-		STATIC, 0, nullptr
+		STATIC, GBlockByteLength, nullptr
 	};
 }
 
@@ -265,7 +240,7 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 	const auto CopyData = static_cast<uint8*>(Arg.Data);
 	const auto Address = FAddress::New();
 
-	for(auto i = 0; i < FAddress::Size; i++)
+	for(auto i = 0; i < FAddress::GetSize(); i++)
 	{
 		Address.Arr[i] = CopyData[i];
 	}
@@ -273,12 +248,3 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 	SetValue(Address);
 	Arg.Destroy();
 }
-
-FABIProperty* FABIAddressProperty::Copy()
-{
-	return new FABIAddressProperty(FAddress::From(value.ToHex()));
-}
-
-
-
-
