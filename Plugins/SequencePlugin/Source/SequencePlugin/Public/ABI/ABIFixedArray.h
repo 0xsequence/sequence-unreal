@@ -21,7 +21,7 @@ FABIFixedArrayProperty<T, Size>::FABIFixedArrayProperty()
 }
 
 template <typename T, uint32 Size>
-FABIFixedArrayProperty<T, Size>::FABIFixedArrayProperty(T* initialValue)
+FABIFixedArrayProperty<T, Size>::FABIFixedArrayProperty(T* initialValue) : TABIPropertyWithValue<T*>(initialValue)
 {
 	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIFixedArrayProperty must derive from FABIProperty");
 }
