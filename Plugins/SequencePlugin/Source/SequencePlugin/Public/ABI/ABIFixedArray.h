@@ -12,6 +12,8 @@ public:
 	virtual FABIArg Serialize() override;
 	virtual FABIArg BlankArg() override;
 	virtual void Deserialize(FABIArg Arg) override;
+	static uint32 GetBlockSize();
+	static uint32 GetUnitBlockSize();
 };
 
 template <typename T, uint32 Size>
@@ -29,26 +31,42 @@ FABIFixedArrayProperty<T, Size>::FABIFixedArrayProperty(T* initialValue) : TABIP
 template <typename T, uint32 Size>
 FABIArg FABIFixedArrayProperty<T, Size>::Serialize()
 {
-	const auto Args = new FABIArg[Size];
+	auto ByteLength = GetBlockSize() * GBlockByteLength;
+	auto Data = new uint8[ByteLength];
+
+	for(auto i = 0; i < ByteLength; i++)
+	{
+		Data[i] = 0x00;
+	}
     
 	for(auto i = 0; i < Size; i++)
 	{
-		Args[i] = this->value[i].Serialize();
+		FABIArg Arg = this->value[i].Serialize();
+		const int Offset = i * GetUnitBlockSize() * GBlockByteLength;
+		
+		for(auto j = 0; j < Arg.Length; j++)
+		{
+			const auto ArgData = static_cast<uint8*>(Arg.Data);
+			Data[Offset + j] = ArgData[j];
+		}
+		
+		Arg.Destroy();
 	}
+
 	
-	return FABIArg{ARRAY, Size, Args};
+	return FABIArg{STATIC, GetBlockSize() * GBlockByteLength, Data};
 }
 
 template <typename T, uint32 Size>
 FABIArg FABIFixedArrayProperty<T, Size>::BlankArg()
 {
-	return FABIArg{STATIC, T().BlankArg().Length * Size, nullptr};
+	return FABIArg{STATIC,  GetBlockSize() * GBlockByteLength, nullptr};
 }
 
 template <typename T, uint32 Size>
 void FABIFixedArrayProperty<T, Size>::Deserialize(FABIArg Arg)
 {
-	const FABIArg* Args = static_cast<const FABIArg*>(Arg.Data);
+	auto ArgData = static_cast<uint8*>(Arg.Data);
 
 	this->value = new T[Size];
 
@@ -56,6 +74,23 @@ void FABIFixedArrayProperty<T, Size>::Deserialize(FABIArg Arg)
 	{
 		this->value[i] = T();
 		FABIProperty* Prop = &(this->value[i]);
-		Prop->Deserialize(Args[i]);
+		Prop->Deserialize(FABIArg{
+			STATIC, T().BlankArg().Length, &ArgData[i * GetUnitBlockSize()]
+		});
 	}
+
+	Arg.Destroy();
+}
+
+template <typename T, uint32 Size>
+uint32 FABIFixedArrayProperty<T, Size>::GetBlockSize()
+{
+	return GetUnitBlockSize() * Size;
+}
+
+template <typename T, uint32 Size>
+uint32 FABIFixedArrayProperty<T, Size>::GetUnitBlockSize()
+{
+	uint32 UnitSize = T().BlankArg().Length;
+	return (UnitSize + GBlockByteLength - 1) / GBlockByteLength;
 }

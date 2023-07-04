@@ -73,10 +73,10 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
-			HeadPtr[GBlockByteLength - this->Length + i] = RawData[i];
+			HeadPtr[GBlockByteLength * this->GetBlockNum() - this->Length + i] = RawData[i];
 		}
 		
-		*Head = &HeadPtr[1 * GBlockByteLength];
+		*Head = &HeadPtr[this->GetBlockNum() * GBlockByteLength];
 		return;
 	}
 

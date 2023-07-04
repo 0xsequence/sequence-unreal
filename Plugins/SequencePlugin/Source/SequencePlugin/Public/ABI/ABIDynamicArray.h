@@ -46,6 +46,8 @@ void FABIDynamicArrayProperty<T>::Deserialize(FABIArg Arg)
     	FABIProperty* Prop = &(*this->value)[i];
     	Prop->Deserialize(Args[i]);
     }
+
+	Arg.Destroy();
 }
 
 template <typename T>
