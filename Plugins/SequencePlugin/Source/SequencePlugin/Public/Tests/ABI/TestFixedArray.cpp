@@ -50,26 +50,28 @@ bool TestFixedArray::RunTest(const FString& Parameters)
 			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
 		}
 	}
-	/*
+	
 	TArray<FABIProperty*> DecodeProperties;
-	auto Arr1 = FABIDynamicArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>>{};
-	auto Arr2 = FABIDynamicArrayProperty<FABIStringProperty>{};
+	auto Arr1 = FABIFixedArrayProperty<FABIDynamicArrayProperty<FABIUInt32Property>, 2>{};
+	auto Arr2 = FABIFixedArrayProperty<FABIStringProperty, 3>{};
 	DecodeProperties.Push(&Arr1);
 	DecodeProperties.Push(&Arr2);
 	ABI::Decode(Obj, DecodeProperties);
 
-	for(auto Prop : *Arr1.GetValue())
+	for(auto i = 0; i < 2; i++)
 	{
+		auto Prop = Arr1.GetValue()[i];
 		for(auto InnerProp : *Prop.GetValue())
 		{
 			UE_LOG(LogTemp, Display, TEXT("The Value of the int is %i"), InnerProp.GetValue());
 		}
 	}
 
-	for(auto Prop : *Arr2.GetValue())
+	for(auto i = 0; i < 3; i++)
 	{
+		auto Prop = Arr2.GetValue()[i];
 		UE_LOG(LogTemp, Display, TEXT("The Value of the string is %s"), *Prop.GetValue());
-	}*/
+	}
 	
 	
 	// Make the test pass by returning true, or fail by returning false.
