@@ -3,6 +3,7 @@
 
 #include "Provider.h"
 
+#include "FEthTransaction.h"
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "HttpManager.h"
@@ -304,6 +305,15 @@ TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, uint64 Number
 TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, EBlockTag Number)
 {
 	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
+}
+
+void Provider::NonViewCall(FEthTransaction transaction,FPrivateKey PrivateKey, int ChainID  )
+{
+	auto SignedTransaction = transaction
+		.GetSignedTransaction(PrivateKey, ChainID);
+
+	SendRawTransaction("0x" + SignedTransaction.ToHex());
+	
 }
 
 TResult<FNonUniformData> Provider::CallHelper(ContractCall ContractCall, FString Number)
