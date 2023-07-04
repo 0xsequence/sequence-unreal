@@ -120,12 +120,7 @@ FHash256 FHash256::From(uint8* Arr)
 
 FHash256 FHash256::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FHash256::GetLength()
-{
-	return Size;
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FAddress FAddress::New()
@@ -144,12 +139,7 @@ FAddress FAddress::From(uint8* Arr)
 
 FAddress FAddress::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FAddress::GetLength()
-{
-	return Size;
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FPublicKey FPublicKey::New()
@@ -168,13 +158,9 @@ FPublicKey FPublicKey::From(uint8* Arr)
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToHash(GetSize(), Str));
 }
 
-const ByteLength FPublicKey::GetLength()
-{
-	return Size;
-}
 
 FPrivateKey FPrivateKey::New()
 {
@@ -192,12 +178,7 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FPrivateKey::GetLength()
-{
-	return Size;
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FBloom FBloom::New()
@@ -216,12 +197,7 @@ FBloom FBloom::From(uint8* Arr)
 
 FBloom FBloom::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FBloom::GetLength()
-{
-	return Size;
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 FBlockNonce FBlockNonce::New()
@@ -240,12 +216,7 @@ FBlockNonce FBlockNonce::From(uint8* Arr)
 
 FBlockNonce FBlockNonce::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FBlockNonce::GetLength()
-{
-	return Size;
+	return From(HexStringToHash(GetSize(), Str));
 }
 
 void FBlockNonce::Increment()
@@ -291,15 +262,6 @@ FString UTF8ToString(FNonUniformData BinaryData)
 	Buffer.Add('\0');
 	return reinterpret_cast<const char*>(Buffer.GetData());
 }
-
-FNonUniformData FUniformData::Copy()
-{
-	auto Length = GetLength();
-	auto NewArr = new uint8[Length];
-	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
-	return FNonUniformData{NewArr, Length};
-}
-
 FNonUniformData HexStringToBinary(const FString Hex)
 {
 	auto HexCopy = FString(Hex);
