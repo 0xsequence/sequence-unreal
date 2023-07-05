@@ -191,6 +191,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
 		auto ModelArg = Arr[0];
 		delete [] Arr;
+		
 
 		Arr = new FABIArg[this->Length];
 
@@ -209,7 +210,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			
 			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
 		}
-		
+
 		this->Data = Arr;
 		
 		return *this;
@@ -239,7 +240,8 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			
 			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
 		}
-		
+
+		delete [] Models;
 		this->Data = Arr;
 		
 		return *this;
