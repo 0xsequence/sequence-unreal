@@ -3,7 +3,7 @@
 #include "ABI/ABI.h"
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"
-#include "ABI/ABIFixedArray.h"
+#include "ABI/ABIDynamicFixedArray.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestFixedArray, "Public.Tests.ABI.TestFixedArray",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -19,7 +19,7 @@ bool TestFixedArray::RunTest(const FString& Parameters)
 	uint32 Number3 = 3;
 	auto NumberProp3 = FABIUInt32Property(Number3);
 
-	auto ArrayProp1 = FABIFixedArrayProperty<FABIUInt32Property, 3>(new FABIUInt32Property[]{NumberProp1, NumberProp2, NumberProp3});
+	auto ArrayProp1 = FABIDynamicFixedArrayProperty<FABIUInt32Property, 3>(new TArray{NumberProp1, NumberProp2, NumberProp3});
 
 	TArray<FABIProperty*> Properties;
     Properties.Push(&ArrayProp1);
@@ -41,8 +41,8 @@ bool TestFixedArray::RunTest(const FString& Parameters)
 	ABI::Decode(Obj, Properties);
 
 	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
-	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
-	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
+	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp2.GetValue());
+	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp3.GetValue());
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

@@ -69,7 +69,7 @@ public:
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
-}; 
+};
 
 class FABIBooleanProperty : public TABIPropertyWithValue<bool> {
 public:
@@ -94,6 +94,16 @@ class FABIAddressProperty : public TABIPropertyWithValue<FAddress>
 public:
     FABIAddressProperty();
     FABIAddressProperty(FAddress Address);
+    virtual FABIArg Serialize() override;
+    virtual FABIArg BlankArg() override;
+    virtual void Deserialize(FABIArg Arg) override;
+};
+
+class FABIFixedBytesProperty : public TABIPropertyWithValue<FNonUniformData>
+{
+public:
+    FABIFixedBytesProperty();
+    FABIFixedBytesProperty(FNonUniformData InitialValue);
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
