@@ -120,7 +120,7 @@ TResult<uint64> Provider::TransactionCountHelper(FAddress Address, FString Numbe
 {
 	const auto Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
-			->AddString(Address.ToHex())
+			->AddString("0x" + Address.ToHex())
 			->AddValue(Number)
 			->EndArray()
 		->ToString();
@@ -250,6 +250,63 @@ TResult<uint64> Provider::TransactionCount(FAddress Addr, uint64 Number)
 TResult<uint64> Provider::TransactionCount(FAddress Addr, EBlockTag Tag)
 {
 	return TransactionCountHelper(Addr, ConvertString(TagToString(Tag)));
+}
+
+TResult<FNonUniformData> Provider::getGasPrice()
+{
+	const auto Content = RPCBuilder("eth_gasPrice").ToPtr()
+		->AddArray("params").ToPtr()
+			->EndArray()
+		->ToString();
+	
+	auto Data = ExtractStringResult(SendRPC(Content));
+
+	if(Data.HasError())
+	{
+		return MakeError(Data.GetError());
+	}
+	
+	return MakeValue(HexStringToBinary(Data.GetValue()));
+	
+}
+
+TResult<FNonUniformData> Provider::estimateContractCallGas(ContractCall ContractCall)
+{
+	{
+		const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
+			->AddArray("params").ToPtr()
+				->AddValue(ContractCall.GetJson())
+				->EndArray()
+			->ToString();
+		UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
+		auto Data = ExtractStringResult(SendRPC(Content));
+		if(Data.HasError())
+		{
+			return MakeError(Data.GetError());
+		}
+	
+		return MakeValue(HexStringToBinary(Data.GetValue()));
+	}
+}
+
+TResult<FNonUniformData> Provider::estimateDeploymentGas(FAddress from, FString Bytecode) //byte has ox prefix
+{
+		auto json = FJsonBuilder();
+		json.AddString("from", "0x" + from.ToHex());
+		json.AddString("data",   Bytecode);
+		const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
+			->AddArray("params").ToPtr()
+				->AddValue(json.ToString())
+				->EndArray()
+			->ToString();
+		UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
+		auto Data = ExtractStringResult(SendRPC(Content));
+		if(Data.HasError())
+		{
+			return MakeError(Data.GetError());
+		}
+	
+		return MakeValue(HexStringToBinary(Data.GetValue()));
 }
 
 TResult<FTransactionReceipt> Provider::TransactionReceipt(FHash256 Hash)
