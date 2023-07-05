@@ -12,6 +12,7 @@
 #include "JsonBuilder.h"
 #include "Types/FTransactionReceipt.h"
 #include "Types/Types.h"
+#include "FEthTransaction.h"
 
 struct ContractCall;
 
@@ -69,6 +70,8 @@ public:
 
 	TResult<FNonUniformData> Call(ContractCall ContractCall, uint64 Number);
 	TResult<FNonUniformData> Call(ContractCall ContractCall, EBlockTag Number);
+	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID );
+
 };
 
 
