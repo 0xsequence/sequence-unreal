@@ -28,6 +28,7 @@ FString TypeToString(EABIArgType Type)
 	if(Type == STATIC) return "Static";
 	if(Type == STRING) return "String";
 	if(Type == BYTES) return "Bytes";
+	if(Type == FIXED) return "Fixed";
 	return "Array";
 }
 
@@ -47,13 +48,18 @@ uint8 FABIArg::GetBlockNum() const
 		return BlockCount + (this->Length - 1 + GBlockByteLength) / GBlockByteLength;
 	}
 
-	// For Arrays we must count through elements
+	// For Arrays and Fixed we must count through elements
 	for(auto i = 0; i < this->Length; i++)
 	{
 		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
 		FABIArg Item = Arr[i];
 
 		BlockCount += Item.GetBlockNum();
+	}
+
+	if(this->Type == FIXED)
+	{
+		BlockCount -= 1; // No need for size parameter
 	}
 
 	return BlockCount;
@@ -73,10 +79,10 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
-			HeadPtr[GBlockByteLength - this->Length + i] = RawData[i];
+			HeadPtr[GBlockByteLength * this->GetBlockNum() - this->Length + i] = RawData[i];
 		}
 		
-		*Head = &HeadPtr[1 * GBlockByteLength];
+		*Head = &HeadPtr[this->GetBlockNum() * GBlockByteLength];
 		return;
 	}
 
@@ -115,6 +121,23 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		{
 			FABIArg Item = Arr[i];
 			Item.Encode(&TailPtr[GBlockByteLength], &SubHead, &SubTail);
+		}
+
+		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
+		return;
+	}
+
+	if(this->Type == FIXED)
+	{
+		auto SubHead = &TailPtr[0];
+		auto SubTail = &TailPtr[GBlockByteLength * (this->Length)];
+
+		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
+		
+		for(auto i = 0; i < this->Length; i++)
+		{
+			FABIArg Item = Arr[i];
+			Item.Encode(&TailPtr[0], &SubHead, &SubTail);
 		}
 
 		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
@@ -168,6 +191,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
 		auto ModelArg = Arr[0];
 		delete [] Arr;
+		
 
 		Arr = new FABIArg[this->Length];
 
@@ -179,14 +203,45 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			Arr[i].Length = ModelArg.Length;
 
 			// Must preserve our model
-			if(ModelArg.Type == ARRAY)
+			if(ModelArg.Type == ARRAY || ModelArg.Type == FIXED)
 			{
-				Arr[i].Data = new FABIArg{*static_cast<FABIArg*>(ModelArg.Data)};
+				Arr[i].Data = ModelArg.Data;
 			}
 			
 			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
 		}
+
+		this->Data = Arr;
 		
+		return *this;
+	}
+
+	if(this->Type == FIXED)
+	{
+		// We know the length of fixed items!
+		
+		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
+		auto Models = Arr;
+
+		Arr = new FABIArg[this->Length];
+
+		for(auto i = 0; i < this->Length; i++)
+		{
+			auto SubStart = &DataPtr[0];
+			auto SubHead = &DataPtr[GBlockByteLength * (i)];
+			Arr[i].Type = Models[i].Type;
+			Arr[i].Length = Models[i].Length;
+
+			// Must preserve our model
+			if(Models[i].Type == ARRAY || Models[i].Type == FIXED)
+			{
+				Arr[i].Data = Models[i].Data;
+			}
+			
+			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
+		}
+
+		delete [] Models;
 		this->Data = Arr;
 		
 		return *this;
@@ -369,6 +424,39 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 	};
 }
 
+FNonUniformData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
+{
+	auto BlockNum = 0;
+	
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		auto Arg = Args[i];
+		BlockNum += Arg.GetBlockNum();
+	}
+
+	uint32 TotalByteLength = (GBlockByteLength * BlockNum);
+	uint8* Blocks = new uint8[TotalByteLength];
+
+	for(auto i = 0; i < TotalByteLength; i++)
+	{
+		Blocks[i] = 0;
+	}
+
+	uint8* HeadPtr = &Blocks[0];
+	uint8* Start = HeadPtr;
+	uint8* TailPtr = &Blocks[GBlockByteLength * ArgNum];
+
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		auto Arg = Args[i];
+		Arg.Encode(Start, &HeadPtr, &TailPtr);
+	}
+
+	return FNonUniformData{
+		Blocks, TotalByteLength
+	};
+}
+
 FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
 {
 	const auto Size = Args.Num();
@@ -387,6 +475,16 @@ void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 	{
 		uint8* Start = &Data.Arr[GMethodIdByteLength];
 		uint8* Head = &Data.Arr[GMethodIdByteLength + (i * GBlockByteLength)];
+		Args[i] = Args[i].Decode(Data.Arr, Start, Head);
+	}
+}
+
+void ABI::DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+{
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		uint8* Start = &Data.Arr[0];
+		uint8* Head = &Data.Arr[0 + (i * GBlockByteLength)];
 		Args[i] = Args[i].Decode(Data.Arr, Start, Head);
 	}
 }
