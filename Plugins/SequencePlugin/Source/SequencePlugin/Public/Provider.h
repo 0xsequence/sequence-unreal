@@ -56,10 +56,16 @@ public:
 	TResult<FHeader> HeaderByNumber(EBlockTag Tag);
 	TResult<FHeader> HeaderByHash(FHash256 Hash);
 
+
+
 	TResult<TSharedPtr<FJsonObject>> TransactionByHash(FHash256 Hash);
 	TResult<uint64> TransactionCount(FAddress Addr, uint64 Number);
 	TResult<uint64> TransactionCount(FAddress Addr, EBlockTag Tag);
 	TResult<FTransactionReceipt> TransactionReceipt(FHash256 Hash);
+
+	TResult<FNonUniformData> getGasPrice();
+	TResult<FNonUniformData> estimateContractCallGas(ContractCall ContractCall);
+	TResult<FNonUniformData> estimateDeploymentGas(FAddress from, FString Bytecode);
 	
 	TResult<FBlockNonce> NonceAt(uint64 Number);
 	TResult<FBlockNonce> NonceAt(EBlockTag Tag);

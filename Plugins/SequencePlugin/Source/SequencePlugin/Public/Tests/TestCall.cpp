@@ -10,7 +10,7 @@
 #include "ABI/ABITypes.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCall, "Public.Tests.TestCall",
-                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool TestCall::RunTest(const FString& Parameters)
 {
@@ -56,7 +56,16 @@ bool TestCall::RunTest(const FString& Parameters)
 	};
 
 	UE_LOG(LogTemp, Display, TEXT("Transaction Hash:"), *transaction.GetTransactionHash(CHAIN_ID).ToHex());
-	
+
+	//get gas price nonce and gas amount
+	TResult<uint64> val =  provider.TransactionCount(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), EBlockTag::Latest);
+	UE_LOG(LogTemp, Display, TEXT("Nonce value: %llu"), val.GetValue());
+	auto price = provider.getGasPrice();
+	UE_LOG(LogTemp, Display, TEXT("Gas price is: %s"), *price.GetValue().ToHex());
+	auto deploymentGas = provider.estimateDeploymentGas(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), FString(small_byte_code));
+	UE_LOG(LogTemp, Display, TEXT("Deployment gas: %s"), *deploymentGas.GetValue().ToHex());
+
+
 	
 	auto SignedTransaction = transaction
 		.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID);
@@ -99,6 +108,22 @@ bool TestCall::RunTest(const FString& Parameters)
 	auto contractGasLimit = HexStringToBinary("0f4240").Trim();
 	auto contractTo = FAddress::From("0x78cfa0a45e279bfe8add6aeae31d9993ec08b66b");
 	auto contractValue = HexStringToBinary("0x29a2241af62c0000");
+
+
+
+	//estimate gas needed
+	
+	auto mContractCall = ContractCall{
+		TOptional<FAddress>(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249")),
+		FAddress::From("0x78cfa0a45e279bfe8add6aeae31d9993ec08b66b"),
+		TOptional<uint64>(),
+		TOptional<uint64>(),
+		TOptional<uint64>(500),
+		TOptional<FString>(contractData.ToHex()),
+	};
+	//auto contractCallGas = provider.estimateContractCallGas(mContractCall);
+	//UE_LOG(LogTemp, Display, TEXT("Method call gas: %s"), *contractCallGas.GetValue().ToHex());
+	
 
 	//call purchase function in smart contract
 	auto contractTransaction = FEthTransaction{
