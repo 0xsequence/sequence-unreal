@@ -217,14 +217,15 @@ FABIAddressProperty::FABIAddressProperty(FAddress Address):  TABIPropertyWithVal
 FABIArg FABIAddressProperty::Serialize()
 {
 	FNonUniformData ArgData = NewEmptyBlock();
+	auto buffer = GBlockByteLength - FAddress::GetSize();
 
 	for(auto i = 0; i < FAddress::GetSize(); i++)
 	{
-		ArgData.Arr[i] = value.Arr[i];
+		ArgData.Arr[buffer + i] = value.Arr[i];
 	}
 
 	return FABIArg{
-		STATIC, FAddress::GetSize(), ArgData.Arr
+		STATIC, GBlockByteLength, ArgData.Arr
 	};
 }
 
