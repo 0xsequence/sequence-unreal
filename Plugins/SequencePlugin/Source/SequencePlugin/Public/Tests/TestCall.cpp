@@ -114,8 +114,8 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<uint64>(500),
 		TOptional<FString>(contractData.ToHex()),
 	};
-	//auto contractCallGas = provider.estimateContractCallGas(mContractCall);
-	//UE_LOG(LogTemp, Display, TEXT("Method call gas: %s"), *contractCallGas.GetValue().ToHex());
+	auto contractCallGas = provider.estimateContractCallGas(mContractCall);
+	UE_LOG(LogTemp, Display, TEXT("Method call gas: %s"), *contractCallGas.GetValue().ToHex());
 	
 
 	//call purchase function in smart contract
