@@ -72,7 +72,7 @@ bool Ecdsa::sign(const Uint256 &privateKey, const Sha256Hash &msgHash, const Uin
 	countOps(1 * uint256CopyOps);
 
 	//calculate recovery parameter
-	recoveryBit+=(MyY.Arr[FHash256::GetSize() - 1] % 2);
+	recoveryBit+=(MyY.Arr[FHash256::Size - 1] % 2);
 	Uint256 n_div_2 = CurvePoint::ORDER;
 	n_div_2.shiftRight1();
 	if(s > n_div_2) recoveryBit = recoveryBit^1;

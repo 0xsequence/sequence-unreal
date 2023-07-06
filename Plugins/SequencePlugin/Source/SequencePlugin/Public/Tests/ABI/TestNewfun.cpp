@@ -13,7 +13,7 @@ bool TestNewfun::RunTest(const FString& Parameters)
 	UE_LOG(LogTemp, Display, TEXT("The addy is %s"), *addy.ToHex());
 	
 	auto addy_arg = FABIArg{
-		STATIC, FAddress::GetSize(), addy.Arr
+		STATIC, FAddress::Size, addy.Arr
 	};
 	addy_arg.Log();
 	FABIArg* Args = new FABIArg[2]{FABIArg::New(static_cast<uint32>(15)), addy_arg};

@@ -217,9 +217,9 @@ FABIAddressProperty::FABIAddressProperty(FAddress Address):  TABIPropertyWithVal
 FABIArg FABIAddressProperty::Serialize()
 {
 	FNonUniformData ArgData = NewEmptyBlock();
-	auto buffer = GBlockByteLength - FAddress::GetSize();
+	auto buffer = GBlockByteLength - FAddress::Size;
 
-	for(auto i = 0; i < FAddress::GetSize(); i++)
+	for(auto i = 0; i < FAddress::Size; i++)
 	{
 		ArgData.Arr[buffer + i] = value.Arr[i];
 	}
@@ -241,7 +241,7 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 	const auto CopyData = static_cast<uint8*>(Arg.Data);
 	const auto Address = FAddress::New();
 
-	for(auto i = 0; i < FAddress::GetSize(); i++)
+	for(auto i = 0; i < FAddress::Size; i++)
 	{
 		Address.Arr[i] = CopyData[i];
 	}
