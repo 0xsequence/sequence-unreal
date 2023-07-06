@@ -3,7 +3,7 @@
 #include "Misc/AutomationTest.h"
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"
-#include "ABI/ABIFixedArray.h"
+//#include "ABI/ABIFixedArray.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
