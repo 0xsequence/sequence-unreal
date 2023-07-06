@@ -204,7 +204,7 @@ TResult<FBlockNonce> Provider::NonceAtHelper(FString Number)
 	}
 	
 	auto Hex = Obj->GetStringField("nonce");
-	return MakeValue(FBlockNonce::From(HexStringToHash(FBlockNonce::GetSize(), Hex)));
+	return MakeValue(FBlockNonce::From(HexStringToHash(FBlockNonce::Size, Hex)));
 }
 
 TResult<FHeader> Provider::HeaderByNumber(uint64 Id)
