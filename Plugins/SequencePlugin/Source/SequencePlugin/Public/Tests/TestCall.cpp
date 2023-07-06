@@ -113,7 +113,7 @@ bool TestCall::RunTest(const FString& Parameters)
 		FAddress::From("0x78cfa0a45e279bfe8add6aeae31d9993ec08b66b"),
 		TOptional<uint64>(),
 		TOptional<uint64>(),
-		TOptional<uint64>(500),
+		TOptional<uint64>(3000000000000000000),
 		TOptional<FString>(contractData.ToHex()),
 	};
 	auto contractCallGas = provider.estimateContractCallGas(mContractCall);
