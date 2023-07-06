@@ -3,6 +3,7 @@
 
 #include "Provider.h"
 
+#include "Crypto.h"
 #include "FEthTransaction.h"
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
@@ -309,6 +310,36 @@ TResult<FNonUniformData> Provider::estimateDeploymentGas(FAddress from, FString 
 		return MakeValue(HexStringToBinary(Data.GetValue()));
 }
 
+FAddress Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId)
+{
+	auto FROM = GetAddress(GetPublicKey(PrivKey));
+	auto NONCE = FBlockNonce::From(IntToHexString(TransactionCount(FROM, EBlockTag::Latest).GetValue()));
+	auto GASPRICE = getGasPrice().GetValue();
+	auto GASLIMIT = estimateDeploymentGas(FROM, Bytecode).GetValue();
+	auto TO = FAddress::From("");
+	auto VALUE = HexStringToBinary("");
+	auto DATA = HexStringToBinary(Bytecode);
+	
+	auto transaction = FEthTransaction{
+		NONCE,
+		GASPRICE,
+		GASLIMIT,
+		TO,
+		VALUE,
+		DATA,
+	};
+	FAddress DeployedAddress = GetContractAddress(FROM, NONCE);;
+	auto SignedTransaction = transaction
+	.GetSignedTransaction(PrivKey, ChainId);
+	SendRawTransaction(
+		"0x" + SignedTransaction.ToHex()
+	 );
+	UE_LOG(LogTemp, Display, TEXT("The contract address is %s"), *(DeployedAddress.ToHex()));
+	return DeployedAddress;
+}
+
+//call method
+
 TResult<FTransactionReceipt> Provider::TransactionReceipt(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
@@ -345,7 +376,8 @@ void Provider::SendRawTransaction(FString data)
 			->EndArray()
 		->ToString();
 
-	SendRPC(Content);
+	auto retval = SendRPC(Content);
+	UE_LOG(LogTemp, Display, TEXT("retval is %s"), *retval);
 }
 
 TResult<uint64> Provider::ChainId()
