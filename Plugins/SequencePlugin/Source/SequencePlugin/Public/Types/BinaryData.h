@@ -34,23 +34,17 @@ FString UTF8ToString(FNonUniformData BinaryData);
 
 // UNIFORM DATA TYPES
 
-template<ByteLength Size>
+template<ByteLength TSize>
 struct FUniformData : FBinaryData
 {
-	static const ByteLength GetSize();
+	const static ByteLength Size = TSize;
 	virtual const ByteLength GetLength() override;
 	FNonUniformData Copy(); // This creates new data that must be freed
 	operator FNonUniformData() { return Copy(); }
 }; // Data with set sizes
 
 template <ByteLength Size>
-const ByteLength FUniformData<Size>::GetSize()
-{
-	return Size;
-}
-
-template <ByteLength Size>
-const ByteLength FUniformData<Size>::GetLength()
+const inline ByteLength FUniformData<Size>::GetLength()
 {
 	return Size;
 }
