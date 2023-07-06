@@ -129,6 +129,9 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 
 	if(this->Type == FIXED)
 	{
+		CopyInUint32(HeadPtr, Offset * GBlockByteLength);
+		*Head = &HeadPtr[1 * GBlockByteLength];
+		
 		auto SubHead = &TailPtr[0];
 		auto SubTail = &TailPtr[GBlockByteLength * (this->Length)];
 
