@@ -4,7 +4,6 @@
 #include "Provider.h"
 #include "Misc/AutomationTest.h"
 #include "Types/ContractCall.h"
-#include "Coders/AddressCoder.h"
 #include "ABI/ABI.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "ABI/ABITypes.h"
@@ -91,12 +90,6 @@ bool TestCall::RunTest(const FString& Parameters)
 	auto Signature = FHash256::New();
 	auto Msg = StringToUTF8("cupcakeBalances(address)");
 	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
-	
-	auto addressEncoder = AddressCoder();
-	auto encodedMethod = Signature.ToHex().Left(8);
-	auto encodedAddress = addressEncoder.Encode("0x81b35475847c79ce03e9ce407d93a40475b6a166");
-	UE_LOG(LogTemp, Display, TEXT("Encode method: %s"), *encodedMethod);
-	//remove above
 
 	auto mAbiEncoder = ABI();
 	auto arg1 = FABIUInt32Property(3);
