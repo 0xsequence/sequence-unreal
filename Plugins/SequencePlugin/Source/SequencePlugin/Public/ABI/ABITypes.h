@@ -98,13 +98,3 @@ public:
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;
 };
-
-class FABIFixedBytesProperty : public TABIPropertyWithValue<FNonUniformData>
-{
-public:
-    FABIFixedBytesProperty();
-    FABIFixedBytesProperty(FNonUniformData InitialValue);
-    virtual FABIArg Serialize() override;
-    virtual FABIArg BlankArg() override;
-    virtual void Deserialize(FABIArg Arg) override;
-};
