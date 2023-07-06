@@ -4,28 +4,28 @@
 #include "ABI/ABITypes.h"
 
 template<uint32 Size>
-class FABIStaticFixedBytes : public TABIPropertyWithValue<FUniformData<Size>>
+class FABIStaticFixedBytesProperty : public TABIPropertyWithValue<FUniformData<Size>>
 {
 public:
-	FABIStaticFixedBytes();
-	FABIStaticFixedBytes(FUniformData<Size> initialValue);
+	FABIStaticFixedBytesProperty();
+	FABIStaticFixedBytesProperty(FUniformData<Size> initialValue);
 	virtual FABIArg Serialize() override;
 	virtual FABIArg BlankArg() override;
 	virtual void Deserialize(FABIArg Arg) override;
 };
 
 template <uint32 Size>
-FABIStaticFixedBytes<Size>::FABIStaticFixedBytes() : TABIPropertyWithValue<FUniformData<Size>>(FUniformData<Size>{nullptr})
+FABIStaticFixedBytesProperty<Size>::FABIStaticFixedBytesProperty() : TABIPropertyWithValue<FUniformData<Size>>(FUniformData<Size>{nullptr})
 {
 }
 
 template <uint32 Size>
-FABIStaticFixedBytes<Size>::FABIStaticFixedBytes(FUniformData<Size> initialValue): TABIPropertyWithValue<FUniformData<Size>>(initialValue)
+FABIStaticFixedBytesProperty<Size>::FABIStaticFixedBytesProperty(FUniformData<Size> initialValue): TABIPropertyWithValue<FUniformData<Size>>(initialValue)
 {
 }
 
 template <uint32 Size>
-FABIArg FABIStaticFixedBytes<Size>::Serialize()
+FABIArg FABIStaticFixedBytesProperty<Size>::Serialize()
 {
 	auto Copy = this->GetValue().Copy();
 
@@ -33,13 +33,13 @@ FABIArg FABIStaticFixedBytes<Size>::Serialize()
 }
 
 template <uint32 Size>
-FABIArg FABIStaticFixedBytes<Size>::BlankArg()
+FABIArg FABIStaticFixedBytesProperty<Size>::BlankArg()
 {
 	return FABIArg{STATIC, Size, nullptr};
 }
 
 template <uint32 Size>
-void FABIStaticFixedBytes<Size>::Deserialize(FABIArg Arg)
+void FABIStaticFixedBytesProperty<Size>::Deserialize(FABIArg Arg)
 {
 	auto ArgData = static_cast<uint8*>(Arg.Data);
 	auto Data = new uint8[Size];
