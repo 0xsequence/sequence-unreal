@@ -49,7 +49,7 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	auto MyY = FHash256::New();
 	Uint256 BigR, BigS;
 	uint16 recoveryParameter;
-	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::GetSize()), BigR, BigS, recoveryParameter);
+	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS, recoveryParameter);
 	BigR.getBigEndianBytes(MyR.Arr);
 	BigS.getBigEndianBytes(MyS.Arr);
 	

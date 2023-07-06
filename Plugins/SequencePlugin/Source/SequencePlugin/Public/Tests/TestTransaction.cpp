@@ -74,12 +74,12 @@ bool TestTransaction::RunTest(const FString& Parameters)
 	//PrivateKey Privkey = HexStringToHash(GPrivateKeyByteLength, PRIVATE_KEY);
 	FPublicKey PubKey = GetPublicKey(PRIVATE_KEY);
 	FAddress Addr = GetAddress(PubKey);
-	uint8 MyR[FHash256::GetSize()]; // Buffer for R to be transferred to
-	uint8 MyS[FHash256::GetSize()]; // Buffer for S to be transferred to
+	uint8 MyR[FHash256::Size]; // Buffer for R to be transferred to
+	uint8 MyS[FHash256::Size]; // Buffer for S to be transferred to
 	Uint256 R, S; // These have to be Nayuki's special Uint256s
 	uint16 recoveryParameter;
 	
-	auto msgHash = Sha256Hash(SigningHash.Arr, FHash256::GetSize()); //"dc77b4d97ddddcb8ba2ab7ed304cf6449a6eebde8322ee2819cc90975c15c65a");//); // We must convert our hash to Nayuki's Sha256Hash 
+	auto msgHash = Sha256Hash(SigningHash.Arr, FHash256::Size); //"dc77b4d97ddddcb8ba2ab7ed304cf6449a6eebde8322ee2819cc90975c15c65a");//); // We must convert our hash to Nayuki's Sha256Hash 
 
 	// Usually EDSCA uses a random nonce value that has to be generated
 	// Nowadays crypto libraries get this random nonce deterministically from the private key and hash
