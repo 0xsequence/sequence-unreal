@@ -9,5 +9,4 @@ TOptional<uint64> HexStringToUint64(FString Hex);
 FString HashToHexString(ByteLength Size, Hash Hash);
 Hash HexStringToHash(ByteLength Size, FString Hex);
 
-
 FString TrimHex(FString Hex);
