@@ -61,7 +61,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	//get gas price nonce and gas amount
 	TResult<uint64> val =  provider.TransactionCount(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), EBlockTag::Latest);
 	UE_LOG(LogTemp, Display, TEXT("Nonce value: %llu"), val.GetValue());
-	auto price = provider.getGasPrice();
+	auto price = provider.GetGasPrice();
 	UE_LOG(LogTemp, Display, TEXT("Gas price is: %s"), *price.GetValue().ToHex());
 	auto deploymentGas = provider.estimateDeploymentGas(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), FString(small_byte_code));
 	UE_LOG(LogTemp, Display, TEXT("Deployment gas: %s"), *deploymentGas.GetValue().ToHex());
@@ -116,7 +116,7 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<uint64>(3000000000000000000),
 		TOptional<FString>(contractData.ToHex()),
 	};
-	auto contractCallGas = provider.estimateContractCallGas(mContractCall);
+	auto contractCallGas = provider.EstimateContractCallGas(mContractCall);
 	UE_LOG(LogTemp, Display, TEXT("Method call gas: %s"), *contractCallGas.GetValue().ToHex());
 	
 
