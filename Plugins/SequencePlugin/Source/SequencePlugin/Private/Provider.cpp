@@ -33,7 +33,7 @@ FString TagToString(EBlockTag Tag)
 	return "";
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::GetBlockByNumberHelper(FString Number)
+TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::GetBlockByNumberHelper(FString Number)
 {
 	const auto Content = FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")
@@ -44,7 +44,11 @@ TResult<TSharedPtr<FJsonObject>> Provider::GetBlockByNumberHelper(FString Number
 			->AddBool(true)
 			->EndArray()
 		->ToString();
-	return ExtractJsonObjectResult(SendRPC(Content));
+	
+	return Async(EAsyncExecution::Thread, [this, Content]
+	{
+		return ExtractJsonObjectResult(SendRPC(Content).Get());
+	});
 }
 
 TSharedPtr<FJsonObject> Provider::Parse(FString JsonRaw)
@@ -101,23 +105,18 @@ TResult<uint64> Provider::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-FString Provider::SendRPC(FString Content)
+TFuture<FString> Provider::SendRPC(FString Content)
 {
-	auto responseContent = NewObject<URequestHandler>()
+	return NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->Process()
-		->GetContentAsString();
-
-	 UE_LOG(LogTemp, Display, TEXT("Received response: %s"), *responseContent);
-
-	return responseContent;
+		->Process();
 }
 
-TResult<uint64> Provider::TransactionCountHelper(FAddress Address, FString Number)
+TFuture<TResult<uint64>> Provider::TransactionCountHelper(FAddress Address, FString Number)
 {
 	const auto Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
@@ -125,7 +124,11 @@ TResult<uint64> Provider::TransactionCountHelper(FAddress Address, FString Numbe
 			->AddValue(Number)
 			->EndArray()
 		->ToString();
-	return ExtractUIntResult(SendRPC(Content));
+	
+	return Async(EAsyncExecution::Thread, [Content, this]
+	{
+		return ExtractUIntResult(SendRPC(Content).Get());
+	});
 }
 
 FJsonBuilder Provider::RPCBuilder(const FString MethodName)
@@ -140,17 +143,17 @@ Provider::Provider(FString Url) : Url(Url)
 {
 }
 
-TResult<TSharedPtr<FJsonObject>>  Provider::BlockByNumber(uint64 Id)
+TFuture<TResult<TSharedPtr<FJsonObject>>>  Provider::BlockByNumber(uint64 Id)
 {
 	return GetBlockByNumberHelper(ConvertString(IntToHexString(Id)));
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::BlockByNumber(EBlockTag Tag)
+TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::BlockByNumber(EBlockTag Tag)
 {
 	return GetBlockByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(FHash256 Hash)
+TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::BlockByHash(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getBlockByHash").ToPtr()
 		->AddArray("params").ToPtr()
@@ -158,18 +161,24 @@ TResult<TSharedPtr<FJsonObject>> Provider::BlockByHash(FHash256 Hash)
 			->AddBool(true)
 			->EndArray()
 		->ToString();
-	return ExtractJsonObjectResult(SendRPC(Content));
+	return Async(EAsyncExecution::Thread, [this, Content]
+	{
+		return ExtractJsonObjectResult(SendRPC(Content).Get());
+	});
 }
 
-TResult<uint64> Provider::BlockNumber()
+TFuture<TResult<uint64>> Provider::BlockNumber()
 {
 	const auto Content = RPCBuilder("eth_blockNumber").ToString();
-	return ExtractUIntResult(SendRPC(Content));
+	return Async(EAsyncExecution::Thread, [this, Content]
+	{
+		return ExtractUIntResult(SendRPC(Content).Get());
+	});
 }
 
-TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
+TResult<FHeader> Provider::HeaderByNumberHelperSynchronous(FString Number)
 {
-	const auto Content = GetBlockByNumberHelper(Number);
+	const auto Content = GetBlockByNumberHelper(Number).Get();
 
 	if(Content.HasError())
 	{
@@ -182,15 +191,23 @@ TResult<FHeader> Provider::HeaderByNumberHelper(FString Number)
 	{
 		return MakeError(SequenceError(EmptyResponse, "Json response is null"));
 	}
-	
+		
 	auto Header = JsonToHeader(Obj);
 
 	return MakeValue(Header);
 }
 
-TResult<FBlockNonce> Provider::NonceAtHelper(FString Number)
+TFuture<TResult<FHeader>> Provider::HeaderByNumberHelper(FString Number)
 {
-	const auto Content = GetBlockByNumberHelper(Number);
+	auto Future = Async(EAsyncExecution::Thread, [this, Number]
+	{
+		return HeaderByNumberHelperSynchronous(Number);
+	});
+}
+
+TResult<FBlockNonce> Provider::NonceAtHelperSynchronous(FString Number)
+{
+	const auto Content = GetBlockByNumberHelper(Number).Get();
 
 	if(Content.HasError())
 	{
@@ -208,113 +225,107 @@ TResult<FBlockNonce> Provider::NonceAtHelper(FString Number)
 	return MakeValue(FBlockNonce::From(HexStringToHash(FBlockNonce::Size, Hex)));
 }
 
-TResult<FHeader> Provider::HeaderByNumber(uint64 Id)
+
+TFuture<TResult<FBlockNonce>> Provider::NonceAtHelper(FString Number)
+{
+	return Async(EAsyncExecution::Thread, [this, Number]
+	{
+		return NonceAtHelperSynchronous(Number);
+	});
+}
+
+TFuture<TResult<FHeader>> Provider::HeaderByNumber(uint64 Id)
 {
 	return HeaderByNumberHelper(ConvertString(IntToHexString(Id)));
 }
 
-TResult<FHeader> Provider::HeaderByNumber(EBlockTag Tag)
+TFuture<TResult<FHeader>> Provider::HeaderByNumber(EBlockTag Tag)
 {
 	return HeaderByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
-TResult<FHeader> Provider::HeaderByHash(FHash256 Hash)
+TFuture<TResult<FHeader>> Provider::HeaderByHash(FHash256 Hash)
 {
-	const auto Content = BlockByHash(Hash);
-
-	if(Content.HasError())
+	return Async(EAsyncExecution::Thread, [this, Hash]
 	{
-		return MakeError(Content.GetError());
-	}
-
-	auto Obj = Content.GetValue();
-	auto Header = JsonToHeader(Obj);
-
-	return MakeValue(Header);
+		return HeaderByHashSynchronous(Hash);
+	});
 }
 
-TResult<TSharedPtr<FJsonObject>> Provider::TransactionByHash(FHash256 Hash)
+TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::TransactionByHash(FHash256 Hash)
 {
 	const auto Content = RPCBuilder("eth_getTransactionByHash").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Hash.ToHex())
 			->EndArray()
 		->ToString();
-	return ExtractJsonObjectResult(SendRPC(Content));
+	
+	return Async(EAsyncExecution::Thread, [this, Content]()
+	{
+		return ExtractJsonObjectResult(SendRPC(Content).Get());
+	});
 }
 
-TResult<uint64> Provider::TransactionCount(FAddress Addr, uint64 Number)
+TFuture<TResult<uint64>> Provider::TransactionCount(FAddress Addr, uint64 Number)
 {
 	return TransactionCountHelper(Addr, ConvertInt(Number));
 }
 
-TResult<uint64> Provider::TransactionCount(FAddress Addr, EBlockTag Tag)
+TFuture<TResult<uint64>> Provider::TransactionCount(FAddress Addr, EBlockTag Tag)
 {
 	return TransactionCountHelper(Addr, ConvertString(TagToString(Tag)));
 }
 
-TResult<FNonUniformData> Provider::getGasPrice()
+TFuture<TResult<FNonUniformData>> Provider::GetGasPrice()
 {
-	const auto Content = RPCBuilder("eth_gasPrice").ToPtr()
+	return Async(EAsyncExecution::Thread, [this]
+	{
+		return GetGasPriceSynchronous();
+	});
+}
+
+TFuture<TResult<FNonUniformData>> Provider::EstimateContractCallGas(ContractCall ContractCall)
+{
+	return Async(EAsyncExecution::Thread, [this, ContractCall]()
+	{
+		return EstimateContractCallGasSynchronous(ContractCall);
+	});
+}
+
+TResult<FNonUniformData> Provider::EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode)
+{
+	auto json = FJsonBuilder();
+	json.AddString("from", "0x" + from.ToHex());
+	json.AddString("data",   Bytecode);
+	const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
 		->AddArray("params").ToPtr()
+			->AddValue(json.ToString())
 			->EndArray()
 		->ToString();
-	
-	auto Data = ExtractStringResult(SendRPC(Content));
-
+	UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
+	auto Data = ExtractStringResult(SendRPC(Content).Get());
 	if(Data.HasError())
 	{
 		return MakeError(Data.GetError());
 	}
 	
 	return MakeValue(HexStringToBinary(Data.GetValue()));
-	
 }
 
-TResult<FNonUniformData> Provider::estimateContractCallGas(ContractCall ContractCall)
+
+TFuture<TResult<FNonUniformData>> Provider::EstimateDeploymentGas(FAddress from, FString Bytecode) //byte has ox prefix
 {
+	return Async(EAsyncExecution::Thread, [from, Bytecode, this]
 	{
-		const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
-			->AddArray("params").ToPtr()
-				->AddValue(ContractCall.GetJson())
-				->EndArray()
-			->ToString();
-		UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
-		auto Data = ExtractStringResult(SendRPC(Content));
-		if(Data.HasError())
-		{
-			return MakeError(Data.GetError());
-		}
-	
-		return MakeValue(HexStringToBinary(Data.GetValue()));
-	}
-}
-
-TResult<FNonUniformData> Provider::estimateDeploymentGas(FAddress from, FString Bytecode) //byte has ox prefix
-{
-		auto json = FJsonBuilder();
-		json.AddString("from", "0x" + from.ToHex());
-		json.AddString("data",   Bytecode);
-		const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
-			->AddArray("params").ToPtr()
-				->AddValue(json.ToString())
-				->EndArray()
-			->ToString();
-		UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
-		auto Data = ExtractStringResult(SendRPC(Content));
-		if(Data.HasError())
-		{
-			return MakeError(Data.GetError());
-		}
-	
-		return MakeValue(HexStringToBinary(Data.GetValue()));
+		return EstimateDeploymentGasSynchronous(from, Bytecode);
+	});
 }
 
 FAddress Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId)
 {
 	auto FROM = GetAddress(GetPublicKey(PrivKey));
 	auto NONCE = FBlockNonce::From(IntToHexString(TransactionCount(FROM, EBlockTag::Latest).GetValue()));
-	auto GASPRICE = getGasPrice().GetValue();
+	auto GASPRICE = GetGasPrice().GetValue();
 	auto GASLIMIT = estimateDeploymentGas(FROM, Bytecode).GetValue();
 	auto TO = FAddress::From("");
 	auto VALUE = HexStringToBinary("");
@@ -423,4 +434,53 @@ TResult<FNonUniformData> Provider::CallHelper(ContractCall ContractCall, FString
 	
 	return MakeValue(HexStringToBinary(Data.GetValue()));
 	
+}
+
+TResult<FHeader> Provider::HeaderByHashSynchronous(FHash256 Hash)
+{
+	const auto Content = BlockByHash(Hash).Get();
+
+	if(Content.HasError())
+	{
+		return MakeError(Content.GetError());
+	}
+
+	auto Obj = Content.GetValue();
+	auto Header = JsonToHeader(Obj);
+
+	return MakeValue(Header);
+}
+
+TResult<FNonUniformData> Provider::GetGasPriceSynchronous()
+{
+	const auto Content = RPCBuilder("eth_gasPrice").ToPtr()
+		->AddArray("params").ToPtr()
+			->EndArray()
+		->ToString();
+	
+	auto Data = ExtractStringResult(SendRPC(Content).Get());
+
+	if(Data.HasError())
+	{
+		return MakeError(Data.GetError());
+	}
+	
+	return MakeValue(HexStringToBinary(Data.GetValue()));
+}
+
+TResult<FNonUniformData> Provider::EstimateContractCallGasSynchronous(ContractCall ContractCall)
+{
+	const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
+			->AddArray("params").ToPtr()
+				->AddValue(ContractCall.GetJson())
+				->EndArray()
+			->ToString();
+	UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
+	auto Data = ExtractStringResult(SendRPC(Content).Get());
+	if(Data.HasError())
+	{
+		return MakeError(Data.GetError());
+	}
+	
+	return MakeValue(HexStringToBinary(Data.GetValue()));
 }
