@@ -55,7 +55,7 @@ FNonUniformData FUniformData<Size>::Copy()
 {
 	auto Length = GetLength();
 	auto NewArr = new uint8[Length];
-	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	for(auto i = 0u; i < Length; i++) NewArr[i] = Arr[i];
 	return FNonUniformData{NewArr, Length};
 }
 

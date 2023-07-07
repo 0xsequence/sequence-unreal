@@ -7,7 +7,7 @@ uint8* BlankArray(ByteLength size)
 {
 	auto Arr = new uint8[size];
 
-	for(auto i = 0; i < size; i++)
+	for(auto i = 0u; i < size; i++)
 	{
 		Arr[i] = 0x00;
 	}
@@ -52,7 +52,7 @@ FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)
 FNonUniformData FNonUniformData::Copy()
 {
 	auto NewArr = new uint8[Length];
-	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	for(auto i = 0u; i < Length; i++) NewArr[i] = Arr[i];
 	return FNonUniformData{NewArr, Length};
 }
 
@@ -75,7 +75,7 @@ FNonUniformData Trimmed(FBinaryData& Data)
 	auto empty_count = 0;
 	auto len = Data.GetLength();
 
-	for(auto i = 0; i < len; i++)
+	for(auto i = 0u; i < len; i++)
 	{
 		if(Data.Arr[i] == 0x00)
 		{
@@ -96,7 +96,7 @@ FNonUniformData Trimmed(FBinaryData& Data)
 	
 	const auto NewData = new uint8[NewLength];
 
-	for(auto i = 0; i < NewLength; i++)
+	for(auto i = 0u; i < NewLength; i++)
 	{
 		NewData[i] = Data.Arr[i + empty_count];
 	}
@@ -221,7 +221,7 @@ FBlockNonce FBlockNonce::From(FString Str)
 
 void FBlockNonce::Increment()
 {
-	for(auto i = 0; i < GetLength(); i--)
+	for(auto i = 0u; i < GetLength(); i--)
 	{
 		auto index = GetLength() - 1 - i;
 		this->Arr[index] += 1;
@@ -244,7 +244,7 @@ FNonUniformData StringToUTF8(FString String)
 	StringToBytes(String, binary.Arr, Length);
 
 	// I have no idea why I need to add 1 but it works
-	for(auto i = 0; i < binary.GetLength(); i++)
+	for(auto i = 0u; i < binary.GetLength(); i++)
 	{
 		binary.Arr[i] = binary.Arr[i] + 1;
 	}
@@ -255,7 +255,7 @@ FNonUniformData StringToUTF8(FString String)
 FString UTF8ToString(FNonUniformData BinaryData)
 {
 	TArray<uint8> Buffer;
-	for(auto i = 0; i < BinaryData.GetLength(); i++)
+	for(auto i = 0u; i < BinaryData.GetLength(); i++)
 	{
 		Buffer.Add(BinaryData.Arr[i]);
 	}
