@@ -42,7 +42,8 @@ FABIArg FABIStaticFixedBytesProperty<Size>::Serialize()
 		}
 	}
 
-	return FABIArg{STATIC, Size, Data};
+
+	return FABIArg{STATIC, GBlockByteLength * BlockNum, Data};
 }
 
 template <uint32 Size>
