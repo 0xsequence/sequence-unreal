@@ -41,6 +41,7 @@ struct FUniformData : FBinaryData
 	virtual const ByteLength GetLength() override;
 	FNonUniformData Copy(); // This creates new data that must be freed
 	operator FNonUniformData() { return Copy(); }
+	const static FUniformData Empty();
 }; // Data with set sizes
 
 template <ByteLength Size>
@@ -56,6 +57,12 @@ FNonUniformData FUniformData<Size>::Copy()
 	auto NewArr = new uint8[Length];
 	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
 	return FNonUniformData{NewArr, Length};
+}
+
+template <ByteLength TSize>
+const FUniformData<TSize> FUniformData<TSize>::Empty()
+{
+	return FUniformData<TSize>{};
 }
 
 // Basic Binary Types
