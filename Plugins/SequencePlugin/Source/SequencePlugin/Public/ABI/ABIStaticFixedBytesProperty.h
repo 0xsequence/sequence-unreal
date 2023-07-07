@@ -27,9 +27,22 @@ FABIStaticFixedBytesProperty<Size>::FABIStaticFixedBytesProperty(FUniformData<Si
 template <uint32 Size>
 FABIArg FABIStaticFixedBytesProperty<Size>::Serialize()
 {
-	auto Copy = this->GetValue().Copy();
+	auto BlockNum = (this->value.GetLength() + GBlockByteLength - 1) / GBlockByteLength;
+	auto Data = new uint8[GBlockByteLength * BlockNum];
+	
+	for(auto i = 0; i < GBlockByteLength * BlockNum; i++)
+	{
+		if(i < this->value.GetLength())
+		{
+			Data[i] = this->value.Arr[i];
+		}
+		else
+		{
+			Data[i] = 0;
+		}
+	}
 
-	return FABIArg{STATIC, Size, Copy.Arr};
+	return FABIArg{STATIC, Size, Data};
 }
 
 template <uint32 Size>
