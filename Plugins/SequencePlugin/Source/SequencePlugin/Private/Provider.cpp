@@ -368,7 +368,7 @@ TResult<FBlockNonce> Provider::NonceAt(EBlockTag Tag)
 	return NonceAtHelper(ConvertString(TagToString(Tag)));
 }
 
-void Provider::SendRawTransaction(FString data)
+FString Provider::SendRawTransaction(FString data)
 {
 	const auto Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
 		->AddArray("params").ToPtr()
@@ -377,7 +377,7 @@ void Provider::SendRawTransaction(FString data)
 		->ToString();
 
 	auto retval = SendRPC(Content);
-	UE_LOG(LogTemp, Display, TEXT("retval is %s"), *retval);
+	return retval;
 }
 
 TResult<uint64> Provider::ChainId()
