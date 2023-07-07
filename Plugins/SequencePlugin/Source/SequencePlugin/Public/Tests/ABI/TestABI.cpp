@@ -95,11 +95,10 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestFixedByte(bytes10)
 	//TestFixedByte("abcdeabcde")
 	//0xb8b97ccc6162636465616263646500000000000000000000000000000000000000000000
-	auto byte10 = FUniformData<10>();
+	auto byte10 = FUniformData<(uint32)10>();
 	byte10.Arr = StringToUTF8("abcdeabcde").Arr;
-	//auto P10 = FABIStaticFixedBytesProperty<10>{byte10};
-	
-	//if(!EncoderTest(&P10, "TestFixedByte(bytes10)", FString("b8b97ccc6162636465616263646500000000000000000000000000000000000000000000"))) return false;
+	auto P10 = FABIStaticFixedBytesProperty<10>{byte10};
+	if(!EncoderTest(&P10, "TestFixedByte(bytes10)", FString("b8b97ccc6162636465616263646500000000000000000000000000000000000000000000"))) return false;
 
 
 	//Test 11 not working similar to unity project

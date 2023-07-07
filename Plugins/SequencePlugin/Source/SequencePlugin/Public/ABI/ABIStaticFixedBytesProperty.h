@@ -44,12 +44,13 @@ void FABIStaticFixedBytesProperty<Size>::Deserialize(FABIArg Arg)
 	auto ArgData = static_cast<uint8*>(Arg.Data);
 	auto Data = new uint8[Size];
 
-	for(auto i = 0; i < Size; i++)
+	for(auto i = 0u; i < Size; i++)
 	{
 		Data[i] = ArgData[i];
 	}
-	
-	this->SetValue(FUniformData<Size>{Data});
+	auto mUniformData = FUniformData<Size>();
+	mUniformData.Arr = Data;
+	this->SetValue(mUniformData);
 	Arg.Destroy();
 }
 
