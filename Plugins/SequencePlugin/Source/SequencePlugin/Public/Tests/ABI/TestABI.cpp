@@ -4,6 +4,7 @@
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"
 #include "ABI/ABIDynamicFixedArray.h"
+#include "ABI/ABIStaticFixedBytesProperty.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.TestABI",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -94,7 +95,10 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestFixedByte(bytes10)
 	//TestFixedByte("abcdeabcde")
 	//0xb8b97ccc6162636465616263646500000000000000000000000000000000000000000000
-	//auto P10 = FABIFixedBytes(FUniformData<5>(StringToUTF8("abcdeabcde")));
+	auto byte10 = FUniformData<10>();
+	byte10.Arr = StringToUTF8("abcdeabcde").Arr;
+	//auto P10 = FABIStaticFixedBytesProperty<10>{byte10};
+	
 	//if(!EncoderTest(&P10, "TestFixedByte(bytes10)", FString("b8b97ccc6162636465616263646500000000000000000000000000000000000000000000"))) return false;
 
 
