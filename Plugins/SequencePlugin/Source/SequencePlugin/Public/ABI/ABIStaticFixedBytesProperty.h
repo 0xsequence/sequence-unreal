@@ -15,7 +15,7 @@ public:
 };
 
 template <uint32 Size>
-FABIStaticFixedBytesProperty<Size>::FABIStaticFixedBytesProperty() : TABIPropertyWithValue<FUniformData<Size>>(FUniformData<Size>{nullptr})
+FABIStaticFixedBytesProperty<Size>::FABIStaticFixedBytesProperty() : TABIPropertyWithValue<FUniformData<Size>>(FUniformData<Size>::Empty())
 {
 }
 
