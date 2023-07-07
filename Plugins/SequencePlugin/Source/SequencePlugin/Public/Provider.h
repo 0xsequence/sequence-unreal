@@ -72,7 +72,7 @@ public:
 	TResult<FBlockNonce> NonceAt(uint64 Number);
 	TResult<FBlockNonce> NonceAt(EBlockTag Tag);
 
-	void SendRawTransaction(FString data);
+	FString SendRawTransaction(FString data);
 	
 	TResult<uint64> ChainId();
 
