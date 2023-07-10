@@ -82,7 +82,6 @@ public:
 	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
 
 	TFuture<FString> SendRawTransaction(FString data);
-
 	
 	TFuture<TResult<uint64>> ChainId();
 

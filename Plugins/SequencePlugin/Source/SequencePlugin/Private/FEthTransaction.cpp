@@ -115,6 +115,7 @@ FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, in
 	}, 9));
 }
 
+
 void FEthTransaction::Log()
 {
 	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *Nonce.ToHex());

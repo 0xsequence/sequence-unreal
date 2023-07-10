@@ -30,7 +30,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 			HexStringToBinary("0x10"),
 		}.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID)
 		.ToHex()
-	 );
+	 ).Wait();
 
 	provider.SendRawTransaction("0x" +
 		FEthTransaction{
@@ -42,7 +42,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 			HexStringToBinary("0x10"),
 		}.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID)
 		.ToHex()
-	 );
+	 ).Wait();
 
 	provider.SendRawTransaction("0x" +
 		FEthTransaction{
@@ -54,7 +54,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 			HexStringToBinary("0x10"),
 		}.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID)
 		.ToHex()
-	 );
+	 ).Wait();
 
 	provider.SendRawTransaction("0x" +
 		FEthTransaction{
@@ -66,7 +66,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 			HexStringToBinary(""),
 		}.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID)
 		.ToHex()
-	 );
+	 ).Wait();
 
 	
 	

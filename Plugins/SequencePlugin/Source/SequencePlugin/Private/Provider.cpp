@@ -200,7 +200,7 @@ TResult<FHeader> Provider::HeaderByNumberHelperSynchronous(FString Number)
 
 TFuture<TResult<FHeader>> Provider::HeaderByNumberHelper(FString Number)
 {
-	auto Future = Async(EAsyncExecution::Thread, [this, Number]
+	return Async(EAsyncExecution::Thread, [this, Number]
 	{
 		return HeaderByNumberHelperSynchronous(Number);
 	});
@@ -412,13 +412,15 @@ TFuture<FString> Provider::SendRawTransaction(FString data)
 TResult<uint64> Provider::ChainIdSynchronous()
 {
 	const auto Content = RPCBuilder("eth_chainId").ToString();
-	ExtractUIntResult(SendRPC(Content).Get());
+	return ExtractUIntResult(SendRPC(Content).Get());
 }
 
 TFuture<TResult<uint64>> Provider::ChainId()
 {
-	const auto Content = RPCBuilder("eth_chainId").ToString();
-		ExtractUIntResult(SendRPC(Content).Get());	
+	return Async(EAsyncExecution::Thread, [this]
+	{
+		return ChainIdSynchronous();
+	});
 }
 
 TFuture<TResult<FNonUniformData>> Provider::Call(ContractCall ContractCall, uint64 Number) //check if eth_call
@@ -433,10 +435,12 @@ TFuture<TResult<FNonUniformData>> Provider::Call(ContractCall ContractCall, EBlo
 
 TFuture<void> Provider::NonViewCall(FEthTransaction transaction,FPrivateKey PrivateKey, int ChainID  )
 {
-	auto SignedTransaction = transaction
-		.GetSignedTransaction(PrivateKey, ChainID);
+	return Async(EAsyncExecution::Thread, [&transaction, PrivateKey, ChainID, this]
+	{
+		auto SignedTransaction = transaction.GetSignedTransaction(PrivateKey, ChainID);
 
-	SendRawTransaction("0x" + SignedTransaction.ToHex());
+		SendRawTransaction("0x" + SignedTransaction.ToHex());
+	});
 }
 
 TResult<FNonUniformData> Provider::CallHelperSynchronous(ContractCall ContractCall, FString Number)
