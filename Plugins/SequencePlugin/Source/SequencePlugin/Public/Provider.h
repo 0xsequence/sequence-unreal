@@ -48,11 +48,14 @@ class Provider
 	TResult<FBlockNonce> NonceAtHelperSynchronous(FString Number);
 	TFuture<TResult<FBlockNonce>> NonceAtHelper(FString Number);
 	TFuture<TResult<FNonUniformData>> CallHelper(ContractCall ContractCall, FString Number);
+	TResult<FNonUniformData> CallHelperSynchronous(ContractCall ContractCall, FString Number);
 	TResult<FHeader> HeaderByHashSynchronous(FHash256 Hash);
 	TResult<FNonUniformData> GetGasPriceSynchronous();
 	TResult<FNonUniformData> EstimateContractCallGasSynchronous(ContractCall ContractCall);
 	TResult<FNonUniformData> EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode);
-	
+	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
+	TResult<FTransactionReceipt> TransactionReceiptSynchronous(FHash256 Hash);
+	TResult<uint64> ChainIdSynchronous();
 public:
 	Provider(FString Url);
 	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
@@ -79,6 +82,7 @@ public:
 	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
 
 	TFuture<FString> SendRawTransaction(FString data);
+
 	
 	TFuture<TResult<uint64>> ChainId();
 
