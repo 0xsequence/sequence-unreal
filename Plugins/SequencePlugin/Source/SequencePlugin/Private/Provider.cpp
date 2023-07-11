@@ -285,7 +285,6 @@ TResult<FNonUniformData> Provider::estimateContractCallGas(ContractCall Contract
 		{
 			return MakeError(Data.GetError());
 		}
-	
 		return MakeValue(HexStringToBinary(Data.GetValue()));
 	}
 }
@@ -306,8 +305,24 @@ TResult<FNonUniformData> Provider::estimateDeploymentGas(FAddress from, FString 
 		{
 			return MakeError(Data.GetError());
 		}
-	
 		return MakeValue(HexStringToBinary(Data.GetValue()));
+}
+
+FAddress Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TResult<FNonUniformData>& TransactionHash)
+{
+	auto FROM = GetAddress(GetPublicKey(PrivKey));
+	auto NONCE = FBlockNonce::From(IntToHexString(TransactionCount(FROM, EBlockTag::Latest).GetValue()));
+	auto GASPRICE = getGasPrice().GetValue();
+	auto GASLIMIT = estimateDeploymentGas(FROM, Bytecode).GetValue();
+	auto TO = FAddress::From("");
+	auto VALUE = HexStringToBinary("");
+	auto DATA = HexStringToBinary(Bytecode);
+	
+	auto transaction = FEthTransaction{NONCE,GASPRICE,GASLIMIT,TO,VALUE,DATA};
+	FAddress DeployedAddress = GetContractAddress(FROM, NONCE);
+	auto SignedTransaction = transaction.GetSignedTransaction(PrivKey, ChainId);
+	TransactionHash = SendRawTransaction("0x" + SignedTransaction.ToHex());
+	return DeployedAddress;
 }
 
 FAddress Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId)
@@ -328,13 +343,12 @@ FAddress Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 C
 		VALUE,
 		DATA,
 	};
-	FAddress DeployedAddress = GetContractAddress(FROM, NONCE);;
+	FAddress DeployedAddress = GetContractAddress(FROM, NONCE);
 	auto SignedTransaction = transaction
 	.GetSignedTransaction(PrivKey, ChainId);
-	SendRawTransaction(
+	auto Retval = SendRawTransaction(
 		"0x" + SignedTransaction.ToHex()
 	 );
-	UE_LOG(LogTemp, Display, TEXT("The contract address is %s"), *(DeployedAddress.ToHex()));
 	return DeployedAddress;
 }
 
@@ -347,14 +361,11 @@ TResult<FTransactionReceipt> Provider::TransactionReceipt(FHash256 Hash)
 			->AddString("0x" + Hash.ToHex())
 			->EndArray()
 		->ToString();
-
 	auto Json = ExtractJsonObjectResult(SendRPC(Content));
-
 	if(Json.HasError())
 	{
 		return MakeError(Json.GetError());
 	}
-	
 	return MakeValue(JsonToTransactionReceipt(Json.GetValue()));
 }
 
@@ -368,7 +379,7 @@ TResult<FBlockNonce> Provider::NonceAt(EBlockTag Tag)
 	return NonceAtHelper(ConvertString(TagToString(Tag)));
 }
 
-FString Provider::SendRawTransaction(FString data)
+TResult<FNonUniformData> Provider::SendRawTransaction(FString data)
 {
 	const auto Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
 		->AddArray("params").ToPtr()
@@ -376,8 +387,14 @@ FString Provider::SendRawTransaction(FString data)
 			->EndArray()
 		->ToString();
 
-	auto retval = SendRPC(Content);
-	return retval;
+	auto Data = ExtractStringResult(SendRPC(Content));
+
+	if(Data.HasError())
+	{
+		return MakeError(Data.GetError());
+	}
+	
+	return MakeValue(HexStringToBinary(Data.GetValue()));
 }
 
 TResult<uint64> Provider::ChainId()
@@ -396,12 +413,12 @@ TResult<FNonUniformData> Provider::Call(ContractCall ContractCall, EBlockTag Num
 	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
 }
 
-void Provider::NonViewCall(FEthTransaction transaction,FPrivateKey PrivateKey, int ChainID  )
+TResult<FNonUniformData> Provider::NonViewCall(FEthTransaction transaction,FPrivateKey PrivateKey, int ChainID  )
 {
 	auto SignedTransaction = transaction
 		.GetSignedTransaction(PrivateKey, ChainID);
 
-	SendRawTransaction("0x" + SignedTransaction.ToHex());
+	return SendRawTransaction("0x" + SignedTransaction.ToHex());
 	
 }
 

@@ -1,6 +1,7 @@
 #include "Crypto.h"
 #include "Types/BinaryData.h"
 #include "FEthTransaction.h"
+#include "HexUtility.h"
 #include "Provider.h"
 #include "Misc/AutomationTest.h"
 #include "Types/ContractCall.h"
@@ -154,8 +155,20 @@ bool TestCall::RunTest(const FString& Parameters)
 	};
 	provider.NonViewCall(contractTransaction2, PRIVATE_KEY, CHAIN_ID);
 	
-
-
+	auto mArgs1 = TArray<FABIProperty*>();
+	FABIAddressProperty myAddressProperty = FABIAddressProperty(contractTo2);
+	mArgs1.Add(&myAddressProperty);
+	auto encodedData = ABI::Encode("cupcakeBalances(address)", mArgs1);
+	
+	auto ContractBalance = provider.Call(ContractCall{
+		TOptional<FAddress>(),
+		contractTo2,
+		TOptional<uint64>(),
+		TOptional<uint64>(),
+		TOptional<uint64>(),
+		TOptional<FString>(encodedData.ToHex()),
+	}, EBlockTag::Latest);
+	UE_LOG(LogTemp, Display, TEXT("refill balance is %s"), *ContractBalance.GetValue().ToHex())
 	
 	//check if balance decrease for 
 	/*
