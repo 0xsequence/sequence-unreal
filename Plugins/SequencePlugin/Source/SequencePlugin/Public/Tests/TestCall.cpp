@@ -168,7 +168,7 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<uint64>(),
 		TOptional<FString>(encodedData.ToHex()),
 	}, EBlockTag::Latest);
-	UE_LOG(LogTemp, Display, TEXT("refill balance is %s"), *ContractBalance.GetValue().ToHex())
+	UE_LOG(LogTemp, Display, TEXT("refill balance is %s"), *ContractBalance.Get().GetValue().ToHex())
 	
 	//check if balance decrease for 
 	/*

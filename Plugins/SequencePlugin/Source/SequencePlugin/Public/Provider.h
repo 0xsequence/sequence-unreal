@@ -54,9 +54,10 @@ class Provider
 	TResult<FNonUniformData> EstimateContractCallGasSynchronous(ContractCall ContractCall);
 	TResult<FNonUniformData> EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode);
 	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
-	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TResult<FNonUniformData>& TransactionHash);
+	FAddress DeployContractSynchronousWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
 	TResult<FTransactionReceipt> TransactionReceiptSynchronous(FHash256 Hash);
 	TResult<uint64> ChainIdSynchronous();
+	TResult<FNonUniformData> SendRawTransactionSynchronous(FString data);
 public:
 	Provider(FString Url);
 	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
@@ -78,12 +79,12 @@ public:
 	TFuture<TResult<FNonUniformData>> EstimateDeploymentGas(FAddress from, FString Bytecode);
 
 	TFuture<FAddress> DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
-	TFuture<FAddress> DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TResult<FNonUniformData>& TransactionHash);
+	TFuture<FAddress> DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
 	
 	TFuture<TResult<FBlockNonce>> NonceAt(uint64 Number);
 	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
 
-	TFuture<FNonUniformData> SendRawTransaction(FString data);
+	TFuture<TResult<FNonUniformData>> SendRawTransaction(FString data);
 	
 	TFuture<TResult<uint64>> ChainId();
 
