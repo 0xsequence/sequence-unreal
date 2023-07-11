@@ -68,17 +68,18 @@ public:
 	TResult<FNonUniformData> estimateDeploymentGas(FAddress from, FString Bytecode);
 
 	FAddress DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
+	FAddress DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TResult<FNonUniformData>& TransactionHash);
 	
 	TResult<FBlockNonce> NonceAt(uint64 Number);
 	TResult<FBlockNonce> NonceAt(EBlockTag Tag);
 
-	FString SendRawTransaction(FString data);
+	TResult<FNonUniformData> SendRawTransaction(FString data);
 	
 	TResult<uint64> ChainId();
 
 	TResult<FNonUniformData> Call(ContractCall ContractCall, uint64 Number);
 	TResult<FNonUniformData> Call(ContractCall ContractCall, EBlockTag Number);
-	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
+	TResult<FNonUniformData> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
 };
 
 

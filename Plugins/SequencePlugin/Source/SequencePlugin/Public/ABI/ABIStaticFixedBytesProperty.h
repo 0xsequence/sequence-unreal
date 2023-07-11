@@ -30,7 +30,7 @@ FABIArg FABIStaticFixedBytesProperty<Size>::Serialize()
 	auto BlockNum = (this->value.GetLength() + GBlockByteLength - 1) / GBlockByteLength;
 	auto Data = new uint8[GBlockByteLength * BlockNum];
 	
-	for(auto i = 0; i < GBlockByteLength * BlockNum; i++)
+	for(auto i = 0u; i < GBlockByteLength * BlockNum; i++)
 	{
 		if(i < this->value.GetLength())
 		{
