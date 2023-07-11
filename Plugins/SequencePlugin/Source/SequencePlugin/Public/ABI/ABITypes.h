@@ -6,7 +6,6 @@ struct FABIArg;
 
 class FABIProperty {
 public:
-    virtual ~FABIProperty() = default;
     virtual FABIArg Serialize() = 0;
     virtual FABIArg BlankArg() = 0;
     virtual void Deserialize(FABIArg Arg) = 0;

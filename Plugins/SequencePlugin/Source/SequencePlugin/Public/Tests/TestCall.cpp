@@ -60,11 +60,11 @@ bool TestCall::RunTest(const FString& Parameters)
 	UE_LOG(LogTemp, Display, TEXT("Transaction Hash:"), *transaction.GetTransactionHash(CHAIN_ID).ToHex());
 
 	//get gas price nonce and gas amount
-	TResult<uint64> val =  provider.TransactionCount(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), EBlockTag::Latest);
+	TResult<uint64> val =  provider.TransactionCount(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), EBlockTag::Latest).Get();
 	UE_LOG(LogTemp, Display, TEXT("Nonce value: %llu"), val.GetValue());
-	auto price = provider.getGasPrice();
+	auto price = provider.GetGasPrice().Get();
 	UE_LOG(LogTemp, Display, TEXT("Gas price is: %s"), *price.GetValue().ToHex());
-	auto deploymentGas = provider.estimateDeploymentGas(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), FString(small_byte_code));
+	auto deploymentGas = provider.EstimateDeploymentGas(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), FString(small_byte_code)).Get();
 	UE_LOG(LogTemp, Display, TEXT("Deployment gas: %s"), *deploymentGas.GetValue().ToHex());
 
 
@@ -79,7 +79,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	auto from = GetAddress(publicKey);
 	auto contractAddress = FAddress::From("0x81b35475847c79ce03e9ce407d93a40475b6a166");
 
-	auto chain_id = provider.ChainId().GetValue();
+	auto chain_id = provider.ChainId().Get().GetValue();
 	auto TransactionHash = GetKeccakHash(SignedTransaction);
 
 	UE_LOG(LogTemp, Display, TEXT("From: %s"), *from.ToHex());
@@ -117,7 +117,7 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<uint64>(3000000000000000000),
 		TOptional<FString>(contractData.ToHex()),
 	};
-	auto contractCallGas = provider.estimateContractCallGas(mContractCall);
+	auto contractCallGas = provider.EstimateContractCallGas(mContractCall).Get();
 	UE_LOG(LogTemp, Display, TEXT("Method call gas: %s"), *contractCallGas.GetValue().ToHex());
 	
 

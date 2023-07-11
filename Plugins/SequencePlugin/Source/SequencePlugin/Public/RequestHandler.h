@@ -32,5 +32,5 @@ public:
 	URequestHandler* WithContentAsString(FString Content);
 
 	// Process
-	FHttpResponsePtr Process();
+	TFuture<FString> Process();
 };
