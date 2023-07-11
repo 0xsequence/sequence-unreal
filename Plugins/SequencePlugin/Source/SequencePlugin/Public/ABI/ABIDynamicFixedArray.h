@@ -17,13 +17,13 @@ public:
 template <typename T, uint32 Size>
 FABIDynamicFixedArrayProperty<T, Size>::FABIDynamicFixedArrayProperty() : TABIPropertyWithValue<TArray<T>*>(nullptr)
 {
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIFixedArrayProperty must derive from FABIProperty");
+	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIDynamicFixedArrayProperty must derive from FABIProperty");
 }
 
 template <typename T, uint32 Size>
 FABIDynamicFixedArrayProperty<T, Size>::FABIDynamicFixedArrayProperty(TArray<T>* initialValue) : TABIPropertyWithValue<TArray<T>*>(initialValue)
 {
-	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIFixedArrayProperty must derive from FABIProperty");
+	static_assert(std::is_base_of_v<FABIProperty, T>, "type parameter of FABIDynamicFixedArrayProperty must derive from FABIProperty");
 }
 
 template <typename T, uint32 Size>
