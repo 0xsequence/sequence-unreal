@@ -4,6 +4,7 @@
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"
 #include "ABI/ABIDynamicFixedArray.h"
+#include "ABI/ABIStaticFixedArray.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestFixedArray, "Public.Tests.ABI.TestFixedArray",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -19,30 +20,66 @@ bool TestFixedArray::RunTest(const FString& Parameters)
 	uint32 Number3 = 3;
 	auto NumberProp3 = FABIUInt32Property(Number3);
 
-	auto ArrayProp1 = FABIDynamicFixedArrayProperty<FABIUInt32Property, 3>(new TArray{NumberProp1, NumberProp2, NumberProp3});
+	TArray<FABIUInt32Property> MyArray = TArray{NumberProp1, NumberProp2, NumberProp3};
 
-	TArray<FABIProperty*> Properties;
-    Properties.Push(&ArrayProp1);
-    auto Obj = ABI::Encode("newFun(string,address)", Properties);
-	uint32 BlockNum = (Obj.Length - GMethodIdByteLength) / GBlockByteLength;
-	
-	UE_LOG(LogTemp, Display, TEXT("The length is %i"), BlockNum);
+	auto ArrayProp1 = FABIDynamicFixedArrayProperty<FABIUInt32Property, 3>(&MyArray);
+	auto ArrayProp2 = FABIStaticFixedArrayProperty<FABIUInt32Property, 3>(&MyArray);
 
-	if(true)
 	{
-		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
-		for(auto i = 0; i < BlockNum; i++)
+		TArray<FABIProperty*> Properties;
+		Properties.Push(&ArrayProp1);
+		auto Obj = ABI::Encode("newFun(string,address)", Properties);
+		uint32 BlockNum = (Obj.Length - GMethodIdByteLength) / GBlockByteLength;
+	
+		UE_LOG(LogTemp, Display, TEXT("The length of is %i"), BlockNum);
+
+		if(true)
 		{
-			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
-			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+			UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
+			for(auto i = 0; i < BlockNum; i++)
+			{
+				auto Addr = GMethodIdByteLength + GBlockByteLength * i;
+				UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+			}
 		}
+
+		ABI::Decode(Obj, Properties);
+
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
+		if(NumberProp1.GetValue() != 1) return false;
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp2.GetValue());
+		if(NumberProp2.GetValue() != 2) return false;
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp3.GetValue());
+		if(NumberProp3.GetValue() != 3) return false;
 	}
 
-	ABI::Decode(Obj, Properties);
+	{
+		TArray<FABIProperty*> Properties;
+		Properties.Push(&ArrayProp2);
+		auto Obj = ABI::Encode("newFun(string,address)", Properties);
+		uint32 BlockNum = (Obj.Length - GMethodIdByteLength) / GBlockByteLength;
+	
+		UE_LOG(LogTemp, Display, TEXT("The length of is %i"), BlockNum);
 
-	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
-	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp2.GetValue());
-	UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp3.GetValue());
+		if(true)
+		{
+			UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
+			for(auto i = 0; i < BlockNum; i++)
+			{
+				auto Addr = GMethodIdByteLength + GBlockByteLength * i;
+				UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+			}
+		}
+
+		ABI::Decode(Obj, Properties);
+
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp1.GetValue());
+		if(NumberProp1.GetValue() != 1) return false;
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp2.GetValue());
+		if(NumberProp2.GetValue() != 2) return false;
+		UE_LOG(LogTemp, Display, TEXT("The value is %i"), NumberProp3.GetValue());
+		if(NumberProp3.GetValue() != 3) return false;
+	}
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;
