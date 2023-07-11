@@ -24,17 +24,17 @@ bool HttpSimpleTest::RunTest(const FString& Parameters)
 	auto hash = FHash256::From(HexStringToBinary("0xabc0000000000000000000000000000000000000000000000000000000000001").Arr);
 	auto addr = FAddress::From(HexStringToBinary("0x1099542D7dFaF6757527146C0aB9E70A967f71C0").Arr);
 
-	LogIfError("BlockByNumber", provider.BlockByNumber(1));
-	LogIfError("BlockByNumber", provider.BlockByNumber(Latest));
-	LogIfError("ChainID", provider.ChainId());
-	LogIfError("BlockNumber", provider.BlockNumber());
+	LogIfError("BlockByNumber", provider.BlockByNumber(1).Get());
+	LogIfError("BlockByNumber", provider.BlockByNumber(Latest).Get());
+	LogIfError("ChainID", provider.ChainId().Get());
+	LogIfError("BlockNumber", provider.BlockNumber().Get());
 	//LogIfError("BlockByHash", provider.BlockByHash(hash));
 	//LogIfError(provider.TransactionCount(addr, 1));
 	//LogIfError(provider.TransactionCount(addr, Latest));
-	LogIfError("HeaderByNumber", provider.HeaderByNumber(1));
-	LogIfError("HeaderByNumber", provider.HeaderByNumber(Latest));
-	LogIfError("NonceAt", provider.NonceAt(1));
-	LogIfError("NonceAt", provider.NonceAt(Latest));
+	LogIfError("HeaderByNumber", provider.HeaderByNumber(1).Get());
+	LogIfError("HeaderByNumber", provider.HeaderByNumber(Latest).Get());
+	LogIfError("NonceAt", provider.NonceAt(1).Get());
+	LogIfError("NonceAt", provider.NonceAt(Latest).Get());
 
 	auto PrivateKey = FPrivateKey::From(HexStringToBinary("0xabc0000000000000000000000000000000000000000000000000000000000001").Arr);
 	FPublicKey PublicKey = GetPublicKey(PrivateKey);
