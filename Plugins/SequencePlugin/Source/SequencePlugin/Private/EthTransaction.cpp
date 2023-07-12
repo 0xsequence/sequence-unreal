@@ -1,5 +1,4 @@
-#include "FEthTransaction.h"
-
+#include "EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "Crypto.h"
 #include "HexUtility.h"
@@ -59,6 +58,7 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("S: %s"), *MyS.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("V: %s"), *IntToHexString(35));
 	UE_LOG(LogTemp, Display, TEXT("PRIVATE KEY: %s"), *PrivateKey.ToHex());
 
 	this->V = HexStringToBinary(IntToHexString(BigV));

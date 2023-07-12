@@ -1,6 +1,6 @@
 #pragma once
 #include "BinaryData.h"
-#include "FEthTransaction.h"
+#include "EthTransaction.h"
 
 class FWallet
 {

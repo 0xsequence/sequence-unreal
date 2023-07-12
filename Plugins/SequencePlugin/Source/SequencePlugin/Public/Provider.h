@@ -10,11 +10,11 @@
 #include "Types/Header.h"
 #include "Http.h"
 #include "JsonBuilder.h"
-#include "Types/FTransactionReceipt.h"
+#include "Types/TransactionReceipt.h"
 #include "Types/Types.h"
 #include "FEthTransaction.h"
 
-struct ContractCall;
+struct FContractCall;
 
 enum EBlockTag
 {
@@ -58,6 +58,7 @@ class Provider
 	TResult<FTransactionReceipt> TransactionReceiptSynchronous(FHash256 Hash);
 	TResult<uint64> ChainIdSynchronous();
 	TResult<FNonUniformData> SendRawTransactionSynchronous(FString data);
+
 public:
 	Provider(FString Url);
 	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
@@ -83,7 +84,6 @@ public:
 	
 	TFuture<TResult<FBlockNonce>> NonceAt(uint64 Number);
 	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
-
 	TFuture<TResult<FNonUniformData>> SendRawTransaction(FString data);
 	
 	TFuture<TResult<uint64>> ChainId();
@@ -91,6 +91,7 @@ public:
 	TFuture<TResult<FNonUniformData>> Call(ContractCall ContractCall, uint64 Number);
 	TFuture<TResult<FNonUniformData>> Call(ContractCall ContractCall, EBlockTag Number);
 	TFuture<TResult<FNonUniformData>> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
+
 };
 
 
