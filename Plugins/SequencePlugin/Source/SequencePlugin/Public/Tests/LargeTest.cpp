@@ -1,6 +1,6 @@
 ﻿#include "Crypto.h"
 #include "Types/BinaryData.h"
-#include "FEthTransaction.h"
+#include "EthTransaction.h"
 #include "HexUtility.h"
 #include "Provider.h"
 #include "Misc/AutomationTest.h"
@@ -19,7 +19,7 @@ int64 GetBalance(FAddress From, FAddress To)
 	auto myAddressProperty = FABIAddressProperty(To);
 	mArgs.Add(&myAddressProperty);
 	auto encodedData = ABI::Encode("cupcakeBalances(address)", mArgs);
-	auto ContractBalance = provider.Call(ContractCall{
+	auto ContractBalance = provider.Call(FContractCall{
 		TOptional<FAddress>(),
 		To,
 		TOptional<uint64>(),
@@ -87,7 +87,7 @@ bool LargeTest::RunTest(const FString& Parameters)
 	mArgs1.Add(&myAddressProperty);
 	auto encodedData = ABI::Encode("cupcakeBalances(address)", mArgs1);
 	
-	auto ContractBalance = provider.Call(ContractCall{
+	auto ContractBalance = provider.Call(FContractCall{
 		TOptional<FAddress>(),
 		ContractAddress4,
 		TOptional<uint64>(),
@@ -107,7 +107,7 @@ bool LargeTest::RunTest(const FString& Parameters)
 	auto contractTo = ContractAddress4;
 	uint64 contractValue = 3000000000000000000;
 	
-	auto mContractCall = ContractCall{
+	auto mContractCall = FContractCall{
 		TOptional<FAddress>(),
 		ContractAddress4,
 		TOptional<uint64>(),
@@ -141,7 +141,7 @@ bool LargeTest::RunTest(const FString& Parameters)
 	 contractTo = ContractAddress4;
 	 contractValue = 0;
 	
-	 auto mContractCall2 = ContractCall{
+	 auto mContractCall2 = FContractCall{
 		TOptional<FAddress>(Address2),
 		ContractAddress4,
 		TOptional<uint64>(),

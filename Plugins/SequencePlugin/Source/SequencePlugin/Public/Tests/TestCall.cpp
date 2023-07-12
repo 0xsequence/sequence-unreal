@@ -110,7 +110,7 @@ bool TestCall::RunTest(const FString& Parameters)
 
 	//estimate gas needed
 	
-	auto mContractCall = ContractCall{
+	auto mContractCall = FContractCall{
 		TOptional<FAddress>(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249")),
 		FAddress::From("0x78cfa0a45e279bfe8add6aeae31d9993ec08b66b"),
 		TOptional<uint64>(),
@@ -161,7 +161,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	mArgs1.Add(&myAddressProperty);
 	auto encodedData = ABI::Encode("cupcakeBalances(address)", mArgs1);
 	
-	auto ContractBalance = provider.Call(ContractCall{
+	auto ContractBalance = provider.Call(FContractCall{
 		TOptional<FAddress>(),
 		contractTo2,
 		TOptional<uint64>(),

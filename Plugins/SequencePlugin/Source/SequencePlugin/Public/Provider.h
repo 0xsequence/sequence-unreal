@@ -12,7 +12,7 @@
 #include "JsonBuilder.h"
 #include "Types/TransactionReceipt.h"
 #include "Types/Types.h"
-#include "FEthTransaction.h"
+#include "EthTransaction.h"
 
 struct FContractCall;
 
@@ -47,11 +47,11 @@ class Provider
 	TFuture<TResult<FHeader>> HeaderByNumberHelper(FString Number);
 	TResult<FBlockNonce> NonceAtHelperSynchronous(FString Number);
 	TFuture<TResult<FBlockNonce>> NonceAtHelper(FString Number);
-	TFuture<TResult<FNonUniformData>> CallHelper(ContractCall ContractCall, FString Number);
-	TResult<FNonUniformData> CallHelperSynchronous(ContractCall ContractCall, FString Number);
+	TFuture<TResult<FNonUniformData>> CallHelper(FContractCall ContractCall, FString Number);
+	TResult<FNonUniformData> CallHelperSynchronous(FContractCall ContractCall, FString Number);
 	TResult<FHeader> HeaderByHashSynchronous(FHash256 Hash);
 	TResult<FNonUniformData> GetGasPriceSynchronous();
-	TResult<FNonUniformData> EstimateContractCallGasSynchronous(ContractCall ContractCall);
+	TResult<FNonUniformData> EstimateContractCallGasSynchronous(FContractCall ContractCall);
 	TResult<FNonUniformData> EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode);
 	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
 	FAddress DeployContractSynchronousWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
@@ -76,7 +76,7 @@ public:
 	TFuture<TResult<FTransactionReceipt>> TransactionReceipt(FHash256 Hash);
 
 	TFuture<TResult<FNonUniformData>> GetGasPrice();
-	TFuture<TResult<FNonUniformData>> EstimateContractCallGas(ContractCall ContractCall);
+	TFuture<TResult<FNonUniformData>> EstimateContractCallGas(FContractCall ContractCall);
 	TFuture<TResult<FNonUniformData>> EstimateDeploymentGas(FAddress from, FString Bytecode);
 
 	TFuture<FAddress> DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
@@ -88,8 +88,8 @@ public:
 	
 	TFuture<TResult<uint64>> ChainId();
 
-	TFuture<TResult<FNonUniformData>> Call(ContractCall ContractCall, uint64 Number);
-	TFuture<TResult<FNonUniformData>> Call(ContractCall ContractCall, EBlockTag Number);
+	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, uint64 Number);
+	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, EBlockTag Number);
 	TFuture<TResult<FNonUniformData>> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
 
 };

@@ -4,7 +4,7 @@
 #include "Provider.h"
 
 #include "Crypto.h"
-#include "FEthTransaction.h"
+#include "EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "HttpManager.h"
@@ -285,7 +285,7 @@ TFuture<TResult<FNonUniformData>> Provider::GetGasPrice()
 	});
 }
 
-TFuture<TResult<FNonUniformData>> Provider::EstimateContractCallGas(ContractCall ContractCall)
+TFuture<TResult<FNonUniformData>> Provider::EstimateContractCallGas(FContractCall ContractCall)
 {
 	return Async(EAsyncExecution::Thread, [this, ContractCall]()
 	{
@@ -464,12 +464,12 @@ TFuture<TResult<uint64>> Provider::ChainId()
 	});
 }
 
-TFuture<TResult<FNonUniformData>> Provider::Call(ContractCall ContractCall, uint64 Number) //check if eth_call
+TFuture<TResult<FNonUniformData>> Provider::Call(FContractCall ContractCall, uint64 Number) //check if eth_call
 {
 	return CallHelper(ContractCall, ConvertInt(Number));
 }
 
-TFuture<TResult<FNonUniformData>> Provider::Call(ContractCall ContractCall, EBlockTag Number)
+TFuture<TResult<FNonUniformData>> Provider::Call(FContractCall ContractCall, EBlockTag Number)
 {
 	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
 }
@@ -480,7 +480,7 @@ TFuture<TResult<FNonUniformData>> Provider::NonViewCall(FEthTransaction transact
 	return SendRawTransaction("0x" + SignedTransaction.ToHex());
 }
 
-TResult<FNonUniformData> Provider::CallHelperSynchronous(ContractCall ContractCall, FString Number)
+TResult<FNonUniformData> Provider::CallHelperSynchronous(FContractCall ContractCall, FString Number)
 {
 	const auto Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
@@ -499,7 +499,7 @@ TResult<FNonUniformData> Provider::CallHelperSynchronous(ContractCall ContractCa
 	return MakeValue(HexStringToBinary(Data.GetValue()));
 }
 
-TFuture<TResult<FNonUniformData>> Provider::CallHelper(ContractCall ContractCall, FString Number)
+TFuture<TResult<FNonUniformData>> Provider::CallHelper(FContractCall ContractCall, FString Number)
 {
 	return Async(EAsyncExecution::Thread, [ContractCall, Number, this]
 	{
@@ -530,57 +530,7 @@ TResult<FNonUniformData> Provider::GetGasPriceSynchronous()
 			->EndArray()
 		->ToString();
 	
-
-	return MakeValue(JsonToTransactionReceipt(Json.GetValue()));
-}
-
-TResult<FBlockNonce> Provider::NonceAt(uint64 Number)
-{
-	return NonceAtHelper(ConvertInt(Number));
-}
-
-TResult<FBlockNonce> Provider::NonceAt(EBlockTag Tag)
-{
-	return NonceAtHelper(ConvertString(TagToString(Tag)));
-}
-
-void Provider::SendRawTransaction(FString data)
-{
-	const auto Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
-		->AddArray("params").ToPtr()
-			->AddString(data)
-			->EndArray()
-		->ToString();
-
-	SendRPC(Content);
-}
-
-TResult<uint64> Provider::ChainId()
-{
-	const auto Content = RPCBuilder("eth_chainId").ToString();
-	return ExtractUIntResult(SendRPC(Content));
-}
-
-TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, uint64 Number)
-{
-	return CallHelper(ContractCall, ConvertInt(Number));
-}
-
-TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, EBlockTag Number)
-{
-	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
-}
-
-TResult<FNonUniformData> Provider::CallHelper(FContractCall ContractCall, FString Number)
-{
-	const auto Content = RPCBuilder("eth_call").ToPtr()
-		->AddArray("params").ToPtr()
-			->AddValue(ContractCall.GetJson())
-			->AddValue(Number)
-			->EndArray()
-		->ToString();
-
-	auto Data = ExtractStringResult(SendRPC(Content));
+	auto Data = ExtractStringResult(SendRPC(Content).Get());
 
 	if(Data.HasError())
 	{
@@ -590,7 +540,7 @@ TResult<FNonUniformData> Provider::CallHelper(FContractCall ContractCall, FStrin
 	return MakeValue(HexStringToBinary(Data.GetValue()));
 }
 
-TResult<FNonUniformData> Provider::EstimateContractCallGasSynchronous(ContractCall ContractCall)
+TResult<FNonUniformData> Provider::EstimateContractCallGasSynchronous(FContractCall ContractCall)
 {
 	const auto Content = RPCBuilder("eth_estimateGas").ToPtr()
 			->AddArray("params").ToPtr()
