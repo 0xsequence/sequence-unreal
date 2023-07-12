@@ -7,7 +7,7 @@ uint8* BlankArray(ByteLength size)
 {
 	auto Arr = new uint8[size];
 
-	for(auto i = 0; i < size; i++)
+	for(auto i = 0u; i < size; i++)
 	{
 		Arr[i] = 0x00;
 	}
@@ -17,10 +17,14 @@ uint8* BlankArray(ByteLength size)
 
 void FBinaryData::Destroy()
 {
-	delete [] this->Arr;
+	if(this->Arr != nullptr)
+	{
+		delete [] this->Arr;
+		this->Arr = nullptr;
+	}
 }
 
-FString FBinaryData::ToHex()
+const FString FBinaryData::ToHex()
 {
 	if(Arr == nullptr)
 	{
@@ -35,6 +39,11 @@ void FBinaryData::Renew()
 	this->Arr = BlankArray(this->GetLength());
 }
 
+FNonUniformData FNonUniformData::Empty()
+{
+	return FNonUniformData{nullptr, 0};
+}
+
 FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)
 {
 	this->Arr = Arr;
@@ -43,7 +52,7 @@ FNonUniformData::FNonUniformData(uint8* Arr, ByteLength Length) : Length(Length)
 FNonUniformData FNonUniformData::Copy()
 {
 	auto NewArr = new uint8[Length];
-	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
+	for(auto i = 0u; i < Length; i++) NewArr[i] = Arr[i];
 	return FNonUniformData{NewArr, Length};
 }
 
@@ -66,7 +75,7 @@ FNonUniformData Trimmed(FBinaryData& Data)
 	auto empty_count = 0;
 	auto len = Data.GetLength();
 
-	for(auto i = 0; i < len; i++)
+	for(auto i = 0u; i < len; i++)
 	{
 		if(Data.Arr[i] == 0x00)
 		{
@@ -87,7 +96,7 @@ FNonUniformData Trimmed(FBinaryData& Data)
 	
 	const auto NewData = new uint8[NewLength];
 
-	for(auto i = 0; i < NewLength; i++)
+	for(auto i = 0u; i < NewLength; i++)
 	{
 		NewData[i] = Data.Arr[i + empty_count];
 	}
@@ -114,11 +123,6 @@ FHash256 FHash256::From(FString Str)
 	return From(HexStringToHash(Size, Str));
 }
 
-const ByteLength FHash256::GetLength()
-{
-	return Size;
-}
-
 FAddress FAddress::New()
 {
 	auto Data = FAddress{};
@@ -136,11 +140,6 @@ FAddress FAddress::From(uint8* Arr)
 FAddress FAddress::From(FString Str)
 {
 	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FAddress::GetLength()
-{
-	return Size;
 }
 
 FPublicKey FPublicKey::New()
@@ -162,10 +161,6 @@ FPublicKey FPublicKey::From(FString Str)
 	return From(HexStringToHash(Size, Str));
 }
 
-const ByteLength FPublicKey::GetLength()
-{
-	return Size;
-}
 
 FPrivateKey FPrivateKey::New()
 {
@@ -184,11 +179,6 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 FPrivateKey FPrivateKey::From(FString Str)
 {
 	return From(HexStringToHash(Size, Str));
-}
-
-const ByteLength FPrivateKey::GetLength()
-{
-	return Size;
 }
 
 FBloom FBloom::New()
@@ -210,11 +200,6 @@ FBloom FBloom::From(FString Str)
 	return From(HexStringToHash(Size, Str));
 }
 
-const ByteLength FBloom::GetLength()
-{
-	return Size;
-}
-
 FBlockNonce FBlockNonce::New()
 {
 	auto Data = FBlockNonce{};
@@ -234,14 +219,9 @@ FBlockNonce FBlockNonce::From(FString Str)
 	return From(HexStringToHash(Size, Str));
 }
 
-const ByteLength FBlockNonce::GetLength()
-{
-	return Size;
-}
-
 void FBlockNonce::Increment()
 {
-	for(auto i = 0; i < GetLength(); i--)
+	for(auto i = 0u; i < GetLength(); i--)
 	{
 		auto index = GetLength() - 1 - i;
 		this->Arr[index] += 1;
@@ -264,7 +244,7 @@ FNonUniformData StringToUTF8(FString String)
 	StringToBytes(String, binary.Arr, Length);
 
 	// I have no idea why I need to add 1 but it works
-	for(auto i = 0; i < binary.GetLength(); i++)
+	for(auto i = 0u; i < binary.GetLength(); i++)
 	{
 		binary.Arr[i] = binary.Arr[i] + 1;
 	}
@@ -275,22 +255,13 @@ FNonUniformData StringToUTF8(FString String)
 FString UTF8ToString(FNonUniformData BinaryData)
 {
 	TArray<uint8> Buffer;
-	for(auto i = 0; i < BinaryData.GetLength(); i++)
+	for(auto i = 0u; i < BinaryData.GetLength(); i++)
 	{
 		Buffer.Add(BinaryData.Arr[i]);
 	}
 	Buffer.Add('\0');
 	return reinterpret_cast<const char*>(Buffer.GetData());
 }
-
-FNonUniformData FUniformData::Copy()
-{
-	auto Length = GetLength();
-	auto NewArr = new uint8[Length];
-	for(auto i = 0; i < Length; i++) NewArr[i] = Arr[i];
-	return FNonUniformData{NewArr, Length};
-}
-
 FNonUniformData HexStringToBinary(const FString Hex)
 {
 	auto HexCopy = FString(Hex);

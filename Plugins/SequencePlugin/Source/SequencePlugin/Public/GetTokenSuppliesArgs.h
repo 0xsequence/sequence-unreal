@@ -17,5 +17,5 @@ public:
         FPage page;
 
     bool customGetter = false;
-    FString Get() { return""; };
+    FString Get() { return ""; }
 };

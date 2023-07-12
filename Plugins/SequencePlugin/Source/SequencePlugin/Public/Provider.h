@@ -10,10 +10,11 @@
 #include "Types/Header.h"
 #include "Http.h"
 #include "JsonBuilder.h"
-#include "Types/FTransactionReceipt.h"
+#include "Types/TransactionReceipt.h"
 #include "Types/Types.h"
+#include "EthTransaction.h"
 
-struct ContractCall;
+struct FContractCall;
 
 enum EBlockTag
 {
@@ -32,43 +33,65 @@ FString TagToString(EBlockTag Tag);
 class Provider
 {
 	FString Url;
-	TResult<TSharedPtr<FJsonObject>> GetBlockByNumberHelper(FString Number);
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	FString SendRPC(FString Content);
-	TResult<uint64> TransactionCountHelper(FAddress Address, FString Number);
+	TFuture<FString> SendRPC(FString Content);
 	static FJsonBuilder RPCBuilder(FString MethodName);
-	TResult<FHeader> HeaderByNumberHelper(FString Number);
-	TResult<FBlockNonce> NonceAtHelper(FString Number);
-	TResult<FNonUniformData> CallHelper(ContractCall ContractCall, FString Number);
-	
+
+//helpers
+	TFuture<TResult<TSharedPtr<FJsonObject>>> GetBlockByNumberHelper(FString Number);
+	TFuture<TResult<uint64>> TransactionCountHelper(FAddress Address, FString Number);
+	TResult<FHeader> HeaderByNumberHelperSynchronous(FString Number);
+	TFuture<TResult<FHeader>> HeaderByNumberHelper(FString Number);
+	TResult<FBlockNonce> NonceAtHelperSynchronous(FString Number);
+	TFuture<TResult<FBlockNonce>> NonceAtHelper(FString Number);
+	TFuture<TResult<FNonUniformData>> CallHelper(FContractCall ContractCall, FString Number);
+	TResult<FNonUniformData> CallHelperSynchronous(FContractCall ContractCall, FString Number);
+	TResult<FHeader> HeaderByHashSynchronous(FHash256 Hash);
+	TResult<FNonUniformData> GetGasPriceSynchronous();
+	TResult<FNonUniformData> EstimateContractCallGasSynchronous(FContractCall ContractCall);
+	TResult<FNonUniformData> EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode);
+	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
+	FAddress DeployContractSynchronousWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
+	TResult<FTransactionReceipt> TransactionReceiptSynchronous(FHash256 Hash);
+	TResult<uint64> ChainIdSynchronous();
+	TResult<FNonUniformData> SendRawTransactionSynchronous(FString data);
+
 public:
 	Provider(FString Url);
-	TResult<TSharedPtr<FJsonObject>> BlockByNumber(uint64 Number);
-	TResult<TSharedPtr<FJsonObject>> BlockByNumber(EBlockTag Tag);
-	TResult<TSharedPtr<FJsonObject>> BlockByHash(FHash256 Hash);
-	TResult<uint64> BlockNumber();
+	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
+	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(EBlockTag Tag);
+	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByHash(FHash256 Hash);
+	TFuture<TResult<uint64>> BlockNumber();
 
-	TResult<FHeader> HeaderByNumber(uint64 Id);
-	TResult<FHeader> HeaderByNumber(EBlockTag Tag);
-	TResult<FHeader> HeaderByHash(FHash256 Hash);
-
-	TResult<TSharedPtr<FJsonObject>> TransactionByHash(FHash256 Hash);
-	TResult<uint64> TransactionCount(FAddress Addr, uint64 Number);
-	TResult<uint64> TransactionCount(FAddress Addr, EBlockTag Tag);
-	TResult<FTransactionReceipt> TransactionReceipt(FHash256 Hash);
+	TFuture<TResult<FHeader>> HeaderByNumber(uint64 Id);
+	TFuture<TResult<FHeader>> HeaderByNumber(EBlockTag Tag);
+	TFuture<TResult<FHeader>> HeaderByHash(FHash256 Hash);
 	
-	TResult<FBlockNonce> NonceAt(uint64 Number);
-	TResult<FBlockNonce> NonceAt(EBlockTag Tag);
+	TFuture<TResult<TSharedPtr<FJsonObject>>> TransactionByHash(FHash256 Hash);
+	TFuture<TResult<uint64>> TransactionCount(FAddress Addr, uint64 Number);
+	TFuture<TResult<uint64>> TransactionCount(FAddress Addr, EBlockTag Tag);
+	TFuture<TResult<FTransactionReceipt>> TransactionReceipt(FHash256 Hash);
 
-	void SendRawTransaction(FString data);
+	TFuture<TResult<FNonUniformData>> GetGasPrice();
+	TFuture<TResult<FNonUniformData>> EstimateContractCallGas(FContractCall ContractCall);
+	TFuture<TResult<FNonUniformData>> EstimateDeploymentGas(FAddress from, FString Bytecode);
+
+	TFuture<FAddress> DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
+	TFuture<FAddress> DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
 	
-	TResult<uint64> ChainId();
+	TFuture<TResult<FBlockNonce>> NonceAt(uint64 Number);
+	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
+	TFuture<TResult<FNonUniformData>> SendRawTransaction(FString data);
+	
+	TFuture<TResult<uint64>> ChainId();
 
-	TResult<FNonUniformData> Call(ContractCall ContractCall, uint64 Number);
-	TResult<FNonUniformData> Call(ContractCall ContractCall, EBlockTag Number);
+	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, uint64 Number);
+	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, EBlockTag Number);
+	TFuture<TResult<FNonUniformData>> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
+
 };
 
 

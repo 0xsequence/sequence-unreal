@@ -35,9 +35,9 @@ FString UIndexer::HostName(int64 chainID)
 /*
 	Here we construct a post request and parse out a response if valid.
 */
-FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
+TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 {
-	FString response = "[NO RESPONSE]";
+	
 	//Now we create the post request
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 
@@ -48,21 +48,24 @@ FString UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
 	http_post_req->ProcessRequest();
 
-	double LastTime = FPlatformTime::Seconds();
-	while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
+	return Async(EAsyncExecution::Thread, [http_post_req, this, args]()
 	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+		double LastTime = FPlatformTime::Seconds();
+		while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
+		{
+			const double AppTime = FPlatformTime::Seconds();
+			FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+			LastTime = AppTime;
+			FPlatformProcess::Sleep(0.5f);
+		}
 
-	response = http_post_req.Get().GetResponse().Get()->GetContentAsString();
+		auto response = http_post_req.Get().GetResponse().Get()->GetContentAsString();
 
-	UE_LOG(LogTemp, Display, TEXT("Args in: %s"), *args);
+		UE_LOG(LogTemp, Display, TEXT("Args in: %s"), *args);
 
-	UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
-	return response;
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
+		return response;
+	});
 }
 
 void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
@@ -313,26 +316,29 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 
 bool UIndexer::Ping(int64 chainID)
 {
-	FPingReturn response = BuildResponse<FPingReturn>(HTTPPost(chainID, "Ping", ""));
+	FPingReturn response = BuildResponse<FPingReturn>(HTTPPost(chainID, "Ping", "").Get());
 	return response.status;
 }
 
 FVersion UIndexer::Version(int64 chainID)
 {
-	FVersionReturn response = BuildResponse<FVersionReturn>(HTTPPost(chainID, "Version", ""));
+	FVersionReturn response = BuildResponse<FVersionReturn>(HTTPPost(chainID, "Version", "").Get());
 	return response.version;
 }
 
 FRuntimeStatus UIndexer::RunTimeStatus(int64 chainID)
 {
-	FRuntimeStatusReturn response = BuildResponse<FRuntimeStatusReturn>(HTTPPost(chainID, "RuntimeStatus", ""));
+	FRuntimeStatusReturn response = BuildResponse<FRuntimeStatusReturn>(HTTPPost(chainID, "RuntimeStatus", "").Get());
 	return response.status;
 }
 
-int64 UIndexer::GetChainID(int64 chainID)
+TFuture<int64> UIndexer::GetChainID(int64 chainID)
 {
-	FGetChainIDReturn response = BuildResponse<FGetChainIDReturn>(HTTPPost(chainID, "GetChainID", ""));
-	return response.chainID;
+	return Async(EAsyncExecution::Thread, [this, chainID]
+	{
+		FGetChainIDReturn response = BuildResponse<FGetChainIDReturn>(HTTPPost(chainID, "GetChainID", "").Get());
+		return response.chainID;
+	});
 }
 
 void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
@@ -358,27 +364,27 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
 FGetTokenBalancesReturn UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args)
 {
-	return BuildResponse<FGetTokenBalancesReturn>(HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args)));
+	return BuildResponse<FGetTokenBalancesReturn>(HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args)).Get());
 }
 
 FGetTokenSuppliesReturn UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesReturn>(HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args)));
+	return BuildResponse<FGetTokenSuppliesReturn>(HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args)).Get());
 }
 
 FGetTokenSuppliesMapReturn UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesMapReturn>(HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args)));
+	return BuildResponse<FGetTokenSuppliesMapReturn>(HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args)).Get());
 }
 
 FGetBalanceUpdatesReturn UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args)
 {
-	return BuildResponse<FGetBalanceUpdatesReturn>(HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args)));
+	return BuildResponse<FGetBalanceUpdatesReturn>(HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args)).Get());
 }
 
 FGetTransactionHistoryReturn UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
 {
-	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args)));
+	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args)).Get());
 }
 
 void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
