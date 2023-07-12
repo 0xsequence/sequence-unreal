@@ -1,6 +1,6 @@
 #include "Crypto.h"
 #include "Types/BinaryData.h"
-#include "FEthTransaction.h"
+#include "EthTransaction.h"
 #include "HexUtility.h"
 #include "Provider.h"
 #include "Misc/AutomationTest.h"
@@ -14,7 +14,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCall, "Public.Tests.TestCall",
 
 bool TestCall::RunTest(const FString& Parameters)
 {
-	auto provider = Provider("http://localhost:3000/");
+	auto provider = Provider("http://localhost:8545"); 
 
 
 	auto res = provider.BlockByNumber(EBlockTag::Latest);
@@ -48,6 +48,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	//auto deployedAddress = provider.DeployContract(vm_byte_code, PRIVATE_KEY, CHAIN_ID);
 	//UE_LOG(LogTemp, Display, TEXT("The contract address is %s"), *(deployedAddress.ToHex()));
 	
+
 	auto transaction = FEthTransaction{
 		NONCE,
 		GASPRICE,

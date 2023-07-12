@@ -530,7 +530,57 @@ TResult<FNonUniformData> Provider::GetGasPriceSynchronous()
 			->EndArray()
 		->ToString();
 	
-	auto Data = ExtractStringResult(SendRPC(Content).Get());
+
+	return MakeValue(JsonToTransactionReceipt(Json.GetValue()));
+}
+
+TResult<FBlockNonce> Provider::NonceAt(uint64 Number)
+{
+	return NonceAtHelper(ConvertInt(Number));
+}
+
+TResult<FBlockNonce> Provider::NonceAt(EBlockTag Tag)
+{
+	return NonceAtHelper(ConvertString(TagToString(Tag)));
+}
+
+void Provider::SendRawTransaction(FString data)
+{
+	const auto Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddString(data)
+			->EndArray()
+		->ToString();
+
+	SendRPC(Content);
+}
+
+TResult<uint64> Provider::ChainId()
+{
+	const auto Content = RPCBuilder("eth_chainId").ToString();
+	return ExtractUIntResult(SendRPC(Content));
+}
+
+TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, uint64 Number)
+{
+	return CallHelper(ContractCall, ConvertInt(Number));
+}
+
+TResult<FNonUniformData> Provider::Call(FContractCall ContractCall, EBlockTag Number)
+{
+	return CallHelper(ContractCall, ConvertString(TagToString(Number)));
+}
+
+TResult<FNonUniformData> Provider::CallHelper(FContractCall ContractCall, FString Number)
+{
+	const auto Content = RPCBuilder("eth_call").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddValue(ContractCall.GetJson())
+			->AddValue(Number)
+			->EndArray()
+		->ToString();
+
+	auto Data = ExtractStringResult(SendRPC(Content));
 
 	if(Data.HasError())
 	{

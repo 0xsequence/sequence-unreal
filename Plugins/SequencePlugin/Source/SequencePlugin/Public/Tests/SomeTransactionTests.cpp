@@ -1,7 +1,7 @@
+#include "EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "Provider.h"
-#include "FEthTransaction.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SomeTransactionTests, "Public.Tests.SomeTransactionTests",
@@ -10,13 +10,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(SomeTransactionTests, "Public.Tests.SomeTransac
 bool SomeTransactionTests::RunTest(const FString& Parameters)
 {
 	// constants for the transaction
-	auto NONCE = FBlockNonce::From("5");
-	auto GASPRICE= HexStringToBinary("12"); // "0x4A817C800";
-	auto GASLIMIT = HexStringToBinary("200000");
+	auto NONCE = FBlockNonce::From("9");
+	auto GASPRICE= HexStringToBinary("4A817C800"); // "0x4A817C800";
+	auto GASLIMIT = HexStringToBinary("5208");
 	auto TO = FAddress::From("3535353535353535353535353535353535353535");
-	auto VALUE = HexStringToBinary("1"); // 0xDE0B6B3A7640000;
-	auto PRIVATE_KEY = FPrivateKey::From("abc0000000000000000000000000000000000000000000000000000000000001");
-	auto CHAIN_ID = 0; //1337;
+	auto VALUE = HexStringToBinary("de0b6b3a7640000"); // 0xDE0B6B3A7640000;
+	auto PRIVATE_KEY = FPrivateKey::From("0x4646464646464646464646464646464646464646464646464646464646464646"); //"abc0000000000000000000000000000000000000000000000000000000000001");
+	auto CHAIN_ID = 1; //1337;
 	auto DATA = HexStringToBinary("");
 	
 	auto provider = Provider("http://localhost:8545/");
@@ -62,8 +62,8 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 			HexStringToBinary("0x000005f5e100"),
 			HexStringToBinary("200000"),
 			 FAddress::From("3535353535353535353535353535353535353535"),
-			HexStringToBinary("1"),
-			HexStringToBinary(""),
+			VALUE,
+			DATA,
 		}.GetSignedTransaction(PRIVATE_KEY, CHAIN_ID)
 		.ToHex()
 	 ).Wait();

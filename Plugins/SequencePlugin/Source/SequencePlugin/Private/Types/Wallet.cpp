@@ -1,4 +1,5 @@
-#include "Types/FWallet.h"
+#include "Types/Wallet.h"
+#include "EthTransaction.h"
 
 FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
 {

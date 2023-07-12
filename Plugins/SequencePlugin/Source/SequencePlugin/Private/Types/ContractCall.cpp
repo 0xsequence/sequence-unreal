@@ -3,7 +3,7 @@
 #include "HexUtility.h"
 #include "JsonBuilder.h"
 
-FString ContractCall::GetJson()
+FString FContractCall::GetJson()
 {
 	auto json = FJsonBuilder();
 
