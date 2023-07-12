@@ -1,5 +1,6 @@
 #include "Crypto.h"
 
+#include "HexUtility.h"
 #include "RLP.h"
 #include "Types/BinaryData.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
@@ -38,9 +39,11 @@ FHash256 GetKeccakHash(FBinaryData& Data)
 
 FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce)
 {
-	const auto RLPArray = new RLPItem[]{Itemize(Sender), Itemize(Nonce)};
+	auto NonceStr = TrimHex(Nonce.ToHex());
+	const auto RLPArray = new RLPItem[]{Itemize(Sender), Itemize(HexStringToBinary(NonceStr))};
 	const auto Items = Itemize(RLPArray, 2);
 	auto Data = RLP::Encode(Items);
+	UE_LOG(LogTemp, Display, TEXT("Nonce %s RLP is %s"),*Nonce.ToHex(), *Data.ToHex())
 	delete [] RLPArray;
 	const auto Hash = GetKeccakHash(Data);
 

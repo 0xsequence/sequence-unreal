@@ -1,19 +1,23 @@
 #pragma once
 #include "Types/BinaryData.h"
 #include "Types/Types.h"
+#include "ABI/ABITypes.h"
 
 inline uint8 GMethodIdByteLength = 4;
 inline uint8 GBlockByteLength = 32;
+FNonUniformData NewEmptyBlock();
 
 enum EABIArgType
 {
 	STATIC, // Integers, bytes, and hashes
-	BYTES,
+	BYTES, 
 	STRING,
 	ARRAY,
+	FIXED // Like array, but no size attribute
+	//Address,
 };
 
-FString TypeToString(EABIArgType Type);
+FString TypeToString(EABIArgType Type);	
 
 struct FABIArg
 {
@@ -46,8 +50,13 @@ struct FABIArg
 class ABI
 {
 public:
-	static FNonUniformData Encode(FString Method, FABIArg* Args, uint8 ArgNum);
-	static void Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
+	static void ParseMethod(FString& Method);
+	static FNonUniformData Encode(FString Method, TArray<FABIProperty*> &Args);
+	static FNonUniformData EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum);
+	static FNonUniformData EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum);
+	static void DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
+	static void DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
+	static void Decode(FNonUniformData Data, TArray<FABIProperty*> &Args);
 };
 
 void CopyInUint32(uint8* BlockPtr, uint32 Value);

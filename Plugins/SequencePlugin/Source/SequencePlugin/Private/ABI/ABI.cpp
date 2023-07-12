@@ -1,17 +1,34 @@
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4146)
 #pragma warning(disable: 4104)
-#include "ABI.h"
+#include "ABI/ABI.h"
 
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+
+FNonUniformData NewEmptyBlock()
+{
+	auto block = FNonUniformData
+	{
+		new uint8[GBlockByteLength],
+		GBlockByteLength
+	};
+
+	for(auto i = 0; i < GBlockByteLength; i++)
+	{
+		block.Arr[i] = 0x00;
+	}
+
+	return block;
+}
 
 FString TypeToString(EABIArgType Type)
 {
 	if(Type == STATIC) return "Static";
 	if(Type == STRING) return "String";
 	if(Type == BYTES) return "Bytes";
+	if(Type == FIXED) return "Fixed";
 	return "Array";
 }
 
@@ -19,7 +36,7 @@ uint8 FABIArg::GetBlockNum() const
 {
 	if(this->Type == STATIC)
 	{
-		return 1;
+		return (this->Length + GBlockByteLength - 1) / GBlockByteLength;
 	} 
 
 	auto BlockCount = 2;
@@ -31,13 +48,18 @@ uint8 FABIArg::GetBlockNum() const
 		return BlockCount + (this->Length - 1 + GBlockByteLength) / GBlockByteLength;
 	}
 
-	// For Arrays we must count through elements
+	// For Arrays and Fixed we must count through elements
 	for(auto i = 0; i < this->Length; i++)
 	{
 		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
 		FABIArg Item = Arr[i];
 
 		BlockCount += Item.GetBlockNum();
+	}
+
+	if(this->Type == FIXED)
+	{
+		BlockCount -= 1; // No need for size parameter
 	}
 
 	return BlockCount;
@@ -57,10 +79,10 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
-			HeadPtr[GBlockByteLength - this->Length + i] = RawData[i];
+			HeadPtr[GBlockByteLength * this->GetBlockNum() - this->Length + i] = RawData[i];
 		}
 		
-		*Head = &HeadPtr[1 * GBlockByteLength];
+		*Head = &HeadPtr[this->GetBlockNum() * GBlockByteLength];
 		return;
 	}
 
@@ -76,6 +98,7 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		
 		for(auto i = 0; i < this->Length; i++)
 		{
+			// UE_LOG(LogTemp, Display, TEXT("the raw data at %i is %i"), i, RawData[i]);
 			TailPtr[GBlockByteLength + i] = RawData[i];
 		}
 		
@@ -103,6 +126,26 @@ void FABIArg::Encode(uint8* Start, uint8** Head, uint8** Tail)
 		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
 		return;
 	}
+
+	if(this->Type == FIXED)
+	{
+		CopyInUint32(HeadPtr, Offset * GBlockByteLength);
+		*Head = &HeadPtr[1 * GBlockByteLength];
+		
+		auto SubHead = &TailPtr[0];
+		auto SubTail = &TailPtr[GBlockByteLength * (this->Length)];
+
+		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
+		
+		for(auto i = 0; i < this->Length; i++)
+		{
+			FABIArg Item = Arr[i];
+			Item.Encode(&TailPtr[0], &SubHead, &SubTail);
+		}
+
+		*Tail = &TailPtr[GBlockByteLength * (this->GetBlockNum() - 1)];
+		return;
+	}
 }
 
 FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
@@ -110,10 +153,9 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 	
 	if(this->Type == STATIC)
 	{
-		this->Length = 1;
-		this->Data = new uint8[GBlockByteLength];
+		this->Data = new uint8[this->Length];
 
-		for(auto i = 0; i < GBlockByteLength; i++)
+		for(auto i = 0; i < this->Length; i++)
 		{
 			static_cast<uint8*>(this->Data)[i] = Head[i];
 		}
@@ -152,6 +194,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
 		auto ModelArg = Arr[0];
 		delete [] Arr;
+		
 
 		Arr = new FABIArg[this->Length];
 
@@ -160,16 +203,48 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 			auto SubStart = &DataPtr[GBlockByteLength];
 			auto SubHead = &DataPtr[GBlockByteLength * (i + 1)];
 			Arr[i].Type = ModelArg.Type;
+			Arr[i].Length = ModelArg.Length;
 
 			// Must preserve our model
-			if(ModelArg.Type == ARRAY)
+			if(ModelArg.Type == ARRAY || ModelArg.Type == FIXED)
 			{
-				Arr[i].Data = new FABIArg{*static_cast<FABIArg*>(ModelArg.Data)};
+				Arr[i].Data = ModelArg.Data;
 			}
 			
 			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
 		}
+
+		this->Data = Arr;
 		
+		return *this;
+	}
+
+	if(this->Type == FIXED)
+	{
+		// We know the length of fixed items!
+		
+		FABIArg* Arr = static_cast<FABIArg*>(this->Data);
+		auto Models = Arr;
+
+		Arr = new FABIArg[this->Length];
+
+		for(auto i = 0; i < this->Length; i++)
+		{
+			auto SubStart = &DataPtr[0];
+			auto SubHead = &DataPtr[GBlockByteLength * (i)];
+			Arr[i].Type = Models[i].Type;
+			Arr[i].Length = Models[i].Length;
+
+			// Must preserve our model
+			if(Models[i].Type == ARRAY || Models[i].Type == FIXED)
+			{
+				Arr[i].Data = Models[i].Data;
+			}
+			
+			Arr[i] = Arr[i].Decode(TrueStart, SubStart, SubHead);
+		}
+
+		delete [] Models;
 		this->Data = Arr;
 		
 		return *this;
@@ -277,7 +352,30 @@ FABIArg FABIArg::New(FABIArg* Array, uint32 Length)
 	return FABIArg{ARRAY, Length, Array};
 }
 
-FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
+void ABI::ParseMethod(FString& Method)
+{
+	FString searchText1 = "int,";
+	FString replaceText1 = "int256,";
+	Method.ReplaceInline(*searchText1, *replaceText1, ESearchCase::CaseSensitive);
+	FString searchText2 = "int[";
+	FString replaceText2 = "int256[";
+	Method.ReplaceInline(*searchText2, *replaceText2, ESearchCase::CaseSensitive);
+	FString searchText3 = "int)";
+	FString replaceText3 = "int256)";
+	Method.ReplaceInline(*searchText3, *replaceText3, ESearchCase::CaseSensitive);
+	FString searchText4 = "fixed,";
+	FString replaceText4 = "fixed128x18,";
+	Method.ReplaceInline(*searchText4, *replaceText4, ESearchCase::CaseSensitive);
+	FString searchText5 = "fixed[";
+	FString replaceText5 = "fixed128x18[";
+	Method.ReplaceInline(*searchText5, *replaceText5, ESearchCase::CaseSensitive);
+	FString searchText6 = "fixed)";
+	FString replaceText6 = "fixed128x18)";
+	Method.ReplaceInline(*searchText6, *replaceText6, ESearchCase::CaseSensitive);
+
+}
+
+FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
 	
@@ -296,13 +394,19 @@ FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
 	}
 
 	auto Signature = FHash256::New();
+	ParseMethod(Method);
+	UE_LOG(LogTemp, Display, TEXT("Parsed method: %s"), *Method);
+	
 	auto Msg = StringToUTF8(Method);
+	
 	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
 
 	for(auto i = 0; i < GMethodIdByteLength; i++)
 	{
 		Blocks[i] = Signature.Arr[i];
 	}
+
+	//UE_LOG(LogTemp, Display, TEXT("%s"), *Signature.ToHex());
 
 	// Free calculation data
 	Signature.Destroy();
@@ -323,7 +427,52 @@ FNonUniformData ABI::Encode(FString Method, FABIArg* Args, uint8 ArgNum)
 	};
 }
 
-void ABI::Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+FNonUniformData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
+{
+	auto BlockNum = 0;
+	
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		auto Arg = Args[i];
+		BlockNum += Arg.GetBlockNum();
+	}
+
+	uint32 TotalByteLength = (GBlockByteLength * BlockNum);
+	uint8* Blocks = new uint8[TotalByteLength];
+
+	for(auto i = 0; i < TotalByteLength; i++)
+	{
+		Blocks[i] = 0;
+	}
+
+	uint8* HeadPtr = &Blocks[0];
+	uint8* Start = HeadPtr;
+	uint8* TailPtr = &Blocks[GBlockByteLength * ArgNum];
+
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		auto Arg = Args[i];
+		Arg.Encode(Start, &HeadPtr, &TailPtr);
+	}
+
+	return FNonUniformData{
+		Blocks, TotalByteLength
+	};
+}
+
+FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
+{
+	const auto Size = Args.Num();
+	FABIArg* Arr = new FABIArg[Size];
+
+	for(auto i = 0; i < Size; i++)
+	{
+		Arr[i] = (Args[i]->Serialize());
+	}
+	return EncodeArgs(Method, Arr, Size);
+}
+
+void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{
@@ -333,6 +482,33 @@ void ABI::Decode(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 	}
 }
 
+void ABI::DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+{
+	for(auto i = 0; i < ArgNum; i++)
+	{
+		uint8* Start = &Data.Arr[0];
+		uint8* Head = &Data.Arr[0 + (i * GBlockByteLength)];
+		Args[i] = Args[i].Decode(Data.Arr, Start, Head);
+	}
+}
+
+void ABI::Decode(FNonUniformData Data, TArray<FABIProperty*>& Args)
+{
+	const auto Size = Args.Num();
+	FABIArg* Arr = new FABIArg[Size];
+
+	for(auto i = 0; i < Size; i++)
+	{
+		Arr[i] = (Args[i]->BlankArg());
+	}
+	
+	DecodeArgs(Data, Arr, Size);
+
+	for(auto i = 0; i < Size; i++)
+	{
+		Args[i]->Deserialize(Arr[i]);
+	}
+}
 
 
 void CopyInUint32(uint8* BlockPtr, uint32 Value)
@@ -354,3 +530,4 @@ uint32 CopyOutUint32(uint8* BlockPtr)
 
 	return Value;
 }
+

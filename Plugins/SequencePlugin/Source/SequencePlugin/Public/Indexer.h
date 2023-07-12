@@ -45,7 +45,7 @@ private:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	FString HTTPPost(int64 chainID, FString endpoint, FString args);
+	TFuture<FString> HTTPPost(int64 chainID, FString endpoint, FString args);
 
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
@@ -117,7 +117,7 @@ public:
 	/*
 		Used to get the chainID from the sequence app
 	*/
-	int64 GetChainID(int64 chainID);
+	TFuture<int64> GetChainID(int64 chainID);
 
 	/*
 		Used to get the Ether balance from the sequence app

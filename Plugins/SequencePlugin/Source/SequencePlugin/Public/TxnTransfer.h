@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "TokenMetaData.h"
 #include "Indexer_Enums.h"
+#include "ContractInfo.h"
 #include "TxnTransfer.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FTxnTransfer
