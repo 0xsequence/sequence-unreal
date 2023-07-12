@@ -102,17 +102,17 @@ public:
 	/*
 		Used to get a ping back from the sequence app
 	*/
-	bool Ping(int64 chainID);
+	TFuture<bool> Ping(int64 chainID);
 
 	/*
 		Used to get version data back from the sequence app
 	*/
-	FVersion Version(int64 chainID);
+	TFuture<FVersion> Version(int64 chainID);
 
 	/*
 		Used to get the runtime status of the sequence app
 	*/
-	FRuntimeStatus RunTimeStatus(int64 chainID);
+	TFuture<FRuntimeStatus> RunTimeStatus(int64 chainID);
 
 	/*
 		Used to get the chainID from the sequence app
