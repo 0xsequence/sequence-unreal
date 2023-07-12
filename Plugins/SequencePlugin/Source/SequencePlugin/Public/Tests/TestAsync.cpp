@@ -29,6 +29,11 @@ bool TestAsync::RunTest(const FString& Parameters)
 		auto Data = Async(EAsyncExecution::Thread, LateHello);
 		Print(Data.Get());
 	}).Wait();
+
+	auto MyFuture = Async(EAsyncExecution::Thread, LateHello);
+	TFunction<void (FString)> Func = Print;
+	Pipe(MyFuture, Func).Wait();
+
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

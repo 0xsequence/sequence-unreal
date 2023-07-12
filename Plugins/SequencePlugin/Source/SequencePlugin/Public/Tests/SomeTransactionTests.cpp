@@ -16,7 +16,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 	auto TO = FAddress::From("3535353535353535353535353535353535353535");
 	auto VALUE = HexStringToBinary("de0b6b3a7640000"); // 0xDE0B6B3A7640000;
 	auto PRIVATE_KEY = FPrivateKey::From("0x4646464646464646464646464646464646464646464646464646464646464646"); //"abc0000000000000000000000000000000000000000000000000000000000001");
-	auto CHAIN_ID = 1; //1337;
+	auto CHAIN_ID = 1337; //1337;
 	auto DATA = HexStringToBinary("");
 	
 	auto provider = Provider("http://localhost:8545/");
