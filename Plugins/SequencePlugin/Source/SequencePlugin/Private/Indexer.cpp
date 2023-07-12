@@ -2,6 +2,8 @@
 
 
 #include "Indexer.h"
+
+#include "Async.h"
 #include "JsonBuilder.h"
 
 UIndexer::UIndexer()
@@ -314,31 +316,32 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 	return img;
 }
 
-bool UIndexer::Ping(int64 chainID)
+TFuture<bool> UIndexer::Ping(int64 chainID)
 {
-	FPingReturn response = BuildResponse<FPingReturn>(HTTPPost(chainID, "Ping", "").Get());
-	return response.status;
+	auto Request = HTTPPost(chainID, "Ping", "");
+	TFunction<bool(FString)> MakeResponse = [this](FString Input){return BuildResponse<FPingReturn>(Input).status;}
+	return PipeAsync(Request, MakeResponse);
 }
 
-FVersion UIndexer::Version(int64 chainID)
+TFuture<FVersion> UIndexer::Version(int64 chainID)
 {
-	FVersionReturn response = BuildResponse<FVersionReturn>(HTTPPost(chainID, "Version", "").Get());
-	return response.version;
+	auto Request = HTTPPost(chainID, "Version", "");
+	TFunction<FVersion(FString)> MakeResponse = [this](FString Input){return BuildResponse<FVersionReturn>(Input).version;};
+	return PipeAsync(Request, MakeResponse);
 }
 
-FRuntimeStatus UIndexer::RunTimeStatus(int64 chainID)
+TFuture<FRuntimeStatus> UIndexer::RunTimeStatus(int64 chainID)
 {
-	FRuntimeStatusReturn response = BuildResponse<FRuntimeStatusReturn>(HTTPPost(chainID, "RuntimeStatus", "").Get());
-	return response.status;
+	auto Request = HTTPPost(chainID, "RuntimeStatus", "");
+	TFunction<FRuntimeStatus (FString)> MakeResponse = [this](FString Input){return  BuildResponse<FRuntimeStatusReturn>(Input).status;};
+	return PipeAsync(Request, MakeResponse);
 }
 
 TFuture<int64> UIndexer::GetChainID(int64 chainID)
 {
-	return Async(EAsyncExecution::Thread, [this, chainID]
-	{
-		FGetChainIDReturn response = BuildResponse<FGetChainIDReturn>(HTTPPost(chainID, "GetChainID", "").Get());
-		return response.chainID;
-	});
+	auto Request = HTTPPost(chainID, "GetChainID", "");
+	TFunction<int64 (FString)> MakeResponse = [this](FString Input){return BuildResponse<FGetChainIDReturn>(Input).chainID;};
+	return PipeAsync(Request, MakeResponse);
 }
 
 void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)

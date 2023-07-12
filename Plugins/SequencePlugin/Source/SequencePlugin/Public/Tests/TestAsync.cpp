@@ -18,6 +18,15 @@ FString LateHello()
 	return "Hello World";
 }
 
+class MyClass
+{
+public:
+	void MyPrint(FString Input)
+	{
+		UE_LOG(LogTemp, Display, TEXT("MyClass is printing %s"), *Input);
+	}
+};
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAsync, "Public.Tests.TestAsync",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -30,9 +39,11 @@ bool TestAsync::RunTest(const FString& Parameters)
 		Print(Data.Get());
 	}).Wait();
 
+	MyClass MyObject = MyClass();
+
 	auto MyFuture = Async(EAsyncExecution::Thread, LateHello);
-	TFunction<void (FString)> Func = Print;
-	Pipe(MyFuture, Func).Wait();
+	TFunction<void (FString)> Func = [&MyObject](FString Input){MyObject.MyPrint(Input);};
+	SendAsync(MyFuture, Func).Wait();
 
 	
 	// Make the test pass by returning true, or fail by returning false.
