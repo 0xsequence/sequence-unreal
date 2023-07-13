@@ -319,7 +319,7 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 TFuture<bool> UIndexer::Ping(int64 chainID)
 {
 	auto Request = HTTPPost(chainID, "Ping", "");
-	TFunction<bool(FString)> MakeResponse = [this](FString Input){return BuildResponse<FPingReturn>(Input).status;}
+	TFunction<bool(FString)> MakeResponse = [this](FString Input){return BuildResponse<FPingReturn>(Input).status;};
 	return PipeAsync(Request, MakeResponse);
 }
 
