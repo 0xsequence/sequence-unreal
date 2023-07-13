@@ -130,27 +130,27 @@ public:
 	/*
 		Gets the token balances from the sequence app
 	*/
-	FGetTokenBalancesReturn GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args);
+	TFuture<FGetTokenBalancesReturn> GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args);
 
 	/*
 		gets the token supplies from the sequence app
 	*/
-	FGetTokenSuppliesReturn GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args);
+	TFuture<FGetTokenSuppliesReturn> GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args);
 
 	/*
 		gets the token supplies map from the sequence app
 	*/
-	FGetTokenSuppliesMapReturn GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args);
+	TFuture<FGetTokenSuppliesMapReturn> GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args);
 	
 	/*
 		Get the balance updates from the sequence app
 	*/
-	FGetBalanceUpdatesReturn GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args);
+	TFuture<FGetBalanceUpdatesReturn> GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args);
 
 	/*
 		get transaction history from the sequence app
 	*/
-	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
+	TFuture<FGetTransactionHistoryReturn> GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
 
 	/*
 	* Used for making Async requests!

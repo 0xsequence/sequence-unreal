@@ -37,7 +37,7 @@ class Provider
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	TFuture<FString> SendRPC(FString Content);
+	void SendRPC(FString Content, TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError);
 	static FJsonBuilder RPCBuilder(FString MethodName);
 
 //helpers
