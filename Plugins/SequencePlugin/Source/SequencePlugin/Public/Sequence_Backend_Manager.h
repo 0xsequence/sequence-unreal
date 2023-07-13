@@ -7,6 +7,7 @@
 #include "Http.h"
 #include "ObjectHandler.h"
 #include "Backend.h"
+#include "BE_Structs.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
