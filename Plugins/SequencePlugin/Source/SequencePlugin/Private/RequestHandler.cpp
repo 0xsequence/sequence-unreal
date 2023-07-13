@@ -58,25 +58,20 @@ URequestHandler* URequestHandler::WithContentAsString(const FString Content)
 
 // This is a hacky way to make it synchronous
 // TODO: Find a better method
-TFuture<FString> URequestHandler::Process()
+FHttpRequestCompleteDelegate& URequestHandler::Process() const
 {
 	Request->ProcessRequest();
+	return Request->OnProcessRequestComplete();
+}
 
-	auto Future = Async(EAsyncExecution::Thread, [this]()
+void URequestHandler::ProcessAndThen(TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError)
+{
+	Process().BindLambda([&Consumer](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
-		double LastTime = FPlatformTime::Seconds();
-		while(EHttpRequestStatus::Processing == Request->GetStatus())
-		{
-			const double AppTime = FPlatformTime::Seconds();
-			FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-			LastTime = AppTime;
-			FPlatformProcess::Sleep(0.5f);
-		}
-
+		
+		
 		return Request->GetResponse()->GetContentAsString();
 	});
-
-	return Future;
 }
 
 

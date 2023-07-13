@@ -106,15 +106,15 @@ TResult<uint64> Provider::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-TFuture<FString> Provider::SendRPC(FString Content)
+void Provider::SendRPC(FString Content, TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError)
 {
-	return NewObject<URequestHandler>()
+	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->Process();
+		->ProcessAndThen(OnSuccess, OnError);
 }
 
 TFuture<TResult<uint64>> Provider::TransactionCountHelper(FAddress Address, FString Number)

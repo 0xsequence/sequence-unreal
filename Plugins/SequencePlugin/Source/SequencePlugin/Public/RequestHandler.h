@@ -32,5 +32,6 @@ public:
 	URequestHandler* WithContentAsString(FString Content);
 
 	// Process
-	TFuture<FString> Process();
+	FHttpRequestCompleteDelegate& Process() const;
+	void ProcessAndThen(TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError);
 };

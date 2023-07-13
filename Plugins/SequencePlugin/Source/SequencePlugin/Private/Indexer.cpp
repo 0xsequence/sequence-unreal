@@ -58,7 +58,7 @@ TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString arg
 			const double AppTime = FPlatformTime::Seconds();
 			FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
 			LastTime = AppTime;
-			FPlatformProcess::Sleep(0.5f);
+			FPlatformProcess::Sleep(0.25f);
 		}
 
 		auto response = http_post_req.Get().GetResponse().Get()->GetContentAsString();
@@ -199,7 +199,7 @@ TArray<UTexture2D*> UIndexer::testing()
 	args.filter = filter;
 	args.includeMetaData = true;
 
-	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args);
+	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args).Get();
 	UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
 
 	GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
@@ -365,29 +365,39 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
-FGetTokenBalancesReturn UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args)
+TFuture<FGetTokenBalancesReturn> UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args)
 {
-	return BuildResponse<FGetTokenBalancesReturn>(HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args)).Get());
+	TFuture<FString> Request = HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args));
+	TFunction<FGetTokenBalancesReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTokenBalancesReturn>(Input); };
+	return PipeAsync(Request, MakeResponse);
 }
 
-FGetTokenSuppliesReturn UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args)
+TFuture<FGetTokenSuppliesReturn> UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesReturn>(HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args)).Get());
+	TFuture<FString> Request = HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args));
+	TFunction<FGetTokenSuppliesReturn (FString)> MakeResponse = [this](FString Input){ return BuildResponse<FGetTokenSuppliesReturn>(Input); };
+	return PipeAsync(Request, MakeResponse);
 }
 
-FGetTokenSuppliesMapReturn UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args)
+TFuture<FGetTokenSuppliesMapReturn> UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args)
 {
-	return BuildResponse<FGetTokenSuppliesMapReturn>(HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args)).Get());
+	TFuture<FString> Request = HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args));
+	TFunction<FGetTokenSuppliesMapReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTokenSuppliesMapReturn>(Input); };
+	return PipeAsync(Request, MakeResponse);
 }
 
-FGetBalanceUpdatesReturn UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args)
+TFuture<FGetBalanceUpdatesReturn> UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args)
 {
-	return BuildResponse<FGetBalanceUpdatesReturn>(HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args)).Get());
+	TFuture<FString> Request = HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args));
+	TFunction<FGetBalanceUpdatesReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetBalanceUpdatesReturn>(Input); };
+	return PipeAsync(Request, MakeResponse);
 }
 
-FGetTransactionHistoryReturn UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
+TFuture<FGetTransactionHistoryReturn> UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
 {
-	return BuildResponse<FGetTransactionHistoryReturn>(HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args)).Get());
+	TFuture<FString> Request = HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args));
+	TFunction<FGetTransactionHistoryReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTransactionHistoryReturn>(Input); };
+	return PipeAsync(Request, MakeResponse);
 }
 
 void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
