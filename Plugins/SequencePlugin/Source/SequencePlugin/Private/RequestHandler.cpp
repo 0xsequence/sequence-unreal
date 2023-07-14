@@ -64,13 +64,19 @@ FHttpRequestCompleteDelegate& URequestHandler::Process() const
 	return Request->OnProcessRequestComplete();
 }
 
-void URequestHandler::ProcessAndThen(TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError)
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure)
 {
-	Process().BindLambda([&Consumer](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	Process().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
-		
-		
-		return Request->GetResponse()->GetContentAsString();
+		if(bWasSuccessful)
+		{
+			auto Content = Request->GetResponse()->GetContentAsString();
+			OnSuccess(Content);
+		}
+		else
+		{
+			OnFailure(Request->GetResponse());
+		}
 	});
 }
 
