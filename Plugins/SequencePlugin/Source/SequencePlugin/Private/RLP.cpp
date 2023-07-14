@@ -1,3 +1,4 @@
+#pragma warning(disable: 4018)
 #include "RLP.h"
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
