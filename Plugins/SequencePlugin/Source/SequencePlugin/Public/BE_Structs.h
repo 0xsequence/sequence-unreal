@@ -269,6 +269,52 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct FCoinTxn_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FCoin_BE coin;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float amount;
+};
+
+USTRUCT(BlueprintType)
+struct FNFTTxn_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FNFTDetails_BE nft;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        int32 amount;//can't have half a card so int32 maybe 64?
+};
+
+USTRUCT(BlueprintType)
+struct FTransactionHistoryItem_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString network_name;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* network_icon;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString other_public_address;//the other person involved in the transaction
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* other_icon;//the other persons icon
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TEnumAsByte<ETXNType> transaction_type;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FMonthDayYear_BE transaction_date;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FCoinTxn_BE> txn_history_coins;//the list of coins in the txn history item!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFTTxn_BE> txn_history_nfts;//the list of nfts in the txn history item!
+};
+
+
+USTRUCT(BlueprintType)
 struct FUserData_BE
 {
     GENERATED_USTRUCT_BODY()
@@ -299,4 +345,6 @@ public:
         TArray<FCoin_BE> coins;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FNetwork_BE> networks;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FTransactionHistoryItem_BE> transaction_history;
 };
