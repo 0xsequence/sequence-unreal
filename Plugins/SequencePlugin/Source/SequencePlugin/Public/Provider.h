@@ -37,7 +37,11 @@ class Provider
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	void SendRPC(FString Content, TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError);
+	void SendRPC(FString Content, TFunction<void (FString)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure);
+
+	template<typename T>
+	void SendRPCAndExtract(FString Content, TFunction<void (T)> OnSuccess, TFunction<TResult<T> (FString)> Extractor, TFunction<void (FHttpResponsePtr)> OnFailure);
+	
 	static FJsonBuilder RPCBuilder(FString MethodName);
 
 //helpers
@@ -63,8 +67,8 @@ public:
 	Provider(FString Url);
 	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
 	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(EBlockTag Tag);
-	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByHash(FHash256 Hash);
-	TFuture<TResult<uint64>> BlockNumber();
+	void BlockByHash(FHash256 Hash, TFunction<void (TSharedPtr<FJsonObject>)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure);
+	void BlockNumber(TFunction<void (uint64)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure);
 
 	TFuture<TResult<FHeader>> HeaderByNumber(uint64 Id);
 	TFuture<TResult<FHeader>> HeaderByNumber(EBlockTag Tag);
@@ -93,5 +97,20 @@ public:
 	TFuture<TResult<FNonUniformData>> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
 
 };
+
+template <typename T>
+void Provider::SendRPCAndExtract(FString Content, TFunction<void(T)> OnSuccess,
+	TFunction<TResult<T>(FString)> Extractor, TFunction<void(FHttpResponsePtr)> OnFailure)
+{
+	SendRPC(Content, [&OnSuccess, &Extractor](FString Result)
+	{
+		auto Value = Extractor(Result);
+
+		if(Value.hasValue())
+		{
+			OnSuccess(Value.getValue());
+		}
+	}, OnFailure);
+}
 
 

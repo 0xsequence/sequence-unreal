@@ -106,7 +106,7 @@ TResult<uint64> Provider::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-void Provider::SendRPC(FString Content, TFunction<FString> OnSuccess, TFunction<FHttpResponsePtr> OnError)
+void Provider::SendRPC(FString Content, TFunction<void (FString)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnError)
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -154,7 +154,7 @@ TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::BlockByNumber(EBlockTag Tag)
 	return GetBlockByNumberHelper(ConvertString(TagToString(Tag)));
 }
 
-TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::BlockByHash(FHash256 Hash)
+void Provider::BlockByHash(FHash256 Hash, TFunction<void (TSharedPtr<FJsonObject>)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure)
 {
 	const auto Content = RPCBuilder("eth_getBlockByHash").ToPtr()
 		->AddArray("params").ToPtr()
@@ -162,19 +162,26 @@ TFuture<TResult<TSharedPtr<FJsonObject>>> Provider::BlockByHash(FHash256 Hash)
 			->AddBool(true)
 			->EndArray()
 		->ToString();
-	return Async(EAsyncExecution::Thread, [this, Content]
-	{
-		return ExtractJsonObjectResult(SendRPC(Content).Get());
-	});
+
+	SendRPCAndExtract<TSharedPtr<FJsonObject>>(Content,
+		OnSuccess,
+		[this](FString Result)
+		{
+			return ExtractJsonObjectResult(Result);
+		},
+		OnFailure);
 }
 
-TFuture<TResult<uint64>> Provider::BlockNumber()
+void Provider::BlockNumber(TFunction<void (uint64)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure)
 {
 	const auto Content = RPCBuilder("eth_blockNumber").ToString();
-	return Async(EAsyncExecution::Thread, [this, Content]
-	{
-		return ExtractUIntResult(SendRPC(Content).Get());
-	});
+	SendRPCAndExtract<uint64>(Content,
+		OnSuccess,
+		[this](FString Result)
+		{
+			return ExtractUIntResult(Result);
+		},
+		OnFailure);
 }
 
 TResult<FHeader> Provider::HeaderByNumberHelperSynchronous(FString Number)
