@@ -23,11 +23,15 @@ struct FNetwork_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Network_Name;
+        FString network_name;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Network_Symbol;
+        bool is_default;//default selected network need at least 1
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FNetworkProfileSetting_BE Network_Settings;
+        FNetworkProfileSetting_BE default_network_settings;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FNetworkProfileSetting_BE current_network_settings;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* network_icon;
 };
 
 USTRUCT(BlueprintType)
@@ -262,4 +266,37 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNFTDetails_BE NFT_Details;
 
+};
+
+USTRUCT(BlueprintType)
+struct FUserData_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString username;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString email;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        int32 account_id;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float account_balance;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString public_address;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* profile_image;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString email_service;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FContact_BE> contacts;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        bool hide_unlisted_tokens;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        bool hide_unlisted_collectibles;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFT_BE> nfts;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FCoin_BE> coins;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNetwork_BE> networks;
 };
