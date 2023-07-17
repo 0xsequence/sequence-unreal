@@ -113,6 +113,31 @@ void ASequence_Backend_Manager::dec_request_count()
 	}
 }
 
+void ASequence_Backend_Manager::init_user_data()
+{
+	UE_LOG(LogTemp, Display, TEXT("[UserData Fetch INITIATED]"));
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate; // Delegate to bind function with parameters
+	FUserData_BE user_data_ret;
+	Delegate.BindUFunction(this, "update_user_data", user_data_ret);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 15), false);
+}
+
+void ASequence_Backend_Manager::init_signin(FString email)
+{
+	UE_LOG(LogTemp, Display, TEXT("[Signin Request Initiated]"));//first chunk simulates signin request code gen
+	FTimerHandle TH_signin_delay;
+	FTimerDelegate Delegate;
+	const FString oob_code = "123456";
+	Delegate.BindUFunction(this, "update_signin",oob_code);
+	GetWorld()->GetTimerManager().SetTimer(TH_signin_delay, Delegate, FMath::RandRange(1, 5), false);
+
+	FTimerHandle TH_auth_delay;//second chunk simulates successful login
+	FTimerDelegate Delegate_2;
+	Delegate_2.BindUFunction(this, "update_authentication", true);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2, FMath::RandRange(6, 15), false);
+}
+
 void ASequence_Backend_Manager::get_txn_imgs_manager()
 {
 	this->reset_request_count();
@@ -195,6 +220,15 @@ void ASequence_Backend_Manager::testing_network_infrastructures()
 
 
 	http_post_req->ProcessRequest();
+}
+
+void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state)
+{
+	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate; // Delegate to bind function with parameters
+	Delegate.BindUFunction(this, "update_authentication", true);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,15), false);
 }
 
 void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
