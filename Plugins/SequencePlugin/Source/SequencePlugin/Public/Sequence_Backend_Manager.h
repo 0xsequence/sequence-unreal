@@ -71,18 +71,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Get_From_Clipboard();
-
-	/*
-	* Used to initiate a passwordless signin!
-	* @param FString email (email in)
-	* @return the Oob code to be displayed for the user to enter on the site login!
-	* NOTE: for the code we are expecting 6 digits!
-	* 
-	* ***DEPRECATED SWITCHING TO ASYNC VERSION ONCE ASYNC COMES ONLINE***
-	* 
-	*/
-	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		FString Signin(FString email);
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
@@ -123,12 +111,18 @@ public:
 	/*
 	* Used to let the frontend know if authentication succeeded or not
 	* in an async. manner
+	* 
+	* if authenticated is false the we failed to auth the user or timed out
+	* if authenticated is true we successfully authenticated the user and we need to signal the ui that
+	* we are ready for next steps
+	* 
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Authentication")
 		void update_authentication(bool authenticated);
 
 	/*
 	* Used to init. a call to fetch user data in an async manner
+	* Once user data struct is built we send it up with update_user_data(user_data_struct)
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "UserData")
 		void init_user_data();
@@ -140,9 +134,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "UserData")
 		void update_user_data(const FUserData_BE &user_data);
 
+	/*
+	* Used to initate the signin process from the frontend
+	* This call will make 2 calls
+	* 1) to generate an oob code and send that back to the front end
+	* 2) a call to authenticate user credentials in relation to the oob code that was sent out
+	* If authentication succeeds we send update_authentication(true)
+	* If authentication fails (times out / error) we send update_authentication(false)
+	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="Signin")
 		void init_signin(FString email);
 
+	/*
+	* Used to tell the frontend that the signin process has been initiated and the code here is present!
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
 		void update_signin(const FString &oob_code);
 
