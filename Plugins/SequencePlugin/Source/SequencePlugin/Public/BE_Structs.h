@@ -348,3 +348,18 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FTransactionHistoryItem_BE> transaction_history;
 };
+
+USTRUCT(BlueprintType)
+struct FStoredState_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString public_address;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString email;//not sure if we actually need this
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FActiveSession_BE> active_Sessions;//we may only need the one session?
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FSystemSession_BE> system_sessions;
+};
