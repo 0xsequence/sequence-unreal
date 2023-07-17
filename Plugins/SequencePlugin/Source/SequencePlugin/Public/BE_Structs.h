@@ -4,6 +4,12 @@
 #include "BE_Enums.h"
 #include "BE_Structs.generated.h"
 
+
+/*
+* Used to store connected network settings
+* info
+*/
+
 USTRUCT(BlueprintType)
 struct FNetworkProfileSetting_BE
 {
@@ -17,6 +23,10 @@ public:
         FString Block_Explorer_URL;
 };
 
+/*
+* Stores all of a networks data including a
+* FNetwork_Profile_BE
+*/
 USTRUCT(BlueprintType)
 struct FNetwork_BE
 {
@@ -34,6 +44,11 @@ public:
         UTexture2D* network_icon;
 };
 
+/*
+* Subject to change but stores
+* a system sessions data this seems to be
+* specific to the computing system ie) wintel or arm mac os for example
+*/
 USTRUCT(BlueprintType)
 struct FSystemSession_BE
 {
@@ -49,6 +64,11 @@ public:
         FNetwork_BE Network;
 };
 
+
+/*
+* Stores active session data not sure how this differs from system session data
+* outside that it may be independent of platform specific details
+*/
 USTRUCT(BlueprintType)
 struct FActiveSession_BE
 {
@@ -68,6 +88,10 @@ public:
         FNetwork_BE Network;
 };
 
+/*
+* The data struct I use to store contact data
+* critical data is the public address
+*/
 USTRUCT(BlueprintType)
 struct FContact_BE
 {
@@ -81,6 +105,10 @@ public:
         UTexture2D* Profile_Icon;
 };
 
+/*
+* Used to store fee data that the user
+* must pay if they wish to conduct an on chain txn
+*/
 USTRUCT(BlueprintType)
 struct FFee_BE
 {
@@ -102,6 +130,9 @@ public:
         float Fee_Value;
 };
 
+/*
+* this maybe deprecated
+*/
 USTRUCT(BlueprintType)
 struct FFiatCurrency_BE
 {
@@ -117,6 +148,12 @@ public:
         float Mult;//NOP value for right now until I know how currency data is structured
 };
 
+/*
+* This stores data about a currency
+* note for the various currency symbols there maybe some
+* manual input of utf-8 or utf-16 char symbols in order for those to appear correctly in
+* the front
+*/
 USTRUCT(BlueprintType)
 struct FSelectableCurrency_BE
 {
@@ -132,6 +169,17 @@ public:
         float Mult;//NOP value for right now until I know how currency data is structured
 };
 
+/*
+* Used to store an entry in a history txn,
+* a single history txn may have many of these!
+* NOTE: the follow entries may not always need to be populated in the case of coin based history items
+* 1) token_collection_name (coins aren't apart of collections)
+* 2) Collection_Short_name (coins aren't apart of collections) double note short names are abreviated main names
+* 3) collection icon
+* 
+* NOTE: this is used more so for frontend use rather than backend use
+* 
+*/
 USTRUCT(BlueprintType)
 struct FHistoryElement_BE
 {
@@ -157,6 +205,10 @@ public:
         TEnumAsByte<EHistoryItemType> History_Item_Type;
 };
 
+/*
+* This will probably change to something more accurate in the future but 
+* good enough for now
+*/
 USTRUCT(BlueprintType)
 struct FMonthDayYear_BE
 {
@@ -170,6 +222,10 @@ public:
         int32 Year;
 };
 
+/*
+* This is history specific to token collections
+* this is used more so for frontend use rather than backend parsing
+*/
 USTRUCT(BlueprintType)
 struct FTokenHistoryCollection_BE
 {
@@ -189,6 +245,9 @@ public:
         TEnumAsByte<ETXNType> TXN_Type;//this enum consists of send,receive,swap the base txnTransfer type only has send and receive!
 };
 
+/*
+* This is how coin data is stored in system
+*/
 USTRUCT(BlueprintType)
 struct FCoin_BE
 {
@@ -214,7 +273,9 @@ public:
         FString Coin_Standard;//ERC 1155, etc
 };
 
-
+/*
+* Specific details about nft's
+*/
 USTRUCT(BlueprintType)
 struct FNFTDetails_BE
 {
@@ -234,6 +295,9 @@ public:
         UTexture2D* Network_Icon;
 };
 
+/*
+* this is how nft data is stored in system
+*/
 USTRUCT(BlueprintType)
 struct FNFT_BE
 {
@@ -268,6 +332,9 @@ public:
 
 };
 
+/*
+* this is how coin based transactions can get stored
+*/
 USTRUCT(BlueprintType)
 struct FCoinTxn_BE
 {
@@ -279,6 +346,9 @@ public:
         float amount;
 };
 
+/*
+* this is how nft based txn's are stored
+*/
 USTRUCT(BlueprintType)
 struct FNFTTxn_BE
 {
@@ -290,6 +360,11 @@ public:
         int32 amount;//can't have half a card so int32 maybe 64?
 };
 
+/*
+* this is how a single transaction is stored
+* we build out the specifics of date time etc,
+* then store a list of coinTXN's and tokenTXN's as members of this struct
+*/
 USTRUCT(BlueprintType)
 struct FTransactionHistoryItem_BE
 {
