@@ -77,6 +77,9 @@ public:
 	* @param FString email (email in)
 	* @return the Oob code to be displayed for the user to enter on the site login!
 	* NOTE: for the code we are expecting 6 digits!
+	* 
+	* ***DEPRECATED SWITCHING TO ASYNC VERSION ONCE ASYNC COMES ONLINE***
+	* 
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Signin(FString email);
@@ -110,6 +113,38 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
 		void testing_network_infrastructures();
+
+	/*
+	* Used to initiate a stored authentication call from the frontend
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "Authentication")
+		void init_authentication(FStoredState_BE stored_state);
+
+	/*
+	* Used to let the frontend know if authentication succeeded or not
+	* in an async. manner
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Authentication")
+		void update_authentication(bool authenticated);
+
+	/*
+	* Used to init. a call to fetch user data in an async manner
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "UserData")
+		void init_user_data();
+
+	/*
+	* Used to update the frontend with the supplied user data
+	* in an async manner
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "UserData")
+		void update_user_data(const FUserData_BE &user_data);
+
+	UFUNCTION(BlueprintCallable, CATEGORY="Signin")
+		void init_signin(FString email);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
+		void update_signin(const FString &oob_code);
 
 	void get_txn_imgs_manager();
 
