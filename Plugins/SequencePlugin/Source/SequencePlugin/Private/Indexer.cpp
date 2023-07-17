@@ -41,6 +41,8 @@ TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString arg
 {
 	
 	//Now we create the post request
+	/*
+
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 
 	http_post_req->SetVerb("POST");
@@ -68,6 +70,11 @@ TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString arg
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
 		return response;
 	});
+	*/
+
+	TFuture<FString> ret;
+	ret.Get() = "place holder response";
+	return ret;
 }
 
 void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
