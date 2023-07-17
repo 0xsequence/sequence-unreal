@@ -51,17 +51,6 @@ void ASequence_Backend_Manager::Tick(float DeltaTime)
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 /*
-* Initiates the passwordless signin process
-*/
-FString ASequence_Backend_Manager::Signin(FString email)
-{
-	this->user_email = email;
-	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
-
-	return "";
-}
-
-/*
 	Used to copy data to the systems clipboard!
 */
 void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
