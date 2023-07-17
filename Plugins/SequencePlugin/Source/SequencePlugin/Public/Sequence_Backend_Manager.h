@@ -108,6 +108,9 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "ASYNC")
 		void get_transaction_imgs();
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
+		void testing_network_infrastructures();
+
 	void get_txn_imgs_manager();
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]

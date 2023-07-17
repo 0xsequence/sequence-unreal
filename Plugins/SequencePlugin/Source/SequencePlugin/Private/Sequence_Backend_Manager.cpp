@@ -165,8 +165,36 @@ void ASequence_Backend_Manager::get_transaction_imgs()
 //	AsyncTask(ENamedThreads::AnyThread, [this]()
 	//{
 			// This code will run asynchronously, without freezing the game thread
-			this->get_txn_imgs_manager();
+			//this->get_txn_imgs_manager();
 	//});
+}
+
+void ASequence_Backend_Manager::testing_network_infrastructures()
+{
+	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+
+	http_post_req->SetVerb("POST");
+	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
+	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetURL("https://www.google.ca");
+	http_post_req->SetContentAsString("{ some bad json }");//args will need to be a json object converted to a string
+	
+	http_post_req.Get().OnProcessRequestComplete().BindLambda([&](FHttpRequestPtr Req, FHttpResponsePtr Response, bool IsSuccessful)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Lambda called!"));
+			if (IsSuccessful)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Success!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed!"));
+			}
+		});
+
+
+
+	http_post_req->ProcessRequest();
 }
 
 void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
