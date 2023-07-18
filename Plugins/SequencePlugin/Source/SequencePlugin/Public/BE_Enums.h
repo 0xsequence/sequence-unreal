@@ -16,5 +16,6 @@ UENUM(BlueprintType)
 enum EHistoryItemType
 {
 	Currency UMETA(DisplayName = "Currency"),
-	Token UMETA(DisplayName = "Token")
+	Token UMETA(DisplayName = "Token"),
+	Collection UMETA(DisplayName = "Collection")
 };
