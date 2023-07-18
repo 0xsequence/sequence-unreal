@@ -337,7 +337,7 @@ struct FNFTTxn_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FNFTDetails_BE nft;
+        FNFT_BE nft;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         int32 amount;//can't have half a card so int32 maybe 64?
 };
