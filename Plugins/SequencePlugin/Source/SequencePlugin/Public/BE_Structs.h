@@ -152,7 +152,7 @@ public:
 };
 
 /*
-* Used to store an entry in a history txn,
+* Used to store a generic entry in a history txn,
 * a single history txn may have many of these!
 * NOTE: the follow entries may not always need to be populated in the case of coin based history items
 * 1) token_collection_name (coins aren't apart of collections)
