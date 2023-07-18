@@ -131,24 +131,6 @@ public:
 };
 
 /*
-* this maybe deprecated
-*/
-USTRUCT(BlueprintType)
-struct FFiatCurrency_BE
-{
-    GENERATED_USTRUCT_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Long_Name;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Short_Name;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Symbol;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Mult;//NOP value for right now until I know how currency data is structured
-};
-
-/*
 * This stores data about a currency
 * note for the various currency symbols there maybe some
 * manual input of utf-8 or utf-16 char symbols in order for those to appear correctly in
