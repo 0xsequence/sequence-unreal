@@ -404,6 +404,27 @@ public:
         TArray<FTransactionHistoryItem_BE> transaction_history;
 };
 
+/*
+* I keep session data seperate from user data in this case
+* as when we hit the frontend this needs to get seperated anyway
+*/
+USTRUCT(BlueprintType)
+struct FSystemData_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FUserData_BE user_data;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FActiveSession_BE> active_sessions_list;//the first item in this list is the current session!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FSystemSession_BE> system_sessions_list;//the first item in this list is the current system session!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FSelectableCurrency_BE> currency_list;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FSelectableCurrency_BE selected_currency;//the selected currency the user is currently using!
+};
+
 USTRUCT(BlueprintType)
 struct FStoredState_BE
 {

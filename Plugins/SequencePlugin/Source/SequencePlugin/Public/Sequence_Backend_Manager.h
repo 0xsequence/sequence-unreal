@@ -121,18 +121,18 @@ public:
 		void update_authentication(bool authenticated);
 
 	/*
-	* Used to init. a call to fetch user data in an async manner
-	* Once user data struct is built we send it up with update_user_data(user_data_struct)
+	* Used to init. a call to fetch all system data needed by frontend in an async manner
+	* Once system data struct is built we send it up with update_system_data(FSystemData_BE)
 	*/
-	UFUNCTION(BlueprintCallable, CATEGORY = "UserData")
-		void init_user_data();
+	UFUNCTION(BlueprintCallable, CATEGORY = "SystemData")
+		void init_system_data();
 
 	/*
-	* Used to update the frontend with the supplied user data
+	* Used to update the frontend with the supplied system data
 	* in an async manner
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "UserData")
-		void update_user_data(const FUserData_BE &user_data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
+		void update_system_data(const FSystemData_BE &system_data);
 
 	/*
 	* Used to initate the signin process from the frontend
