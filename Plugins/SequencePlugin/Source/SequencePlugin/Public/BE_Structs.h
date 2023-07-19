@@ -246,11 +246,11 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         float Coin_Value;//per 1 coin!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Amount;//parser in frontend
+        FString Formatted_Amount;//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Total_Value;//perser in frontend
+        FString Formatted_Total_Value;//perser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Single_Value;//parser in frontend
+        FString Formatted_Single_Value;//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Coin_Standard;//ERC 1155, etc
 };
@@ -302,9 +302,9 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         float Value;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Total_Value;//Parser in frontend
+        FString Formatted_Total_Value;//Parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Single_Value;//Parser in frontend
+        FString Formatted_Single_Value;//Parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Description;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -382,8 +382,6 @@ public:
         FString email;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         int32 account_id;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float account_balance;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString public_address;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
