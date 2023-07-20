@@ -2,6 +2,8 @@
 
 
 #include "RequestHandler.h"
+
+#include "Async.h"
 #include "Http.h"
 #include "HttpManager.h"
 
@@ -64,7 +66,7 @@ FHttpRequestCompleteDelegate& URequestHandler::Process() const
 	return Request->OnProcessRequestComplete();
 }
 
-void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure)
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FailureCallback OnFailure)
 {
 	Process().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
@@ -75,7 +77,7 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFunct
 		}
 		else
 		{
-			OnFailure(Request->GetResponse());
+			OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
 		}
 	});
 }

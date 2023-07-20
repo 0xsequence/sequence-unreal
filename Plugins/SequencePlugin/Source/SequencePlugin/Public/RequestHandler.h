@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async.h"
 #include "Interfaces/IHttpRequest.h"
 #include "UObject/Object.h"
 #include "RequestHandler.generated.h"
@@ -33,5 +34,5 @@ public:
 
 	// Process
 	FHttpRequestCompleteDelegate& Process() const;
-	void ProcessAndThen(TFunction<void (FString)> OnSuccess, TFunction<void (FHttpResponsePtr)> OnFailure);
+	void ProcessAndThen(TFunction<void (FString)> OnSuccess, FailureCallback OnFailure);
 };
