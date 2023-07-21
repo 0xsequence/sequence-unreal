@@ -190,7 +190,7 @@ void ASequence_Backend_Manager::init_send_txn(FTxn_BE txn_data)
 	FTimerDelegate Delegate;
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
-	callback.txn_id_hash = txn_data.txn_id_hash;
+	callback.txn_hash_id = txn_data.txn_hash_id;
 	Delegate.BindUFunction(this, "update_txn",callback);
 	GetWorld()->GetTimerManager().SetTimer(TH_txn_delay, Delegate,FMath::RandRange(5,30), false);
 }
