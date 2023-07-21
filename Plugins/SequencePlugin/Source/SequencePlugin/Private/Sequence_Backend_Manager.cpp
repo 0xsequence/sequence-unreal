@@ -73,6 +73,14 @@ FString ASequence_Backend_Manager::Get_From_Clipboard()
 	return ret_data;
 }
 
+FString ASequence_Backend_Manager::get_transaction_hash()
+{
+	FString txn_hash = "0x";
+	int32 txn_value = FMath::RandRange(1, 65536);
+	txn_hash.AppendInt(txn_value);
+	return txn_hash;
+}
+
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
@@ -98,7 +106,6 @@ void ASequence_Backend_Manager::dec_request_count()
 	if (req_count == 0)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Done Fetching Images sending them to front!"));
-		this->update_transaction_imgs(this->fetched_imgs);
 	}
 }
 
@@ -175,16 +182,17 @@ void ASequence_Backend_Manager::get_txn_imgs_manager()
 	}
 }
 
-
-
-void ASequence_Backend_Manager::get_transaction_imgs()
+void ASequence_Backend_Manager::init_send_txn(FTxn_BE txn_data)
 {
-	//testing async stuff
-//	AsyncTask(ENamedThreads::AnyThread, [this]()
-	//{
-			// This code will run asynchronously, without freezing the game thread
-			//this->get_txn_imgs_manager();
-	//});
+	//dummy function for right now we just call back the update_txn with some pseudo random state!
+	UE_LOG(LogTemp, Display, TEXT("[Txn Request Initiated]"));//first chunk simulates signin request code gen
+	FTimerHandle TH_txn_delay;
+	FTimerDelegate Delegate;
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_id_hash = txn_data.txn_id_hash;
+	Delegate.BindUFunction(this, "update_txn",callback);
+	GetWorld()->GetTimerManager().SetTimer(TH_txn_delay, Delegate,FMath::RandRange(5,30), false);
 }
 
 void ASequence_Backend_Manager::testing_network_infrastructures()

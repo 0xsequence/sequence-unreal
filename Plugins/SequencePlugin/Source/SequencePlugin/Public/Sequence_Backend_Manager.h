@@ -71,16 +71,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Get_From_Clipboard();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+		FString get_transaction_hash();
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-
-	/*
-	* Meant to be overriden in blueprints to give the plugin access to the needed data!
-	* @param the ether balance fetched from get_ether_balance()
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent,CATEGORY = "FUNCTION")
-		void update_ether_balance(int64 ether_balance);//DO NOT ADD A BODY HERE THIS IS MEANT TO BE OVERRIDDEN IN BP'S
 
 	/*
 	* This is meant to initiate an ASYNC request with the backend
@@ -90,14 +86,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		void get_ether_balance();//uses the signed in account address
-
-
-	//testing the async fetching process
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent,CATEGORY = "FUNCTION")
-		void update_transaction_imgs(const TArray<UTexture2D *> &imgs);
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "ASYNC")
-		void get_transaction_imgs();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
 		void testing_network_infrastructures();
@@ -153,6 +141,17 @@ public:
 
 	void get_txn_imgs_manager();
 
+	/*
+	* Used to initalize a send transaction!
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_send_txn(FTxn_BE txn_data);
+
+	/*
+	* Used to let the frontend know if a txn went through or not!
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
+		void update_txn(FTxnCallback_BE txn_callback);
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 //Fetching Functions

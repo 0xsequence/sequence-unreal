@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "BE_Enums.h"
+#include "Indexer_Enums.h"
 #include "BE_Structs.generated.h"
 
 
@@ -484,4 +485,59 @@ public:
         TArray<FActiveSession_BE> active_Sessions;//we may only need the one session?
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FSystemSession_BE> system_sessions;
+};
+
+/*
+* Used by the frontend to keep track of a pending txn's
+* state! The idea is when a txn is initiated the UI will update to a 
+* state where it will assume the TXN went through. A request will go out
+* to the backend with this TXN data gathered from the UI / backend requests for getting a txn hash!
+* then at some point in the future the backend will let us know whether to commit the TXN if it went
+* through OR Undo the TXN if it failed to process
+*/
+USTRUCT(BlueprintType)
+struct FPendingTxn_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString txn_hash_id;//we use this to uniquely identify this transaction!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float value;//true state value of the txn for a send this should be negative!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString item_name;//the name of the item that is involved in the txn! NOTE this is for frontend usage!
+};
+
+
+/*
+* Used to let the frontend know what the final state of a given pending txn is!
+*/
+USTRUCT(BlueprintType)
+struct FTxnCallback_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString txn_id_hash;//the unique txn_id_hash of a pending txn!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        bool good_txn;//whether our txn went through or not!
+};
+
+USTRUCT(BlueprintType)
+struct FTxn_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString txn_id_hash;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString contact_public_addr;//the contact we are sending this too!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float amount;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float value;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FFee_BE fee;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
 };
