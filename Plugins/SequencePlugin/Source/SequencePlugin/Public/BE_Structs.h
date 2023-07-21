@@ -266,9 +266,9 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString External_URL;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Contract_Address;
+        FString token_id;//this doesn't need to be set here and will be maintained up front
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 Token_ID;
+        FString Contract_Address;//this doesn't need to be set here and will be maintained up front
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Token_Standard;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -314,6 +314,52 @@ public:
 
 };
 
+USTRUCT(BlueprintType)
+struct FNFT_UData_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString token_id;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString contract_address;
+};
+
+
+/*
+* This data struct is specially crafted to maximally reduce the amount of 
+* redundent data stored within the system and vastly improving the memory footprint!
+*/
+USTRUCT(BlueprintType)
+struct FNFT_Master_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    //Duplicate Data that all NFT's of this type will have!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* NFT_Icon;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString NFT_Name;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString NFT_Short_Name;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString Collection_Long_Name;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString Collection_Short_Name;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* Collection_Icon;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float Value;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString Description;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TMap<FString, FString> Properties;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FNFTDetails_BE NFT_Details;//we need also these details EXCEPT token ID and Contract addr in here
+    //we can get the correct contract & token_id hashes from the FNFT_UData_BE list below!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFT_UData_BE> nft_data;//this is the list of unique data for each NFT!
+};
 /*
 * this is how coin based transactions can get stored
 */
@@ -395,7 +441,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         bool hide_unlisted_collectibles;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FNFT_BE> nfts;
+        TArray<FNFT_Master_BE> nfts;//we send the NFT_Master_BE to initialize NFT data upfront!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FCoin_BE> coins;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
