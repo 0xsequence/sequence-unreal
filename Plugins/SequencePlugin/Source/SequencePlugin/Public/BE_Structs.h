@@ -316,7 +316,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FNFT_UData_BE
+struct FNFT_UData_BE//this is the unique data of an nft!
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -506,6 +506,8 @@ public:
         float value;//true state value of the txn for a send this should be negative!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString item_name;//the name of the item that is involved in the txn! NOTE this is for frontend usage!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FNFT_UData_BE nft_u_data;//this is specific for tokens as when we are pending a txn we also could be consuming this too!
 };
 
 
@@ -518,7 +520,7 @@ struct FTxnCallback_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_id_hash;//the unique txn_id_hash of a pending txn!
+        FString txn_hash_id;//the unique txn_id_hash of a pending txn!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         bool good_txn;//whether our txn went through or not!
 };
@@ -529,7 +531,7 @@ struct FTxn_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_id_hash;
+        FString txn_hash_id;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString contact_public_addr;//the contact we are sending this too!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -540,4 +542,6 @@ public:
         FFee_BE fee;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FNFT_UData_BE nft_u_data;//for nft based txn's! we need this too!
 };
