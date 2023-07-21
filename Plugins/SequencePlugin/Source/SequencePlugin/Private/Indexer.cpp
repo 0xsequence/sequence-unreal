@@ -429,7 +429,6 @@ void UIndexer::get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Respo
 		Response = Request.Get()->GetResponse();
 		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
 		FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(rep_content);//build our response!
-		this->bck_mngr->update_ether_balance(response.balance.balanceWei);//let the backend know we are done!
 	}
 	else
 	{
