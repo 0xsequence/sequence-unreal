@@ -58,7 +58,7 @@ bool TestCall::RunTest(const FString& Parameters)
 		DATA,
 	};
 
-	UE_LOG(LogTemp, Display, TEXT("Transaction Hash:"), *transaction.GetTransactionHash(CHAIN_ID).ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Transaction Hash:"), *transaction.GetUnsignedTransactionHash(CHAIN_ID).ToHex());
 
 	//get gas price nonce and gas amount
 	TResult<uint64> val =  provider.TransactionCount(FAddress::From("c683a014955b75F5ECF991d4502427c8fa1Aa249"), EBlockTag::Latest).Get();

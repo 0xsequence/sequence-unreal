@@ -37,7 +37,7 @@ FString UIndexer::HostName(int64 chainID)
 /*
 	Here we construct a post request and parse out a response if valid.
 */
-TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args)
+void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, SuccessCallback<FString> OnSuccess, FailureCallback OnFailure)
 {
 	
 	//Now we create the post request
@@ -48,26 +48,21 @@ TFuture<FString> UIndexer::HTTPPost(int64 chainID, FString endpoint, FString arg
 	http_post_req->SetHeader("Accept", "application/json");
 	http_post_req->SetURL(this->Url(chainID, endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
-	http_post_req->ProcessRequest();
 
-	return Async(EAsyncExecution::Thread, [http_post_req, this, args]()
+	http_post_req->OnProcessRequestComplete().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
-		double LastTime = FPlatformTime::Seconds();
-		while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
+		if(bWasSuccessful)
 		{
-			const double AppTime = FPlatformTime::Seconds();
-			FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-			LastTime = AppTime;
-			FPlatformProcess::Sleep(0.25f);
+			auto Content = Request->GetResponse()->GetContentAsString();
+			OnSuccess(Content);
 		}
-
-		auto response = http_post_req.Get().GetResponse().Get()->GetContentAsString();
-
-		UE_LOG(LogTemp, Display, TEXT("Args in: %s"), *args);
-
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"),*response);
-		return response;
+		else
+		{
+			OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+		}
 	});
+	
+	http_post_req->ProcessRequest();
 }
 
 void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
@@ -316,32 +311,35 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 	return img;
 }
 
-TFuture<bool> UIndexer::Ping(int64 chainID)
+void UIndexer::Ping(int64 chainID, SuccessCallback<bool> OnSuccess, FailureCallback OnFailure)
 {
-	auto Request = HTTPPost(chainID, "Ping", "");
-	TFunction<bool(FString)> MakeResponse = [this](FString Input){return BuildResponse<FPingReturn>(Input).status;};
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "Ping", "", [this, &OnSuccess](FString Content) {
+		OnSuccess(BuildResponse<FPingReturn>(Content).status);
+	}, OnFailure);
 }
 
-TFuture<FVersion> UIndexer::Version(int64 chainID)
+void UIndexer::Version(int64 chainID, SuccessCallback<FVersion> OnSuccess, FailureCallback OnFailure)
 {
-	auto Request = HTTPPost(chainID, "Version", "");
-	TFunction<FVersion(FString)> MakeResponse = [this](FString Input){return BuildResponse<FVersionReturn>(Input).version;};
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "Version", "", [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FVersionReturn>(Content).version);
+	}, OnFailure);
 }
 
-TFuture<FRuntimeStatus> UIndexer::RunTimeStatus(int64 chainID)
+void UIndexer::RunTimeStatus(int64 chainID, SuccessCallback<FRuntimeStatus> OnSuccess, FailureCallback OnFailure)
 {
-	auto Request = HTTPPost(chainID, "RuntimeStatus", "");
-	TFunction<FRuntimeStatus (FString)> MakeResponse = [this](FString Input){return  BuildResponse<FRuntimeStatusReturn>(Input).status;};
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "RuntimeStatus", "", [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FRuntimeStatusReturn>(Content).status);
+	}, OnFailure);
 }
 
-TFuture<int64> UIndexer::GetChainID(int64 chainID)
+void UIndexer::GetChainID(int64 chainID, SuccessCallback<int64> OnSuccess, FailureCallback OnFailure)
 {
-	auto Request = HTTPPost(chainID, "GetChainID", "");
-	TFunction<int64 (FString)> MakeResponse = [this](FString Input){return BuildResponse<FGetChainIDReturn>(Input).chainID;};
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetChainID", "", [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetChainIDReturn>(Content).chainID);
+	}, OnFailure);
 }
 
 void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
@@ -365,39 +363,44 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
-TFuture<FGetTokenBalancesReturn> UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args)
+void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, SuccessCallback<FGetTokenBalancesReturn> OnSuccess, FailureCallback OnFailure)
 {
-	TFuture<FString> Request = HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args));
-	TFunction<FGetTokenBalancesReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTokenBalancesReturn>(Input); };
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args), [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetTokenBalancesReturn>(Content));
+	}, OnFailure);
 }
 
-TFuture<FGetTokenSuppliesReturn> UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args)
+void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, SuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FailureCallback OnFailure)
 {
-	TFuture<FString> Request = HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args));
-	TFunction<FGetTokenSuppliesReturn (FString)> MakeResponse = [this](FString Input){ return BuildResponse<FGetTokenSuppliesReturn>(Input); };
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args), [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetTokenSuppliesReturn>(Content));
+	}, OnFailure);
 }
 
-TFuture<FGetTokenSuppliesMapReturn> UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args)
+void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, SuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FailureCallback OnFailure)
 {
-	TFuture<FString> Request = HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args));
-	TFunction<FGetTokenSuppliesMapReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTokenSuppliesMapReturn>(Input); };
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args), [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetTokenSuppliesMapReturn>(Content));
+	}, OnFailure);
 }
 
-TFuture<FGetBalanceUpdatesReturn> UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args)
+void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, SuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FailureCallback OnFailure)
 {
-	TFuture<FString> Request = HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args));
-	TFunction<FGetBalanceUpdatesReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetBalanceUpdatesReturn>(Input); };
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args), [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetBalanceUpdatesReturn>(Content));
+	}, OnFailure);
 }
 
-TFuture<FGetTransactionHistoryReturn> UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args)
+void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, SuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FailureCallback OnFailure)
 {
-	TFuture<FString> Request = HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args));
-	TFunction<FGetTransactionHistoryReturn (FString)> MakeResponse = [this](FString Input) { return BuildResponse<FGetTransactionHistoryReturn>(Input); };
-	return PipeAsync(Request, MakeResponse);
+	HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args), [this, &OnSuccess](FString Content)
+	{
+		OnSuccess(BuildResponse<FGetTransactionHistoryReturn>(Content));
+	}, OnFailure);
 }
 
 void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
