@@ -182,17 +182,32 @@ void ASequence_Backend_Manager::get_txn_imgs_manager()
 	}
 }
 
-void ASequence_Backend_Manager::init_send_txn(FTxn_BE txn_data)
+/*
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_coin_send_txn(FCoin_Send_Txn_BE coin_txn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_nft_send_txn(FNFT_Send_Txn_BE nft_txn);
+*/
+
+void ASequence_Backend_Manager::init_coin_send_txn(FCoin_Send_Txn_BE coin_txn)
 {
 	//dummy function for right now we just call back the update_txn with some pseudo random state!
-	UE_LOG(LogTemp, Display, TEXT("[Txn Request Initiated]"));//first chunk simulates signin request code gen
-	FTimerHandle TH_txn_delay;
-	FTimerDelegate Delegate;
+	UE_LOG(LogTemp, Display, TEXT("[Coin Txn Request Initiated]"));//first chunk simulates signin request code gen
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
-	callback.txn_hash_id = txn_data.txn_hash_id;
-	Delegate.BindUFunction(this, "update_txn",callback);
-	GetWorld()->GetTimerManager().SetTimer(TH_txn_delay, Delegate,FMath::RandRange(5,30), false);
+	callback.txn_hash_id = coin_txn.txn_hash_id;
+	this->update_txn(callback);
+}
+
+void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
+{
+	//dummy function for right now we just call back the update_txn with some pseudo random state!
+	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));//first chunk simulates signin request code gen
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_hash_id = nft_txn.txn_hash_id;
+	this->update_txn(callback);
 }
 
 void ASequence_Backend_Manager::testing_network_infrastructures()
