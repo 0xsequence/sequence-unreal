@@ -16,7 +16,8 @@ public:
 	FEthTransaction(FBlockNonce Nonce, FNonUniformData GasPrice, FNonUniformData GasLimit, FAddress To, FNonUniformData Value, FNonUniformData Data);
 
 	void Sign(FPrivateKey PrivateKey, int ChainID);
-	FHash256 GetTransactionHash(int ChainID);
+	FHash256 GetSignedTransactionHash(FPrivateKey Key, int ChainID);
+	FHash256 GetUnsignedTransactionHash(int ChainID);
 	FNonUniformData GetSignedTransaction(FPrivateKey PrivateKey, int ChainID);
 	void Log();
 };
