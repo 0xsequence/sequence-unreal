@@ -253,7 +253,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Formatted_Single_Value;//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Coin_Standard;//ERC 1155, etc
+        TEnumAsByte<EContractType> Coin_Standard;//ERC 1155, etc
 };
 
 /*
@@ -267,11 +267,11 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString External_URL;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString token_id;//this doesn't need to be set here and will be maintained up front
+        FString token_id;//this doesn't need to be set here and will be set up front for *THIS* struct
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Contract_Address;//this doesn't need to be set here and will be maintained up front
+        FString Contract_Address;//this doesn't need to be set here and will be set up front for *THIS* struct
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Token_Standard;
+        TEnumAsByte<EContractType> Token_Standard;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Network;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -362,7 +362,7 @@ public:
         TArray<FNFT_UData_BE> nft_data;//this is the list of unique data for each NFT!
 };
 /*
-* this is how coin based transactions can get stored
+* this is how coin based transactions can get stored in history!
 */
 USTRUCT(BlueprintType)
 struct FCoinTxn_BE
@@ -376,7 +376,7 @@ public:
 };
 
 /*
-* this is how nft based txn's are stored
+* this is how nft based txn's are stored in history!
 */
 USTRUCT(BlueprintType)
 struct FNFTTxn_BE
@@ -525,23 +525,41 @@ public:
         bool good_txn;//whether our txn went through or not!
 };
 
+/*
+* This is specific for NFT / Token based transactions
+* this will get paired off with a dedicated call in the Sequence_Backend_Manager.h/.cpp
+* for initiating the transaction
+*/
 USTRUCT(BlueprintType)
-struct FTxn_BE
+struct FNFT_Send_Txn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString txn_hash_id;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString contact_public_addr;//the contact we are sending this too!
+        FString contact_public_addr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float amount;
+        int32 amount;//nft's deal in postive int's S.T. {Z^+}/{0}
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float value;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FFee_BE fee;
+        FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FNFT_UData_BE nft_u_data;//for nft based txn's! we need this too!
+        TArray<FNFT_UData_BE> nft_u_data;//for nft based txn's! we need this too!
+};
+
+USTRUCT(BlueprintType)
+struct FCoin_Send_Txn_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString txn_hash_id;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float amount;//Coins deal in Positve non Zero Real Numbers {R^+}/{0.0}
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
 };
