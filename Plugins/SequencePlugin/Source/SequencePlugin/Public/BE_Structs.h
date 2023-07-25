@@ -107,31 +107,6 @@ public:
 };
 
 /*
-* Used to store fee data that the user
-* must pay if they wish to conduct an on chain txn
-*/
-USTRUCT(BlueprintType)
-struct FFee_BE
-{
-    GENERATED_USTRUCT_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Fee_Long_Name;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Fee_Short_Name;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Fee_Amount;//parser exists in frontend
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Fee_Value;//parser exists in frontend
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Fee_Icon;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Fee_Amount;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Fee_Value;
-};
-
-/*
 * This stores data about a currency
 * note for the various currency symbols there maybe some
 * manual input of utf-8 or utf-16 char symbols in order for those to appear correctly in
@@ -417,6 +392,18 @@ public:
         TArray<FNFTTxn_BE> txn_history_nfts;//the list of nfts in the txn history item!
 };
 
+/*
+* Used to store fee data that the user
+* must pay if they wish to conduct an on chain txn
+*/
+USTRUCT(BlueprintType)
+struct FFee_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FCoin_BE fee;//here we use FCoin_BE struct BUT for coin amount is the fee amount. everything else is the same!
+};
 
 USTRUCT(BlueprintType)
 struct FUserData_BE
@@ -470,6 +457,8 @@ public:
         TArray<FSelectableCurrency_BE> currency_list;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FSelectableCurrency_BE selected_currency;//the selected currency the user is currently using!
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FFee_BE> fee_list;
 };
 
 USTRUCT(BlueprintType)
