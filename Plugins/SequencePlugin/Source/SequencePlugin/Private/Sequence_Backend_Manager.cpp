@@ -111,13 +111,8 @@ void ASequence_Backend_Manager::dec_request_count()
 
 void ASequence_Backend_Manager::init_system_data()
 {
-	UE_LOG(LogTemp, Display, TEXT("[UserData Fetch INITIATED]"));
-	//FTimerHandle TH_auth_delay;
-	//FTimerDelegate Delegate; // Delegate to bind function with parameters
-	FSystemData_BE system_data_ret;
-	//Delegate.BindUFunction(this, "update_system_data", system_data_ret);
-	//GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 15), false);
-	this->update_system_data(system_data_ret);
+	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
+	this->update_system_data(FSystemData_BE());
 }
 
 void ASequence_Backend_Manager::init_signin(FString email)
