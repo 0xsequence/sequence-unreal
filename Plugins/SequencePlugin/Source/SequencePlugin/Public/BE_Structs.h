@@ -505,9 +505,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         float value;//true state value of the txn for a send this should be negative!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString item_name;//the name of the item that is involved in the txn! NOTE this is for frontend usage!
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FNFT_UData_BE nft_u_data;//this is specific for tokens as when we are pending a txn we also could be consuming this too!
+        TArray<FNFT_UData_BE> nft_u_data_list;
 };
 
 
