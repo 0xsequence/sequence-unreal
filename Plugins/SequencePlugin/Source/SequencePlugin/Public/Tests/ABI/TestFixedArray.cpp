@@ -1,3 +1,4 @@
+#pragma warning(disable: 4018)
 #include "Misc/AutomationTest.h"
 #include "HexUtility.h"
 #include "ABI/ABI.h"

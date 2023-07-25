@@ -51,17 +51,6 @@ void ASequence_Backend_Manager::Tick(float DeltaTime)
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 /*
-* Initiates the passwordless signin process
-*/
-FString ASequence_Backend_Manager::Signin(FString email)
-{
-	this->user_email = email;
-	post_json_request(get_main_url(), create_blk_req(), &ASequence_Backend_Manager::get_blk_handler);
-
-	return "";
-}
-
-/*
 	Used to copy data to the systems clipboard!
 */
 void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
@@ -82,6 +71,14 @@ FString ASequence_Backend_Manager::Get_From_Clipboard()
 	//again platform misc is deprecated :( but until the generic platform clipboard functions are
 	//actually implemented this is the best I can do for the time being.
 	return ret_data;
+}
+
+FString ASequence_Backend_Manager::get_transaction_hash()
+{
+	FString txn_hash = "0x";
+	int32 txn_value = FMath::RandRange(1, 65536);
+	txn_hash.AppendInt(txn_value);
+	return txn_hash;
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -109,8 +106,36 @@ void ASequence_Backend_Manager::dec_request_count()
 	if (req_count == 0)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Done Fetching Images sending them to front!"));
-		this->update_transaction_imgs(this->fetched_imgs);
 	}
+}
+
+void ASequence_Backend_Manager::init_system_data()
+{
+	UE_LOG(LogTemp, Display, TEXT("[UserData Fetch INITIATED]"));
+	//FTimerHandle TH_auth_delay;
+	//FTimerDelegate Delegate; // Delegate to bind function with parameters
+	FSystemData_BE system_data_ret;
+	//Delegate.BindUFunction(this, "update_system_data", system_data_ret);
+	//GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 15), false);
+	this->update_system_data(system_data_ret);
+}
+
+void ASequence_Backend_Manager::init_signin(FString email)
+{
+	UE_LOG(LogTemp, Display, TEXT("[Signin Request Initiated]"));//first chunk simulates signin request code gen
+	FTimerHandle TH_signin_delay;
+	FTimerDelegate Delegate;
+	const FString oob_code = "123456";
+	Delegate.BindUFunction(this, "update_signin", oob_code);
+	GetWorld()->GetTimerManager().SetTimer(TH_signin_delay, Delegate,1, false);
+
+	//this->update_signin("123456");
+	//this->update_authentication(true);
+
+	FTimerHandle TH_auth_delay;//second chunk simulates successful login this may be causing a crash
+	FTimerDelegate Delegate_2;
+	Delegate_2.BindUFunction(this, "update_authentication", true);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2,3, false);
 }
 
 void ASequence_Backend_Manager::get_txn_imgs_manager()
@@ -157,16 +182,69 @@ void ASequence_Backend_Manager::get_txn_imgs_manager()
 	}
 }
 
+/*
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_coin_send_txn(FCoin_Send_Txn_BE coin_txn);
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_nft_send_txn(FNFT_Send_Txn_BE nft_txn);
+*/
 
-void ASequence_Backend_Manager::get_transaction_imgs()
+void ASequence_Backend_Manager::init_coin_send_txn(FCoin_Send_Txn_BE coin_txn)
 {
-	//testing async stuff
-//	AsyncTask(ENamedThreads::AnyThread, [this]()
-	//{
-			// This code will run asynchronously, without freezing the game thread
-			this->get_txn_imgs_manager();
-	//});
+	//dummy function for right now we just call back the update_txn with some pseudo random state!
+	UE_LOG(LogTemp, Display, TEXT("[Coin Txn Request Initiated]"));//first chunk simulates signin request code gen
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_hash_id = coin_txn.txn_hash_id;
+	this->update_txn(callback);
+}
+
+void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
+{
+	//dummy function for right now we just call back the update_txn with some pseudo random state!
+	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));//first chunk simulates signin request code gen
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_hash_id = nft_txn.txn_hash_id;
+	this->update_txn(callback);
+}
+
+void ASequence_Backend_Manager::testing_network_infrastructures()
+{
+	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+
+	http_post_req->SetVerb("POST");
+	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
+	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetURL("https://www.google.ca");
+	http_post_req->SetContentAsString("{ some bad json }");//args will need to be a json object converted to a string
+	
+	http_post_req.Get().OnProcessRequestComplete().BindLambda([&](FHttpRequestPtr Req, FHttpResponsePtr Response, bool IsSuccessful)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Lambda called!"));
+			if (IsSuccessful)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Success!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Display, TEXT("Failed!"));
+			}
+		});
+
+
+
+	http_post_req->ProcessRequest();
+}
+
+void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state)
+{
+	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate; // Delegate to bind function with parameters
+	Delegate.BindUFunction(this, "update_authentication", true);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
 void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)

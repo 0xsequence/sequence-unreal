@@ -7,6 +7,7 @@
 #include "Http.h"
 #include "ObjectHandler.h"
 #include "Backend.h"
+#include "BE_Structs.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
@@ -71,24 +72,11 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Get_From_Clipboard();
 
-	/*
-	* Used to initiate a passwordless signin!
-	* @param FString email (email in)
-	* @return the Oob code to be displayed for the user to enter on the site login!
-	* NOTE: for the code we are expecting 6 digits!
-	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		FString Signin(FString email);
+		FString get_transaction_hash();
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-
-	/*
-	* Meant to be overriden in blueprints to give the plugin access to the needed data!
-	* @param the ether balance fetched from get_ether_balance()
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent,CATEGORY = "FUNCTION")
-		void update_ether_balance(int64 ether_balance);//DO NOT ADD A BODY HERE THIS IS MEANT TO BE OVERRIDDEN IN BP'S
 
 	/*
 	* This is meant to initiate an ASYNC request with the backend
@@ -99,16 +87,74 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		void get_ether_balance();//uses the signed in account address
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
+		void testing_network_infrastructures();
 
-	//testing the async fetching process
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent,CATEGORY = "FUNCTION")
-		void update_transaction_imgs(const TArray<UTexture2D *> &imgs);
+	/*
+	* Used to initiate a stored authentication call from the frontend
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "Authentication")
+		void init_authentication(FStoredState_BE stored_state);
 
-	UFUNCTION(BlueprintCallable, CATEGORY = "ASYNC")
-		void get_transaction_imgs();
+	/*
+	* Used to let the frontend know if authentication succeeded or not
+	* in an async. manner
+	* 
+	* if authenticated is false the we failed to auth the user or timed out
+	* if authenticated is true we successfully authenticated the user and we need to signal the ui that
+	* we are ready for next steps
+	* 
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Authentication")
+		void update_authentication(bool authenticated);
+
+	/*
+	* Used to init. a call to fetch all system data needed by frontend in an async manner
+	* Once system data struct is built we send it up with update_system_data(FSystemData_BE)
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "SystemData")
+		void init_system_data();
+
+	/*
+	* Used to update the frontend with the supplied system data
+	* in an async manner
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
+		void update_system_data(const FSystemData_BE &system_data);
+
+	/*
+	* Used to initate the signin process from the frontend
+	* This call will make 2 calls
+	* 1) to generate an oob code and send that back to the front end
+	* 2) a call to authenticate user credentials in relation to the oob code that was sent out
+	* If authentication succeeds we send update_authentication(true)
+	* If authentication fails (times out / error) we send update_authentication(false)
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY="Signin")
+		void init_signin(FString email);
+
+	/*
+	* Used to tell the frontend that the signin process has been initiated and the code here is present!
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
+		void update_signin(const FString &oob_code);
 
 	void get_txn_imgs_manager();
 
+	/*
+	* Used to initalize a send transaction!
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_coin_send_txn(FCoin_Send_Txn_BE coin_txn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
+		void init_nft_send_txn(FNFT_Send_Txn_BE nft_txn);
+
+	/*
+	* Used to let the frontend know if a txn went through or not!
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
+		void update_txn(FTxnCallback_BE txn_callback);
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 //Fetching Functions
