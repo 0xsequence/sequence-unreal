@@ -9,6 +9,7 @@ enum ErrorType
 	UnsupportedMethodOnChain,
 	RequestFail,
 	RequestTimeExceeded,
+	TestFail,
 };
 
 class SequenceError

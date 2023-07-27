@@ -58,26 +58,31 @@ URequestHandler* URequestHandler::WithContentAsString(const FString Content)
 	return this;
 }
 
-// This is a hacky way to make it synchronous
-// TODO: Find a better method
 FHttpRequestCompleteDelegate& URequestHandler::Process() const
 {
 	Request->ProcessRequest();
 	return Request->OnProcessRequestComplete();
 }
 
-void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FailureCallback OnFailure)
+
+
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFailureCallback OnFailure)
 {
-	Process().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	Process().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
 		if(bWasSuccessful)
 		{
-			auto Content = Request->GetResponse()->GetContentAsString();
+			auto Content = Response->GetContentAsString();
 			OnSuccess(Content);
 		}
 		else
 		{
-			OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+			if(!Response.IsValid())
+			{
+				return OnFailure(SequenceError(RequestFail, "The Request is invalid!"));
+			}
+			
+			OnFailure(SequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}
 	});
 }

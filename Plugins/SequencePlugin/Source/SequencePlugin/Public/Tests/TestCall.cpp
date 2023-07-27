@@ -14,10 +14,11 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCall, "Public.Tests.TestCall",
 
 bool TestCall::RunTest(const FString& Parameters)
 {
+	
 	auto provider = Provider("http://localhost:8545"); 
 
 
-	auto res = provider.BlockByNumber(EBlockTag::Latest);
+	//auto res = provider.BlockByNumber(EBlockTag::Latest);
 
 	/*FBlockNonce NONCE;
 
@@ -28,6 +29,8 @@ bool TestCall::RunTest(const FString& Parameters)
 		NONCE.Increment();
 		UE_LOG(LogTemp, Display, TEXT("After %s"), *NONCE.ToHex());
 	}*/
+
+	/* UNCOMMENT STARTING HERE
 
 	auto NONCE = FBlockNonce::From("0x00");
 
@@ -48,7 +51,7 @@ bool TestCall::RunTest(const FString& Parameters)
 	//auto deployedAddress = provider.DeployContract(vm_byte_code, PRIVATE_KEY, CHAIN_ID);
 	//UE_LOG(LogTemp, Display, TEXT("The contract address is %s"), *(deployedAddress.ToHex()));
 	
-
+	
 	auto transaction = FEthTransaction{
 		NONCE,
 		GASPRICE,
@@ -170,6 +173,8 @@ bool TestCall::RunTest(const FString& Parameters)
 		TOptional<FString>(encodedData.ToHex()),
 	}, EBlockTag::Latest);
 	UE_LOG(LogTemp, Display, TEXT("refill balance is %s"), *ContractBalance.Get().GetValue().ToHex())
+
+	*/
 	
 	//check if balance decrease for 
 	/*

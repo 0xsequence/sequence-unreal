@@ -51,11 +51,11 @@ private:
 	* Here I include some additional state data about the callback as well as
 	* error data that get printed out in the callback failure!
 	*/
-	void callback_failed(FString state_data, SequenceError error);
+	void Callback_Failed(FString state_data, SequenceError error) const;
 
 	/*
 	* Used to convert an enum to a readable string
 	*/
-	FString error_to_string(ErrorType error);
+	static FString Error_To_String(ErrorType error);
 
 };

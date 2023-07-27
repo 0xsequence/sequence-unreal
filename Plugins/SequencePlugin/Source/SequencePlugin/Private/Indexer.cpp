@@ -37,7 +37,7 @@ FString UIndexer::HostName(int64 chainID)
 /*
 	Here we construct a post request and parse out a response if valid.
 */
-void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, SuccessCallback<FString> OnSuccess, FailureCallback OnFailure)
+void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure)
 {
 	
 	//Now we create the post request
@@ -186,10 +186,13 @@ void UIndexer::setup(ASequence_Backend_Manager* manager_ref)
 
 TArray<UTexture2D*> UIndexer::testing()
 {
+	
 	bool res = true;
 	TArray<UTexture2D*> ret;
 	FGetTransactionHistoryArgs args;// ("0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
 	FTransactionHistoryFilter filter;
+
+	/* UNCOMMENT THIS
 
 	FGetTokenBalancesArgs t_args;
 	t_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
@@ -209,6 +212,7 @@ TArray<UTexture2D*> UIndexer::testing()
 	FGetTokenBalancesReturn bln_ret = GetTokenBalances(137, bln_args);
 	UE_LOG(LogTemp, Display, TEXT("Done testing get token balances\n"));
 
+	*/
 
 	/*
 	UTexture2D* fetched_img = NULL;
@@ -234,6 +238,8 @@ TArray<UTexture2D*> UIndexer::testing()
 	UE_LOG(LogTemp, Display, TEXT("Img amount %d"),ret.Num());
 
 	return ret;
+
+	
 }
 
 
@@ -242,7 +248,7 @@ UTexture2D* UIndexer::get_image_data(FString URL)
 {
 	UE_LOG(LogTemp, Display, TEXT("Img from URL: %s"),*URL);
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-	UTexture2D * ret = NULL;
+	UTexture2D * ret = nullptr;
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
 	http_post_req->ProcessRequest();
@@ -287,7 +293,7 @@ EImageFormat UIndexer::get_image_format(FString URL)
 UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 {
 	int32 width = 0, height = 0;
-	UTexture2D* img = NULL;
+	UTexture2D* img = nullptr;
 	EPixelFormat pxl_format = PF_B8G8R8A8;
 	EImageFormat img_format = get_image_format(URL);//get the image format nicely!
 
@@ -303,7 +309,7 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 			height = ImageWrapper.Get()->GetHeight();
 
 			img = UTexture2D::CreateTransient(width, height, pxl_format);
-			if (!img) return NULL;//nothing to do if it doesn't load!
+			if (!img) return nullptr;//nothing to do if it doesn't load!
 
 			void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
@@ -315,14 +321,14 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 	return img;
 }
 
-void UIndexer::Ping(int64 chainID, SuccessCallback<bool> OnSuccess, FailureCallback OnFailure)
+void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "Ping", "", [this, &OnSuccess](FString Content) {
 		OnSuccess(BuildResponse<FPingReturn>(Content).status);
 	}, OnFailure);
 }
 
-void UIndexer::Version(int64 chainID, SuccessCallback<FVersion> OnSuccess, FailureCallback OnFailure)
+void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "Version", "", [this, &OnSuccess](FString Content)
 	{
@@ -330,7 +336,7 @@ void UIndexer::Version(int64 chainID, SuccessCallback<FVersion> OnSuccess, Failu
 	}, OnFailure);
 }
 
-void UIndexer::RunTimeStatus(int64 chainID, SuccessCallback<FRuntimeStatus> OnSuccess, FailureCallback OnFailure)
+void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "RuntimeStatus", "", [this, &OnSuccess](FString Content)
 	{
@@ -338,7 +344,7 @@ void UIndexer::RunTimeStatus(int64 chainID, SuccessCallback<FRuntimeStatus> OnSu
 	}, OnFailure);
 }
 
-void UIndexer::GetChainID(int64 chainID, SuccessCallback<int64> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetChainID", "", [this, &OnSuccess](FString Content)
 	{
@@ -367,7 +373,7 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
-void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, SuccessCallback<FGetTokenBalancesReturn> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args), [this, &OnSuccess](FString Content)
 	{
@@ -375,7 +381,7 @@ void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, Succe
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, SuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args), [this, &OnSuccess](FString Content)
 	{
@@ -383,7 +389,7 @@ void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, Succe
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, SuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args), [this, &OnSuccess](FString Content)
 	{
@@ -391,7 +397,7 @@ void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args,
 	}, OnFailure);
 }
 
-void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, SuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args), [this, &OnSuccess](FString Content)
 	{
@@ -399,7 +405,7 @@ void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, Suc
 	}, OnFailure);
 }
 
-void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, SuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FailureCallback OnFailure)
+void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args), [this, &OnSuccess](FString Content)
 	{
