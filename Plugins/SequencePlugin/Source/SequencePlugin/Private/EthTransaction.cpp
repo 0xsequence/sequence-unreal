@@ -68,9 +68,9 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 
 FHash256 FEthTransaction::GetSignedTransactionHash(FPrivateKey Key, int ChainID)
 {
-	auto Data = GetSignedTransaction(Key, ChainID);
+	auto SignedData = GetSignedTransaction(Key, ChainID);
 	auto Hash = FHash256::New();
-	Keccak256::getHash(Data.Arr, Data.GetLength(), Hash.Arr);
+	Keccak256::getHash(SignedData.Arr, SignedData.GetLength(), Hash.Arr);
 	return Hash;
 }
 

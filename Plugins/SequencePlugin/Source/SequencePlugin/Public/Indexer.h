@@ -46,7 +46,7 @@ private:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	void HTTPPost(int64 chainID, FString endpoint, FString args, SuccessCallback<FString> OnSuccess, FailureCallback OnFailure);
+	void HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
@@ -103,22 +103,22 @@ public:
 	/*
 		Used to get a ping back from the sequence app
 	*/
-	void Ping(int64 chainID, SuccessCallback<bool> OnSuccess, FailureCallback OnFailure);
+	void Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get version data back from the sequence app
 	*/
-	void Version(int64 chainID, SuccessCallback<FVersion> OnSuccess, FailureCallback OnFailure);
+	void Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the runtime status of the sequence app
 	*/
-	void RunTimeStatus(int64 chainID, SuccessCallback<FRuntimeStatus> OnSuccess, FailureCallback OnFailure);
+	void RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the chainID from the sequence app
 	*/
-	void GetChainID(int64 chainID, SuccessCallback<int64> OnSuccess, FailureCallback OnFailure);
+	void GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the Ether balance from the sequence app
@@ -131,27 +131,27 @@ public:
 	/*
 		Gets the token balances from the sequence app
 	*/
-	void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, SuccessCallback<FGetTokenBalancesReturn> OnSuccess, FailureCallback OnFailure);
+	void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		gets the token supplies from the sequence app
 	*/
-	void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, SuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FailureCallback OnFailure);
+	void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		gets the token supplies map from the sequence app
 	*/
-	void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, SuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FailureCallback OnFailure);
+	void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, TFailureCallback OnFailure);
 	
 	/*
 		Get the balance updates from the sequence app
 	*/
-	void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, SuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FailureCallback OnFailure);
+	void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		get transaction history from the sequence app
 	*/
-	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, SuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FailureCallback OnFailure);
+	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 	* Used for making Async requests!

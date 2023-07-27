@@ -140,6 +140,8 @@ void ASequence_Backend_Manager::init_signin(FString email)
 
 void ASequence_Backend_Manager::get_txn_imgs_manager()
 {
+	/*
+	
 	this->reset_request_count();
 	this->fetched_imgs.Empty();
 	//first thing we need to do is actually get the transaction data!
@@ -180,6 +182,8 @@ void ASequence_Backend_Manager::get_txn_imgs_manager()
 		if (!req_handler->request_raw(i))
 			this->dec_request_count();
 	}
+
+	*/
 }
 
 /*
@@ -249,7 +253,7 @@ void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state
 
 void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
 {
-	if (img_to_add != NULL) 
+	if (img_to_add != nullptr) 
 	{
 		this->fetched_imgs.Add(img_to_add);
 		dec_request_count();

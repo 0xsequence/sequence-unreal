@@ -2,6 +2,9 @@
 
 
 #include "General_Testing.h"
+#include "Tests/LargeTest.h"
+#include "JsonBuilder.h"
+#include "RequestHandler.h"
 
 // Sets default values
 AGeneral_Testing::AGeneral_Testing()
@@ -16,11 +19,39 @@ void AGeneral_Testing::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 void AGeneral_Testing::test_provider()
 {
 	//stub in connect tests here!
+
+	TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		callback_passed(State);
+	};
+
+	TFunction<void (SequenceError)> OnFailure = [this](SequenceError Err)
+	{
+		Callback_Failed("", Err);
+	};
+
+	const FString Content = FJsonBuilder().ToPtr()
+		->AddString("jsonrpc", "2.0")
+		->AddInt("id", 1)
+		->AddString("method", "eth_chainId")
+		->ToString();
+
+	NewObject<URequestHandler>()
+		->PrepareRequest()
+		->WithUrl("http://0.0.0.0:8545/")
+		->WithHeader("Content-type", "application/json")
+		->WithVerb("POST")
+		->WithContentAsString(Content)
+		->ProcessAndThen(OnSuccess, OnFailure);
+	
+	//LargeTest(OnSuccess, OnFailure);
+	
 }
 
 void AGeneral_Testing::test_indexer()
@@ -42,35 +73,34 @@ void AGeneral_Testing::callback_passed(FString state_data)
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-void AGeneral_Testing::callback_failed(FString state_data, SequenceError error)
+void AGeneral_Testing::Callback_Failed(const FString state_data, SequenceError error) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *state_data);
 	UE_LOG(LogTemp, Error, TEXT("[Error Message]:\n[%s]"),*error.Message);
-	UE_LOG(LogTemp, Error, TEXT("[Error Type]: [%s]"),*error_to_string(error.Type));
+	UE_LOG(LogTemp, Error, TEXT("[Error Type]: [%s]"),*Error_To_String(error.Type));
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-FString AGeneral_Testing::error_to_string(ErrorType error)
+FString AGeneral_Testing::Error_To_String(ErrorType error)
 {
-	FString ret = "";
 	switch (error) {
-	case 0:
-		ret = "NotFound";
-		break;
-	case 1:
-		ret = "ResponseParseError";
-		break;
-	case 2:
-		ret = "EmptyResponse";
-		break;
-	case 3:
-		ret = "UnsupportedMethodOnChain";
-		break;
-	case 4:
-		ret = "RequestFail";
-		break;
+	case NotFound:
+		return "NotFound";
+	case ResponseParseError:
+		return "ResponseParseError";
+	case EmptyResponse:
+		return "EmptyResponse";
+	case UnsupportedMethodOnChain:
+		return "UnsupportedMethodOnChain";
+	case RequestFail:
+		return "RequestFail";
+	case RequestTimeExceeded:
+		return "RequestTimeExceeded";
+	case TestFail:
+		return "TestFail";
+	default:
+		return "SequenceError";
 	}
-	return ret;
 }
 

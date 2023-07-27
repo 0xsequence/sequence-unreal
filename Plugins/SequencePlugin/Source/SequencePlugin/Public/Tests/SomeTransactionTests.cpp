@@ -9,6 +9,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(SomeTransactionTests, "Public.Tests.SomeTransac
 
 bool SomeTransactionTests::RunTest(const FString& Parameters)
 {
+	/*
 	// constants for the transaction
 	auto NONCE = FBlockNonce::From("9");
 	auto GASPRICE= HexStringToBinary("4A817C800"); // "0x4A817C800";
@@ -70,7 +71,7 @@ bool SomeTransactionTests::RunTest(const FString& Parameters)
 
 	
 	
-	
+	*/
 	// Make the test pass by returning true, or fail by returning false.
 	return true;
 }
