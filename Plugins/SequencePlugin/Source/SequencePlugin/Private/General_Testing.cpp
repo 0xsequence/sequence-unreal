@@ -28,6 +28,31 @@ void AGeneral_Testing::test_indexer()
 	//stub in test functions here!
 }
 
+void AGeneral_Testing::testMisc()
+{
+	FString testJson = "{\"nested_obj\":{\"pain\":101}, \"name\":\"test_object\",\"age\":1,\"list\":[\"one\",\"two\",\"three\"]}";
+	TSharedPtr<FJsonObject> jsonObj = MakeShareable(new FJsonObject);
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(testJson);
+
+	if (!FJsonSerializer::Deserialize(Reader, jsonObj))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to deserialize the json object!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Built test JSON Object!"));
+		TMap<FString, FString> tProp = UIndexerSupport::jsonObjectParser(jsonObj);
+		TArray<FString> keys;
+		tProp.GetKeys(keys);//get the keys
+		UE_LOG(LogTemp, Display, TEXT("Resulting Property Map"));
+		for (FString key : keys)
+		{
+			FString value = *tProp.Find(key);
+			UE_LOG(LogTemp, Display, TEXT("Key: [%s] Value: [%s]"),*key, *value);
+		}
+	}
+}
+
 // Called every frame
 void AGeneral_Testing::Tick(float DeltaTime)
 {
