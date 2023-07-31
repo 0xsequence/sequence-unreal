@@ -24,7 +24,7 @@ void FBinaryData::Destroy()
 	}
 }
 
-const FString FBinaryData::ToHex()
+FString FBinaryData::ToHex() const
 {
 	if(Arr == nullptr)
 	{
@@ -56,7 +56,7 @@ FNonUniformData FNonUniformData::Copy()
 	return FNonUniformData{NewArr, Length};
 }
 
-const ByteLength FNonUniformData::GetLength()
+ByteLength FNonUniformData::GetLength() const
 {
 	return this->Length;
 }

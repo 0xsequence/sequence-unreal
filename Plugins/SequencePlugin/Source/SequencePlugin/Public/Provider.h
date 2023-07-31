@@ -34,6 +34,7 @@ FString TagToString(EBlockTag Tag);
 class Provider
 {
 	FString Url;
+	Provider Copy();
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
@@ -72,7 +73,7 @@ public:
 	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
 
 	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, TFailureCallback OnFailure);
-	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash, TSuccessCallback<FAddress> OnSuccess, TFailureCallback OnFailure);
+	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FNonUniformData> OnSuccess, TFailureCallback OnFailure);
 	
 	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
 	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
@@ -92,7 +93,7 @@ template <typename T>
 void Provider::SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess,
 	Extractor<T> Extractor, TFailureCallback OnFailure)
 {
-	SendRPC(Content, [&OnSuccess, &Extractor](FString Result)
+	SendRPC(Content, [OnSuccess, Extractor](FString Result)
 	{
 		TResult<T> Value = Extractor(Result);
 
