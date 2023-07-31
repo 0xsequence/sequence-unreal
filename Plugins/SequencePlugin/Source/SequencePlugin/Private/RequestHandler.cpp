@@ -68,7 +68,7 @@ FHttpRequestCompleteDelegate& URequestHandler::Process() const
 
 void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFailureCallback OnFailure)
 {
-	Process().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
 		if(bWasSuccessful)
 		{

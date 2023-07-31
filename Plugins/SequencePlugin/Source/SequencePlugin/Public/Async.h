@@ -6,6 +6,10 @@
 
 template <typename T>
 using TSuccessCallback =  TFunction<void (T)>;
+
+template <typename T1, typename T2>
+using TSuccessCallbackTuple =  TFunction<void (T1, T2)>;
+
 using TFailureCallback =  TFunction<void (SequenceError)>;
 
 template <typename T>

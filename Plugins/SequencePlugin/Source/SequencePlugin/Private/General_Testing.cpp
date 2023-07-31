@@ -26,31 +26,19 @@ void AGeneral_Testing::test_provider()
 {
 	//stub in connect tests here!
 
+	
+
 	TFunction<void (FString)> OnSuccess = [this](FString State)
 	{
 		callback_passed(State);
 	};
 
-	TFunction<void (SequenceError)> OnFailure = [this](SequenceError Err)
+	TFunction<void (FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
 	{
-		Callback_Failed("", Err);
+		Callback_Failed(data, Err);
 	};
 
-	const FString Content = FJsonBuilder().ToPtr()
-		->AddString("jsonrpc", "2.0")
-		->AddInt("id", 1)
-		->AddString("method", "eth_chainId")
-		->ToString();
-
-	NewObject<URequestHandler>()
-		->PrepareRequest()
-		->WithUrl("http://0.0.0.0:8545/")
-		->WithHeader("Content-type", "application/json")
-		->WithVerb("POST")
-		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnFailure);
-	
-	//LargeTest(OnSuccess, OnFailure);
+	LargeTest(OnSuccess, OnFailure);
 	
 }
 
