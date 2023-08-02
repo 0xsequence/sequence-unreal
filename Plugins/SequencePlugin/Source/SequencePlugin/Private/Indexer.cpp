@@ -41,8 +41,6 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 {
 	
 	//Now we create the post request
-	/*
-
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 
 	http_post_req->SetVerb("POST");
@@ -51,7 +49,7 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 	http_post_req->SetURL(this->Url(chainID, endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
 
-	http_post_req->OnProcessRequestComplete().BindLambda([&OnSuccess, &OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	http_post_req->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
 		if(bWasSuccessful)
 		{
@@ -65,8 +63,6 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 	});
 	
 	http_post_req->ProcessRequest();
-=======
-	*/
 }
 
 void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
@@ -192,7 +188,6 @@ TArray<UTexture2D*> UIndexer::testing()
 	FGetTransactionHistoryArgs args;// ("0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
 	FTransactionHistoryFilter filter;
 
-	/* UNCOMMENT THIS
 
 	FGetTokenBalancesArgs t_args;
 	t_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
@@ -201,18 +196,23 @@ TArray<UTexture2D*> UIndexer::testing()
 	args.filter = filter;
 	args.includeMetaData = true;
 
-	FGetTransactionHistoryReturn data = GetTransactionHistory(137,args).Get();
-	UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
+	GetTransactionHistory(137,args, [=](FGetTransactionHistoryReturn Data)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
+	}, [](SequenceError Err)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Failed testing history\n"));
+	});
 
-	GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
-	UE_LOG(LogTemp, Display, TEXT("Done testing eth balance\n"));
+	
 
-	FGetTokenBalancesArgs bln_args;
-	bln_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
-	FGetTokenBalancesReturn bln_ret = GetTokenBalances(137, bln_args);
-	UE_LOG(LogTemp, Display, TEXT("Done testing get token balances\n"));
-
-	*/
+	GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9", [=](FEtherBalance Balance)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Done testing eth balance\n"));
+	}, [](SequenceError Err)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Failed testing eth balance\n"));
+	});
 
 	/*
 	UTexture2D* fetched_img = NULL;
@@ -244,7 +244,7 @@ TArray<UTexture2D*> UIndexer::testing()
 
 
 
-UTexture2D* UIndexer::get_image_data(FString URL)
+UTexture2D* UIndexer::GetImageData(const FString URL)
 {
 	UE_LOG(LogTemp, Display, TEXT("Img from URL: %s"),*URL);
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
@@ -323,14 +323,14 @@ UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
 
 void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "Ping", "", [this, &OnSuccess](FString Content) {
+	HTTPPost(chainID, "Ping", "", [=](FString Content) {
 		OnSuccess(BuildResponse<FPingReturn>(Content).status);
 	}, OnFailure);
 }
 
 void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "Version", "", [this, &OnSuccess](FString Content)
+	HTTPPost(chainID, "Version", "", [=](FString Content)
 	{
 		OnSuccess(BuildResponse<FVersionReturn>(Content).version);
 	}, OnFailure);
@@ -338,7 +338,7 @@ void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFai
 
 void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, TFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "RuntimeStatus", "", [this, &OnSuccess](FString Content)
+	HTTPPost(chainID, "RuntimeStatus", "", [=](FString Content)
 	{
 		OnSuccess(BuildResponse<FRuntimeStatusReturn>(Content).status);
 	}, OnFailure);
@@ -346,30 +346,23 @@ void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnS
 
 void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetChainID", "", [this, &OnSuccess](FString Content)
+	HTTPPost(chainID, "GetChainID", "", [=](FString Content)
 	{
 		OnSuccess(BuildResponse<FGetChainIDReturn>(Content).chainID);
 	}, OnFailure);
 }
 
-void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr)
+void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, TFailureCallback OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString json_arg = "{\"accountAddress\":\"";
-	json_arg += accountAddr;
-	json_arg += "\"}";
-	//FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(HTTPPost(chainID, "GetEtherBalance", json_arg));
-//new get eth balance call? PROBLEM since params is a json array and they can contain multiple differing data types unreal won't be able to store it in any other form
-// 	   other than json array meaning to get what we need we'd need to re write how the indexer works currently :(
-	//Request
-//'{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x407d73d8a49eeb85d32cf465507dd71d507100c1", "latest"],"id":1}'
+	json_arg.Append(accountAddr);
+	json_arg.Append("\"}");
 
-	//Response
-//{"id":1 , "jsonrpc" : "2.0" , "result" : "0x0234c8a3397aab58" }
-
-	this->Url(chainID, "GetEtherBalance");
-	//this->async_request(this->Url(chainID, "GetEtherBalance"), json_arg, &UIndexer::get_ether_handler);
-	FName handler = "get_ether_handler_2";
-	this->async_request_test(this->Url(chainID, "GetEtherBalance"), json_arg, 7, &UIndexer::get_ether_handler);
+	HTTPPost(chainID, "GetEtherBalance", json_arg, [=](FString Content)
+	{
+		FGetEtherBalanceReturn Response = BuildResponse<FGetEtherBalanceReturn>(Content);
+		OnSuccess(Response.balance);
+	}, OnFailure);
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
@@ -411,49 +404,4 @@ void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs a
 	{
 		OnSuccess(BuildResponse<FGetTransactionHistoryReturn>(Content));
 	}, OnFailure);
-}
-
-void UIndexer::async_request(FString url, FString json, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
-{
-	FString response = "[FAILURE]";
-	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("POST");
-	http_post_req->SetHeader("Content-Type", "application/json");
-	http_post_req->SetURL(url);
-	http_post_req->SetContentAsString(json);
-	http_post_req->OnProcessRequestComplete().BindUObject(this, handler);//here we pass in one of our handler functions to do the processing!
-	http_post_req->ProcessRequest();
-}
-
-void UIndexer::async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
-{
-	FString response = "[FAILURE]";
-	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("POST");
-	http_post_req->SetHeader("Content-Type", "application/json");
-	http_post_req->SetURL(url);
-	http_post_req->SetContentAsString(json);
-	//http_post_req->OnProcessRequestComplete().BindRaw(this,handler);
-	//http_post_req->ProcessRequest();
-}
-
-void UIndexer::get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	FString rep_content = "[error]";
-	if (bWasSuccessful)
-	{//Parse the json response
-		Response = Request.Get()->GetResponse();
-		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
-		FGetEtherBalanceReturn response = BuildResponse<FGetEtherBalanceReturn>(rep_content);//build our response!
-	}
-	else
-	{
-		switch (Request->GetStatus()) {
-		case EHttpRequestStatus::Failed_ConnectionError:
-			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
-		default:
-			UE_LOG(LogTemp, Error, TEXT("Request failed."));
-		}
-	}
-	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 }
