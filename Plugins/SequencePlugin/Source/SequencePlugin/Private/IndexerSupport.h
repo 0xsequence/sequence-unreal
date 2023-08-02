@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TokenMetaData.h"
 #include "UObject/NoExportTypes.h"
 #include "IndexerSupport.generated.h"
 
@@ -20,7 +19,18 @@ public:
 	*/
 	static TMap<FString, FString> jsonObjectParser(TSharedPtr<FJsonObject> jsonData);
 
+	/*
+	* Used to remove
+	* \n, \", \t, \r, spaces etc
+	*/
+	static FString simplifyString(FString string);
+
+private:
 	static FString jsonToString(TSharedPtr<FJsonValue> jsonData);
 
+	/*
+	* Similar to simplifyString EXCEPT we also cleanup 
+	* some special edge cases from json responses / parsing as well!
+	*/
 	static FString stringCleanup(FString string);
 };

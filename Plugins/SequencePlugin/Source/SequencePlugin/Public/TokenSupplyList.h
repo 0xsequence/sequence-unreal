@@ -23,7 +23,11 @@ public:
     {
         for (int32 i = 0; i < token_supply_list.Num(); i++)
         {
-            token_supply_list[i].setup(*json_in[i].Get()->AsObject());
-        }
-    }
+            TSharedPtr<FJsonObject>* itemObj;
+            if (json_in[i].Get()->TryGetObject(itemObj))
+            {
+                token_supply_list[i].setup(*itemObj->Get());
+            }//if
+        }//for
+    }//setup
 };

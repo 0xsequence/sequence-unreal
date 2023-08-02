@@ -38,7 +38,10 @@ public:
 
     void setup(FJsonObject json_in)
     {
-        if (json_in.TryGetField("tokenMetaData") != nullptr)
-            tokenMetaData.setup(json_in.GetObjectField("tokenMetaData"));
+        const TSharedPtr<FJsonObject> *item;
+        if (json_in.TryGetObjectField("tokenMetaData", item))
+        {
+            tokenMetaData.setup(*item->Get());
+        }
     }//setup
 };

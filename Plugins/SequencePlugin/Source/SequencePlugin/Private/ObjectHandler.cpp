@@ -203,12 +203,15 @@ bool UObjectHandler::request_raw_indexed(FString URL, int32 index)
 	return this->request_raw(URL);
 }
 
+//TODO update objectHandler to UImageHandler then update it so it's one and only purpose will be 
+//for handling image gathering and caching rather than trying to do both json and image request
+//handling
 void UObjectHandler::img_handler(TArray<uint8> response,FString URL)
 {
 	ASequence_Backend_Manager* bknd = Cast<ASequence_Backend_Manager, UObject>(TObjectPtr<UObject>(this->main_this_ref));
 	if (!bknd)
 		return;//nothing more to do if this isn't valid
-	bknd->add_img(build_img_data(response,URL));
+	//bknd->add_img(build_img_data(response,URL));
 }
 
 EImageFormat UObjectHandler::get_img_format(FString URL)
