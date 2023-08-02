@@ -35,17 +35,7 @@ private:
 	FString user_email;
 	//end of signin variables
 
-	//ASYNC storage//
-	TArray<UTexture2D*> fetched_imgs;
-	int32 req_count;
-	//ASYNC storage//
-
 	UObjectHandler * request_handler;
-
-private:
-	void inc_request_count();
-	void dec_request_count();
-	void reset_request_count();
 
 public:
 	// Sets default values for this actor's properties
@@ -130,8 +120,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
 		void update_signin(const FString &oob_code);
 
-	void get_txn_imgs_manager();
-
 	/*
 	* Used to initalize a send transaction!
 	*/
@@ -148,15 +136,7 @@ public:
 		void update_txn(FTxnCallback_BE txn_callback);
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
-//Fetching Functions
-
-	void add_img(UTexture2D * img_to_add);
-
-
-//Fetching Functions
-
 private:
-
 	//Private handlers
 	void signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void get_blk_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -209,31 +189,4 @@ private:
 	FString get_main_url();
 	FString get_continue_url();
 	FString get_signin_url();
-
-public:
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//TESTING FUNCTIONS
-	/*
-	* Used to test an indivual private key, to see how it's generated public key compares to a CORRECT
-	* pre computed and and how the generated address from the generated public key compares to a precomputed
-	* CORRECT address
-	* returns true IFF gen_public_key matches the hard_public_key &&
-	* gen_address matches hard_address
-	*/
-		bool test_address_gen(FString prvt_k, FString hrd_pblc_k, FString hrd_addr);
-
-		/*
-		* Used to test the public key generation and address generation in accordance with
-		* the test chain!
-		*/
-		UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
-			FString Testing_Address_Generation();
-
-		/*
-		* Testing function used for evaluating the indexer
-		*/
-		UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
-			void Testing_Indexer();
-//TESTING FUNCTIONS
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 };

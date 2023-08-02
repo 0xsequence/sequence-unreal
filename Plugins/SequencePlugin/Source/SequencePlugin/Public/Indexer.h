@@ -73,29 +73,6 @@ public:
 	void setup(ASequence_Backend_Manager* manager_ref);
 
 	/*
-		Used for testing out the core components of the indexer
-	*/
-	TArray<UTexture2D*> testing();
-
-	UTexture2D* GetImageData(FString URL);
-
-	UTexture2D* build_image_data(TArray<uint8> img_data, FString URL);
-
-	EImageFormat get_image_format(FString URL);
-
-	/*
-		Used to remove all \n, \r, \t and spaces from a json string for testing!
-		@param firstParam (The already made json object in FString form)
-		@ret void (this is inline so all effects are carried on the presented obj.
-	*/
-	void Remove_Json_SNRT_INLINE(FString * json_string_in);
-
-	/*
-		Used for testing json parsing
-	*/
-	template <typename T> bool Test_Json_Parsing(FString json_in, FString type);
-
-	/*
 		General purpose constuctor
 	*/
 	UIndexer();

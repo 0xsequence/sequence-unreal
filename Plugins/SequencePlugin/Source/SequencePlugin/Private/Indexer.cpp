@@ -8,8 +8,22 @@
 
 UIndexer::UIndexer()
 {
-	this->Indexernames.Add(TPair<int64, FString>(1337, "testchain"));//there are others listed but we don't have them yet
-	this->Indexernames.Add(TPair<int64, FString>(137,"polygon"));//need to verify that this is polygons chain id!
+	//Mainnets
+	this->Indexernames.Add(TPair<int64, FString>(137,"polygon"));
+	this->Indexernames.Add(TPair<int64, FString>(1, "ethereum"));
+	this->Indexernames.Add(TPair<int64, FString>(56, "bnbsmartchain"));
+	this->Indexernames.Add(TPair<int64, FString>(42161, "arbitrumone"));
+	this->Indexernames.Add(TPair<int64, FString>(42170, "arbitrumnova"));
+	this->Indexernames.Add(TPair<int64, FString>(10, "optimism"));
+	this->Indexernames.Add(TPair<int64, FString>(43114, "avalanche"));
+	this->Indexernames.Add(TPair<int64, FString>(100, "gnosis"));
+
+	//Testnets
+	this->Indexernames.Add(TPair<int64, FString>(1337, "testchain"));
+	this->Indexernames.Add(TPair<int64, FString>(5, "testnetgoerli"));
+	this->Indexernames.Add(TPair<int64, FString>(80001, "testnetpolygonmumbai"));
+	this->Indexernames.Add(TPair<int64, FString>(97, "testnetbnbsmartchain"));
+	this->Indexernames.Add(TPair<int64, FString>(43113, "testnetavalanchefuji"));
 }
 
 /*
@@ -65,26 +79,6 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 	http_post_req->ProcessRequest();
 }
 
-void UIndexer::Remove_Json_SNRT_INLINE(FString* json_string_in)
-{
-
-	(*json_string_in).RemoveSpacesInline();
-
-	FString srch_n = TEXT("\n");
-	FString srch_r = TEXT("\r");
-	FString srch_t = TEXT("\t");
-	FString replace = TEXT("");
-
-	const TCHAR* rep_ptr = *replace;
-	const TCHAR* srch_ptr_n = *srch_n;
-	const TCHAR* srch_ptr_r = *srch_r;
-	const TCHAR* srch_ptr_t = *srch_t;
-
-	(*json_string_in).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
-	(*json_string_in).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
-	(*json_string_in).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
-}
-
 /*
 	Here we take in a struct and convert it straight into a json object String
 	@Param (T) Struct_in the struct we are converting to a json object string
@@ -137,188 +131,10 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 }
 
 //0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9 peter's public addr
-template <typename T> bool UIndexer::Test_Json_Parsing(FString json_in, FString type)
-{
-	UE_LOG(LogTemp, Display, TEXT("====================================================================="));
-	UE_LOG(LogTemp, Display, TEXT("JSON Type %s"), *type);
-
-	T built_response = BuildResponse<T>(json_in);
-	FString intermediate_out;
-	FJsonObjectConverter::UStructToJsonObjectString<T>(built_response, intermediate_out);
-
-	FString testable_out = BuildArgs<T>(built_response);
-
-	FString* i_ptr = &intermediate_out;
-	this->Remove_Json_SNRT_INLINE(i_ptr);
-	FString* o_ptr = &testable_out;
-	this->Remove_Json_SNRT_INLINE(o_ptr);//removes spaces, /n, /r, /t
-	FString* in_ptr = &json_in;
-	this->Remove_Json_SNRT_INLINE(in_ptr);
-
-	UE_LOG(LogTemp, Display, TEXT("JSON_in %s"), *json_in);
-
-	UE_LOG(LogTemp, Display, TEXT("Intermediate Json %s"), *intermediate_out);
-
-	UE_LOG(LogTemp, Display, TEXT("resulting jsonString: %s"), *testable_out);
-
-	bool result = (testable_out.ToLower().Compare(json_in.ToLower()) == 0);
-
-	if (result)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Test passed\n"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Test failed\n"));
-	}
-	UE_LOG(LogTemp, Display, TEXT("====================================================================="));
-	return result;
-}
 
 void UIndexer::setup(ASequence_Backend_Manager* manager_ref)
 {
 	this->bck_mngr = manager_ref;
-}
-
-TArray<UTexture2D*> UIndexer::testing()
-{
-	
-	bool res = true;
-	TArray<UTexture2D*> ret;
-	FGetTransactionHistoryArgs args;// ("0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
-	FTransactionHistoryFilter filter;
-
-
-	FGetTokenBalancesArgs t_args;
-	t_args.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
-
-	filter.accountAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";
-	args.filter = filter;
-	args.includeMetaData = true;
-
-	GetTransactionHistory(137,args, [=](FGetTransactionHistoryReturn Data)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Done testing history\n"));
-	}, [](SequenceError Err)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Failed testing history\n"));
-	});
-
-	
-
-	GetEtherBalance(137, "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9", [=](FEtherBalance Balance)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Done testing eth balance\n"));
-	}, [](SequenceError Err)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Failed testing eth balance\n"));
-	});
-
-	/*
-	UTexture2D* fetched_img = NULL;
-	for (auto i : data.transactions)//all txn's
-	{
-		for (auto j : i.transfers)//goes through transfers of a transaction!
-		{
-			fetched_img = get_image_data(j.contractInfo.extensions.ogImage);
-			if(fetched_img != NULL)
-				ret.Add(fetched_img);//this will hammer the call to see how it will behave
-			TArray<FString> keys;
-			j.tokenMetaData.GetKeys(keys);
-			for (auto key : keys)//the metadata of a transfer!
-			{
-				auto data_e = j.tokenMetaData.Find(key);
-				fetched_img = get_image_data(data_e->image);
-				if (fetched_img != NULL)
-					ret.Add(fetched_img);//this will hammer the call to see how it will behave
-			}
-		}
-	}
-	*/
-	UE_LOG(LogTemp, Display, TEXT("Img amount %d"),ret.Num());
-
-	return ret;
-
-	
-}
-
-
-
-UTexture2D* UIndexer::GetImageData(const FString URL)
-{
-	UE_LOG(LogTemp, Display, TEXT("Img from URL: %s"),*URL);
-	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-	UTexture2D * ret = nullptr;
-	http_post_req->SetVerb("GET");
-	http_post_req->SetURL(URL);
-	http_post_req->ProcessRequest();
-
-	//going forward these calls must be made ASYNC otherwise we will be constantly stalling at the start for
-	//very long periods of time look at setting up a dynamic approach to solve this properly
-	double LastTime = FPlatformTime::Seconds();
-	while (EHttpRequestStatus::Processing == http_post_req->GetStatus())
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	if (http_post_req.Get().GetResponse()) 
-	{
-		UE_LOG(LogTemp, Display, TEXT("Response Received processing img"));
-		TArray<uint8> img_data = http_post_req.Get().GetResponse().Get()->GetContent();
-		ret = build_image_data(img_data,URL);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Response INVALID!"));
-	}
-	return ret;
-}
-
-EImageFormat UIndexer::get_image_format(FString URL)
-{
-	EImageFormat fmt = EImageFormat::Invalid;
-
-	if (URL.Contains(".jpg", ESearchCase::IgnoreCase))
-		fmt = EImageFormat::JPEG;
-	else if (URL.Contains(".png", ESearchCase::IgnoreCase))
-		fmt = EImageFormat::PNG;
-	else if (URL.Contains(".bmp", ESearchCase::IgnoreCase))
-		fmt = EImageFormat::BMP;
-	return fmt;
-}
-
-UTexture2D* UIndexer::build_image_data(TArray<uint8> img_data,FString URL)
-{
-	int32 width = 0, height = 0;
-	UTexture2D* img = nullptr;
-	EPixelFormat pxl_format = PF_B8G8R8A8;
-	EImageFormat img_format = get_image_format(URL);//get the image format nicely!
-
-	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(img_format);
-	
-	if (ImageWrapper && ImageWrapper.Get()->SetCompressed(img_data.GetData(),img_data.Num()))
-	{
-		TArray64<uint8>  Uncompressed;
-		if (ImageWrapper.Get()->GetRaw(Uncompressed))
-		{
-			width = ImageWrapper.Get()->GetWidth();
-			height = ImageWrapper.Get()->GetHeight();
-
-			img = UTexture2D::CreateTransient(width, height, pxl_format);
-			if (!img) return nullptr;//nothing to do if it doesn't load!
-
-			void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
-			img->GetPlatformData()->Mips[0].BulkData.Unlock();
-
-			img->UpdateResource();
-		}
-	}
-	return img;
 }
 
 void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure)
