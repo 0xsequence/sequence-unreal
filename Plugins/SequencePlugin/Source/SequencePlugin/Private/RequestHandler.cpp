@@ -2,6 +2,8 @@
 
 
 #include "RequestHandler.h"
+
+#include "Async.h"
 #include "Http.h"
 #include "HttpManager.h"
 
@@ -56,27 +58,33 @@ URequestHandler* URequestHandler::WithContentAsString(const FString Content)
 	return this;
 }
 
-// This is a hacky way to make it synchronous
-// TODO: Find a better method
-TFuture<FString> URequestHandler::Process()
+FHttpRequestCompleteDelegate& URequestHandler::Process() const
 {
 	Request->ProcessRequest();
+	return Request->OnProcessRequestComplete();
+}
 
-	auto Future = Async(EAsyncExecution::Thread, [this]()
+
+
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, TFailureCallback OnFailure)
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
-		double LastTime = FPlatformTime::Seconds();
-		while(EHttpRequestStatus::Processing == Request->GetStatus())
+		if(bWasSuccessful)
 		{
-			const double AppTime = FPlatformTime::Seconds();
-			FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-			LastTime = AppTime;
-			FPlatformProcess::Sleep(0.5f);
+			auto Content = Response->GetContentAsString();
+			OnSuccess(Content);
 		}
-
-		return Request->GetResponse()->GetContentAsString();
+		else
+		{
+			if(!Response.IsValid())
+			{
+				return OnFailure(SequenceError(RequestFail, "The Request is invalid!"));
+			}
+			
+			OnFailure(SequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+		}
 	});
-
-	return Future;
 }
 
 

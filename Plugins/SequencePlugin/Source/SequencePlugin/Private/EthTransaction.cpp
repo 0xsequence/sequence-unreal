@@ -66,7 +66,15 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	this->S = MyS;
 }
 
-FHash256 FEthTransaction::GetTransactionHash(int ChainID)
+FHash256 FEthTransaction::GetSignedTransactionHash(FPrivateKey Key, int ChainID)
+{
+	auto SignedData = GetSignedTransaction(Key, ChainID);
+	auto Hash = FHash256::New();
+	Keccak256::getHash(SignedData.Arr, SignedData.GetLength(), Hash.Arr);
+	return Hash;
+}
+
+FHash256 FEthTransaction::GetUnsignedTransactionHash(int ChainID)
 {
 	auto NonceStr = TrimHex(Nonce.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);

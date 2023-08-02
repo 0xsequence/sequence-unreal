@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async.h"
 #include "Types/BinaryData.h"
 #include "Errors.h"
 #include "Types/Header.h"
@@ -33,65 +34,74 @@ FString TagToString(EBlockTag Tag);
 class Provider
 {
 	FString Url;
+	Provider Copy();
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	TFuture<FString> SendRPC(FString Content);
+	void SendRPC(FString Content, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure);
+
+	template<typename T>
+	void SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, TFailureCallback OnFailure);
+	
 	static FJsonBuilder RPCBuilder(FString MethodName);
 
 //helpers
-	TFuture<TResult<TSharedPtr<FJsonObject>>> GetBlockByNumberHelper(FString Number);
-	TFuture<TResult<uint64>> TransactionCountHelper(FAddress Address, FString Number);
-	TResult<FHeader> HeaderByNumberHelperSynchronous(FString Number);
-	TFuture<TResult<FHeader>> HeaderByNumberHelper(FString Number);
-	TResult<FBlockNonce> NonceAtHelperSynchronous(FString Number);
-	TFuture<TResult<FBlockNonce>> NonceAtHelper(FString Number);
-	TFuture<TResult<FNonUniformData>> CallHelper(FContractCall ContractCall, FString Number);
-	TResult<FNonUniformData> CallHelperSynchronous(FContractCall ContractCall, FString Number);
-	TResult<FHeader> HeaderByHashSynchronous(FHash256 Hash);
-	TResult<FNonUniformData> GetGasPriceSynchronous();
-	TResult<FNonUniformData> EstimateContractCallGasSynchronous(FContractCall ContractCall);
-	TResult<FNonUniformData> EstimateDeploymentGasSynchronous(FAddress from, FString Bytecode);
-	FAddress DeployContractSynchronous(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
-	FAddress DeployContractSynchronousWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
-	TResult<FTransactionReceipt> TransactionReceiptSynchronous(FHash256 Hash);
-	TResult<uint64> ChainIdSynchronous();
-	TResult<FNonUniformData> SendRawTransactionSynchronous(FString data);
+	void BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
+	void HeaderByNumberHelper(FString Number, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
+	void NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
+	void CallHelper(FContractCall ContractCall, FString Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
 
 public:
 	Provider(FString Url);
-	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(uint64 Number);
-	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByNumber(EBlockTag Tag);
-	TFuture<TResult<TSharedPtr<FJsonObject>>> BlockByHash(FHash256 Hash);
-	TFuture<TResult<uint64>> BlockNumber();
+	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
+	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
+	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
+	void BlockNumber(TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
 
-	TFuture<TResult<FHeader>> HeaderByNumber(uint64 Id);
-	TFuture<TResult<FHeader>> HeaderByNumber(EBlockTag Tag);
-	TFuture<TResult<FHeader>> HeaderByHash(FHash256 Hash);
+	void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
+	void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
+	void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
 	
-	TFuture<TResult<TSharedPtr<FJsonObject>>> TransactionByHash(FHash256 Hash);
-	TFuture<TResult<uint64>> TransactionCount(FAddress Addr, uint64 Number);
-	TFuture<TResult<uint64>> TransactionCount(FAddress Addr, EBlockTag Tag);
-	TFuture<TResult<FTransactionReceipt>> TransactionReceipt(FHash256 Hash);
+	void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
+	void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
+	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
+	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, TFailureCallback OnFailure);
 
-	TFuture<TResult<FNonUniformData>> GetGasPrice();
-	TFuture<TResult<FNonUniformData>> EstimateContractCallGas(FContractCall ContractCall);
-	TFuture<TResult<FNonUniformData>> EstimateDeploymentGas(FAddress from, FString Bytecode);
+	void GetGasPrice(TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
+	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
+	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
 
-	TFuture<FAddress> DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId);
-	TFuture<FAddress> DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, FNonUniformData* TransactionHash);
+	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, TFailureCallback OnFailure);
+	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FNonUniformData> OnSuccess, TFailureCallback OnFailure);
 	
-	TFuture<TResult<FBlockNonce>> NonceAt(uint64 Number);
-	TFuture<TResult<FBlockNonce>> NonceAt(EBlockTag Tag);
-	TFuture<TResult<FNonUniformData>> SendRawTransaction(FString data);
+	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
+	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
+	void SendRawTransaction(FString Data, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
 	
-	TFuture<TResult<uint64>> ChainId();
+	void ChainId(TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
 
-	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, uint64 Number);
-	TFuture<TResult<FNonUniformData>> Call(FContractCall ContractCall, EBlockTag Number);
-	TFuture<TResult<FNonUniformData>> NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID);
+	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
 
 };
+
+template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
+
+template <typename T>
+void Provider::SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess,
+	Extractor<T> Extractor, TFailureCallback OnFailure)
+{
+	SendRPC(Content, [OnSuccess, Extractor](FString Result)
+	{
+		TResult<T> Value = Extractor(Result);
+
+		if(Value.HasValue())
+		{
+			OnSuccess(Value.GetValue());
+		}
+	}, OnFailure);
+}
 
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async.h"
 #include "UObject/NoExportTypes.h"
 #include "Struct_Data.h"
 #include "Dom/JsonObject.h"
@@ -45,7 +46,7 @@ private:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	FString HTTPPost(int64 chainID, FString endpoint, FString args);
+	void HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
@@ -74,9 +75,9 @@ public:
 	/*
 		Used for testing out the core components of the indexer
 	*/
-	void testing();
+	TArray<UTexture2D*> testing();
 
-	UTexture2D* get_image_data(FString URL);
+	UTexture2D* GetImageData(FString URL);
 
 	UTexture2D* build_image_data(TArray<uint8> img_data, FString URL);
 
@@ -102,22 +103,22 @@ public:
 	/*
 		Used to get a ping back from the sequence app
 	*/
-	//TFuture<bool> Ping(int64 chainID);
+	void Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get version data back from the sequence app
 	*/
-	//TFuture<FVersion> Version(int64 chainID);
+	void Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the runtime status of the sequence app
 	*/
-	//TFuture<FRuntimeStatus> RunTimeStatus(int64 chainID);
+	void RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the chainID from the sequence app
 	*/
-	//TFuture<int64> GetChainID(int64 chainID);
+	void GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Used to get the Ether balance from the sequence app
@@ -125,44 +126,32 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	//void GetEtherBalance(int64 chainID, FString accountAddr);
+	void GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Gets the token balances from the sequence app
 	*/
-	FGetTokenBalancesReturn GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args);
+	void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		gets the token supplies from the sequence app
 	*/
-	FGetTokenSuppliesReturn GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args);
+	void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		gets the token supplies map from the sequence app
 	*/
-	FGetTokenSuppliesMapReturn GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args);
+	void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, TFailureCallback OnFailure);
 	
 	/*
 		Get the balance updates from the sequence app
 	*/
-	FGetBalanceUpdatesReturn GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args);
+	void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		get transaction history from the sequence app
 	*/
-	FGetTransactionHistoryReturn GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args);
-
-	/*
-	* Used for making Async requests!
-	*/
-	void async_request(FString url, FString json, void (UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
-
-	void async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
-
-	//async handlers
-	private:
-
-		void get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, TFailureCallback OnFailure);
 
 //end of public functions
 };

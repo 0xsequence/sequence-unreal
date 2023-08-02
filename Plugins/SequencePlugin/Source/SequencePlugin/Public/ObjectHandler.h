@@ -30,7 +30,7 @@ class UObjectHandler : public UObject
 	
 private:
 	//this index we will be inserting into
-	UObject* main_this_ref = NULL;
+	UObject* main_this_ref = nullptr;
 	TMap<FString, int32> insertion_indices;//we can associate URL's with insertion indices!
 	//note 2GB is the limit because of int32 size limits!
 	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!

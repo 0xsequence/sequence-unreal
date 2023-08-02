@@ -1,5 +1,6 @@
 #include "Misc/AutomationTest.h"
 #include "Async.h"
+#include "Http.h"
 
 void Hello()
 {

@@ -8,6 +8,8 @@ enum ErrorType
 	EmptyResponse,
 	UnsupportedMethodOnChain,
 	RequestFail,
+	RequestTimeExceeded,
+	TestFail,
 };
 
 class SequenceError
