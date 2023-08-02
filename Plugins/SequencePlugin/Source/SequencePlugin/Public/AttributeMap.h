@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IndexerSupport.h"
 #include "AttributeMap.generated.h"
 
 /*
@@ -14,6 +15,11 @@ struct FAttributeMap
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
-        TMap<FString, UObject*> attribute_map;//this will probably need to be stored as is as well!
+        TMap<FString, FString> attribute_map;
+        
+        void setup(TSharedPtr<FJsonObject> json_in)
+        {//the json_in will be a mirror of what we have here!
+            //we just need to convert the json object into an attributeMap now!
+            attribute_map = UIndexerSupport::jsonObjectParser(json_in);
+        }
 };

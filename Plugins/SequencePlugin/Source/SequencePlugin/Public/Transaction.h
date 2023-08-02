@@ -26,13 +26,18 @@ public:
 
     void setup(FJsonObject json_in)
     {
-        TArray<TSharedPtr<FJsonValue>> trnsfrs = json_in.GetArrayField("transfers");
-
-        //here we know the array's are gonna be parallel as we setup up the UStruct with the exact same data!
-        for (int i = 0; i < transfers.Num(); i++)
+        const TArray<TSharedPtr<FJsonValue>>* trnsfrs;
+        if (json_in.TryGetArrayField("transfers", trnsfrs))
         {
-            transfers[i].setup(*trnsfrs[i].Get()->AsObject().Get());
+            //here we know the array's are gonna be parallel as we setup up the UStruct with the exact same data!
+            for (int i = 0; i < transfers.Num(); i++)
+            {
+                const TSharedPtr<FJsonObject>* itemObj;
+                if ((*trnsfrs)[i].Get()->TryGetObject(itemObj))
+                {
+                    transfers[i].setup(*itemObj->Get());
+                }
+            }
         }
-
     }
 };

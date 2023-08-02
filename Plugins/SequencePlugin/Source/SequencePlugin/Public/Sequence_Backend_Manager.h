@@ -78,15 +78,6 @@ public:
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
-	/*
-	* This is meant to initiate an ASYNC request with the backend
-	* it will call update_wei when it completes where the child class of
-	* Sequence_Backend_Manager will override the matching update_ether_balance in Blueprints
-	* with that data
-	*/
-	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		void get_ether_balance();//uses the signed in account address
-
 	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
 		void testing_network_infrastructures();
 
@@ -242,7 +233,7 @@ public:
 		* Testing function used for evaluating the indexer
 		*/
 		UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
-			TArray<UTexture2D*> Testing_Indexer();
+			void Testing_Indexer();
 //TESTING FUNCTIONS
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
