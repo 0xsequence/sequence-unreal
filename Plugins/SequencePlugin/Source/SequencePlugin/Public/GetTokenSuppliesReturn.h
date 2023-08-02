@@ -21,14 +21,17 @@ public:
     void construct(FJsonObject json_in) {};//dummy construct for templating
     void setup(FJsonObject json_in)
     {
-        if (json_in.TryGetField("tokenIDs") != nullptr)
+        const TArray<TSharedPtr<FJsonValue>>* lst;
+        if (json_in.TryGetArrayField("tokenIDs",lst))
         {
-            TArray<TSharedPtr<FJsonValue>> list = json_in.GetArrayField("tokenIDs");
-
             for (int32 i = 0; i < tokenIDs.Num(); i++)
             {
-                tokenIDs[i].setup(*list[i].Get()->AsObject());
-            }
-        }
-    }
+                const TSharedPtr<FJsonObject>* itemObj;
+                if ((*lst)[i].Get()->TryGetObject(itemObj))
+                {
+                    tokenIDs[i].setup(*itemObj->Get());
+                }//if
+            }//for
+        }//if
+    }//setup
 };

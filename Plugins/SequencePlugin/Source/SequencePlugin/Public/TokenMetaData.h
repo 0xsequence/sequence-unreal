@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AttributeMap.h"
 #include "JsonObjectConverter.h"
+#include "IndexerSupport.h"
 #include "TokenMetaData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -35,33 +36,33 @@ public:
     UPROPERTY()
         FString animation_url;
 
-    //properties form: TMap<FString,Object>
-    TSharedPtr<FJsonObject> properties;//this is our properties ref!
+    TMap<FString, FString> properties;
 
-    //attributes form: TArray<TMap<FString, Object>>
-    TArray<TSharedPtr<FJsonValue>> attributes;//this is our attributes ref!
+    TArray<FAttributeMap> attributes;
 
-    void setup(TSharedPtr<FJsonObject> json_in)
+    void setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
-        
-        const TSharedPtr<FJsonObject>* ref = &properties;
-        if (!json_in.Get()->TryGetObjectField("properties", ref))
+        const TSharedPtr<FJsonObject>* refPtr;
+        if (json_in.TryGetObjectField("properties", refPtr))
         {
-            FString OutputString;
-            TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-            FJsonSerializer::Serialize(json_in.ToSharedRef(), Writer);
-            UE_LOG(LogTemp, Warning, TEXT("Error getting properties out of: %s"),*OutputString);
+            properties = UIndexerSupport::jsonObjectParser(*refPtr);
         }
-        //now we create the attribute map!
 
-        // = &attributes;
-        const TArray<TSharedPtr<FJsonValue>> *lst = &attributes;
-        if (!json_in.Get()->TryGetArrayField("attributes",lst))//attempt to assign!
+        //now we create the attribute map!
+        const TArray<TSharedPtr<FJsonValue>>* lstPtr;
+        if (json_in.TryGetArrayField("attributes",lstPtr))//attempt to assign!
         {
-            FString OutputString;
-            TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-            FJsonSerializer::Serialize(json_in.ToSharedRef(), Writer);
-            UE_LOG(LogTemp, Warning, TEXT("Error getting attributes out of: %s"), *OutputString);
+            for (TSharedPtr<FJsonValue> i : *lstPtr)
+            {
+                //we need to convert i to an object! then will be able to proceed!
+                const TSharedPtr<FJsonObject>* iObjPtr;
+                if (i.Get()->TryGetObject(iObjPtr))
+                {//failed to convert
+                    FAttributeMap attr;
+                    attr.setup(*iObjPtr);
+                    attributes.Add(attr);
+                }
+            }
         }
     }
 };

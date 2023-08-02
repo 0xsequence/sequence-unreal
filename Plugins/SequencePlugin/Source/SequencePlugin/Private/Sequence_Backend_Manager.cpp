@@ -85,36 +85,6 @@ FString ASequence_Backend_Manager::get_transaction_hash()
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
-void ASequence_Backend_Manager::get_ether_balance()
-{
-	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress, [](FEtherBalance Balance)
-	{
-		
-	}, [](SequenceError Err)
-	{
-		
-	});
-}
-
-void ASequence_Backend_Manager::reset_request_count()
-{
-	this->req_count = 0;
-}
-
-void ASequence_Backend_Manager::inc_request_count()
-{
-	this->req_count++;
-}
-
-void ASequence_Backend_Manager::dec_request_count()
-{
-	this->req_count = FMath::Max(0, this->req_count-1);
-	if (req_count == 0)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Done Fetching Images sending them to front!"));
-	}
-}
-
 void ASequence_Backend_Manager::init_system_data()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
@@ -130,70 +100,11 @@ void ASequence_Backend_Manager::init_signin(FString email)
 	Delegate.BindUFunction(this, "update_signin", oob_code);
 	GetWorld()->GetTimerManager().SetTimer(TH_signin_delay, Delegate,1, false);
 
-	//this->update_signin("123456");
-	//this->update_authentication(true);
-
 	FTimerHandle TH_auth_delay;//second chunk simulates successful login this may be causing a crash
 	FTimerDelegate Delegate_2;
 	Delegate_2.BindUFunction(this, "update_authentication", true);
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2,3, false);
 }
-
-void ASequence_Backend_Manager::get_txn_imgs_manager()
-{
-	/*
-	
-	this->reset_request_count();
-	this->fetched_imgs.Empty();
-	//first thing we need to do is actually get the transaction data!
-	FGetTransactionHistoryArgs args;
-	FTransactionHistoryFilter filter;
-	filter.accountAddress = this->glb_PublicAddress;
-	args.filter = filter;
-	args.includeMetaData = true;
-	FGetTransactionHistoryReturn ret = this->indexer->GetTransactionHistory(this->glb_ChainID, args);
-	UObjectHandler* req_handler = this->request_handler;//use our request handler!
-	req_handler->setup_raw_handler(&UObjectHandler::img_handler, this, true);
-	//a req_handler can handle many requests at a time now! :) & now with caching for even faster responses!
-
-	TArray<FString> req_urls;
-
-	for (auto i : ret.transactions)//all txn's
-	{
-		for (auto j : i.transfers)//goes through transfers of a transaction!
-		{
-			req_urls.Add(j.contractInfo.logoURI);//add this too!
-
-			req_urls.Add(j.contractInfo.extensions.ogImage);
-			TArray<FString> keys;
-			j.tokenMetaData.GetKeys(keys);
-			for (auto key : keys)//the metadata of a transfer!
-			{
-				auto data_e = j.tokenMetaData.Find(key);
-				req_urls.Add(data_e->image);
-			}
-		}
-	}//url fetching
-
-	this->req_count = req_urls.Num();
-
-	for (auto i : req_urls)
-	{
-		//may need to use defferred processing to avoid stalls otherwise there will be a big hitch if we have a series of cache hits
-		if (!req_handler->request_raw(i))
-			this->dec_request_count();
-	}
-
-	*/
-}
-
-/*
-	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_coin_send_txn(FCoin_Send_Txn_BE coin_txn);
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_nft_send_txn(FNFT_Send_Txn_BE nft_txn);
-*/
 
 void ASequence_Backend_Manager::init_coin_send_txn(FCoin_Send_Txn_BE coin_txn)
 {
@@ -202,7 +113,6 @@ void ASequence_Backend_Manager::init_coin_send_txn(FCoin_Send_Txn_BE coin_txn)
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
 	callback.txn_hash_id = coin_txn.txn_hash_id;
-	//this->update_txn(callback);
 
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate;
@@ -217,7 +127,6 @@ void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
 	callback.txn_hash_id = nft_txn.txn_hash_id;
-	//this->update_txn(callback);
 
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate;
@@ -261,21 +170,6 @@ void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
 	Delegate.BindUFunction(this, "update_authentication", true);
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
-}
-
-void ASequence_Backend_Manager::add_img(UTexture2D* img_to_add)
-{
-	if (img_to_add != nullptr) 
-	{
-		this->fetched_imgs.Add(img_to_add);
-		dec_request_count();
-		UE_LOG(LogTemp, Display, TEXT("Image Data Received!"));
-	}
-	else
-	{
-		dec_request_count();//in the event of null data we need to dec too
-		UE_LOG(LogTemp, Error, TEXT("Image Data Received but processed to NULL :("));
-	}
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
@@ -535,107 +429,3 @@ FString ASequence_Backend_Manager::get_signin_url()
 	FBase64::Decode(signin_url, result);
 	return result;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//TESTING FUNCTIONS
-
-/*
-* Used to test an indivual private key, to see how it's generated public key compares to a CORRECT
-* pre computed and and how the generated address from the generated public key compares to a precomputed
-* CORRECT address
-* returns true IFF gen_public_key matches the hard_public_key &&
-* gen_address matches hard_address
-*/
-bool ASequence_Backend_Manager::test_address_gen(FString prvt_k, FString hrd_pblc_k, FString hrd_addr)
-{
-	bool bResult = false;
-
-	//gen the public key one that's usable and the other for printing / testing!
-	auto PrivKey = FPrivateKey::From(prvt_k);
-	FPublicKey gen_pblc_key_H = GetPublicKey(PrivKey);
-	FString gen_pblc_k_V = gen_pblc_key_H.ToHex();
-
-	FAddress addr_H = GetAddress(gen_pblc_key_H);
-	FString addr_V = addr_H.ToHex();
-	UE_LOG(LogTemp, Display, TEXT("=========================================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Private Key: %s"), *prvt_k);
-	UE_LOG(LogTemp, Display, TEXT("Public Gen Key: %s"), *gen_pblc_k_V);
-	UE_LOG(LogTemp, Display, TEXT("Public HRD Key: %s"), *hrd_pblc_k);
-	UE_LOG(LogTemp, Display, TEXT("Gen Address: %s"), *addr_V);
-	UE_LOG(LogTemp, Display, TEXT("Hrd Address: %s"), *hrd_addr);
-
-	hrd_addr = hrd_addr.ToLower();//because this all needs to be lower case to work!
-	hrd_pblc_k = hrd_pblc_k.ToLower();
-	addr_V = addr_V.ToLower();
-	gen_pblc_k_V = gen_pblc_k_V.ToLower();
-	if (hrd_addr.Compare(addr_V) == 0 && gen_pblc_k_V.Compare(hrd_pblc_k) == 0)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Test Passed"));
-		bResult = true;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("Test Failed"));
-	}
-	UE_LOG(LogTemp, Display, TEXT("=========================================================================="));
-	return bResult;
-}
-
-/*
-* Used to test the public key generation and address generation in accordance with
-* the test chain!
-*/
-FString ASequence_Backend_Manager::Testing_Address_Generation()
-{
-	FString Result = "Test Failed";
-	bool bResult = true;
-	//account 1
-	FString a0_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000001";
-	FString a0_pblc_k_h = "ef345e93b9c10b43b42ae5e1322cba136cf1553c8e9ae065b89d8dcea02badaf22561f1b8bb92f60c5c003a7898c5f785cef6496819c862a18c50b22f7b4d17f";
-	FString a0_addr_h = "c683a014955b75f5ecf991d4502427c8fa1aa249";
-	bResult &= test_address_gen(a0_prvt_k, a0_pblc_k_h, a0_addr_h);
-
-	//account 2
-	FString a1_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000002";
-	FString a1_pblc_k_h = "2ad49951b009ddfb436cf7f6ab485ef5bb4ad1f19c41f28d447a9c63866a69b11e0de95f630b5bfc8c77d357e81e5bab8aff4609a89b7420c2f776d6a030197a";
-	FString a1_addr_h = "1099542d7dfaf6757527146c0ab9e70a967f71c0";
-	bResult &= test_address_gen(a1_prvt_k, a1_pblc_k_h, a1_addr_h);
-
-	//account 3
-	FString a2_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000003";
-	FString a2_pblc_k_h = "515d9e6b30d7602acf4c58129ef87e893109175a2a9653ce12c50d56f5119b7a9ea16ce02f796e272f82318e141fb786752dbe667787667f02f109a953dfc3a7";
-	FString a2_addr_h = "606e6d28e9150D8A3C070AEfB751a2D0C5DB19fa";
-	bResult &= test_address_gen(a2_prvt_k, a2_pblc_k_h, a2_addr_h);
-	
-	//account 4
-	FString a3_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000004";
-	FString a3_pblc_k_h = "c96393b446ef90ab2e2cd3d216f14efc475ad0b64992671d5f435a9f6db0768f0f68d673742aef4a894233e40f6f49f3ef512b89dd8131343bcbc6ca032529aa";
-	FString a3_addr_h = "b396CbD9b745Ffc4a9C9A6D43D7957b1350Be153";
-	bResult &= test_address_gen(a3_prvt_k, a3_pblc_k_h, a3_addr_h);
-
-	//account 5
-	FString a4_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000005";
-	FString a4_pblc_k_h = "1b42044486d6d22cbd1ea5e113add43011bdea1979e44f1df1b6e2d8e4ebc2e0f031d773ffb1e4c65b78d6ce906b352288fc1b51686cfb9925402b979a904807";
-	FString a4_addr_h = "6F5Ddb00e3cb99Dfd9A07885Ea91303629D1DA94";
-	bResult &= test_address_gen(a4_prvt_k, a4_pblc_k_h, a4_addr_h);
-
-	//account 6
-	FString a5_prvt_k = "abc0000000000000000000000000000000000000000000000000000000000006";
-	FString a5_pblc_k_h = "1d6069a50f0df1488654757302dc0cfbbccced0dc740f205c8871d0700b20753bb703ac8b47ac7e86f65842401b25321446a90c28167fd4d9bab2ab38c62b3f6";
-	FString a5_addr_h = "3F96a0D6697e5E7ACEC56A21681195dC6262b06C";
-	bResult &= test_address_gen(a5_prvt_k, a5_pblc_k_h, a5_addr_h);
-
-	if (bResult)
-	{
-		Result = "Test Passed";
-	}
-	return Result;
-}
-
-TArray<UTexture2D*> ASequence_Backend_Manager::Testing_Indexer()
-{
-	TArray<UTexture2D*> ret = this->indexer->testing();
-	return ret;
-}
-//TESTING FUNCTIONS
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
