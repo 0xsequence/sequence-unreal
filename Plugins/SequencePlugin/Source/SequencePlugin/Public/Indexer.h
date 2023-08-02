@@ -77,7 +77,7 @@ public:
 	*/
 	TArray<UTexture2D*> testing();
 
-	UTexture2D* get_image_data(FString URL);
+	UTexture2D* GetImageData(FString URL);
 
 	UTexture2D* build_image_data(TArray<uint8> img_data, FString URL);
 
@@ -126,7 +126,7 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(int64 chainID, FString accountAddr);
+	void GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, TFailureCallback OnFailure);
 
 	/*
 		Gets the token balances from the sequence app
@@ -152,18 +152,6 @@ public:
 		get transaction history from the sequence app
 	*/
 	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, TFailureCallback OnFailure);
-
-	/*
-	* Used for making Async requests!
-	*/
-	void async_request(FString url, FString json, void (UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
-
-	void async_request_test(FString url, FString json,int32 i_index, void(UIndexer::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
-
-	//async handlers
-	private:
-
-		void get_ether_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 //end of public functions
 };
