@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async.h"
 #include "Interfaces/IHttpRequest.h"
 #include "UObject/Object.h"
 #include "RequestHandler.generated.h"
@@ -32,5 +33,6 @@ public:
 	URequestHandler* WithContentAsString(FString Content);
 
 	// Process
-	TFuture<FString> Process();
+	FHttpRequestCompleteDelegate& Process() const;
+	void ProcessAndThen(TFunction<void (FString)> OnSuccess, TFailureCallback OnFailure);
 };

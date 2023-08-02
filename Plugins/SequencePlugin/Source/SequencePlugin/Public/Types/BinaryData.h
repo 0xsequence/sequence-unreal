@@ -7,9 +7,9 @@ struct FBinaryData
 {
 	virtual ~FBinaryData() = default; // Does NOT free Data pointer. Must do so manually!
 	uint8* Arr;
-	virtual const ByteLength GetLength() = 0;
+	virtual ByteLength GetLength() const = 0;
 	void Destroy();
-	const FString ToHex();
+	FString ToHex() const;
 	void Renew(); // Makes new blank array. Clean up the old one!
 };
 
@@ -21,7 +21,7 @@ struct FNonUniformData : FBinaryData
 	ByteLength Length;
 	FNonUniformData(uint8* Arr, ByteLength Length);
 	FNonUniformData Copy(); // This creates new data that must be freed
-	virtual const ByteLength GetLength() override;
+	virtual ByteLength GetLength() const override;
 	FNonUniformData Trim(); // Destroys itself
 };
 
@@ -38,14 +38,14 @@ template<ByteLength TSize>
 struct FUniformData : FBinaryData
 {
 	const static ByteLength Size = TSize;
-	virtual const ByteLength GetLength() override;
+	virtual ByteLength GetLength() const override;
 	FNonUniformData Copy(); // This creates new data that must be freed
 	operator FNonUniformData() { return Copy(); }
 	const static FUniformData Empty();
 }; // Data with set sizes
 
 template <ByteLength Size>
-const inline ByteLength FUniformData<Size>::GetLength()
+inline ByteLength FUniformData<Size>::GetLength() const 
 {
 	return Size;
 }
