@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TokenMetaData.h"
 #include "UObject/NoExportTypes.h"
 #include "IndexerSupport.generated.h"
 

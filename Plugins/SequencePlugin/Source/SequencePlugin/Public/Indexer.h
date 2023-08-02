@@ -45,7 +45,7 @@ private:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	TFuture<FString> HTTPPost(int64 chainID, FString endpoint, FString args);
+	FString HTTPPost(int64 chainID, FString endpoint, FString args);
 
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
@@ -74,7 +74,7 @@ public:
 	/*
 		Used for testing out the core components of the indexer
 	*/
-	TArray<UTexture2D*> testing();
+	void testing();
 
 	UTexture2D* get_image_data(FString URL);
 
@@ -102,22 +102,22 @@ public:
 	/*
 		Used to get a ping back from the sequence app
 	*/
-	TFuture<bool> Ping(int64 chainID);
+	//TFuture<bool> Ping(int64 chainID);
 
 	/*
 		Used to get version data back from the sequence app
 	*/
-	TFuture<FVersion> Version(int64 chainID);
+	//TFuture<FVersion> Version(int64 chainID);
 
 	/*
 		Used to get the runtime status of the sequence app
 	*/
-	TFuture<FRuntimeStatus> RunTimeStatus(int64 chainID);
+	//TFuture<FRuntimeStatus> RunTimeStatus(int64 chainID);
 
 	/*
 		Used to get the chainID from the sequence app
 	*/
-	TFuture<int64> GetChainID(int64 chainID);
+	//TFuture<int64> GetChainID(int64 chainID);
 
 	/*
 		Used to get the Ether balance from the sequence app
@@ -125,7 +125,7 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(int64 chainID, FString accountAddr);
+	//void GetEtherBalance(int64 chainID, FString accountAddr);
 
 	/*
 		Gets the token balances from the sequence app

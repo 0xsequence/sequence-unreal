@@ -18,11 +18,17 @@ public:
     void construct(FJsonObject json_in) {};//dummy construct for templating
     void setup(FJsonObject json_in)
     {
-        TArray<TSharedPtr<FJsonValue>> txn_data = json_in.GetArrayField("transactions");
-
-        for (int i = 0; i < transactions.Num(); i++)
+        const TArray<TSharedPtr<FJsonValue>>* lst;
+        if (json_in.TryGetArrayField("transactions", lst))
         {
-            transactions[i].setup(*txn_data[i].Get()->AsObject().Get());
-        }
-    }
+            for (int i = 0; i < transactions.Num(); i++)
+            {
+                const TSharedPtr<FJsonObject>* itemObj;
+                if ((*lst)[i].Get()->TryGetObject(itemObj))
+                {
+                    transactions[i].setup(*itemObj->Get());
+                }//if
+            }//for
+        }//if
+    }//setup
 };

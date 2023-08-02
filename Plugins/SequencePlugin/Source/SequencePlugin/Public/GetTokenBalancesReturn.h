@@ -18,14 +18,19 @@ public:
     void construct(FJsonObject json_in) {};//dummy construct for templating
     void setup(FJsonObject json_in)
     {
-        if (json_in.TryGetField("balances") != nullptr)
-        {
-           TArray<TSharedPtr<FJsonValue>> list = json_in.GetArrayField("balances");
 
-           for (int32 i = 0; i < balances.Num(); i++)
-           {
-               balances[i].setup(*list[i].Get()->AsObject());
-           }
+        const TArray<TSharedPtr<FJsonValue>>* lst;
+        if (json_in.TryGetArrayField("balances", lst))
+        {
+            for (int32 i = 0; i < balances.Num(); i++)
+            {
+                TSharedPtr<FJsonValue> item = (*lst)[i];
+                const TSharedPtr<FJsonObject>* itemObj;
+                if ((*lst)[i].Get()->TryGetObject(itemObj))
+                {
+                    balances[i].setup(*itemObj->Get());
+                }
+            }
         }
     }
 };
