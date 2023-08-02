@@ -2,9 +2,7 @@
 
 
 #include "General_Testing.h"
-#include "Tests/LargeTest.h"
-#include "JsonBuilder.h"
-#include "RequestHandler.h"
+#include "tests/ContractTest.h"
 
 // Sets default values
 AGeneral_Testing::AGeneral_Testing()
@@ -38,7 +36,7 @@ void AGeneral_Testing::test_provider()
 		Callback_Failed(data, Err);
 	};
 
-	LargeTest(OnSuccess, OnFailure);
+	ContractTest::RunTest(OnSuccess, OnFailure);
 	
 }
 

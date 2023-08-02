@@ -12,7 +12,6 @@
 #include "Http.h"
 #include "JsonBuilder.h"
 #include "Types/TransactionReceipt.h"
-#include "Types/Types.h"
 #include "EthTransaction.h"
 
 struct FContractCall;
