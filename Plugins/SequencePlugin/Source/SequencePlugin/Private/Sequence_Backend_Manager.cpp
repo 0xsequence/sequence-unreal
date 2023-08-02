@@ -196,7 +196,12 @@ void ASequence_Backend_Manager::init_coin_send_txn(FCoin_Send_Txn_BE coin_txn)
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
 	callback.txn_hash_id = coin_txn.txn_hash_id;
-	this->update_txn(callback);
+	//this->update_txn(callback);
+
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "update_txn", callback);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
 }
 
 void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
@@ -206,7 +211,13 @@ void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
 	FTxnCallback_BE callback;
 	callback.good_txn = FMath::RandBool();
 	callback.txn_hash_id = nft_txn.txn_hash_id;
-	this->update_txn(callback);
+	//this->update_txn(callback);
+
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "update_txn", callback);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
+
 }
 
 void ASequence_Backend_Manager::testing_network_infrastructures()

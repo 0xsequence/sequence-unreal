@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Errors.h"
+#include "IndexerSupport.h"
 #include "General_Testing.generated.h"
 
 UCLASS()
@@ -33,6 +34,12 @@ protected:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Indexer")
 		void test_indexer();
+
+	/*
+	* Used to test misc functions / support objects!
+	*/
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Misc")
+		void testMisc();
 //End of Testing Functions//
 public:	
 	// Called every frame
