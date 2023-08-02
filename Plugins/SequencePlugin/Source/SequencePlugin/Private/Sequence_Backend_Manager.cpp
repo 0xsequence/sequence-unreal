@@ -87,7 +87,13 @@ FString ASequence_Backend_Manager::get_transaction_hash()
 
 void ASequence_Backend_Manager::get_ether_balance()
 {
-	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress);
+	this->indexer->GetEtherBalance(glb_ChainID, glb_PublicAddress, [](FEtherBalance Balance)
+	{
+		
+	}, [](SequenceError Err)
+	{
+		
+	});
 }
 
 void ASequence_Backend_Manager::reset_request_count()
