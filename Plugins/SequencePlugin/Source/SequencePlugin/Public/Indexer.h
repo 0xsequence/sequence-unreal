@@ -28,7 +28,6 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 private:
 	const FString PATH = "/rpc/Indexer/";
 	TMap<int64, FString> Indexernames;
-	ASequence_Backend_Manager * bck_mngr;
 
 //private functions
 	
@@ -69,8 +68,6 @@ private:
 public:
 
 //public functions
-
-	void setup(ASequence_Backend_Manager* manager_ref);
 
 	/*
 		General purpose constuctor

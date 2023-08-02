@@ -130,13 +130,6 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	return ret_struct;
 }
 
-//0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9 peter's public addr
-
-void UIndexer::setup(ASequence_Backend_Manager* manager_ref)
-{
-	this->bck_mngr = manager_ref;
-}
-
 void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "Ping", "", [=](FString Content) {
