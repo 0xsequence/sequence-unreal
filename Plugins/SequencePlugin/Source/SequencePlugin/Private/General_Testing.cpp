@@ -2,6 +2,7 @@
 
 
 #include "General_Testing.h"
+#include "IndexerTests.h"
 #include "tests/ContractTest.h"
 
 // Sets default values
@@ -43,6 +44,17 @@ void AGeneral_Testing::test_provider()
 void AGeneral_Testing::test_indexer()
 {
 	//stub in test functions here!
+	TFunction<void(FString)> OnSuccess = [this](FString State)
+	{
+		callback_passed(State);
+	};
+
+	TFunction<void(FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
+	{
+		Callback_Failed(data, Err);
+	};
+
+	IndexerTest(OnSuccess, OnFailure);
 }
 
 void AGeneral_Testing::testMisc()

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "JsonObjectConverter.h"
 #include "IndexerSupport.generated.h"
 
 /**
@@ -24,6 +25,16 @@ public:
 	* \n, \", \t, \r, spaces etc
 	*/
 	static FString simplifyString(FString string);
+
+	/*
+	* Allows for the converting of a Struct straigt into a nicely formatted json string!
+	*/
+	template < typename T > static FString structToString(T structVar)
+	{
+		FString ret;
+		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
+		return ret;
+	}
 
 private:
 	static FString jsonToString(TSharedPtr<FJsonValue> jsonData);

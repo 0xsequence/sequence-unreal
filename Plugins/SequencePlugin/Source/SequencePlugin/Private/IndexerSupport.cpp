@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
+#pragma once
 #include "IndexerSupport.h"
+#include "Version.h"
 
 /*
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
