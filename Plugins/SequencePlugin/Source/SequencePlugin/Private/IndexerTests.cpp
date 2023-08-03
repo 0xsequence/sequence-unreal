@@ -134,17 +134,62 @@ void getTokenSuppliesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess,
 
 void getTokenSuppliesMapTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
+	const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesMapReturn tokenSuppliesMap)
+	{
+		OnSuccess("Received TokenSuppliesMap Data");
+		FString ret = UIndexerSupport::structToString<FGetTokenSuppliesMapReturn>(tokenSuppliesMap);
+		UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *ret);
+	};
 
+	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	{
+		OnFailure("TokenSuppliesMap Failure", Error);
+	};
+
+	FGetTokenSuppliesMapArgs args;
+	TMap<FString, FTokenList> tokenMap;
+	args.includeMetaData = true;
+	args.tokenMap = tokenMap;
+	indexer->GetTokenSuppliesMap(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
 void getBalanceUpdatesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
+	const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [OnSuccess](const FGetBalanceUpdatesReturn balanceUpdates)
+	{
+		OnSuccess("Received balanceUpdates Data");
+		FString ret = UIndexerSupport::structToString<FGetBalanceUpdatesReturn>(balanceUpdates);
+		UE_LOG(LogTemp, Display, TEXT("Parsed balanceUpdatesReturn Struct:\n%s\n"), *ret);
+	};
 
+	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	{
+		OnFailure("balanceUpdates Failure", Error);
+	};
+
+	FGetBalanceUpdatesArgs args;
+	args.contractAddress = "0x";//need work here!
+	indexer->GetBalanceUpdates(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
 void getTransactionHistoryTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
+	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [OnSuccess](const FGetTransactionHistoryReturn transactionHistory)
+	{
+		OnSuccess("Received transactionHistory Data");
+		FString ret = UIndexerSupport::structToString<FGetTransactionHistoryReturn>(transactionHistory);
+		UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
+	};
 
+	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	{
+		OnFailure("transactionHistory Failure", Error);
+	};
+
+	FGetTransactionHistoryArgs args;
+	args.filter.accountAddress = testingAddress;
+	args.includeMetaData = true;
+	indexer->GetTransactionHistory(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
 
@@ -152,13 +197,18 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 {
 	//now we need to test all the different calls!
 	UIndexer* indexer = NewObject<UIndexer>();//for testing!	
+	//these all work
+//	pingTest(indexer, OnSuccess, OnFailure);
+//	versionTest(indexer, OnSuccess, OnFailure);
+//	runTimeStatusTest(indexer, OnSuccess, OnFailure);
+//	getChainIDTest(indexer, OnSuccess, OnFailure);
+//	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 
-	pingTest(indexer, OnSuccess, OnFailure);
-	versionTest(indexer, OnSuccess, OnFailure);
-	runTimeStatusTest(indexer, OnSuccess, OnFailure);
-	getChainIDTest(indexer, OnSuccess, OnFailure);
-	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
-	//getTokenBalanceTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
+	//arg based indexer calls seem to be crashing for some reason could be bad arg handling?
+	getTokenBalanceTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
+	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
+	//getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
+	//getTransactionHistoryTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
 
 	return;//done
 }

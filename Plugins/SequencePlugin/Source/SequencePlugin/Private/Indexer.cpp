@@ -179,7 +179,8 @@ void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSucc
 {
 	HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args), [this, &OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetTokenBalancesReturn>(Content));
+		FGetTokenBalancesReturn response = BuildResponse<FGetTokenBalancesReturn>(Content);
+		OnSuccess(response);
 	}, OnFailure);
 }
 
