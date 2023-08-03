@@ -32,7 +32,6 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("f");
 
 	this->indexer = NewObject<UIndexer>();
-	this->indexer->setup(this);//pass the indexer a ref. to ourselves so it can let us know when stuff is done!
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
