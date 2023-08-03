@@ -1,11 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#pragma once
+
 #include "General_Testing.h"
-#include "Tests/LargeTest.h"
-#include "IndexerTests.h"
-#include "JsonBuilder.h"
-#include "RequestHandler.h"
+#include "tests/ContractTest.h"
 
 // Sets default values
 AGeneral_Testing::AGeneral_Testing()
@@ -39,25 +36,13 @@ void AGeneral_Testing::test_provider()
 		Callback_Failed(data, Err);
 	};
 
-	LargeTest(OnSuccess, OnFailure);
+	ContractTest::RunTest(OnSuccess, OnFailure);
 	
 }
 
 void AGeneral_Testing::test_indexer()
 {
 	//stub in test functions here!
-	TFunction<void(FString)> OnSuccess = [this](FString State)
-	{
-		callback_passed(State);
-	};
-
-	TFunction<void(FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
-	{
-		Callback_Failed(data, Err);
-	};
-
-	IndexerTest(OnSuccess, OnFailure);
-
 }
 
 void AGeneral_Testing::testMisc()

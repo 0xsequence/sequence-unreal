@@ -1,4 +1,6 @@
-﻿#include "Crypto.h"
+#include "tests/ContractTest.h"
+
+#include "Crypto.h"
 #include "Types/BinaryData.h"
 #include "EthTransaction.h"
 #include "HexUtility.h"
@@ -7,11 +9,65 @@
 #include "ABI/ABI.h"
 #include "ABI/ABITypes.h"
 
-#pragma once
+void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
+{
+	const TFailureCallback GenericFailure = [=](const SequenceError Error)
+	{
+		OnFailure("", Error);
+	};
+	
+	//nonpayable method
+	auto RefillAmount = FABIUInt32Property(5);
+	TArray<FABIProperty*> Properties2{&RefillAmount};
+	const FNonUniformData ContractData = ABI::Encode("refill(uint256)", Properties2);
 
-void NonPayable(FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure);
+	Provider(Url).TransactionCount(Address2, EBlockTag::Latest, [=](uint64 Nonce)
+	{
+		Provider(Url).GetGasPrice([=](FNonUniformData GasPrice)
+		{
+			const auto ContractTo = ContractAddress4;
 
-void GetBalance(const FAddress To, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure)
+			const auto ContractCall2 = FContractCall{
+			TOptional<FAddress>(Address2),
+			ContractAddress4,
+			TOptional<uint64>(),
+			TOptional<uint64>(),
+			TOptional<uint64>(),
+			TOptional<FString>(ContractData.ToHex())};
+
+			Provider(Url).EstimateContractCallGas(ContractCall2, [=](FNonUniformData ContractCallGas)
+			{
+				//call purchase function in smart contract
+				const auto ContractTransaction = FEthTransaction{
+					FBlockNonce::From(IntToHexString(Nonce)),
+					GasPrice,
+					ContractCallGas,
+					ContractTo,
+					HexStringToBinary(""),
+					ContractData,
+				};
+
+				Provider(Url).NonViewCall(ContractTransaction, PrivateKey2, 1337, [=](FNonUniformData MethodHash)
+				{
+					GetBalance(ContractAddress4, [=](const uint64 Value)
+					{
+						if(Value != 102)
+						{
+							GenericFailure(SequenceError{TestFail, "LargeTest: Contract4 Balance is incorrect (not 102)"});
+						}
+						else
+						{
+							OnSuccess("LargeTest: NonPayable Call Successful");
+						}
+					}, GenericFailure);
+				}, GenericFailure);
+			}, GenericFailure);
+		}, GenericFailure);
+		
+	}, GenericFailure);
+}
+
+void ContractTest::GetBalance(const FAddress To, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure)
 {
 	FString Url = "http://localhost:8545/";
 	Provider Provider(Url);
@@ -42,9 +98,9 @@ void GetBalance(const FAddress To, TSuccessCallback<uint64> OnSuccess, TFailureC
 	}, OnFailure);
 }
 
-void CallMethods(FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
+void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
 {
-	TFailureCallback GenericFailure = [=](SequenceError Error)
+	const TFailureCallback GenericFailure = [=](SequenceError Error)
 	{
 		OnFailure("", Error);
 	};
@@ -117,75 +173,10 @@ void CallMethods(FAddress ContractAddress4, FString Url, FAddress Address2, FPri
 			}, GenericFailure);
 		}, GenericFailure);
 	}, GenericFailure);
-
-	
-	
-	 
-	
-	
-
-	
 }
 
-void NonPayable(FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
-{
-	const TFailureCallback GenericFailure = [=](const SequenceError Error)
-	{
-		OnFailure("", Error);
-	};
-	
-	//nonpayable method
-	auto RefillAmount = FABIUInt32Property(5);
-	TArray<FABIProperty*> Properties2{&RefillAmount};
-	const FNonUniformData ContractData = ABI::Encode("refill(uint256)", Properties2);
 
-	Provider(Url).TransactionCount(Address2, EBlockTag::Latest, [=](uint64 Nonce)
-	{
-		Provider(Url).GetGasPrice([=](FNonUniformData GasPrice)
-		{
-			const auto ContractTo = ContractAddress4;
-
-			const auto ContractCall2 = FContractCall{
-			TOptional<FAddress>(Address2),
-			ContractAddress4,
-			TOptional<uint64>(),
-			TOptional<uint64>(),
-			TOptional<uint64>(),
-			TOptional<FString>(ContractData.ToHex())};
-
-			Provider(Url).EstimateContractCallGas(ContractCall2, [=](FNonUniformData ContractCallGas)
-			{
-				//call purchase function in smart contract
-				const auto ContractTransaction = FEthTransaction{
-					FBlockNonce::From(IntToHexString(Nonce)),
-					GasPrice,
-					ContractCallGas,
-					ContractTo,
-					HexStringToBinary(""),
-					ContractData,
-				};
-
-				Provider(Url).NonViewCall(ContractTransaction, PrivateKey2, 1337, [=](FNonUniformData MethodHash)
-				{
-					GetBalance(ContractAddress4, [=](const uint64 Value)
-					{
-						if(Value != 102)
-						{
-							GenericFailure(SequenceError{TestFail, "LargeTest: Contract4 Balance is incorrect (not 102)"});
-						}
-						else
-						{
-							OnSuccess("LargeTest: NonPayable Call Successful");
-						}
-					}, GenericFailure);
-				}, GenericFailure);
-			}, GenericFailure);
-		}, GenericFailure);
-		
-	}, GenericFailure);
-}
-
-void DeployContract4(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract4(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey2, FAddress Address2)
 {
 	//deploy PrivateKey2
 	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey2, 1337, [=](FAddress ContractAddress4, FNonUniformData Hash)
@@ -203,7 +194,7 @@ void DeployContract4(const FString Url, const FString VMByteCode, const TFailure
 	}, GenericFailure);
 }
 
-void DeployContract3(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract3(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
 	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey1, 1337, [=](const FAddress ContractAddress3, FNonUniformData Hash)
 	{
@@ -220,7 +211,7 @@ void DeployContract3(const FString Url, const FString VMByteCode, const TFailure
 	}, GenericFailure);
 }
 
-void DeployContract2(FString Url, FString LongByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract2(FString Url, FString LongByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
 	Provider(Url).DeployContractWithHash(LongByteCode, PrivateKey1, 1337, [=](FAddress ContractAddress2, FNonUniformData Hash)
 	{
@@ -238,7 +229,7 @@ void DeployContract2(FString Url, FString LongByteCode, FString VMByteCode, TFai
 	}, GenericFailure);
 }
 
-void DeployContracts(FString Url,  FString LongByteCode, FString SmallByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContracts(FString Url,  FString LongByteCode, FString SmallByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
 	Provider(Url).DeployContractWithHash(SmallByteCode, PrivateKey1, 1337, [=](FAddress Address, FNonUniformData Hash)
 	{
@@ -255,7 +246,7 @@ void DeployContracts(FString Url,  FString LongByteCode, FString SmallByteCode, 
 	}, GenericFailure);
 }
 
-void LargeTest(TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
+void ContractTest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
 	const FString Url = "http://localhost:8545/";
 	const FString LongByteCode = "0x608060405234801561001057600080fd5b50610997806100206000396000f3fe608060405234801561001057600080fd5b50600436106100be5760003560e01c80633950935111610076578063a457c2d71161005b578063a457c2d7146102f0578063a9059cbb14610329578063dd62ed3e14610362576100be565b8063395093511461028457806370a08231146102bd576100be565b806323b872dd116100a757806323b872dd1461012a5780632e72102f1461016d578063378934b41461024b576100be565b8063095ea7b3146100c357806318160ddd14610110575b600080fd5b6100fc600480360360408110156100d957600080fd5b5073ffffffffffffffffffffffffffffffffffffffff813516906020013561039d565b604080519115158252519081900360200190f35b6101186103b3565b60408051918252519081900360200190f35b6100fc6004803603606081101561014057600080fd5b5073ffffffffffffffffffffffffffffffffffffffff8135811691602081013590911690604001356103b9565b6102496004803603606081101561018357600080fd5b81019060208101813564010000000081111561019e57600080fd5b8201836020820111156101b057600080fd5b803590602001918460208302840111640100000000831117156101d257600080fd5b9193909273ffffffffffffffffffffffffffffffffffffffff8335169260408101906020013564010000000081111561020a57600080fd5b82018360208201111561021c57600080fd5b8035906020019184602083028401116401000000008311171561023e57600080fd5b509092509050610417565b005b6102496004803603604081101561026157600080fd5b5073ffffffffffffffffffffffffffffffffffffffff8135169060200135610509565b6100fc6004803603604081101561029a57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff8135169060200135610517565b610118600480360360208110156102d357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661055a565b6100fc6004803603604081101561030657600080fd5b5073ffffffffffffffffffffffffffffffffffffffff8135169060200135610582565b6100fc6004803603604081101561033f57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356105c5565b6101186004803603604081101561037857600080fd5b5073ffffffffffffffffffffffffffffffffffffffff813581169160200135166105d2565b60006103aa33848461060a565b50600192915050565b60025490565b60006103c68484846106b9565b73ffffffffffffffffffffffffffffffffffffffff841660009081526001602090815260408083203380855292529091205461040d91869161040890866107ac565b61060a565b5060019392505050565b60005b818110156105015785858281811061042e57fe5b9050602002013573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663a9059cbb8585858581811061047357fe5b905060200201356040518363ffffffff1660e01b8152600401808373ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050602060405180830381600087803b1580156104cd57600080fd5b505af11580156104e1573d6000803e3d6000fd5b505050506040513d60208110156104f757600080fd5b505060010161041a565b505050505050565b6105138282610823565b5050565b33600081815260016020908152604080832073ffffffffffffffffffffffffffffffffffffffff8716845290915281205490916103aa91859061040890866108e6565b73ffffffffffffffffffffffffffffffffffffffff1660009081526020819052604090205490565b33600081815260016020908152604080832073ffffffffffffffffffffffffffffffffffffffff8716845290915281205490916103aa91859061040890866107ac565b60006103aa3384846106b9565b73ffffffffffffffffffffffffffffffffffffffff918216600090815260016020908152604080832093909416825291909152205490565b73ffffffffffffffffffffffffffffffffffffffff821661062a57600080fd5b73ffffffffffffffffffffffffffffffffffffffff831661064a57600080fd5b73ffffffffffffffffffffffffffffffffffffffff808416600081815260016020908152604080832094871680845294825291829020859055815185815291517f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b9259281900390910190a3505050565b73ffffffffffffffffffffffffffffffffffffffff82166106d957600080fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526020819052604090205461070990826107ac565b73ffffffffffffffffffffffffffffffffffffffff808516600090815260208190526040808220939093559084168152205461074590826108e6565b73ffffffffffffffffffffffffffffffffffffffff8084166000818152602081815260409182902094909455805185815290519193928716927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef92918290030190a3505050565b60008282111561081d57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601760248201527f536166654d617468237375623a20554e444552464c4f57000000000000000000604482015290519081900360640190fd5b50900390565b73ffffffffffffffffffffffffffffffffffffffff821661084357600080fd5b60025461085090826108e6565b60025573ffffffffffffffffffffffffffffffffffffffff821660009081526020819052604090205461088390826108e6565b73ffffffffffffffffffffffffffffffffffffffff83166000818152602081815260408083209490945583518581529351929391927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef9281900390910190a35050565b60008282018381101561095a57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601660248201527f536166654d617468236164643a204f564552464c4f5700000000000000000000604482015290519081900360640190fd5b939250505056fea26469706673582212201e8282683b3b9580e5722aa29d3e976acdd4cd35c3e88cdd1abb688867d0547a64736f6c63430007040033";
@@ -282,3 +273,4 @@ void LargeTest(TFunction<void (FString)> OnSuccess, TFunction<void (FString, Seq
 	//deploy 4 different contracts
 	DeployContracts(Url, LongByteCode, SmallByteCode, VMByteCode, GenericFailure, OnSuccess, OnFailure, PrivateKey1, Address1, PrivateKey2, Address2);
 }
+

@@ -132,7 +132,9 @@ bool UObjectHandler::can_add_to_cache(int32 byte_count_to_add)
 void UObjectHandler::add_to_insertion_indices(FString URL, int32 i_index)
 {
 	if (i_index >= 0)
-		this->insertion_indices.Add(TTuple<FString,int32>(URL,i_index));
+	{
+		this->insertion_indices.Add(MakeTuple(URL,i_index));
+	}
 }
 
 void UObjectHandler::remove_from_insertion_indices(FString URL)
