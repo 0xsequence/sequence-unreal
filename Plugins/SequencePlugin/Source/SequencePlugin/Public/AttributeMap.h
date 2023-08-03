@@ -17,6 +17,31 @@ struct FAttributeMap
 public:
         TMap<FString, FString> attribute_map;
         
+        //used for testing
+        FString Get()
+        {
+            FString ret = "{";
+            
+            TArray<FString> keys;
+            attribute_map.GetKeys(keys);
+
+            for (FString key : keys)
+            {
+                ret.Append("\"");
+                ret.Append(key);
+                ret.Append("\"");
+                ret.Append(":");
+                ret.Append(*attribute_map.Find(key));
+                ret.Append(",");
+            }
+            if (keys.Num() > 0)
+            {
+                ret.RemoveAt(ret.Len() - 1);//remove the last index as it'll be a wrongly placed ,
+            }
+            ret.Append("}");
+            return ret;
+        }
+
         void setup(TSharedPtr<FJsonObject> json_in)
         {//the json_in will be a mirror of what we have here!
             //we just need to convert the json object into an attributeMap now!
