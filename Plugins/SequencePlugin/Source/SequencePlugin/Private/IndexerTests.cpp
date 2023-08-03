@@ -89,7 +89,7 @@ void getEtherBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 
 	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
-		OnFailure("ChainID Failure", Error);
+		OnFailure("etherBalance Failure", Error);
 	};
 
 	indexer->GetEtherBalance(testingChainID, testingAddress, GenericSuccess, GenericFailure);
@@ -97,12 +97,39 @@ void getEtherBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 
 void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
+	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [OnSuccess](const FGetTokenBalancesReturn tokenBalances)
+	{
+		OnSuccess("Received TokenBalances Data");
+		FString ret = UIndexerSupport::structToString<FGetTokenBalancesReturn>(tokenBalances);
+		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
+	};
 
+	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	{
+		OnFailure("TokenBalances Failure", Error);
+	};
+	FGetTokenBalancesArgs args;
+	args.accountAddress = testingAddress;
+	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
 void getTokenSuppliesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
+	const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesReturn tokenSupplies)
+	{
+		OnSuccess("Received TokenSupplies Data");
+		FString ret = UIndexerSupport::structToString<FGetTokenSuppliesReturn>(tokenSupplies);
+		UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *ret);
+	};
 
+	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	{
+		OnFailure("TokenSupplies Failure", Error);
+	};
+	FGetTokenSuppliesArgs args;
+	args.contractAddress = "0x8";
+	args.includeMetaData = true;
+	indexer->GetTokenSupplies(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
 void getTokenSuppliesMapTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
@@ -131,6 +158,7 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	runTimeStatusTest(indexer, OnSuccess, OnFailure);
 	getChainIDTest(indexer, OnSuccess, OnFailure);
 	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
+	//getTokenBalanceTest(indexer, OnSuccess, OnFailure);//*** exception thrown here! ***
 
 	return;//done
 }
