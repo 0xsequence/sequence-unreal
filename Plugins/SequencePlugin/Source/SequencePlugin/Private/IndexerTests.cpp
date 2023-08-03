@@ -463,7 +463,34 @@ void getTokenBalanceParsingTest(UIndexer* indexer)
 
 void getTokenSuppliesParsingTest(UIndexer* indexer)
 {
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Parsing Test"));
+	//"{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true}
+	//\"balances\":[{\"id\":15,\"contractAddress\":\"0xc1\",\"contractType\":\"ERC20\",\"accountAddress\":\"0xa1\",\"tokenID\":11,\"balance\":16384,\"blockHash\":\"0xb1\",\"blockNumber\":1,\"updateID\":3,\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
+	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"contractType\":\"ERC1155\",\"tokenIDs\":[{\"tokenID\":69,\"supply\":\"supply_data\",\"chainId\":9,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
+	FGetTokenSuppliesReturn rep = indexer->BuildResponse<FGetTokenSuppliesReturn>(args);
+	args = UIndexerSupport::simplifyString(args);
 
+	//convert response to string testable string format
+	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
+	//to parse it completely
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+	}
+
+	if (args.ToLower().Compare(repString.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
 void getTokenSuppliesMapParsingTest(UIndexer* indexer)
@@ -487,10 +514,10 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	UIndexer* indexer = NewObject<UIndexer>();//for testing!
 
 	//failure testing//
-	//emptyResponseTest(indexer);
-	//invalidResponseTest(indexer);
-	//wrongResponseReceivedTest1(indexer);
-	//wrongResponseReceivedTest2(indexer);
+	emptyResponseTest(indexer);
+	invalidResponseTest(indexer);
+	wrongResponseReceivedTest1(indexer);
+	wrongResponseReceivedTest2(indexer);
 
 	//parsing tests//
 	//buildResponse parsing tests//
