@@ -112,6 +112,7 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(text), json_step))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *text);
+			return T();
 		}
 		//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
 		if (ret_struct.customConstructor) 
@@ -123,6 +124,7 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(json_step.ToSharedRef(), &ret_struct))
 			{
 				UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *text);
+				return T();
 			}
 		}
 		ret_struct.setup(*json_step.Get());//now for the edge cases we will manually inject the data where it needs to be!

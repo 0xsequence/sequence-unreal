@@ -47,6 +47,10 @@ private:
 	*/
 	void HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure);
 
+	//end of private functions
+public:
+	//public functions
+
 	/*
 	Here we take in text and convert it to a Struct of type T if possible
 	@return a Struct of type T
@@ -62,12 +66,6 @@ private:
 	@Return the JSON Object String
 	*/
 	template < typename T> FString BuildArgs(T struct_in);
-
-//end of private functions
-
-public:
-
-//public functions
 
 	/*
 		General purpose constuctor

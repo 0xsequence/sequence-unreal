@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Page.h"
+#include "IndexerSupport.h"
 #include "TokenBalance.h"
 #include "GetTokenBalancesReturn.generated.h"
 
@@ -16,9 +17,24 @@ public:
         TArray<FTokenBalance> balances;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
+
+    //for testing
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+
+        ret.Get()->SetObjectField("page", page.Get());
+        TArray<TSharedPtr<FJsonObject>> balancesList;
+        for (FTokenBalance tBalance : balances)
+        {
+            balancesList.Add(tBalance.Get());
+        }
+        ret.Get()->SetStringField("balances",UIndexerSupport::jsonObjListToSimpleString(balancesList));
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {
-
         const TArray<TSharedPtr<FJsonValue>>* lst;
         if (json_in.TryGetArrayField("balances", lst))
         {

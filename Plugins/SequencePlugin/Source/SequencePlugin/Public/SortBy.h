@@ -14,6 +14,17 @@ public:
     UPROPERTY()
         TEnumAsByte<ESortOrder> order;
 
+    FString Get()
+    {
+        FString ret = "{";
+        ret.Append("column:");
+        ret.Append(column);
+        ret.Append(",order:");
+        ret.Append(UEnum::GetValueAsString(order.GetValue()));
+        ret.Append("}");
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {
         if (!json_in.TryGetField("column"))
