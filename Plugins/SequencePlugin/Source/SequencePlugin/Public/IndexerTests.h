@@ -21,24 +21,33 @@ const static FString testingBalanceData = "{\"id\":10,\"contractAddress\":\"0xc1
 const static FString testingTxnTransferData = "{\"transferType\":\"SEND\",\"contractAddress\":\"0xt1\",\"contractType\":\"ERC20\",\"from\":\"tester\",\"to\":\"testee\",\"tokenIds\":[0,1,2],\"amounts\":[12,13,14],\"logIndex\":1313,\"contractInfo\":"+testingContractInfo+",\"tokenMetaData\":{\"key1\":"+testingTokenMetaData+",\"key2\":"+testingTokenMetaData+"}}";
 const static FString testingTransactionData = "{\"txnHash\":\"0xtxnHash\",\"blockNumber\":101313,\"blockHash\":\"0xBlockhash\",\"chainId\":1616,\"metaTxnID\":\"0xMetaTxnID\",\"transfers\":["+testingTxnTransferData+"],\"timestamp\":\"today\"}";
 const static FString testTokenMap = "{\"keyOne\":[\"value1\",\"value2\"]}";
+const static FString testHistoryFilter = "{\"accountAddress\":\"" + testingAddress + "\",\"contractAddress\":\"" + testingContractAddress + "\",\"accountAddresses\":[\"" + testingAddress + "\"],\"contractAddresses\":[\"" + testingContractAddress + "\"],\"transactionHashes\":[\"0x123abc\"],\"metaTransactionIDs\":[\"0xTEST\"],\"fromBlock\":10,\"toBlock\":101}";
 //testing inputs
 
 //generators for testing//
 
 /*
 * The page here is mirror to
-* testingPage and if any changes to testingPage occur
+* FString testingPage and if any changes to FString testingPage occur
 * the same changes need to be reflected here otherwise tests will fail!
 */
 FPage buildTestPage();
 
 /*
-* Builds a mirror TMap<FString,FTokenList> to testTokenMap
-* for testing purposes, if anychanges occur to testTokenMap then
+* Builds a mirror TMap<FString,FTokenList> to FString testTokenMap
+* for testing purposes, if anychanges occur to FString testTokenMap then
 * matching changes must be made to this function in order to maintain
 * test correctness
 */
 TMap<FString, FTokenList> buildTokenMap();
+
+/*
+* Builds a mirror to FString testHistoryFilter to testTransactionHistoryFull
+* if any changes occur to FString testHistoryFilter then you must update this function to
+*  match otherwise the test will fail due to a mismatch!
+*/
+FTransactionHistoryFilter buildHistoryFilter();
+
 //generators for testing//
 
 //these are our general response tests used to test if we get back anything or not!
@@ -102,4 +111,6 @@ void tokenSuppliesMapArgsTest(UIndexer* indexer);
 
 void balanceUpdatesArgsTest(UIndexer* indexer);
 
-void transactionHistoryArgsTest(UIndexer* indexer);
+void transactionHistoryArgsFullTest(UIndexer* indexer);
+
+void transactionHistoryArgsMinTest(UIndexer* indexer);

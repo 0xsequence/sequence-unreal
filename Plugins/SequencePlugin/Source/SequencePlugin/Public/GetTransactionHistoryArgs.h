@@ -12,13 +12,26 @@ struct FGetTransactionHistoryArgs
 public:
     UPROPERTY()
         FTransactionHistoryFilter filter;
-    //UPROPERTY()
-      // FPage page;
+    UPROPERTY()
+        FPage page;
     UPROPERTY()
         bool includeMetaData = false;
 
-    bool customGetter = false;
-    FString Get() { return ""; }
+    bool customGetter = true;
+    /// <summary>
+    /// rename this to GetArgs()! to differentiate it from the Get()'s in the Return UStructs!
+    /// </summary>
+    /// <returns>The jsonString from this UStruct formatted proper!</returns>
+    FString Get()
+    {
+        FString ret = "{";
+        ret += "\"filter\":" + filter.GetArgs();//get the args! MUST Have this!
+        if (page.containsData())
+            ret += ",\"page\":" + page.GetArgs();
+        ret += ",\"includeMetaData\":" + includeMetaData;
+        ret += "}";
+        return ret;
+    }
 
     FGetTransactionHistoryArgs() {};
 

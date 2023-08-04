@@ -653,6 +653,20 @@ TMap<FString, FTokenList> buildTokenMap()
 	return ret;
 }
 
+FTransactionHistoryFilter buildHistoryFilter()
+{
+	FTransactionHistoryFilter ret;
+	ret.accountAddress = testingAddress;
+	ret.contractAddress = testingContractAddress;
+	ret.accountAddresses.Add(testingAddress);
+	ret.contractAddresses.Add(testingContractAddress);
+	ret.transactionHashes.Add("0x123abc");
+	ret.metaTransactionIDs.Add("0xTEST");
+	ret.fromBlock = 10;
+	ret.toBlock = 101;
+	return ret;
+}
+
 void tokenSuppliesArgsTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
@@ -745,7 +759,40 @@ void balanceUpdatesArgsTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
-void transactionHistoryArgsTest(UIndexer* indexer)
+//set of args testing for transaction history filter as there can be many types of calls made!
+
+void transactionHistoryArgsFullTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("transaction History Args [FULL] Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"filter\":"+ testHistoryFilter +",\"page\":"+testingPage+",\"includeMetaData\":true}";
+	FGetTransactionHistoryArgs args;
+	args.filter = buildHistoryFilter();
+	args.page = buildTestPage();
+	args.includeMetaData = true;
+
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+void transactionHistoryArgsMinTest(UIndexer* indexer)
 {
 
 }
@@ -780,7 +827,8 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	tokenSuppliesArgsTest(indexer);
 	tokenSuppliesMapArgsTest(indexer);
 	balanceUpdatesArgsTest(indexer);
-	transactionHistoryArgsTest(indexer);
+	transactionHistoryArgsFullTest(indexer);
+	transactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
 
 	//system tests//

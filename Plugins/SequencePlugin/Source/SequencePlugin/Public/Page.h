@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SortBy.h"
+#include "IndexerSupport.h"
 #include "Page.generated.h"
 
 USTRUCT(BlueprintType)
@@ -10,19 +11,65 @@ struct FPage
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-    int32 page = 0;
+    int32 page = -1;
     UPROPERTY()
-    FString column;
+    FString column = "";
     UPROPERTY()
-    FString before;//based on observations from what I'm getting these are strings!
+    FString before = "";
     UPROPERTY()
-    FString after;
+    FString after = "";
     UPROPERTY()
     TArray<FSortBy> sort;
     UPROPERTY()
-    int32 pageSize = 50;
+    int32 pageSize = -1;
     UPROPERTY()
-    bool more;
+    bool more = false;
+
+    /// <summary>
+    /// Used to determine if this struct contains ANY NON zeroed data
+    /// IE) Arrays => Not Empty, int32 != -1, FString => Not Empty
+    /// </summary>
+    /// <returns>true if there existed non zero data, else returns false</returns>
+    bool containsData()
+    {
+        bool ret = false;//assume nothing & look for true states!
+        ret = (page != -1 || pageSize != -1);//int32 data
+        ret = (column.Len() > 0 || before.Len() > 0 || after.Len() > 0);//FString data
+        ret = (sort.Num() > 0);//TArray data
+        ret |= more;//bool data
+        return ret;
+    }
+
+    /// <summary>
+    /// Used to get custom arguments for cases where we don't need all these datums!
+    /// </summary>
+    /// <returns>empty string if it doesn't contain non zero data, else it'll contain parsed json string!</returns>
+    FString GetArgs()
+    {
+        FString ret = "";
+        if (containsData())
+        {
+            ret += "{";
+            ret += "\"page\":" + page;
+            ret += ",\"column\":"+ column;
+            ret += ",\"before\":" + before;
+            ret += ",\"after\":" + after;
+            ret += ",\"sort\":";
+
+            //convert SortBy to Json!Strings!
+            TArray<FString> stringList;
+            for (FSortBy sItem : sort)
+            {
+                stringList.Add(sItem.Get());
+            }
+            //Parse the string list into a JsonString
+            ret += UIndexerSupport::stringListToSimpleString(stringList);
+            ret += ",\"pageSize\":"+ pageSize;
+            ret += ",\"more\":" + more;
+            ret += "}";
+        }
+        return ret;
+    }
 
     TSharedPtr<FJsonObject> Get()
     {
