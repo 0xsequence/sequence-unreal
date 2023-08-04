@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "TokenList.h"
+#include "IndexerSupport.h"
 #include "JsonObjectConverter.h"
 #include "GetTokenSuppliesMapArgs.generated.h"
 
@@ -43,25 +44,21 @@ public:
 		}
     };
 
+	//this function name may need to be renamed
 	FString Get()
 	{
-		TSharedPtr<FJsonObject> json;
-		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create("{ \"tokenMap\": {} }"), json);
-		//we need to create key value pairs to insert into json out!
+		FString ret = "{\"tokenMap\":{";
 		TArray<FString> keys;
 		tokenMap.GetKeys(keys);
 
-		for (auto key : keys)//go through the keys!
+		for (FString key : keys)
 		{
-			TSharedPtr<FJsonObject> j_out = FJsonObjectConverter::UStructToJsonObject<FTokenList>(*tokenMap.Find(key));
-			json.Get()->GetObjectField("tokenMap").Get()->SetArrayField(key, j_out.Get()->GetArrayField("token_list"));
+			ret += "\"" + key + "\":" + UIndexerSupport::stringListToSimpleString(tokenMap.Find(key)->token_list);
 		}
-
-		//lastly convert from a json object to a FString
-		FString out;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&out);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
-
-		return out;
+		ret += "},";//close off tokenMap subObject
+		ret += "\"includeMetaData\":";
+		ret += includeMetaData ? "true" : "false";
+		ret += "}";
+		return ret;
 	};
 };

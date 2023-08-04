@@ -49,6 +49,8 @@ public:
 		return ret;
 	}
 
+	static FString stringListToSimpleString(TArray<FString> stringData);
+
 	static FString int64ListToSimpleString(TArray<int64> intData);
 
 	static FString jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData);
