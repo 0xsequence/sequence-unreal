@@ -19,6 +19,20 @@ public:
     UPROPERTY()
         TArray<FTokenSupply> token_supply_list;
 
+    //this UStruct only exists because of UE's lack of nested data structures
+    //so we need to account for the nesting here!
+    FString Get()
+    {
+        TArray<TSharedPtr<FJsonObject>> jsonList;
+        for (FTokenSupply tItem : token_supply_list)
+        {
+            jsonList.Add(tItem.Get());
+        }
+        FString ret = UIndexerSupport::jsonObjListToSimpleString(jsonList);
+
+        return ret;
+    }
+
     void setup(TArray<TSharedPtr<FJsonValue>> json_in)
     {
         for (int32 i = 0; i < token_supply_list.Num(); i++)

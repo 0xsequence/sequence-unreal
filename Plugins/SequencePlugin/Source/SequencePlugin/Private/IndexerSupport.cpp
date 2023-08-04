@@ -46,6 +46,25 @@ FString UIndexerSupport::simplifyString(FString string)
 	return (*ret);
 }
 
+FString UIndexerSupport::int64ListToSimpleString(TArray<int64> intData)
+{
+	FString ret = "[";
+
+	for (int64 iData : intData)
+	{
+		FString iDataString = FString::Printf(TEXT("%lld"), iData);
+		ret += iDataString + ",";
+	}
+
+	if (intData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+	}
+
+	ret += "]";
+	return ret;
+}
+
 FString UIndexerSupport::jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData)
 {
 	FString ret = "[";

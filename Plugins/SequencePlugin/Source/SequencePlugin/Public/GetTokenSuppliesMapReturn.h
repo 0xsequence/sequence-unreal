@@ -15,6 +15,22 @@ public:
 		TMap<FString, FTokenSupplyList> supplies;
 	bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
 
+	TSharedPtr<FJsonObject> Get()
+	{
+		TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+		TSharedPtr<FJsonObject> nRet = MakeShareable<FJsonObject>(new FJsonObject);
+		TArray<FString> keys;
+		supplies.GetKeys(keys);
+
+		for (FString key : keys)
+		{
+			FString value = supplies.Find(key)->Get();
+			nRet.Get()->SetStringField(key,value);
+		}
+		ret.Get()->SetObjectField("supplies", nRet);
+		return ret;
+	}
+
 	void setup(FJsonObject json_in)
 	{
 
@@ -70,33 +86,5 @@ public:
 				}
 			}
 		}
-	};
-
-	FString Get()
-	{
-		TSharedPtr<FJsonObject> json;
-		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create("{ \"supplies\": {} }"), json);
-		//we need to create key value pairs to insert into json out!
-		TArray<FString> keys;
-		supplies.GetKeys(keys);
-
-		for (auto key : keys)//go through the keys!
-		{
-			TSharedPtr<FJsonObject> j_out = FJsonObjectConverter::UStructToJsonObject<FTokenSupplyList>(*supplies.Find(key));
-			const TSharedPtr<FJsonObject>* jSupplies;
-			const TArray<TSharedPtr<FJsonValue>>* tokenSupplyList;
-
-			if ((json.Get()->TryGetObjectField("supplies", jSupplies)) && (j_out.Get()->TryGetArrayField("token_supply_list", tokenSupplyList)))
-			{
-				jSupplies->Get()->SetArrayField(key, *tokenSupplyList);
-			}
-		}
-
-		//lastly convert from a json object to a FString
-		FString out;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&out);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
-
-		return out;
 	};
 };
