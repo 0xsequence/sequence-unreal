@@ -495,17 +495,95 @@ void getTokenSuppliesParsingTest(UIndexer* indexer)
 
 void getTokenSuppliesMapParsingTest(UIndexer* indexer)
 {
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Map Parsing Test"));
+	//{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true}
+	//\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}}
+	//{\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}
+	FString args = "{\"supplies\":{\"key1\":[{\"tokenID\":101,\"supply\":\"supply_data\",\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}}";
+	FGetTokenSuppliesMapReturn rep = indexer->BuildResponse<FGetTokenSuppliesMapReturn>(args);
+	args = UIndexerSupport::simplifyString(args);
 
+	//convert response to string testable string format
+	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
+	//to parse it completely
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+	}
+
+	if (args.ToLower().Compare(repString.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
 void getBalanceUpdatesParsingTest(UIndexer* indexer)
 {
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("get Balance Updates Parsing Test"));
+	FString args = "{\"page\":"+testingPage+",\"balances\":["+testingBalanceData+"]}";
+	FGetBalanceUpdatesReturn rep = indexer->BuildResponse<FGetBalanceUpdatesReturn>(args);
+	args = UIndexerSupport::simplifyString(args);
 
+	//convert response to string testable string format
+	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
+	//to parse it completely
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+	}
+
+	if (args.ToLower().Compare(repString.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
 void getTransactionHistoryParsingTest(UIndexer* indexer)
 {
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("get Transaction History Parsing Test"));
+	FString args = "{\"page\":"+testingPage+",\"transactions\":["+testingTransactionData+"]}";
+	FGetTransactionHistoryReturn rep = indexer->BuildResponse<FGetTransactionHistoryReturn>(args);
+	args = UIndexerSupport::simplifyString(args);
 
+	//convert response to string testable string format
+	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
+	//to parse it completely
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+	}
+
+	if (args.ToLower().Compare(repString.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
 void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
