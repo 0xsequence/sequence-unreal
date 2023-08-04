@@ -46,6 +46,24 @@ FString UIndexerSupport::simplifyString(FString string)
 	return (*ret);
 }
 
+FString UIndexerSupport::stringListToSimpleString(TArray<FString> stringData)
+{
+	FString ret = "[";
+
+	for (FString string : stringData)
+	{
+		ret += string;
+		ret += ",";
+	}
+
+	if (stringData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+	}
+	ret += "]";
+	return ret;
+}
+
 FString UIndexerSupport::int64ListToSimpleString(TArray<int64> intData)
 {
 	FString ret = "[";

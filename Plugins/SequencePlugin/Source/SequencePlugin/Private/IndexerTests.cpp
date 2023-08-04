@@ -586,6 +586,170 @@ void getTransactionHistoryParsingTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
+void tokenBalanceArgsTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("Token Balance Args Parsing Test"));
+	FString testArgs = "{\"accountAddress\":\""+testingAddress+"\"}";
+	
+	FGetTokenBalancesArgs args;
+	args.accountAddress = testingAddress;
+	
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+/*
+* The page here is mirror to
+* testingPage and if any changes to testingPage occur
+* the same changes need to be reflected here otherwise tests will fail!
+*/
+FPage buildTestPage()
+{
+	//setup page data!
+	FPage ret;
+	ret.page = 10;
+	ret.column = "left";
+	ret.before = "b1";
+	ret.after = "a1";
+
+	TArray<FSortBy> sortList;
+	FSortBy sortByEntry;
+	sortByEntry.column = "left";
+	sortByEntry.order = ESortOrder::DESC;
+	sortList.Add(sortByEntry);
+
+	ret.sort = sortList;
+	ret.pageSize = 64;
+	ret.more = true;
+	//setup page data!
+	return ret;
+}
+
+TMap<FString, FTokenList> buildTokenMap()
+{
+	TMap<FString, FTokenList> ret;
+	//{\"keyOne\":[\"value1\",\"value2\"]}
+	FTokenList rItem;//array of strings!
+	rItem.token_list.Add("value1");
+	rItem.token_list.Add("value2");
+	ret.Add(TPair<FString,FTokenList>("keyOne",rItem));
+	return ret;
+}
+
+void tokenSuppliesArgsTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("Token Supplies Args Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"contractAddress\":"+testingContractAddress+",\"includeMetaData\":true,\"page\":"+testingPage+"}";
+
+	FGetTokenSuppliesArgs args;
+	args.contractAddress = testingContractAddress;
+	args.includeMetaData = true;
+	args.page = buildTestPage();
+
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+void tokenSuppliesMapArgsTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("Token Supplies Map Args Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"tokenMap\":"+testTokenMap+",\"includeMetaData\":true}";
+	FGetTokenSuppliesMapArgs args;
+	args.tokenMap = buildTokenMap();
+	args.includeMetaData = true;
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+void balanceUpdatesArgsTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("balance Updates Args Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"contractAddress\":"+testingContractAddress+",\"lastUpdateID\":10,\"page\":"+testingPage+"}";
+	FGetBalanceUpdatesArgs args;
+	args.contractAddress = testingContractAddress;
+	args.lastUpdateID = 10;
+	args.page = buildTestPage();
+
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+void transactionHistoryArgsTest(UIndexer* indexer)
+{
+
+}
+
 void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
 	//now we need to test all the different calls!
@@ -609,6 +773,15 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	getTokenSuppliesMapParsingTest(indexer);
 	getBalanceUpdatesParsingTest(indexer);
 	getTransactionHistoryParsingTest(indexer);
+	//buildResponse parsing tests//
+
+	//buildArgs parsing tests//
+	tokenBalanceArgsTest(indexer);
+	tokenSuppliesArgsTest(indexer);
+	tokenSuppliesMapArgsTest(indexer);
+	balanceUpdatesArgsTest(indexer);
+	transactionHistoryArgsTest(indexer);
+	//buildArgs parsing tests//
 
 	//system tests//
 	//pingTest(indexer, OnSuccess, OnFailure);
