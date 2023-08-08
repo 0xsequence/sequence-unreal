@@ -11,7 +11,7 @@
 
 void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
 {
-	const TFailureCallback GenericFailure = [=](const SequenceError Error)
+	const FFailureCallback GenericFailure = [=](const SequenceError Error)
 	{
 		OnFailure("", Error);
 	};
@@ -19,11 +19,11 @@ void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress A
 	//nonpayable method
 	auto RefillAmount = FABIUInt32Property(5);
 	TArray<FABIProperty*> Properties2{&RefillAmount};
-	const FNonUniformData ContractData = ABI::Encode("refill(uint256)", Properties2);
+	const FUnsizedData ContractData = ABI::Encode("refill(uint256)", Properties2);
 
 	Provider(Url).TransactionCount(Address2, EBlockTag::Latest, [=](uint64 Nonce)
 	{
-		Provider(Url).GetGasPrice([=](FNonUniformData GasPrice)
+		Provider(Url).GetGasPrice([=](FUnsizedData GasPrice)
 		{
 			const auto ContractTo = ContractAddress4;
 
@@ -35,7 +35,7 @@ void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress A
 			TOptional<uint64>(),
 			TOptional<FString>(ContractData.ToHex())};
 
-			Provider(Url).EstimateContractCallGas(ContractCall2, [=](FNonUniformData ContractCallGas)
+			Provider(Url).EstimateContractCallGas(ContractCall2, [=](FUnsizedData ContractCallGas)
 			{
 				//call purchase function in smart contract
 				const auto ContractTransaction = FEthTransaction{
@@ -47,7 +47,7 @@ void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress A
 					ContractData,
 				};
 
-				Provider(Url).NonViewCall(ContractTransaction, PrivateKey2, 1337, [=](FNonUniformData MethodHash)
+				Provider(Url).NonViewCall(ContractTransaction, PrivateKey2, 1337, [=](FUnsizedData MethodHash)
 				{
 					GetBalance(ContractAddress4, [=](const uint64 Value)
 					{
@@ -67,14 +67,14 @@ void ContractTest::NonPayable(FAddress ContractAddress4, FString Url, FAddress A
 	}, GenericFailure);
 }
 
-void ContractTest::GetBalance(const FAddress To, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure)
+void ContractTest::GetBalance(const FAddress To, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
 	FString Url = "http://localhost:8545/";
 	Provider Provider(Url);
 	TArray<FABIProperty*> mArgs = TArray<FABIProperty*>();
 	FABIAddressProperty myAddressProperty = FABIAddressProperty(To);
 	mArgs.Add(&myAddressProperty);
-	const FNonUniformData EncodedData = ABI::Encode("cupcakeBalances(address)", mArgs);
+	const FUnsizedData EncodedData = ABI::Encode("cupcakeBalances(address)", mArgs);
 	const FContractCall Call = FContractCall{
 		TOptional<FAddress>(),
 		To,
@@ -83,7 +83,7 @@ void ContractTest::GetBalance(const FAddress To, TSuccessCallback<uint64> OnSucc
 		TOptional<uint64>(),
 		TOptional<FString>(EncodedData.ToHex()),
 	};
-	Provider.Call(Call, EBlockTag::Latest, [=](FNonUniformData ContractBalance)
+	Provider.Call(Call, EBlockTag::Latest, [=](FUnsizedData ContractBalance)
 	{
 		TOptional<uint64> Value = HexStringToUint64(ContractBalance.ToHex());
 
@@ -100,7 +100,7 @@ void ContractTest::GetBalance(const FAddress To, TSuccessCallback<uint64> OnSucc
 
 void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAddress Address2, FPrivateKey PrivateKey2, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure)
 {
-	const TFailureCallback GenericFailure = [=](SequenceError Error)
+	const FFailureCallback GenericFailure = [=](SequenceError Error)
 	{
 		OnFailure("", Error);
 	};
@@ -118,11 +118,11 @@ void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAd
 		//payable method
 		FABIUInt32Property PurchaseAmount = FABIUInt32Property(3);
 		TArray<FABIProperty*> Properties{&PurchaseAmount};
-		const FNonUniformData ContractData = ABI::Encode("purchase(uint256)", Properties);
+		const FUnsizedData ContractData = ABI::Encode("purchase(uint256)", Properties);
 		
 		Provider(Url).TransactionCount(Address2, EBlockTag::Latest, [=](uint64 Nonce)
 		{
-			Provider(Url).GetGasPrice([=](const FNonUniformData Price)
+			Provider(Url).GetGasPrice([=](const FUnsizedData Price)
 			{
 				const FAddress ContractTo = ContractAddress4;
 				const uint64 ContractValue = 3000000000000000000;
@@ -138,7 +138,7 @@ void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAd
 				};
 				
 				
-				Provider(Url).EstimateContractCallGas(MContractCall, [=](FNonUniformData CallGas)
+				Provider(Url).EstimateContractCallGas(MContractCall, [=](FUnsizedData CallGas)
 				{
 					//call purchase function in smart contract
 					FEthTransaction contractTransaction = FEthTransaction
@@ -151,7 +151,7 @@ void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAd
 						ContractData,
 					};
 
-					Provider(Url).NonViewCall(contractTransaction, PrivateKey2, 1337, [=](FNonUniformData Data)
+					Provider(Url).NonViewCall(contractTransaction, PrivateKey2, 1337, [=](FUnsizedData Data)
 					{
 						//view method
 						GetBalance(ContractAddress4, [=](const uint64 MyBalance)
@@ -176,10 +176,10 @@ void ContractTest::CallMethods(const FAddress ContractAddress4, FString Url, FAd
 }
 
 
-void ContractTest::DeployContract4(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract4(const FString Url, const FString VMByteCode, const FFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey2, FAddress Address2)
 {
 	//deploy PrivateKey2
-	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey2, 1337, [=](FAddress ContractAddress4, FNonUniformData Hash)
+	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey2, 1337, [=](FAddress ContractAddress4, FUnsizedData Hash)
 	{
 		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
 		{	
@@ -194,9 +194,9 @@ void ContractTest::DeployContract4(const FString Url, const FString VMByteCode, 
 	}, GenericFailure);
 }
 
-void ContractTest::DeployContract3(const FString Url, const FString VMByteCode, const TFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract3(const FString Url, const FString VMByteCode, const FFailureCallback GenericFailure, const TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
-	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey1, 1337, [=](const FAddress ContractAddress3, FNonUniformData Hash)
+	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey1, 1337, [=](const FAddress ContractAddress3, FUnsizedData Hash)
 	{
 		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
 		{	
@@ -211,9 +211,9 @@ void ContractTest::DeployContract3(const FString Url, const FString VMByteCode, 
 	}, GenericFailure);
 }
 
-void ContractTest::DeployContract2(FString Url, FString LongByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContract2(FString Url, FString LongByteCode, FString VMByteCode, FFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
-	Provider(Url).DeployContractWithHash(LongByteCode, PrivateKey1, 1337, [=](FAddress ContractAddress2, FNonUniformData Hash)
+	Provider(Url).DeployContractWithHash(LongByteCode, PrivateKey1, 1337, [=](FAddress ContractAddress2, FUnsizedData Hash)
 	{
 		UE_LOG(LogTemp, Display, TEXT("My deployed address is %s"), *ContractAddress2.ToHex());
 		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
@@ -229,9 +229,9 @@ void ContractTest::DeployContract2(FString Url, FString LongByteCode, FString VM
 	}, GenericFailure);
 }
 
-void ContractTest::DeployContracts(FString Url,  FString LongByteCode, FString SmallByteCode, FString VMByteCode, TFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
+void ContractTest::DeployContracts(FString Url,  FString LongByteCode, FString SmallByteCode, FString VMByteCode, FFailureCallback GenericFailure, TFunction<void (FString)> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure, FPrivateKey PrivateKey1, FAddress Address1, FPrivateKey PrivateKey2, FAddress Address2)
 {
-	Provider(Url).DeployContractWithHash(SmallByteCode, PrivateKey1, 1337, [=](FAddress Address, FNonUniformData Hash)
+	Provider(Url).DeployContractWithHash(SmallByteCode, PrivateKey1, 1337, [=](FAddress Address, FUnsizedData Hash)
 	{
 		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
 		{
@@ -265,7 +265,7 @@ void ContractTest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FS
 	if(GetAddress(PublicKey1).ToHex() != Address1.ToHex()) return OnFailure("", SequenceError{TestFail, "Public Key 1 doesn't correspond to Address 1"});
 	if(GetAddress(PublicKey2).ToHex() != Address2.ToHex()) return OnFailure("", SequenceError{TestFail, "Public Key 2 doesn't correspond to Address 2"});
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("", Error);
 	};

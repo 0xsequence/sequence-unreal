@@ -10,7 +10,7 @@ using TSuccessCallback =  TFunction<void (T)>;
 template <typename T1, typename T2>
 using TSuccessCallbackTuple =  TFunction<void (T1, T2)>;
 
-using TFailureCallback =  TFunction<void (SequenceError)>;
+using FFailureCallback =  TFunction<void (SequenceError)>;
 
 template <typename T>
 TFuture<void> SendAsync(TFuture<T>& Input, TFunction<void (T)>& CallBack)
@@ -33,11 +33,11 @@ TFuture<TOut> PipeAsync(TFuture<TIn>& Input, TFunction<TOut (TIn)>& TransformFun
 template <typename TIn, typename  TOut>
 class Chain
 {
-	TFailureCallback OnFailure;
+	FFailureCallback OnFailure;
 	TFunction<TResult<TOut> (TIn)> Function;
 
 public:
-	Chain(TFunction<TResult<TOut> (TIn)> Function, TFailureCallback OnFailure);
+	Chain(TFunction<TResult<TOut> (TIn)> Function, FFailureCallback OnFailure);
 	
 	template <typename TNext>
 	Chain<TIn, TNext> Then(TFunction<TNext (TOut)> NextFunction);
@@ -46,7 +46,7 @@ public:
 };
 
 template <typename TIn, typename TOut>
-Chain<TIn, TOut>::Chain(TFunction<TResult<TOut> (TIn)> Function, TFailureCallback OnFailure) : OnFailure(OnFailure), Function(Function)
+Chain<TIn, TOut>::Chain(TFunction<TResult<TOut> (TIn)> Function, FFailureCallback OnFailure) : OnFailure(OnFailure), Function(Function)
 {
 }
 

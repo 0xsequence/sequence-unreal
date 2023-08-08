@@ -11,15 +11,15 @@ struct FHeader
 	FHash256 TxHash;
 	FHash256 ReceiptHash;
 	FBloom Bloom;
-	FNonUniformData Difficulty;
-	FNonUniformData Number;
+	FUnsizedData Difficulty;
+	FUnsizedData Number;
 	uint64 GasLimit;
 	uint64 GasUsed;
 	uint64 Time;
-	FNonUniformData ExtraData;
+	FUnsizedData ExtraData;
 	FHash256 MixDigest;
 	FBlockNonce Nonce;
-	FNonUniformData BaseFee;
+	FUnsizedData BaseFee;
 };
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);

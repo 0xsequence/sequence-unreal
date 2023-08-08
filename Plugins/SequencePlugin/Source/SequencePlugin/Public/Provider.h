@@ -38,51 +38,51 @@ class Provider
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	void SendRPC(FString Content, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure);
+	void SendRPC(FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	template<typename T>
-	void SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, TFailureCallback OnFailure);
+	void SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);
 	
 	static FJsonBuilder RPCBuilder(FString MethodName);
 
 //helpers
-	void BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
-	void HeaderByNumberHelper(FString Number, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
-	void NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
-	void CallHelper(FContractCall ContractCall, FString Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+	void HeaderByNumberHelper(FString Number, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+	void NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+	void CallHelper(FContractCall ContractCall, FString Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
 public:
 	Provider(FString Url);
-	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
-	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
-	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
-	void BlockNumber(TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
+	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+	void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
-	void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
-	void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
-	void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, TFailureCallback OnFailure);
+	void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+	void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+	void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
 	
-	void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, TFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
-	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, TFailureCallback OnFailure);
+	void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+	void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
 
-	void GetGasPrice(TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
-	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
-	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FNonUniformData>, TFailureCallback OnFailure);
+	void GetGasPrice(TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
+	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
+	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
 
-	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, TFailureCallback OnFailure);
-	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
+	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	
-	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
-	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, TFailureCallback OnFailure);
-	void SendRawTransaction(FString Data, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+	void SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	
-	void ChainId(TSuccessCallback<uint64> OnSuccess, TFailureCallback OnFailure);
+	void ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
-	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
-	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
-	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FNonUniformData> OnSuccess, TFailureCallback OnFailure);
+	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
 };
 
@@ -90,7 +90,7 @@ template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
 
 template <typename T>
 void Provider::SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess,
-	Extractor<T> Extractor, TFailureCallback OnFailure)
+	Extractor<T> Extractor, FFailureCallback OnFailure)
 {
 	SendRPC(Content, [OnSuccess, Extractor](FString Result)
 	{

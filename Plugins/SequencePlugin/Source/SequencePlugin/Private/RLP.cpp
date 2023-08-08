@@ -5,32 +5,32 @@
 
 ByteLength GetByteLength(uint32 Length)
 {
-	auto bytes = 4;
+	uint32 Bytes = 4;
 
-	for(auto i = 0; i < 4; i++)
+	for(uint32 i = 0; i < 4; i++)
 	{
-		uint8 byte = (Length >> (8 * (3 - i))) & 0xFF;
+		const uint8 Byte = (Length >> (8 * (3 - i))) & 0xFF;
 		
-		if(byte != 0x00)
+		if(Byte != 0x00)
 		{
-			return bytes;
+			return Bytes;
 		}
 
-		bytes -= 1;
+		Bytes -= 1;
 	}
 
-	return bytes;
+	return Bytes;
 }
 
 ByteLength RLPItem::CalculateLength()
 {
 	if(this->Type == LIST)
 	{
-		auto Args = static_cast<RLPItem*>(this->Data);
+		const RLPItem* Args = static_cast<RLPItem*>(this->Data);
 
 		LengthSum = 0;
 
-		for(auto i = 0; i < this->Length; i++)
+		for(uint32 i = 0; i < this->Length; i++)
 		{
 			auto Arg = Args[i];
 			LengthSum += Arg.CalculateLength();
@@ -46,7 +46,7 @@ ByteLength RLPItem::CalculateLength()
 	
 	if(this->Type == BINARY)
 	{
-		auto RawData = static_cast<uint8*>(this->Data);
+		const uint8* RawData = static_cast<uint8*>(this->Data);
 
 		if(this->Length == 0) // Shouldn't happen 
 		{
@@ -74,7 +74,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 
 	if(this->Type == BINARY)
 	{
-		auto RawData = static_cast<uint8*>(this->Data);
+		const uint8* RawData = static_cast<uint8*>(this->Data);
 
 		if(this->Length == 1 && RawData[0] == 0x00)
 		{
@@ -99,7 +99,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 			return;
 		}
 
-		auto LengthByteLength = GetByteLength(this->Length);
+		const ByteLength LengthByteLength = GetByteLength(this->Length);
 
 		HeadPtr[0] = 0xb7 + LengthByteLength;
 
@@ -118,7 +118,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 
 	if(this->Type == LIST)
 	{
-		auto Args = static_cast<RLPItem*>(this->Data);
+		const RLPItem* Args = static_cast<RLPItem*>(this->Data);
 
 		auto DataOffset = 1;
 		this->CalculateLength();
@@ -129,7 +129,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 		}
 		else
 		{
-			auto LengthByteLength = GetByteLength(LengthSum);
+			const ByteLength LengthByteLength = GetByteLength(LengthSum);
 			HeadPtr[0] = 0xf7 + LengthByteLength;
 			
 			for(auto i = 0; i < LengthByteLength; i++)
@@ -154,17 +154,17 @@ RLPItem Itemize(FString String)
 	return Itemize(StringToUTF8(String));
 }
 
-RLPItem Itemize(FBinaryData &Data)
+RLPItem Itemize(const FBinaryData &Data)
 {
 	return Itemize(Data.Arr, Data.GetLength());
 }
 
-RLPItem Itemize(FNonUniformData Data)
+RLPItem Itemize(const FUnsizedData Data)
 {
 	return Itemize(Data.Arr, Data.GetLength());
 }
 
-RLPItem Itemize(Hash Hash, ByteLength Length)
+RLPItem Itemize(const Hash Hash, const ByteLength Length)
 {
 	return RLPItem{
 		RLPItemType::BINARY, Length, 0, Hash,
@@ -177,9 +177,9 @@ RLPItem Itemize(RLPItem* Items, uint32 Length)
 		LIST, Length, 0, Items,
 	};
 }
-FNonUniformData RLP::Encode(RLPItem Item)
+FUnsizedData RLP::Encode(RLPItem Item)
 {
-	auto Length = Item.CalculateLength();
+	const auto Length = Item.CalculateLength();
 
 	// Bugfix?
 	//if(Length > 56) {
@@ -188,7 +188,7 @@ FNonUniformData RLP::Encode(RLPItem Item)
 	
 	uint8* Data = new uint8[Length];
 	Item.Encode(Data);
-	return FNonUniformData
+	return FUnsizedData
 	{
 		Data, Length
 	};

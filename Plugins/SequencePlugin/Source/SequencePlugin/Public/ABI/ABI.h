@@ -5,7 +5,7 @@
 
 inline uint8 GMethodIdByteLength = 4;
 inline uint8 GBlockByteLength = 32;
-FNonUniformData NewEmptyBlock();
+FUnsizedData NewEmptyBlock();
 
 enum EABIArgType
 {
@@ -28,7 +28,7 @@ struct FABIArg
 	uint8 GetBlockNum() const;
 	void Encode(uint8* Start, uint8** Head, uint8** Tail);
 	FABIArg Decode(uint8* TrueStart, uint8* Start, uint8* Head);
-	FNonUniformData ToBinary() const;
+	FUnsizedData ToBinary() const;
 	FString ToHex() const;
 	FString ToString() const;
 	uint8 ToUint8() const;
@@ -51,12 +51,12 @@ class ABI
 {
 public:
 	static void ParseMethod(FString& Method);
-	static FNonUniformData Encode(FString Method, TArray<FABIProperty*> &Args);
-	static FNonUniformData EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum);
-	static FNonUniformData EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum);
-	static void DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
-	static void DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 ArgNum);
-	static void Decode(FNonUniformData Data, TArray<FABIProperty*> &Args);
+	static FUnsizedData Encode(FString Method, TArray<FABIProperty*> &Args);
+	static FUnsizedData EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum);
+	static FUnsizedData EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum);
+	static void DecodeArgs(FUnsizedData Data, FABIArg* Args, uint8 ArgNum);
+	static void DecodeArgsWithoutSignature(FUnsizedData Data, FABIArg* Args, uint8 ArgNum);
+	static void Decode(FUnsizedData Data, TArray<FABIProperty*> &Args);
 };
 
 void CopyInUint32(uint8* BlockPtr, uint32 Value);

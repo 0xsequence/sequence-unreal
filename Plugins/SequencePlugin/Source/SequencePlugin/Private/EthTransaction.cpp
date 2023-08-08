@@ -8,24 +8,24 @@
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
 
-FEthTransaction::FEthTransaction(FBlockNonce Nonce, FNonUniformData GasPrice, FNonUniformData GasLimit, FAddress To,
-	FNonUniformData Value, FNonUniformData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
+FEthTransaction::FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsizedData GasLimit, FAddress To,
+	FUnsizedData Value, FUnsizedData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
 	                                               Value(Value), Data(Data), V(nullptr, 0), R(FHash256{}), S(FHash256{})
 {
 }
 
 void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 {
-	auto NonceStr = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
+	FString NonceString = TrimHex(Nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 
-	auto trimmed_nonce = Trimmed(Nonce);
+	FUnsizedData TrimmedNonce = Trimmed(Nonce);
 
-	UE_LOG(LogTemp, Display, TEXT("My trimmed nonce is %s"), *trimmed_nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("My trimmed nonce is %s"), *TrimmedNonce.ToHex());
 	
-	auto EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
+	FUnsizedData EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
 	{
-		Itemize(trimmed_nonce), // Nonce
+		Itemize(TrimmedNonce), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
 		Itemize(Trimmed(To)), // To
@@ -36,24 +36,24 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 		Itemize(HexStringToBinary("")), // S
 	}, 9));
 
-	trimmed_nonce.Destroy();
+	TrimmedNonce.Destroy();
 
-	auto SigningHash = FHash256::New();
+	FHash256 SigningHash = FHash256::New();
 	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
 
 	FPublicKey PublicKey = GetPublicKey(PrivateKey);
 	FAddress Addr = GetAddress(PublicKey);
-	auto MyR = FHash256::New();
-	auto MyS = FHash256::New();
-	auto MyY = FHash256::New();
+	FHash256 MyR = FHash256::New();
+	FHash256 MyS = FHash256::New();
+	FHash256 MyY = FHash256::New();
 	Uint256 BigR, BigS;
-	uint16 recoveryParameter;
-	auto IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS, recoveryParameter);
+	uint16 RecoveryParameter;
+	bool IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS, RecoveryParameter);
 	BigR.getBigEndianBytes(MyR.Arr);
 	BigS.getBigEndianBytes(MyS.Arr);
 	
-	const uint16 BigV = ChainID * 2 + 35 + recoveryParameter;
-	UE_LOG(LogTemp, Display, TEXT("Recovery Bit: %d"), recoveryParameter);
+	const uint16 BigV = ChainID * 2 + 35 + RecoveryParameter;
+	UE_LOG(LogTemp, Display, TEXT("Recovery Bit: %d"), RecoveryParameter);
 	UE_LOG(LogTemp, Display, TEXT("ENCODED SIGNING DATA: %s"), *EncodedSigningData.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
 	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
@@ -68,22 +68,22 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 
 FHash256 FEthTransaction::GetSignedTransactionHash(FPrivateKey Key, int ChainID)
 {
-	auto SignedData = GetSignedTransaction(Key, ChainID);
-	auto Hash = FHash256::New();
+	FUnsizedData SignedData = GetSignedTransaction(Key, ChainID);
+	FHash256 Hash = FHash256::New();
 	Keccak256::getHash(SignedData.Arr, SignedData.GetLength(), Hash.Arr);
 	return Hash;
 }
 
 FHash256 FEthTransaction::GetUnsignedTransactionHash(int ChainID)
 {
-	auto NonceStr = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
+	FString NonceString = TrimHex(Nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 
-	auto trimmed_nonce = Trimmed(Nonce);
+	FUnsizedData TrimmedNonce = Trimmed(Nonce);
 	
-	auto EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
+	FUnsizedData EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
 	{
-		Itemize(trimmed_nonce), // Nonce
+		Itemize(TrimmedNonce), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
 		Itemize(Trimmed(To)), // To
@@ -94,24 +94,24 @@ FHash256 FEthTransaction::GetUnsignedTransactionHash(int ChainID)
 		Itemize(HexStringToBinary("")), // S
 	}, 9));
 
-	trimmed_nonce.Destroy();
+	TrimmedNonce.Destroy();
 
-	auto SigningHash = FHash256::New();
+	FHash256 SigningHash = FHash256::New();
 	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
 
 	return SigningHash;
 }
 
-FNonUniformData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int ChainID)
+FUnsizedData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int ChainID)
 {
 	this->Sign(PrivateKey, ChainID);
 
-	auto NonceStr = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceStr);
+	const FString NonceString = TrimHex(Nonce.ToHex());
+	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 	
 	return RLP::Encode(Itemize(new RLPItem[]
 	{
-		Itemize(HexStringToBinary(NonceStr)), // Nonce
+		Itemize(HexStringToBinary(NonceString)), // Nonce
 		Itemize(GasPrice.Trim()), // GasPrice
 		Itemize(GasLimit.Trim()), // GasLimit
 		Itemize(Trimmed(To)), // To

@@ -80,10 +80,10 @@ public:
     virtual void Deserialize(FABIArg Arg) override;
 };
 
-class FABIBytesProperty : public TABIPropertyWithValue<FNonUniformData> {
+class FABIBytesProperty : public TABIPropertyWithValue<FUnsizedData> {
 public:
     FABIBytesProperty();
-    FABIBytesProperty(FNonUniformData InitialValue);
+    FABIBytesProperty(FUnsizedData InitialValue);
     virtual FABIArg Serialize() override;
     virtual FABIArg BlankArg() override;
     virtual void Deserialize(FABIArg Arg) override;

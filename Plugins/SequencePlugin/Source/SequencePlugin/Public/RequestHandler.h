@@ -34,5 +34,5 @@ public:
 
 	// Process
 	FHttpRequestCompleteDelegate& Process() const;
-	void ProcessAndThen(TFunction<void (FString)> OnSuccess, TFailureCallback OnFailure);
+	void ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure);
 };

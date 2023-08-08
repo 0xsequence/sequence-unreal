@@ -1,7 +1,7 @@
 #pragma once
 #include "Types.h"
 
-uint8* BlankArray(ByteLength size);
+uint8* BlankArray(ByteLength Size);
 
 struct FBinaryData
 {
@@ -15,97 +15,97 @@ struct FBinaryData
 
 // Number of arbitrary length
 // Must be deallocated
-struct FNonUniformData : FBinaryData
+struct FUnsizedData final : FBinaryData
 {
-	static FNonUniformData Empty();
+	static FUnsizedData Empty();
 	ByteLength Length;
-	FNonUniformData(uint8* Arr, ByteLength Length);
-	FNonUniformData Copy(); // This creates new data that must be freed
+	FUnsizedData(uint8* Arr, ByteLength Length);
+	FUnsizedData Copy() const; // This creates new data that must be freed
 	virtual ByteLength GetLength() const override;
-	FNonUniformData Trim(); // Destroys itself
+	FUnsizedData Trim(); // Destroys itself
 };
 
 // Returns returns data with leading 0x00 bytes trimmed
-FNonUniformData Trimmed(FBinaryData &Data);
+FUnsizedData Trimmed(const FBinaryData &Data);
 
-FNonUniformData HexStringToBinary(FString Hex); // Hex String to Number of arbitrary size
-FNonUniformData StringToUTF8(FString String);
-FString UTF8ToString(FNonUniformData BinaryData);
+FUnsizedData HexStringToBinary(FString Hex); // Hex String to Number of arbitrary size
+FUnsizedData StringToUTF8(FString String);
+FString UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
 
 template<ByteLength TSize>
-struct FUniformData : FBinaryData
+struct TSizedData : FBinaryData
 {
 	const static ByteLength Size = TSize;
 	virtual ByteLength GetLength() const override;
-	FNonUniformData Copy(); // This creates new data that must be freed
-	operator FNonUniformData() { return Copy(); }
-	const static FUniformData Empty();
+	FUnsizedData Copy() const; // This creates new data that must be freed
+	explicit operator FUnsizedData() const { return Copy(); }
+	static TSizedData Empty();
 }; // Data with set sizes
 
 template <ByteLength Size>
-inline ByteLength FUniformData<Size>::GetLength() const 
+inline ByteLength TSizedData<Size>::GetLength() const 
 {
 	return Size;
 }
 
 template <ByteLength Size>
-FNonUniformData FUniformData<Size>::Copy()
+FUnsizedData TSizedData<Size>::Copy() const
 {
 	auto Length = GetLength();
 	auto NewArr = new uint8[Length];
 	for(auto i = 0u; i < Length; i++) NewArr[i] = Arr[i];
-	return FNonUniformData{NewArr, Length};
+	return FUnsizedData{NewArr, Length};
 }
 
 template <ByteLength TSize>
-const FUniformData<TSize> FUniformData<TSize>::Empty()
+TSizedData<TSize> TSizedData<TSize>::Empty()
 {
-	return FUniformData<TSize>{};
+	return TSizedData<TSize>{};
 }
 
 // Basic Binary Types
-struct FHash256 : FUniformData<32>
+struct FHash256 final : TSizedData<32>
 {
 	static FHash256 New(); // This creates new data that must be freed
 	static FHash256 From(uint8* Arr);
 	static FHash256 From(FString Str);
 };
 
-struct FAddress : FUniformData<20>
+struct FAddress final : TSizedData<20>
 {
 	static FAddress New(); // This creates new data that must be freed
 	static FAddress From(uint8* Arr);
 	static FAddress From(FString Str);
 };
 
-struct FPublicKey : FUniformData<64>
+struct FPublicKey final : TSizedData<64>
 {
 	static FPublicKey New(); // This creates new data that must be freed
 	static FPublicKey From(uint8* Arr);
 	static FPublicKey From(FString Str);
 };
 
-struct FPrivateKey : FUniformData<32>
+struct FPrivateKey final : TSizedData<32>
 {
 	static FPrivateKey New(); // This creates new data that must be freed
 	static FPrivateKey From(uint8* Arr);
 	static FPrivateKey From(FString Str);
 };
 
-struct FBloom : FUniformData<256>
+struct FBloom final : TSizedData<256>
 {
 	static FBloom New(); // This creates new data that must be freed
 	static FBloom From(uint8* Arr);
 	static FBloom From(FString Str);
 };
 
-struct FBlockNonce : FUniformData<8>
+struct FBlockNonce final : TSizedData<8>
 {
 	static FBlockNonce New(); // This creates new data that must be freed
 	static FBlockNonce From(uint8* Arr);
 	static FBlockNonce From(FString Str);
-	void Increment();
+	void Increment() const;
 };
 

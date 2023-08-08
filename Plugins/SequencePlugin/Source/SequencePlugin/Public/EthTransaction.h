@@ -4,20 +4,20 @@
 class FEthTransaction
 {
 	FBlockNonce Nonce;
-	FNonUniformData GasPrice;
-	FNonUniformData GasLimit;
+	FUnsizedData GasPrice;
+	FUnsizedData GasLimit;
 	FAddress To;
-	FNonUniformData Value;
-	FNonUniformData Data;
-	FNonUniformData V;
+	FUnsizedData Value;
+	FUnsizedData Data;
+	FUnsizedData V;
 	FHash256 R;
 	FHash256 S;
 public:
-	FEthTransaction(FBlockNonce Nonce, FNonUniformData GasPrice, FNonUniformData GasLimit, FAddress To, FNonUniformData Value, FNonUniformData Data);
+	FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsizedData GasLimit, FAddress To, FUnsizedData Value, FUnsizedData Data);
 
 	void Sign(FPrivateKey PrivateKey, int ChainID);
 	FHash256 GetSignedTransactionHash(FPrivateKey Key, int ChainID);
 	FHash256 GetUnsignedTransactionHash(int ChainID);
-	FNonUniformData GetSignedTransaction(FPrivateKey PrivateKey, int ChainID);
+	FUnsizedData GetSignedTransaction(FPrivateKey PrivateKey, int ChainID);
 	void Log();
 };

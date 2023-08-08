@@ -14,7 +14,7 @@ FString IntToHexString(uint64 Num)
 
 	while (Num > 0)
 	{
-		auto Remainder = Num & 0xf;
+		const uint64 Remainder = Num & 0xf;
 
 		auto Numeral = IntToHexLetter(Remainder);
 
@@ -70,7 +70,7 @@ FString IntToHexLetter(uint8 Num)
 	return "";
 }
 
-TOptional<uint8> HexLetterToInt(TCHAR Hex)
+TOptional<uint8> HexLetterToInt(const TCHAR Hex)
 {
 	switch (Hex)
 	{
@@ -129,16 +129,16 @@ TOptional<uint64> HexStringToUint64(FString Hex)
 
 	for(int Counter = 0; Counter < Hex.Len() - Offset; Counter++)
 	{
-		auto Letter = Hex[Hex.Len() - 1 - Counter];
-		auto Convert = HexLetterToInt(Letter);
+		const TCHAR Letter = Hex[Hex.Len() - 1 - Counter];
+		TOptional<uint8> Convert = HexLetterToInt(Letter);
 
 		if(!Convert.IsSet())
 		{
 			return TOptional<uint64>();
 		}
 
-		uint64 converted = Convert.GetValue();
-		Sum += converted << 4 * Counter;
+		const uint64 Converted = Convert.GetValue();
+		Sum += Converted << 4 * Counter;
 	}
 
 	return Sum;
@@ -148,11 +148,11 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 {
 	FString String = "";
 	
-	for(auto i = 0; i < Size; i++)
+	for(uint32 i = 0; i < Size; i++)
 	{
 		const uint8 Byte = Hash[i];
 
-		auto Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+		FString Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
 		String = String + Added;
 	}
 
@@ -163,15 +163,15 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 
 uint8* HexStringToHash(ByteLength Size, FString Hex)
 {
-	Hash Hash = new uint8[Size];
+	const Hash Hash = new uint8[Size];
 	// Set it to 0s
-	for(int i = 0; i < Size; i++)
+	for(uint32 i = 0; i < Size; i++)
 	{
 		Hash[i] = 0x00;
 	}
 
 	// Compensation for 0x
-	auto Offset = 0;
+	int Offset = 0;
 	if(Hex.StartsWith("0x"))
 	{
 		Offset = 2;
@@ -189,19 +189,18 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 		{
 			break;
 		}
-		
-		auto Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
-		TOptional<uint8> Upper;
-		Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
+
+		TOptional<uint8> Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
+		TOptional<uint8> Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
 
 		if(!Lower.IsSet() || !Upper.IsSet())
 		{
 			return nullptr;
 		}
 
-		auto LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
-		auto UpperVal = Lower.GetValue() & 0x0000000F;
-		auto Pos = Size - 1 - Counter;
+		const int LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
+		const int UpperVal = Lower.GetValue() & 0x0000000F;
+		const uint32 Pos = Size - 1 - Counter;
 		Hash[Pos] = LowerVal + UpperVal;
 	}
 

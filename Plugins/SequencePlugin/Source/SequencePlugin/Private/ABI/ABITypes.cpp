@@ -33,7 +33,7 @@ void FABIStringProperty::Deserialize(FABIArg Arg)
 	const auto Data = static_cast<uint8*>(Arg.Data);
 	ByteLength Length = Arg.Length;
 
-	const auto StringData = FNonUniformData
+	const auto StringData = FUnsizedData
 	{
 		Data, Length
 	};
@@ -164,11 +164,11 @@ void FABIBooleanProperty::Deserialize(FABIArg Arg)
 	Arg.Destroy();
 }
 
-FABIBytesProperty::FABIBytesProperty(): TABIPropertyWithValue<FNonUniformData>(FNonUniformData::Empty())
+FABIBytesProperty::FABIBytesProperty(): TABIPropertyWithValue<FUnsizedData>(FUnsizedData::Empty())
 {
 }
 
-FABIBytesProperty::FABIBytesProperty(FNonUniformData InitialValue): TABIPropertyWithValue(InitialValue)
+FABIBytesProperty::FABIBytesProperty(FUnsizedData InitialValue): TABIPropertyWithValue(InitialValue)
 {}
 
 FABIArg FABIBytesProperty::Serialize()
@@ -202,7 +202,7 @@ void FABIBytesProperty::Deserialize(FABIArg Arg)
 		Data[i] = CopyData[i];
 	}
 
-	SetValue(FNonUniformData{
+	SetValue(FUnsizedData{
 		Data, Arg.Length
 	});
 	Arg.Destroy();
@@ -216,7 +216,7 @@ FABIAddressProperty::FABIAddressProperty(FAddress Address):  TABIPropertyWithVal
 
 FABIArg FABIAddressProperty::Serialize()
 {
-	FNonUniformData ArgData = NewEmptyBlock();
+	FUnsizedData ArgData = NewEmptyBlock();
 	auto buffer = GBlockByteLength - FAddress::Size;
 
 	for(auto i = 0; i < FAddress::Size; i++)

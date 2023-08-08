@@ -7,9 +7,9 @@
 #include "HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
-FNonUniformData NewEmptyBlock()
+FUnsizedData NewEmptyBlock()
 {
-	auto block = FNonUniformData
+	auto block = FUnsizedData
 	{
 		new uint8[GBlockByteLength],
 		GBlockByteLength
@@ -253,9 +253,9 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 	return FABIArg::Empty(STATIC); // Should never reach here
 }
 
-FNonUniformData FABIArg::ToBinary() const
+FUnsizedData FABIArg::ToBinary() const
 {
-	return FNonUniformData{static_cast<uint8*>(Data), Length};
+	return FUnsizedData{static_cast<uint8*>(Data), Length};
 }
 
 FString FABIArg::ToHex() const
@@ -375,7 +375,7 @@ void ABI::ParseMethod(FString& Method)
 
 }
 
-FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
+FUnsizedData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
 	
@@ -422,12 +422,12 @@ FNonUniformData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 		Arg.Encode(Start, &HeadPtr, &TailPtr);
 	}
 
-	return FNonUniformData{
+	return FUnsizedData{
 		Blocks, TotalByteLength
 	};
 }
 
-FNonUniformData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
+FUnsizedData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
 {
 	auto BlockNum = 0;
 	
@@ -455,12 +455,12 @@ FNonUniformData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
 		Arg.Encode(Start, &HeadPtr, &TailPtr);
 	}
 
-	return FNonUniformData{
+	return FUnsizedData{
 		Blocks, TotalByteLength
 	};
 }
 
-FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
+FUnsizedData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
 {
 	const auto Size = Args.Num();
 	FABIArg* Arr = new FABIArg[Size];
@@ -472,7 +472,7 @@ FNonUniformData ABI::Encode(const FString Method, TArray<FABIProperty*>& Args)
 	return EncodeArgs(Method, Arr, Size);
 }
 
-void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+void ABI::DecodeArgs(FUnsizedData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{
@@ -482,7 +482,7 @@ void ABI::DecodeArgs(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
 	}
 }
 
-void ABI::DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 ArgNum)
+void ABI::DecodeArgsWithoutSignature(FUnsizedData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{
@@ -492,7 +492,7 @@ void ABI::DecodeArgsWithoutSignature(FNonUniformData Data, FABIArg* Args, uint8 
 	}
 }
 
-void ABI::Decode(FNonUniformData Data, TArray<FABIProperty*>& Args)
+void ABI::Decode(FUnsizedData Data, TArray<FABIProperty*>& Args)
 {
 	const auto Size = Args.Num();
 	FABIArg* Arr = new FABIArg[Size];
