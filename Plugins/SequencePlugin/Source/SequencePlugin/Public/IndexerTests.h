@@ -104,14 +104,18 @@ void getBalanceUpdatesParsingTest(UIndexer* indexer);
 void getTransactionHistoryParsingTest(UIndexer* indexer);
 
 //arguement parsing tests
-void tokenBalanceArgsTest(UIndexer* indexer);
+void tokenBalanceMaxArgsTest(UIndexer* indexer);
+
+void tokenBalanceMinArgsTest(UIndexer* indexer);
 
 void tokenSuppliesArgsTest(UIndexer* indexer);
 
 void tokenSuppliesMapArgsTest(UIndexer* indexer);
 
-void balanceUpdatesArgsTest(UIndexer* indexer);
+void balanceUpdatesMaxArgsTest(UIndexer* indexer);
 
-void transactionHistoryArgsFullTest(UIndexer* indexer);
+void balanceUpdatesMinArgsTest(UIndexer* indexer);
+
+void transactionHistoryArgsMaxTest(UIndexer* indexer);
 
 void transactionHistoryArgsMinTest(UIndexer* indexer);

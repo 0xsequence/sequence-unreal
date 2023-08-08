@@ -104,6 +104,7 @@ template < typename T> FString UIndexer::BuildArgs(T struct_in)
 //generic
 template<typename T> T UIndexer::BuildResponse(FString text)
 {
+	UE_LOG(LogTemp, Display, TEXT("Rep:\n[%s]"), *text);
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> json_step;
 	//Then take the json object we make and convert it to a USTRUCT of type T then we return that!
