@@ -37,12 +37,102 @@ FString UIndexerSupport::simplifyString(FString string)
 	const TCHAR* srch_ptr_c = *srch_c;
 	const TCHAR* rep_ptr = *replace;
 
+	(*ret).RemoveSpacesInline();//remove spaces
 	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
 	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
 	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
 	(*ret).ReplaceInline(srch_ptr_c, rep_ptr, ESearchCase::IgnoreCase);//remove \"
 
 	return (*ret);
+}
+
+FString UIndexerSupport::stringListToSimpleString(TArray<FString> stringData)
+{
+	FString ret = "[";
+
+	for (FString string : stringData)
+	{
+		ret += string;
+		ret += ",";
+	}
+
+	if (stringData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+	}
+	ret += "]";
+	return ret;
+}
+
+FString UIndexerSupport::int64ListToSimpleString(TArray<int64> intData)
+{
+	FString ret = "[";
+
+	for (int64 iData : intData)
+	{
+		FString iDataString = FString::Printf(TEXT("%lld"), iData);
+		ret += iDataString + ",";
+	}
+
+	if (intData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+	}
+
+	ret += "]";
+	return ret;
+}
+
+FString UIndexerSupport::jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData)
+{
+	FString ret = "[";
+	for (TSharedPtr<FJsonObject> jObj : jsonData)
+	{
+		ret.Append(UIndexerSupport::jsonToString(jObj));
+		ret.Append(",");
+	}
+
+	if (jsonData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);
+	}
+	ret.Append("]");
+	return ret;
+}
+
+FString UIndexerSupport::jsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> jsonData)
+{
+	FString ret = "[";
+	for (TSharedPtr<FJsonObject> jObj : jsonData)
+	{
+		ret.Append(UIndexerSupport::jsonToSimpleString(jObj));
+		ret.Append(",");
+	}
+
+	if (jsonData.Num() > 0)
+	{
+		ret.RemoveAt(ret.Len() - 1);
+	}
+	ret.Append("]");
+	return ret;
+}
+
+FString UIndexerSupport::jsonToString(TSharedPtr<FJsonObject> jsonData)
+{
+	FString ret;
+	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
+	FJsonSerializer::Serialize(jsonData.ToSharedRef(), Writer);
+	return ret;
+}
+
+FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonValue> jsonData)
+{
+	return simplifyString(jsonToString(jsonData));
+}
+
+FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonObject> jsonData)
+{
+	return simplifyString(jsonToString(jsonData));
 }
 
 /*

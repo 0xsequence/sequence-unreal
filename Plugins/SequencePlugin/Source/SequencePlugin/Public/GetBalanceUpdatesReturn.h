@@ -16,6 +16,22 @@ public:
         TArray<FTokenBalance> balances;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
+
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+        ret.Get()->SetObjectField("page", page.Get());
+        TArray<TSharedPtr<FJsonObject>> jsonList;
+
+        for (FTokenBalance tItem : balances)
+        {
+            jsonList.Add(tItem.Get());
+        }
+        ret.Get()->SetStringField("balances", UIndexerSupport::jsonObjListToSimpleString(jsonList));
+
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>> *lst;

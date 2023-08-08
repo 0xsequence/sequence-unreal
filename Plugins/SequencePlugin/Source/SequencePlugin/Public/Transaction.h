@@ -24,6 +24,28 @@ public:
     UPROPERTY()
         FString timestamp;
 
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+        ret.Get()->SetStringField("txnHash", txnHash);
+        ret.Get()->SetNumberField("blockNumber", blockNumber);
+        ret.Get()->SetStringField("blockHash", blockHash);
+        ret.Get()->SetNumberField("chainId", chainId);
+        ret.Get()->SetStringField("metaTxnID", metaTxnID);
+
+        TArray<TSharedPtr<FJsonObject>> jList;
+
+        for (FTxnTransfer tItem : transfers)
+        {
+            jList.Add(tItem.Get());
+        }
+
+        ret.Get()->SetStringField("transfers", UIndexerSupport::jsonObjListToSimpleString(jList));
+
+        ret.Get()->SetStringField("timestamp", timestamp);
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* trnsfrs;

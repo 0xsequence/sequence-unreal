@@ -33,6 +33,33 @@ public:
     UPROPERTY()
         TMap<FString, FTokenMetaData> tokenMetaData;
 
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+
+        ret.Get()->SetStringField("transferType", UEnum::GetValueAsString(transferType.GetValue()));
+        ret.Get()->SetStringField("contractAddress", contractAddress);
+        ret.Get()->SetStringField("contractType", UEnum::GetValueAsString(contractType.GetValue()));
+        ret.Get()->SetStringField("from",from);
+        ret.Get()->SetStringField("to", to);
+        ret.Get()->SetStringField("tokenIds",UIndexerSupport::int64ListToSimpleString(tokenIds));
+        ret.Get()->SetStringField("amounts", UIndexerSupport::int64ListToSimpleString(amounts));
+        ret.Get()->SetNumberField("logIndex", logIndex);
+        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
+        TSharedPtr<FJsonObject> nRet = MakeShareable<FJsonObject>(new FJsonObject);
+        TArray<FString> keys;
+        tokenMetaData.GetKeys(keys);
+        for (FString key : keys)
+        {
+            TSharedPtr<FJsonObject> value = tokenMetaData.Find(key)->Get();
+            nRet.Get()->SetObjectField(key,value);
+        }
+
+        ret.Get()->SetObjectField("tokenMetaData",nRet);
+
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {//the json object we get will be a mirror to this!        
         const TSharedPtr<FJsonObject>* ptrJson;

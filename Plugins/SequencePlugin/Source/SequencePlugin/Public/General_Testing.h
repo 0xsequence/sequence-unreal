@@ -12,7 +12,6 @@ UCLASS()
 class SEQUENCEPLUGIN_API AGeneral_Testing : public AActor
 {
 	GENERATED_BODY()
-	
 public:	
 	// Sets default values for this actor's properties
 	AGeneral_Testing();
