@@ -124,7 +124,11 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("TokenBalances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
-	args.accountAddress = testingAddress;	
+	args.accountAddress = testingAddress;
+	FSortBy sortType;
+	sortType.column = "0x1";
+	sortType.order = ESortOrder::DESC;
+	args.page.sort.Add(sortType);
 	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
@@ -296,6 +300,7 @@ void wrongResponseReceivedTest2(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
+//end of return parsing tests
 void pingParsingTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
@@ -470,8 +475,6 @@ void getTokenSuppliesParsingTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Parsing Test"));
-	//"{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true}
-	//\"balances\":[{\"id\":15,\"contractAddress\":\"0xc1\",\"contractType\":\"ERC20\",\"accountAddress\":\"0xa1\",\"tokenID\":11,\"balance\":16384,\"blockHash\":\"0xb1\",\"blockNumber\":1,\"updateID\":3,\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"contractType\":\"ERC1155\",\"tokenIDs\":[{\"tokenID\":69,\"supply\":\"supply_data\",\"chainId\":9,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FGetTokenSuppliesReturn rep = indexer->BuildResponse<FGetTokenSuppliesReturn>(args);
 	args = UIndexerSupport::simplifyString(args);
@@ -502,9 +505,6 @@ void getTokenSuppliesMapParsingTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Map Parsing Test"));
-	//{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true}
-	//\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}}
-	//{\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}
 	FString args = "{\"supplies\":{\"key1\":[{\"tokenID\":101,\"supply\":\"supply_data\",\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}}";
 	FGetTokenSuppliesMapReturn rep = indexer->BuildResponse<FGetTokenSuppliesMapReturn>(args);
 	args = UIndexerSupport::simplifyString(args);
@@ -590,7 +590,9 @@ void getTransactionHistoryParsingTest(UIndexer* indexer)
 	}
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
+//end of return parsing tests
 
+//start of args parsing tests
 void tokenBalanceMaxArgsTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
@@ -603,8 +605,8 @@ void tokenBalanceMaxArgsTest(UIndexer* indexer)
 	args.includeMetaData = true;
 	args.page = buildTestPage();
 	
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -632,8 +634,8 @@ void tokenBalanceMinArgsTest(UIndexer* indexer)
 	FGetTokenBalancesArgs args;
 	args.accountAddress = testingAddress;
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -709,15 +711,15 @@ void tokenSuppliesArgsTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Token Supplies Args Parsing Test"));
 	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":"+testingContractAddress+",\"includeMetaData\":true,\"page\":"+testingPage+"}";
+	FString testArgs = "{\"contractAddress\":\""+testingContractAddress+"\",\"includeMetaData\":true,\"page\":"+testingPage+"}";
 
 	FGetTokenSuppliesArgs args;
 	args.contractAddress = testingContractAddress;
 	args.includeMetaData = true;
 	args.page = buildTestPage();
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -745,8 +747,8 @@ void tokenSuppliesMapArgsTest(UIndexer* indexer)
 	FGetTokenSuppliesMapArgs args;
 	args.tokenMap = buildTokenMap();
 	args.includeMetaData = true;
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -770,14 +772,14 @@ void balanceUpdatesMaxArgsTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("balance Updates [MAX] Args Parsing Test"));
 	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":"+testingContractAddress+",\"lastUpdateID\":10,\"page\":"+testingPage+"}";
+	FString testArgs = "{\"contractAddress\":\""+testingContractAddress+"\",\"lastUpdateID\":10,\"page\":"+testingPage+"}";
 	FGetBalanceUpdatesArgs args;
 	args.contractAddress = testingContractAddress;
 	args.lastUpdateID = 10;
 	args.page = buildTestPage();
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -801,12 +803,12 @@ void balanceUpdatesMinArgsTest(UIndexer * indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("balance Updates [MIN] Args Parsing Test"));
 	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":" + testingContractAddress + "}";
+	FString testArgs = "{\"contractAddress\":\"" + testingContractAddress + "\"}";
 	FGetBalanceUpdatesArgs args;
 	args.contractAddress = testingContractAddress;
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -838,8 +840,8 @@ void transactionHistoryArgsMaxTest(UIndexer* indexer)
 	args.page = buildTestPage();
 	args.includeMetaData = true;
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -868,8 +870,8 @@ void transactionHistoryArgsMinTest(UIndexer* indexer)
 	args.filter.accountAddress = testingAddress;
 	args.includeMetaData = true;
 
-	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
-	testArgs = UIndexerSupport::simplifyString(testArgs);
+	FString stringArgs = UIndexerSupport::simplifyStringParsable(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = UIndexerSupport::simplifyStringParsable(testArgs);
 
 	if (printAll)
 	{
@@ -894,13 +896,19 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	UIndexer* indexer = NewObject<UIndexer>();//for testing!
 
 	//failure testing//
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	UE_LOG(LogTemp, Display, TEXT("Start of Failure Tests"));
 	emptyResponseTest(indexer);
 	invalidResponseTest(indexer);
 	wrongResponseReceivedTest1(indexer);
 	wrongResponseReceivedTest2(indexer);
+	UE_LOG(LogTemp, Display, TEXT("End of Failure Tests"));
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
 	//parsing tests//
 	//buildResponse parsing tests//
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	UE_LOG(LogTemp, Display, TEXT("Start of Response Tests"));
 	pingParsingTest(indexer);
 	versionParsingTest(indexer);
 	runTimeStatusParsingTest(indexer);
@@ -912,7 +920,11 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	getBalanceUpdatesParsingTest(indexer);
 	getTransactionHistoryParsingTest(indexer);
 	//buildResponse parsing tests//
+	UE_LOG(LogTemp, Display, TEXT("End of Response Tests"));
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	UE_LOG(LogTemp, Display, TEXT("Start of Argument Tests"));
 	//buildArgs parsing tests//
 	tokenBalanceMaxArgsTest(indexer);
 	tokenBalanceMinArgsTest(indexer);
@@ -923,16 +935,20 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	transactionHistoryArgsMaxTest(indexer);
 	transactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
+	UE_LOG(LogTemp, Display, TEXT("End of Argument Tests"));
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
+	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	UE_LOG(LogTemp, Display, TEXT("Start of System Tests"));
 	//system tests//
-	pingTest(indexer, OnSuccess, OnFailure);
+	//pingTest(indexer, OnSuccess, OnFailure);
 	//versionTest(indexer, OnSuccess, OnFailure);
 	//runTimeStatusTest(indexer, OnSuccess, OnFailure);
 	//getChainIDTest(indexer, OnSuccess, OnFailure);
 	//getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 	//getTokenBalanceTest(indexer, OnSuccess, OnFailure);
 	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
-	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
+	//getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
 	//getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
 }

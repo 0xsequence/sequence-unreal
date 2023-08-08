@@ -27,6 +27,12 @@ public:
 	static FString simplifyString(FString string);
 
 	/*
+	* Similar to simplify string EXCEPT we keept he /" because we are trying
+	* to maintain json correctness for parsing!
+	*/
+	static FString simplifyStringParsable(FString string);
+
+	/*
 	* Allows for the converting of a Struct straigt into a nicely formatted json string!
 	*/
 	template < typename T > static FString structToString(T structVar)
@@ -51,15 +57,24 @@ public:
 
 	static FString stringListToSimpleString(TArray<FString> stringData);
 
+	//for maintaining valid json for args in RPC calls
+	static FString stringListToParsableString(TArray<FString> stringData);
+
 	static FString int64ListToSimpleString(TArray<int64> intData);
 
 	static FString jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData);
 	
 	static FString jsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> jsonData);
 
+	static FString jsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> jsonData);
+
 	static FString jsonToString(TSharedPtr<FJsonValue> jsonData);
 
 	static FString jsonToSimpleString(TSharedPtr<FJsonValue> jsonData);
+
+	static FString jsonToParsableString(TSharedPtr<FJsonValue> jsonData);
+
+	static FString jsonToParsableString(TSharedPtr<FJsonObject> jsonData);
 
 	static FString jsonToString(TSharedPtr<FJsonObject> jsonData);
 

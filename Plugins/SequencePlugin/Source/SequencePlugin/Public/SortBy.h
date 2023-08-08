@@ -17,11 +17,11 @@ public:
     FString Get()
     {
         FString ret = "{";
-        ret.Append("column:");
+        ret.Append("\"column\":\"");
         ret.Append(column);
-        ret.Append(",order:");
+        ret.Append("\",\"order\":\"");
         ret.Append(UEnum::GetValueAsString(order.GetValue()));
-        ret.Append("}");
+        ret.Append("\"}");
         return ret;
     }
 
