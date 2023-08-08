@@ -11,5 +11,5 @@ public:
     //this guy is a nothing burger?
 
     bool customGetter = false;
-    FString GetArgs() { return ""; }
+    FString GetArgs() { return ""; }//no custom getter needed
 };
