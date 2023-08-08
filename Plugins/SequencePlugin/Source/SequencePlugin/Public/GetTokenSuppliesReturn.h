@@ -20,17 +20,17 @@ public:
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
 
-        ret.Get()->SetObjectField("page", page.Get());
+        ret.Get()->SetObjectField("page", page.GetJson());
         ret.Get()->SetStringField("contractType", UEnum::GetValueAsString(contractType.GetValue()));
         TArray<TSharedPtr<FJsonObject>> jList;
 
         for (FTokenSupply tID : tokenIDs)
         {
-            jList.Add(tID.Get());
+            jList.Add(tID.GetJson());
         }
         ret.Get()->SetStringField("tokenIDs", UIndexerSupport::jsonObjListToSimpleString(jList));
         return ret;

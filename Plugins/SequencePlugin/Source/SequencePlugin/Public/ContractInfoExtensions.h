@@ -22,7 +22,7 @@ public:
         bool blacklist;
 
     //for testing
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetStringField("link", link);

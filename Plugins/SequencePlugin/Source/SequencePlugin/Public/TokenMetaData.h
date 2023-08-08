@@ -41,7 +41,7 @@ public:
     TArray<FAttributeMap> attributes;
 
     //used for testing!
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("tokenId", tokenId);
@@ -73,7 +73,7 @@ public:
         FString attributeString = "[";
         for (FAttributeMap aMap : attributes)
         {
-            attributeString.Append(UIndexerSupport::simplifyString(aMap.Get()));
+            attributeString.Append(UIndexerSupport::simplifyString(aMap.GetJsonString()));
             attributeString.Append(",");
         }
         if (attributes.Num() > 0)

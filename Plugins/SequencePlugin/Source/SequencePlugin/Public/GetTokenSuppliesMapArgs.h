@@ -45,7 +45,7 @@ public:
     };
 
 	//this function name may need to be renamed
-	FString Get()
+	FString GetArgs()
 	{
 		FString ret = "{\"tokenMap\":{";
 		TArray<FString> keys;

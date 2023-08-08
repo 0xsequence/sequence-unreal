@@ -21,14 +21,14 @@ public:
     UPROPERTY()
         FTokenMetaData tokenMetaData;
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("tokenID",tokenID);
         ret.Get()->SetStringField("supply", supply);
         ret.Get()->SetNumberField("chainId", chainId);
-        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
-        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.Get());
+        ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
+        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.GetJson());
         return ret;
     }
 

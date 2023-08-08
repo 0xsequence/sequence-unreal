@@ -19,7 +19,7 @@ public:
         FPage page;
 
     bool customGetter = true;
-    FString Get() 
+    FString GetArgs()
     {
         FString ret = "{";
 

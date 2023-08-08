@@ -18,7 +18,7 @@ public:
         TMap<FString, FString> attribute_map;
         
         //used for testing
-        FString Get()
+        FString GetJsonString()
         {
             FString ret = "{";
             

@@ -36,7 +36,7 @@ public:
     UPROPERTY()
         FTokenMetaData tokenMetaData;
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("id", id);
@@ -49,8 +49,8 @@ public:
         ret.Get()->SetNumberField("blockNumber", blockNumber);
         ret.Get()->SetNumberField("updateID", updateID);
         ret.Get()->SetNumberField("chainId", chainId);
-        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
-        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.Get());
+        ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
+        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.GetJson());
         return ret;
     };
 

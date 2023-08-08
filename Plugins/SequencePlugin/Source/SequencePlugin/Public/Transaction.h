@@ -24,7 +24,7 @@ public:
     UPROPERTY()
         FString timestamp;
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetStringField("txnHash", txnHash);
@@ -37,7 +37,7 @@ public:
 
         for (FTxnTransfer tItem : transfers)
         {
-            jList.Add(tItem.Get());
+            jList.Add(tItem.GetJson());
         }
 
         ret.Get()->SetStringField("transfers", UIndexerSupport::jsonObjListToSimpleString(jList));

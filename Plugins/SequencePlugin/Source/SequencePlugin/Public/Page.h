@@ -69,7 +69,7 @@ public:
                 TArray<FString> stringList;
                 for (FSortBy sItem : sort)
                 {
-                    stringList.Add(sItem.Get());
+                    stringList.Add(sItem.GetJsonString());
                 }
                 //Parse the string list into a JsonString
                 ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
@@ -88,7 +88,7 @@ public:
         return ret;
     }
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("page", page);
@@ -99,7 +99,7 @@ public:
         FString sortString = "[";
         for (FSortBy s : sort)
         {
-            sortString.Append(UIndexerSupport::simplifyString(s.Get()));
+            sortString.Append(UIndexerSupport::simplifyString(s.GetJsonString()));
             sortString.Append(",");
         }
         if (sort.Num() > 0)

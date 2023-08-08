@@ -19,10 +19,10 @@ public:
 
     bool customGetter = true;
     /// <summary>
-    /// rename this to GetArgs()! to differentiate it from the Get()'s in the Return UStructs!
+    /// 
     /// </summary>
     /// <returns>The jsonString from this UStruct formatted proper!</returns>
-    FString Get()
+    FString GetArgs()
     {
         FString ret = "{";
         ret.Append("\"filter\":");

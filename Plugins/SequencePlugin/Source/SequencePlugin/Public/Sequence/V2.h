@@ -18,11 +18,12 @@ enum class ESignatureType
 	Chained = 3,
 };
 
+/*
 class SignatureTree
 {
 	
 };
-
+*/
 class FRegularSignature
 {
 	bool IsRegular;

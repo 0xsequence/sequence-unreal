@@ -111,7 +111,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 {
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [OnSuccess](const FGetTokenBalancesReturn tokenBalances)
 	{
-		OnSuccess("Received TokenBalances Data");
+		OnSuccess("Received Token Balances Data");
 		if (printAll)
 		{
 			FString ret = UIndexerSupport::structToString<FGetTokenBalancesReturn>(tokenBalances);
@@ -121,7 +121,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 
 	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
-		OnFailure("TokenBalances Failure", Error);
+		OnFailure("Token Balances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
 	args.accountAddress = testingAddress;
@@ -129,6 +129,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 	sortType.column = "0x1";
 	sortType.order = ESortOrder::DESC;
 	args.page.sort.Add(sortType);
+	args.page.page = 10;
 	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
@@ -185,7 +186,7 @@ void getBalanceUpdatesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess
 {
 	const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [OnSuccess](const FGetBalanceUpdatesReturn balanceUpdates)
 	{
-		OnSuccess("Received balanceUpdates Data");
+		OnSuccess("Received balance Updates Data");
 		if (printAll)
 		{
 			FString ret = UIndexerSupport::structToString<FGetBalanceUpdatesReturn>(balanceUpdates);
@@ -452,7 +453,7 @@ void getTokenBalanceParsingTest(UIndexer* indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.GetJson());
 
 	if (printAll)
 	{
@@ -482,7 +483,7 @@ void getTokenSuppliesParsingTest(UIndexer* indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.GetJson());
 
 	if (printAll)
 	{
@@ -512,7 +513,7 @@ void getTokenSuppliesMapParsingTest(UIndexer* indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.GetJson());
 
 	if (printAll)
 	{
@@ -542,7 +543,7 @@ void getBalanceUpdatesParsingTest(UIndexer* indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.GetJson());
 
 	if (printAll)
 	{
@@ -572,7 +573,7 @@ void getTransactionHistoryParsingTest(UIndexer* indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::jsonToSimpleString(rep.Get());
+	FString repString = UIndexerSupport::jsonToSimpleString(rep.GetJson());
 
 	if (printAll)
 	{
@@ -941,14 +942,14 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 	UE_LOG(LogTemp, Display, TEXT("Start of System Tests"));
 	//system tests//
-	//pingTest(indexer, OnSuccess, OnFailure);
-	//versionTest(indexer, OnSuccess, OnFailure);
-	//runTimeStatusTest(indexer, OnSuccess, OnFailure);
-	//getChainIDTest(indexer, OnSuccess, OnFailure);
-	//getEtherBalanceTest(indexer, OnSuccess, OnFailure);
-	//getTokenBalanceTest(indexer, OnSuccess, OnFailure);
-	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
-	//getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
-	//getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
+	pingTest(indexer, OnSuccess, OnFailure);
+	versionTest(indexer, OnSuccess, OnFailure);
+	runTimeStatusTest(indexer, OnSuccess, OnFailure);
+	getChainIDTest(indexer, OnSuccess, OnFailure);
+	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
+	getTokenBalanceTest(indexer, OnSuccess, OnFailure);
+	getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
+	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
+	getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
 }
