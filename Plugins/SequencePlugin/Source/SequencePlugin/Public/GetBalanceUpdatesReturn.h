@@ -14,6 +14,7 @@ public:
         FPage page;
     UPROPERTY()
         TArray<FTokenBalance> balances;
+    //we don't need custom constructor for this!
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
@@ -32,6 +33,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to handle edge cases with Unreal's json parsing
+    */
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>> *lst;

@@ -10,7 +10,6 @@
 * Used to store connected network settings
 * info
 */
-
 USTRUCT(BlueprintType)
 struct FNetworkProfileSetting_BE
 {

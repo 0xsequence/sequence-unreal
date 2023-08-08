@@ -40,7 +40,10 @@ public:
 
     TArray<FAttributeMap> attributes;
 
-    //used for testing!
+    /*
+    * Used to get the json object formed by this struct
+    * used for args and testing
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
@@ -86,6 +89,9 @@ public:
         return ret;
     };
 
+    /*
+    * Used to handle Edge cases with UE's json parsing
+    */
     void setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
         const TSharedPtr<FJsonObject>* refPtr;

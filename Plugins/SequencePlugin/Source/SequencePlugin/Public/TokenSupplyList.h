@@ -19,8 +19,11 @@ public:
     UPROPERTY()
         TArray<FTokenSupply> token_supply_list;
 
-    //this UStruct only exists because of UE's lack of nested data structures
-    //so we need to account for the nesting here!
+    /*
+    * This ustruct only exists because of UE's lack of nested data structures,
+    * so we account for the nesting here, this will return a JsonObjectString accounting
+    * for the nesting caused by this struct
+    */
     FString GetJsonString()
     {
         TArray<TSharedPtr<FJsonObject>> jsonList;
@@ -33,6 +36,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to handle edge cases with unreal's json parsing
+    */
     void setup(TArray<TSharedPtr<FJsonValue>> json_in)
     {
         for (int32 i = 0; i < token_supply_list.Num(); i++)
