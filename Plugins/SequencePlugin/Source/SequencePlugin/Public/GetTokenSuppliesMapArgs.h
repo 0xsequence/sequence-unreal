@@ -53,7 +53,7 @@ public:
 
 		for (FString key : keys)
 		{
-			ret += "\"" + key + "\":" + UIndexerSupport::stringListToSimpleString(tokenMap.Find(key)->token_list);
+			ret += "\"" + key + "\":" + UIndexerSupport::stringListToParsableString(tokenMap.Find(key)->token_list);
 		}
 		ret += "},";//close off tokenMap subObject
 		ret += "\"includeMetaData\":";

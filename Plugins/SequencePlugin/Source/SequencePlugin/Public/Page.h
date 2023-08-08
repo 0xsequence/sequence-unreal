@@ -60,7 +60,7 @@ public:
                 ret += ",\"before\":\""+before+"\"";
             
             if (after.Len() > 0)
-                ret += ",\"after\":" + after + "\"";
+                ret += ",\"after\":\"" + after + "\"";
 
             if (sort.Num() > 0)
             {
@@ -99,7 +99,7 @@ public:
         FString sortString = "[";
         for (FSortBy s : sort)
         {
-            sortString.Append(s.Get());
+            sortString.Append(UIndexerSupport::simplifyString(s.Get()));
             sortString.Append(",");
         }
         if (sort.Num() > 0)
