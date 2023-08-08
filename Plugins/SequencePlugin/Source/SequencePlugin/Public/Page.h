@@ -49,12 +49,16 @@ public:
         FString ret = "";
         if (containsData())
         {
-            ret += "{";
-            ret += "\"page\":" + page;
-            ret += ",\"column\":"+ column;
-            ret += ",\"before\":" + before;
-            ret += ",\"after\":" + after;
-            ret += ",\"sort\":";
+            ret.Append("{");
+            ret.Append("\"page\":");
+            ret.AppendInt(page);
+            ret.Append(",\"column\":");
+            ret.Append(column);
+            ret.Append(",\"before\":");
+            ret.Append(before);
+            ret.Append(",\"after\":");
+            ret.Append(after);
+            ret.Append(",\"sort\":");
 
             //convert SortBy to Json!Strings!
             TArray<FString> stringList;
@@ -63,10 +67,12 @@ public:
                 stringList.Add(sItem.Get());
             }
             //Parse the string list into a JsonString
-            ret += UIndexerSupport::stringListToSimpleString(stringList);
-            ret += ",\"pageSize\":"+ pageSize;
-            ret += ",\"more\":" + more;
-            ret += "}";
+            ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
+            ret.Append(",\"pageSize\":");
+            ret.AppendInt(pageSize);
+            ret.Append(",\"more\":");
+            ret.Append(more ? "true" : "false");
+            ret.Append("}");
         }
         return ret;
     }

@@ -25,11 +25,16 @@ public:
     FString Get()
     {
         FString ret = "{";
-        ret += "\"filter\":" + filter.GetArgs();//get the args! MUST Have this!
+        ret.Append("\"filter\":");
+        ret.Append(filter.GetArgs());//get the args! MUST Have this!
         if (page.containsData())
-            ret += ",\"page\":" + page.GetArgs();
-        ret += ",\"includeMetaData\":" + includeMetaData;
-        ret += "}";
+        {
+            ret.Append(",\"page\":");
+            ret.Append(page.GetArgs());
+        }
+        ret.Append(",\"includeMetaData\":");
+        ret.Append(includeMetaData ? "true" : "false");
+        ret.Append("}");
         return ret;
     }
 

@@ -764,9 +764,9 @@ void balanceUpdatesArgsTest(UIndexer* indexer)
 void transactionHistoryArgsFullTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("transaction History Args [FULL] Parsing Test"));
+	UE_LOG(LogTemp, Display, TEXT("transaction History Args [Max] Parsing Test"));
 	//this will mirror args!
-	FString testArgs = "{\"filter\":"+ testHistoryFilter +",\"page\":"+testingPage+",\"includeMetaData\":true}";
+	FString testArgs = "{\"filter\":"+ testHistoryFilterMax +",\"page\":"+testingPage+",\"includeMetaData\":true}";
 	FGetTransactionHistoryArgs args;
 	args.filter = buildHistoryFilter();
 	args.page = buildTestPage();
@@ -794,7 +794,32 @@ void transactionHistoryArgsFullTest(UIndexer* indexer)
 
 void transactionHistoryArgsMinTest(UIndexer* indexer)
 {
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("transaction History Args [Min] Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"filter\":" + testHistoryFilterMin + ",\"includeMetaData\":true}";
+	FGetTransactionHistoryArgs args;
+	args.filter.accountAddress = testingAddress;
+	args.includeMetaData = true;
 
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
 void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)

@@ -21,7 +21,8 @@ const static FString testingBalanceData = "{\"id\":10,\"contractAddress\":\"0xc1
 const static FString testingTxnTransferData = "{\"transferType\":\"SEND\",\"contractAddress\":\"0xt1\",\"contractType\":\"ERC20\",\"from\":\"tester\",\"to\":\"testee\",\"tokenIds\":[0,1,2],\"amounts\":[12,13,14],\"logIndex\":1313,\"contractInfo\":"+testingContractInfo+",\"tokenMetaData\":{\"key1\":"+testingTokenMetaData+",\"key2\":"+testingTokenMetaData+"}}";
 const static FString testingTransactionData = "{\"txnHash\":\"0xtxnHash\",\"blockNumber\":101313,\"blockHash\":\"0xBlockhash\",\"chainId\":1616,\"metaTxnID\":\"0xMetaTxnID\",\"transfers\":["+testingTxnTransferData+"],\"timestamp\":\"today\"}";
 const static FString testTokenMap = "{\"keyOne\":[\"value1\",\"value2\"]}";
-const static FString testHistoryFilter = "{\"accountAddress\":\"" + testingAddress + "\",\"contractAddress\":\"" + testingContractAddress + "\",\"accountAddresses\":[\"" + testingAddress + "\"],\"contractAddresses\":[\"" + testingContractAddress + "\"],\"transactionHashes\":[\"0x123abc\"],\"metaTransactionIDs\":[\"0xTEST\"],\"fromBlock\":10,\"toBlock\":101}";
+const static FString testHistoryFilterMax = "{\"accountAddress\":\"" + testingAddress + "\",\"contractAddress\":\"" + testingContractAddress + "\",\"accountAddresses\":[\"" + testingAddress + "\"],\"contractAddresses\":[\"" + testingContractAddress + "\"],\"transactionHashes\":[\"0x123abc\"],\"metaTransactionIDs\":[\"0xTEST\"],\"fromBlock\":10,\"toBlock\":101}";
+const static FString testHistoryFilterMin = "{\"accountAddress\":\""+testingAddress+"\"}";
 //testing inputs
 
 //generators for testing//
