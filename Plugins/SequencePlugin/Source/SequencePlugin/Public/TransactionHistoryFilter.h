@@ -28,31 +28,51 @@ public:
     FString GetArgs()
     {
         FString ret = "{";
-        ret += "\"accountAddress\":" + accountAddress;//MUST HAVE THIS!
+        ret.Append("\"accountAddress\":");//MUST HAVE THIS
+        ret.Append(accountAddress);
 
-        //everything below is optional so if we don't have anything there it won't be parsed in!
-        if (!contractAddress.IsEmpty())
-            ret += ",\"contractAddress\":" + contractAddress;
+        if (contractAddress.Len() > 0)
+        {
+            ret.Append(",\"contractAddress\":");
+            ret.Append(contractAddress);
+        }
 
-        if (!accountAddress.IsEmpty())
-            ret += ",\"accountAddresses\":" + UIndexerSupport::stringListToSimpleString(accountAddresses);
+        if (!accountAddresses.IsEmpty())
+        {
+            ret.Append(",\"accountAddresses\":");
+            ret.Append(UIndexerSupport::stringListToSimpleString(accountAddresses));
+        }
 
         if (!contractAddresses.IsEmpty())
-            ret += ",\"contractAddresses\":" + UIndexerSupport::stringListToSimpleString(contractAddresses);
+        {
+            ret.Append(",\"contractAddresses\":" + UIndexerSupport::stringListToSimpleString(contractAddresses));
+        }
 
         if (!transactionHashes.IsEmpty())
-            ret += ",\"transactionHashes\":" + UIndexerSupport::stringListToSimpleString(transactionHashes);
+        {
+            ret.Append(",\"transactionHashes\":");
+            ret.Append(UIndexerSupport::stringListToSimpleString(transactionHashes));
+        }
 
         if (!metaTransactionIDs.IsEmpty())
-            ret += ",\"metaTransactionIDs\":" + UIndexerSupport::stringListToSimpleString(metaTransactionIDs);
+        {
+            ret.Append(",\"metaTransactionIDs\":");
+            ret.Append(UIndexerSupport::stringListToSimpleString(metaTransactionIDs));
+        }
         
         if (fromBlock != -1)
-            ret += ",\"fromBlock\":" + fromBlock;
+        {
+            ret.Append(",\"fromBlock\":");
+            ret.AppendInt(fromBlock);
+        }
 
         if (toBlock != -1)
-            ret += ",\"toBlock\":" + toBlock;
+        {
+            ret.Append(",\"toBlock\":");
+            ret.AppendInt(toBlock);
+        }
 
-        ret += "}";
+        ret.Append("}");
         return ret;
     }
 };
