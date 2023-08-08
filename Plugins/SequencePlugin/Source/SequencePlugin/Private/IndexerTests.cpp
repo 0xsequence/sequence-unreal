@@ -124,7 +124,8 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("TokenBalances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
-	args.accountAddress = testingAddress;
+	args.accountAddress = testingAddress;	
+	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
@@ -169,6 +170,8 @@ void getTokenSuppliesMapTest(UIndexer* indexer, TFunction<void(FString)> OnSucce
 
 	FGetTokenSuppliesMapArgs args;
 	TMap<FString, FTokenList> tokenMap;
+	TPair<FString,FTokenList> item;
+	tokenMap.Add(item);
 	args.includeMetaData = true;
 	args.tokenMap = tokenMap;
 	indexer->GetTokenSuppliesMap(testingChainID, args, GenericSuccess, GenericFailure);
@@ -193,6 +196,8 @@ void getBalanceUpdatesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess
 
 	FGetBalanceUpdatesArgs args;
 	args.contractAddress = testingContractAddress;
+	args.page.page = 10;
+	args.page.more = true;
 	indexer->GetBalanceUpdates(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
@@ -586,15 +591,47 @@ void getTransactionHistoryParsingTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
-void tokenBalanceArgsTest(UIndexer* indexer)
+void tokenBalanceMaxArgsTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Balance Args Parsing Test"));
-	FString testArgs = "{\"accountAddress\":\""+testingAddress+"\"}";
+	UE_LOG(LogTemp, Display, TEXT("Token Balance [MAX] Args Parsing Test"));
+	FString testArgs = "{\"accountAddress\":\""+testingAddress+"\",\"contractAddress\":\""+testingContractAddress+"\",\"includeMetaData\":true,\"page\":"+testingPage+"}";
 	
 	FGetTokenBalancesArgs args;
 	args.accountAddress = testingAddress;
+	args.contractAddress = testingContractAddress;
+	args.includeMetaData = true;
+	args.page = buildTestPage();
 	
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
+void tokenBalanceMinArgsTest(UIndexer* indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("Token Balance [MIN] Args Parsing Test"));
+	FString testArgs = "{\"accountAddress\":\"" + testingAddress + "\",\"includeMetaData\":false}";
+
+	FGetTokenBalancesArgs args;
+	args.accountAddress = testingAddress;
+
 	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetTokenBalancesArgs>(args));
 	testArgs = UIndexerSupport::simplifyString(testArgs);
 
@@ -728,10 +765,10 @@ void tokenSuppliesMapArgsTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
-void balanceUpdatesArgsTest(UIndexer* indexer)
+void balanceUpdatesMaxArgsTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("balance Updates Args Parsing Test"));
+	UE_LOG(LogTemp, Display, TEXT("balance Updates [MAX] Args Parsing Test"));
 	//this will mirror args!
 	FString testArgs = "{\"contractAddress\":"+testingContractAddress+",\"lastUpdateID\":10,\"page\":"+testingPage+"}";
 	FGetBalanceUpdatesArgs args;
@@ -759,9 +796,38 @@ void balanceUpdatesArgsTest(UIndexer* indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
+void balanceUpdatesMinArgsTest(UIndexer * indexer)
+{
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	UE_LOG(LogTemp, Display, TEXT("balance Updates [MIN] Args Parsing Test"));
+	//this will mirror args!
+	FString testArgs = "{\"contractAddress\":" + testingContractAddress + "}";
+	FGetBalanceUpdatesArgs args;
+	args.contractAddress = testingContractAddress;
+
+	FString stringArgs = UIndexerSupport::simplifyString(indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = UIndexerSupport::simplifyString(testArgs);
+
+	if (printAll)
+	{
+		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
+		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+	}
+
+	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Passed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed"));
+	}
+	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+}
+
 //set of args testing for transaction history filter as there can be many types of calls made!
 
-void transactionHistoryArgsFullTest(UIndexer* indexer)
+void transactionHistoryArgsMaxTest(UIndexer* indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("transaction History Args [Max] Parsing Test"));
@@ -848,23 +914,25 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	//buildResponse parsing tests//
 
 	//buildArgs parsing tests//
-	tokenBalanceArgsTest(indexer);
+	tokenBalanceMaxArgsTest(indexer);
+	tokenBalanceMinArgsTest(indexer);
 	tokenSuppliesArgsTest(indexer);
 	tokenSuppliesMapArgsTest(indexer);
-	balanceUpdatesArgsTest(indexer);
-	transactionHistoryArgsFullTest(indexer);
+	balanceUpdatesMaxArgsTest(indexer);
+	balanceUpdatesMinArgsTest(indexer);
+	transactionHistoryArgsMaxTest(indexer);
 	transactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
 
 	//system tests//
-	//pingTest(indexer, OnSuccess, OnFailure);
+	pingTest(indexer, OnSuccess, OnFailure);
 	//versionTest(indexer, OnSuccess, OnFailure);
 	//runTimeStatusTest(indexer, OnSuccess, OnFailure);
 	//getChainIDTest(indexer, OnSuccess, OnFailure);
 	//getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 	//getTokenBalanceTest(indexer, OnSuccess, OnFailure);
 	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
-	//getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
+	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
 	//getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
 }

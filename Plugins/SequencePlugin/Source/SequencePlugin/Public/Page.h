@@ -52,24 +52,35 @@ public:
             ret.Append("{");
             ret.Append("\"page\":");
             ret.AppendInt(page);
-            ret.Append(",\"column\":");
-            ret.Append(column);
-            ret.Append(",\"before\":");
-            ret.Append(before);
-            ret.Append(",\"after\":");
-            ret.Append(after);
-            ret.Append(",\"sort\":");
 
-            //convert SortBy to Json!Strings!
-            TArray<FString> stringList;
-            for (FSortBy sItem : sort)
+            if (column.Len() > 0)
+                ret += ",\"column\":\""+column+"\"";
+            
+            if (before.Len() > 0)
+                ret += ",\"before\":\""+before+"\"";
+            
+            if (after.Len() > 0)
+                ret += ",\"after\":" + after + "\"";
+
+            if (sort.Num() > 0)
             {
-                stringList.Add(sItem.Get());
+                ret.Append(",\"sort\":");
+                //convert SortBy to Json!Strings!
+                TArray<FString> stringList;
+                for (FSortBy sItem : sort)
+                {
+                    stringList.Add(sItem.Get());
+                }
+                //Parse the string list into a JsonString
+                ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
             }
-            //Parse the string list into a JsonString
-            ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
-            ret.Append(",\"pageSize\":");
-            ret.AppendInt(pageSize);
+
+            if (pageSize != -1)
+            {
+                ret.Append(",\"pageSize\":");
+                ret.AppendInt(pageSize);
+            }
+
             ret.Append(",\"more\":");
             ret.Append(more ? "true" : "false");
             ret.Append("}");

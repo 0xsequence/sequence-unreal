@@ -28,13 +28,11 @@ public:
     FString GetArgs()
     {
         FString ret = "{";
-        ret.Append("\"accountAddress\":");//MUST HAVE THIS
-        ret.Append(accountAddress);
+        ret += "\"accountAddress\":\"" + accountAddress +"\"";
 
         if (contractAddress.Len() > 0)
         {
-            ret.Append(",\"contractAddress\":");
-            ret.Append(contractAddress);
+            ret += ",\"contractAddress\":\"" + contractAddress + "\"";
         }
 
         if (!accountAddresses.IsEmpty())

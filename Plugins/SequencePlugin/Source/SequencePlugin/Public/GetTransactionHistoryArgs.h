@@ -32,9 +32,12 @@ public:
             ret.Append(",\"page\":");
             ret.Append(page.GetArgs());
         }
+
         ret.Append(",\"includeMetaData\":");
         ret.Append(includeMetaData ? "true" : "false");
+
         ret.Append("}");
+
         return ret;
     }
 
