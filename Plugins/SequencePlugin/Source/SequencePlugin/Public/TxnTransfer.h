@@ -33,7 +33,7 @@ public:
     UPROPERTY()
         TMap<FString, FTokenMetaData> tokenMetaData;
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
 
@@ -45,13 +45,13 @@ public:
         ret.Get()->SetStringField("tokenIds",UIndexerSupport::int64ListToSimpleString(tokenIds));
         ret.Get()->SetStringField("amounts", UIndexerSupport::int64ListToSimpleString(amounts));
         ret.Get()->SetNumberField("logIndex", logIndex);
-        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
+        ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
         TSharedPtr<FJsonObject> nRet = MakeShareable<FJsonObject>(new FJsonObject);
         TArray<FString> keys;
         tokenMetaData.GetKeys(keys);
         for (FString key : keys)
         {
-            TSharedPtr<FJsonObject> value = tokenMetaData.Find(key)->Get();
+            TSharedPtr<FJsonObject> value = tokenMetaData.Find(key)->GetJson();
             nRet.Get()->SetObjectField(key,value);
         }
 

@@ -21,12 +21,12 @@ public:
 
     //this UStruct only exists because of UE's lack of nested data structures
     //so we need to account for the nesting here!
-    FString Get()
+    FString GetJsonString()
     {
         TArray<TSharedPtr<FJsonObject>> jsonList;
         for (FTokenSupply tItem : token_supply_list)
         {
-            jsonList.Add(tItem.Get());
+            jsonList.Add(tItem.GetJson());
         }
         FString ret = UIndexerSupport::jsonObjListToSimpleString(jsonList);
 

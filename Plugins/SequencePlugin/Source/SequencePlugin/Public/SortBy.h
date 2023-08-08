@@ -14,7 +14,7 @@ public:
     UPROPERTY()
         TEnumAsByte<ESortOrder> order;
 
-    FString Get()
+    FString GetJsonString()
     {
         FString ret = "{";
         ret.Append("\"column\":\"");

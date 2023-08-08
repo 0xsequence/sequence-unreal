@@ -26,7 +26,7 @@ public:
     UPROPERTY()
         FContractInfoExtensions extensions;
 
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("chainId", chainId);
@@ -36,7 +36,7 @@ public:
         ret.Get()->SetStringField("symbol", symbol);
         ret.Get()->SetNumberField("decimals", decimals);
         ret.Get()->SetStringField("logoURI", logoURI);
-        ret.Get()->SetObjectField("extensions", extensions.Get());
+        ret.Get()->SetObjectField("extensions", extensions.GetJson());
         return ret;
     }
 };

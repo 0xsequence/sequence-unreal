@@ -12,5 +12,5 @@ public:
         FString accountAddress;
 
     bool customGetter = false;
-    FString Get() { return ""; }
+    FString GetArgs() { return ""; }
 };

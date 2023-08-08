@@ -19,15 +19,15 @@ public:
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
     //for testing
-    TSharedPtr<FJsonObject> Get()
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
 
-        ret.Get()->SetObjectField("page", page.Get());
+        ret.Get()->SetObjectField("page", page.GetJson());
         TArray<TSharedPtr<FJsonObject>> balancesList;
         for (FTokenBalance tBalance : balances)
         {
-            balancesList.Add(tBalance.Get());
+            balancesList.Add(tBalance.GetJson());
         }
         ret.Get()->SetStringField("balances",UIndexerSupport::jsonObjListToSimpleString(balancesList));
         return ret;
