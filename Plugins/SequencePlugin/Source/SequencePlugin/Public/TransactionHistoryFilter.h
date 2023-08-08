@@ -25,6 +25,10 @@ public:
     UPROPERTY()
         int32 toBlock = -1;
 
+    /// <summary>
+    /// Used to get args formed by this struct in JsonObjectString form
+    /// </summary>
+    /// <returns>JsonObjectString</returns>
     FString GetArgs()
     {
         FString ret = "{";

@@ -17,7 +17,10 @@ struct FAttributeMap
 public:
         TMap<FString, FString> attribute_map;
         
-        //used for testing
+        /*
+        * Gets the json object string formed by this struct
+        * Note: because this struct only exists due to UE's lack of nested data structure
+        */
         FString GetJsonString()
         {
             FString ret = "{";

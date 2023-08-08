@@ -24,6 +24,10 @@ public:
     UPROPERTY()
         FString timestamp = "";
 
+    /*
+    * Used to get the json Object formed by this struct
+    * used for args & testing
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
@@ -46,6 +50,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to handle edge case parsing with Unreal's json parser
+    */
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* trnsfrs;

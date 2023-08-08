@@ -14,6 +14,9 @@ public:
     UPROPERTY()
         TEnumAsByte<ESortOrder> order = ESortOrder::ASC;
 
+    /*
+    * Used to get the jsonObjectString of this struct for args and testing
+    */
     FString GetJsonString()
     {
         FString ret = "{";
@@ -25,6 +28,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to handle UE's edge cases with json Parsing
+    */
     void setup(FJsonObject json_in)
     {
         if (!json_in.TryGetField("column"))

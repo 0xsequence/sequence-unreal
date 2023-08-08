@@ -19,6 +19,11 @@ public:
         FPage page;
 
     bool customGetter = true;
+
+    /*
+    * Used to get the JsonObjectString formed by this struct
+    * used for args and testing
+    */
     FString GetArgs()
     {
         FString ret = "{";

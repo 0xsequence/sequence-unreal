@@ -17,5 +17,5 @@ public:
         FPage page;
 
     bool customGetter = false;
-    FString GetArgs() { return ""; }
+    FString GetArgs() { return ""; }//no custom getter needed here!
 };

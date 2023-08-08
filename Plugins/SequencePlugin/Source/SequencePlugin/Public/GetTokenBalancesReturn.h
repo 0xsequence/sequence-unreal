@@ -18,7 +18,9 @@ public:
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
-    //for testing
+    /*
+    * Used to return a json Object for arg's purposes / testing
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
@@ -33,6 +35,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to Handle Edge Cases with Unreal's Json parsing
+    */
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;

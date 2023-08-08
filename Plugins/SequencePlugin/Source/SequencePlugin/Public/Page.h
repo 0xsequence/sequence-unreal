@@ -88,6 +88,10 @@ public:
         return ret;
     }
 
+    /*
+    * Gets the json Object formed by this struct
+    * used for args and testing
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
@@ -113,6 +117,6 @@ public:
         return ret;
     }
 
-    void setup(FJsonObject json_in)
-    {}
+  
+    void setup(FJsonObject json_in){}//dummy method but used for handling edge cases with UE's json parser
 };
