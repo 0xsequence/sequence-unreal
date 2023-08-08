@@ -19,7 +19,7 @@ void pingTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<v
 		}
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("Ping Failure", Error);
 	};
@@ -36,7 +36,7 @@ void versionTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunctio
 		UE_LOG(LogTemp, Display, TEXT("Parsed Version Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("Version Failure", Error);
 	};
@@ -53,7 +53,7 @@ void runTimeStatusTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TF
 		UE_LOG(LogTemp, Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("RunTimeStatus Failure", Error);
 	};
@@ -70,7 +70,7 @@ void getChainIDTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunc
 		UE_LOG(LogTemp, Display, TEXT("ChainID: %s"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("ChainID Failure", Error);
 	};
@@ -87,7 +87,7 @@ void getEtherBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		UE_LOG(LogTemp, Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("etherBalance Failure", Error);
 	};
@@ -104,7 +104,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("TokenBalances Failure", Error);
 	};
@@ -122,7 +122,7 @@ void getTokenSuppliesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess,
 		UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("TokenSupplies Failure", Error);
 	};
@@ -141,7 +141,7 @@ void getTokenSuppliesMapTest(UIndexer* indexer, TFunction<void(FString)> OnSucce
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("TokenSuppliesMap Failure", Error);
 	};
@@ -162,7 +162,7 @@ void getBalanceUpdatesTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess
 		UE_LOG(LogTemp, Display, TEXT("Parsed balanceUpdatesReturn Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("balanceUpdates Failure", Error);
 	};
@@ -181,7 +181,7 @@ void getTransactionHistoryTest(UIndexer* indexer, TFunction<void(FString)> OnSuc
 		UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 	};
 
-	const TFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
 	{
 		OnFailure("transactionHistory Failure", Error);
 	};

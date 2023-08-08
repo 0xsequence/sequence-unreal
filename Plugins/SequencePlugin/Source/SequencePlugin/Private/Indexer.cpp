@@ -51,7 +51,7 @@ FString UIndexer::HostName(int64 chainID)
 /*
 	Here we construct a post request and parse out a response if valid.
 */
-void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	
 	//Now we create the post request
@@ -130,14 +130,14 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 	return ret_struct;
 }
 
-void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "Ping", "", [=](FString Content) {
 		OnSuccess(BuildResponse<FPingReturn>(Content).status);
 	}, OnFailure);
 }
 
-void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "Version", "", [=](FString Content)
 	{
@@ -145,7 +145,7 @@ void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, TFai
 	}, OnFailure);
 }
 
-void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "RuntimeStatus", "", [=](FString Content)
 	{
@@ -153,7 +153,7 @@ void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnS
 	}, OnFailure);
 }
 
-void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetChainID", "", [=](FString Content)
 	{
@@ -161,7 +161,7 @@ void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, TFai
 	}, OnFailure);
 }
 
-void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString json_arg = "{\"accountAddress\":\"";
 	json_arg.Append(accountAddr);
@@ -175,7 +175,7 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallb
 }
 
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
-void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args), [=](FString Content)
 	{
@@ -184,7 +184,7 @@ void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSucc
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args), [=](FString Content)
 	{
@@ -192,7 +192,7 @@ void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSucc
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args), [=](FString Content)
 	{
@@ -200,7 +200,7 @@ void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args,
 	}, OnFailure);
 }
 
-void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args), [=](FString Content)
 	{
@@ -208,7 +208,7 @@ void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSu
 	}, OnFailure);
 }
 
-void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, TFailureCallback OnFailure)
+void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args), [=](FString Content)
 	{

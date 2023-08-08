@@ -7,5 +7,5 @@ class FWallet
 	FPrivateKey PrivateKey;
 public:
 	FWallet(FPrivateKey PrivateKey);
-	FNonUniformData GetSignedTransaction(FEthTransaction Transaction, int ChainId) const;
+	FUnsizedData GetSignedTransaction(FEthTransaction Transaction, int ChainId) const;
 };

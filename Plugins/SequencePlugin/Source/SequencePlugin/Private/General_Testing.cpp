@@ -23,10 +23,6 @@ void AGeneral_Testing::BeginPlay()
 
 void AGeneral_Testing::test_provider()
 {
-	//stub in connect tests here!
-
-	
-
 	TFunction<void (FString)> OnSuccess = [this](FString State)
 	{
 		callback_passed(State);
@@ -43,7 +39,6 @@ void AGeneral_Testing::test_provider()
 
 void AGeneral_Testing::test_indexer()
 {
-	//stub in test functions here!
 	TFunction<void(FString)> OnSuccess = [this](FString State)
 	{
 		callback_passed(State);

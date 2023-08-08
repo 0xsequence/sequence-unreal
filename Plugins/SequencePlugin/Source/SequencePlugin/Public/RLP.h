@@ -22,13 +22,13 @@ struct RLPItem
 };
 
 RLPItem Itemize(FString String);
-RLPItem Itemize(FBinaryData &Data);
-RLPItem Itemize(FNonUniformData Data);
+RLPItem Itemize(const FBinaryData &Data);
+RLPItem Itemize(FUnsizedData Data);
 RLPItem Itemize(Hash Hash, ByteLength Length);
 RLPItem Itemize(RLPItem* Items, uint32 Length);
 
 class RLP
 {
 public:
-	static FNonUniformData Encode(RLPItem Item);
+	static FUnsizedData Encode(RLPItem Item);
 };
