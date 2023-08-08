@@ -14,7 +14,7 @@ public:
     UPROPERTY()
         FPage page;
     UPROPERTY()
-        TEnumAsByte<EContractType> contractType;
+        TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
     UPROPERTY()
         TArray<FTokenSupply> tokenIDs;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!

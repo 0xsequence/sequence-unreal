@@ -10,9 +10,9 @@ struct FSortBy
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString column;
+        FString column = "";
     UPROPERTY()
-        TEnumAsByte<ESortOrder> order;
+        TEnumAsByte<ESortOrder> order = ESortOrder::ASC;
 
     FString GetJsonString()
     {

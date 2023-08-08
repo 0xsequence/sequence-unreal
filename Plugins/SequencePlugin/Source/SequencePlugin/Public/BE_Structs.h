@@ -17,11 +17,11 @@ struct FNetworkProfileSetting_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Indexer_URL;
+        FString Indexer_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Relayer_URL;
+        FString Relayer_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Block_Explorer_URL;
+        FString Block_Explorer_URL = "";
 };
 
 /*
@@ -34,15 +34,15 @@ struct FNetwork_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString network_name;
+        FString network_name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool is_default;//default selected network need at least 1
+        bool is_default = false;//default selected network need at least 1
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNetworkProfileSetting_BE default_network_settings;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNetworkProfileSetting_BE current_network_settings;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* network_icon;
+        UTexture2D* network_icon = nullptr;
 };
 
 /*
@@ -56,11 +56,11 @@ struct FSystemSession_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString System_Session;
+        FString System_Session = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString System_Session_Key;
+        FString System_Session_Key = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* System_Session_Icon;
+        UTexture2D* System_Session_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNetwork_BE Network;
 };
@@ -76,15 +76,15 @@ struct FActiveSession_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Current_Session;
+        FString Current_Session = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Session_Key;
+        FString Session_Key = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Last_Seen_Date_Time;
+        FString Last_Seen_Date_Time = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Platform_Data;
+        FString Platform_Data = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Session_Icon;
+        UTexture2D* Session_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNetwork_BE Network;
 };
@@ -99,11 +99,11 @@ struct FContact_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Nickname;
+        FString Nickname = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Public_Address;
+        FString Public_Address = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Profile_Icon;
+        UTexture2D* Profile_Icon = nullptr;
 };
 
 /*
@@ -118,13 +118,13 @@ struct FSelectableCurrency_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Long_Name;
+        FString Long_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Short_Name;
+        FString Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Symbol;
+        FString Symbol = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Mult;//NOP value for right now until I know how currency data is structured
+        float Mult = 0.0;//NOP value for right now until I know how currency data is structured
 };
 
 /*
@@ -144,23 +144,23 @@ struct FHistoryElement_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Item_Name;
+        FString Item_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Item_Short_Name;
+        FString Item_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Token_Collection_Name;
+        FString Token_Collection_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Short_Name;
+        FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Collection_Icon;
+        UTexture2D* Collection_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Item_Amount;
+        float Item_Amount = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Value_Per_Item;
+        float Value_Per_Item = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Item_Icon;
+        UTexture2D* Item_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<EHistoryItemType> History_Item_Type;
+        TEnumAsByte<EHistoryItemType> History_Item_Type = EHistoryItemType::Token_HIT;
 };
 
 /*
@@ -173,11 +173,11 @@ struct FMonthDayYear_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 Month;
+        int32 Month = -1;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 Day;
+        int32 Day = -1;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 Year;
+        int32 Year = -1;
 };
 
 /*
@@ -190,17 +190,17 @@ struct FTokenHistoryCollection_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Name;
+        FString Collection_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Short_Name;
+        FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FHistoryElement_BE> Token_Data;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Collection_Icon;
+        UTexture2D* Collection_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool From_To;
+        bool From_To = false;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<ETXNType> TXN_Type;//this enum consists of send,receive,swap the base txnTransfer type only has send and receive!
+        TEnumAsByte<ETXNType> TXN_Type = ETXNType::TXN_Receive;//this enum consists of send,receive,swap the base txnTransfer type only has send and receive!
 };
 
 /*
@@ -212,23 +212,23 @@ struct FCoin_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Coin_Symbol;
+        UTexture2D* Coin_Symbol = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Coin_Long_Name;
+        FString Coin_Long_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Coin_Short_Name;
+        FString Coin_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Coin_Amount;
+        float Coin_Amount = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Coin_Value;//per 1 coin!
+        float Coin_Value = 0.0;//per 1 coin!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Amount;//parser in frontend ignore in backend
+        FString Formatted_Amount = "";//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Total_Value;//perser in frontend ignore in backend
+        FString Formatted_Total_Value = "";//perser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Single_Value;//parser in frontend ignore in backend
+        FString Formatted_Single_Value = "";//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<EContractType> Coin_Standard;//ERC 1155, etc
+        TEnumAsByte<EContractType> Coin_Standard = EContractType::ERC1155;//ERC 1155, etc
 };
 
 /*
@@ -240,17 +240,17 @@ struct FNFTDetails_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString External_URL;
+        FString External_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString token_id;//this doesn't need to be set here and will be set up front for *THIS* struct
+        FString token_id = "";//this doesn't need to be set here and will be set up front for *THIS* struct
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Contract_Address;//this doesn't need to be set here and will be set up front for *THIS* struct
+        FString Contract_Address = "";//this doesn't need to be set here and will be set up front for *THIS* struct
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<EContractType> Token_Standard;
+        TEnumAsByte<EContractType> Token_Standard = EContractType::ERC1155;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Network;
+        FString Network = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Network_Icon;
+        UTexture2D* Network_Icon = nullptr;
 };
 
 /*
@@ -262,27 +262,27 @@ struct FNFT_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* NFT_Icon;
+        UTexture2D* NFT_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString NFT_Name;
+        FString NFT_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString NFT_Short_Name;
+        FString NFT_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Long_Name;
+        FString Collection_Long_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Short_Name;
+        FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Collection_Icon;
+        UTexture2D* Collection_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 Amount;
+        int32 Amount = -1;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Value;
+        float Value = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Total_Value;//Parser in frontend ignore in backend
+        FString Formatted_Total_Value = "";//Parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Formatted_Single_Value;//Parser in frontend ignore in backend
+        FString Formatted_Single_Value = "";//Parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Description;
+        FString Description = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TMap<FString, FString> Properties;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -296,9 +296,9 @@ struct FNFT_UData_BE//this is the unique data of an nft!
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString token_id;
+        FString token_id = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString contract_address;
+        FString contract_address = "";
 };
 
 
@@ -313,21 +313,21 @@ struct FNFT_Master_BE
 public:
     //Duplicate Data that all NFT's of this type will have!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* NFT_Icon;
+        UTexture2D* NFT_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString NFT_Name;
+        FString NFT_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString NFT_Short_Name;
+        FString NFT_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Long_Name;
+        FString Collection_Long_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Collection_Short_Name;
+        FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* Collection_Icon;
+        UTexture2D* Collection_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Value;
+        float Value = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Description;
+        FString Description = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TMap<FString, FString> Properties;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -347,7 +347,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FCoin_BE coin;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float amount;
+        float amount = 0.0;
 };
 
 /*
@@ -361,7 +361,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FNFT_BE nft;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 amount;//can't have half a card so int32 maybe 64?
+        int32 amount = -1;//can't have half a card so int32 maybe 64?
 };
 
 /*
@@ -375,15 +375,15 @@ struct FTransactionHistoryItem_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString network_name;
+        FString network_name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* network_icon;
+        UTexture2D* network_icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString other_public_address;//the other person involved in the transaction
+        FString other_public_address = "";//the other person involved in the transaction
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* other_icon;//the other persons icon
+        UTexture2D* other_icon = nullptr;//the other persons icon
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<ETXNType> transaction_type;
+        TEnumAsByte<ETXNType> transaction_type = ETXNType::TXN_Receive;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FMonthDayYear_BE transaction_date;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -411,23 +411,23 @@ struct FUserData_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString username;
+        FString username = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email;
+        FString email = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 account_id;
+        int32 account_id = -1;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString public_address;
+        FString public_address = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* profile_image;
+        UTexture2D* profile_image = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email_service;
+        FString email_service = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FContact_BE> contacts;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool hide_unlisted_tokens;
+        bool hide_unlisted_tokens = false;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool hide_unlisted_collectibles;
+        bool hide_unlisted_collectibles = false;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FNFT_Master_BE> nfts;//we send the NFT_Master_BE to initialize NFT data upfront!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -467,9 +467,9 @@ struct FStoredState_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString public_address;
+        FString public_address = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email;//not sure if we actually need this
+        FString email = "";//not sure if we actually need this
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FActiveSession_BE> active_Sessions;//we may only need the one session?
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -490,9 +490,9 @@ struct FPendingTxn_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_hash_id;//we use this to uniquely identify this transaction!
+        FString txn_hash_id = "";//we use this to uniquely identify this transaction!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float value;//true state value of the txn for a send this should be negative!
+        float value = false;//true state value of the txn for a send this should be negative!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FNFT_UData_BE> nft_u_data_list;
 };
@@ -507,9 +507,9 @@ struct FTxnCallback_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_hash_id;//the unique txn_id_hash of a pending txn!
+        FString txn_hash_id = "";//the unique txn_id_hash of a pending txn!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool good_txn;//whether our txn went through or not!
+        bool good_txn = false;//whether our txn went through or not!
 };
 
 /*
@@ -523,15 +523,15 @@ struct FNFT_Send_Txn_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_hash_id;
+        FString txn_hash_id = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString contact_public_addr;
+        FString contact_public_addr = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 amount;//nft's deal in postive int's S.T. {Z^+}/{0}
+        int32 amount = -1;//nft's deal in postive int's S.T. {Z^+}/{0}
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
+        TEnumAsByte<EContractType> item_type = EContractType::ERC1155;//the type of item we are transacting on
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FNFT_UData_BE> nft_u_data;//for nft based txn's! we need this too!
 };
@@ -542,11 +542,11 @@ struct FCoin_Send_Txn_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString txn_hash_id;
+        FString txn_hash_id = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float amount;//Coins deal in Positve non Zero Real Numbers {R^+}/{0.0}
+        float amount = false;//Coins deal in Positve non Zero Real Numbers {R^+}/{0.0}
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TEnumAsByte<EContractType> item_type;//the type of item we are transacting on
+        TEnumAsByte<EContractType> item_type = EContractType::ERC1155;//the type of item we are transacting on
 };

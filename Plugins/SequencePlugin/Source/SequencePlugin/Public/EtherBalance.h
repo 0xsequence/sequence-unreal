@@ -9,7 +9,7 @@ struct FEtherBalance
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
     UPROPERTY()
-        int64 balanceWei;
+        int64 balanceWei = -1;
 };

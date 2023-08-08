@@ -9,9 +9,9 @@ struct FRuntimeChecks
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        bool running;
+        bool running = false;
     UPROPERTY()
-        FString syncMode;
+        FString syncMode = "";
     UPROPERTY()
-        int64 lastBlockNum;
+        int64 lastBlockNum = -1;
 };

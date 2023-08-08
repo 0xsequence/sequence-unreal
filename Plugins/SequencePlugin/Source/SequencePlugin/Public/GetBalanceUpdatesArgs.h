@@ -10,7 +10,7 @@ struct FGetBalanceUpdatesArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
         int32 lastUpdateID = -1;
     UPROPERTY()

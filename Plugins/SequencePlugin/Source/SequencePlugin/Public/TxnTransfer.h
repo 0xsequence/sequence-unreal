@@ -13,21 +13,21 @@ struct FTxnTransfer
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        TEnumAsByte<ETxnTransferType> transferType;
+        TEnumAsByte<ETxnTransferType> transferType = ETxnTransferType::RECEIVE;
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        TEnumAsByte<EContractType> contractType;
+        TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
     UPROPERTY()
-        FString from;
+        FString from = "";
     UPROPERTY()
-        FString to;
+        FString to = "";
     UPROPERTY()
         TArray<int64> tokenIds;
     UPROPERTY()
         TArray<int64> amounts;
     UPROPERTY()
-        int32 logIndex;
+        int32 logIndex = -1;
     UPROPERTY()
         FContractInfo contractInfo;
     UPROPERTY()

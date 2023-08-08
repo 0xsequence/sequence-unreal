@@ -14,7 +14,7 @@ public:
     UPROPERTY()
         TMap<FString, FTokenList> tokenMap;
     UPROPERTY()
-        bool includeMetaData;
+        bool includeMetaData = false;
 
 	bool customGetter = true;
 

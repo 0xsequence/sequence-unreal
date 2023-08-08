@@ -11,11 +11,11 @@ struct FTokenSupply
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 tokenID;
+        int64 tokenID = -1;
     UPROPERTY()
-        FString supply;
+        FString supply = "";
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
         FContractInfo contractInfo;
     UPROPERTY()

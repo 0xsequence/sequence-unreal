@@ -9,7 +9,7 @@ struct FIndexState
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
-        int32 lastBlockNum;
+        int32 lastBlockNum = -1;
 };
