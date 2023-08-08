@@ -12,9 +12,28 @@ public:
     UPROPERTY()
         FString contractAddress;
     UPROPERTY()
-        int32 lastUpdateID;
+        int32 lastUpdateID = -1;
     UPROPERTY()
         FPage page;
-    bool customGetter = false;
-    FString Get() { return""; };
+    bool customGetter = true;
+    FString Get()
+    {
+        FString ret = "{";
+
+        ret += "\"contractAddress\":\"" + contractAddress + "\"";
+
+        if (lastUpdateID != -1)
+        {
+            ret += ",\"lastUpdateID\":";
+            ret.AppendInt(lastUpdateID);
+        }
+
+        if (page.containsData())
+        {
+            ret += ",\"page\":" + page.GetArgs();
+        }
+
+        ret += "}";
+        return ret; 
+    };
 };

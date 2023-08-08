@@ -20,4 +20,17 @@ public:
         FString originAddress;
     UPROPERTY()
         bool blacklist;
+
+    //for testing
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+        ret.Get()->SetStringField("link", link);
+        ret.Get()->SetStringField("description", description);
+        ret.Get()->SetStringField("ogImage", ogImage);
+        ret.Get()->SetNumberField("originChainId", originChainId);
+        ret.Get()->SetStringField("originAddress", originAddress);
+        ret.Get()->SetBoolField("blacklist", blacklist);
+        return ret;
+    };
 };

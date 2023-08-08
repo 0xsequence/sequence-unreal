@@ -21,6 +21,17 @@ public:
     UPROPERTY()
         FTokenMetaData tokenMetaData;
 
+    TSharedPtr<FJsonObject> Get()
+    {
+        TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
+        ret.Get()->SetNumberField("tokenID",tokenID);
+        ret.Get()->SetStringField("supply", supply);
+        ret.Get()->SetNumberField("chainId", chainId);
+        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
+        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.Get());
+        return ret;
+    }
+
     void setup(FJsonObject json_in)
     {
         const TSharedPtr<FJsonObject>* itemObj;
