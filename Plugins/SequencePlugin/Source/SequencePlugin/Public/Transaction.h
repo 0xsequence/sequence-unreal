@@ -10,19 +10,19 @@ struct FTransaction
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString txnHash;
+        FString txnHash = "";
     UPROPERTY()
-        int64 blockNumber;
+        int64 blockNumber = -1;
     UPROPERTY()
-        FString blockHash;
+        FString blockHash = "";
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
-        FString metaTxnID;
+        FString metaTxnID = "";
     UPROPERTY()
         TArray<FTxnTransfer> transfers;
     UPROPERTY()
-        FString timestamp;
+        FString timestamp = "";
 
     TSharedPtr<FJsonObject> GetJson()
     {

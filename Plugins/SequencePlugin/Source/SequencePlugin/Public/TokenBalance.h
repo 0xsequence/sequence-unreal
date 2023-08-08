@@ -12,25 +12,25 @@ struct FTokenBalance
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int32 id;
+        int32 id = -1;
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        TEnumAsByte<EContractType> contractType;
+        TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
     UPROPERTY()
-        int64 tokenID;
+        int64 tokenID = -1;
     UPROPERTY()
-        int64 balance;
+        int64 balance = -1;
     UPROPERTY()
-        FString blockHash;
+        FString blockHash = "";
     UPROPERTY()
-        int64 blockNumber;
+        int64 blockNumber = -1;
     UPROPERTY()
-        int64 updateID;
+        int64 updateID = -1;
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
         FContractInfo contractInfo;
     UPROPERTY()

@@ -10,19 +10,19 @@ struct FContractInfo
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
-        FString address;
+        FString address = "";
     UPROPERTY()
-        FString name;
+        FString name = "";
     UPROPERTY()
-        FString type;
+        FString type = "";
     UPROPERTY()
-        FString symbol;
+        FString symbol = "";
     UPROPERTY()
-        int32 decimals;
+        int32 decimals = -1;
     UPROPERTY()
-        FString logoURI;
+        FString logoURI = "";
     UPROPERTY()
         FContractInfoExtensions extensions;
 

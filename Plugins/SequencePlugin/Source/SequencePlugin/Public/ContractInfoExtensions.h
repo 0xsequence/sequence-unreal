@@ -9,17 +9,17 @@ struct FContractInfoExtensions
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString link;
+        FString link = "";
     UPROPERTY()
-        FString description;
+        FString description = "";
     UPROPERTY()
-        FString ogImage;
+        FString ogImage = "";
     UPROPERTY()
-        int32 originChainId;//might be int64?
+        int32 originChainId = -1;//might be int64?
     UPROPERTY()
-        FString originAddress;
+        FString originAddress = "";
     UPROPERTY()
-        bool blacklist;
+        bool blacklist = false;
 
     //for testing
     TSharedPtr<FJsonObject> GetJson()

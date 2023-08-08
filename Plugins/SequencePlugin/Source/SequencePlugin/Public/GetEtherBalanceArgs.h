@@ -9,7 +9,7 @@ struct FGetEtherBalanceArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
 
     bool customGetter = false;
     FString GetArgs() { return ""; }

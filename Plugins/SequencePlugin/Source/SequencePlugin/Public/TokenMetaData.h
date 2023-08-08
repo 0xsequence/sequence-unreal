@@ -12,29 +12,29 @@ struct FTokenMetaData
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 tokenId;
+        int64 tokenId = -1;
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        FString name;
+        FString name = "";
     UPROPERTY()
-        FString description;
+        FString description = "";
     UPROPERTY()
-        FString image;
+        FString image = "";
     UPROPERTY()
-        float decimals;
+        float decimals = 0.0;
     UPROPERTY()
-        FString video;
+        FString video = "";
     UPROPERTY()
-        FString audio;
+        FString audio = "";
     UPROPERTY()
-        FString image_data;
+        FString image_data = "";
     UPROPERTY()
-        FString external_url;
+        FString external_url = "";
     UPROPERTY()
-        FString background_color;
+        FString background_color = "";
     UPROPERTY()
-        FString animation_url;
+        FString animation_url = "";
 
     TMap<FString, FString> properties;
 

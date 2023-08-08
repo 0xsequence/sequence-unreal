@@ -10,7 +10,7 @@ struct FGetTokenBalancesArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
     UPROPERTY()
         FString contractAddress = "";
     UPROPERTY()

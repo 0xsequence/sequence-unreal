@@ -10,9 +10,9 @@ struct FGetTokenSuppliesArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        bool includeMetaData;
+        bool includeMetaData = false;
     UPROPERTY()
         FPage page;
 
