@@ -16,6 +16,9 @@ public:
     UPROPERTY()
         FPage page;
     bool customGetter = true;
+    /*
+    * Gets the jsonObjectString formed by this struct
+    */
     FString GetArgs()
     {
         FString ret = "{";

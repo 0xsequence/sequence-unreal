@@ -44,7 +44,10 @@ public:
 		}
     };
 
-	//this function name may need to be renamed
+	/*
+	* Used to get the Json Object String formed by this struct
+	* used for args and testing
+	*/
 	FString GetArgs()
 	{
 		FString ret = "{\"tokenMap\":{";

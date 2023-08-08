@@ -21,7 +21,9 @@ public:
     UPROPERTY()
         bool blacklist = false;
 
-    //for testing
+    /*
+    * Gets the json object formed by this struct
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);

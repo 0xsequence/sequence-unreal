@@ -36,6 +36,10 @@ public:
     UPROPERTY()
         FTokenMetaData tokenMetaData;
 
+    /*
+    * Used to get the json object formed by this struct
+    * used for testing and args
+    */
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
@@ -54,6 +58,9 @@ public:
         return ret;
     };
 
+    /*
+    * Used for handling edge cases with unreal's parsing
+    */
     void setup(FJsonObject json_in)
     {
         const TSharedPtr<FJsonObject> *item;
