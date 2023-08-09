@@ -8,6 +8,7 @@
 #include "ObjectHandler.h"
 #include "Backend.h"
 #include "BE_Structs.h"
+#include "SequenceData.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
@@ -26,6 +27,7 @@ private:
 
 	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
 	UIndexer* indexer;//indexer ref!
+	USequenceData* sequence;//sequence data ref for sequence specific data
 	
 	//for right now we use these variables to bootstrap signin
 	bool ready = false;

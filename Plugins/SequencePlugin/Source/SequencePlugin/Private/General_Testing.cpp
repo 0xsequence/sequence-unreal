@@ -17,8 +17,6 @@ AGeneral_Testing::AGeneral_Testing()
 void AGeneral_Testing::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	
 }
 
 void AGeneral_Testing::test_provider()
@@ -75,6 +73,21 @@ void AGeneral_Testing::testMisc()
 			UE_LOG(LogTemp, Display, TEXT("Key: [%s] Value: [%s]"),*key, *value);
 		}
 	}
+}
+
+void AGeneral_Testing::testSequence()
+{
+	TFunction<void(FString)> OnSuccess = [this](FString State)
+	{
+		callback_passed(State);
+	};
+
+	TFunction<void(FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
+	{
+		Callback_Failed(data, Err);
+	};
+
+	TestSequenceData(OnSuccess, OnFailure);
 }
 
 // Called every frame

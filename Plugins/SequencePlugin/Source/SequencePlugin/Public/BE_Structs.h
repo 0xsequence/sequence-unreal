@@ -202,6 +202,47 @@ public:
         TEnumAsByte<ETXNType> TXN_Type = ETXNType::TXN_Receive;//this enum consists of send,receive,swap the base txnTransfer type only has send and receive!
 };
 
+USTRUCT(BlueprintType)
+struct FID_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString contractAddress = "";//used to uniquely identify this item TYPE
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        int64 chainID = -1;//used for getting updated price data!
+};
+
+/*
+* Used for updating the front with up to date pricing data
+*/
+USTRUCT(BlueprintType)
+struct FPrice_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        float value = 0.0;//new value
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString currency = "";//not sure what this is for?
+};
+
+/*
+* Used for updating the front with up to date pricing data
+* This is also meant to mirror what we receive from the sequence side
+* hence the differing names!
+*/
+USTRUCT(BlueprintType)
+struct FItemPrice_BE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FID_BE Token;//unique item identifier pairs to itemID but sequence calls it Token
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FPrice_BE price;
+};
+
 /*
 * This is how coin data is stored in system
 */
@@ -228,6 +269,8 @@ public:
         FString Formatted_Single_Value = "";//parser in frontend ignore in backend
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> Coin_Standard = EContractType::ERC1155;//ERC 1155, etc
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FID_BE itemID;//used to uniquely identify this item TYPE
 };
 
 /*
@@ -241,9 +284,11 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString External_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString token_id = "";//this doesn't need to be set here and will be set up front for *THIS* struct
+        FString token_id = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Contract_Address = "";//this doesn't need to be set here and will be set up front for *THIS* struct
+        FString Contract_Address = "";//used to uniquely identify this item TYPE
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FID_BE itemID;//used to uniquely identify this item TYPE
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> Token_Standard = EContractType::ERC1155;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
