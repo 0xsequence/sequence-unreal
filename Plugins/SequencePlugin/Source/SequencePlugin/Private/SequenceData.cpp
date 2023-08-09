@@ -27,7 +27,8 @@ void USequenceData::HTTPPost(FString endpoint, FString args, TSuccessCallback<FS
 		{
 			if (bWasSuccessful)
 			{
-				auto Content = Request->GetResponse()->GetContentAsString();
+				FString Content = Request->GetResponse()->GetContentAsString();
+				UE_LOG(LogTemp, Error, TEXT("Response: [%s]"), *Content);
 				OnSuccess(Content);
 			}
 			else
