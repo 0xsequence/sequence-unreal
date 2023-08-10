@@ -3,6 +3,10 @@
 
 #include "General_Testing.h"
 #include "IndexerTests.h"
+#include "Misc/AES.h"
+#include "Containers/UnrealString.h"
+#include "HexUtility.h"
+#include "SequenceEncryptor.h"
 #include "tests/ContractTest.h"
 
 // Sets default values
@@ -51,28 +55,61 @@ void AGeneral_Testing::test_indexer()
 }
 
 void AGeneral_Testing::testMisc()
-{
-	FString testJson = "{\"nested_obj\":{\"pain\":101}, \"name\":\"test_object\",\"age\":1,\"list\":[\"one\",\"two\",\"three\"]}";
-	TSharedPtr<FJsonObject> jsonObj = MakeShareable(new FJsonObject);
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(testJson);
+{//used for testing various things in the engine to verify behaviour
+	
+	const FString key = "abababababababababababababababab";
+	FString name = "calvin";
 
-	if (!FJsonSerializer::Deserialize(Reader, jsonObj))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to deserialize the json object!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("Built test JSON Object!"));
-		TMap<FString, FString> tProp = UIndexerSupport::jsonObjectParser(jsonObj);
-		TArray<FString> keys;
-		tProp.GetKeys(keys);//get the keys
-		UE_LOG(LogTemp, Display, TEXT("Resulting Property Map"));
-		for (FString key : keys)
-		{
-			FString value = *tProp.Find(key);
-			UE_LOG(LogTemp, Display, TEXT("Key: [%s] Value: [%s]"),*key, *value);
-		}
-	}
+	int32 payloadLength = name.Len();//store this ahead of time unless it's hardcoded!
+
+	FString encryptedData = USequenceEncryptor::encrypt(name, key);
+
+	FString decryptedData = USequenceEncryptor::decrypt(encryptedData, payloadLength, key);
+
+	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *name);
+	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *encryptedData);
+	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *decryptedData);
+
+	//UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *name);
+	//UE_LOG(LogTemp, Display, TEXT("Key Size: %d"), key.Len());
+
+	//uint32 keySize = 32;//hard code this!
+	//uint8* keyBlob = new uint8[keySize];
+
+	//StringToBytes(key,keyBlob, keySize);
+	//FString ret = BytesToString(keyBlob, keySize);
+
+	//uint8* blob; //we declare uint8 pointer
+	//uint32 size; //for size calculation
+	//
+	////encrypting
+	////sizing
+	//size = name.Len();
+	//size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));
+	//blob = new uint8[size];
+
+	//StringToBytes(name,blob, name.Len());
+	//FAES::EncryptData(blob, size,keyBlob,keySize); //We encrypt the data, don't know how you want to input key
+	//FString encryptedData = BytesToString(blob,size);
+	//UE_LOG(LogTemp, Display, TEXT("During Encrypt: %s"), *encryptedData);
+	//delete blob; //deleting allocation for safety
+
+	////decrypting
+	////sizing
+	//
+	//size = encryptedData.Len();
+	//size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));//align size with block size!
+	//blob = new uint8[size];
+	//
+	////FString::ToHexBlob(encryptedData, blob, encryptedData.Len());
+	//StringToBytes(encryptedData, blob,encryptedData.Len());
+	//FAES::DecryptData(blob, size,keyBlob,keySize);
+	//FString decryptedData = BytesToString(blob, size);
+	//decryptedData = decryptedData.Left(name.Len());
+	//UE_LOG(LogTemp, Display, TEXT("post Encrypt: %s"), *decryptedData);
+
+	//delete blob;
+	//delete keyBlob;
 }
 
 void AGeneral_Testing::testSequence()
