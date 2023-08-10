@@ -70,6 +70,11 @@ FUnsizedData FUnsizedData::Trim()
 	return trimmed;
 }
 
+FUnsizedData FUnsizedData::From(const FString Hex)
+{
+	return HexStringToBinary(Hex);
+}
+
 
 FUnsizedData Trimmed(const FBinaryData& Data)
 {

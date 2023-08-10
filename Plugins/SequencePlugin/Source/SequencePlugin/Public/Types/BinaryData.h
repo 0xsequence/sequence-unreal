@@ -23,6 +23,7 @@ struct FUnsizedData final : FBinaryData
 	FUnsizedData Copy() const; // This creates new data that must be freed
 	virtual ByteLength GetLength() const override;
 	FUnsizedData Trim(); // Destroys itself
+	static FUnsizedData From(FString Hex);
 };
 
 // Returns returns data with leading 0x00 bytes trimmed

@@ -67,7 +67,7 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 	{
 		if(bWasSuccessful)
 		{
-			auto Content = Request->GetResponse()->GetContentAsString();
+			const FString Content = Request->GetResponse()->GetContentAsString();
 			OnSuccess(Content);
 		}
 		else
