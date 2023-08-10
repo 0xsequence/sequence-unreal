@@ -13,6 +13,7 @@
 #include "JsonBuilder.h"
 #include "Types/TransactionReceipt.h"
 #include "EthTransaction.h"
+#include "RPCCaller.h"
 
 struct FContractCall;
 
@@ -30,20 +31,10 @@ FString TagToString(EBlockTag Tag);
 /**
  * 
  */
-class Provider
+class Provider : public RPCCaller
 {
 	FString Url;
 	Provider Copy();
-	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
-	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
-	TResult<FString> ExtractStringResult(FString JsonRaw);
-	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	void SendRPC(FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-
-	template<typename T>
-	void SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);
-	
-	static FJsonBuilder RPCBuilder(FString MethodName);
 
 //helpers
 	void BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
@@ -85,22 +76,3 @@ public:
 	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
 };
-
-template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
-
-template <typename T>
-void Provider::SendRPCAndExtract(FString Content, TSuccessCallback<T> OnSuccess,
-	Extractor<T> Extractor, FFailureCallback OnFailure)
-{
-	SendRPC(Content, [OnSuccess, Extractor](FString Result)
-	{
-		TResult<T> Value = Extractor(Result);
-
-		if(Value.HasValue())
-		{
-			OnSuccess(Value.GetValue());
-		}
-	}, OnFailure);
-}
-
-
