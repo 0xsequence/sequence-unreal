@@ -6,5 +6,6 @@
 #include "SequenceData.h"
 
 void TestGetFriends(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+void testGetCoins(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
 
 void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);

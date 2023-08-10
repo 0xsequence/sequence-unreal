@@ -30,8 +30,8 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("d");
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
-
-	this->indexer = NewObject<UIndexer>();
+	this->sequence = NewObject<USequenceData>();//for handling sequence data
+	this->indexer = NewObject<UIndexer>();//for handling indexer data
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
@@ -169,6 +169,47 @@ void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
 	Delegate.BindUFunction(this, "update_authentication", true);
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
+}
+
+void ASequence_Backend_Manager::init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate)
+{
+	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedCoinData)
+	{
+		this->updateCoinData(updatedCoinData);
+	};
+
+	const FFailureCallback GenericFailure = [=](const SequenceError Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated coin data]"));
+	};
+
+	this->sequence->getUpdatedItemPrices(coinsToUpdate,GenericSuccess,GenericFailure);
+}
+
+
+void ASequence_Backend_Manager::init_get_updated_token_data(TArray<FID_BE> tokensToUpdate)
+{
+	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
+	{
+		this->updateTokenData(updatedTokenData);
+	};
+
+	const FFailureCallback GenericFailure = [=](const SequenceError Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated token data]"));
+	};
+
+	this->sequence->getUpdatedItemPrices(tokensToUpdate, GenericSuccess, GenericFailure);
+}
+
+void ASequence_Backend_Manager::init_get_updated_fee_data()
+{
+	//stub in we don't know where we get fee's from yet!
+	TArray<FFee_BE> feeData;
+	FFee_BE testFee;
+	testFee.fee.Coin_Amount = 10;
+	feeData.Add(testFee);
+	this->updateFeeData(feeData);
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]

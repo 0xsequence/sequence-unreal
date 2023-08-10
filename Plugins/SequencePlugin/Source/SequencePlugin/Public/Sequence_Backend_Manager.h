@@ -8,6 +8,7 @@
 #include "ObjectHandler.h"
 #include "Backend.h"
 #include "BE_Structs.h"
+#include "Misc/AES.h"
 #include "SequenceData.h"
 #include "Sequence_Backend_Manager.generated.h"
 
@@ -136,6 +137,26 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
 		void update_txn(FTxnCallback_BE txn_callback);
+
+	
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
+		void init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
+		void init_get_updated_token_data(TArray<FID_BE> tokensToUpdate);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
+		void init_get_updated_fee_data();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
+		void updateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
+		void updateTokenData(const TArray<FItemPrice_BE> &updatedTokenValues);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
+		void updateFeeData(const TArray<FFee_BE> &updatedFeeValues);
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 private:
