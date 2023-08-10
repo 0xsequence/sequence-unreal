@@ -9,11 +9,11 @@ struct FVersion
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString webrpcVersion;
+        FString webrpcVersion = "";
     UPROPERTY()
-        FString schemaVersion;
+        FString schemaVersion = "";
     UPROPERTY()
-        FString schemaHash;
+        FString schemaHash = "";
     UPROPERTY()
-        FString appVersion;
+        FString appVersion = "";
 };

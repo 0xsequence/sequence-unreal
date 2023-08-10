@@ -12,36 +12,39 @@ struct FTokenMetaData
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 tokenId;
+        int64 tokenId = -1;
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        FString name;
+        FString name = "";
     UPROPERTY()
-        FString description;
+        FString description = "";
     UPROPERTY()
-        FString image;
+        FString image = "";
     UPROPERTY()
-        float decimals;
+        float decimals = 0.0;
     UPROPERTY()
-        FString video;
+        FString video = "";
     UPROPERTY()
-        FString audio;
+        FString audio = "";
     UPROPERTY()
-        FString image_data;
+        FString image_data = "";
     UPROPERTY()
-        FString external_url;
+        FString external_url = "";
     UPROPERTY()
-        FString background_color;
+        FString background_color = "";
     UPROPERTY()
-        FString animation_url;
+        FString animation_url = "";
 
     TMap<FString, FString> properties;
 
     TArray<FAttributeMap> attributes;
 
-    //used for testing!
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Used to get the json object formed by this struct
+    * used for args and testing
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("tokenId", tokenId);
@@ -73,7 +76,7 @@ public:
         FString attributeString = "[";
         for (FAttributeMap aMap : attributes)
         {
-            attributeString.Append(UIndexerSupport::simplifyString(aMap.Get()));
+            attributeString.Append(UIndexerSupport::simplifyString(aMap.GetJsonString()));
             attributeString.Append(",");
         }
         if (attributes.Num() > 0)
@@ -86,6 +89,9 @@ public:
         return ret;
     };
 
+    /*
+    * Used to handle Edge cases with UE's json parsing
+    */
     void setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
         const TSharedPtr<FJsonObject>* refPtr;

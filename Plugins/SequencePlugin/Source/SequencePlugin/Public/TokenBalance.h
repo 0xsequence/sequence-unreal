@@ -12,31 +12,35 @@ struct FTokenBalance
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int32 id;
+        int32 id = -1;
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        TEnumAsByte<EContractType> contractType;
+        TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
     UPROPERTY()
-        int64 tokenID;
+        int64 tokenID = -1;
     UPROPERTY()
-        int64 balance;
+        int64 balance = -1;
     UPROPERTY()
-        FString blockHash;
+        FString blockHash = "";
     UPROPERTY()
-        int64 blockNumber;
+        int64 blockNumber = -1;
     UPROPERTY()
-        int64 updateID;
+        int64 updateID = -1;
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
         FContractInfo contractInfo;
     UPROPERTY()
         FTokenMetaData tokenMetaData;
 
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Used to get the json object formed by this struct
+    * used for testing and args
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("id", id);
@@ -49,11 +53,14 @@ public:
         ret.Get()->SetNumberField("blockNumber", blockNumber);
         ret.Get()->SetNumberField("updateID", updateID);
         ret.Get()->SetNumberField("chainId", chainId);
-        ret.Get()->SetObjectField("contractInfo", contractInfo.Get());
-        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.Get());
+        ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
+        ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.GetJson());
         return ret;
     };
 
+    /*
+    * Used for handling edge cases with unreal's parsing
+    */
     void setup(FJsonObject json_in)
     {
         const TSharedPtr<FJsonObject> *item;

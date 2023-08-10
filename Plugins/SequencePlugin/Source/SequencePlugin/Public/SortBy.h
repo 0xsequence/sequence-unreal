@@ -10,21 +10,27 @@ struct FSortBy
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString column;
+        FString column = "";
     UPROPERTY()
-        TEnumAsByte<ESortOrder> order;
+        TEnumAsByte<ESortOrder> order = ESortOrder::ASC;
 
-    FString Get()
+    /*
+    * Used to get the jsonObjectString of this struct for args and testing
+    */
+    FString GetJsonString()
     {
         FString ret = "{";
-        ret.Append("column:");
+        ret.Append("\"column\":\"");
         ret.Append(column);
-        ret.Append(",order:");
+        ret.Append("\",\"order\":\"");
         ret.Append(UEnum::GetValueAsString(order.GetValue()));
-        ret.Append("}");
+        ret.Append("\"}");
         return ret;
     }
 
+    /*
+    * Used to handle UE's edge cases with json Parsing
+    */
     void setup(FJsonObject json_in)
     {
         if (!json_in.TryGetField("column"))

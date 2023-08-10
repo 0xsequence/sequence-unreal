@@ -25,6 +25,10 @@ public:
     UPROPERTY()
         int32 toBlock = -1;
 
+    /// <summary>
+    /// Used to get args formed by this struct in JsonObjectString form
+    /// </summary>
+    /// <returns>JsonObjectString</returns>
     FString GetArgs()
     {
         FString ret = "{";
@@ -38,24 +42,24 @@ public:
         if (!accountAddresses.IsEmpty())
         {
             ret.Append(",\"accountAddresses\":");
-            ret.Append(UIndexerSupport::stringListToSimpleString(accountAddresses));
+            ret.Append(UIndexerSupport::stringListToParsableString(accountAddresses));
         }
 
         if (!contractAddresses.IsEmpty())
         {
-            ret.Append(",\"contractAddresses\":" + UIndexerSupport::stringListToSimpleString(contractAddresses));
+            ret.Append(",\"contractAddresses\":" + UIndexerSupport::stringListToParsableString(contractAddresses));
         }
 
         if (!transactionHashes.IsEmpty())
         {
             ret.Append(",\"transactionHashes\":");
-            ret.Append(UIndexerSupport::stringListToSimpleString(transactionHashes));
+            ret.Append(UIndexerSupport::stringListToParsableString(transactionHashes));
         }
 
         if (!metaTransactionIDs.IsEmpty())
         {
             ret.Append(",\"metaTransactionIDs\":");
-            ret.Append(UIndexerSupport::stringListToSimpleString(metaTransactionIDs));
+            ret.Append(UIndexerSupport::stringListToParsableString(metaTransactionIDs));
         }
         
         if (fromBlock != -1)

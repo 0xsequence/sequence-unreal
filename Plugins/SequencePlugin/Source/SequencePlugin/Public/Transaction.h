@@ -10,21 +10,25 @@ struct FTransaction
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString txnHash;
+        FString txnHash = "";
     UPROPERTY()
-        int64 blockNumber;
+        int64 blockNumber = -1;
     UPROPERTY()
-        FString blockHash;
+        FString blockHash = "";
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
-        FString metaTxnID;
+        FString metaTxnID = "";
     UPROPERTY()
         TArray<FTxnTransfer> transfers;
     UPROPERTY()
-        FString timestamp;
+        FString timestamp = "";
 
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Used to get the json Object formed by this struct
+    * used for args & testing
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetStringField("txnHash", txnHash);
@@ -37,7 +41,7 @@ public:
 
         for (FTxnTransfer tItem : transfers)
         {
-            jList.Add(tItem.Get());
+            jList.Add(tItem.GetJson());
         }
 
         ret.Get()->SetStringField("transfers", UIndexerSupport::jsonObjListToSimpleString(jList));
@@ -46,6 +50,9 @@ public:
         return ret;
     }
 
+    /*
+    * Used to handle edge case parsing with Unreal's json parser
+    */
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* trnsfrs;
