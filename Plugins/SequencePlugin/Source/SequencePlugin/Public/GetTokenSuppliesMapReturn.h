@@ -15,7 +15,11 @@ public:
 		TMap<FString, FTokenSupplyList> supplies;
 	bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
 
-	TSharedPtr<FJsonObject> Get()
+	/*
+	* Used to return the json Object formed by this struct
+	* used for args & testing purposes
+	*/
+	TSharedPtr<FJsonObject> GetJson()
 	{
 		TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
 		TSharedPtr<FJsonObject> nRet = MakeShareable<FJsonObject>(new FJsonObject);
@@ -24,13 +28,16 @@ public:
 
 		for (FString key : keys)
 		{
-			FString value = supplies.Find(key)->Get();
+			FString value = supplies.Find(key)->GetJsonString();
 			nRet.Get()->SetStringField(key,value);
 		}
 		ret.Get()->SetObjectField("supplies", nRet);
 		return ret;
 	}
 
+	/*
+	* Used to Handle Edge Cases with Unreal's Json parsing
+	*/
 	void setup(FJsonObject json_in)
 	{
 

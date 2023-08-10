@@ -10,7 +10,7 @@ struct FGetTokenBalancesArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString accountAddress;
+        FString accountAddress = "";
     UPROPERTY()
         FString contractAddress = "";
     UPROPERTY()
@@ -19,7 +19,12 @@ public:
         FPage page;
 
     bool customGetter = true;
-    FString Get() 
+
+    /*
+    * Used to get the JsonObjectString formed by this struct
+    * used for args and testing
+    */
+    FString GetArgs()
     {
         FString ret = "{";
 

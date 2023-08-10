@@ -60,7 +60,7 @@ public:
                 ret += ",\"before\":\""+before+"\"";
             
             if (after.Len() > 0)
-                ret += ",\"after\":" + after + "\"";
+                ret += ",\"after\":\"" + after + "\"";
 
             if (sort.Num() > 0)
             {
@@ -69,7 +69,7 @@ public:
                 TArray<FString> stringList;
                 for (FSortBy sItem : sort)
                 {
-                    stringList.Add(sItem.Get());
+                    stringList.Add(sItem.GetJsonString());
                 }
                 //Parse the string list into a JsonString
                 ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
@@ -88,7 +88,11 @@ public:
         return ret;
     }
 
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Gets the json Object formed by this struct
+    * used for args and testing
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("page", page);
@@ -99,7 +103,7 @@ public:
         FString sortString = "[";
         for (FSortBy s : sort)
         {
-            sortString.Append(s.Get());
+            sortString.Append(UIndexerSupport::simplifyString(s.GetJsonString()));
             sortString.Append(",");
         }
         if (sort.Num() > 0)
@@ -113,6 +117,6 @@ public:
         return ret;
     }
 
-    void setup(FJsonObject json_in)
-    {}
+  
+    void setup(FJsonObject json_in){}//dummy method but used for handling edge cases with UE's json parser
 };

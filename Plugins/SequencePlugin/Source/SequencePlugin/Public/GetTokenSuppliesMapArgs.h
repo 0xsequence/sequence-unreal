@@ -14,7 +14,7 @@ public:
     UPROPERTY()
         TMap<FString, FTokenList> tokenMap;
     UPROPERTY()
-        bool includeMetaData;
+        bool includeMetaData = false;
 
 	bool customGetter = true;
 
@@ -44,8 +44,11 @@ public:
 		}
     };
 
-	//this function name may need to be renamed
-	FString Get()
+	/*
+	* Used to get the Json Object String formed by this struct
+	* used for args and testing
+	*/
+	FString GetArgs()
 	{
 		FString ret = "{\"tokenMap\":{";
 		TArray<FString> keys;
@@ -53,7 +56,7 @@ public:
 
 		for (FString key : keys)
 		{
-			ret += "\"" + key + "\":" + UIndexerSupport::stringListToSimpleString(tokenMap.Find(key)->token_list);
+			ret += "\"" + key + "\":" + UIndexerSupport::stringListToParsableString(tokenMap.Find(key)->token_list);
 		}
 		ret += "},";//close off tokenMap subObject
 		ret += "\"includeMetaData\":";

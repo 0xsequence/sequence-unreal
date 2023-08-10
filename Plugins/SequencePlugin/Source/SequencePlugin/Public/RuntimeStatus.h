@@ -10,21 +10,21 @@ struct FRuntimeStatus
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        bool healthOK;
+        bool healthOK = false;
     UPROPERTY()
-        bool indexerEnabled;
+        bool indexerEnabled = false;
     UPROPERTY()
-        FString startTime;
+        FString startTime = "";
     UPROPERTY()
-        double uptime;
+        double uptime = 0.0;
     UPROPERTY()
-        FString ver;
+        FString ver = "";
     UPROPERTY()
-        FString branch;
+        FString branch = "";
     UPROPERTY()
-        FString commitHash;
+        FString commitHash = "";
     UPROPERTY()
-        int64 chainID;
+        int64 chainID = -1;
     UPROPERTY()
         FRuntimeChecks checks;
 };

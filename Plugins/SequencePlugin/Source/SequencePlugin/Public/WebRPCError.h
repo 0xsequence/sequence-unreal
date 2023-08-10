@@ -9,9 +9,9 @@ struct FWebRPCError
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString code;
+        FString code = "";
     UPROPERTY()
-        FString msg;
+        FString msg = "";
     UPROPERTY()
-        int32 status;
+        int32 status = -1;
 };

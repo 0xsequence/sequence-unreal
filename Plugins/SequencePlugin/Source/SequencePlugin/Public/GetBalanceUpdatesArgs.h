@@ -10,13 +10,16 @@ struct FGetBalanceUpdatesArgs
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
         int32 lastUpdateID = -1;
     UPROPERTY()
         FPage page;
     bool customGetter = true;
-    FString Get()
+    /*
+    * Gets the jsonObjectString formed by this struct
+    */
+    FString GetArgs()
     {
         FString ret = "{";
 

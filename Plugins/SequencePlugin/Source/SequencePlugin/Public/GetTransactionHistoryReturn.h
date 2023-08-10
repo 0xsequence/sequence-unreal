@@ -17,20 +17,27 @@ public:
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Used to get the json object formed by this struct, used for
+    * args & testing purposes
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
-        ret.Get()->SetObjectField("page", page.Get());
+        ret.Get()->SetObjectField("page", page.GetJson());
 
         TArray<TSharedPtr<FJsonObject>> jList;
         for (FTransaction tItem : transactions)
         {
-            jList.Add(tItem.Get());
+            jList.Add(tItem.GetJson());
         }
         ret.Get()->SetStringField("transactions", UIndexerSupport::jsonObjListToSimpleString(jList));
         return ret;
     }
 
+    /*
+    * Used to Handle Edge Cases with Unreal's Json parsing
+    */
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Errors.h"
 #include "IndexerSupport.h"
+#include "SequenceDataTests.h"
 #include "General_Testing.generated.h"
 
 UCLASS()
@@ -39,6 +40,9 @@ protected:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Misc")
 		void testMisc();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
+		void testSequence();
 //End of Testing Functions//
 public:	
 	// Called every frame

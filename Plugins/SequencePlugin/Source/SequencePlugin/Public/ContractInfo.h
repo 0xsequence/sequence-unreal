@@ -10,23 +10,26 @@ struct FContractInfo
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 chainId;
+        int64 chainId = -1;
     UPROPERTY()
-        FString address;
+        FString address = "";
     UPROPERTY()
-        FString name;
+        FString name = "";
     UPROPERTY()
-        FString type;
+        FString type = "";
     UPROPERTY()
-        FString symbol;
+        FString symbol = "";
     UPROPERTY()
-        int32 decimals;
+        int32 decimals = -1;
     UPROPERTY()
-        FString logoURI;
+        FString logoURI = "";
     UPROPERTY()
         FContractInfoExtensions extensions;
 
-    TSharedPtr<FJsonObject> Get()
+    /*
+    * Gets the json object formed by this struct
+    */
+    TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetNumberField("chainId", chainId);
@@ -36,7 +39,7 @@ public:
         ret.Get()->SetStringField("symbol", symbol);
         ret.Get()->SetNumberField("decimals", decimals);
         ret.Get()->SetStringField("logoURI", logoURI);
-        ret.Get()->SetObjectField("extensions", extensions.Get());
+        ret.Get()->SetObjectField("extensions", extensions.GetJson());
         return ret;
     }
 };

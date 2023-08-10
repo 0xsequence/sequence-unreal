@@ -53,7 +53,6 @@ FString UIndexer::HostName(int64 chainID)
 */
 void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	
 	//Now we create the post request
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 
@@ -75,7 +74,6 @@ void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessC
 			OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
 		}
 	});
-	
 	http_post_req->ProcessRequest();
 }
 
@@ -89,7 +87,7 @@ template < typename T> FString UIndexer::BuildArgs(T struct_in)
 	FString result = "[FAILED TO PARSE]";
 	if (struct_in.customGetter)
 	{
-		result = struct_in.Get();
+		result = struct_in.GetArgs();
 	}
 	else
 	{

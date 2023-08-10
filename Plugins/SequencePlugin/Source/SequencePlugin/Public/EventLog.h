@@ -10,27 +10,27 @@ struct FEventLog
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY()
-        int64 id;
+        int64 id = -1;
     UPROPERTY()
-        TEnumAsByte<EEventLogType> type;
+        TEnumAsByte<EEventLogType> type = EEventLogType::BLOCK_ADDED;
     UPROPERTY()
-        int64 blockNumber;
+        int64 blockNumber = -1;
     UPROPERTY()
-        FString blockHash;
+        FString blockHash = "";
     UPROPERTY()
-        FString contractAddress;
+        FString contractAddress = "";
     UPROPERTY()
-        TEnumAsByte<EContractType> contractType;
+        TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
     UPROPERTY()
-        FString txnHash;
+        FString txnHash = "";
     UPROPERTY()
-        int64 txnIndex;
+        int64 txnIndex = -1;
     UPROPERTY()
-        int64 txnLogIndex;
+        int64 txnLogIndex = -1;
     UPROPERTY()
-        TEnumAsByte<EEventLogDataType> logDataType;
+        TEnumAsByte<EEventLogDataType> logDataType = EEventLogDataType::SEQUENCE_TXN;
     UPROPERTY()
-        FString ts;
+        FString ts = "";
     UPROPERTY()
-        FString logData;
+        FString logData = "";
 };
