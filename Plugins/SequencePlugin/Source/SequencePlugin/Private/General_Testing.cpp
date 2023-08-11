@@ -6,6 +6,8 @@
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 #include "HexUtility.h"
+#include "IndexerSupport.h"
+#include "Auth.h"
 #include "SequenceEncryptor.h"
 #include "tests/ContractTest.h"
 
@@ -56,16 +58,21 @@ void AGeneral_Testing::test_indexer()
 
 void AGeneral_Testing::testMisc()
 {//used for testing various things in the engine to verify behaviour
-	
-	const FString key = "abababababababababababababababab";
-	FString name = "calvin";
+	UAuth * auth = NewObject<UAuth>();
+	FStoredAuthState_BE testingStruct;
 
-	int32 payloadLength = name.Len();//store this ahead of time unless it's hardcoded!
+	FString preEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(testingStruct);
 
-	FString encryptedData = USequenceEncryptor::encrypt(name, key);
-	FString decryptedData = USequenceEncryptor::decrypt(encryptedData, payloadLength, key);
+	auth->setNewSecureStorableAuth(testingStruct);
+	FSecureKey duringEncryptStruct = auth->getSecureStorableAuth();
 
-	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *name);
+	FString encryptedData = UIndexerSupport::structToSimpleString<FSecureKey>(duringEncryptStruct);
+
+	auth->setSecureStorableAuth(duringEncryptStruct);
+
+	FString decryptedData = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(auth->auth);
+
+	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *preEncrypt);
 	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *encryptedData);
 	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *decryptedData);
 }
