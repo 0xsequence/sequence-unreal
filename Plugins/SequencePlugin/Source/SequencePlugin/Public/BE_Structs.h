@@ -16,11 +16,11 @@ struct FNetworkProfileSetting_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Indexer_URL = "";
+        FString Indexer_URL = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Relayer_URL = "";
+        FString Relayer_URL = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Block_Explorer_URL = "";
+        FString Block_Explorer_URL = "testing";
 };
 
 /*
@@ -33,7 +33,7 @@ struct FNetwork_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString network_name = "";
+        FString network_name = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         bool is_default = false;//default selected network need at least 1
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -55,9 +55,9 @@ struct FSystemSession_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString System_Session = "";
+        FString System_Session = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString System_Session_Key = "";
+        FString System_Session_Key = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* System_Session_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -75,13 +75,13 @@ struct FActiveSession_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Current_Session = "";
+        FString Current_Session = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Session_Key = "";
+        FString Session_Key = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Last_Seen_Date_Time = "";
+        FString Last_Seen_Date_Time = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Platform_Data = "";
+        FString Platform_Data = "testing";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* Session_Icon = nullptr;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -506,16 +506,20 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FStoredState_BE
+struct FStoredAuthState_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString public_address = "";
+        FString key1 = "epic key";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email = "";//not sure if we actually need this
+        FString key2 = "legendary key";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FActiveSession_BE> active_Sessions;//we may only need the one session?
+        FString public_address = "0xbignumber0117";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString email = "someepickeybasedemail@gmail.com";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FActiveSession_BE> active_Sessions;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FSystemSession_BE> system_sessions;
 };

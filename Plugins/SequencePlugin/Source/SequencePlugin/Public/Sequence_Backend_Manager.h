@@ -10,6 +10,7 @@
 #include "BE_Structs.h"
 #include "Misc/AES.h"
 #include "SequenceData.h"
+#include "Auth.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
@@ -25,10 +26,14 @@ private:
 
 	FString prvt_key; // private key for signin
 	FString pblc_key; // public key for signin
-
 	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
+
 	UIndexer* indexer;//indexer ref!
 	USequenceData* sequence;//sequence data ref for sequence specific data
+
+	UObjectHandler* request_handler;//going to be reworked into an image handler
+
+	UAuth* auth;//for auth handling
 	
 	//for right now we use these variables to bootstrap signin
 	bool ready = false;
@@ -37,8 +42,6 @@ private:
 	FString recv_block_hsh;
 	FString user_email;
 	//end of signin variables
-
-	UObjectHandler * request_handler;
 
 public:
 	// Sets default values for this actor's properties
@@ -58,7 +61,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
 		void Copy_To_Clipboard(FString data);
-
 	/*
 	* Used to get data from clipboard for ease of use
 	*/
@@ -67,18 +69,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString get_transaction_hash();
+
+	//Used to get the stored auth credentials encrypt them and send them up
+	//to be stored in a game save object
+	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
+		FSecureKey getSecureStorableAuth();
+
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "TESTING")
-		void testing_network_infrastructures();
 
 	/*
 	* Used to initiate a stored authentication call from the frontend
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Authentication")
-		void init_authentication(FStoredState_BE stored_state);
+		void init_authentication(FSecureKey storedAuthData);
 
 	/*
 	* Used to let the frontend know if authentication succeeded or not
@@ -137,8 +142,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
 		void update_txn(FTxnCallback_BE txn_callback);
-
-	
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate);
