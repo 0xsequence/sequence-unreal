@@ -27,8 +27,8 @@ FString USequenceEncryptor::encrypt(FString payload,FString key)
 	FString encryptedData = BytesToString(payloadBlob, size);//get into usable form for storage
 	
 	//cleanup
-	delete payloadBlob;
-	delete keyBlob;
+	delete [] payloadBlob;
+	delete [] keyBlob;
 
 	return encryptedData;
 }
@@ -56,8 +56,8 @@ FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength, FString
 	//because post encryption we can have some fat left, we trim it
 	decryptedData = decryptedData.Left(payloadLength);
 
-	delete payloadBlob;
-	delete keyBlob;
+	delete [] payloadBlob;
+	delete [] keyBlob;
 
 	return decryptedData;
 }
