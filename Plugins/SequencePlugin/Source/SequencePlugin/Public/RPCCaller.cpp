@@ -64,6 +64,7 @@ void RPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> 
 		->PrepareRequest()
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
 		->ProcessAndThen(OnSuccess, OnError);
