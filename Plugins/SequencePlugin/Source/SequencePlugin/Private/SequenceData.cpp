@@ -6,7 +6,9 @@
 
 FString USequenceData::getURL(FString endpoint)
 {
-	return (this->sequenceURL + endpoint);
+	FString retUrl = sequenceURL;
+	retUrl.Append(endpoint);
+	return retUrl;
 }
 
 /*
@@ -20,8 +22,36 @@ void USequenceData::HTTPPost(FString endpoint, FString args, TSuccessCallback<FS
 	http_post_req->SetVerb("POST");
 	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	http_post_req->SetHeader("Accept", "application/json");
-	http_post_req->SetURL(getURL(endpoint));
+	FString url = this->getURL(endpoint);
+	http_post_req->SetURL(this->getURL(endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
+
+	http_post_req->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				FString Content = Request->GetResponse()->GetContentAsString();
+				UE_LOG(LogTemp, Error, TEXT("Response: [%s]"), *Content);
+				OnSuccess(Content);
+			}
+			else
+			{
+				OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+			}
+		});
+	http_post_req->ProcessRequest();
+}
+
+void HTTPGet(FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{
+	//Now we create the Get request
+	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+
+	http_post_req->SetVerb("GET");
+	//this is more or less custom tuned for the QR fetcher still waiting on the setup of that though!
+	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
+	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetURL(endpoint);
 
 	http_post_req->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 		{
@@ -71,10 +101,11 @@ TArray<FContact_BE> USequenceData::buildFriendListFromJson(FString json)
 
 /*
 * Gets the friend data from the given username!
+* This function appears to require some form of authentication (perhaps all of the sequence api does)
 */
 void USequenceData::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
 {
-	FString json_arg = "{\"filterUsername\":\"" + username + "\"}";
+	FString json_arg = "{}";
 
 	HTTPPost("friendList", json_arg, [=](FString Content)
 		{
@@ -102,14 +133,14 @@ TArray<FItemPrice_BE> USequenceData::buildItemUpdateListFromJson(FString json)
 	return updatedItems;
 }
 
-void USequenceData::getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceData::getUpdatedItemPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	TArray<FID_BE> items;
 	items.Add(itemToUpdate);
-	getUpdatedCoinPrices(items, OnSuccess, OnFailure);
+	getUpdatedItemPrices(items, OnSuccess, OnFailure);
 }
 
-void USequenceData::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceData::getUpdatedItemPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString args = "{\"tokens\":";
 	FString jsonObjString = "";
@@ -128,35 +159,14 @@ void USequenceData::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessC
 		}, OnFailure);
 }
 
-void USequenceData::getUpdatedTokenPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
-{
-	TArray<FID_BE> items;
-	items.Add(itemToUpdate);
-	getUpdatedCoinPrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceData::getUpdatedTokenPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : itemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += UIndexerSupport::stringListToSimpleString(parsedItems);
-	args += "}";
-
-	HTTPPost("getCollectiblePrices", args, [=](FString Content)
-		{
-			OnSuccess(buildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-void USequenceData::getQR(FString publicAddress, int32 size, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
-{
+void USequenceData::getQR(FString publicAddress, int32 size, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{//still need authentication for this to work!
 	int32 lclSize = FMath::Max(size, 64);//ensures a nice valid size
 	FString args = "{\"publicAddress\":\""+publicAddress+"\"}";
-	//need more information before I can implement this
+	FString urlSize = "/";
+	urlSize.AppendInt(size);
+	HTTPPost(sequenceURL_QR+urlSize, args, [=](FString Content)
+		{
+			OnSuccess(Content);
+		}, OnFailure);
 }
