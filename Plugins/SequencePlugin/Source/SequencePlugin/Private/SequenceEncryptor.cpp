@@ -5,12 +5,27 @@
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 
-FString USequenceEncryptor::encrypt(FString payload,FString key)
+FString USequenceEncryptor::getStoredKey()
 {
+	FString key = "";
+	//get the stored key in DefaultCrypto.ini for usage in securing our data!
+	FString cPath = FConfigCacheIni::NormalizeConfigIniPath(FPaths::ProjectConfigDir() + TEXT("/DefaultCrypto.ini"));
+
+	if (!GConfig->GetString(TEXT("/Script/CryptoKeys.CryptoKeysSettings"), TEXT("EncryptionKey"), key, cPath))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Failed to read secure key from configuration, please ensure you've generated a key in the project settings]"));
+	}
+
+	return key;
+}
+
+FString USequenceEncryptor::encrypt(FString payload)
+{
+	FString key = getStoredKey();
 	if (key.Len() < 32)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Cannot decrypt with a key length less than 32]"), *key);
-		return "";
+		return payload;
 	}
 	//prepping the key for encryption
 	const uint32 keySize = 32;//hard code this!
@@ -33,14 +48,15 @@ FString USequenceEncryptor::encrypt(FString payload,FString key)
 	return encryptedData;
 }
 
-FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength, FString key)
+FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength)
 {
+	FString key = getStoredKey();
 	if (key.Len() < 32)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Cannot decrypt with a key length less than 32]"), *key);
-		return "";
+		return payload;
 	}
-	//prepping the key for encryption
+	//prepping the key for decryption
 	const uint32 keySize = 32;//hard code this!
 	uint8* keyBlob = new uint8[keySize];
 	StringToBytes(key, keyBlob, keySize);
