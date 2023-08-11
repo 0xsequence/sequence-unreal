@@ -63,53 +63,11 @@ void AGeneral_Testing::testMisc()
 	int32 payloadLength = name.Len();//store this ahead of time unless it's hardcoded!
 
 	FString encryptedData = USequenceEncryptor::encrypt(name, key);
-
 	FString decryptedData = USequenceEncryptor::decrypt(encryptedData, payloadLength, key);
 
 	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *name);
 	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *encryptedData);
 	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *decryptedData);
-
-	//UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *name);
-	//UE_LOG(LogTemp, Display, TEXT("Key Size: %d"), key.Len());
-
-	//uint32 keySize = 32;//hard code this!
-	//uint8* keyBlob = new uint8[keySize];
-
-	//StringToBytes(key,keyBlob, keySize);
-	//FString ret = BytesToString(keyBlob, keySize);
-
-	//uint8* blob; //we declare uint8 pointer
-	//uint32 size; //for size calculation
-	//
-	////encrypting
-	////sizing
-	//size = name.Len();
-	//size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));
-	//blob = new uint8[size];
-
-	//StringToBytes(name,blob, name.Len());
-	//FAES::EncryptData(blob, size,keyBlob,keySize); //We encrypt the data, don't know how you want to input key
-	//FString encryptedData = BytesToString(blob,size);
-	//UE_LOG(LogTemp, Display, TEXT("During Encrypt: %s"), *encryptedData);
-	//delete blob; //deleting allocation for safety
-
-	////decrypting
-	////sizing
-	//
-	//size = encryptedData.Len();
-	//size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));//align size with block size!
-	//blob = new uint8[size];
-	//
-	////FString::ToHexBlob(encryptedData, blob, encryptedData.Len());
-	//StringToBytes(encryptedData, blob,encryptedData.Len());
-	//FAES::DecryptData(blob, size,keyBlob,keySize);
-	//FString decryptedData = BytesToString(blob, size);
-	//decryptedData = decryptedData.Left(name.Len());
-	//UE_LOG(LogTemp, Display, TEXT("post Encrypt: %s"), *decryptedData);
-
-	//delete blob;
-	//delete keyBlob;
 }
 
 void AGeneral_Testing::testSequence()
