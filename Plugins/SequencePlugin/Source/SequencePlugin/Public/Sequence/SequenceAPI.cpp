@@ -3,63 +3,50 @@
 #include "Http.h"
 #include "HttpManager.h"
 
-FString SortOrderToString(const ESortOrder SortOrder)
+FString SortOrderToString(const SequenceAPI::ESortOrder SortOrder)
 {
 	switch(SortOrder)
 	{
-	case ASC:
+	case SequenceAPI::ASC:
 		return "ASC";
-	case DESC:
+	case SequenceAPI::DESC:
 		return "DESC";
 	default: return "";
 	}
 }
 
-FString FSequenceWallet::Url(const FString Name) const
+FString SequenceAPI::FSequenceWallet::Url(const FString Name) const
 {
 	return this->Hostname + this->Path + Name;
 }
 
-void FSequenceWallet::HTTPPost(const FString Endpoint, const FString Args, TSuccessCallback<FString> OnSuccess,
-                               FFailureCallback OnFailure)
+SequenceAPI::FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
 {
-	//Now we create the post request
-	const TSharedRef<IHttpRequest> HttpPostReq = FHttpModule::Get().CreateRequest();
+	
+}
 
-	HttpPostReq->SetVerb("POST");
-	HttpPostReq->SetHeader("Content-Type", "application/json");
-	HttpPostReq->SetHeader("Accept", "application/json");
-	HttpPostReq->SetURL(this->Url(Endpoint));
-	HttpPostReq->SetContentAsString(Args);//args will need to be a json object converted to a string
-
-	HttpPostReq->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess,
+	FFailureCallback OnFailure)
+{
+	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
 	{
-		if(bWasSuccessful)
+		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TResult<FAddress> Retval = MakeValue(FAddress::Empty());
+
+		if(Json.HasError())
 		{
-			const FString Content = Request->GetResponse()->GetContentAsString();
-			OnSuccess(Content);
+			Retval = MakeError(Json.GetError());
 		}
 		else
 		{
-			OnFailure(SequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+			const FString AddressString = Json.GetValue()->GetStringField("address");
+			Retval = MakeValue(FAddress::From(AddressString));
 		}
-	});
-	
-	HttpPostReq->ProcessRequest();
-}
-
-FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
-{
-	
-}
-
-void FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess,
-	FFailureCallback OnFailure)
-{
-	
-	
-	this->HTTPPost("CreateWallet", "", [=](FString Content)
-	{
 		
-	}, OnFailure);
+		
+		return Retval;
+	};
+	
+	this->SendRPCAndExtract(Url("CreateWallet"), "", OnSuccess, ExtractAddress,
+	OnFailure);
 }
