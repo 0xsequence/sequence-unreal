@@ -31,6 +31,7 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
 	this->sequence = NewObject<USequenceData>();//for handling sequence data
+	this->auth = NewObject<UAuth>();//for authentication storage and handling
 	this->indexer = NewObject<UIndexer>();//for handling indexer data
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
@@ -78,6 +79,11 @@ FString ASequence_Backend_Manager::get_transaction_hash()
 	int32 txn_value = FMath::RandRange(1, 65536);
 	txn_hash.AppendInt(txn_value);
 	return txn_hash;
+}
+
+FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
+{
+	return this->auth->getSecureStorableAuth();//get the stored auth data ready for storage!
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -134,40 +140,14 @@ void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
 
 }
 
-void ASequence_Backend_Manager::testing_network_infrastructures()
-{
-	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-
-	http_post_req->SetVerb("POST");
-	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
-	http_post_req->SetHeader("Accept", "application/json");
-	http_post_req->SetURL("https://www.google.ca");
-	http_post_req->SetContentAsString("{ some bad json }");//args will need to be a json object converted to a string
-	
-	http_post_req.Get().OnProcessRequestComplete().BindLambda([&](FHttpRequestPtr Req, FHttpResponsePtr Response, bool IsSuccessful)
-		{
-			UE_LOG(LogTemp, Display, TEXT("Lambda called!"));
-			if (IsSuccessful)
-			{
-				UE_LOG(LogTemp, Display, TEXT("Success!"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Display, TEXT("Failed!"));
-			}
-		});
-
-
-
-	http_post_req->ProcessRequest();
-}
-
-void ASequence_Backend_Manager::init_authentication(FStoredState_BE stored_state)
+//update this to be the encrypted json string
+void ASequence_Backend_Manager::init_authentication(FSecureKey storedAuthData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
+	this->auth->setSecureStorableAuth(storedAuthData);
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
-	Delegate.BindUFunction(this, "update_authentication", true);
+	Delegate.BindUFunction(this, "update_authentication", this->auth->setSecureStorableAuth(storedAuthData));
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
@@ -216,6 +196,10 @@ void ASequence_Backend_Manager::init_get_updated_fee_data()
 
 //PRIVATE HANDLERS//
 
+/*
+* Signin is pending but I'm suspecting I will create a series of static signin function in a new 
+* signin Handler Object to clean this process up!
+*/
 void ASequence_Backend_Manager::signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
@@ -469,3 +453,5 @@ FString ASequence_Backend_Manager::get_signin_url()
 	FBase64::Decode(signin_url, result);
 	return result;
 }
+
+//end of old signin stuff
