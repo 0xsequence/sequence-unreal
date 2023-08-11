@@ -112,6 +112,8 @@ FString SequenceAPI::FTransaction::ToJson()
 	Json.AddInt("chainId", ChainId);
 	Json.AddString("from", "0x" + From.ToHex());
 	Json.AddString("to", "0x" + From.ToHex());
+
+	return Json.ToString();
 }
 
 SequenceAPI::FPartnerWallet SequenceAPI::FPartnerWallet::From(TSharedPtr<FJsonObject> Json)
@@ -310,7 +312,7 @@ void SequenceAPI::FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddr
 	{
 		
 		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
-		TResult<bool> ReturnVal = MakeValue(FUnsizedData::Empty());
+		TResult<bool> ReturnVal = MakeValue(false);
 
 		if(Json.HasError())
 		{
@@ -343,7 +345,7 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSu
 	{
 		
 		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
-		TResult<FHash256> ReturnVal = MakeValue(FUnsizedData::Empty());
+		TResult<FHash256> ReturnVal = MakeValue(FHash256{});
 
 		if(Json.HasError())
 		{
@@ -373,7 +375,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	{
 		
 		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
-		TResult<FHash256> ReturnVal = MakeValue(FUnsizedData::Empty());
+		TResult<FHash256> ReturnVal = MakeValue(FHash256{});
 
 		if(Json.HasError())
 		{
