@@ -6,7 +6,6 @@
 
 namespace SequenceAPI
 {
-	
 	using FSignature = FUnsizedData;
 
 	enum ESortOrder {
@@ -15,11 +14,15 @@ namespace SequenceAPI
 	};
 
 	FString SortOrderToString(ESortOrder SortOrder);
+	ESortOrder StringToSortOrder(FString String);
 
 	struct FSortBy
 	{
 		FString Column;
 		ESortOrder Order;
+
+		FString ToJson();
+		static FSortBy From(TSharedPtr<FJsonObject> Json);
 	};
 
 	struct FPage
@@ -28,13 +31,16 @@ namespace SequenceAPI
 		TOptional<uint64> PageNum;
 		TOptional<uint64> TotalRecords;
 		TOptional<FString> Column;
-		TOptional<FSortBy> Sort; 
+		TOptional<TArray<FSortBy>> Sort;
+
+		FString ToJson();
+		static FPage From(TSharedPtr<FJsonObject> Json);
 	};
 
 	struct FTransaction
 	{
 		uint64 ChainId;
-		FString From;
+		FAddress From;
 		FAddress To;
 		TOptional<FString> AutoGas;
 		TOptional<uint64> Nonce;
@@ -44,6 +50,8 @@ namespace SequenceAPI
 		TOptional<FString> TokenAmount;
 		TOptional<TArray<FString>> TokenIds;
 		TOptional<TArray<FString>> TokenAmounts;
+
+		FString ToJson();
 	};
 
 	struct FPartnerWallet
@@ -52,6 +60,8 @@ namespace SequenceAPI
 		uint64 PartnerId;
 		uint64 WalletIndex;
 		FString WalletAddress;
+
+		static FPartnerWallet From(TSharedPtr<FJsonObject> Json);
 	};
 
 	struct FDeployWalletReturn
@@ -68,7 +78,7 @@ namespace SequenceAPI
 
 	class FSequenceWallet : public RPCCaller
 	{
-		FString Hostname;
+		const FString Hostname = "https://api.sequence.app";
 		const FString Path = "/rpc/Wallet/";
 		FString Url(FString Name) const;
 		
