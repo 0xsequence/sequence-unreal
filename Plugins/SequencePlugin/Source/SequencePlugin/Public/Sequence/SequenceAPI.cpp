@@ -31,7 +31,7 @@ void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCal
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
 	{
 		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
-		TResult<FAddress> Retval = MakeValue(FAddress::Empty());
+		TResult<FAddress> Retval = MakeValue(FAddress{});
 
 		if(Json.HasError())
 		{
