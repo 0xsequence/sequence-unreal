@@ -119,9 +119,9 @@ FString SequenceAPI::FTransaction::ToJson()
 SequenceAPI::FPartnerWallet SequenceAPI::FPartnerWallet::From(TSharedPtr<FJsonObject> Json)
 {
 	return FPartnerWallet{
-		Json->GetIntegerField("number"),
-		Json->GetIntegerField("partnerId"),
-		Json->GetIntegerField("walletIndex"),
+		static_cast<uint64>(Json->GetIntegerField("number")),
+		static_cast<uint64>(Json->GetIntegerField("partnerId")),
+		static_cast<uint64>(Json->GetIntegerField("walletIndex")),
 		Json->GetStringField("walletAddress")
 	};
 }
