@@ -5,18 +5,37 @@
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 
+/*
+* This function is meant to be rebuilt depending on how developers want to secure their key data
+* for the time being I include this key for testing but in release builds no key will be provided and
+* NO state will be written unless a valid key is provided!
+*/
 FString USequenceEncryptor::getStoredKey()
-{
-	FString key = "";
-	//get the stored key in DefaultCrypto.ini for usage in securing our data!
-	FString cPath = FConfigCacheIni::NormalizeConfigIniPath(FPaths::ProjectConfigDir() + TEXT("/DefaultCrypto.ini"));
+{//***Replace this implementation with your own proper implementation***
+	FString ret;
 
-	if (!GConfig->GetString(TEXT("/Script/CryptoKeys.CryptoKeysSettings"), TEXT("EncryptionKey"), key, cPath))
+//this is for testing only a proper implementation needs to be provided for this function to work!
+#if UE_EDITOR
+	TArray<FString> kData;
+
+	kData.Add("cmpnb");
+	kData.Add("kFlZWYwbFJ");
+	kData.Add("TRGJrOE5");
+	kData.Add("nT282QTc5Uj");
+	kData.Add("E4aFQ");
+	kData.Add("2MFJEO");
+	kData.Add("ExW");
+	kData.Add("Y0RkRWN");
+	kData.Add("ad");
+	kData.Add("z0=");
+	FString eK;
+	for (FString kP : kData)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Failed to read secure key from configuration, please ensure you've generated a key in the project settings]"));
+		eK += kP;
 	}
-
-	return key;
+	FBase64::Decode(eK, ret);
+#endif // UE_EDITOR
+	return ret;
 }
 
 FString USequenceEncryptor::encrypt(FString payload)
@@ -24,8 +43,8 @@ FString USequenceEncryptor::encrypt(FString payload)
 	FString key = getStoredKey();
 	if (key.Len() < 32)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Cannot decrypt with a key length less than 32]"), *key);
-		return payload;
+		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
+		return "[NOP]";
 	}
 	//prepping the key for encryption
 	const uint32 keySize = 32;//hard code this!
@@ -53,8 +72,8 @@ FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength)
 	FString key = getStoredKey();
 	if (key.Len() < 32)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Cannot decrypt with a key length less than 32]"), *key);
-		return payload;
+		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
+		return "[NOP]";
 	}
 	//prepping the key for decryption
 	const uint32 keySize = 32;//hard code this!
