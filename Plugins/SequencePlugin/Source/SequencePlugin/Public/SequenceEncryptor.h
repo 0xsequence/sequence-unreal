@@ -20,6 +20,7 @@ private:
 	* for the time being I include this key for testing but in release builds no key will be provided and
 	* NO state will be written unless a valid key is provided!
 	*/
+	//***Replace this implementation with your own proper implementation***
 	static FString getStoredKey();
 
 public:

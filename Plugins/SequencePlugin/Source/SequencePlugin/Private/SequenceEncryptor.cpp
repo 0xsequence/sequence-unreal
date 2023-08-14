@@ -17,7 +17,6 @@ FString USequenceEncryptor::getStoredKey()
 //this is for testing only a proper implementation needs to be provided for this function to work!
 #if UE_EDITOR
 	TArray<FString> kData;
-
 	kData.Add("cmpnb");
 	kData.Add("kFlZWYwbFJ");
 	kData.Add("TRGJrOE5");
