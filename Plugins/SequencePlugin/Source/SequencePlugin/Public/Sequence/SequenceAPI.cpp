@@ -3,7 +3,7 @@
 #include "Http.h"
 #include "HttpManager.h"
 
-FString SortOrderToString(const SequenceAPI::ESortOrder SortOrder)
+FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 {
 	switch(SortOrder)
 	{
@@ -75,15 +75,15 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 
 	if(Json->HasField("pageSize"))
 	{
-		page.PageSize = Json->GetIntegerField("pageSize"); 
+		page.PageSize = static_cast<uint64>(Json->GetIntegerField("pageSize")); 
 	}
 	if(Json->HasField("page"))
 	{
-		page.PageNum = Json->GetIntegerField("page"); 
+		page.PageNum =  static_cast<uint64>(Json->GetIntegerField("page")); 
 	}
 	if(Json->HasField("totalRecords"))
 	{
-		page.TotalRecords = Json->GetIntegerField("totalRecords"); 
+		page.TotalRecords = static_cast<uint64>(Json->GetIntegerField("totalRecords")); 
 	}
 	if(Json->HasField("Column"))
 	{
