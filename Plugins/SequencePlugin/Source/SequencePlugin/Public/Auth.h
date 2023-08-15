@@ -16,9 +16,9 @@ struct FSecureKey
 	GENERATED_USTRUCT_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int32 of;//encrypted auth data length
+		int32 of = -1;//encrypted auth data length
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FString ky;//encrypted auth data
+		FString ky = "";//encrypted auth data
 };
 
 /**
