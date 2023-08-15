@@ -137,7 +137,6 @@ void ASequence_Backend_Manager::init_nft_send_txn(FNFT_Send_Txn_BE nft_txn)
 	FTimerDelegate Delegate;
 	Delegate.BindUFunction(this, "update_txn", callback);
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
-
 }
 
 //update this to be the encrypted json string
@@ -152,7 +151,9 @@ void ASequence_Backend_Manager::init_authentication(FSecureKey storedAuthData)
 }
 
 void ASequence_Backend_Manager::init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate)
-{
+{	
+	UE_LOG(LogTemp, Display, TEXT("[Update Coin Fetch INITIATED]"));
+	/*
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedCoinData)
 	{
 		this->updateCoinData(updatedCoinData);
@@ -164,11 +165,30 @@ void ASequence_Backend_Manager::init_get_updated_coin_data(TArray<FID_BE> coinsT
 	};
 
 	this->sequence->getUpdatedItemPrices(coinsToUpdate,GenericSuccess,GenericFailure);
+	*/
+	TArray<FItemPrice_BE> updatedItems;
+	FItemPrice_BE item;
+	item.Token.chainID = 137;
+
+	FString lclID = "0x";
+	lclID.AppendInt(FMath::RandRange(1,5));//inclusive (testing coin range)
+
+	item.Token.contractAddress = lclID;
+	item.price.value = FMath::RandRange(1, 100);
+	item.price.currency = "Canadian dollars?????";
+	updatedItems.Add(item);
+	//this->updateCoinData(updatedItems);
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "updateCoinData", updatedItems);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
 }
 
 
 void ASequence_Backend_Manager::init_get_updated_token_data(TArray<FID_BE> tokensToUpdate)
 {
+	UE_LOG(LogTemp, Display, TEXT("[Update NFT Fetch INITIATED]"));
+	/*
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
 	{
 		this->updateTokenData(updatedTokenData);
@@ -180,16 +200,46 @@ void ASequence_Backend_Manager::init_get_updated_token_data(TArray<FID_BE> token
 	};
 
 	this->sequence->getUpdatedItemPrices(tokensToUpdate, GenericSuccess, GenericFailure);
+	*/
+
+	TArray<FItemPrice_BE> updatedItems;
+	FItemPrice_BE item;
+	item.Token.chainID = 137;
+
+	FString lclID = "0x";
+	lclID.AppendInt(FMath::RandRange(6, 8));//inclusive (testing token range)
+
+	item.Token.contractAddress = lclID;
+	item.price.value = FMath::RandRange(1, 1000000);
+	item.price.currency = "Canadian dollars?????";
+	updatedItems.Add(item);
+	//this->updateTokenData(updatedItems);
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "updateTokenData", updatedItems);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
 }
 
 void ASequence_Backend_Manager::init_get_updated_fee_data()
 {
+	UE_LOG(LogTemp, Display, TEXT("[Update Fee Fetch INITIATED]"));
 	//stub in we don't know where we get fee's from yet!
 	TArray<FFee_BE> feeData;
 	FFee_BE testFee;
-	testFee.fee.Coin_Amount = 10;
+
+	testFee.fee.itemID.chainID = 137;
+	testFee.fee.itemID.contractAddress = "0x1";
+	testFee.fee.Coin_Amount = 1;
+	testFee.fee.Coin_Value = 1;
+	testFee.fee.Coin_Long_Name = "Ethereum";
+	testFee.fee.Coin_Short_Name = "Eth";
+	testFee.fee.Coin_Symbol = nullptr;//nothing will go here for ease of testing
 	feeData.Add(testFee);
-	this->updateFeeData(feeData);
+
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "updateFeeData", feeData);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
