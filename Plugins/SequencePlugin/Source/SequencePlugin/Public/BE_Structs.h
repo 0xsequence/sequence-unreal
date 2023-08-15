@@ -107,9 +107,7 @@ public:
 
 /*
 * This stores data about a currency
-* note for the various currency symbols there maybe some
-* manual input of utf-8 or utf-16 char symbols in order for those to appear correctly in
-* the front
+* Based on the a ref from Sequence.go ExchangeRate struct {}
 */
 USTRUCT(BlueprintType)
 struct FSelectableCurrency_BE
@@ -117,13 +115,15 @@ struct FSelectableCurrency_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Long_Name = "";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Short_Name = "";
+        FString Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Symbol = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float Mult = 0.0;//NOP value for right now until I know how currency data is structured
+        float value = 0.0;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString VsCurrency = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString CurrencyType = "";
 };
 
 /*
