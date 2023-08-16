@@ -220,28 +220,6 @@ void ASequence_Backend_Manager::init_get_updated_token_data(TArray<FID_BE> token
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
 }
 
-void ASequence_Backend_Manager::init_get_updated_fee_data()
-{
-	UE_LOG(LogTemp, Display, TEXT("[Update Fee Fetch INITIATED]"));
-	//stub in we don't know where we get fee's from yet!
-	TArray<FFee_BE> feeData;
-	FFee_BE testFee;
-
-	testFee.fee.itemID.chainID = 137;
-	testFee.fee.itemID.contractAddress = "0x1";
-	testFee.fee.Coin_Amount = 1;
-	testFee.fee.Coin_Value = 1;
-	testFee.fee.Coin_Long_Name = "Ethereum";
-	testFee.fee.Coin_Short_Name = "Eth";
-	testFee.fee.Coin_Symbol = nullptr;//nothing will go here for ease of testing
-	feeData.Add(testFee);
-
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate;
-	Delegate.BindUFunction(this, "updateFeeData", feeData);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
-}
-
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 //PRIVATE HANDLERS//
