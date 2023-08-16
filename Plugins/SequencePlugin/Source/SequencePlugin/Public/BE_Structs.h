@@ -436,50 +436,37 @@ public:
         TArray<FNFTTxn_BE> txn_history_nfts;//the list of nfts in the txn history item!
 };
 
-/*
-* Used to store fee data that the user
-* must pay if they wish to conduct an on chain txn
-*/
-USTRUCT(BlueprintType)
-struct FFee_BE
-{
-    GENERATED_USTRUCT_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FCoin_BE fee;//here we use FCoin_BE struct BUT for coin amount is the fee amount. everything else is the same!
-};
-
 USTRUCT(BlueprintType)
 struct FUserData_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString username = "";
+        FString username = "";//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email = "";
+        FString email = "";//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 account_id = -1;
+        int32 account_id = -1;//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString public_address = "";
+        FString public_address = "";//we get this during authentication
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* profile_image = nullptr;
+        UTexture2D* profile_image = nullptr; //no profile images I swap this out for something else in the front!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email_service = "";
+        FString email_service = "";//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FContact_BE> contacts;
+        TArray<FContact_BE> contacts;//We get this from sequenceAPI (currently sequence data) but we need authentication
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool hide_unlisted_tokens = false;
+        bool hide_unlisted_tokens = false;//not needed
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        bool hide_unlisted_collectibles = false;
+        bool hide_unlisted_collectibles = false;//not needed
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FNFT_Master_BE> nfts;//we send the NFT_Master_BE to initialize NFT data upfront!
+        TArray<FNFT_Master_BE> nfts;//we get this from the balances out of the indexer
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FCoin_BE> coins;
+        TArray<FCoin_BE> coins;//we can get this from balances out of the indexer
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FNetwork_BE> networks;
+        TArray<FNetwork_BE> networks;//only need the current network
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FTransactionHistoryItem_BE> transaction_history;
+        TArray<FTransactionHistoryItem_BE> transaction_history;//we can get this from txn history
 };
 
 /*
@@ -492,17 +479,15 @@ struct FSystemData_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FUserData_BE user_data;
+        FUserData_BE user_data;//(need)
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FActiveSession_BE> active_sessions_list;//the first item in this list is the current session!
+        TArray<FActiveSession_BE> active_sessions_list;//the first item in this list is the current session! (don't need for now) (unknown)
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FSystemSession_BE> system_sessions_list;//the first item in this list is the current system session!
+        TArray<FSystemSession_BE> system_sessions_list;//the first item in this list is the current system session! (don't need for now) (unknown)
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FSelectableCurrency_BE> currency_list;
+        TArray<FSelectableCurrency_BE> currency_list;//don't need for now (unknown)
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FSelectableCurrency_BE selected_currency;//the selected currency the user is currently using!
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FFee_BE> fee_list;
+        FSelectableCurrency_BE selected_currency;//the selected currency the user is currently using!(need) (unknown)
 };
 
 USTRUCT(BlueprintType)
@@ -577,8 +562,6 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         int32 amount = -1;//nft's deal in postive int's S.T. {Z^+}/{0}
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> item_type = EContractType::ERC1155;//the type of item we are transacting on
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FNFT_UData_BE> nft_u_data;//for nft based txn's! we need this too!
@@ -593,8 +576,6 @@ public:
         FString txn_hash_id = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         float amount = false;//Coins deal in Positve non Zero Real Numbers {R^+}/{0.0}
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FFee_BE selected_fee;//the fee the user's chose to pay to for this TXN
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> item_type = EContractType::ERC1155;//the type of item we are transacting on
 };
