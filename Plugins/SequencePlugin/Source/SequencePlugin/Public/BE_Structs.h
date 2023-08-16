@@ -115,15 +115,15 @@ struct FSelectableCurrency_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Name = "";
+        FString Name = "USD";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString Symbol = "";
+        FString Symbol = "$";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        float value = 0.0;
+        float value = 1.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString VsCurrency = "";
+        FString VsCurrency = "USD";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString CurrencyType = "";
+        FString CurrencyType = "United States Dollar";
 };
 
 /*
@@ -485,9 +485,9 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FSystemSession_BE> system_sessions_list;//the first item in this list is the current system session! (don't need for now) (unknown)
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FSelectableCurrency_BE> currency_list;//don't need for now (unknown)
+        TArray<FSelectableCurrency_BE> currency_list;//don't need for now so ignore it
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FSelectableCurrency_BE selected_currency;//the selected currency the user is currently using!(need) (unknown)
+        FSelectableCurrency_BE selected_currency;//this is defaulted to USD so ignore it nothing needs to be done here
 };
 
 USTRUCT(BlueprintType)
