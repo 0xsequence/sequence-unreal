@@ -9,7 +9,9 @@
 #include "IndexerSupport.h"
 #include "Auth.h"
 #include "SequenceEncryptor.h"
+#include "Sequence/SequenceAPI.h"
 #include "tests/ContractTest.h"
+#include "Tests/TestSequenceAPI.h"
 
 // Sets default values
 AGeneral_Testing::AGeneral_Testing()
@@ -37,8 +39,8 @@ void AGeneral_Testing::test_provider()
 		Callback_Failed(data, Err);
 	};
 
-	ContractTest::RunTest(OnSuccess, OnFailure);
-	
+	//ContractTest::RunTest(OnSuccess, OnFailure);
+	SequenceAPITest::RunTest(OnSuccess, OnFailure);
 }
 
 void AGeneral_Testing::test_indexer()

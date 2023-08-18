@@ -14,7 +14,7 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
-	"SupportedTargetPlatforms": [ "Win64" ],
+	"SupportedTargetPlatforms": [ "Win64", "Mac", "IOS", "Android" ],
 	"Modules": [
 		{
 			"Name": "SequencePlugin",

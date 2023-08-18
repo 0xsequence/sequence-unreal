@@ -23,7 +23,7 @@ public:
 	// Setters
 	void SetUrl(FString Url) const;
 	void SetVerb(FString Verb) const;
-	void SetHeader(FString Name, FString Value) const;
+	void AddHeader(FString Name, FString Value) const;
 	void SetContentAsString(FString Content) const;
 
 	// Builder Pattern
