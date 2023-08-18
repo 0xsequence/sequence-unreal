@@ -66,14 +66,14 @@ static void doUint256() {
 		Uint256 x = Uint256::ONE;
 		Uint256 y = Uint256::ONE;
 		opsCount = 0;
-		x == y;
+		//x == y;
 		printOps("uiEquals");
 	}
 	{
 		Uint256 x = Uint256::ONE;
 		Uint256 y = Uint256::ONE;
 		opsCount = 0;
-		x < y;
+		//x < y;
 		printOps("uiLessThan");
 	}
 	{
@@ -125,14 +125,14 @@ static void doFieldInt() {
 		FieldInt x(Uint256::ONE);
 		FieldInt y(Uint256::ONE);
 		opsCount = 0;
-		x == y;
+		//x == y;
 		printOps("fiEquals");
 	}
 	{
 		FieldInt x(Uint256::ONE);
 		FieldInt y(Uint256::ONE);
 		opsCount = 0;
-		x < y;
+		//x < y;
 		printOps("fiLessThan");
 	}
 	{
@@ -196,7 +196,7 @@ static void doCurvePoint() {
 		CurvePoint x = CurvePoint::G;
 		CurvePoint y = CurvePoint::G;
 		opsCount = 0;
-		x == y;
+		//x == y;
 		printOps("cpEquals");
 	}
 	{

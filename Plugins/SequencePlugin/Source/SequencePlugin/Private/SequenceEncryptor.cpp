@@ -15,7 +15,7 @@ FString USequenceEncryptor::getStoredKey()
 	FString ret;
 
 //this is for testing only a proper implementation needs to be provided for this function to work!
-#if UE_EDITOR
+//#if UE_EDITOR //remove these comments for later when we ship this we want to force out these errors!
 	TArray<FString> kData;
 	kData.Add("cmpnb");
 	kData.Add("kFlZWYwbFJ");
@@ -33,7 +33,7 @@ FString USequenceEncryptor::getStoredKey()
 		eK += kP;
 	}
 	FBase64::Decode(eK, ret);
-#endif // UE_EDITOR
+//#endif // UE_EDITOR
 	return ret;
 }
 
