@@ -2,6 +2,7 @@
 
 #include "Http.h"
 #include "HttpManager.h"
+#include "RequestHandler.h"
 
 FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 {
@@ -113,6 +114,8 @@ FString SequenceAPI::FTransaction::ToJson()
 	Json.AddString("from", "0x" + From.ToHex());
 	Json.AddString("to", "0x" + From.ToHex());
 
+	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
+
 	return Json.ToString();
 }
 
@@ -131,27 +134,44 @@ FString SequenceAPI::FSequenceWallet::Url(const FString Name) const
 	return this->Hostname + this->Path + Name;
 }
 
+void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess,
+	FFailureCallback OnFailure)
+{
+	NewObject<URequestHandler>()
+			->PrepareRequest()
+			->WithUrl(Url)
+			->WithHeader("Content-type", "application/json")
+			->WithHeader("Authorization", AuthToken)
+			->WithVerb("POST")
+			->WithContentAsString(Content)
+			->ProcessAndThen(OnSuccess, OnFailure);
+}
+
 SequenceAPI::FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
 {
 	
 }
 
+SequenceAPI::FSequenceWallet::FSequenceWallet()
+{
+}
+
 void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess,
-	FFailureCallback OnFailure)
+                                                FFailureCallback OnFailure)
 {
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FAddress> Retval = MakeValue(FAddress{});
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			Retval = MakeError(Json.GetError());
+			Retval = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const FString AddressString = Json.GetValue()->GetStringField("address");
+			const FString AddressString = Json->GetStringField("address");
 			Retval = MakeValue(FAddress::From(AddressString));
 		}
 		
@@ -173,16 +193,16 @@ void SequenceAPI::FSequenceWallet::GetWalletAddress(uint64 AccountIndex, TSucces
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FAddress> Retval = MakeValue(FAddress{});
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			Retval = MakeError(Json.GetError());
+			Retval = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const FString AddressString = Json.GetValue()->GetStringField("address");
+			const FString AddressString = Json->GetStringField("address");
 			Retval = MakeValue(FAddress::From(AddressString));
 		}
 		
@@ -204,17 +224,17 @@ void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId, uint64 AccountIn
 	TFunction<TResult<FDeployWalletReturn> (FString)> ExtractDeployWalletReturn = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FDeployWalletReturn> Retval = MakeValue(FDeployWalletReturn{"", ""});
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			Retval = MakeError(Json.GetError());
+			Retval = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const FString AddressString = Json.GetValue()->GetStringField("address");
-			const FString TransactionHashString = Json.GetValue()->GetStringField("txnHash");
+			const FString AddressString = Json->GetStringField("address");
+			const FString TransactionHashString = Json->GetStringField("txnHash");
 			Retval = MakeValue(FDeployWalletReturn{AddressString, TransactionHashString});
 		}
 		
@@ -236,17 +256,17 @@ void SequenceAPI::FSequenceWallet::Wallets(FPage Page, TSuccessCallback<FWallets
 	const TFunction<TResult<FWalletsReturn> (FString)> ExtractWallets = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FWalletsReturn> ReturnVal = MakeValue(FWalletsReturn{});
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			ReturnVal = MakeError(Json.GetError());
+			ReturnVal = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			TArray<TSharedPtr<FJsonValue>> WalletsJsonArray = Json.GetValue()->GetArrayField("wallets");
-			const TSharedPtr<FJsonObject> PageJson = Json.GetValue()->GetObjectField("page");
+			TArray<TSharedPtr<FJsonValue>> WalletsJsonArray = Json->GetArrayField("wallets");
+			const TSharedPtr<FJsonObject> PageJson = Json->GetObjectField("page");
 			TArray<FPartnerWallet> Wallets;
 
 			for(TSharedPtr<FJsonValue> WalletJson : WalletsJsonArray)
@@ -279,16 +299,16 @@ void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountA
 	const TFunction<TResult<FSignature> (FString)> ExtractSignature = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FSignature> ReturnVal = MakeValue(FUnsizedData::Empty());
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			ReturnVal = MakeError(Json.GetError());
+			ReturnVal = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const FString SignatureString = Json.GetValue()->GetStringField("signature");
+			const FString SignatureString = Json->GetStringField("signature");
 			ReturnVal = MakeValue(HexStringToBinary(SignatureString));
 		}
 		
@@ -311,16 +331,16 @@ void SequenceAPI::FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddr
 	const TFunction<TResult<bool> (FString)> ExtractSignature = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<bool> ReturnVal = MakeValue(false);
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			ReturnVal = MakeError(Json.GetError());
+			ReturnVal = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const bool bIsValid = Json.GetValue()->GetBoolField("isValid");
+			const bool bIsValid = Json->GetBoolField("isValid");
 			ReturnVal = MakeValue(bIsValid);
 		}
 		
@@ -344,16 +364,16 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSu
 	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
 	{
 		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
+		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FHash256> ReturnVal = MakeValue(FHash256{});
 
-		if(Json.HasError())
+		if(!Json)
 		{
-			ReturnVal = MakeError(Json.GetError());
+			ReturnVal = MakeError(SequenceError{RequestFail, "Json did not parse"});
 		}
 		else
 		{
-			const FString HashString = Json.GetValue()->GetStringField("txHash");
+			const FString HashString = Json->GetStringField("txHash");
 			ReturnVal = MakeValue(FHash256::From(HashString));
 		}
 		
@@ -364,7 +384,7 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSu
 		  ->AddField("tx", Transaction.ToJson())
 		  ->ToString();
 	
-	this->SendRPCAndExtract(Url("sendTransaction"), Content, OnSuccess, ExtractSignature,
+	this->SendRPCAndExtract(Url("SendTransaction"), Content, OnSuccess, ExtractSignature,
 	OnFailure);
 }
 

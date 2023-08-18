@@ -78,12 +78,15 @@ namespace SequenceAPI
 
 	class FSequenceWallet : public RPCCaller
 	{
-		const FString Hostname = "https://api.sequence.app";
+		FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
+		const FString Hostname = "https://next-api.sequence.app";
 		const FString Path = "/rpc/Wallet/";
 		FString Url(FString Name) const;
+		virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) override;
 		
 	public:
 		FSequenceWallet(FString Hostname);
+		FSequenceWallet();
 		
 		void CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void GetWalletAddress(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);

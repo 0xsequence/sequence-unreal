@@ -38,15 +38,6 @@ static void doCurvePoint();
 static void doEcdsa();
 
 
-int main() {
-	doUint256();
-	doFieldInt();
-	doCurvePoint();
-	doEcdsa();
-	return EXIT_SUCCESS;
-}
-
-
 static void doUint256() {
 	{
 		Uint256 x = Uint256::ONE;

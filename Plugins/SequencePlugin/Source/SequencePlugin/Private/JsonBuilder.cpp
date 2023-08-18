@@ -22,25 +22,25 @@ FJsonBuilder* FJsonBuilder::AddField(const FString Name, const FString Value)
 		StringValue = StringValue + ", ";
 	}
 
-	StringValue = StringValue + Name + ":" + Value;
+	StringValue = StringValue + ConvertString(Name) + ":" + Value;
 	return this;
 }
 
 FJsonBuilder* FJsonBuilder::AddString(const FString Name, const FString Value)
 {
-	AddField(ConvertString(Name), ConvertString(Value));
+	AddField(Name, ConvertString(Value));
 	return this;
 }
 
 FJsonBuilder* FJsonBuilder::AddInt(const FString Name, const int Value)
 {
-	AddField(ConvertString(Name), ConvertInt(Value));
+	AddField(Name, ConvertInt(Value));
 	return this;
 }
 
 FJsonBuilder* FJsonBuilder::AddBool(const FString Name, const bool Value)
 {
-	AddField(ConvertString(Name), ConvertBool(Value));
+	AddField(Name, ConvertBool(Value));
 	return this;
 }
 
