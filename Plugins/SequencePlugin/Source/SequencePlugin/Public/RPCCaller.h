@@ -6,11 +6,12 @@
 class RPCCaller
 {
 public:
+	virtual ~RPCCaller() = default;
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
 	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	template<typename T>
 	void SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);
