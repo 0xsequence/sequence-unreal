@@ -2,6 +2,7 @@
 #include "Async.h"
 #include "EthTransaction.h"
 #include "RPCCaller.h"
+#include "BE_Structs.h"
 #include "Types/BinaryData.h"
 
 namespace SequenceAPI
@@ -80,9 +81,21 @@ namespace SequenceAPI
 	{
 		FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 		const FString Hostname = "https://next-api.sequence.app";
+		const FString sequenceURL = "https://api.sequence.app/";
+		const FString sequenceURL_QR = "https://api.sequence.app/qr/BASE64-URL-ENCODED-STRING";
 		const FString Path = "/rpc/Wallet/";
+		
+		//URL fetchers for sequence services
 		FString Url(FString Name) const;
+		FString getSequenceURL(FString endpoint);
+
+		//Raw request functions
 		virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) override;
+		void HTTPGet(FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+
+		//Response helper functions
+		TArray<FContact_BE> buildFriendListFromJson(FString json);
+		TArray<FItemPrice_BE> buildItemUpdateListFromJson(FString json);
 		
 	public:
 		FSequenceWallet(FString Hostname);
@@ -97,6 +110,9 @@ namespace SequenceAPI
 		void IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message, FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 		void SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		void SendTransactionBatch(TArray<FTransaction> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
+		void getUpdatedItemPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+		void getUpdatedItemPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+		void getQR(FString publicAddress, int32 size, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	};
-
 }

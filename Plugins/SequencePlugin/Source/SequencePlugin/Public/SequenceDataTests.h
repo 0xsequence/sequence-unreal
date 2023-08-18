@@ -2,10 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Async.h"
-#include "IndexerTests.h" //move testing constants to testingConstants.h
-#include "SequenceData.h"
+#include "IndexerTests.h"
 
-void TestGetFriends(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
-void testGetCoins(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
 
 void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);

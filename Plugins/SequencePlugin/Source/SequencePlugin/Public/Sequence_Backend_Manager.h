@@ -9,7 +9,6 @@
 #include "Backend.h"
 #include "BE_Structs.h"
 #include "Misc/AES.h"
-#include "SequenceData.h"
 #include "Auth.h"
 #include "Sequence_Backend_Manager.generated.h"
 
@@ -29,7 +28,6 @@ private:
 	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
 
 	UIndexer* indexer;//indexer ref!
-	USequenceData* sequence;//sequence data ref for sequence specific data
 
 	UObjectHandler* request_handler;//going to be reworked into an image handler
 
