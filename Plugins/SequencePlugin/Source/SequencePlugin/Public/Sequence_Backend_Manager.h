@@ -10,6 +10,7 @@
 #include "BE_Structs.h"
 #include "Misc/AES.h"
 #include "Auth.h"
+#include "Sequence/SequenceAPI.h"
 #include "Sequence_Backend_Manager.generated.h"
 
 class UIndexer;
@@ -26,7 +27,7 @@ private:
 	FString prvt_key; // private key for signin
 	FString pblc_key; // public key for signin
 	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
-
+	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* indexer;//indexer ref!
 
 	UObjectHandler* request_handler;//going to be reworked into an image handler
@@ -44,6 +45,8 @@ private:
 public:
 	// Sets default values for this actor's properties
 	ASequence_Backend_Manager();
+	//destructor for cleaning up old refs
+	~ASequence_Backend_Manager();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

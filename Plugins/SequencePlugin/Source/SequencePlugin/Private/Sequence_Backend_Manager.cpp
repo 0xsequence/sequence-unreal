@@ -32,8 +32,17 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
 	this->auth = NewObject<UAuth>();//for authentication storage and handling
+	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
 	this->indexer = NewObject<UIndexer>();//for handling indexer data
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
+}
+
+ASequence_Backend_Manager::~ASequence_Backend_Manager()
+{
+	if (this->sequenceWallet)
+	{
+		delete this->sequenceWallet;//free memory only if it's valid!
+	}
 }
 
 // Called when the game starts or when spawned
@@ -88,6 +97,11 @@ FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
 void ASequence_Backend_Manager::init_system_data()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
+
+	FSystemData_BE sysData;
+
+	
+
 	this->update_system_data(FSystemData_BE());
 }
 
