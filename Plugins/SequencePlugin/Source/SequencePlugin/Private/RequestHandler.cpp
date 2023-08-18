@@ -6,6 +6,7 @@
 #include "Async.h"
 #include "Http.h"
 #include "HttpManager.h"
+#include "Types/BinaryData.h"
 
 URequestHandler* URequestHandler::PrepareRequest()
 {
@@ -23,9 +24,9 @@ void URequestHandler::SetVerb(FString Verb) const
 	Request->SetVerb(Verb);
 }
 
-void URequestHandler::SetHeader(const FString Name, const FString Value) const
+void URequestHandler::AddHeader(const FString Name, const FString Value) const
 {
-	Request->SetHeader(Name, Value);
+	Request->AppendToHeader(Name, Value);
 }
 
 void URequestHandler::SetContentAsString(const FString Content) const
@@ -47,7 +48,7 @@ URequestHandler* URequestHandler::WithVerb(const FString Verb)
 
 URequestHandler* URequestHandler::WithHeader(const FString Name, const FString Value)
 {
-	SetHeader(Name, Value);
+	AddHeader(Name, Value);
 	return this;
 }
 
@@ -70,6 +71,21 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Request URL: %s"), *Req->GetURL());
+		
+		auto content = Req->GetContent();
+		FString str = "";
+		for(auto i : content)
+		{
+			str += UTF8ToString(FUnsizedData{&i, 1});
+		}
+		UE_LOG(LogTemp, Display, TEXT("Request Content: %s"), *str);
+
+		auto headers = Req->GetAllHeaders();
+		FString headers_str = "";
+		for(auto header : headers) { headers_str += "\n" + header; }
+		UE_LOG(LogTemp, Display, TEXT("Request Headers: %s"), *headers_str);
+		
 		if(bWasSuccessful)
 		{
 			auto Content = Response->GetContentAsString();
