@@ -1,8 +1,13 @@
+#pragma once
 #include "SequenceAPI.h"
 
 #include "Http.h"
 #include "HttpManager.h"
 #include "RequestHandler.h"
+#include "IndexerSupport.h"
+#include "JsonBuilder.h"
+#include "Dom/JsonObject.h"
+#include "JsonObjectConverter.h"
 
 FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 {
@@ -134,8 +139,7 @@ FString SequenceAPI::FSequenceWallet::Url(const FString Name) const
 	return this->Hostname + this->Path + Name;
 }
 
-void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess,
-	FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	NewObject<URequestHandler>()
 			->PrepareRequest()
@@ -145,6 +149,19 @@ void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSucces
 			->WithVerb("POST")
 			->WithContentAsString(Content)
 			->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::HTTPGet(FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{
+	NewObject<URequestHandler>()
+		->PrepareRequest()
+		->WithUrl(endpoint)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept" ,"application/json")
+		->WithHeader("Authorization", AuthToken)
+		->WithVerb("GET")
+		->WithContentAsString(args)
+		->ProcessAndThen(OnSuccess, OnFailure);
 }
 
 SequenceAPI::FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
@@ -419,4 +436,114 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	
 	this->SendRPCAndExtract(Url("sendTransactionBatch"), Content, OnSuccess, ExtractSignature,
 	OnFailure);
+}
+
+//appending functions from sequenceData.cpp
+
+FString SequenceAPI::FSequenceWallet::getSequenceURL(FString endpoint)
+{
+	return this->sequenceURL + endpoint;
+}
+
+TArray<FContact_BE> SequenceAPI::FSequenceWallet::buildFriendListFromJson(FString json)
+{
+	TArray<FContact_BE> friendList;
+	TSharedPtr<FJsonObject> jsonObj;
+
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), jsonObj))
+	{
+		const TArray<TSharedPtr<FJsonValue>>* storedFriends;
+		if (jsonObj.Get()->TryGetArrayField("friends", storedFriends))
+		{
+			for (TSharedPtr<FJsonValue> friendData : *storedFriends)
+			{
+				const TSharedPtr<FJsonObject>* fJsonObj;
+				if (friendData.Get()->TryGetObject(fJsonObj))//need it as an object
+				{
+					FContact_BE newFriend;
+					newFriend.Public_Address = fJsonObj->Get()->GetStringField("userAddress");
+					newFriend.Nickname = fJsonObj->Get()->GetStringField("nickname");
+					friendList.Add(newFriend);
+				}
+			}
+		}
+	}
+	else
+	{//failure
+		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *json);
+	}
+	return friendList;
+}
+
+/*
+* Gets the friend data from the given username!
+* This function appears to require some form of authentication (perhaps all of the sequence api does)
+*/
+void SequenceAPI::FSequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	FString json_arg = "{}";
+
+
+	SendRPC(getSequenceURL("friendList"), json_arg, [=](FString Content)
+		{
+			OnSuccess(buildFriendListFromJson(Content));
+		}, OnFailure);
+}
+
+TArray<FItemPrice_BE> SequenceAPI::FSequenceWallet::buildItemUpdateListFromJson(FString json)
+{
+	TSharedPtr<FJsonObject> jsonObj;
+	FUpdatedPriceReturn updatedPrices;
+
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), jsonObj))
+	{
+		if (FJsonObjectConverter::JsonObjectToUStruct<FUpdatedPriceReturn>(jsonObj.ToSharedRef(), &updatedPrices))
+		{
+			return updatedPrices.tokenPrices;
+		}
+	}
+	else
+	{//failure
+		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *json);
+	}
+	TArray<FItemPrice_BE> updatedItems;
+	return updatedItems;
+}
+
+void SequenceAPI::FSequenceWallet::getUpdatedItemPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	TArray<FID_BE> items;
+	items.Add(itemToUpdate);
+	getUpdatedItemPrices(items, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::getUpdatedItemPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	FString args = "{\"tokens\":";
+	FString jsonObjString = "";
+	TArray<FString> parsedItems;
+	for (FID_BE item : itemsToUpdate)
+	{
+		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
+			parsedItems.Add(jsonObjString);
+	}
+	args += UIndexerSupport::stringListToSimpleString(parsedItems);
+	args += "}";
+
+	SendRPC(getSequenceURL("getCoinPrices"), args, [=](FString Content)
+		{
+			OnSuccess(buildItemUpdateListFromJson(Content));
+		}, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::getQR(FString publicAddress, int32 size, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{//still need authentication for this to work!
+	int32 lclSize = FMath::Max(size, 64);//ensures a nice valid size
+	FString args = "{\"publicAddress\":\"" + publicAddress + "\"}";
+	FString urlSize = "/";
+	urlSize.AppendInt(size);
+	HTTPGet(sequenceURL_QR + urlSize, args, [=](FString Content)
+		{
+			OnSuccess(Content);
+		}, OnFailure);
 }

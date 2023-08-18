@@ -31,7 +31,6 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("d");
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
-	this->sequence = NewObject<USequenceData>();//for handling sequence data
 	this->auth = NewObject<UAuth>();//for authentication storage and handling
 	this->indexer = NewObject<UIndexer>();//for handling indexer data
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!

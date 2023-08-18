@@ -1,6 +1,7 @@
 #include "Types/BinaryData.h"
 #include "HexUtility.h"
 
+
 uint8* BlankArray(ByteLength Size)
 {
 	uint8* Arr = new uint8[Size];

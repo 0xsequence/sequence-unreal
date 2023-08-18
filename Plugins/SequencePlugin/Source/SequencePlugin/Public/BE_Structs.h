@@ -5,7 +5,6 @@
 #include "Indexer_Enums.h"
 #include "BE_Structs.generated.h"
 
-
 /*
 * Used to store connected network settings
 * info
@@ -580,4 +579,13 @@ public:
         float amount = false;//Coins deal in Positve non Zero Real Numbers {R^+}/{0.0}
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<EContractType> item_type = EContractType::ERC1155;//the type of item we are transacting on
+};
+
+USTRUCT(BlueprintType)
+struct FUpdatedPriceReturn
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FItemPrice_BE> tokenPrices;
 };

@@ -1,7 +1,8 @@
 
 #include "SequenceDataTests.h"
+#include "Sequence/SequenceAPI.h"
 
-void TestGetFriends(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
 	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [OnSuccess](const TArray<FContact_BE> contactList)
 	{
@@ -12,10 +13,16 @@ void TestGetFriends(USequenceData* sequence, TFunction<void(FString)> OnSuccess,
 	{
 		OnFailure("Get Friend Failure", Error);
 	};
-	sequence->getFriends(testingAddress,GenericSuccess,GenericFailure);
+
+	//because of the way this code was structured we can't rely on unreal GC for this
+	SequenceAPI::FSequenceWallet* lclWallet = new SequenceAPI::FSequenceWallet();
+
+	lclWallet->getFriends(testingAddress, GenericSuccess, GenericFailure);
+
+	delete lclWallet;
 }
 
-void testGetCoins(USequenceData* sequence, TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [OnSuccess](const TArray<FItemPrice_BE> contactList)
 	{
@@ -29,13 +36,17 @@ void testGetCoins(USequenceData* sequence, TFunction<void(FString)> OnSuccess, T
 	FID_BE args;
 	args.chainID = 137;
 	args.contractAddress = "0xeac222c7f2456b393621fa3f2eff9e410832e8f0";
-	sequence->getUpdatedItemPrice(args, GenericSuccess, GenericFailure);
+
+	//because of the way this code was structured we can't rely on unreal GC for this
+	SequenceAPI::FSequenceWallet* lclWallet = new SequenceAPI::FSequenceWallet();
+
+	lclWallet->getUpdatedItemPrice(args, GenericSuccess, GenericFailure);
+
+	delete lclWallet;
 }
 
 void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
-{
-	USequenceData* sequence = NewObject<USequenceData>();
-	
-	TestGetFriends(sequence, OnSuccess, OnFailure);
-	testGetCoins(sequence, OnSuccess, OnFailure);
+{	
+	TestGetFriends(OnSuccess, OnFailure);
+	testGetCoins(OnSuccess, OnFailure);
 }
