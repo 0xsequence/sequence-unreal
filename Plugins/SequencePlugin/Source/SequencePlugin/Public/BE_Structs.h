@@ -452,6 +452,8 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* profile_image = nullptr; //no profile images I swap this out for something else in the front!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        UTexture2D* public_qr_address = nullptr;//the is where the QR code for the public address will be stored
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString email_service = "";//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FContact_BE> contacts;//We get this from sequenceAPI (currently sequence data) but we need authentication
