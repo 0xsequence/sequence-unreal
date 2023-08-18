@@ -149,17 +149,12 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void init_get_updated_token_data(TArray<FID_BE> tokensToUpdate);
 
-	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
-		void init_get_updated_fee_data();
-
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
 		void updateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
 		void updateTokenData(const TArray<FItemPrice_BE> &updatedTokenValues);
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
-		void updateFeeData(const TArray<FFee_BE> &updatedFeeValues);
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 private:
