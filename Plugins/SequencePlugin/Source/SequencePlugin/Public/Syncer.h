@@ -19,6 +19,8 @@ private:
 	int32 requestCount = 0;
 public:
 	void inc();
+	void incN(int32 n);
 	void dec();
+	void decN(int32 n);
 	
 };

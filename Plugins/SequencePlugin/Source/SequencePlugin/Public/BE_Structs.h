@@ -424,7 +424,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString other_public_address = "";//the other person involved in the transaction
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* other_icon = nullptr;//the other persons icon
+        UTexture2D* other_icon = nullptr;//the other persons icon ignore this
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TEnumAsByte<ETXNType> transaction_type = ETXNType::TXN_Receive;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
