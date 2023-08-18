@@ -455,7 +455,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString email_service = "";//not sure where this comes from
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FContact_BE> contacts;//We get this from sequenceAPI (currently sequence data) but we need authentication
+        TArray<FContact_BE> contacts;//We get this from SequenceAPI but we need authentication
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         bool hide_unlisted_tokens = false;//not needed
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
