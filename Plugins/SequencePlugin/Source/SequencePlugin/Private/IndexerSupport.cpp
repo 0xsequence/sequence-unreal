@@ -241,3 +241,30 @@ FString UIndexerSupport::stringCleanup(FString string)
 
 	return (*ret);
 }
+
+//indexer response extractors
+
+void UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
+{
+	//this is all getting wrapped in a extractionReturn struct
+	TArray<FCoin_BE> coins;//these arrays will be parallel!
+	TArray<FString> coinIconUrls;
+
+	TArray<FNFT_BE> nfts;//these array's will be parallel!
+	TArray<FString> nftIconUrls;
+
+	
+	for (FTokenBalance token : tokenBalances.balances)
+	{
+		if (token.contractType == EContractType::ERC1155 || token.contractType == EContractType::ERC1155_BRIDGE)
+		{//coin
+			FCoin_BE coin;
+			coin.Coin_Amount = token.balance;
+			
+		}
+		else if (token.contractType == EContractType::ERC721 || token.contractType == EContractType::ERC721_BRIDGE || token.contractType == EContractType::ERC20 || token.contractType == EContractType::ERC20_BRIDGE)
+		{//nft
+			FNFT_BE nft;
+		}
+	}
+}

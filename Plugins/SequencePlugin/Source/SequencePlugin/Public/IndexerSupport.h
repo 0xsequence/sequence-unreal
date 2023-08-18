@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "JsonObjectConverter.h"
+#include "Struct_Data.h"
+#include "BE_Structs.h"
 #include "IndexerSupport.generated.h"
 
 /**
@@ -79,6 +81,11 @@ public:
 	static FString jsonToString(TSharedPtr<FJsonObject> jsonData);
 
 	static FString jsonToSimpleString(TSharedPtr<FJsonObject> jsonData);
+
+	//indexer reponse extraction functions used to parse response into a frontend usable form!
+
+	static void extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
+
 private:
 	/*
 	* Similar to simplifyString EXCEPT we also cleanup 

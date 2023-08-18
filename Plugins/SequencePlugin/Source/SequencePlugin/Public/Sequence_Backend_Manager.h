@@ -34,7 +34,7 @@ private:
 
 	UAuth* auth;//for auth handling
 	
-	//for right now we use these variables to bootstrap signin
+	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
 	bool ready = false;
 	FString recv_block_num;
 	int32 recv_id;
