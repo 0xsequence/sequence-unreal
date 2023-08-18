@@ -249,7 +249,7 @@ void SequenceAPI::FSequenceWallet::Wallets(FPage Page, TSuccessCallback<FWallets
 			const TSharedPtr<FJsonObject> PageJson = Json.GetValue()->GetObjectField("page");
 			TArray<FPartnerWallet> Wallets;
 
-			for(const TSharedPtr<FJsonValue> WalletJson : WalletsJsonArray)
+			for(TSharedPtr<FJsonValue> WalletJson : WalletsJsonArray)
 			{
 				Wallets.Push(FPartnerWallet::From(WalletJson->AsObject()));
 			}

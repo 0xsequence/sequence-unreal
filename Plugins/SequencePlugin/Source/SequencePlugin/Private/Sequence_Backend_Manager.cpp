@@ -4,6 +4,7 @@
 #include "Provider.h"
 #include "HexUtility.h"
 #include "Misc/AutomationTest.h"
+#include "GenericPlatform/GenericPlatformApplicationMisc.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Indexer.h"
@@ -55,22 +56,17 @@ void ASequence_Backend_Manager::Tick(float DeltaTime)
 */
 void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
 {
-	FPlatformMisc::ClipboardCopy(*data);//deprecated call :( , but actually works lol
-	//the replacement call isn't even available to use yet ;-; Requires platform lumin which doesn't exist?
-
-	//this function call is straight up not implemented :(
-	//FGenericPlatformApplicationMisc::ClipboardCopy(*data);
+	//rebuild these 2 functions using #ifdefs for platforms IOS, Android, Mac, Windows to clear out this warning!
+	//works for now
+	FGenericPlatformMisc::ClipboardCopy(*data);
 }
 
 FString ASequence_Backend_Manager::Get_From_Clipboard()
 {
-	FString* ret;
-	FString ret_data;
-	ret = &ret_data;
-	FPlatformMisc::ClipboardPaste(*ret);//get data from the clip board!
-	//again platform misc is deprecated :( but until the generic platform clipboard functions are
-	//actually implemented this is the best I can do for the time being.
-	return ret_data;
+	FString retData;
+	//gets data from clipboard but it comes back invalid? this will be broken until we move up engine versions (hopefully epic actually implements a real solution)
+	FGenericPlatformMisc::ClipboardPaste(retData);
+	return retData;
 }
 
 FString ASequence_Backend_Manager::get_transaction_hash()
