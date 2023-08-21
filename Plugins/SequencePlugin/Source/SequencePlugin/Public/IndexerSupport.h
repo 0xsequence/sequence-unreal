@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GetTransactionHistoryReturn.h"
 #include "UObject/NoExportTypes.h"
 #include "JsonObjectConverter.h"
 #include "IndexerSupport.generated.h"
@@ -85,6 +86,7 @@ public:
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
 
 	static void extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
+	static void ExtractFromTransactionHistory(FGetTransactionHistoryReturn TransactionHistory, );
 
 private:
 	/*
