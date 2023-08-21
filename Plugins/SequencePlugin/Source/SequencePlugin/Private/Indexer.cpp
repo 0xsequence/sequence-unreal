@@ -96,13 +96,14 @@ template < typename T> FString UIndexer::BuildArgs(T struct_in)
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
+	UE_LOG(LogTemp, Display, TEXT("Args: %s"),*result);
 	return result;
 }
 
 //generic
 template<typename T> T UIndexer::BuildResponse(FString text)
 {
-	UE_LOG(LogTemp, Display, TEXT("Rep:\n[%s]"), *text);
+	UE_LOG(LogTemp, Display, TEXT("Rep:\n%s"), *text);
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> json_step;
 	//Then take the json object we make and convert it to a USTRUCT of type T then we return that!
