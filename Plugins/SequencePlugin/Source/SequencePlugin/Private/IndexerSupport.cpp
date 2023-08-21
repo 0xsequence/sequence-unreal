@@ -246,27 +246,59 @@ FString UIndexerSupport::stringCleanup(FString string)
 
 //indexer response extractors
 
-void UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
+FTokenBalanceExtractorReturn UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
 {
-	//this is all getting wrapped in a extractionReturn struct
-	TArray<FCoin_BE> coins;//these arrays will be parallel!
-	TArray<FString> coinIconUrls;
-
-	TArray<FNFT_BE> nfts;//these array's will be parallel!
-	TArray<FString> nftIconUrls;
-
+	FTokenBalanceExtractorReturn ret;
 	
 	for (FTokenBalance token : tokenBalances.balances)
 	{
 		if (token.contractType == EContractType::ERC1155 || token.contractType == EContractType::ERC1155_BRIDGE)
-		{//coin
-			FCoin_BE coin;
-			coin.Coin_Amount = token.balance;
-			
+		{//NFT
+			FNFT_BE nft;
+			nft.NFT_Name = token.tokenMetaData.name;
+			nft.NFT_Short_Name = token.tokenMetaData.name;
+			nft.Collection_Long_Name = token.contractInfo.name;
+			nft.Collection_Short_Name = token.contractInfo.symbol;
+			nft.Description = token.tokenMetaData.description;
+			nft.Properties = token.tokenMetaData.properties;
+			nft.Amount = -1;//need an amount parser
+			nft.Value = -1;
+
+			//parse nft details data
+			nft.NFT_Details.External_URL = token.tokenMetaData.external_url;
+			nft.NFT_Details.token_id.Append(FString::Printf(TEXT("%lld"), token.tokenID));
+			nft.NFT_Details.Contract_Address = token.contractAddress;
+			nft.NFT_Details.itemID.contractAddress = nft.NFT_Details.Contract_Address;
+			nft.NFT_Details.itemID.chainID = token.chainId;
+			nft.NFT_Details.Token_Standard = token.contractType;
+			//not sure where or what we do with network icon or name though!
+			//nft.NFT_Details.Network = "n/a";
+			//nft.NFT_Details.Network_Icon = nullptr;
+			ret.semiParsedBalances.nfts.Add(nft);
+
+			FNFTUpdatable uNFT;//prep the updatable
+			uNFT.nftCollectionIconUrl = token.contractInfo.extensions.ogImage;
+			uNFT.nftIconUrl = token.tokenMetaData.image;
+			uNFT.nftID = nft.NFT_Details.itemID;
+			ret.updatingNftData.Add(uNFT);
 		}
 		else if (token.contractType == EContractType::ERC721 || token.contractType == EContractType::ERC721_BRIDGE || token.contractType == EContractType::ERC20 || token.contractType == EContractType::ERC20_BRIDGE)
-		{//nft
-			FNFT_BE nft;
+		{//coin
+			FCoin_BE coin;
+			coin.Coin_Long_Name = token.contractInfo.name;
+			coin.Coin_Short_Name = token.contractInfo.symbol;
+			coin.Coin_Standard = token.contractType;
+			coin.itemID.chainID = token.chainId;
+			coin.itemID.contractAddress = token.contractAddress;
+			coin.Coin_Amount = -1;//need an amount parser
+			coin.Coin_Value = -1;
+			ret.semiParsedBalances.coins.Add(coin);//add the semi parsed coin data
+
+			FCoinUpdatable uCoin;//add the needed info for getting the rest of the coin data
+			uCoin.coinIconUrl = token.contractInfo.logoURI;
+			uCoin.coinID = coin.itemID;
+			ret.updatingCoinData.Add(uCoin);
 		}
 	}
+	return ret;
 }

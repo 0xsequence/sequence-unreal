@@ -9,6 +9,7 @@
 #include "IndexerSupport.generated.h"
 
 struct FGetTokenBalancesReturn;
+struct FTokenBalanceExtractorReturn;
 
 /**
  * Support class for the indexer
@@ -84,9 +85,9 @@ public:
 	static FString jsonToSimpleString(TSharedPtr<FJsonObject> jsonData);
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
-
 	static void extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 	static void ExtractFromTransactionHistory(FGetTransactionHistoryReturn TransactionHistory, );
+	static FTokenBalanceExtractorReturn extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 
 private:
 	/*

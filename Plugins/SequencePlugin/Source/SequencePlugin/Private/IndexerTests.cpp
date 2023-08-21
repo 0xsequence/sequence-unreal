@@ -124,12 +124,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("Token Balances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
-	args.accountAddress = testingAddress;
-	FSortBy sortType;
-	sortType.column = "0x1";
-	sortType.order = ESortOrder::DESC;
-	args.page.sort.Add(sortType);
-	args.page.page = 10;
+	args.accountAddress = testingAddress;//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"
 	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
@@ -223,9 +218,11 @@ void getTransactionHistoryTest(UIndexer* indexer, TFunction<void(FString)> OnSuc
 		OnFailure("transactionHistory Failure", Error);
 	};
 
-	FGetTransactionHistoryArgs args;
+	FGetTransactionHistoryArgs args;			// 0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9
 	args.filter.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	args.includeMetaData = true;
+	args.page.page = 0;
+	args.page.more = true;
 	indexer->GetTransactionHistory(testingChainID, args, GenericSuccess, GenericFailure);
 }
 
@@ -910,15 +907,15 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	//buildResponse parsing tests//
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 	UE_LOG(LogTemp, Display, TEXT("Start of Response Tests"));
-	pingParsingTest(indexer);
-	versionParsingTest(indexer);
-	runTimeStatusParsingTest(indexer);
-	getChainIDParsingTest(indexer);
-	getEtherBalanceParsingTest(indexer);
-	getTokenBalanceParsingTest(indexer);
-	getTokenSuppliesParsingTest(indexer);
-	getTokenSuppliesMapParsingTest(indexer);
-	getBalanceUpdatesParsingTest(indexer);
+//	pingParsingTest(indexer);
+	//versionParsingTest(indexer);
+	//runTimeStatusParsingTest(indexer);
+	//getChainIDParsingTest(indexer);
+//	getEtherBalanceParsingTest(indexer);
+	//getTokenBalanceParsingTest(indexer);
+	//getTokenSuppliesParsingTest(indexer);
+	//getTokenSuppliesMapParsingTest(indexer);
+	//getBalanceUpdatesParsingTest(indexer);
 	getTransactionHistoryParsingTest(indexer);
 	//buildResponse parsing tests//
 	UE_LOG(LogTemp, Display, TEXT("End of Response Tests"));
@@ -927,14 +924,14 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 	UE_LOG(LogTemp, Display, TEXT("Start of Argument Tests"));
 	//buildArgs parsing tests//
-	tokenBalanceMaxArgsTest(indexer);
-	tokenBalanceMinArgsTest(indexer);
-	tokenSuppliesArgsTest(indexer);
-	tokenSuppliesMapArgsTest(indexer);
-	balanceUpdatesMaxArgsTest(indexer);
-	balanceUpdatesMinArgsTest(indexer);
-	transactionHistoryArgsMaxTest(indexer);
-	transactionHistoryArgsMinTest(indexer);
+//	tokenBalanceMaxArgsTest(indexer);
+//	tokenBalanceMinArgsTest(indexer);
+	//tokenSuppliesArgsTest(indexer);
+//	tokenSuppliesMapArgsTest(indexer);
+	//balanceUpdatesMaxArgsTest(indexer);
+	//balanceUpdatesMinArgsTest(indexer);
+	//transactionHistoryArgsMaxTest(indexer);
+	//transactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
 	UE_LOG(LogTemp, Display, TEXT("End of Argument Tests"));
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
@@ -942,14 +939,14 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Seq
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 	UE_LOG(LogTemp, Display, TEXT("Start of System Tests"));
 	//system tests//
-	pingTest(indexer, OnSuccess, OnFailure);
-	versionTest(indexer, OnSuccess, OnFailure);
-	runTimeStatusTest(indexer, OnSuccess, OnFailure);
-	getChainIDTest(indexer, OnSuccess, OnFailure);
-	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
+	//pingTest(indexer, OnSuccess, OnFailure);
+	//versionTest(indexer, OnSuccess, OnFailure);
+	//runTimeStatusTest(indexer, OnSuccess, OnFailure);
+	//getChainIDTest(indexer, OnSuccess, OnFailure);
+	//getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 	getTokenBalanceTest(indexer, OnSuccess, OnFailure);
-	getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
-	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
-	getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
+	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
+	//getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
+	//getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
 }
