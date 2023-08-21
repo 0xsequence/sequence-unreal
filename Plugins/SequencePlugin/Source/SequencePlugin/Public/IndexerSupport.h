@@ -8,7 +8,7 @@
 #include "IndexerSupport.generated.h"
 
 struct FGetTokenBalancesReturn;
-struct FTokenBalanceExtractorReturn;
+struct FUpdatableItemDataArgs;
 
 /**
  * Support class for the indexer
@@ -85,7 +85,7 @@ public:
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
 
-	static FTokenBalanceExtractorReturn extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
+	static FUpdatableItemDataArgs extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 
 private:
 	/*
