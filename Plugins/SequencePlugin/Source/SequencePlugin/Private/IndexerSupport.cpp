@@ -2,6 +2,8 @@
 #pragma once
 #include "IndexerSupport.h"
 #include "Version.h"
+#include "Struct_Data.h"
+#include "BE_Structs.h"
 
 /*
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
