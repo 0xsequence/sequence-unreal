@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "JsonObjectConverter.h"
-#include "Struct_Data.h"
-#include "BE_Structs.h"
 #include "IndexerSupport.generated.h"
+
+struct FGetTokenBalancesReturn;
 
 /**
  * Support class for the indexer

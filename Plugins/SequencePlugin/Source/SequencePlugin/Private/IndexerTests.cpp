@@ -224,7 +224,7 @@ void getTransactionHistoryTest(UIndexer* indexer, TFunction<void(FString)> OnSuc
 	};
 
 	FGetTransactionHistoryArgs args;
-	args.filter.accountAddress = testingAddress;
+	args.filter.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	args.includeMetaData = true;
 	indexer->GetTransactionHistory(testingChainID, args, GenericSuccess, GenericFailure);
 }
