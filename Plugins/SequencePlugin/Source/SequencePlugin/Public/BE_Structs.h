@@ -589,3 +589,53 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FItemPrice_BE> tokenPrices;
 };
+
+USTRUCT(BlueprintType)
+struct FSemiParsedTokenBalances
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FCoin_BE> coins;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFT_BE> nfts;
+};
+
+USTRUCT(BlueprintType)
+struct FCoinUpdatable
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString coinIconUrl = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FID_BE coinID;
+};
+
+USTRUCT(BlueprintType)
+struct FNFTUpdatable
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString nftIconUrl = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FString nftCollectionIconUrl = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FID_BE nftID;
+};
+
+USTRUCT(BlueprintType)
+struct FTokenBalanceExtractorReturn
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    //this array is parallel with coins in SemiParsed Balances
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FCoinUpdatable> updatingCoinData;//this is used to update the value and image data of coins
+    //this array is parallel with nfts in SemiParsed Balances
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFTUpdatable> updatingNftData;//this is used to update the value and image data of nft's
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FSemiParsedTokenBalances semiParsedBalances;//this is the token data with everything but value and image data
+};
