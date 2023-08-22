@@ -81,8 +81,6 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 */
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
-	FUpdatableItemDataArgs* itemPtr = &itemsToUpdate;//this needs to be global if we want to do this async!
-
 	this->getItemDataSyncer->incN(2);//1 for getting images 1 for getting values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -103,7 +101,6 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		idList.Add(nft.nftID);//for getting updated value
 	}
 
-	//this will inject the image data //hopefully// into itemsToUpdate
 	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
 		[this]()
 		{
@@ -208,9 +205,12 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	this->GPublicAddress = publicAddress;
 	this->sqncMngr = manager;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDone");
-	//start of systemData construction calls!
 
+	//sync operations FIRST
 	this->systemData.user_data.public_address = publicAddress;
+
+	//ASYNC Operations next!
+	this->initGetTokenData();
 }
 
 void USystemDataBuilder::OnDone()
