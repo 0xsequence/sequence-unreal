@@ -264,9 +264,6 @@ void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTrans
 
 				Item.txn_history_nfts.Add(NftTxn);
 			}
-
-			Item.txn_history_coins;
-			Item.txn_history_nfts;
 		}
 		
 		Array.Push(Item);
