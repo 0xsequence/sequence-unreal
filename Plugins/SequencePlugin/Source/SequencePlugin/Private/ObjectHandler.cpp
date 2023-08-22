@@ -160,12 +160,14 @@ bool UObjectHandler::request_raw_base(FString URL)
 
 void UObjectHandler::requestImage(FString URL)
 {
+	this->storedResponses.Empty();
 	this->syncer->inc();
 	this->request_raw_base(URL);
 }
 
 void UObjectHandler::requestImages(TArray<FString> URLs)
 {
+	this->storedResponses.Empty();
 	this->syncer->incN(URLs.Num());//inc for all requests
 	for (FString url : URLs)
 	{
