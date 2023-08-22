@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IndexerSupport.h"
 #include "TransactionHistoryFilter.generated.h"
 
 USTRUCT(BlueprintType)
