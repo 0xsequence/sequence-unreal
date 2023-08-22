@@ -101,7 +101,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	}
 
 	//this will inject the image data //hopefully// into itemsToUpdate
-	this->imageHandler->FOnDoneImageProcessingDelegate.BindWeakLambda(this,
+	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
 		[this,itemPtr]()
 		{
 			TMap<FString,UTexture2D*> images = this->imageHandler->getProcessedImages();
