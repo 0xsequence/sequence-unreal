@@ -257,6 +257,7 @@ struct FCoin_BE
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* Coin_Symbol = nullptr;
+    FString Coin_Symbol_URL = "";//the coins symbol URL backend use only
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString Coin_Long_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -311,6 +312,7 @@ struct FNFT_BE
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* NFT_Icon = nullptr;
+    FString NFT_Icon_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString NFT_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -321,6 +323,7 @@ public:
         FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* Collection_Icon = nullptr;
+    FString Collection_Icon_URL = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         int32 Amount = -1;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
