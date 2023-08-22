@@ -17,6 +17,10 @@ class SEQUENCEPLUGIN_API USystemDataBuilder : public UObject
 	GENERATED_BODY()
 private:
 	FSystemData_BE systemData;
+
+	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
+
+	FUpdatableItemDataReturn getItemData(FUpdatableItemDataArgs itemsToUpdate);
 public:
 	void initBuildSystemData(UIndexer * indexer, SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress);
 	FSystemData_BE getSystemData();

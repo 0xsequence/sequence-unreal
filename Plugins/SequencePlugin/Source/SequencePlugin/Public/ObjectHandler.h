@@ -8,7 +8,10 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 #include "UObject/NoExportTypes.h"
+#include "Syncer.h"
 #include "ObjectHandler.generated.h"
+
+DECLARE_DELEGATE(FOnDoneImageProcessingSignature);
 
 class UIndexer;
 
@@ -27,40 +30,20 @@ UCLASS()
 class UObjectHandler : public UObject
 {
 	GENERATED_BODY()
-	
+public:
+	FOnDoneImageProcessingSignature FOnDoneImageProcessingDelegate;
+	TMap<FString, UTexture2D*> getProcessedImages();
 private:
-	//this index we will be inserting into
-	UObject* main_this_ref = nullptr;
-	TMap<FString, int32> insertion_indices;//we can associate URL's with insertion indices!
 	//note 2GB is the limit because of int32 size limits!
 	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
 	int32 current_cache_size = 0;//in bytes we want this as accurate as possible!
 	TMap<FString, FRawData> cache;//a Map of URL's and rawData
+	TMap<FString, UTexture2D*> storedResponses;
 
-	typedef void(UObjectHandler::*string_handler)(FString response,FString URL);//pass in data it absolutely needs to seperate!
-	typedef void(UObjectHandler::*raw_handler)(TArray<uint8> response,FString URL);
-
-	//used to process string based responses!
-	string_handler main_string_handler;
-	bool string_handler_ready = false;
-
-	//used to process raw uint8 based responses!
-	raw_handler main_raw_handler;
-	bool raw_handler_ready = false;
 	bool use_raw_cache = false; // enables / disables the use of raw data caching!
 
 	//this is the number of requests that are actively processing
-	int32 active_requests = 0;
-
-	/*
-	* Adds a KVP (URL,i_index) to insertion indices
-	*/
-	void add_to_insertion_indices(FString URL,int32 i_index);
-
-	/*
-	* Removes a Key from the insertion indices if it exists!
-	*/
-	void remove_from_insertion_indices(FString URL);
+	USyncer* syncer;
 
 	/*
 	* Checks the cache to see if we already have the data needed in it
@@ -86,33 +69,23 @@ private:
 	bool can_add_to_cache(int32 byte_count_to_add);
 
 public:
-	/*
-	* Used to setup the String handler for web requests
-	*/
-	void setup_string_handler(string_handler handler_in, UObject * this_ref);
 
 	/*
 	* Used to setup the Raw handler for web requests
 	*/
-	void setup_raw_handler(raw_handler handler_in, UObject * this_ref,bool raw_cache_enabled);
-
-	//here we process the data as json (For json responses)
-	void handle_request_string(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	//Here we process the data as uint8[] (For images)
-	void handle_request_raw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void setup(bool raw_cache_enabled);
 
 	//used to clear the contents of the raw cache!
 	void clear_raw_cache();
 
 private:
+	UFUNCTION()
+	void OnDone();
 
-	/*
-	* Base implementation of async json request, calls the associated string handler set
-	* for this object handler!
-	* @return true if the request started successfully else false
-	*/
-	bool request_json_base(FString URL, FString json_args);
+	void storeImageData(UTexture2D * image, FString url);
+
+	//Here we process the data as uint8[] (For images)
+	void handle_request_raw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	/*
 	* Base implementation of async raw request (IE getting raw uint8 bytes!) calls the associated
@@ -124,43 +97,18 @@ private:
 public:
 
 	/*
-	* Basic json request
-	* @return true if req. started else false
-	*/
-	bool request_json(FString URL, FString json_args);
-
-	/*
-	* Index json request, initiates like a base request json BUT
-	* when complete there will be an index provided via the TMap indices that is associated with
-	* the requests URL this index can be used in a handler to index into a TArray in the Callers stores!
-	* @return whether the txn started or not
-	*/
-	bool request_json_indexed(FString URL, FString json_args, int32 index);
-
-	/*
 	* Basic raw request
-	* @return true if req. started else false
+	* @upon request completetion a delegate OnDone will fire that will contain the needed data!
+	* in the event an error occurs OnDone will fire with nothing in it
 	*/
-	bool request_raw(FString URL);//this is specifically there for getting raw data!
+	void requestImage(FString URL);//this is specifically there for getting raw data!
 
 	/*
-	* Index raw request, initiates like a base request raw BUT
-	* when complete there will be an index provided via the TMap indices that is associated with
-	* the requests URL this index can be used in a handler to index into a TArray in the Callers stores!
-	* @return whether the txn started or not
+	* Basic raw multi request
+	* @upon request completetion a delegate OnDone will fire that will contain the needed data!
+	* in the event an error occurs OnDone will fire with nothing in it
 	*/
-	bool request_raw_indexed(FString URL, int32 index);
-
-public:
-
-//RAW HANDLERS//
-	/*
-	* Custom handler for handling received image data!
-	* this will call add_img in Sequence_Backend_Manager to add
-	* the newly built image data from the request
-	*/
-	void img_handler(TArray<uint8> response,FString URL);
-//RAW HANDLERS//
+	void requestImages(TArray<FString> URLs);//this is specifically there for getting raw data!
 
 private:
 	//helper functions for handling requests data! specifically image data!

@@ -210,6 +210,11 @@ public:
         FString contractAddress = "";//used to uniquely identify this item TYPE
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         int64 chainID = -1;//used for getting updated price data!
+
+    bool operator ==(const FID_BE& a)
+    {
+        return (this->contractAddress.ToLower().Compare(a.contractAddress.ToLower()) == 0 && this->chainID == a.chainID);
+    }
 };
 
 /*
@@ -626,7 +631,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FTokenBalanceExtractorReturn
+struct FUpdatableItemDataArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -638,4 +643,13 @@ public:
         TArray<FNFTUpdatable> updatingNftData;//this is used to update the value and image data of nft's
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FSemiParsedTokenBalances semiParsedBalances;//this is the token data with everything but value and image data
+};
+
+USTRUCT(BlueprintType)
+struct FUpdatableItemDataReturn
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        FSemiParsedTokenBalances fullyParsedBalances;//Data filled in with all the extra datums
 };

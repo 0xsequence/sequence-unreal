@@ -12,6 +12,7 @@
 struct FGetTokenBalancesReturn;
 struct FTokenBalanceExtractorReturn;
 struct FGetTransactionHistoryReturn;
+struct FUpdatableItemDataArgs;
 
 /**
  * Support class for the indexer
@@ -88,7 +89,7 @@ public:
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
 	static void ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory, TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure);
-	static FTokenBalanceExtractorReturn extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
+	static FUpdatableItemDataArgs extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 
 private:
 	/*
