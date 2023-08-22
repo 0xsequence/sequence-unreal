@@ -3,6 +3,11 @@
 
 #include "Syncer.h"
 
+void USyncer::reset()
+{
+	this->requestCount = 0;
+	this->OnDoneDelegate.ExecuteIfBound();//executes if bound!
+}
 
 void USyncer::inc()
 {
@@ -19,7 +24,7 @@ void USyncer::dec()
 	this->requestCount = FMath::Max(this->requestCount-1, 0);//clamp to stop having values < 0
 	if (this->requestCount == 0)
 	{
-		FOnDone().Execute();//fire off the delegate so anyone bound will know that we are done!
+		this->OnDoneDelegate.ExecuteIfBound();
 	}
 }
 
@@ -28,6 +33,6 @@ void USyncer::decN(int32 n)
 	this->requestCount = FMath::Max(this->requestCount - n, 0);//clamp to stop having values < 0
 	if (this->requestCount == 0)
 	{
-		FOnDone().Execute();//fire off the delegate so anyone bound will know that we are done!
+		this->OnDoneDelegate.ExecuteIfBound();
 	}
 }

@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Syncer.generated.h"
 
-DECLARE_DELEGATE(FOnDone)//Delegate used to let others know when this syncer has zero active requests!
+DECLARE_DELEGATE(FOnDoneSignature)//Delegate used to let others know when this syncer has zero active requests!
 
 /**
  * Used to aid in the synchronization of asynchronous tasks
@@ -18,6 +18,9 @@ class SEQUENCEPLUGIN_API USyncer : public UObject
 private:
 	int32 requestCount = 0;
 public:
+
+	FOnDoneSignature OnDoneDelegate;
+	void reset();//resets active request counter to zero and fires OnDone to clear everything out
 	void inc();
 	void incN(int32 n);
 	void dec();
