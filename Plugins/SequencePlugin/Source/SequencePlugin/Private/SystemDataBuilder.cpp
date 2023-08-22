@@ -54,11 +54,13 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 		{//create a new card and add that to our list
 			FNFT_Master_BE newMNFT;
 			newMNFT.Collection_Icon = lcl_nfts[0].Collection_Icon;
+			newMNFT.Collection_Icon_Url = lcl_nfts[0].Collection_Icon_URL;
 			newMNFT.Collection_Long_Name = lcl_nfts[0].Collection_Long_Name;
 			newMNFT.Collection_Short_Name = lcl_nfts[0].Collection_Short_Name;
 			newMNFT.Description = lcl_nfts[0].Description;
 			newMNFT.NFT_Details = lcl_nfts[0].NFT_Details;
 			newMNFT.NFT_Icon = lcl_nfts[0].NFT_Icon;
+			newMNFT.NFT_Icon_Url = lcl_nfts[0].NFT_Icon_URL;
 			newMNFT.NFT_Name = lcl_nfts[0].NFT_Name;
 			newMNFT.NFT_Short_Name = lcl_nfts[0].NFT_Short_Name;
 			newMNFT.Properties = lcl_nfts[0].Properties;
@@ -80,6 +82,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
 	FUpdatableItemDataArgs* itemPtr = &itemsToUpdate;//this needs to be global if we want to do this async!
+
 	this->getItemDataSyncer->incN(2);//1 for getting images 1 for getting values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -102,27 +105,26 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 
 	//this will inject the image data //hopefully// into itemsToUpdate
 	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
-		[this,itemPtr]()
+		[this]()
 		{
 			TMap<FString,UTexture2D*> images = this->imageHandler->getProcessedImages();
-			
-			for (FCoin_BE coin : itemPtr->semiParsedBalances.coins)
-			{
-				coin.Coin_Symbol = *images.Find(coin.Coin_Symbol_URL);
-			}
 
-			for (FNFT_BE nft : itemPtr->semiParsedBalances.nfts)
-			{
-				nft.NFT_Icon = *images.Find(nft.NFT_Icon_URL);
-				nft.Collection_Icon = *images.Find(nft.Collection_Icon_URL);
+			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
+			{//index directly into systemData rather than jumping around
+				this->systemData.user_data.coins[i].Coin_Symbol = *images.Find(this->systemData.user_data.coins[i].Coin_Symbol_URL);
 			}
-			//lclDec
+			
+			for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
+			{
+				this->systemData.user_data.nfts[i].NFT_Icon = *images.Find(this->systemData.user_data.nfts[i].NFT_Icon_Url);
+				this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
+			}
 			this->getItemDataSyncer->dec();
 		});
 	this->imageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
 
-	const TSuccessCallback<TArray<FItemPrice_BE>> lclSuccess = [itemPtr,this](const TArray<FItemPrice_BE> updatedItems)
+	const TSuccessCallback<TArray<FItemPrice_BE>> lclSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
 	{//because we don't get a map we have to go through everything
 		TArray<FItemPrice_BE> lclUItems;
 		FItemPrice_BE itemPrice;
@@ -132,24 +134,25 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		{
 			itemPrice = lclUItems[0];
 			found = false;
-			for (FCoin_BE coin : itemPtr->semiParsedBalances.coins)
+			//this->systemData.user_data.coins
+			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{
-				if (coin.itemID == itemPrice.Token)
-				{
-					coin.Coin_Value = itemPrice.price.value;
+				if (itemPrice.Token == this->systemData.user_data.coins[i].itemID)
+				{//directly inject data into system data!
+					this->systemData.user_data.coins[i].Coin_Value = itemPrice.price.value;
 					found = true;//avoid uneeded searching
 					break;
-				}//if
-			}//for
+				}
+			}
 			if (!found)
 			{
-				for (FNFT_BE nft : itemPtr->semiParsedBalances.nfts)
-				{
-					if (nft.NFT_Details.itemID == itemPrice.Token)
+				for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
+				{//index directly into systemData rather than asigning it to some inbetween party
+					if (itemPrice.Token == this->systemData.user_data.nfts[i].NFT_Details.itemID)
 					{
-						nft.Value = itemPrice.price.value;
-					}//if
-				}//for
+						this->systemData.user_data.nfts[i].Value = itemPrice.price.value;
+					}
+				}
 			}//!found
 			lclUItems.RemoveAt(0);
 		}//while
@@ -163,6 +166,12 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	};
 
 	this->sequenceAPI->getUpdatedItemPrices(idList,lclSuccess,lclFailure);
+}
+
+
+void USystemDataBuilder::OnGetItemDataDone()
+{//if we hit this function that means we are DONE getting the token data and we can decrement our master syncer!
+	this->masterSyncer->dec();
 }
 
 void USystemDataBuilder::initGetTokenData()
@@ -183,7 +192,7 @@ void USystemDataBuilder::initGetTokenData()
 	};
 
 	this->masterSyncer->inc();//1 for getting the token data!
-	//we need to setup a binding to the lclSyncer so we know when all these calls are done so we can dec the masterSyncer
+	this->masterSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
 	FGetTokenBalancesArgs args;
 	this->GIndexer->GetTokenBalances(GChainId, args, GenericSuccess, GenericFailure);
 }
@@ -191,19 +200,21 @@ void USystemDataBuilder::initGetTokenData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress)
+void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress,ASequence_Backend_Manager * manager)
 {
 	this->GIndexer = indexer;
 	this->GWallet = wallet;
 	this->GChainId = chainId;
 	this->GPublicAddress = publicAddress;
-
+	this->sqncMngr = manager;
+	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDone");
 	//start of systemData construction calls!
 
 	this->systemData.user_data.public_address = publicAddress;
 }
 
-FSystemData_BE USystemDataBuilder::getSystemData()
+void USystemDataBuilder::OnDone()
 {
-	return this->systemData;
+	this->masterSyncer->OnDoneDelegate.Unbind();//for safety reasons!
+	this->sqncMngr->update_system_data(this->systemData);
 }

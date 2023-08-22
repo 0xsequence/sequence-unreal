@@ -365,6 +365,7 @@ public:
     //Duplicate Data that all NFT's of this type will have!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* NFT_Icon = nullptr;
+    FString NFT_Icon_Url = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString NFT_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -375,6 +376,7 @@ public:
         FString Collection_Short_Name = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* Collection_Icon = nullptr;
+    FString Collection_Icon_Url = "";
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         float Value = 0.0;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
