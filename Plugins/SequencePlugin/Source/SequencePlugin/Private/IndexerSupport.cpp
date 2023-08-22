@@ -333,9 +333,9 @@ FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 
 //indexer response extractors
 
-FTokenBalanceExtractorReturn UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
+FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
 {
-	FTokenBalanceExtractorReturn ret;
+	FUpdatableItemDataArgs ret;
 	
 	for (FTokenBalance token : tokenBalances.balances)
 	{
