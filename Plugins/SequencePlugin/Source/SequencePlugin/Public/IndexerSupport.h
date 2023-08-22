@@ -3,13 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GetTransactionHistoryReturn.h"
+#include "Async.h"
 #include "UObject/NoExportTypes.h"
 #include "JsonObjectConverter.h"
+#include "BE_Structs.h"
 #include "IndexerSupport.generated.h"
 
 struct FGetTokenBalancesReturn;
 struct FTokenBalanceExtractorReturn;
+struct FGetTransactionHistoryReturn;
 
 /**
  * Support class for the indexer
@@ -85,8 +87,7 @@ public:
 	static FString jsonToSimpleString(TSharedPtr<FJsonObject> jsonData);
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
-	static void extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
-	static void ExtractFromTransactionHistory(FGetTransactionHistoryReturn TransactionHistory, );
+	static void ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory, TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure);
 	static FTokenBalanceExtractorReturn extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 
 private:
@@ -95,4 +96,6 @@ private:
 	* some special edge cases from json responses / parsing as well!
 	*/
 	static FString stringCleanup(FString string);
+
+	static FMonthDayYear_BE TimestampToMonthDayYear_Be(FString Timestamp);
 };

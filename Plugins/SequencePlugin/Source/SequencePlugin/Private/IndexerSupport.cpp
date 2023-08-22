@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-#pragma once
+
 #include "IndexerSupport.h"
 #include "Version.h"
+#include "GetTransactionHistoryReturn.h"
 #include "Struct_Data.h"
 #include "BE_Structs.h"
+#include "Indexer.h"
 
 /*
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
@@ -193,6 +195,86 @@ FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonObject> jsonData)
 	return simplifyString(jsonToString(jsonData));
 }
 
+void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory,
+	TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	TArray<FTransactionHistoryItem_BE> Array;
+
+	for(FTransaction Transaction : TransactionHistory.transactions)
+	{
+		FTransactionHistoryItem_BE Item;
+		Item.network_name = *UIndexer::GetIndexerNames().Find(Transaction.chainId);
+		Item.network_icon = nullptr;
+		bool TxnTypeSet = false;
+		
+		for(FTxnTransfer Transfer : Transaction.transfers)
+		{
+			FTokenMetaData TokenMetaData = Transfer.tokenMetaData.Array()[0].Value;
+			Item.other_public_address = Transfer.from == MyAddress ? Transfer.to : Transfer.from;
+			Item.other_icon = nullptr;
+
+			if(!TxnTypeSet)
+			{
+				Item.transaction_type = Transfer.transferType == SEND ? TXN_Send : TXN_Receive;
+				TxnTypeSet = true;
+			}
+			else if(Item.transaction_type != TXN_Swap)
+			{
+				if(Item.transaction_type == TXN_Receive && Transfer.transferType == SEND)
+				{
+					Item.transaction_type = TXN_Swap;
+				}
+				else if(Item.transaction_type == TXN_Send && Transfer.transferType == RECEIVE)
+				{
+					Item.transaction_type = TXN_Swap;
+				}
+			}
+			
+			Item.transaction_date = TimestampToMonthDayYear_Be(Transaction.timestamp);
+
+			if(Transfer.contractType == ERC20 || Transfer.contractType == ERC1155 || Transfer.contractType == ERC1155_BRIDGE || Transfer.contractType == ERC20_BRIDGE)
+			{
+				FCoinTxn_BE CoinTxn;
+				
+				//coin
+				CoinTxn.amount = Transfer.amounts[0] * FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
+				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
+				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
+				CoinTxn.coin.Coin_Standard = Transfer.contractType;
+				CoinTxn.coin.Coin_Value = 1.0; // unknown, set to 1.0 for now
+
+				Item.txn_history_coins.Add(CoinTxn);
+			}
+			else
+			{
+				// Assume its an NFT?
+				FNFTTxn_BE NftTxn;
+
+				NftTxn.amount = Transfer.amounts[0] * FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				NftTxn.nft.Amount = NftTxn.amount;
+				NftTxn.nft.Description = Transfer.contractInfo.extensions.description;
+				NftTxn.nft.Properties; // unknown, probably in token meta data
+				NftTxn.nft.Value = 1.0; // unknown, set to 1.0 for now
+				NftTxn.nft.NFT_Name = Transfer.contractInfo.name;
+				NftTxn.nft.NFT_Short_Name = Transfer.contractInfo.symbol;
+				NftTxn.nft.NFT_Details.token_id = FString::FromInt(Transfer.tokenIds[0]); // assume int conversion?
+				NftTxn.nft.NFT_Details.Contract_Address = Transfer.contractInfo.address;
+				NftTxn.nft.NFT_Details.Token_Standard = Transfer.contractType;
+
+				Item.txn_history_nfts.Add(NftTxn);
+			}
+
+			Item.txn_history_coins;
+			Item.txn_history_nfts;
+		}
+		
+		Array.Push(Item);
+	}
+
+	OnSuccess(Array);
+}
+
 FString UIndexerSupport::jsonToParsableString(TSharedPtr<FJsonValue> jsonData)
 {
 	return simplifyStringParsable(jsonToString(jsonData));
@@ -242,6 +324,11 @@ FString UIndexerSupport::stringCleanup(FString string)
 	(*ret).ReplaceInline(srch_ptr_c, rep_ptr, ESearchCase::IgnoreCase);//remove \"
 
 	return (*ret);
+}
+
+FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
+{
+	return FMonthDayYear_BE{}; // TODO: Date conversion
 }
 
 //indexer response extractors

@@ -8,22 +8,29 @@
 
 UIndexer::UIndexer()
 {
+}
+
+TMap<int64, FString> UIndexer::GetIndexerNames()
+{
+	TMap<int64, FString> IndexerNames;
 	//Mainnets
-	this->Indexernames.Add(TPair<int64, FString>(137,"polygon"));
-	this->Indexernames.Add(TPair<int64, FString>(1, "ethereum"));
-	this->Indexernames.Add(TPair<int64, FString>(56, "bnbsmartchain"));
-	this->Indexernames.Add(TPair<int64, FString>(42161, "arbitrumone"));
-	this->Indexernames.Add(TPair<int64, FString>(42170, "arbitrumnova"));
-	this->Indexernames.Add(TPair<int64, FString>(10, "optimism"));
-	this->Indexernames.Add(TPair<int64, FString>(43114, "avalanche"));
-	this->Indexernames.Add(TPair<int64, FString>(100, "gnosis"));
+	IndexerNames.Add(137,"polygon");
+	IndexerNames.Add(1, "ethereum");
+	IndexerNames.Add(56, "bnbsmartchain");
+	IndexerNames.Add(42161, "arbitrumone");
+	IndexerNames.Add(42170, "arbitrumnova");
+	IndexerNames.Add(10, "optimism");
+	IndexerNames.Add(43114, "avalanche");
+	IndexerNames.Add(100, "gnosis");
 
 	//Testnets
-	this->Indexernames.Add(TPair<int64, FString>(1337, "testchain"));
-	this->Indexernames.Add(TPair<int64, FString>(5, "testnetgoerli"));
-	this->Indexernames.Add(TPair<int64, FString>(80001, "testnetpolygonmumbai"));
-	this->Indexernames.Add(TPair<int64, FString>(97, "testnetbnbsmartchain"));
-	this->Indexernames.Add(TPair<int64, FString>(43113, "testnetavalanchefuji"));
+	IndexerNames.Add(1337, "testchain");
+	IndexerNames.Add(5, "testnetgoerli");
+	IndexerNames.Add(80001, "testnetpolygonmumbai");
+	IndexerNames.Add(97, "testnetbnbsmartchain");
+	IndexerNames.Add(43113, "testnetavalanchefuji");
+	
+	return IndexerNames;
 }
 
 /*
@@ -43,7 +50,7 @@ FString UIndexer::Url(int64 chainID, FString endPoint)
 FString UIndexer::HostName(int64 chainID)
 {
 	FString hostname = "https://";
-	hostname.Append(*this->Indexernames.Find(chainID));
+	hostname.Append(*GetIndexerNames().Find(chainID));
 	hostname.Append("-indexer.sequence.app");
 	return hostname;
 }

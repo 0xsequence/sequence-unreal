@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IndexerSupport.h"
 #include "SortBy.h"
 #include "IndexerSupport.h"
 #include "Page.generated.h"
