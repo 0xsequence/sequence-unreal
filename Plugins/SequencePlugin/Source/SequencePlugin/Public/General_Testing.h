@@ -13,6 +13,10 @@ UCLASS()
 class SEQUENCEPLUGIN_API AGeneral_Testing : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	TArray<FString> testingURLs;
+	UObjectHandler* imgHandler;
 public:	
 	// Sets default values for this actor's properties
 	AGeneral_Testing();
@@ -35,11 +39,21 @@ protected:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Indexer")
 		void test_indexer();
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Encryption")
+		void testEncryption();
+
 	/*
 	* Used to test misc functions / support objects!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Misc")
 		void testMisc();
+
+	//special bindable function used for handling callbacks on Async stuff!
+	UFUNCTION()
+		void OnDoneImageProcessing();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Test_Misc")
+		void testMiscForwarder(const TMap<FString, UTexture2D*>& imageMap);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
 		void testSequence();

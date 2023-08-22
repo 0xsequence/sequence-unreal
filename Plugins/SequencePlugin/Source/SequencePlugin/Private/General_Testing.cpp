@@ -3,6 +3,7 @@
 
 #include "General_Testing.h"
 #include "IndexerTests.h"
+#include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 #include "HexUtility.h"
@@ -18,6 +19,10 @@ AGeneral_Testing::AGeneral_Testing()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	testingURLs.Add("https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389");
+	testingURLs.Add("https://www.circle.com/hubfs/share-USDC.png#keepProtocol");
+	testingURLs.Add("https://assets.skyweaver.net/i7FuksL3/webapp/cards/full-cards/4x/0-silver.png");
+	testingURLs.Add("https://skyweaver.net/images/skyweavercover.jpg");
 }
 
 // Called when the game starts or when spawned
@@ -57,9 +62,9 @@ void AGeneral_Testing::test_indexer()
 	IndexerTest(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::testMisc()
-{//used for testing various things in the engine to verify behaviour
-	UAuth * auth = NewObject<UAuth>();
+void AGeneral_Testing::testEncryption()
+{
+	UAuth* auth = NewObject<UAuth>();
 	FStoredAuthState_BE testingStruct;
 
 	FString preEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(testingStruct);
@@ -76,6 +81,21 @@ void AGeneral_Testing::testMisc()
 	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *preEncrypt);
 	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *encryptedData);
 	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *decryptedData);
+}
+
+//dedicated encryption test!
+
+void AGeneral_Testing::testMisc()
+{//used for testing various things in the engine to verify behaviour
+	imgHandler = NewObject<UObjectHandler>();
+	imgHandler->setup(true);//we want to test caching!
+	imgHandler->FOnDoneImageProcessingDelegate.BindUFunction(this, "OnDoneImageProcessing");
+	imgHandler->requestImages(this->testingURLs);
+}
+
+void AGeneral_Testing::OnDoneImageProcessing()
+{//forward this to the front as we will be able to view all the images from there!
+	this->testMiscForwarder(this->imgHandler->getProcessedImages());
 }
 
 void AGeneral_Testing::testSequence()
