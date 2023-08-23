@@ -481,8 +481,7 @@ TArray<FContact_BE> SequenceAPI::FSequenceWallet::buildFriendListFromJson(FStrin
 void SequenceAPI::FSequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString json_arg = "{}";
-
-
+	
 	SendRPC(getSequenceURL("friendList"), json_arg, [=](FString Content)
 		{
 			OnSuccess(buildFriendListFromJson(Content));
