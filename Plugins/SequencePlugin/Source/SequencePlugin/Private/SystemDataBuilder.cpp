@@ -83,24 +83,25 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
 	this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
-	this->getItemDataSyncer->incN(2);//1 for getting images 1 for getting values
+	this->getItemDataSyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
 	TArray<FString> urlList;
-	TArray<FID_BE> idList;
+	TArray<FID_BE> idCoinList;
+	TArray<FID_BE> idCollectibleList;
 	//compose the URL Fetch list!
 	//compose the FID_BE's into 1 big request list!
 	for (FCoinUpdatable coin : itemsToUpdate.updatingCoinData)
 	{
 		urlList.Add(coin.coinIconUrl);//for getting images
-		idList.Add(coin.coinID);//for getting updated value
+		idCoinList.Add(coin.coinID);//for getting updated value
 	}
 
 	for (FNFTUpdatable nft : itemsToUpdate.updatingNftData)
 	{
 		urlList.Add(nft.nftCollectionIconUrl);//for getting images
 		urlList.Add(nft.nftIconUrl);//for getting images
-		idList.Add(nft.nftID);//for getting updated value
+		idCollectibleList.Add(nft.nftID);//for getting updated value
 	}
 
 	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
@@ -126,36 +127,42 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	this->imageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
 
-	const TSuccessCallback<TArray<FItemPrice_BE>> lclSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
+	const TSuccessCallback<TArray<FItemPrice_BE>> lclCoinSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
 	{//because we don't get a map we have to go through everything
 		TArray<FItemPrice_BE> lclUItems;
 		FItemPrice_BE itemPrice;
-		bool found = false;
 		lclUItems.Append(updatedItems);
 		while (lclUItems.Num() > 0)
 		{
 			itemPrice = lclUItems[0];
-			found = false;
-			//this->systemData.user_data.coins
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{
 				if (itemPrice.Token == this->systemData.user_data.coins[i].itemID)
 				{//directly inject data into system data!
 					this->systemData.user_data.coins[i].Coin_Value = itemPrice.price.value;
-					found = true;//avoid uneeded searching
 					break;
 				}
 			}
-			if (!found)
-			{
-				for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
-				{//index directly into systemData rather than asigning it to some inbetween party
-					if (itemPrice.Token == this->systemData.user_data.nfts[i].NFT_Details.itemID)
-					{
-						this->systemData.user_data.nfts[i].Value = itemPrice.price.value;
-					}
+			lclUItems.RemoveAt(0);
+		}//while
+		this->getItemDataSyncer->dec();
+	};//lambda
+
+	const TSuccessCallback<TArray<FItemPrice_BE>> lclCollectibleSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
+	{//because we don't get a map we have to go through everything
+		TArray<FItemPrice_BE> lclUItems;
+		FItemPrice_BE itemPrice;
+		lclUItems.Append(updatedItems);
+		while (lclUItems.Num() > 0)
+		{
+			itemPrice = lclUItems[0];
+			for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
+			{//index directly into systemData rather than asigning it to some inbetween party
+				if (itemPrice.Token == this->systemData.user_data.nfts[i].NFT_Details.itemID)
+				{
+					this->systemData.user_data.nfts[i].Value = itemPrice.price.value;
 				}
-			}//!found
+			}
 			lclUItems.RemoveAt(0);
 		}//while
 		this->getItemDataSyncer->dec();
@@ -167,7 +174,8 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		this->getItemDataSyncer->dec();
 	};
 
-	this->sequenceAPI->getUpdatedItemPrices(idList,lclSuccess,lclFailure);
+	this->sequenceAPI->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
+	this->sequenceAPI->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 }
 
 
