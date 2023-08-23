@@ -14,23 +14,64 @@ TMap<int64, FString> UIndexer::GetIndexerNames()
 {
 	TMap<int64, FString> IndexerNames;
 	//Mainnets
-	IndexerNames.Add(137,"polygon");
-	IndexerNames.Add(1, "ethereum");
-	IndexerNames.Add(56, "bnbsmartchain");
-	IndexerNames.Add(42161, "arbitrumone");
-	IndexerNames.Add(42170, "arbitrumnova");
+	IndexerNames.Add(1, "mainnet");
+	IndexerNames.Add(137, "polygon");
+	IndexerNames.Add(1101, "polygon-zkevm");
+	IndexerNames.Add(42161, "arbitrum");
+	IndexerNames.Add(42170, "arbitrum-nova");
 	IndexerNames.Add(10, "optimism");
+	IndexerNames.Add(56, "bsc");
 	IndexerNames.Add(43114, "avalanche");
+	IndexerNames.Add(8453, "base");
 	IndexerNames.Add(100, "gnosis");
 
 	//Testnets
 	IndexerNames.Add(1337, "testchain");
-	IndexerNames.Add(5, "testnetgoerli");
-	IndexerNames.Add(80001, "testnetpolygonmumbai");
-	IndexerNames.Add(97, "testnetbnbsmartchain");
+	IndexerNames.Add(5, "goerli");
+	IndexerNames.Add(11155111, "sepolia");
+	IndexerNames.Add(421613, "arbitrum-goerli");
+	IndexerNames.Add(80001, "mumbai");
+	IndexerNames.Add(84531, "base-goerli");
+	IndexerNames.Add(97, "bsc-testnet");
 	IndexerNames.Add(43113, "testnetavalanchefuji");
 	
 	return IndexerNames;
+}
+
+FString UIndexer::GetIndexerName(int64 chainId)
+{
+	TMap<int64, FString> IndexerNames;
+
+	//Mainnets
+	IndexerNames.Add(1, "mainnet");
+	IndexerNames.Add(137, "polygon");
+	IndexerNames.Add(1101, "polygon-zkevm");
+	IndexerNames.Add(42161, "arbitrum");
+	IndexerNames.Add(42170, "arbitrum-nova");
+	IndexerNames.Add(10, "optimism");
+	IndexerNames.Add(56, "bsc");
+	IndexerNames.Add(43114, "avalanche");
+	IndexerNames.Add(8453, "base");
+	IndexerNames.Add(100, "gnosis");
+
+	//Testnets
+	IndexerNames.Add(1337, "testchain");
+	IndexerNames.Add(5, "goerli");
+	IndexerNames.Add(11155111, "sepolia");
+	IndexerNames.Add(421613,"arbitrum-goerli");
+	IndexerNames.Add(80001, "mumbai");
+	IndexerNames.Add(84531, "base-goerli");
+	IndexerNames.Add(97, "bsc-testnet");
+	IndexerNames.Add(43113, "testnetavalanchefuji");
+
+	FString ret = "[ERROR][Name not found]";
+
+	if (IndexerNames.Contains(chainId))
+	{
+		ret = *IndexerNames.Find(chainId);
+	}
+
+	return ret;
 }
 
 /*
