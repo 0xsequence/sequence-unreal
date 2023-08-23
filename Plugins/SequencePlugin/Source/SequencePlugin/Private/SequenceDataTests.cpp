@@ -40,7 +40,7 @@ void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Se
 	//because of the way this code was structured we can't rely on unreal GC for this
 	SequenceAPI::FSequenceWallet* lclWallet = new SequenceAPI::FSequenceWallet();
 
-	lclWallet->getUpdatedItemPrice(args, GenericSuccess, GenericFailure);
+	lclWallet->getUpdatedCoinPrice(args, GenericSuccess, GenericFailure);
 
 	delete lclWallet;
 }
