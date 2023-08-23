@@ -381,9 +381,7 @@ FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalanc
 			nft.NFT_Details.itemID.contractAddress = nft.NFT_Details.Contract_Address;
 			nft.NFT_Details.itemID.chainID = token.chainId;
 			nft.NFT_Details.Token_Standard = token.contractType;
-			//not sure where or what we do with network icon or name though!
-			//nft.NFT_Details.Network = "n/a";
-			//nft.NFT_Details.Network_Icon = nullptr;
+			nft.NFT_Details.Network = UIndexer::GetIndexerName(token.chainId);
 			ret.semiParsedBalances.nfts.Add(nft);
 
 			FNFTUpdatable uNFT;//prep the updatable

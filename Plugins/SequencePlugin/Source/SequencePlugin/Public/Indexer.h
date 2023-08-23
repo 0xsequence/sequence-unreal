@@ -30,6 +30,7 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 
 public:
 	static TMap<int64, FString> GetIndexerNames();
+	static FString GetIndexerName(int64 chainId);
 private:
 	const FString PATH = "/rpc/Indexer/";
 	
