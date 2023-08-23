@@ -222,8 +222,6 @@ void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> O
 			const FString AddressString = Json->GetStringField("address");
 			Retval = MakeValue(FAddress::From(AddressString));
 		}
-		
-		
 		return Retval;
 	};
 
@@ -490,6 +488,7 @@ void SequenceAPI::FSequenceWallet::getFriends(FString username, TSuccessCallback
 
 TArray<FItemPrice_BE> SequenceAPI::FSequenceWallet::buildItemUpdateListFromJson(FString json)
 {
+	UE_LOG(LogTemp, Error, TEXT("Received json: %s"), *json);
 	TSharedPtr<FJsonObject> jsonObj;
 	FUpdatedPriceReturn updatedPrices;
 
@@ -508,14 +507,14 @@ TArray<FItemPrice_BE> SequenceAPI::FSequenceWallet::buildItemUpdateListFromJson(
 	return updatedItems;
 }
 
-void SequenceAPI::FSequenceWallet::getUpdatedItemPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	TArray<FID_BE> items;
 	items.Add(itemToUpdate);
-	getUpdatedItemPrices(items, OnSuccess, OnFailure);
+	getUpdatedCoinPrices(items, OnSuccess, OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::getUpdatedItemPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString args = "{\"tokens\":";
 	FString jsonObjString = "";
@@ -529,6 +528,32 @@ void SequenceAPI::FSequenceWallet::getUpdatedItemPrices(TArray<FID_BE> itemsToUp
 	args += "}";
 
 	SendRPC(getSequenceURL("getCoinPrices"), args, [=](FString Content)
+		{
+			OnSuccess(buildItemUpdateListFromJson(Content));
+		}, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	TArray<FID_BE> items;
+	items.Add(itemToUpdate);
+	getUpdatedCollectiblePrices(items, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+{
+	FString args = "{\"tokens\":";
+	FString jsonObjString = "";
+	TArray<FString> parsedItems;
+	for (FID_BE item : itemsToUpdate)
+	{
+		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
+			parsedItems.Add(jsonObjString);
+	}
+	args += UIndexerSupport::stringListToSimpleString(parsedItems);
+	args += "}";
+
+	SendRPC(getSequenceURL("getCollectiblePrices"), args, [=](FString Content)
 		{
 			OnSuccess(buildItemUpdateListFromJson(Content));
 		}, OnFailure);
