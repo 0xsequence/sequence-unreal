@@ -34,6 +34,7 @@ private:
 	//keeps track of requests regarding itemData! ie)tokens and coins
 	USyncer *getItemDataSyncer;
 	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
+	void assignImageData();
 
 	//this function gets bound to the getItemDataSyncer and fires off when we are done getting image and value data for tokens
 	UFUNCTION()
@@ -52,6 +53,9 @@ private:
 	*/
 	UFUNCTION()
 		void OnDone();
+
+	UFUNCTION()
+		void OnDoneTesting();
 	//master OnDone//
 
 public:
@@ -60,4 +64,7 @@ public:
 	~USystemDataBuilder();
 
 	void initBuildSystemData(UIndexer * indexer, SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress,ASequence_Backend_Manager * manager);
+
+	void testGOTokenData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress);
+
 };

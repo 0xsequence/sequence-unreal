@@ -649,12 +649,3 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FSemiParsedTokenBalances semiParsedBalances;//this is the token data with everything but value and image data
 };
-
-USTRUCT(BlueprintType)
-struct FUpdatableItemDataReturn
-{
-    GENERATED_USTRUCT_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FSemiParsedTokenBalances fullyParsedBalances;//Data filled in with all the extra datums
-};

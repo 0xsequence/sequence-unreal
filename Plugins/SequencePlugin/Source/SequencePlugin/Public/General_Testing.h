@@ -57,6 +57,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
 		void testSequence();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_SystemDataBuiler")
+		void testSystemDataBuilder();
 //End of Testing Functions//
 public:	
 	// Called every frame
