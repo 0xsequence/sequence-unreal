@@ -195,9 +195,10 @@ FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonObject> jsonData)
 	return simplifyString(jsonToString(jsonData));
 }
 
-void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory,
+FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory,
 	TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure)
 {
+	FUpdatableItemDataArgs UpdateItems;
 	TArray<FTransactionHistoryItem_BE> Array;
 
 	for(FTransaction Transaction : TransactionHistory.transactions)
@@ -244,7 +245,17 @@ void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTrans
 				CoinTxn.coin.Coin_Standard = Transfer.contractType;
 				CoinTxn.coin.Coin_Value = 1.0; // unknown, set to 1.0 for now
 
+				//item id
+				CoinTxn.coin.itemID.contractAddress = Transfer.contractInfo.address;
+				CoinTxn.coin.itemID.chainID = Transaction.chainId;
+
 				Item.txn_history_coins.Add(CoinTxn);
+
+				//add the needed info for getting the rest of the coin data
+				FCoinUpdatable uCoin;
+				uCoin.coinIconUrl = Transfer.contractInfo.logoURI;
+				uCoin.coinID = CoinTxn.coin.itemID;
+				UpdateItems.updatingCoinData.Add(uCoin);
 			}
 			else
 			{
@@ -262,7 +273,19 @@ void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTrans
 				NftTxn.nft.NFT_Details.Contract_Address = Transfer.contractInfo.address;
 				NftTxn.nft.NFT_Details.Token_Standard = Transfer.contractType;
 
+				//item id
+				NftTxn.nft.NFT_Details.itemID.contractAddress = NftTxn.nft.NFT_Details.Contract_Address;
+				NftTxn.nft.NFT_Details.itemID.chainID = Transaction.chainId;
+
 				Item.txn_history_nfts.Add(NftTxn);
+
+				//prep the updatable
+				FNFTUpdatable uNFT;
+				
+				uNFT.nftCollectionIconUrl = Transfer.contractInfo.extensions.ogImage;
+				uNFT.nftIconUrl = TokenMetaData.image;
+				uNFT.nftID = NftTxn.nft.NFT_Details.itemID;
+				UpdateItems.updatingNftData.Add(uNFT);
 			}
 		}
 		
@@ -270,6 +293,8 @@ void UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTrans
 	}
 
 	OnSuccess(Array);
+
+	return UpdateItems;
 }
 
 FString UIndexerSupport::jsonToParsableString(TSharedPtr<FJsonValue> jsonData)
