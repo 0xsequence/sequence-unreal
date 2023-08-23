@@ -25,4 +25,9 @@ void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void
 	{
 		UE_LOG(LogTemp, Display, TEXT("The Hash is %s"), *Hash.ToHex());
 	}, GenericFailure);
+
+	Api.GetWalletAddress([=](FAddress Address)
+	{
+		UE_LOG(LogTemp, Display, TEXT("The Address is %s"), *Address.ToHex())
+	}, GenericFailure);
 }

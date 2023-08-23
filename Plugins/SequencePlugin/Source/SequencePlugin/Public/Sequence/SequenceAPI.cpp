@@ -1,4 +1,4 @@
-#pragma once
+
 #include "SequenceAPI.h"
 
 #include "Http.h"
@@ -204,7 +204,7 @@ void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCal
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::GetWalletAddress(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess,
+void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> OnSuccess,
 	FFailureCallback OnFailure)
 {
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
@@ -228,7 +228,6 @@ void SequenceAPI::FSequenceWallet::GetWalletAddress(uint64 AccountIndex, TSucces
 	};
 
 	FString Content = FJsonBuilder().ToPtr()
-		->AddInt("accountIndex", AccountIndex)
 		->ToString();
 	
 	this->SendRPCAndExtract(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,
