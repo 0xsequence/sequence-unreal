@@ -32,10 +32,7 @@ void UObjectHandler::setup(bool raw_cache_enabled)
 
 void UObjectHandler::storeImageData(UTexture2D* image, FString url)
 {
-	TPair<FString, UTexture2D*> response;
-	response.Key = url;
-	response.Value = image;
-	this->storedResponses.Add(response);
+	this->storedResponses.Add(TPair<FString,UTexture2D*>(url,image));
 	UE_LOG(LogTemp, Display, TEXT("[Image stored]"));
 	this->syncer->dec();
 	//this is when we would consider a response satisfied
@@ -160,14 +157,12 @@ bool UObjectHandler::request_raw_base(FString URL)
 
 void UObjectHandler::requestImage(FString URL)
 {
-	this->storedResponses.Empty();
 	this->syncer->inc();
 	this->request_raw_base(URL);
 }
 
 void UObjectHandler::requestImages(TArray<FString> URLs)
 {
-	this->storedResponses.Empty();
 	this->syncer->incN(URLs.Num());//inc for all requests
 	for (FString url : URLs)
 	{

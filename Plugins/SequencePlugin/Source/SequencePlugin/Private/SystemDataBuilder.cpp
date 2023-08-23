@@ -10,6 +10,7 @@ USystemDataBuilder::USystemDataBuilder()
 	this->getItemDataSyncer = NewObject<USyncer>();
 	//might move this to a constructor then put cleanup in destructor
 	this->imageHandler = NewObject<UObjectHandler>();//create our handler!
+	this->imageHandler->setup(true);
 	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 
@@ -81,6 +82,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 */
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
+	this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
 	this->getItemDataSyncer->incN(2);//1 for getting images 1 for getting values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -104,19 +106,22 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
 		[this]()
 		{
-			TMap<FString,UTexture2D*> images = this->imageHandler->getProcessedImages();
-
+			TMap<FString, UTexture2D*> images = this->imageHandler->getProcessedImages();
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{//index directly into systemData rather than jumping around
-				this->systemData.user_data.coins[i].Coin_Symbol = *images.Find(this->systemData.user_data.coins[i].Coin_Symbol_URL);
+				if (images.Contains(this->systemData.user_data.coins[i].Coin_Symbol_URL))
+					this->systemData.user_data.coins[i].Coin_Symbol = *images.Find(this->systemData.user_data.coins[i].Coin_Symbol_URL);
 			}
-			
+
 			for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
 			{
-				this->systemData.user_data.nfts[i].NFT_Icon = *images.Find(this->systemData.user_data.nfts[i].NFT_Icon_Url);
-				this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
+				if (images.Contains(this->systemData.user_data.nfts[i].NFT_Icon_Url))
+					this->systemData.user_data.nfts[i].NFT_Icon = *images.Find(this->systemData.user_data.nfts[i].NFT_Icon_Url);
+
+				if (images.Contains(this->systemData.user_data.nfts[i].Collection_Icon_Url))
+					this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
 			}
-			this->getItemDataSyncer->dec();
+			this->masterSyncer->dec();
 		});
 	this->imageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
@@ -189,9 +194,10 @@ void USystemDataBuilder::initGetTokenData()
 	};
 
 	this->masterSyncer->inc();//1 for getting the token data!
-	this->masterSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
 	FGetTokenBalancesArgs args;
-	this->GIndexer->GetTokenBalances(GChainId, args, GenericSuccess, GenericFailure);
+	args.accountAddress = this->GPublicAddress;
+	args.includeMetaData = true;
+	this->GIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
 }
 
 /*
@@ -209,6 +215,24 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	//sync operations FIRST
 	this->systemData.user_data.public_address = publicAddress;
 
+	//ASYNC Operations next!
+	this->initGetTokenData();
+}
+
+void USystemDataBuilder::OnDoneTesting()
+{
+	//here is where we will 1 print out the system data, 2 send some image data upfront to be viewed / verified
+	FString result = UIndexerSupport::structToSimpleString<FSystemData_BE>(this->systemData);
+	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
+}
+
+void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress)
+{
+	this->GIndexer = indexer;
+	this->GWallet = wallet;
+	this->GChainId = chainId;
+	this->GPublicAddress = publicAddress;
+	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
 	this->initGetTokenData();
 }

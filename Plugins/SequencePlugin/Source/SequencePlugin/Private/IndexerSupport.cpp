@@ -347,7 +347,8 @@ FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalanc
 			nft.Properties = token.tokenMetaData.properties;
 			nft.Amount = -1;//need an amount parser
 			nft.Value = -1;
-
+			nft.NFT_Icon_URL = token.tokenMetaData.image;
+			nft.Collection_Icon_URL = token.contractInfo.extensions.ogImage;
 			//parse nft details data
 			nft.NFT_Details.External_URL = token.tokenMetaData.external_url;
 			nft.NFT_Details.token_id.Append(FString::Printf(TEXT("%lld"), token.tokenID));
@@ -376,6 +377,7 @@ FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalanc
 			coin.itemID.contractAddress = token.contractAddress;
 			coin.Coin_Amount = -1;//need an amount parser
 			coin.Coin_Value = -1;
+			coin.Coin_Symbol_URL = token.contractInfo.logoURI;
 			ret.semiParsedBalances.coins.Add(coin);//add the semi parsed coin data
 
 			FCoinUpdatable uCoin;//add the needed info for getting the rest of the coin data

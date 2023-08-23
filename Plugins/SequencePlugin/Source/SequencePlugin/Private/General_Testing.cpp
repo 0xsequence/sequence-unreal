@@ -10,6 +10,7 @@
 #include "IndexerSupport.h"
 #include "Auth.h"
 #include "SequenceEncryptor.h"
+#include "SystemDataBuilder.h"
 #include "Sequence/SequenceAPI.h"
 #include "tests/ContractTest.h"
 #include "Tests/TestSequenceAPI.h"
@@ -111,6 +112,14 @@ void AGeneral_Testing::testSequence()
 	};
 
 	TestSequenceData(OnSuccess, OnFailure);
+}
+
+void AGeneral_Testing::testSystemDataBuilder()
+{//testing system data builder
+	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
+	UIndexer* indexer = NewObject<UIndexer>();
+	SequenceAPI::FSequenceWallet* wallet = new SequenceAPI::FSequenceWallet();
+	sysBuilder->testGOTokenData(indexer,wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
 }
 
 // Called every frame
