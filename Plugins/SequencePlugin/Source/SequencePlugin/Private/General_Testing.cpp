@@ -43,7 +43,7 @@ void AGeneral_Testing::test_provider()
 		Callback_Failed(data, Err);
 	};
 
-	//ContractTest::RunTest(OnSuccess, OnFailure);
+	ContractTest::RunTest(OnSuccess, OnFailure);
 	SequenceAPITest::RunTest(OnSuccess, OnFailure);
 }
 
