@@ -76,22 +76,24 @@ namespace SequenceAPI
 		TArray<FPartnerWallet> Wallets;
 		FPage Page;
 	};
-
+	const static FString sequenceURL_QR = "https://api.sequence.app/qr/";
 	class FSequenceWallet : public RPCCaller
 	{
+	public:
 		FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 		const FString Hostname = "https://next-api.sequence.app";
 		const FString sequenceURL = "https://api.sequence.app/rpc/API/";
-		const FString sequenceURL_QR = "https://api.sequence.app/qr/BASE64-URL-ENCODED-STRING";
 		const FString Path = "/rpc/Wallet/";
 		
 		//URL fetchers for sequence services
 		FString Url(FString Name) const;
 		FString getSequenceURL(FString endpoint);
 
+		static FString encodeB64_URL(FString data);
+		static FString buildQR_Request_URL(FString data,int32 size);
+
 		//Raw request functions
 		virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) override;
-		void HTTPGet(FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 		//Response helper functions
 		TArray<FContact_BE> buildFriendListFromJson(FString json);
@@ -119,8 +121,5 @@ namespace SequenceAPI
 
 		void getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 		void getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-		//need sequence to be done
-		void getQR(FString publicAddress, int32 size, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-
 	};
 }

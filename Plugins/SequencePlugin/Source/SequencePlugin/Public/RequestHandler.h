@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "Async.h"
 #include "Interfaces/IHttpRequest.h"
+#include "Engine/Texture2D.h"
+#include "IImageWrapper.h"
+#include "IImageWrapperModule.h"
+#include "UObject/NoExportTypes.h"
 #include "UObject/Object.h"
 #include "RequestHandler.generated.h"
 
@@ -34,5 +38,6 @@ public:
 
 	// Process
 	FHttpRequestCompleteDelegate& Process() const;
+	void ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFailureCallback OnFailure);
 	void ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure);
 };
