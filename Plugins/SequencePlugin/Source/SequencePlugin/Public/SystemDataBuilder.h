@@ -23,6 +23,8 @@ private:
 	SequenceAPI::FSequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
+	FString GWalletAddress;
+	FString qr_url;
 
 	FSystemData_BE systemData;
 	UObjectHandler *imageHandler;
@@ -34,7 +36,6 @@ private:
 	//keeps track of requests regarding itemData! ie)tokens and coins
 	USyncer *getItemDataSyncer;
 	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
-	void assignImageData();
 
 	//this function gets bound to the getItemDataSyncer and fires off when we are done getting image and value data for tokens
 	UFUNCTION()
@@ -44,6 +45,12 @@ private:
 	void initGetTokenData();
 
 	//used for managing getting token data setup in systemdata//
+
+	//used for managing anything that depends on the wallet address!//
+
+	void initGetQRCode();
+
+	//used for managing anything that depends on the wallet address//
 
 	//master OnDone//
 	/*

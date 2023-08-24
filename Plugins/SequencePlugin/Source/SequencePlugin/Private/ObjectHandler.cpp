@@ -187,6 +187,8 @@ EImageFormat UObjectHandler::get_img_format(FString URL)
 
 UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
 {
+	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), img_data.Num());
+
 	int32 width = 0, height = 0;
 	UTexture2D* img = nullptr;
 	EPixelFormat pxl_format = PF_B8G8R8A8;

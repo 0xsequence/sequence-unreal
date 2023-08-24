@@ -200,12 +200,41 @@ void USystemDataBuilder::initGetTokenData()
 		//dec the request & throw error?
 		this->masterSyncer->dec();
 	};
-
-	this->masterSyncer->inc();//1 for getting the token data!
 	FGetTokenBalancesArgs args;
 	args.accountAddress = this->GPublicAddress;
 	args.includeMetaData = true;
 	this->GIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
+}
+
+void USystemDataBuilder::initGetQRCode()
+{
+	//GO Level
+	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
+		[this]()
+		{
+			TMap<FString, UTexture2D*> images = this->imageHandler->getProcessedImages();
+			if (images.Contains(this->qr_url))
+			{
+				this->systemData.user_data.public_qr_address = *images.Find(this->qr_url);//here we assign the QRCode we received!
+				this->masterSyncer->dec();
+			}
+		});
+
+	const TSuccessCallback<FAddress> GenericSuccess = [&, this](const FAddress address)
+	{//once wallet responds with the wallet address
+		this->GWalletAddress = address.ToHex();
+		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *this->GWalletAddress);
+		//now we can request the QR code!
+		this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(this->GWalletAddress, 512);
+		this->imageHandler->requestImage(this->qr_url);
+	};
+
+	//GO Level
+	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	{
+		this->masterSyncer->dec();
+	};
+	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
 }
 
 /*
@@ -221,9 +250,16 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDone");
 
 	//sync operations FIRST
+	//all of this we get from auth!
 	this->systemData.user_data.public_address = publicAddress;
+	this->systemData.user_data.account_id = this->sqncMngr->getUserDetails().account_id;
+	this->systemData.user_data.email = this->sqncMngr->getUserDetails().email;
+	this->systemData.user_data.email_service = this->sqncMngr->getUserDetails().email_service;
+	this->systemData.user_data.username = this->sqncMngr->getUserDetails().username;
 
 	//ASYNC Operations next!
+	this->masterSyncer->incN(2);//+1 for each GO you have here!
+	this->initGetQRCode();
 	this->initGetTokenData();
 }
 
@@ -242,7 +278,9 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->initGetTokenData();
+	this->masterSyncer->incN(1);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	//this->initGetTokenData();
+	this->initGetQRCode();
 }
 
 void USystemDataBuilder::OnDone()

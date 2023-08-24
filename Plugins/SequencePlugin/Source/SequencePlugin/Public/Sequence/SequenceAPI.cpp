@@ -151,19 +151,6 @@ void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSucces
 			->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::HTTPGet(FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{
-	NewObject<URequestHandler>()
-		->PrepareRequest()
-		->WithUrl(endpoint)
-		->WithHeader("Content-type", "application/json")
-		->WithHeader("Accept" ,"application/json")
-		->WithHeader("Authorization", AuthToken)
-		->WithVerb("GET")
-		->WithContentAsString(args)
-		->ProcessAndThen(OnSuccess, OnFailure);
-}
-
 SequenceAPI::FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
 {
 	
@@ -559,14 +546,45 @@ void SequenceAPI::FSequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> it
 		}, OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::getQR(FString publicAddress, int32 size, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{//still need authentication for this to work!
+FString SequenceAPI::FSequenceWallet::buildQR_Request_URL(FString walletAddress,int32 size)
+{
 	int32 lclSize = FMath::Max(size, 64);//ensures a nice valid size
-	FString args = "{\"publicAddress\":\"" + publicAddress + "\"}";
+
 	FString urlSize = "/";
 	urlSize.AppendInt(size);
-	HTTPGet(sequenceURL_QR + urlSize, args, [=](FString Content)
-		{
-			OnSuccess(Content);
-		}, OnFailure);
+
+	return sequenceURL_QR + encodeB64_URL(walletAddress) + urlSize;
+}
+
+//we only need to encode base64URL we don't decode them as we receive the QR code
+FString SequenceAPI::FSequenceWallet::encodeB64_URL(FString data)
+{
+	FString ret;
+	UE_LOG(LogTemp, Display, TEXT("Pre encoded addr: [%s]"), *data);
+	ret = FBase64::Encode(data);
+	UE_LOG(LogTemp, Display, TEXT("Post encoded addr: [%s]"), *ret);
+	//now we just gotta do some swaps to make it base64 URL complient
+	//+ -> - / -> _ , = is either removed or replaced .
+
+	FString srch_plus = TEXT("+");
+	FString rep_plus = TEXT("-");
+	FString srch_slash = TEXT("/");
+	FString rep_slash = TEXT("_");
+	FString srch_equals = TEXT("=");
+	FString rep_equals = TEXT(".");
+
+	const TCHAR* srch_ptr_plus = *srch_plus;
+	const TCHAR* rep_ptr_plus = *rep_plus;
+	const TCHAR* srch_ptr_slash = *srch_slash;
+	const TCHAR* rep_ptr_slash = *rep_slash;
+	const TCHAR* srch_ptr_equals = *srch_equals;
+	const TCHAR* rep_ptr_equals = *rep_equals;
+
+	ret.ReplaceInline(srch_ptr_plus, rep_ptr_plus, ESearchCase::IgnoreCase);//remove + and replace with -
+	ret.ReplaceInline(srch_ptr_slash, rep_ptr_slash, ESearchCase::IgnoreCase);//remove / and replace with _
+	ret.ReplaceInline(srch_ptr_equals, rep_ptr_equals, ESearchCase::IgnoreCase);//remove = and replace with .
+
+	UE_LOG(LogTemp, Display, TEXT("B64-URL encoded addr: [%s]"), *ret);
+
+	return ret;
 }

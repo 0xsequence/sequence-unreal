@@ -15,6 +15,17 @@
 
 class UIndexer;
 
+USTRUCT(BlueprintType)
+struct FUserDetails
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	FString username = "";
+	FString email = "";
+	FString email_service = "";
+	int32 account_id = -1;
+};
+
 UCLASS()
 class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor, public IBackend
 {
@@ -40,9 +51,14 @@ private:
 	int32 recv_id;
 	FString recv_block_hsh;
 	FString user_email;
+	int32 account_id;
+	FString email_service;
+	FString username;
 	//end of signin variables
 
 public:
+	FUserDetails getUserDetails();
+
 	// Sets default values for this actor's properties
 	ASequence_Backend_Manager();
 	//destructor for cleaning up old refs

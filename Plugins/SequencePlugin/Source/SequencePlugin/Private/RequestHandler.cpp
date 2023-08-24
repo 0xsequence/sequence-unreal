@@ -65,6 +65,71 @@ FHttpRequestCompleteDelegate& URequestHandler::Process() const
 	return Request->OnProcessRequestComplete();
 }
 
+void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFailureCallback OnFailure)
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Display, TEXT("QR URL: %s"), *Req->GetURL());
+
+		auto content = Req->GetContent();
+		FString str = "";
+		for (auto i : content)
+		{
+			str += UTF8ToString(FUnsizedData{ &i, 1 });
+		}
+		UE_LOG(LogTemp, Display, TEXT("QR Content: %s"), *str);
+
+		auto headers = Req->GetAllHeaders();
+		FString headers_str = "";
+		for (auto header : headers) { headers_str += "\n" + header; }
+		UE_LOG(LogTemp, Display, TEXT("QR Headers: %s"), *headers_str);
+
+		if (bWasSuccessful)
+		{
+			TArray<uint8> img_data = Response->GetContent();
+			//now we must process the image
+			UE_LOG(LogTemp, Display, TEXT("Received Image Size: %d"), img_data.Num());
+			int32 width = 0, height = 0;
+			UTexture2D* img = nullptr;
+			EPixelFormat pxl_format = PF_B8G8R8A8;
+			EImageFormat img_format = EImageFormat::PNG;//the default format for qr codes is png
+
+			IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
+			TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(img_format);
+
+			//we might not be able to have this in here and instead may need to be in an outer function to work
+			if (ImageWrapper && ImageWrapper.Get()->SetCompressed(img_data.GetData(), img_data.Num()))
+			{
+				TArray64<uint8>  Uncompressed;
+				if (ImageWrapper.Get()->GetRaw(Uncompressed))
+				{
+					width = ImageWrapper.Get()->GetWidth();
+					height = ImageWrapper.Get()->GetHeight();
+
+					img = UTexture2D::CreateTransient(width, height, pxl_format);
+					if (!img)
+					{
+						void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+						FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
+						img->GetPlatformData()->Mips[0].BulkData.Unlock();
+						img->UpdateResource();
+						return OnSuccess(img);//return the properly built image data!
+					}//valid image pointer
+				}//able to get raw image data
+			}//image wrapper is setup and ready to go
+		}//if was successful
+		else
+		{
+			if (!Response.IsValid())
+			{
+				OnFailure(SequenceError(RequestFail, "The Request is invalid!"));
+			}
+			OnFailure(SequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+		}//if wasn't successful
+		//catch all error case!
+		OnFailure(SequenceError(RequestFail, "Failed to build QR Image data"));
+	});//lambda
+}
 
 
 void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure)

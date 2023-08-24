@@ -10,6 +10,16 @@
 #include "Indexer.h"
 #include "Crypto.h"
 
+FUserDetails ASequence_Backend_Manager::getUserDetails()
+{
+	FUserDetails ret;
+	ret.account_id = this->account_id;
+	ret.email = this->user_email;
+	ret.email_service = this->email_service;
+	ret.username = this->username;
+	return ret;
+}
+
 // Sets default values
 ASequence_Backend_Manager::ASequence_Backend_Manager()
 {
