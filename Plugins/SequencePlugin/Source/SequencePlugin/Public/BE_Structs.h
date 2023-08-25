@@ -649,3 +649,17 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FSemiParsedTokenBalances semiParsedBalances;//this is the token data with everything but value and image data
 };
+
+USTRUCT(BlueprintType)
+struct FUpdatableHistoryArgs
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    //this array is parallel with coins in SemiParsed Balances
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FCoinUpdatable> updatingCoinData;//this is used to update the value and image data of coins
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FNFTUpdatable> updatingNftData;//this is used to update the value and image data of nft's
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+        TArray<FTransactionHistoryItem_BE> semiParsedHistory;//semiParsed history data
+};

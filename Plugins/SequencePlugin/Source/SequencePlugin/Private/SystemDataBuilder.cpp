@@ -8,10 +8,13 @@ USystemDataBuilder::USystemDataBuilder()
 	//Create a syncer for request management
 	this->masterSyncer = NewObject<USyncer>();
 	this->getItemDataSyncer = NewObject<USyncer>();
+	this->getTxnHistorySyncer = NewObject<USyncer>();
 	this->QRImageHandler = NewObject<UObjectHandler>();
 	this->QRImageHandler->setup(true);
 	this->tokenImageHandler = NewObject<UObjectHandler>();
 	this->tokenImageHandler->setup(true);
+	this->HistoryImageHandler = NewObject<UObjectHandler>();
+	this->HistoryImageHandler->setup(true);
 	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 
@@ -179,7 +182,6 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	this->sequenceAPI->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 }
 
-
 void USystemDataBuilder::OnGetItemDataDone()
 {//if we hit this function that means we are DONE getting the token data and we can decrement our master syncer!
 	this->masterSyncer->dec();
@@ -288,4 +290,37 @@ void USystemDataBuilder::OnDone()
 {
 	this->masterSyncer->OnDoneDelegate.Unbind();//for safety reasons!
 	this->sqncMngr->update_system_data(this->systemData);
+}
+
+void USystemDataBuilder::initGetTxnHistory()
+{
+	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
+	{//once indexer responds!
+		//only thing I can do is apply compression earlier for a cleaner setup
+		//FUpdatableItemDataArgs semiParsedTokenBalance = UIndexerSupport::extractFromTokenBalances(tokenBalances);
+		
+		//UIndexerSupport::ExtractFromTransactionHistory(history);
+
+		//this->systemData.user_data.coins = semiParsedTokenBalance.semiParsedBalances.coins;
+		///this->systemData.user_data.nfts = this->compressNFTData(semiParsedTokenBalance.semiParsedBalances.nfts);
+		//this->initGetItemData(semiParsedTokenBalance);
+	};
+
+	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	{
+		//dec the request & throw error?
+		this->masterSyncer->dec();
+	};
+
+	FGetTransactionHistoryArgs args;
+	args.includeMetaData = true;
+	args.filter.accountAddress = this->GPublicAddress;
+
+	this->GIndexer->GetTransactionHistory(this->GChainId,args, GenericSuccess, GenericFailure);
+}
+
+UFUNCTION()
+void USystemDataBuilder::OnGetTxnHistoryDone()
+{
+
 }
