@@ -7,6 +7,23 @@
 #include "BE_Structs.h"
 #include "Indexer.h"
 
+float UIndexerSupport::getAmount(int64 amount, int32 decimals)
+{
+	float ret = amount;
+
+	ret /= FMath::Pow(10,decimals);
+
+	return ret;
+}
+float UIndexerSupport::getAmount(int64 amount, float decimals)
+{
+	float ret = amount;
+
+	ret /= FMath::Pow(10, decimals);
+
+	return ret;
+}
+
 /*
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
 * object usable in the UI!
