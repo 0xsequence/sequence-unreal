@@ -8,9 +8,10 @@ USystemDataBuilder::USystemDataBuilder()
 	//Create a syncer for request management
 	this->masterSyncer = NewObject<USyncer>();
 	this->getItemDataSyncer = NewObject<USyncer>();
-	//might move this to a constructor then put cleanup in destructor
-	this->imageHandler = NewObject<UObjectHandler>();//create our handler!
-	this->imageHandler->setup(true);
+	this->QRImageHandler = NewObject<UObjectHandler>();
+	this->QRImageHandler->setup(true);
+	this->tokenImageHandler = NewObject<UObjectHandler>();
+	this->tokenImageHandler->setup(true);
 	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 
@@ -104,10 +105,10 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		idCollectibleList.Add(nft.nftID);//for getting updated value
 	}
 
-	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
+	this->tokenImageHandler->FOnDoneImageProcessingDelegate.BindLambda(
 		[this]()
 		{
-			TMap<FString, UTexture2D*> images = this->imageHandler->getProcessedImages();
+			TMap<FString, UTexture2D*> images = this->tokenImageHandler->getProcessedImages();
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{//index directly into systemData rather than jumping around
 				if (images.Contains(this->systemData.user_data.coins[i].Coin_Symbol_URL))
@@ -122,9 +123,9 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 				if (images.Contains(this->systemData.user_data.nfts[i].Collection_Icon_Url))
 					this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
 			}
-			this->masterSyncer->dec();
+			this->getItemDataSyncer->dec();
 		});
-	this->imageHandler->requestImages(urlList);//init the requests!
+	this->tokenImageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
 
 	const TSuccessCallback<TArray<FItemPrice_BE>> lclCoinSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
@@ -209,10 +210,10 @@ void USystemDataBuilder::initGetTokenData()
 void USystemDataBuilder::initGetQRCode()
 {
 	//GO Level
-	this->imageHandler->FOnDoneImageProcessingDelegate.BindLambda(
+	this->QRImageHandler->FOnDoneImageProcessingDelegate.BindLambda(
 		[this]()
 		{
-			TMap<FString, UTexture2D*> images = this->imageHandler->getProcessedImages();
+			TMap<FString, UTexture2D*> images = this->QRImageHandler->getProcessedImages();
 			if (images.Contains(this->qr_url))
 			{
 				this->systemData.user_data.public_qr_address = *images.Find(this->qr_url);//here we assign the QRCode we received!
@@ -226,7 +227,7 @@ void USystemDataBuilder::initGetQRCode()
 		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *this->GWalletAddress);
 		//now we can request the QR code!
 		this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(this->GWalletAddress, 512);
-		this->imageHandler->requestImage(this->qr_url);
+		this->QRImageHandler->requestImage(this->qr_url);
 	};
 
 	//GO Level
@@ -278,8 +279,8 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->masterSyncer->incN(1);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
-	//this->initGetTokenData();
+	this->masterSyncer->incN(2);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	this->initGetTokenData();
 	this->initGetQRCode();
 }
 
