@@ -160,7 +160,7 @@ SequenceAPI::FSequenceWallet::FSequenceWallet()
 {
 }
 
-void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess,
+void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,
                                                 FFailureCallback OnFailure)
 {
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
@@ -184,7 +184,6 @@ void SequenceAPI::FSequenceWallet::CreateWallet(uint64 AccountIndex, TSuccessCal
 	};
 
 	FString Content = FJsonBuilder().ToPtr()
-		->AddInt("accountIndex", AccountIndex)
 		->ToString();
 	
 	this->SendRPCAndExtract(Url("CreateWallet"), Content, OnSuccess, ExtractAddress,
@@ -219,7 +218,7 @@ void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> O
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId, uint64 AccountIndex,
+void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,
 	TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	TFunction<TResult<FDeployWalletReturn> (FString)> ExtractDeployWalletReturn = [=](FString Content)
@@ -244,7 +243,6 @@ void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId, uint64 AccountIn
 
 	FString Content = FJsonBuilder().ToPtr()
 		->AddInt("chainId", ChainId)
-		->AddInt("accountIndex", AccountIndex)
 		->ToString();
 	
 	this->SendRPCAndExtract(Url("DeployWallet"), Content, OnSuccess, ExtractDeployWalletReturn,
