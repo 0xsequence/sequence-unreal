@@ -124,7 +124,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("Token Balances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
-	args.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"
+	args.accountAddress = testingAddress;//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"
 	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
