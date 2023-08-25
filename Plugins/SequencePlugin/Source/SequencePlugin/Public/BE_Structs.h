@@ -451,11 +451,11 @@ struct FUserData_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString username = "";//not sure where this comes from
+        FString username = "";//auth
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email = "";//not sure where this comes from
+        FString email = "";//auth
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        int32 account_id = -1;//not sure where this comes from
+        int32 account_id = -1;//auth
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString public_address = "";//we get this during authentication
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -463,7 +463,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         UTexture2D* public_qr_address = nullptr;//the is where the QR code for the public address will be stored
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email_service = "";//not sure where this comes from
+        FString email_service = "";//auth
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FContact_BE> contacts;//We get this from SequenceAPI but we need authentication
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -475,7 +475,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FCoin_BE> coins;//we can get this from balances out of the indexer
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FNetwork_BE> networks;//only need the current network
+        TArray<FNetwork_BE> networks;//might come from auth!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FTransactionHistoryItem_BE> transaction_history;//we can get this from txn history
 };
