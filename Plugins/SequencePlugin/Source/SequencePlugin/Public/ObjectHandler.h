@@ -15,6 +15,7 @@ DECLARE_DELEGATE(FOnDoneImageProcessingSignature);
 
 class UIndexer;
 
+
 USTRUCT()
 struct FRawData //used to store raw data in our runtime cache!
 {
@@ -38,6 +39,7 @@ private:
 	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
 	int32 current_cache_size = 0;//in bytes we want this as accurate as possible!
 	TMap<FString, FRawData> cache;//a Map of URL's and rawData
+	//need a list of maps!
 	TMap<FString, UTexture2D*> storedResponses;
 
 	bool use_raw_cache = false; // enables / disables the use of raw data caching!
