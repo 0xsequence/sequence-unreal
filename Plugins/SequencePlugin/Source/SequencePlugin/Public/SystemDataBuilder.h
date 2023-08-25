@@ -49,8 +49,16 @@ private:
 	//used for managing anything that depends on the wallet address!//
 	UObjectHandler* QRImageHandler;
 	void initGetQRCode();
-
 	//used for managing anything that depends on the wallet address//
+
+	//Used for getting transaction history data in systemData//
+	USyncer* getTxnHistorySyncer;
+	UObjectHandler* HistoryImageHandler;
+	void initGetTxnHistory();
+
+	UFUNCTION()
+		void OnGetTxnHistoryDone();
+	//Used for getting transaction history data in systemData//
 
 	//master OnDone//
 	/*

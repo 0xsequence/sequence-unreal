@@ -90,7 +90,7 @@ public:
 	static FString jsonToSimpleString(TSharedPtr<FJsonObject> jsonData);
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
-	static FUpdatableItemDataArgs ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory, TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure);
+	static FUpdatableHistoryArgs extractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
 	static FUpdatableItemDataArgs extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
 
 private:

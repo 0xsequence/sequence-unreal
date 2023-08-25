@@ -11,7 +11,7 @@ float UIndexerSupport::getAmount(int64 amount, int32 decimals)
 {
 	float ret = amount;
 
-	ret /= FMath::Pow(10,decimals);
+	ret /= FMath::Pow(10,float(decimals));
 
 	return ret;
 }
@@ -212,11 +212,9 @@ FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonObject> jsonData)
 	return simplifyString(jsonToString(jsonData));
 }
 
-FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory,
-	TSuccessCallback<TArray<FTransactionHistoryItem_BE>> OnSuccess, FFailureCallback OnFailure)
+FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
 {
-	FUpdatableItemDataArgs UpdateItems;
-	TArray<FTransactionHistoryItem_BE> Array;
+	FUpdatableHistoryArgs UpdateItems;
 
 	for(FTransaction Transaction : TransactionHistory.transactions)
 	{
@@ -227,8 +225,88 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 		
 		for(FTxnTransfer Transfer : Transaction.transfers)
 		{
-			long long TokenId = Transfer.tokenIds[0];
-			FTokenMetaData* TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
+			//preprocess all the indexable amounts and properties
+			int64 TokenId = -1;
+			int64 amount = -1;
+
+			if (Transfer.tokenIds.Num() > 0)
+			{
+				TokenId = Transfer.tokenIds[0];
+			}
+
+			if (Transfer.amounts.Num() > 0)
+			{
+				amount = Transfer.amounts[0];
+			}
+
+			bool hasMetaData = false;
+			FTokenMetaData* TokenMetaData = nullptr;
+			if (Transfer.tokenMetaData.Contains(FString::FromInt(TokenId)))
+			{
+				hasMetaData = true;
+				TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
+			}
+			//end of pre processing
+
+			if (Transfer.contractType == EContractType::ERC1155 || Transfer.contractType == EContractType::ERC1155_BRIDGE)
+			{//NFT
+				FNFTTxn_BE NftTxn;
+				if (hasMetaData)
+				{
+					TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
+					NftTxn.amount = UIndexerSupport::getAmount(amount, TokenMetaData->decimals);
+					NftTxn.nft.NFT_Name = TokenMetaData->name;
+					NftTxn.nft.NFT_Short_Name = TokenMetaData->name;
+					NftTxn.nft.NFT_Icon_URL = TokenMetaData->image;
+				}
+
+				NftTxn.nft.Amount = NftTxn.amount;
+				NftTxn.nft.Description = Transfer.contractInfo.extensions.description;
+				NftTxn.nft.Value = 1.0; //we get this later
+				NftTxn.nft.Collection_Long_Name = Transfer.contractInfo.name;
+				NftTxn.nft.Collection_Short_Name = Transfer.contractInfo.symbol;
+				NftTxn.nft.Collection_Icon_URL = Transfer.contractInfo.extensions.ogImage;
+				//nft details
+				NftTxn.nft.NFT_Details.token_id = FString::FromInt(TokenId);
+				NftTxn.nft.NFT_Details.Contract_Address = Transfer.contractInfo.address;
+				NftTxn.nft.NFT_Details.Token_Standard = Transfer.contractType;
+				//item id
+				NftTxn.nft.NFT_Details.itemID.contractAddress = NftTxn.nft.NFT_Details.Contract_Address;
+				NftTxn.nft.NFT_Details.itemID.chainID = Transaction.chainId;
+
+				//add to the list of history items
+				Item.txn_history_nfts.Add(NftTxn);
+
+				//prep the updatable
+				FNFTUpdatable uNFT;
+				uNFT.nftID = NftTxn.nft.NFT_Details.itemID;
+				uNFT.nftCollectionIconUrl = NftTxn.nft.Collection_Icon_URL;
+				uNFT.nftIconUrl = NftTxn.nft.NFT_Icon_URL;
+				UpdateItems.updatingNftData.Add(uNFT);
+			}
+			else if (Transfer.contractType == EContractType::ERC721 || Transfer.contractType == EContractType::ERC721_BRIDGE || Transfer.contractType == EContractType::ERC20 || Transfer.contractType == EContractType::ERC20_BRIDGE)
+			{//coin
+				FCoinTxn_BE CoinTxn;
+				CoinTxn.amount = UIndexerSupport::getAmount(amount,Transfer.contractInfo.decimals);
+				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
+				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
+				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
+				CoinTxn.coin.Coin_Standard = Transfer.contractType;
+				CoinTxn.coin.Coin_Value = 1.0; //we get this in the 2nd part of the level of updating
+
+				//item id
+				CoinTxn.coin.itemID.contractAddress = Transfer.contractInfo.address;
+				CoinTxn.coin.itemID.chainID = Transaction.chainId;
+
+				//Add it to the transaction history entry
+				Item.txn_history_coins.Add(CoinTxn);
+
+				//add the needed info for getting the rest of the coin data
+				FCoinUpdatable uCoin;
+				uCoin.coinIconUrl = Transfer.contractInfo.logoURI;
+				uCoin.coinID = CoinTxn.coin.itemID;
+				UpdateItems.updatingCoinData.Add(uCoin);
+			}
 
 			if(!TokenMetaData)
 			{
@@ -236,7 +314,6 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 			}
 			
 			Item.other_public_address = Transfer.from == MyAddress ? Transfer.to : Transfer.from;
-			Item.other_icon = nullptr;
 
 			if(!TxnTypeSet)
 			{
@@ -255,78 +332,12 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				}
 			}
 			
+			//they use a very precise timestamp whereas our time format is simple
 			Item.transaction_date = TimestampToMonthDayYear_Be(Transaction.timestamp);
-
-			if(Transfer.contractType == ERC20 || Transfer.contractType == ERC1155 || Transfer.contractType == ERC1155_BRIDGE || Transfer.contractType == ERC20_BRIDGE)
-			{
-				FCoinTxn_BE CoinTxn;
-				
-				//coin
-				if(Transfer.contractType == ERC20 || Transfer.contractType == ERC20_BRIDGE)
-				{
-					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
-				}
-				else if(TokenMetaData)
-				{
-					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, TokenMetaData->decimals);
-				}
-				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
-				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
-				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
-				CoinTxn.coin.Coin_Standard = Transfer.contractType;
-				CoinTxn.coin.Coin_Value = 1.0; // unknown, set to 1.0 for now
-
-				//item id
-				CoinTxn.coin.itemID.contractAddress = Transfer.contractInfo.address;
-				CoinTxn.coin.itemID.chainID = Transaction.chainId;
-
-				Item.txn_history_coins.Add(CoinTxn);
-
-				//add the needed info for getting the rest of the coin data
-				FCoinUpdatable uCoin;
-				uCoin.coinIconUrl = Transfer.contractInfo.logoURI;
-				uCoin.coinID = CoinTxn.coin.itemID;
-				UpdateItems.updatingCoinData.Add(uCoin);
-			}
-			else
-			{
-				// Assume its an NFT?
-				FNFTTxn_BE NftTxn;
-
-				NftTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
-				NftTxn.nft.Amount = NftTxn.amount;
-				NftTxn.nft.Description = Transfer.contractInfo.extensions.description;
-				NftTxn.nft.Properties; // unknown, probably in token meta data
-				NftTxn.nft.Value = 1.0; // unknown, set to 1.0 for now
-				NftTxn.nft.NFT_Name = Transfer.contractInfo.name;
-				NftTxn.nft.NFT_Short_Name = Transfer.contractInfo.symbol;
-				NftTxn.nft.NFT_Details.token_id = FString::FromInt(TokenId);
-				NftTxn.nft.NFT_Details.Contract_Address = Transfer.contractInfo.address;
-				NftTxn.nft.NFT_Details.Token_Standard = Transfer.contractType;
-
-				//item id
-				NftTxn.nft.NFT_Details.itemID.contractAddress = NftTxn.nft.NFT_Details.Contract_Address;
-				NftTxn.nft.NFT_Details.itemID.chainID = Transaction.chainId;
-
-				Item.txn_history_nfts.Add(NftTxn);
-
-				//prep the updatable
-				FNFTUpdatable uNFT;
-				
-				uNFT.nftCollectionIconUrl = Transfer.contractInfo.extensions.ogImage;
-				if(TokenMetaData)
-				{
-					uNFT.nftIconUrl = TokenMetaData->image;
-				}
-				uNFT.nftID = NftTxn.nft.NFT_Details.itemID;
-				UpdateItems.updatingNftData.Add(uNFT);
-			}
 		}
 		
-		Array.Push(Item);
-	}
-
-	OnSuccess(Array);
+		UpdateItems.semiParsedHistory.Add(Item);
+	}//for
 
 	return UpdateItems;
 }

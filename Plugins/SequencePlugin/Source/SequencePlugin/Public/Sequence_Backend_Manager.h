@@ -78,6 +78,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
 		void Copy_To_Clipboard(FString data);
+
 	/*
 	* Used to get data from clipboard for ease of use
 	*/
