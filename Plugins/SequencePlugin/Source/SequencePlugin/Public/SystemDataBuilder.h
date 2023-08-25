@@ -27,7 +27,7 @@ private:
 	FString qr_url;
 
 	FSystemData_BE systemData;
-	UObjectHandler *imageHandler;
+	//UObjectHandler *imageHandler;//each GO gets an image handler!
 	SequenceAPI::FSequenceWallet* sequenceAPI;
 	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
 
@@ -36,7 +36,7 @@ private:
 	//keeps track of requests regarding itemData! ie)tokens and coins
 	USyncer *getItemDataSyncer;
 	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
-
+	UObjectHandler* tokenImageHandler;
 	//this function gets bound to the getItemDataSyncer and fires off when we are done getting image and value data for tokens
 	UFUNCTION()
 	void OnGetItemDataDone();
@@ -47,7 +47,7 @@ private:
 	//used for managing getting token data setup in systemdata//
 
 	//used for managing anything that depends on the wallet address!//
-
+	UObjectHandler* QRImageHandler;
 	void initGetQRCode();
 
 	//used for managing anything that depends on the wallet address//
