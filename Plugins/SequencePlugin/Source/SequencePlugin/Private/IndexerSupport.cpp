@@ -210,7 +210,8 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 		
 		for(FTxnTransfer Transfer : Transaction.transfers)
 		{
-			FTokenMetaData TokenMetaData = Transfer.tokenMetaData.Array()[0].Value;
+			long long TokenId = Transfer.tokenIds[0];
+			FTokenMetaData TokenMetaData = *Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
 			Item.other_public_address = Transfer.from == MyAddress ? Transfer.to : Transfer.from;
 			Item.other_icon = nullptr;
 
@@ -238,7 +239,16 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				FCoinTxn_BE CoinTxn;
 				
 				//coin
-				CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				if(Transfer.contractType == ERC20 || Transfer.contractType == ERC20_BRIDGE)
+				{
+					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				}
+				else
+				{
+					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, TokenMetaData.decimals);
+				}
+				
+				
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
 				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
@@ -269,7 +279,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				NftTxn.nft.Value = 1.0; // unknown, set to 1.0 for now
 				NftTxn.nft.NFT_Name = Transfer.contractInfo.name;
 				NftTxn.nft.NFT_Short_Name = Transfer.contractInfo.symbol;
-				NftTxn.nft.NFT_Details.token_id = FString::FromInt(Transfer.tokenIds[0]); // assume int conversion?
+				NftTxn.nft.NFT_Details.token_id = FString::FromInt(TokenId);
 				NftTxn.nft.NFT_Details.Contract_Address = Transfer.contractInfo.address;
 				NftTxn.nft.NFT_Details.Token_Standard = Transfer.contractType;
 
