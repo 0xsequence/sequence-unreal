@@ -22,6 +22,8 @@ class UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:
+	static float getAmount(int64 amount,int32 decimals);
+	static float getAmount(int64 amount,float decimals);
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings
 	*/
