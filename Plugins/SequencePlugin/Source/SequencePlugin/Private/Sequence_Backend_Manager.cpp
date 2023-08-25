@@ -87,12 +87,9 @@ FString ASequence_Backend_Manager::Get_From_Clipboard()
 	return retData;
 }
 
-FString ASequence_Backend_Manager::get_transaction_hash()
+FString ASequence_Backend_Manager::get_transaction_hash(SequenceAPI::FTransaction Transaction)
 {
-	FString txn_hash = "0x";
-	int32 txn_value = FMath::RandRange(1, 65536);
-	txn_hash.AppendInt(txn_value);
-	return txn_hash;
+	return Transaction.ID();
 }
 
 FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()

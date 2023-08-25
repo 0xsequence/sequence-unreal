@@ -227,7 +227,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 		
 		for(FTxnTransfer Transfer : Transaction.transfers)
 		{
-			long long TokenId = Transfer.tokenIds[0];
+			uint64 TokenId = Transfer.tokenIds[0];
 			FTokenMetaData* TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
 
 			if(!TokenMetaData)
