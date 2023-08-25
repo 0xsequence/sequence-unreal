@@ -1,6 +1,7 @@
 
 #include "SequenceAPI.h"
 
+#include "Crypto.h"
 #include "Http.h"
 #include "HttpManager.h"
 #include "RequestHandler.h"
@@ -111,7 +112,7 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 	return page;
 }
 
-FString SequenceAPI::FTransaction::ToJson()
+const FString SequenceAPI::FTransaction::ToJson()
 {
 	FJsonBuilder Json = FJsonBuilder();
 
@@ -122,6 +123,12 @@ FString SequenceAPI::FTransaction::ToJson()
 	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
 
 	return Json.ToString();
+}
+
+const FString SequenceAPI::FTransaction::ID()
+{
+	FUnsizedData Data = StringToUTF8(ToJson());
+	return GetKeccakHash(Data).ToHex();
 }
 
 SequenceAPI::FPartnerWallet SequenceAPI::FPartnerWallet::From(TSharedPtr<FJsonObject> Json)
@@ -418,6 +425,16 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	
 	this->SendRPCAndExtract(Url("sendTransactionBatch"), Content, OnSuccess, ExtractSignature,
 	OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction Transaction,
+	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{
+	FString ID = Transaction.ID();
+	SendTransaction(Transaction, [=](FHash256 Hash)
+	{
+		OnSuccess(ID);
+	}, OnFailure);
 }
 
 //appending functions from sequenceData.cpp
