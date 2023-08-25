@@ -238,7 +238,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				FCoinTxn_BE CoinTxn;
 				
 				//coin
-				CoinTxn.amount = Transfer.amounts[0] * FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
 				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
@@ -262,7 +262,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				// Assume its an NFT?
 				FNFTTxn_BE NftTxn;
 
-				NftTxn.amount = Transfer.amounts[0] * FMath::Pow(10.0, Transfer.contractInfo.decimals);
+				NftTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
 				NftTxn.nft.Amount = NftTxn.amount;
 				NftTxn.nft.Description = Transfer.contractInfo.extensions.description;
 				NftTxn.nft.Properties; // unknown, probably in token meta data
