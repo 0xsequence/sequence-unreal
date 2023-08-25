@@ -228,7 +228,13 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 		for(FTxnTransfer Transfer : Transaction.transfers)
 		{
 			long long TokenId = Transfer.tokenIds[0];
-			FTokenMetaData TokenMetaData = *Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
+			FTokenMetaData* TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
+
+			if(!TokenMetaData)
+			{
+				SequenceError(RequestFail, "No token metadata found!");
+			}
+			
 			Item.other_public_address = Transfer.from == MyAddress ? Transfer.to : Transfer.from;
 			Item.other_icon = nullptr;
 
@@ -260,12 +266,10 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				{
 					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, Transfer.contractInfo.decimals);
 				}
-				else
+				else if(TokenMetaData)
 				{
-					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, TokenMetaData.decimals);
+					CoinTxn.amount = Transfer.amounts[0] / FMath::Pow(10.0, TokenMetaData->decimals);
 				}
-				
-				
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
 				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
@@ -310,7 +314,10 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTransactionHistory(FString My
 				FNFTUpdatable uNFT;
 				
 				uNFT.nftCollectionIconUrl = Transfer.contractInfo.extensions.ogImage;
-				uNFT.nftIconUrl = TokenMetaData.image;
+				if(TokenMetaData)
+				{
+					uNFT.nftIconUrl = TokenMetaData->image;
+				}
 				uNFT.nftID = NftTxn.nft.NFT_Details.itemID;
 				UpdateItems.updatingNftData.Add(uNFT);
 			}

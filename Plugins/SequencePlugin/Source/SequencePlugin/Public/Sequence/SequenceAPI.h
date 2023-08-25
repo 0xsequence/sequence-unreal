@@ -103,9 +103,9 @@ namespace SequenceAPI
 		FSequenceWallet(FString Hostname);
 		FSequenceWallet();
 		
-		void CreateWallet(uint64 AccountIndex, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
+		void CreateWallet(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void GetWalletAddress(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
-		void DeployWallet(uint64 ChainId, uint64 AccountIndex, TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure);
+		void DeployWallet(uint64 ChainId, TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure);
 
 		void Wallets(FPage Page, TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure);
 		void Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure);
