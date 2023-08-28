@@ -112,7 +112,7 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 	return page;
 }
 
-const FString SequenceAPI::FTransaction::ToJson()
+const FString FTransactionData::ToJson()
 {
 	FJsonBuilder Json = FJsonBuilder();
 
@@ -125,7 +125,7 @@ const FString SequenceAPI::FTransaction::ToJson()
 	return Json.ToString();
 }
 
-const FString SequenceAPI::FTransaction::ID()
+const FString FTransactionData::ID()
 {
 	FUnsizedData Data = StringToUTF8(ToJson());
 	return GetKeccakHash(Data).ToHex();
@@ -364,7 +364,7 @@ void SequenceAPI::FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddr
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess,
+void SequenceAPI::FSequenceWallet::SendTransaction(FTransactionData Transaction, TSuccessCallback<FHash256> OnSuccess,
 	FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
@@ -394,7 +394,7 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSu
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Transactions,
+void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransactionData> Transactions,
 	TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
@@ -417,7 +417,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	};
 
 	FJsonArray JsonArray = FJsonBuilder().AddArray("txs");
-	for(FTransaction Transaction : Transactions)
+	for(FTransactionData Transaction : Transactions)
 	{
 		JsonArray.AddValue(Transaction.ToJson());
 	}
@@ -427,7 +427,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction Transaction,
+void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransactionData Transaction,
 	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FString ID = Transaction.ID();
