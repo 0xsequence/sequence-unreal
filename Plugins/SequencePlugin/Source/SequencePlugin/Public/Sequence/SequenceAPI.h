@@ -116,7 +116,7 @@ namespace SequenceAPI
 		void SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		void SendTransactionBatch(TArray<FTransaction> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 
-		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<FString> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure);
 
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
 
