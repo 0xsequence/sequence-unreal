@@ -5,45 +5,6 @@
 #include "BE_Structs.h"
 #include "Types/BinaryData.h"
 
-//this can't be in a namespace!
-//USTRUCT(BlueprintType)
-struct FTransactionData
-{
-	//GENERATED_USTRUCT_BODY()
-public:
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		uint64 ChainId;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FAddress From;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FAddress To;
-
-	TOptional<FString> AutoGas;
-	TOptional<uint64> Nonce;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TOptional<FString> Value;
-
-	TOptional<FString> CallData;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TOptional<FString> TokenAddress;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TOptional<FString> TokenAmount;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TOptional<TArray<FString>> TokenIds;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TOptional<TArray<FString>> TokenAmounts;
-
-	const FString ToJson();
-	const FString ID();
-};
-
 namespace SequenceAPI
 {
 	using FSignature = FUnsizedData;
@@ -75,6 +36,24 @@ namespace SequenceAPI
 
 		FString ToJson();
 		static FPage From(TSharedPtr<FJsonObject> Json);
+	};
+
+	struct FTransaction
+	{
+		uint64 ChainId;
+		FAddress From;
+		FAddress To;
+		TOptional<FString> AutoGas;
+		TOptional<uint64> Nonce;
+		TOptional<FString> Value;
+		TOptional<FString> CallData;
+		TOptional<FString> TokenAddress;
+		TOptional<FString> TokenAmount;
+		TOptional<TArray<FString>> TokenIds;
+		TOptional<TArray<FString>> TokenAmounts;
+
+		const FString ToJson();
+		const FString ID();
 	};
 
 	struct FPartnerWallet
@@ -133,10 +112,10 @@ namespace SequenceAPI
 		void Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure);
 		void SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message, TSuccessCallback<FSignature> OnSuccess, FFailureCallback OnFailure);
 		void IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message, FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
-		void SendTransaction(FTransactionData Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
-		void SendTransactionBatch(TArray<FTransactionData> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+		void SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+		void SendTransactionBatch(TArray<FTransaction> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 
-		void SendTransactionWithCallback(FTransactionData Transaction, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+		void SendTransactionWithCallback(FTransaction Transaction, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
 
