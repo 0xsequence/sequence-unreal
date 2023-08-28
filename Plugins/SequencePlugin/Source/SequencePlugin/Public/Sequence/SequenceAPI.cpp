@@ -124,8 +124,8 @@ SequenceAPI::FTransaction SequenceAPI::FTransaction::Convert(FTransaction_FE Tra
 		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
 		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
 		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
-		Transaction_Fe.TokenIds.Num() > 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
-		Transaction_Fe.TokenAmounts.Num() > 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
+		Transaction_Fe.TokenIds.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
+		Transaction_Fe.TokenAmounts.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
 	};
 }
 
@@ -135,14 +135,14 @@ const FString SequenceAPI::FTransaction::ToJson()
 
 	Json.AddInt("chainId", ChainId);
 	Json.AddString("from", "0x" + From.ToHex());
-	Json.AddString("to", "0x" + From.ToHex());
+	Json.AddString("to", "0x" + To.ToHex());
 
 	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
 
 	return Json.ToString();
 }
 
-const FString SequenceAPI::FTransaction::ID()
+const SequenceAPI::TransactionID SequenceAPI::FTransaction::ID()
 {
 	FUnsizedData Data = StringToUTF8(ToJson());
 	return GetKeccakHash(Data).ToHex();
@@ -445,7 +445,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 }
 
 void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
-                                                               TSuccessCallback<FString> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+                                                               TSuccessCallback<TransactionID> OnSuccess, TFunction<void(TransactionID, SequenceError)> OnFailure)
 {
 	FTransaction Converted = FTransaction::Convert(Transaction);
 	FString ID = Converted.ID();

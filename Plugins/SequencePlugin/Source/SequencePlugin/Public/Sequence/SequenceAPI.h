@@ -38,6 +38,7 @@ namespace SequenceAPI
 		static FPage From(TSharedPtr<FJsonObject> Json);
 	};
 
+	using TransactionID = FString;
 	struct FTransaction
 	{
 		uint64 ChainId;
@@ -54,7 +55,7 @@ namespace SequenceAPI
 
 		static FTransaction Convert(FTransaction_FE Transaction_Fe);
 		const FString ToJson();
-		const FString ID();
+		const TransactionID ID();
 	};
 
 	struct FPartnerWallet
@@ -116,7 +117,7 @@ namespace SequenceAPI
 		void SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		void SendTransactionBatch(TArray<FTransaction> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 
-		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<FString> OnSuccess, TFunction<void (FString, SequenceError)> OnFailure);
+		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void (TransactionID, SequenceError)> OnFailure);
 
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
 
