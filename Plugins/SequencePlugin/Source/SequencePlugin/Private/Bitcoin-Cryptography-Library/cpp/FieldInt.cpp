@@ -10,7 +10,7 @@
 #pragma warning(disable: 4104)
 #include <cassert>
 #include <cstring>
-#include "AsmX8664.hpp"
+//#include "AsmX8664.hpp"
 #include "CountOps.hpp"
 #include "FieldInt.hpp"
 
@@ -72,28 +72,8 @@ void FieldInt::multiply(const FieldInt &other) {
 	countOps(functionOps);
 	uint32_t difference[NUM_WORDS + 1];
 	
-	if (USE_X8664_ASM_IMPL) {
-		// Compute raw product of (uint256 this->value) * (uint256 other.value) = (uint512 product0), via long multiplication
-		uint32_t product0[NUM_WORDS * 2];
-		asm_FieldInt_multiply256x256eq512(&product0[0], &this->value[0], &other.value[0]);
-		countOps(105 * arithmeticOps);
-		
-		// Barrett reduction algorithm begins here (see https://www.nayuki.io/page/barrett-reduction-algorithm).
-		// Multiply by floor(2^512 / MODULUS), which is 2^256 + 2^32 + 0x3D1. Guaranteed to fit in a uint768.
-		uint32_t product1[NUM_WORDS * 3];
-		asm_FieldInt_multiplyBarrettStep0(product1, product0);
-		countOps((40 + 10*8 + 4) * arithmeticOps);
-		
-		// Virtually shift right by 512 bits, then multiply by MODULUS.
-		// Note that MODULUS = 2^256 - 2^32 - 0x3D1. Result fits in a uint512.
-		uint32_t product2[NUM_WORDS * 2];
-		asm_FieldInt_multiplyBarrettStep1(product2, &product1[NUM_WORDS * 2]);
-		countOps((29 + 12*4 + 5) * arithmeticOps);
-		
-		// Compute product0 - product2, which fits in a uint257 (sic)
-		asm_FieldInt_multiplyBarrettStep2(difference, product0, product2);
-		countOps(15 * arithmeticOps);
-		
+	if (false) {
+		//NOP
 	} else {
 		// Compute raw product of (uint256 this->value) * (uint256 other.value) = (uint512 product0), via long multiplication
 		uint32_t product0[NUM_WORDS * 2] = {};
