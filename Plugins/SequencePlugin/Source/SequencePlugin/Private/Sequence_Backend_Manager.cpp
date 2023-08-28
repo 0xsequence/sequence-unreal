@@ -89,8 +89,7 @@ FString ASequence_Backend_Manager::Get_From_Clipboard()
 
 FString ASequence_Backend_Manager::get_transaction_hash(FTransaction_FE Transaction)
 {
-	//return Transaction.ID();
-	return "nill";
+	return Transaction.ID();
 }
 
 FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
