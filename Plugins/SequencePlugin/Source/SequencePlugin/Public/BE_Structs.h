@@ -663,3 +663,32 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<FTransactionHistoryItem_BE> semiParsedHistory;//semiParsed history data
 };
+
+USTRUCT(BlueprintType)
+struct FTransaction_FE
+{
+    GENERATED_USTRUCT_BODY()
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    int64 chainId = -1;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString From = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString To = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString AutoGas = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    int64 Nonce = -1;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString Value = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString CallData = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString TokenAddress = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    FString TokenAmount = "";
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    TArray<FString> TokenIds;
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    TArray<FString> TokenAmounts;
+};

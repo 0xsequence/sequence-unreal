@@ -85,8 +85,8 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Get_From_Clipboard();
 
-	//UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-	//	FString get_transaction_hash(SequenceAPI::FTransaction Transaction);
+	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+		FString get_transaction_hash(FTransaction_FE Transaction);
 
 	//Used to get the stored auth credentials encrypt them and send them up
 	//to be stored in a game save object
