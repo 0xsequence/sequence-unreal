@@ -143,7 +143,7 @@ void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_d
 	{
 	};
 
-	this->sequenceWallet->SendTransactionWithCallback(transaction_data,GenericSuccess,GenericFailure);
+	this->sequenceWallet->SendTransactionWithCallback(transaction_data,SendSuccess,SendFailure);
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate;
 	Delegate.BindUFunction(this, "update_txn", callback);
