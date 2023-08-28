@@ -585,19 +585,19 @@ FString SequenceAPI::FSequenceWallet::encodeB64_URL(FString data)
 	FString rep_plus = TEXT("-");
 	FString srch_slash = TEXT("/");
 	FString rep_slash = TEXT("_");
-	FString srch_equals = TEXT("=");
-	FString rep_equals = TEXT(".");
+	//FString srch_equals = TEXT("=");
+	//FString rep_equals = TEXT(".");
 
 	const TCHAR* srch_ptr_plus = *srch_plus;
 	const TCHAR* rep_ptr_plus = *rep_plus;
 	const TCHAR* srch_ptr_slash = *srch_slash;
 	const TCHAR* rep_ptr_slash = *rep_slash;
-	const TCHAR* srch_ptr_equals = *srch_equals;
-	const TCHAR* rep_ptr_equals = *rep_equals;
+	//const TCHAR* srch_ptr_equals = *srch_equals;
+	//const TCHAR* rep_ptr_equals = *rep_equals;
 
 	ret.ReplaceInline(srch_ptr_plus, rep_ptr_plus, ESearchCase::IgnoreCase);//remove + and replace with -
 	ret.ReplaceInline(srch_ptr_slash, rep_ptr_slash, ESearchCase::IgnoreCase);//remove / and replace with _
-	ret.ReplaceInline(srch_ptr_equals, rep_ptr_equals, ESearchCase::IgnoreCase);//remove = and replace with .
+	//ret.ReplaceInline(srch_ptr_equals, rep_ptr_equals, ESearchCase::IgnoreCase);//remove = and replace with .
 
 	UE_LOG(LogTemp, Display, TEXT("B64-URL encoded addr: [%s]"), *ret);
 
