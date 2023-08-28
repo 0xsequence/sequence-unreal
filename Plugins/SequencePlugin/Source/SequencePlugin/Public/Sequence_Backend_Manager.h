@@ -150,10 +150,10 @@ public:
 	* Used to initalize a send transaction!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_coin_send_txn(FCoin_Send_Txn_BE coin_txn);
+		void init_coin_send_txn(FTransaction_FE transaction_data);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_nft_send_txn(FNFT_Send_Txn_BE nft_txn);
+		void init_nft_send_txn(FTransaction_FE transaction_data);
 
 	/*
 	* Used to let the frontend know if a txn went through or not!
