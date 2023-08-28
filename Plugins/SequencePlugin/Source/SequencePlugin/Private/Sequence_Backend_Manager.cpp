@@ -131,9 +131,9 @@ void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_d
 {
 	//dummy function for right now we just call back the update_txn with some pseudo random state!
 	UE_LOG(LogTemp, Display, TEXT("[Coin Txn Request Initiated]"));//first chunk simulates signin request code gen
-	//FTxnCallback_BE callback;
-	//callback.good_txn = FMath::RandBool();
-	//callback.txn_hash_id = coin_txn.txn_hash_id;
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_hash_id = transaction_data.ID();
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString repsonse)
 	{
@@ -144,10 +144,10 @@ void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_d
 	};
 
 	this->sequenceWallet->SendTransactionWithCallback(transaction_data,GenericSuccess,GenericFailure);
-//	FTimerHandle TH_auth_delay;
-	//FTimerDelegate Delegate;
-////	Delegate.BindUFunction(this, "update_txn", callback);
-//GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "update_txn", callback);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
 }
 
 void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE transaction_data)
@@ -164,14 +164,14 @@ void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE transaction_da
 
 	this->sequenceWallet->SendTransactionWithCallback(transaction_data, GenericSuccess, GenericFailure);
 
-	//FTxnCallback_BE callback;
-	//callback.good_txn = FMath::RandBool();
-	//callback.txn_hash_id = nft_txn.txn_hash_id;
+	FTxnCallback_BE callback;
+	callback.good_txn = FMath::RandBool();
+	callback.txn_hash_id = transaction_data.ID();
 
-	//FTimerHandle TH_auth_delay;
-	//FTimerDelegate Delegate;
-	//Delegate.BindUFunction(this, "update_txn", callback);
-	//GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
+	FTimerHandle TH_auth_delay;
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "update_txn", callback);
+	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
 }
 
 //update this to be the encrypted json string
