@@ -218,9 +218,17 @@ void USystemDataBuilder::initGetQRCode()
 			TMap<FString, UTexture2D*> images = this->QRImageHandler->getProcessedImages();
 			if (images.Contains(this->qr_url))
 			{
+				if (!*images.Find(this->qr_url))
+				{
+					UE_LOG(LogTemp, Error, TEXT("Resolved QR to null pointer"));
+				}
 				this->systemData.user_data.public_qr_address = *images.Find(this->qr_url);//here we assign the QRCode we received!
-				this->masterSyncer->dec();
 			}
+			else
+			{//log error with getting QR code
+				UE_LOG(LogTemp, Error, TEXT("Failed to fetch QR Code"));
+			}
+			this->masterSyncer->dec();
 		});
 
 	const TSuccessCallback<FAddress> GenericSuccess = [&, this](const FAddress address)
@@ -281,8 +289,8 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->masterSyncer->incN(2);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
-	this->initGetTokenData();
+	this->masterSyncer->incN(1);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	//this->initGetTokenData();
 	this->initGetQRCode();
 }
 

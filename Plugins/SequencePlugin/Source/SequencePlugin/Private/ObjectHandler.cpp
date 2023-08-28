@@ -172,7 +172,7 @@ void UObjectHandler::requestImages(TArray<FString> URLs)
 
 EImageFormat UObjectHandler::get_img_format(FString URL)
 {
-	EImageFormat fmt = EImageFormat::Invalid;
+	EImageFormat fmt = EImageFormat::GrayscaleJPEG;//default!
 
 	if (URL.Contains(".jpg", ESearchCase::IgnoreCase))
 		fmt = EImageFormat::JPEG;
@@ -197,22 +197,25 @@ UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(img_format);
 
-	if (ImageWrapper && ImageWrapper.Get()->SetCompressed(img_data.GetData(), img_data.Num()))
+	if (ImageWrapper)
 	{
-		TArray64<uint8>  Uncompressed;
-		if (ImageWrapper.Get()->GetRaw(Uncompressed))
+		if (ImageWrapper.Get()->SetCompressed(img_data.GetData(), img_data.Num()))
 		{
-			width = ImageWrapper.Get()->GetWidth();
-			height = ImageWrapper.Get()->GetHeight();
+			TArray64<uint8>  Uncompressed;
+			if (ImageWrapper.Get()->GetRaw(Uncompressed))
+			{
+				width = ImageWrapper.Get()->GetWidth();
+				height = ImageWrapper.Get()->GetHeight();
 
-			img = UTexture2D::CreateTransient(width, height, pxl_format);
-			if (!img) return NULL;//nothing to do if it doesn't load!
+				img = UTexture2D::CreateTransient(width, height, pxl_format);
+				if (!img) return NULL;//nothing to do if it doesn't load!
 
-			void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-			FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
-			img->GetPlatformData()->Mips[0].BulkData.Unlock();
+				void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+				FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
+				img->GetPlatformData()->Mips[0].BulkData.Unlock();
 
-			img->UpdateResource();
+				img->UpdateResource();
+			}
 		}
 	}
 	return img;
