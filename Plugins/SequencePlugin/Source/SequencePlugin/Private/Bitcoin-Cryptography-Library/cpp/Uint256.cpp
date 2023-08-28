@@ -10,7 +10,7 @@
 #pragma warning(disable: 4104)
 #include <cassert>
 #include <cstring>
-#include "AsmX8664.hpp"
+//#include "AsmX8664.hpp"
 #include "CountOps.hpp"
 #include "Uint256.hpp"
 #include "Utils.hpp"
@@ -51,10 +51,6 @@ Uint256::Uint256(const FieldInt &val) {
 uint32_t Uint256::add(const Uint256 &other, uint32_t enable) {
 	assert(&other != this && (enable >> 1) == 0);
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		countOps(15 * arithmeticOps);
-		return asm_Uint256_add(&this->value[0], &other.value[0], enable);
-	}
 	
 	uint32_t mask = -enable;
 	uint32_t carry = 0;
@@ -74,10 +70,6 @@ uint32_t Uint256::add(const Uint256 &other, uint32_t enable) {
 uint32_t Uint256::subtract(const Uint256 &other, uint32_t enable) {
 	assert(&other != this && (enable >> 1) == 0);
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		countOps(15 * arithmeticOps);
-		return asm_Uint256_subtract(&this->value[0], &other.value[0], enable);
-	}
 	
 	uint32_t mask = -enable;
 	uint32_t borrow = 0;
@@ -96,10 +88,6 @@ uint32_t Uint256::subtract(const Uint256 &other, uint32_t enable) {
 
 uint32_t Uint256::shiftLeft1() {
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		countOps(6 * arithmeticOps);
-		return asm_Uint256_shiftLeft1(&this->value[0]);
-	}
 	
 	uint32_t prev = 0;
 	countOps(1 * arithmeticOps);
@@ -118,11 +106,6 @@ uint32_t Uint256::shiftLeft1() {
 void Uint256::shiftRight1(uint32_t enable) {
 	assert((enable >> 1) == 0);
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		asm_Uint256_shiftRight1(&this->value[0], enable);
-		countOps(21 * arithmeticOps);
-		return;
-	}
 	
 	uint32_t mask = -enable;
 	uint32_t cur = value[0];
@@ -196,11 +179,6 @@ void Uint256::reciprocal(const Uint256 &modulus) {
 void Uint256::replace(const Uint256 &other, uint32_t enable) {
 	assert((enable >> 1) == 0);
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		asm_Uint256_replace(&this->value[0], &other.value[0], enable);
-		countOps(9 * arithmeticOps);
-		return;
-	}
 	
 	uint32_t mask = -enable;
 	countOps(1 * arithmeticOps);
@@ -215,11 +193,6 @@ void Uint256::replace(const Uint256 &other, uint32_t enable) {
 void Uint256::swap(Uint256 &other, uint32_t enable) {
 	assert((enable >> 1) == 0);
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		asm_Uint256_swap(&this->value[0], &other.value[0], enable);
-		countOps(17 * arithmeticOps);
-		return;
-	}
 	
 	uint32_t mask = -enable;
 	countOps(1 * arithmeticOps);
@@ -243,10 +216,6 @@ void Uint256::getBigEndianBytes(uint8_t b[NUM_WORDS * 4]) const {
 
 bool Uint256::operator==(const Uint256 &other) const {
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		countOps(9 * arithmeticOps);
-		return asm_Uint256_equalTo(&this->value[0], &other.value[0]);
-	}
 	
 	uint32_t diff = 0;
 	countOps(1 * arithmeticOps);
@@ -269,10 +238,6 @@ bool Uint256::operator!=(const Uint256 &other) const {
 
 bool Uint256::operator<(const Uint256 &other) const {
 	countOps(functionOps);
-	if (USE_X8664_ASM_IMPL) {
-		countOps(18 * arithmeticOps);
-		return asm_Uint256_lessThan(&this->value[0], &other.value[0]);
-	}
 	
 	bool result = false;
 	countOps(1 * arithmeticOps);
