@@ -52,6 +52,7 @@ namespace SequenceAPI
 		TOptional<TArray<FString>> TokenIds;
 		TOptional<TArray<FString>> TokenAmounts;
 
+		static FTransaction Convert(FTransaction_FE Transaction_Fe);
 		const FString ToJson();
 		const FString ID();
 	};
