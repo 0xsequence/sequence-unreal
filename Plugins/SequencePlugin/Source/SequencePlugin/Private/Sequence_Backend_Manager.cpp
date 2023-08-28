@@ -135,15 +135,15 @@ void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_d
 	//callback.good_txn = FMath::RandBool();
 	//callback.txn_hash_id = coin_txn.txn_hash_id;
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString repsonse)
+	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
 	{
 	};
 
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const TFunction<void (FString, SequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const SequenceError Error)
 	{
 	};
 
-	this->sequenceWallet->SendTransactionWithCallback(transaction_data,GenericSuccess,GenericFailure);
+	this->sequenceWallet->SendTransactionWithCallback(transaction_data,SendSuccess,SendFailure);
 //	FTimerHandle TH_auth_delay;
 	//FTimerDelegate Delegate;
 ////	Delegate.BindUFunction(this, "update_txn", callback);
@@ -154,15 +154,15 @@ void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE transaction_da
 {
 	//dummy function for right now we just call back the update_txn with some pseudo random state!
 	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));//first chunk simulates signin request code gen
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString repsonse)
+	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
 	{
 	};
 
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const TFunction<void (FString, SequenceError)> SendFailure = [this](const FString ID, const SequenceError Error)
 	{
 	};
 
-	this->sequenceWallet->SendTransactionWithCallback(transaction_data, GenericSuccess, GenericFailure);
+	this->sequenceWallet->SendTransactionWithCallback(transaction_data, SendSuccess, SendFailure);
 
 	//FTxnCallback_BE callback;
 	//callback.good_txn = FMath::RandBool();
