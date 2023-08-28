@@ -112,6 +112,14 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 	return page;
 }
 
+SequenceAPI::FTransaction SequenceAPI::FTransaction::Convert(FTransaction_FE Transaction_Fe)
+{
+	return FTransaction{
+		static_cast<uint64>(Transaction_Fe.chainId),
+		
+	};
+}
+
 const FString SequenceAPI::FTransaction::ToJson()
 {
 	FJsonBuilder Json = FJsonBuilder();
@@ -430,6 +438,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
 	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
+	
 	FString ID = Transaction.ID();
 	SendTransaction(Transaction, [=](FHash256 Hash)
 	{
