@@ -13,7 +13,7 @@ void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void
 	};
 
 	FUnsizedData Message = StringToUTF8("test message");
-	auto tx = FTransactionData{
+	auto tx = SequenceAPI::FTransaction{
 		421613,
 		FAddress::From("0x660250734f31644681ae32d05bd7e8e29fea29e1"),
 		FAddress::From("0xc2f3169e84f69adbdba77b209292b8924b35c121"),
