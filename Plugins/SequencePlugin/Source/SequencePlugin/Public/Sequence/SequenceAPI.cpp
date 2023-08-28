@@ -116,7 +116,16 @@ SequenceAPI::FTransaction SequenceAPI::FTransaction::Convert(FTransaction_FE Tra
 {
 	return FTransaction{
 		static_cast<uint64>(Transaction_Fe.chainId),
-		
+		FAddress::From(Transaction_Fe.From),
+		FAddress::From(Transaction_Fe.To),
+		Transaction_Fe.AutoGas == "" ? TOptional<FString>() : TOptional(Transaction_Fe.AutoGas),
+		Transaction_Fe.Nonce < 0 ? TOptional<uint64>() : TOptional(static_cast<uint64>(Transaction_Fe.Nonce)),
+		Transaction_Fe.Value == "" ? TOptional<FString>() : TOptional(Transaction_Fe.Value),
+		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
+		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
+		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
+		Transaction_Fe.TokenIds.Num() > 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
+		Transaction_Fe.TokenAmounts.Num() > 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
 	};
 }
 
@@ -438,9 +447,9 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
 	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	
-	FString ID = Transaction.ID();
-	SendTransaction(Transaction, [=](FHash256 Hash)
+	FTransaction Converted = FTransaction::Convert(Transaction);
+	FString ID = Converted.ID();
+	SendTransaction(Converted, [=](FHash256 Hash)
 	{
 		OnSuccess(ID);
 	}, OnFailure);
