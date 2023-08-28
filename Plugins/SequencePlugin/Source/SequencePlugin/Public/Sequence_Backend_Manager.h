@@ -85,13 +85,20 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString Get_From_Clipboard();
 
-	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		FString get_transaction_hash(SequenceAPI::FTransaction);
+	//UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
+	//	FString get_transaction_hash(SequenceAPI::FTransaction Transaction);
 
 	//Used to get the stored auth credentials encrypt them and send them up
 	//to be stored in a game save object
 	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
 		FSecureKey getSecureStorableAuth();
+
+	/*
+	* We will poll for updates on receive and on receive we will parse that data up and send
+	* it to the front
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
+		void receiveItems(const TArray<FNFT_Master_BE> &nfts,const TArray<FCoin_BE> &coins);
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
