@@ -691,4 +691,6 @@ public:
     TArray<FString> TokenIds;
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
     TArray<FString> TokenAmounts;
+
+    FString ID() const;
 };
