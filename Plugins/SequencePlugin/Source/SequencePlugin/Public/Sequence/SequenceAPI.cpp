@@ -445,14 +445,17 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 }
 
 void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
-	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+                                                               TSuccessCallback<FString> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
 {
 	FTransaction Converted = FTransaction::Convert(Transaction);
 	FString ID = Converted.ID();
 	SendTransaction(Converted, [=](FHash256 Hash)
 	{
 		OnSuccess(ID);
-	}, OnFailure);
+	}, [=](SequenceError Error)
+	{
+		OnFailure(ID, Error);
+	});
 }
 
 //appending functions from sequenceData.cpp
