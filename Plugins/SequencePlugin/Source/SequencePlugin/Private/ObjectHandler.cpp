@@ -181,6 +181,10 @@ EImageFormat UObjectHandler::get_img_format(FString URL)
 		fmt = EImageFormat::BMP;
 	else if (URL.Contains(".hdr", ESearchCase::IgnoreCase))
 		fmt = EImageFormat::HDR;
+	else if (URL.Contains(".tiff", ESearchCase::IgnoreCase) || URL.Contains(".tif", ESearchCase::IgnoreCase))
+		fmt = EImageFormat::TIFF;
+	else if (URL.Contains(".tga", ESearchCase::IgnoreCase))
+		fmt = EImageFormat::TGA;
 	return fmt;
 }
 
