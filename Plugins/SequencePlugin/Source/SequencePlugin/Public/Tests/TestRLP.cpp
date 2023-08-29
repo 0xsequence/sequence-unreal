@@ -1,5 +1,5 @@
-#include "HexUtility.h"
-#include "RLP.h"
+#include "Util/HexUtility.h"
+#include "Eth/RLP.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestRLP, "Public.Tests.TestRLP",

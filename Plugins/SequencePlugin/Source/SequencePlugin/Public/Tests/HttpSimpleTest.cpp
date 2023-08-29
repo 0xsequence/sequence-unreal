@@ -1,10 +1,6 @@
-#include "HexUtility.h"
+
 #include "Misc/AutomationTest.h"
 #include "Provider.h"
-#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
-#include "Crypto.h"
-#include "RLP.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpSimpleTest, "Public.HttpSimpleTest",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)

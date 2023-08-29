@@ -4,7 +4,7 @@
 #include "ABI/ABI.h"
 
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
 FUnsizedData NewEmptyBlock()

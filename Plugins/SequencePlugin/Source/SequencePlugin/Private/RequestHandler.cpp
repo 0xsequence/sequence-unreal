@@ -3,7 +3,7 @@
 
 #include "RequestHandler.h"
 
-#include "Async.h"
+#include "Util/Async.h"
 #include "Http.h"
 #include "HttpManager.h"
 #include "Types/BinaryData.h"
@@ -122,12 +122,12 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 		{
 			if (!Response.IsValid())
 			{
-				OnFailure(SequenceError(RequestFail, "The Request is invalid!"));
+				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 			}
-			OnFailure(SequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}//if wasn't successful
 		//catch all error case!
-		OnFailure(SequenceError(RequestFail, "Failed to build QR Image data"));
+		OnFailure(FSequenceError(RequestFail, "Failed to build QR Image data"));
 	});//lambda
 }
 
@@ -160,10 +160,10 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 		{
 			if(!Response.IsValid())
 			{
-				return OnFailure(SequenceError(RequestFail, "The Request is invalid!"));
+				return OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 			}
 			
-			OnFailure(SequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}
 	});
 }

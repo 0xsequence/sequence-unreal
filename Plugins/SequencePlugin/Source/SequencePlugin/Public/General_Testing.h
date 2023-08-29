@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Errors.h"
-#include "IndexerSupport.h"
+#include "Indexer/IndexerSupport.h"
 #include "SequenceDataTests.h"
 #include "General_Testing.generated.h"
 
@@ -78,11 +78,11 @@ private:
 	* Here I include some additional state data about the callback as well as
 	* error data that get printed out in the callback failure!
 	*/
-	void Callback_Failed(FString state_data, SequenceError error) const;
+	void Callback_Failed(FString state_data, FSequenceError error) const;
 
 	/*
 	* Used to convert an enum to a readable string
 	*/
-	static FString Error_To_String(ErrorType error);
+	static FString Error_To_String(EErrorType error);
 
 };

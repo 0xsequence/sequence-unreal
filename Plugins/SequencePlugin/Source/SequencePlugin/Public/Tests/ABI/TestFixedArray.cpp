@@ -1,6 +1,6 @@
 #pragma warning(disable: 4018)
 #include "Misc/AutomationTest.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "ABI/ABI.h"
 #include "ABI/ABITypes.h"
 #include "ABI/ABIDynamicArray.h"

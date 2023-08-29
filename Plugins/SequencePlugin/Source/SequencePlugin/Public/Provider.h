@@ -5,14 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Async.h"
+#include "Util/Async.h"
 #include "Types/BinaryData.h"
 #include "Errors.h"
 #include "Types/Header.h"
 #include "Http.h"
-#include "JsonBuilder.h"
+#include "Util/JsonBuilder.h"
 #include "Types/TransactionReceipt.h"
-#include "EthTransaction.h"
+#include "Eth/EthTransaction.h"
 #include "RPCCaller.h"
 
 struct FContractCall;

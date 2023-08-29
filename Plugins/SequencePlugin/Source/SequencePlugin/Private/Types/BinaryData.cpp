@@ -1,5 +1,5 @@
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 
 
 uint8* BlankArray(ByteLength Size)

@@ -1,5 +1,5 @@
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "Types/Types.h"
 #include "Misc/AutomationTest.h"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"

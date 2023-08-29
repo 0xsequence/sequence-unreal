@@ -4,5 +4,5 @@
 class SequenceAPITest
 {
 public:
-	static void RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+	static void RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 };

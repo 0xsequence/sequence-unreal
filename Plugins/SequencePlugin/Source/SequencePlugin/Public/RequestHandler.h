@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Async.h"
+#include "Util/Async.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Engine/Texture2D.h"
 #include "IImageWrapper.h"
