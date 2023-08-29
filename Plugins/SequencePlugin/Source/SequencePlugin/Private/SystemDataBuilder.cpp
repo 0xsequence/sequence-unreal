@@ -1,5 +1,5 @@
 #include "SystemDataBuilder.h"
-#include "Indexer.h"
+#include "Indexer/Indexer.h"
 #include "Syncer.h"
 #include "Sequence/SequenceAPI.h"
 
@@ -172,7 +172,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		this->getItemDataSyncer->dec();
 	};//lambda
 
-	const FFailureCallback lclFailure = [this](const SequenceError Error)
+	const FFailureCallback lclFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
 		this->getItemDataSyncer->dec();
@@ -198,7 +198,7 @@ void USystemDataBuilder::initGetTokenData()
 		this->initGetItemData(semiParsedTokenBalance);
 	};
 
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		//dec the request & throw error?
 		this->masterSyncer->dec();
@@ -241,7 +241,7 @@ void USystemDataBuilder::initGetQRCode()
 	};
 
 	//GO Level
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		this->masterSyncer->dec();
 	};
@@ -314,7 +314,7 @@ void USystemDataBuilder::initGetTxnHistory()
 		//this->initGetItemData(semiParsedTokenBalance);
 	};
 
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		//dec the request & throw error?
 		this->masterSyncer->dec();

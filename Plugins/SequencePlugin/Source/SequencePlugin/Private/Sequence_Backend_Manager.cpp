@@ -2,13 +2,13 @@
 
 #include "Sequence_Backend_Manager.h"
 #include "Provider.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "Misc/AutomationTest.h"
 #include "GenericPlatform/GenericPlatformApplicationMisc.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
-#include "Indexer.h"
-#include "Crypto.h"
+#include "Indexer/Indexer.h"
+#include "Eth/Crypto.h"
 
 FUserDetails ASequence_Backend_Manager::getUserDetails()
 {
@@ -43,7 +43,7 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->hex_data.Add("f");
 	this->auth = NewObject<UAuth>();//for authentication storage and handling
 	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
-	this->indexer = NewObject<UIndexer>();//for handling indexer data
+	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
@@ -139,7 +139,7 @@ void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_d
 	{
 	};
 
-	const TFunction<void (FString, SequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const SequenceError Error)
+	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const FSequenceError Error)
 	{
 	};
 
@@ -158,7 +158,7 @@ void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE transaction_da
 	{
 	};
 
-	const TFunction<void (FString, SequenceError)> SendFailure = [this](const FString ID, const SequenceError Error)
+	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const FString ID, const FSequenceError Error)
 	{
 	};
 

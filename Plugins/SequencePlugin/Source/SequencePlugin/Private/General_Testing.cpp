@@ -2,12 +2,12 @@
 
 
 #include "General_Testing.h"
-#include "IndexerTests.h"
+#include "Indexer/IndexerTests.h"
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "HexUtility.h"
-#include "IndexerSupport.h"
+#include "Util/HexUtility.h"
+#include "Indexer/IndexerSupport.h"
 #include "Auth.h"
 #include "SequenceEncryptor.h"
 #include "SystemDataBuilder.h"
@@ -39,7 +39,7 @@ void AGeneral_Testing::test_provider()
 		callback_passed(State);
 	};
 
-	TFunction<void (FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
+	TFunction<void (FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
 	{
 		Callback_Failed(data, Err);
 	};
@@ -55,7 +55,7 @@ void AGeneral_Testing::test_indexer()
 		callback_passed(State);
 	};
 
-	TFunction<void(FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
+	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
 	{
 		Callback_Failed(data, Err);
 	};
@@ -106,7 +106,7 @@ void AGeneral_Testing::testSequence()
 		callback_passed(State);
 	};
 
-	TFunction<void(FString, SequenceError)> OnFailure = [this](FString data, SequenceError Err)
+	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
 	{
 		Callback_Failed(data, Err);
 	};
@@ -136,7 +136,7 @@ void AGeneral_Testing::callback_passed(FString state_data)
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-void AGeneral_Testing::Callback_Failed(const FString state_data, SequenceError error) const
+void AGeneral_Testing::Callback_Failed(const FString state_data, FSequenceError error) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *state_data);
@@ -145,7 +145,7 @@ void AGeneral_Testing::Callback_Failed(const FString state_data, SequenceError e
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-FString AGeneral_Testing::Error_To_String(ErrorType error)
+FString AGeneral_Testing::Error_To_String(EErrorType error)
 {
 	switch (error) {
 	case NotFound:

@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum ErrorType
+enum EErrorType
 {
 	NotFound,
 	ResponseParseError,
@@ -12,12 +12,12 @@ enum ErrorType
 	TestFail,
 };
 
-class SequenceError
+class FSequenceError
 {
 public:
-	SequenceError(ErrorType Type, FString Message);
+	FSequenceError(EErrorType Type, FString Message);
 	FString Message;
-	ErrorType Type;
+	EErrorType Type;
 };
 
-template<typename T> using TResult = TValueOrError<T, SequenceError>;
+template<typename T> using TResult = TValueOrError<T, FSequenceError>;

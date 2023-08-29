@@ -1,7 +1,5 @@
 #include "Types/TransactionReceipt.h"
 
-#include "HexUtility.h"
-
 FTransactionReceipt JsonToTransactionReceipt(TSharedPtr<FJsonObject> Json)
 {
 	uint64 BlockNumber;

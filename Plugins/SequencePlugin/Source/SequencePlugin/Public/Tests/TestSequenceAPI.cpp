@@ -4,10 +4,10 @@
 #include "ABI/ABITypes.h"
 #include "Sequence/SequenceAPI.h"
 
-void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	SequenceAPI::FSequenceWallet Api = SequenceAPI::FSequenceWallet();
-	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
 	{
 		OnFailure("", Error);
 	};

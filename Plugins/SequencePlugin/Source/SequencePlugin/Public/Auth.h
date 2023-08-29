@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "BE_Structs.h"
+#include "Util/Structs/BE_Structs.h"
 #include "Auth.generated.h"
 
 /*

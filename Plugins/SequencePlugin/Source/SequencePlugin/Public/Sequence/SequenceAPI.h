@@ -1,8 +1,8 @@
 #pragma once
-#include "Async.h"
-#include "EthTransaction.h"
+#include "Util/Async.h"
+#include "Eth/EthTransaction.h"
 #include "RPCCaller.h"
-#include "BE_Structs.h"
+#include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 
 namespace SequenceAPI
@@ -117,7 +117,7 @@ namespace SequenceAPI
 		void SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		void SendTransactionBatch(TArray<FTransaction> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 
-		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void (TransactionID, SequenceError)> OnFailure);
+		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void (TransactionID, FSequenceError)> OnFailure);
 
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
 

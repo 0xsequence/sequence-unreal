@@ -1,6 +1,6 @@
 #include "Types/Header.h"
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 
 FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
 {

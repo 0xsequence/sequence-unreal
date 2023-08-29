@@ -1,7 +1,7 @@
 #include "Types/ContractCall.h"
 
-#include "HexUtility.h"
-#include "JsonBuilder.h"
+#include "Util/HexUtility.h"
+#include "Util/JsonBuilder.h"
 
 FString FContractCall::GetJson()
 {

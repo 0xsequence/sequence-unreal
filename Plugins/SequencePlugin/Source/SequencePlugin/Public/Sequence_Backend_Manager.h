@@ -6,8 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Http.h"
 #include "ObjectHandler.h"
-#include "Backend.h"
-#include "BE_Structs.h"
+#include "Indexer/Backend.h"
+#include "Util/Structs/BE_Structs.h"
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
@@ -39,7 +39,7 @@ private:
 	FString pblc_key; // public key for signin
 	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
-	UIndexer* indexer;//indexer ref!
+	UIndexer* Indexer;//indexer ref!
 
 	UObjectHandler* request_handler;//going to be reworked into an image handler
 

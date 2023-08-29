@@ -1,15 +1,17 @@
 
 #include "SequenceDataTests.h"
+#include "Indexer/IndexerTests.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Structs/BE_Structs.h"
 
-void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [OnSuccess](const TArray<FContact_BE> contactList)
 	{
 		OnSuccess("Get Friend Success");
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
 	{
 		OnFailure("Get Friend Failure", Error);
 	};
@@ -22,14 +24,14 @@ void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, 
 	delete lclWallet;
 }
 
-void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [OnSuccess](const TArray<FItemPrice_BE> contactList)
 	{
 		OnSuccess("Get Coin Success");
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const SequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
 	{
 		OnFailure("Get Get Coin Failure", Error);
 	};
@@ -45,7 +47,7 @@ void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, Se
 	delete lclWallet;
 }
 
-void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure)
+void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {	
 	TestGetFriends(OnSuccess, OnFailure);
 	testGetCoins(OnSuccess, OnFailure);

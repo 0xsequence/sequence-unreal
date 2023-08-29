@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Async.h"
-#include "IndexerTests.h"
+#include "Util/Async.h"
+#include "Indexer/IndexerTests.h"
 
-void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
-void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+void TestGetFriends(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+void testGetCoins(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 
-void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, SequenceError)> OnFailure);
+void TestSequenceData(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);

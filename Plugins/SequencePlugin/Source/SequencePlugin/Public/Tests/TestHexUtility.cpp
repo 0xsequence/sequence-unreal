@@ -1,5 +1,5 @@
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestHexUtility, "Public.TestHexUtility",

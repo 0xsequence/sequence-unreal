@@ -3,15 +3,14 @@
 
 #include "Provider.h"
 
-#include "Crypto.h"
-#include "EthTransaction.h"
+#include "Eth/Crypto.h"
+#include "Eth/EthTransaction.h"
 #include "Types/BinaryData.h"
-#include "HexUtility.h"
+#include "Util/HexUtility.h"
 #include "HttpManager.h"
-#include "JsonBuilder.h"
+#include "Util/JsonBuilder.h"
 #include "JsonObjectConverter.h"
 #include "RequestHandler.h"
-#include "Transaction.h"
 #include "Types/ContractCall.h"
 #include "Types/Header.h"
 
@@ -64,7 +63,7 @@ void Provider::BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<F
 			
 			if(Obj.HasValue() && Obj.GetValue() == nullptr)
 			{
-				TResult<TSharedPtr<FJsonObject>> Val = MakeError(SequenceError(EmptyResponse, "Json response is null"));
+				TResult<TSharedPtr<FJsonObject>> Val = MakeError(FSequenceError(EmptyResponse, "Json response is null"));
 				return Val;
 			}
 
@@ -242,7 +241,7 @@ void Provider::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCal
 			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(String.GetValue())));
 		}
 
-		return TResult<FUnsizedData>(MakeError(SequenceError(ResponseParseError, "")));
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
 
@@ -265,7 +264,7 @@ void Provider::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallb
 			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(String.GetValue())));
 		}
 
-		return TResult<FUnsizedData>(MakeError(SequenceError(ResponseParseError, "")));
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
 
@@ -290,7 +289,7 @@ void Provider::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCa
 			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(StringResult.GetValue())));
 		}
 
-		return TResult<FUnsizedData>(MakeError(SequenceError(ResponseParseError, "")));
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
 
@@ -390,7 +389,7 @@ void Provider::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> O
 			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(StringResult.GetValue())));
 		}
 
-		return TResult<FUnsizedData>(MakeError(SequenceError(ResponseParseError, "")));
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
 
@@ -439,6 +438,6 @@ void Provider::CallHelper(FContractCall ContractCall, FString Number, TSuccessCa
 			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(StringResult.GetValue())));
 		}
 
-		return TResult<FUnsizedData>(MakeError(SequenceError(ResponseParseError, "")));
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
