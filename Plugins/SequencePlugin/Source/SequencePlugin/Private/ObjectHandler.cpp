@@ -79,7 +79,6 @@ bool UObjectHandler::check_raw_cache(FString URL, TArray<uint8>* raw_data)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Raw Cache miss"));
 	}
-
 	return cache_hit;
 }
 
@@ -216,6 +215,10 @@ UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
 
 				img->UpdateResource();
 			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Bad Image format chosen for: [%s]"),*URL);
 		}
 	}
 	return img;

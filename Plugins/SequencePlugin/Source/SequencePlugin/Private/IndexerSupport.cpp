@@ -262,7 +262,7 @@ FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyA
 
 				NftTxn.nft.Amount = NftTxn.amount;
 				NftTxn.nft.Description = Transfer.contractInfo.extensions.description;
-				NftTxn.nft.Value = 1.0; //we get this later
+				NftTxn.nft.Value = -1.0; //we get this later
 				NftTxn.nft.Collection_Long_Name = Transfer.contractInfo.name;
 				NftTxn.nft.Collection_Short_Name = Transfer.contractInfo.symbol;
 				NftTxn.nft.Collection_Icon_URL = Transfer.contractInfo.extensions.ogImage;
@@ -288,11 +288,12 @@ FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyA
 			{//coin
 				FCoinTxn_BE CoinTxn;
 				CoinTxn.amount = UIndexerSupport::getAmount(amount,Transfer.contractInfo.decimals);
-				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.logoURI;
+				CoinTxn.coin.Coin_Symbol_URL = Transfer.contractInfo.logoURI;
+				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.symbol;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
 				CoinTxn.coin.Coin_Amount = CoinTxn.amount;
 				CoinTxn.coin.Coin_Standard = Transfer.contractType;
-				CoinTxn.coin.Coin_Value = 1.0; //we get this in the 2nd part of the level of updating
+				CoinTxn.coin.Coin_Value = -1.0; //we get this in the 2nd part of the level of updating
 
 				//item id
 				CoinTxn.coin.itemID.contractAddress = Transfer.contractInfo.address;
@@ -395,7 +396,20 @@ FString UIndexerSupport::stringCleanup(FString string)
 
 FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 {
-	return FMonthDayYear_BE{}; // TODO: Date conversion
+	//format: 2023-08-21T15:06:09Z to 21,08,2023
+	FMonthDayYear_BE date;
+	int32 loc = Timestamp.Find("T", ESearchCase::CaseSensitive);
+	FString dateString = Timestamp.Left(loc);
+	//need to do 2 splits
+	FString yearData, monthDayData, monthData, dayData;
+	FString *yearString = &yearData, *monthDayString = &monthDayData,*monthString = &monthData,*dayString = &dayData;
+	dateString.Split("-",yearString,monthDayString);
+	monthDayString->Split("-",monthString,dayString);
+	//now year is in yearString, month is in monthString & day is in dayString
+	date.Day = FCString::Atoi(**dayString);
+	date.Month = FCString::Atoi(**monthString);
+	date.Year = FCString::Atoi(**yearString);
+	return date;
 }
 
 //indexer response extractors
