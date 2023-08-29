@@ -267,11 +267,16 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	this->systemData.user_data.email = this->sqncMngr->getUserDetails().email;
 	this->systemData.user_data.email_service = this->sqncMngr->getUserDetails().email_service;
 	this->systemData.user_data.username = this->sqncMngr->getUserDetails().username;
+	FNetwork_BE default_network;
+	default_network.is_default = true;
+	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
+	this->systemData.user_data.networks.Add(default_network);
 
 	//ASYNC Operations next!
-	this->masterSyncer->incN(2);//+1 for each GO you have here!
+	this->masterSyncer->incN(3);//+1 for each General Operation you have here!
 	this->initGetQRCode();
 	this->initGetTokenData();
+	this->initGetTxnHistory();
 }
 
 void USystemDataBuilder::OnDoneTesting()
@@ -289,9 +294,9 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->masterSyncer->incN(1);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
-	//this->initGetTokenData();
-	//this->initGetQRCode();
+	this->masterSyncer->incN(3);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	this->initGetTokenData();
+	this->initGetQRCode();
 	this->initGetTxnHistory();//test the history fetching
 }
 

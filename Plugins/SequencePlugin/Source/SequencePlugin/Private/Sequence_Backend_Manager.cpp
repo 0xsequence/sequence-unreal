@@ -8,6 +8,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Indexer.h"
+#include "SystemDataBuilder.h"
 #include "Crypto.h"
 
 FUserDetails ASequence_Backend_Manager::getUserDetails()
@@ -104,12 +105,9 @@ FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
 void ASequence_Backend_Manager::init_system_data()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
-
-	FSystemData_BE sysData;
-
-	
-
-	this->update_system_data(FSystemData_BE());
+	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
+	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
+	builder->initBuildSystemData(this->indexer, this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
 }
 
 void ASequence_Backend_Manager::init_signin(FString email)
