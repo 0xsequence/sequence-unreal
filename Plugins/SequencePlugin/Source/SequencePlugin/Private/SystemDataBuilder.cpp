@@ -10,7 +10,7 @@ USystemDataBuilder::USystemDataBuilder()
 	this->getItemDataSyncer = NewObject<USyncer>();
 	this->getTxnHistorySyncer = NewObject<USyncer>();
 	this->QRImageHandler = NewObject<UObjectHandler>();
-	this->QRImageHandler->setup(true);
+	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
 	this->tokenImageHandler->setup(true);
 	this->HistoryImageHandler = NewObject<UObjectHandler>();
@@ -248,6 +248,23 @@ void USystemDataBuilder::initGetQRCode()
 	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
 }
 
+void USystemDataBuilder::initGetContactData()
+{
+	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [&, this](const TArray<FContact_BE> contacts)
+	{//assign contact data!
+		this->systemData.user_data.contacts = contacts;
+		this->masterSyncer->dec();//possibly one of these causing an issue?
+	};
+
+	//GO Level
+	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	{
+		this->masterSyncer->dec();
+	};
+
+	this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
+}
+
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
@@ -272,11 +289,14 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
 	this->systemData.user_data.networks.Add(default_network);
 
+	
+
 	//ASYNC Operations next!
-	this->masterSyncer->incN(3);//+1 for each General Operation you have here!
+	this->masterSyncer->incN(4);//+1 for each General Operation you have here!
 	this->initGetQRCode();
 	this->initGetTokenData();
 	this->initGetTxnHistory();
+	this->initGetContactData();
 }
 
 void USystemDataBuilder::OnDoneTesting()
