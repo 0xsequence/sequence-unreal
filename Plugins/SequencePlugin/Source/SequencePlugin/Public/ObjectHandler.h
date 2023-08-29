@@ -37,6 +37,8 @@ public:
 private:
 	//note 2GB is the limit because of int32 size limits!
 	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
+	bool useCustomFormat = false;
+	EImageFormat customFormat = EImageFormat::GrayscaleJPEG;
 	int32 current_cache_size = 0;//in bytes we want this as accurate as possible!
 	TMap<FString, FRawData> cache;//a Map of URL's and rawData
 	//need a list of maps!
@@ -76,6 +78,8 @@ public:
 	* Used to setup the Raw handler for web requests
 	*/
 	void setup(bool raw_cache_enabled);
+
+	void setupCustomFormat(bool raw_cache_enabled, EImageFormat format);
 
 	//used to clear the contents of the raw cache!
 	void clear_raw_cache();
@@ -120,6 +124,8 @@ private:
 	* @return the generated texture2d
 	*/
 	UTexture2D* build_img_data(TArray<uint8> img_data,FString URL);
+
+	UTexture2D* tryBuildImage(TArray<uint8> imgData, EImageFormat format);
 
 	/*
 	* Used to get the img format out of a url

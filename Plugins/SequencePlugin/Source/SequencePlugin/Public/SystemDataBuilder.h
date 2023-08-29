@@ -56,9 +56,15 @@ private:
 	UObjectHandler* HistoryImageHandler;
 	void initGetTxnHistory();
 
+	//used for getting history images and value data!
+	void initGetHistoryAuxData(FUpdatableHistoryArgs history_data);
+
 	UFUNCTION()
 		void OnGetTxnHistoryDone();
 	//Used for getting transaction history data in systemData//
+
+	//used for getting contact data!
+	void initGetContactData();
 
 	//master OnDone//
 	/*

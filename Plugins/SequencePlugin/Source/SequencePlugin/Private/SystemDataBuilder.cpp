@@ -10,7 +10,7 @@ USystemDataBuilder::USystemDataBuilder()
 	this->getItemDataSyncer = NewObject<USyncer>();
 	this->getTxnHistorySyncer = NewObject<USyncer>();
 	this->QRImageHandler = NewObject<UObjectHandler>();
-	this->QRImageHandler->setup(true);
+	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
 	this->tokenImageHandler->setup(true);
 	this->HistoryImageHandler = NewObject<UObjectHandler>();
@@ -248,6 +248,23 @@ void USystemDataBuilder::initGetQRCode()
 	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
 }
 
+void USystemDataBuilder::initGetContactData()
+{
+	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [&, this](const TArray<FContact_BE> contacts)
+	{//assign contact data!
+		this->systemData.user_data.contacts = contacts;
+		this->masterSyncer->dec();//possibly one of these causing an issue?
+	};
+
+	//GO Level
+	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	{
+		this->masterSyncer->dec();
+	};
+
+	this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
+}
+
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
@@ -267,11 +284,19 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	this->systemData.user_data.email = this->sqncMngr->getUserDetails().email;
 	this->systemData.user_data.email_service = this->sqncMngr->getUserDetails().email_service;
 	this->systemData.user_data.username = this->sqncMngr->getUserDetails().username;
+	FNetwork_BE default_network;
+	default_network.is_default = true;
+	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
+	this->systemData.user_data.networks.Add(default_network);
+
+	
 
 	//ASYNC Operations next!
-	this->masterSyncer->incN(2);//+1 for each GO you have here!
+	this->masterSyncer->incN(4);//+1 for each General Operation you have here!
 	this->initGetQRCode();
 	this->initGetTokenData();
+	this->initGetTxnHistory();
+	this->initGetContactData();
 }
 
 void USystemDataBuilder::OnDoneTesting()
@@ -289,9 +314,10 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->masterSyncer->incN(1);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
-	//this->initGetTokenData();
+	this->masterSyncer->incN(3);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	this->initGetTokenData();
 	this->initGetQRCode();
+	this->initGetTxnHistory();//test the history fetching
 }
 
 void USystemDataBuilder::OnDone()
@@ -300,18 +326,132 @@ void USystemDataBuilder::OnDone()
 	this->sqncMngr->update_system_data(this->systemData);
 }
 
+void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
+{
+	this->getTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
+	this->getTxnHistorySyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
+	//sequenceAPI can get all tokens and coins values in 2 calls
+	//we can get all images in 1 call with Object Handler now!
+	TArray<FString> urlList;
+	TArray<FID_BE> idCoinList;
+	TArray<FID_BE> idCollectibleList;
+	//compose the URL Fetch list!
+	//compose the FID_BE's into 1 big request list!
+	for (FCoinUpdatable coin : history_data.updatingCoinData)
+	{
+		urlList.Add(coin.coinIconUrl);//for getting images
+		idCoinList.Add(coin.coinID);//for getting updated value
+	}
+
+	for (FNFTUpdatable nft : history_data.updatingNftData)
+	{
+		urlList.Add(nft.nftCollectionIconUrl);//for getting images
+		urlList.Add(nft.nftIconUrl);//for getting images
+		idCollectibleList.Add(nft.nftID);//for getting updated value
+	}
+
+	this->HistoryImageHandler->FOnDoneImageProcessingDelegate.BindLambda(
+		[this]()
+		{
+			TMap<FString, UTexture2D*> images = this->HistoryImageHandler->getProcessedImages();
+
+			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
+			{				
+				for (int j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_coins.Num(); j++)
+				{
+					FCoin_BE * coin = &this->systemData.user_data.transaction_history[i].txn_history_coins[j].coin;
+					if (images.Contains(coin->Coin_Symbol_URL))
+					{//coin image
+						coin->Coin_Symbol = *images.Find(coin->Coin_Symbol_URL);
+					}
+				}
+
+				for (int j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_nfts.Num(); j++)
+				{
+					FNFT_BE* nft = &this->systemData.user_data.transaction_history[i].txn_history_nfts[j].nft;
+					if (images.Contains(nft->NFT_Icon_URL))
+					{//assign nft image
+						nft->NFT_Icon = *images.Find(nft->NFT_Icon_URL);
+					}
+
+					if (images.Contains(nft->Collection_Icon_URL))
+					{//assign collection image
+						nft->Collection_Icon = *images.Find(nft->Collection_Icon_URL);
+					}
+				}
+			}//for
+			this->getTxnHistorySyncer->dec();
+		});
+	this->HistoryImageHandler->requestImages(urlList);//init the requests!
+	//need to compose the ID list!
+
+	const TSuccessCallback<TArray<FItemPrice_BE>> lclCoinSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
+	{//because we don't get a map we have to go through everything
+		TArray<FItemPrice_BE> lclUItems;
+		FItemPrice_BE itemPrice;
+		lclUItems.Append(updatedItems);
+		while (lclUItems.Num() > 0)
+		{
+			itemPrice = lclUItems[0];
+
+			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
+			{//foreach txn
+				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_coins.Num(); j++)
+				{//foreach coin in the txn
+					FCoin_BE* coin = &this->systemData.user_data.transaction_history[i].txn_history_coins[j].coin;
+					if (itemPrice.Token == coin->itemID)
+					{//if id matched
+						coin->Coin_Value = itemPrice.price.value;//assign value
+					}
+				}
+			}
+			lclUItems.RemoveAt(0);
+		}//while
+		this->getTxnHistorySyncer->dec();
+	};//lambda
+
+	const TSuccessCallback<TArray<FItemPrice_BE>> lclCollectibleSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
+	{//because we don't get a map we have to go through everything
+		TArray<FItemPrice_BE> lclUItems;
+		FItemPrice_BE itemPrice;
+		lclUItems.Append(updatedItems);
+		while (lclUItems.Num() > 0)
+		{
+			itemPrice = lclUItems[0];
+
+			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
+			{//foreach txn
+				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_nfts.Num(); j++)
+				{//foreach nft in the txn
+					FNFT_BE* nft = &this->systemData.user_data.transaction_history[i].txn_history_nfts[j].nft;
+					if (itemPrice.Token == nft->NFT_Details.itemID)
+					{//if id matched
+						nft->Value = itemPrice.price.value;//assign value
+					}
+				}
+			}
+			lclUItems.RemoveAt(0);
+		}//while
+		this->getTxnHistorySyncer->dec();
+	};//lambda
+
+	const FFailureCallback lclFailure = [this](const SequenceError Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
+		this->getTxnHistorySyncer->dec();
+	};
+
+	this->sequenceAPI->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
+	this->sequenceAPI->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+}
+
 void USystemDataBuilder::initGetTxnHistory()
 {
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
 	{//once indexer responds!
-		//only thing I can do is apply compression earlier for a cleaner setup
-		//FUpdatableItemDataArgs semiParsedTokenBalance = UIndexerSupport::extractFromTokenBalances(tokenBalances);
-		
-		//UIndexerSupport::ExtractFromTransactionHistory(history);
-
-		//this->systemData.user_data.coins = semiParsedTokenBalance.semiParsedBalances.coins;
-		///this->systemData.user_data.nfts = this->compressNFTData(semiParsedTokenBalance.semiParsedBalances.nfts);
-		//this->initGetItemData(semiParsedTokenBalance);
+		FUpdatableHistoryArgs semiParsedHistory = UIndexerSupport::extractFromTransactionHistory(this->GPublicAddress,history);
+		this->systemData.user_data.transaction_history = semiParsedHistory.semiParsedHistory;//assign what we have so far!
+		this->initGetHistoryAuxData(semiParsedHistory);
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
@@ -330,5 +470,5 @@ void USystemDataBuilder::initGetTxnHistory()
 UFUNCTION()
 void USystemDataBuilder::OnGetTxnHistoryDone()
 {
-
+	this->masterSyncer->dec();
 }
