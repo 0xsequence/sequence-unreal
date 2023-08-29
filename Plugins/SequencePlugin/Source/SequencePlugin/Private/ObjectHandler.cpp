@@ -30,6 +30,19 @@ void UObjectHandler::setup(bool raw_cache_enabled)
 	this->use_raw_cache = raw_cache_enabled;
 }
 
+/*
+* Used for using a hardset custom image format for all image requests
+* made through this object, if you want to use the computable format use the other setup call
+*/
+void UObjectHandler::setupCustomFormat(bool raw_cache_enabled, EImageFormat format)
+{
+	this->syncer = NewObject<USyncer>();
+	this->customFormat = format;
+	this->useCustomFormat = true;
+	this->syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
+	this->use_raw_cache = raw_cache_enabled;
+}
+
 void UObjectHandler::storeImageData(UTexture2D* image, FString url)
 {
 	this->storedResponses.Add(TPair<FString,UTexture2D*>(url,image));
@@ -171,7 +184,7 @@ void UObjectHandler::requestImages(TArray<FString> URLs)
 
 EImageFormat UObjectHandler::get_img_format(FString URL)
 {
-	EImageFormat fmt = EImageFormat::GrayscaleJPEG;//default!
+	EImageFormat fmt = EImageFormat::PNG;//default!
 
 	if (URL.Contains(".jpg", ESearchCase::IgnoreCase))
 		fmt = EImageFormat::JPEG;
@@ -188,21 +201,17 @@ EImageFormat UObjectHandler::get_img_format(FString URL)
 	return fmt;
 }
 
-UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
+UTexture2D* UObjectHandler::tryBuildImage(TArray<uint8> imgData, EImageFormat format)
 {
-	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), img_data.Num());
-
-	int32 width = 0, height = 0;
+	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(format);
 	UTexture2D* img = nullptr;
 	EPixelFormat pxl_format = PF_B8G8R8A8;
-	EImageFormat img_format = get_img_format(URL);//get the image format nicely!
-
-	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(img_format);
+	int32 width = 0, height = 0;
 
 	if (ImageWrapper)
 	{
-		if (ImageWrapper.Get()->SetCompressed(img_data.GetData(), img_data.Num()))
+		if (ImageWrapper.Get()->SetCompressed(imgData.GetData(), imgData.Num()))
 		{
 			TArray64<uint8>  Uncompressed;
 			if (ImageWrapper.Get()->GetRaw(Uncompressed))
@@ -211,19 +220,49 @@ UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
 				height = ImageWrapper.Get()->GetHeight();
 
 				img = UTexture2D::CreateTransient(width, height, pxl_format);
-				if (!img) return NULL;//nothing to do if it doesn't load!
+				if (!img) return nullptr;//nothing to do if it doesn't load!
 
 				void* TextureData = img->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 				FMemory::Memcpy(TextureData, Uncompressed.GetData(), Uncompressed.Num());
 				img->GetPlatformData()->Mips[0].BulkData.Unlock();
 
 				img->UpdateResource();
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Bad Image format chosen for: [%s]"),*URL);
-		}
+			}//valid fetch
+		}//valid compression
+	}//valid image wrapper
+
+	return img;
+}
+
+UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
+{
+	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), img_data.Num());
+
+	int32 width = 0, height = 0;
+	UTexture2D* img = nullptr;
+	EPixelFormat pxl_format = PF_B8G8R8A8;
+	EImageFormat img_format;
+
+	if (this->useCustomFormat)
+	{
+		img_format = this->customFormat;
 	}
+	else
+	{
+		img_format = get_img_format(URL);//get the image format nicely
+	}
+
+	img = this->tryBuildImage(img_data,img_format);
+
+	if (!img)
+	{//try again with forced Jpeg our default choice in the event of no .type specified is .png
+		img = this->tryBuildImage(img_data, EImageFormat::JPEG);
+	}
+
+	if (!img)
+	{//still no dice possible we don't support this in unreal!
+		UE_LOG(LogTemp, Warning, TEXT("Bad Image format chosen for: [%s]"), *URL);
+	}
+
 	return img;
 }

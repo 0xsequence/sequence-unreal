@@ -63,6 +63,9 @@ private:
 		void OnGetTxnHistoryDone();
 	//Used for getting transaction history data in systemData//
 
+	//used for getting contact data!
+	void initGetContactData();
+
 	//master OnDone//
 	/*
 	* This is the master OnDone function that gets fired when system data requests are complete!
