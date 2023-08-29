@@ -9,6 +9,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Indexer/Indexer.h"
 #include "Eth/Crypto.h"
+#include "SystemDataBuilder.h"
 
 FUserDetails ASequence_Backend_Manager::getUserDetails()
 {
@@ -104,12 +105,9 @@ FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
 void ASequence_Backend_Manager::init_system_data()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
-
-	FSystemData_BE sysData;
-
-	
-
-	this->update_system_data(FSystemData_BE());
+	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
+	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
+	builder->initBuildSystemData(this->indexer, this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
 }
 
 void ASequence_Backend_Manager::init_signin(FString email)
@@ -129,49 +127,49 @@ void ASequence_Backend_Manager::init_signin(FString email)
 
 void ASequence_Backend_Manager::init_coin_send_txn(FTransaction_FE transaction_data)
 {
-	//dummy function for right now we just call back the update_txn with some pseudo random state!
 	UE_LOG(LogTemp, Display, TEXT("[Coin Txn Request Initiated]"));//first chunk simulates signin request code gen
-	FTxnCallback_BE callback;
-	callback.good_txn = FMath::RandBool();
-	callback.txn_hash_id = transaction_data.ID();
 
 	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
 	{
+		FTxnCallback_BE callback;
+		callback.good_txn = true;
+		callback.txn_hash_id = ID;
+		this->update_txn(callback);
 	};
 
 	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const FSequenceError Error)
 	{
+		UE_LOG(LogTemp, Display, TEXT("[Error With Transaction] [%s]"),*Error.Message);
+		FTxnCallback_BE callback;
+		callback.good_txn = false;
+		callback.txn_hash_id = ID;
+		this->update_txn(callback);
 	};
 
 	this->sequenceWallet->SendTransactionWithCallback(transaction_data,SendSuccess,SendFailure);
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate;
-	Delegate.BindUFunction(this, "update_txn", callback);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
 }
 
 void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE transaction_data)
 {
-	//dummy function for right now we just call back the update_txn with some pseudo random state!
-	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));//first chunk simulates signin request code gen
+	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));
 	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
 	{
+		FTxnCallback_BE callback;
+		callback.good_txn = true;
+		callback.txn_hash_id = ID;
+		this->update_txn(callback);
 	};
 
 	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const FString ID, const FSequenceError Error)
 	{
+		UE_LOG(LogTemp, Display, TEXT("[Error With Transaction] [%s]"), *Error.Message);
+		FTxnCallback_BE callback;
+		callback.good_txn = false;
+		callback.txn_hash_id = ID;
+		this->update_txn(callback);
 	};
 
 	this->sequenceWallet->SendTransactionWithCallback(transaction_data, SendSuccess, SendFailure);
-
-	FTxnCallback_BE callback;
-	callback.good_txn = FMath::RandBool();
-	callback.txn_hash_id = transaction_data.ID();
-
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate;
-	Delegate.BindUFunction(this, "update_txn", callback);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 30), false);
 }
 
 //update this to be the encrypted json string

@@ -428,9 +428,9 @@ struct FTransactionHistoryItem_BE
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString network_name = "";
+        FString network_name = "";//we can get this from the indexer via chainId
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        UTexture2D* network_icon = nullptr;
+        UTexture2D* network_icon = nullptr;//this will be updated in the front!
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         FString other_public_address = "";//the other person involved in the transaction
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
