@@ -76,11 +76,16 @@ FString UIndexer::GetIndexerName(int64 chainId)
 /*
 	Combines <see cref="PATH" and name="name" to suffix on to the base address
 */
-FString UIndexer::Url(int64 chainID, FString endPoint)
+FString UIndexer::Url(const int64& chainID,const FString& endPoint)
 {
 	FString out_url = HostName(chainID);
 	out_url.Append(this->PATH);
-	out_url.Append(endPoint);
+	
+
+	if (endPoint.Len() > 0)
+	{//strange error cropping up from this
+		out_url.Append(endPoint);
+	}
 	return out_url;
 }
 
@@ -98,7 +103,7 @@ FString UIndexer::HostName(int64 chainID)
 /*
 	Here we construct a post request and parse out a response if valid.
 */
-void UIndexer::HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void UIndexer::HTTPPost(const int64& chainID,const FString& endpoint,const FString& args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	//Now we create the post request
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
@@ -226,7 +231,9 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallb
 //args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
 void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetTokenBalances", BuildArgs<FGetTokenBalancesArgs>(args), [=](FString Content)
+	const FString endpoint = "GetTokenBalances";
+	UE_LOG(LogTemp, Display, TEXT("Endpoint: [%s]"), *endpoint);
+	HTTPPost(chainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(args), [=](FString Content)
 	{
 		FGetTokenBalancesReturn response = BuildResponse<FGetTokenBalancesReturn>(Content);
 		OnSuccess(response);

@@ -27,8 +27,6 @@ private:
 	FString qr_url;
 
 	FSystemData_BE systemData;
-	//UObjectHandler *imageHandler;//each GO gets an image handler!
-	SequenceAPI::FSequenceWallet* sequenceAPI;
 	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
 
 	//used for managing getting token data setup in systemdata//

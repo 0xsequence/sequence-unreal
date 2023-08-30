@@ -41,7 +41,7 @@ private:
 	/*
 		Creates the URL from a given chainID and endpoint
 	*/
-	FString Url(int64 chainID, FString endpoint);
+	FString Url(const int64& chainID,const FString& endpoint);
 
 	/*
 		Returns the host name
@@ -52,7 +52,7 @@ private:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	void HTTPPost(int64 chainID, FString endpoint, FString args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void HTTPPost(const int64& chainID,const FString& endpoint,const FString& args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	//end of private functions
 public:
