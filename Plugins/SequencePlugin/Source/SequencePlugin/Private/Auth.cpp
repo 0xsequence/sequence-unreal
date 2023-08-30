@@ -10,9 +10,9 @@
 * Used for setting up fresh auth data for this session,
 * used in the case when we had no auth data stored
 */
-void UAuth::setNewSecureStorableAuth(FStoredAuthState_BE newAuthData)
+void UAuth::SetNewSecureStorableAuth(FStoredAuthState_BE NewAuthData)
 {
-	this->auth = newAuthData;
+	this->auth = NewAuthData;
 }
 
 /*
@@ -20,30 +20,30 @@ void UAuth::setNewSecureStorableAuth(FStoredAuthState_BE newAuthData)
 * if this process fails at any step we return false to let the caller know we were unable to parse
 * the data we were given
 */
-bool UAuth::setSecureStorableAuth(FSecureKey secureStoredAuth)
+bool UAuth::SetSecureStorableAuth(FSecureKey SecureStoredAuth)
 {
 	bool bSucceeded = false;
 
 	//decrypt the auth data
-	FString decryptedJsonAuth = USequenceEncryptor::decrypt(secureStoredAuth.ky, secureStoredAuth.of);
-	TSharedPtr<FJsonObject> jsonAuthObj = MakeShareable<FJsonObject>(new FJsonObject);
-	FStoredAuthState_BE storedAuth;
+	const FString DecryptedJsonAuth = USequenceEncryptor::decrypt(SecureStoredAuth.ky, SecureStoredAuth.of);
+	TSharedPtr<FJsonObject> JSONAuthObj = MakeShareable<FJsonObject>(new FJsonObject);
+	FStoredAuthState_BE StoredAuth;
 
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(decryptedJsonAuth), jsonAuthObj))
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(DecryptedJsonAuth), JSONAuthObj))
 	{
-		if (FJsonObjectConverter::JsonObjectToUStruct<FStoredAuthState_BE>(jsonAuthObj.ToSharedRef(), &storedAuth))
+		if (FJsonObjectConverter::JsonObjectToUStruct<FStoredAuthState_BE>(JSONAuthObj.ToSharedRef(), &StoredAuth))
 		{
 			bSucceeded = true;
-			this->auth = storedAuth;//update our auth with the stored data & report success!
+			this->auth = StoredAuth;//update our auth with the stored data & report success!
 		}
 		else
 		{//failed to convert the jsonObject into a UStruct
-			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *decryptedJsonAuth);
+			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *DecryptedJsonAuth);
 		}
 	}
 	else
 	{//failed to convert the decrypted string into a jsonObject
-		UE_LOG(LogTemp, Error, TEXT("[Failed to convert stored jsonObjectString into a jsonObject: [%s]]"), *decryptedJsonAuth);
+		UE_LOG(LogTemp, Error, TEXT("[Failed to convert stored jsonObjectString into a jsonObject: [%s]]"), *DecryptedJsonAuth);
 	}
 	return bSucceeded;
 }
@@ -52,19 +52,18 @@ bool UAuth::setSecureStorableAuth(FSecureKey secureStoredAuth)
 * Used for prepping our StoredAuthData_BE struct to be stored securely
 * on disk using FAES encryption
 */
-FSecureKey UAuth::getSecureStorableAuth()
+FSecureKey UAuth::GetSecureStorableAuth() const
 {
-	FSecureKey ret;
-	FString jsonAuthString;
-	if (FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(this->auth, jsonAuthString))
+	FSecureKey Ret;
+	if (FString JSONAuthString; FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(this->auth, JSONAuthString))
 	{
-		ret.of = jsonAuthString.Len();//store the offset
-		ret.ky = USequenceEncryptor::encrypt(jsonAuthString);//encrypt and store the jsonAuthObject
+		Ret.of = JSONAuthString.Len();//store the offset
+		Ret.ky = USequenceEncryptor::encrypt(JSONAuthString);//encrypt and store the jsonAuthObject
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Failed to convert stored auth data into a jsonAuthString]"));
 	}
 
-	return ret;
+	return Ret;
 }

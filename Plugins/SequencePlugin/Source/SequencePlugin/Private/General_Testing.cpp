@@ -32,61 +32,61 @@ void AGeneral_Testing::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AGeneral_Testing::test_provider()
+void AGeneral_Testing::TestProvider() const
 {
-	TFunction<void (FString)> OnSuccess = [this](FString State)
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
 	{
-		callback_passed(State);
+		CallbackPassed(State);
 	};
 
-	TFunction<void (FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
 	{
-		Callback_Failed(data, Err);
+		CallbackFailed(Data, Err);
 	};
 
 	ContractTest::RunTest(OnSuccess, OnFailure);
 	SequenceAPITest::RunTest(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::test_indexer()
+void AGeneral_Testing::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)
 	{
-		callback_passed(State);
+		CallbackPassed(State);
 	};
 
 	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
 	{
-		Callback_Failed(data, Err);
+		CallbackFailed(data, Err);
 	};
 
 	IndexerTest(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::testEncryption()
+void AGeneral_Testing::TestEncryption() const
 {
-	UAuth* auth = NewObject<UAuth>();
-	FStoredAuthState_BE testingStruct;
+	UAuth* Auth = NewObject<UAuth>();
+	const FStoredAuthState_BE TestingStruct;
 
-	FString preEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(testingStruct);
+	const FString PreEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(TestingStruct);
 
-	auth->setNewSecureStorableAuth(testingStruct);
-	FSecureKey duringEncryptStruct = auth->getSecureStorableAuth();
+	Auth->SetNewSecureStorableAuth(TestingStruct);
+	const FSecureKey DuringEncryptStruct = Auth->GetSecureStorableAuth();
 
-	FString encryptedData = UIndexerSupport::structToSimpleString<FSecureKey>(duringEncryptStruct);
+	const FString EncryptedData = UIndexerSupport::structToSimpleString<FSecureKey>(DuringEncryptStruct);
 
-	auth->setSecureStorableAuth(duringEncryptStruct);
+	Auth->SetSecureStorableAuth(DuringEncryptStruct);
 
-	FString decryptedData = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(auth->auth);
+	const FString DecryptedData = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(Auth->auth);
 
-	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *preEncrypt);
-	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *encryptedData);
-	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *decryptedData);
+	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
+	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *EncryptedData);
+	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *DecryptedData);
 }
 
 //dedicated encryption test!
 
-void AGeneral_Testing::testMisc()
+void AGeneral_Testing::TestMisc()
 {//used for testing various things in the engine to verify behaviour
 	imgHandler = NewObject<UObjectHandler>();
 	imgHandler->setup(true);//we want to test caching!
@@ -99,16 +99,16 @@ void AGeneral_Testing::OnDoneImageProcessing()
 	this->testMiscForwarder(this->imgHandler->getProcessedImages());
 }
 
-void AGeneral_Testing::testSequence()
+void AGeneral_Testing::TestSequence() const
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)
 	{
-		callback_passed(State);
+		CallbackPassed(State);
 	};
 
 	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
 	{
-		Callback_Failed(data, Err);
+		CallbackFailed(data, Err);
 	};
 
 	TestSequenceData(OnSuccess, OnFailure);
@@ -123,31 +123,31 @@ void AGeneral_Testing::testSystemDataBuilder()
 }
 
 // Called every frame
-void AGeneral_Testing::Tick(float DeltaTime)
+void AGeneral_Testing::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AGeneral_Testing::callback_passed(FString state_data)
+void AGeneral_Testing::CallbackPassed(FString StateData) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
-	UE_LOG(LogTemp, Display, TEXT("[Callback Passed!]\nAdditional State: [%s]"), *state_data);
+	UE_LOG(LogTemp, Display, TEXT("[Callback Passed!]\nAdditional State: [%s]"), *StateData);
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-void AGeneral_Testing::Callback_Failed(const FString state_data, FSequenceError error) const
+void AGeneral_Testing::CallbackFailed(const FString StateData, FSequenceError Error) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
-	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *state_data);
-	UE_LOG(LogTemp, Error, TEXT("[Error Message]:\n[%s]"),*error.Message);
-	UE_LOG(LogTemp, Error, TEXT("[Error Type]: [%s]"),*Error_To_String(error.Type));
+	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *StateData);
+	UE_LOG(LogTemp, Error, TEXT("[Error Message]:\n[%s]"),*Error.Message);
+	UE_LOG(LogTemp, Error, TEXT("[Error Type]: [%s]"),*ErrorToString(Error.Type));
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-FString AGeneral_Testing::Error_To_String(EErrorType error)
+FString AGeneral_Testing::ErrorToString(EErrorType Error)
 {
-	switch (error) {
+	switch (Error) {
 	case NotFound:
 		return "NotFound";
 	case ResponseParseError:

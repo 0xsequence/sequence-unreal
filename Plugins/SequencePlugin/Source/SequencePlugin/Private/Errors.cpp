@@ -1,5 +1,5 @@
 #include "Errors.h"
 
-FSequenceError::FSequenceError(EErrorType Type, FString Message) : Message(Message), Type(Type)
+FSequenceError::FSequenceError(const EErrorType Type, const FString Message) : Message(Message), Type(Type)
 {
 }
