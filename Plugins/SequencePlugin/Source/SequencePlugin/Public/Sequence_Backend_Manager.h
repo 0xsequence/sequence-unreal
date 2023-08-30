@@ -113,7 +113,7 @@ public:
 	* Used to initiate a stored authentication call from the frontend
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Authentication")
-		void init_authentication(FSecureKey storedAuthData);
+		void InitAuthentication(FSecureKey storedAuthData);
 
 	/*
 	* Used to let the frontend know if authentication succeeded or not
@@ -132,7 +132,7 @@ public:
 	* Once system data struct is built we send it up with update_system_data(FSystemData_BE)
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "SystemData")
-		void init_system_data();
+		void InitSystemData();
 
 	/*
 	* Used to update the frontend with the supplied system data
@@ -141,7 +141,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
 		void update_system_data(const FSystemData_BE &system_data);
 
-		void update_system_testable_data(const FSystemData_BE& system_data);
+		void UpdateSystemTestableData(const FSystemData_BE& system_data);
 
 	/*
 	* Used to initate the signin process from the frontend
@@ -152,7 +152,7 @@ public:
 	* If authentication fails (times out / error) we send update_authentication(false)
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="Signin")
-		void init_signin(FString email);
+		void InitSignin(FString Email);
 
 	/*
 	* Used to tell the frontend that the signin process has been initiated and the code here is present!
@@ -164,10 +164,10 @@ public:
 	* Used to initalize a send transaction!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_coin_send_txn(FTransaction_FE transaction_data);
+		void InitCoinSendTxn(FTransaction_FE TransactionData);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_nft_send_txn(FTransaction_FE transaction_data);
+		void init_nft_send_txn(FTransaction_FE TransactionData);
 
 	/*
 	* Used to let the frontend know if a txn went through or not!
@@ -176,10 +176,10 @@ public:
 		void update_txn(FTxnCallback_BE txn_callback);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
-		void init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate);
+		void InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
-		void init_get_updated_token_data(TArray<FID_BE> tokensToUpdate);
+		void InitGetUpdateTokenData(TArray<FID_BE> TokensToUpdate);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
 		void updateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
@@ -191,9 +191,9 @@ public:
 
 private:
 	//Private handlers
-	void signin_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void get_blk_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void get_hsh_handler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void SigninHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void GetBlkHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void GetHashHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	//Private handlers
 
 	/*
@@ -203,50 +203,50 @@ private:
 	* @Param json (the json payload in FString form) If invalid we will get a response but it'll be an error mesg from the server in json format
 	* @param Handler (The ASYNC handler that will process the payload once we have received it)
 	*/
-	void post_json_request(FString url, FString json, void (ASequence_Backend_Manager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+	void PostJsonRequest(FString url, FString json, void (ASequence_Backend_Manager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
 	
 	/*
 	* Used to request block information from
 	* the sequence app, 
 	* @Return the block data we want from the latest block on the chain
 	*/
-	FString create_blk_req();
+	FString CreateBlkRequest();
 
 	/*
 	* Used to get the block hash data based on the block number and givin id
 	* Fetches this data from the sequence app
 	* @Return the block hash we want!
 	*/
-	FString create_hsh_req(FString blk_num, int32 id);
+	FString CreateHashRequest(FString blk_num, int32 id);
 
 	/*
 	* Sets up the signin request body
 	* @Return the signin req in json format in an FString
 	*/
-	FString create_req_body(FString email);
+	FString CreateRequestBody(FString Email);
 
 	/*
 	* Sets up the intent for Signin
 	* @Return the Intent in Json format in an FString
 	*/
-	FString create_intent(FString email);
+	FString CreateIntent(FString Email);
 
 	/*
 	* Generates a random wallet ID used to bootstrap signin
 	* @Return a Random wallet ID
 	*/
-	FString setup_random_wallet();//returns the public key!
+	FString SetupRandomWallet();//returns the public key!
 
 	//These functions are used to generate the URL's need to interact with
 	//the various aspects of the sequence app
-	FString get_main_url();
-	FString get_continue_url();
-	FString get_signin_url();
+	FString GetMainURL();
+	FString GetContinueURL();
+	FString GetSigninURL();
 
 	//testing functions//
 
 	UFUNCTION()
-		void randomReceive();
+		void RandomReceive();
 
 	//testing functions//
 };
