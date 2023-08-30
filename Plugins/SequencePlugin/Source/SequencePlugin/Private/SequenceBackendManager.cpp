@@ -95,7 +95,7 @@ FString ASequenceBackendManager::get_transaction_hash(FTransaction_FE Transactio
 
 FSecureKey ASequenceBackendManager::getSecureStorableAuth()
 {
-	return this->auth->getSecureStorableAuth();//get the stored auth data ready for storage!
+	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -235,10 +235,10 @@ void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE transaction_data
 void ASequenceBackendManager::init_authentication(FSecureKey storedAuthData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
-	this->auth->setSecureStorableAuth(storedAuthData);
+	this->auth->SetSecureStorableAuth(storedAuthData);
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
-	Delegate.BindUFunction(this, "update_authentication", this->auth->setSecureStorableAuth(storedAuthData));
+	Delegate.BindUFunction(this, "update_authentication", this->auth->SetSecureStorableAuth(storedAuthData));
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
