@@ -89,7 +89,7 @@ void AGeneral_Testing::TestEncryption() const
 void AGeneral_Testing::TestMisc()
 {//used for testing various things in the engine to verify behaviour
 	imgHandler = NewObject<UObjectHandler>();
-	imgHandler->Setup(true);//we want to test caching!
+	imgHandler->setup(true);//we want to test caching!
 	imgHandler->FOnDoneImageProcessingDelegate.BindUFunction(this, "OnDoneImageProcessing");
 	imgHandler->requestImages(this->testingURLs);
 }
