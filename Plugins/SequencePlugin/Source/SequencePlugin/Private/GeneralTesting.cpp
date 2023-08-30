@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "General_Testing.h"
+#include "GeneralTesting.h"
 #include "Indexer/IndexerTests.h"
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
@@ -16,7 +16,7 @@
 #include "Tests/TestSequenceAPI.h"
 
 // Sets default values
-AGeneral_Testing::AGeneral_Testing()
+AGeneralTesting::AGeneralTesting()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -27,12 +27,12 @@ AGeneral_Testing::AGeneral_Testing()
 }
 
 // Called when the game starts or when spawned
-void AGeneral_Testing::BeginPlay()
+void AGeneralTesting::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void AGeneral_Testing::TestProvider() const
+void AGeneralTesting::TestProvider() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
 	{
@@ -48,7 +48,7 @@ void AGeneral_Testing::TestProvider() const
 	SequenceAPITest::RunTest(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::TestIndexer()
+void AGeneralTesting::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)
 	{
@@ -63,7 +63,7 @@ void AGeneral_Testing::TestIndexer()
 	IndexerTest(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::TestEncryption() const
+void AGeneralTesting::TestEncryption() const
 {
 	UAuth* Auth = NewObject<UAuth>();
 	const FStoredAuthState_BE TestingStruct;
@@ -86,7 +86,7 @@ void AGeneral_Testing::TestEncryption() const
 
 //dedicated encryption test!
 
-void AGeneral_Testing::TestMisc()
+void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
 	imgHandler = NewObject<UObjectHandler>();
 	imgHandler->setup(true);//we want to test caching!
@@ -94,12 +94,12 @@ void AGeneral_Testing::TestMisc()
 	imgHandler->requestImages(this->testingURLs);
 }
 
-void AGeneral_Testing::OnDoneImageProcessing()
+void AGeneralTesting::OnDoneImageProcessing()
 {//forward this to the front as we will be able to view all the images from there!
 	this->testMiscForwarder(this->imgHandler->getProcessedImages());
 }
 
-void AGeneral_Testing::TestSequence() const
+void AGeneralTesting::TestSequence() const
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)
 	{
@@ -114,7 +114,7 @@ void AGeneral_Testing::TestSequence() const
 	TestSequenceData(OnSuccess, OnFailure);
 }
 
-void AGeneral_Testing::testSystemDataBuilder()
+void AGeneralTesting::testSystemDataBuilder()
 {//testing system data builder
 	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
 	UIndexer* indexer = NewObject<UIndexer>();
@@ -123,20 +123,20 @@ void AGeneral_Testing::testSystemDataBuilder()
 }
 
 // Called every frame
-void AGeneral_Testing::Tick(const float DeltaTime)
+void AGeneralTesting::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AGeneral_Testing::CallbackPassed(FString StateData) const
+void AGeneralTesting::CallbackPassed(FString StateData) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 	UE_LOG(LogTemp, Display, TEXT("[Callback Passed!]\nAdditional State: [%s]"), *StateData);
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-void AGeneral_Testing::CallbackFailed(const FString StateData, FSequenceError Error) const
+void AGeneralTesting::CallbackFailed(const FString StateData, FSequenceError Error) const
 {
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *StateData);
@@ -145,7 +145,7 @@ void AGeneral_Testing::CallbackFailed(const FString StateData, FSequenceError Er
 	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 }
 
-FString AGeneral_Testing::ErrorToString(EErrorType Error)
+FString AGeneralTesting::ErrorToString(EErrorType Error)
 {
 	switch (Error) {
 	case NotFound:
@@ -166,4 +166,3 @@ FString AGeneral_Testing::ErrorToString(EErrorType Error)
 		return "SequenceError";
 	}
 }
-

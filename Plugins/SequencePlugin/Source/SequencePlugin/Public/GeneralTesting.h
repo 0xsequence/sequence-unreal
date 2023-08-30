@@ -7,10 +7,10 @@
 #include "Errors.h"
 #include "Indexer/IndexerSupport.h"
 #include "SequenceDataTests.h"
-#include "General_Testing.generated.h"
+#include "GeneralTesting.generated.h"
 
 UCLASS()
-class SEQUENCEPLUGIN_API AGeneral_Testing : public AActor
+class SEQUENCEPLUGIN_API AGeneralTesting : public AActor
 {
 	GENERATED_BODY()
 
@@ -19,7 +19,7 @@ private:
 	UObjectHandler* imgHandler;
 public:	
 	// Sets default values for this actor's properties
-	AGeneral_Testing();
+	AGeneralTesting();
 
 protected:
 	// Called when the game starts or when spawned
