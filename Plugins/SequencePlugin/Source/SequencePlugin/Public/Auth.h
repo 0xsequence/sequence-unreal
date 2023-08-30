@@ -36,18 +36,18 @@ public:
 	* Used for setting up fresh auth data for this session,
 	* used in the case when we had no auth data stored
 	*/
-	void setNewSecureStorableAuth(FStoredAuthState_BE newAuthData);
+	void SetNewSecureStorableAuth(FStoredAuthState_BE NewAuthData);
 	
 	/*
 	* Used to take stored Auth data decrypt it, and reconstruct a FStoredAuthState_BE Struct
 	* if this process fails at any step we return false to let the caller know we were unable to parse
 	* the data we were given
 	*/
-	bool setSecureStorableAuth(FSecureKey secureStoredAuth);
+	bool SetSecureStorableAuth(FSecureKey SecureStoredAuth);
 
 	/*
 	* Used for prepping our StoredAuthData_BE struct to be stored securely
 	* on disk using FAES encryption
 	*/
-	FSecureKey getSecureStorableAuth();
+	FSecureKey GetSecureStorableAuth() const;
 };

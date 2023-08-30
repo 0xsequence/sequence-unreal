@@ -31,22 +31,22 @@ protected:
 	* Called by frontend to test the provider!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Provider")
-		void test_provider();
+		void TestProvider() const;
 
 	/*
 	* Called by frontend to test the indexer
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Indexer")
-		void test_indexer();
+		void TestIndexer();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Encryption")
-		void testEncryption();
+		void TestEncryption() const;
 
 	/*
 	* Used to test misc functions / support objects!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Misc")
-		void testMisc();
+		void TestMisc();
 
 	//special bindable function used for handling callbacks on Async stuff!
 	UFUNCTION()
@@ -56,7 +56,7 @@ protected:
 		void testMiscForwarder(const TMap<FString, UTexture2D*>& imageMap);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
-		void testSequence();
+		void TestSequence() const;
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_SystemDataBuiler")
 		void testSystemDataBuilder();
@@ -72,17 +72,17 @@ private:
 	* Here I include some additional state_data about the callback that can be printed
 	* in with the on successcallback!
 	*/
-	void callback_passed(FString state_data);
+	void CallbackPassed(FString StateData) const;
 
 	/*
 	* Here I include some additional state data about the callback as well as
 	* error data that get printed out in the callback failure!
 	*/
-	void Callback_Failed(FString state_data, FSequenceError error) const;
+	void CallbackFailed(FString StateData, FSequenceError Error) const;
 
 	/*
 	* Used to convert an enum to a readable string
 	*/
-	static FString Error_To_String(EErrorType error);
+	static FString ErrorToString(EErrorType Error);
 
 };
