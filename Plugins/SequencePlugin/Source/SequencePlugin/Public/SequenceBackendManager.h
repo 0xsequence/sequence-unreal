@@ -11,7 +11,7 @@
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
-#include "Sequence_Backend_Manager.generated.h"
+#include "SequenceBackendManager.generated.h"
 
 class UIndexer;
 
@@ -27,7 +27,7 @@ public:
 };
 
 UCLASS()
-class SEQUENCEPLUGIN_API ASequence_Backend_Manager : public AActor, public IBackend
+class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBackend
 {
 	GENERATED_BODY()
 
@@ -66,9 +66,9 @@ public:
 	FUserDetails getUserDetails();
 
 	// Sets default values for this actor's properties
-	ASequence_Backend_Manager();
+	ASequenceBackendManager();
 	//destructor for cleaning up old refs
-	~ASequence_Backend_Manager();
+	~ASequenceBackendManager();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -203,7 +203,7 @@ private:
 	* @Param json (the json payload in FString form) If invalid we will get a response but it'll be an error mesg from the server in json format
 	* @param Handler (The ASYNC handler that will process the payload once we have received it)
 	*/
-	void post_json_request(FString url, FString json, void (ASequence_Backend_Manager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
+	void post_json_request(FString url, FString json, void (ASequenceBackendManager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
 	
 	/*
 	* Used to request block information from
