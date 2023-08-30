@@ -1,6 +1,7 @@
 #include "SystemDataBuilder.h"
 #include "Indexer/Indexer.h"
 #include "Syncer.h"
+#include "Errors.h"
 #include "Sequence/SequenceAPI.h"
 
 USystemDataBuilder::USystemDataBuilder()

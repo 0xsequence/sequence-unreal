@@ -102,6 +102,65 @@ FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
+void ASequence_Backend_Manager::randomReceive()
+{
+	int32 dist = FMath::RandRange(1, 100);
+	int32 acceptRange = 10;
+	bool genNew = (dist <= acceptRange);//acceptRange % of the time we will generate something new!
+
+	if (FMath::RandBool())
+	{//coin
+		FCoin_BE rCoin = this->testCoins[FMath::RandRange(0, this->testCoins.Num() - 1)];
+		rCoin.Coin_Amount = FMath::FRandRange(0.001, 100);
+		if (genNew)
+		{
+			rCoin.Coin_Long_Name = "NewRandomCoin:";
+			rCoin.Coin_Long_Name.AppendInt(FMath::RandRange(0,1000));
+		}
+		this->receiveCoin(rCoin);
+	}
+	else
+	{//nft
+		FNFT_Master_BE rNFT = this->testNFTs[FMath::RandRange(0, this->testNFTs.Num() - 1)];
+		
+		int32 rCount = FMath::RandRange(1, 100);
+		for (int32 i = 0; i < rCount; i++)
+		{
+			FNFT_UData_BE uData;
+			rNFT.nft_data.Add(uData);
+		}
+
+		if (genNew)
+		{
+			rNFT.NFT_Name = "NewRandomNFT";
+			rNFT.NFT_Name.AppendInt(FMath::RandRange(0, 1000));
+			rNFT.Collection_Long_Name = "Testing_Collection";
+			rNFT.Collection_Short_Name = "Tst";
+		}
+
+		this->receiveNFT(rNFT);
+	}
+	FTimerHandle TimerTestReceive;
+	FTimerDelegate Delegate; // Delegate to bind function with parameters
+	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
+	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1,15), false);
+}
+
+void ASequence_Backend_Manager::update_system_testable_data(const FSystemData_BE& system_data)
+{
+	this->testCoins = system_data.user_data.coins;
+	this->testNFTs = system_data.user_data.nfts;
+
+	//need to setup a special timer function delegate!
+
+	FTimerHandle TimerTestReceive;
+	FTimerDelegate Delegate; // Delegate to bind function with parameters
+	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
+	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate, 60, false);
+
+	this->update_system_data(system_data);
+}
+
 void ASequence_Backend_Manager::init_system_data()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
@@ -186,71 +245,39 @@ void ASequence_Backend_Manager::init_authentication(FSecureKey storedAuthData)
 void ASequence_Backend_Manager::init_get_updated_coin_data(TArray<FID_BE> coinsToUpdate)
 {	
 	UE_LOG(LogTemp, Display, TEXT("[Update Coin Fetch INITIATED]"));
-	/*
+	
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedCoinData)
 	{
 		this->updateCoinData(updatedCoinData);
 	};
 
-	const FFailureCallback GenericFailure = [=](const SequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated coin data]"));
+		TArray<FItemPrice_BE> bList;
+		this->updateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
-	this->sequence->getUpdatedItemPrices(coinsToUpdate,GenericSuccess,GenericFailure);
-	*/
-	TArray<FItemPrice_BE> updatedItems;
-	FItemPrice_BE item;
-	item.Token.chainID = 137;
-
-	FString lclID = "0x";
-	lclID.AppendInt(FMath::RandRange(1,5));//inclusive (testing coin range)
-
-	item.Token.contractAddress = lclID;
-	item.price.value = FMath::RandRange(1, 100);
-	item.price.currency = "Canadian dollars?????";
-	updatedItems.Add(item);
-	//this->updateCoinData(updatedItems);
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate;
-	Delegate.BindUFunction(this, "updateCoinData", updatedItems);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
+	this->sequenceWallet->getUpdatedCoinPrices(coinsToUpdate,GenericSuccess,GenericFailure);
 }
 
 
 void ASequence_Backend_Manager::init_get_updated_token_data(TArray<FID_BE> tokensToUpdate)
 {
 	UE_LOG(LogTemp, Display, TEXT("[Update NFT Fetch INITIATED]"));
-	/*
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
 	{
 		this->updateTokenData(updatedTokenData);
 	};
 
-	const FFailureCallback GenericFailure = [=](const SequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated token data]"));
+		TArray<FItemPrice_BE> bList;
+		this->updateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
-	this->sequence->getUpdatedItemPrices(tokensToUpdate, GenericSuccess, GenericFailure);
-	*/
-
-	TArray<FItemPrice_BE> updatedItems;
-	FItemPrice_BE item;
-	item.Token.chainID = 137;
-
-	FString lclID = "0x";
-	lclID.AppendInt(FMath::RandRange(6, 8));//inclusive (testing token range)
-
-	item.Token.contractAddress = lclID;
-	item.price.value = FMath::RandRange(1, 1000000);
-	item.price.currency = "Canadian dollars?????";
-	updatedItems.Add(item);
-	//this->updateTokenData(updatedItems);
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate;
-	Delegate.BindUFunction(this, "updateTokenData", updatedItems);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1, 10), false);
+	this->sequenceWallet->getUpdatedCollectiblePrices(tokensToUpdate, GenericSuccess, GenericFailure);
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]

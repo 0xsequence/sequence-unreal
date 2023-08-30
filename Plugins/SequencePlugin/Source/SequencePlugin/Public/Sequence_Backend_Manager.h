@@ -56,6 +56,12 @@ private:
 	FString username;
 	//end of signin variables
 
+	//testing variables//
+	bool enableTesting = true;
+	TArray<FCoin_BE> testCoins;
+	TArray<FNFT_Master_BE> testNFTs;
+	//testing variables//
+
 public:
 	FUserDetails getUserDetails();
 
@@ -97,6 +103,12 @@ public:
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
+	//these are the 2 receive functions we have
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
+		void receiveCoin(FCoin_BE coin);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
+		void receiveNFT(FNFT_Master_BE nft);
 	/*
 	* Used to initiate a stored authentication call from the frontend
 	*/
@@ -128,6 +140,8 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
 		void update_system_data(const FSystemData_BE &system_data);
+
+		void update_system_testable_data(const FSystemData_BE& system_data);
 
 	/*
 	* Used to initate the signin process from the frontend
@@ -228,4 +242,11 @@ private:
 	FString get_main_url();
 	FString get_continue_url();
 	FString get_signin_url();
+
+	//testing functions//
+
+	UFUNCTION()
+		void randomReceive();
+
+	//testing functions//
 };
