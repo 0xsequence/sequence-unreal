@@ -16,16 +16,10 @@ USystemDataBuilder::USystemDataBuilder()
 	this->tokenImageHandler->setup(true);
 	this->HistoryImageHandler = NewObject<UObjectHandler>();
 	this->HistoryImageHandler->setup(true);
-	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 
 USystemDataBuilder::~USystemDataBuilder()
-{
-	if (this->sequenceAPI)
-	{
-		delete this->sequenceAPI;
-	}
-}
+{}
 
 TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 {
@@ -87,7 +81,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 */
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
-	this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
+	//this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
 	this->getItemDataSyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -179,8 +173,8 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		this->getItemDataSyncer->dec();
 	};
 
-	this->sequenceAPI->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
-	this->sequenceAPI->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	this->GWallet->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
+	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 }
 
 void USystemDataBuilder::OnGetItemDataDone()
@@ -190,6 +184,7 @@ void USystemDataBuilder::OnGetItemDataDone()
 
 void USystemDataBuilder::initGetTokenData()
 {
+	this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this, "OnGetItemDataDone");
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [&,this](const FGetTokenBalancesReturn tokenBalances)
 	{//once indexer responds!
 		//only thing I can do is apply compression earlier for a cleaner setup
@@ -289,9 +284,6 @@ void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSe
 	default_network.is_default = true;
 	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
 	this->systemData.user_data.networks.Add(default_network);
-
-	
-
 	//ASYNC Operations next!
 	this->masterSyncer->incN(4);//+1 for each General Operation you have here!
 	this->initGetQRCode();
@@ -329,7 +321,7 @@ void USystemDataBuilder::OnDone()
 
 void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
 {
-	this->getTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
+	//this->getTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
 	this->getTxnHistorySyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -442,12 +434,13 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		this->getTxnHistorySyncer->dec();
 	};
 
-	this->sequenceAPI->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
-	this->sequenceAPI->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	this->GWallet->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
+	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 }
 
 void USystemDataBuilder::initGetTxnHistory()
 {
+	this->getTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
 	{//once indexer responds!
 		FUpdatableHistoryArgs semiParsedHistory = UIndexerSupport::extractFromTransactionHistory(this->GPublicAddress,history);
