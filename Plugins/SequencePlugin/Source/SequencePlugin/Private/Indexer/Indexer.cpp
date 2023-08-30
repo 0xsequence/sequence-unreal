@@ -3,6 +3,7 @@
 
 #include "Indexer/Indexer.h"
 
+#include "../../../../../../../../../../../Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.0/include/stddef.h"
 #include "Util/Async.h"
 
 UIndexer::UIndexer()
@@ -115,15 +116,23 @@ void UIndexer::HTTPPost(const int64& chainID,const FString& endpoint,const FStri
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
 
 	http_post_req->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-	{
-		if(bWasSuccessful)
+	{ 
+		if(bWasSuccessful )
 		{
 			const FString Content = Request->GetResponse()->GetContentAsString();
 			OnSuccess(Content);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+			if(Request.IsValid() && Request->GetResponse().IsValid())
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+			}
+			
 		}
 	});
 	http_post_req->ProcessRequest();
