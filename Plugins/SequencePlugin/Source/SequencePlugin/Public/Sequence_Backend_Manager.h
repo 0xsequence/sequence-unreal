@@ -97,6 +97,12 @@ public:
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
+	//these are the 2 receive functions we have
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
+		void receiveCoin(FCoin_BE coin);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
+		void receiveNFT(FNFT_Master_BE nft);
 	/*
 	* Used to initiate a stored authentication call from the frontend
 	*/
