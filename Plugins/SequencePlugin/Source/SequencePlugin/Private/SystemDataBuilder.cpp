@@ -12,9 +12,9 @@ USystemDataBuilder::USystemDataBuilder()
 	this->QRImageHandler = NewObject<UObjectHandler>();
 	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
-	this->tokenImageHandler->setup(true);
+	this->tokenImageHandler->Setup(true);
 	this->HistoryImageHandler = NewObject<UObjectHandler>();
-	this->HistoryImageHandler->setup(true);
+	this->HistoryImageHandler->Setup(true);
 	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 
@@ -257,7 +257,7 @@ void USystemDataBuilder::initGetContactData()
 	};
 
 	//GO Level
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		this->masterSyncer->dec();
 	};
@@ -435,7 +435,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		this->getTxnHistorySyncer->dec();
 	};//lambda
 
-	const FFailureCallback lclFailure = [this](const SequenceError Error)
+	const FFailureCallback lclFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
 		this->getTxnHistorySyncer->dec();
