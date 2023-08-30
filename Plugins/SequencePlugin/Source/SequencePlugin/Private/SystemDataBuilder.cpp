@@ -1,6 +1,7 @@
 #include "SystemDataBuilder.h"
 #include "Indexer/Indexer.h"
 #include "Syncer.h"
+#include "Errors.h"
 #include "Sequence/SequenceAPI.h"
 
 USystemDataBuilder::USystemDataBuilder()
@@ -257,7 +258,7 @@ void USystemDataBuilder::initGetContactData()
 	};
 
 	//GO Level
-	const FFailureCallback GenericFailure = [this](const SequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		this->masterSyncer->dec();
 	};
@@ -435,7 +436,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		this->getTxnHistorySyncer->dec();
 	};//lambda
 
-	const FFailureCallback lclFailure = [this](const SequenceError Error)
+	const FFailureCallback lclFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
 		this->getTxnHistorySyncer->dec();
