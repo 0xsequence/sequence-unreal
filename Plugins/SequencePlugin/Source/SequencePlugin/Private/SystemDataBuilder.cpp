@@ -12,9 +12,9 @@ USystemDataBuilder::USystemDataBuilder()
 	this->QRImageHandler = NewObject<UObjectHandler>();
 	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
-	this->tokenImageHandler->Setup(true);
+	this->tokenImageHandler->setup(true);
 	this->HistoryImageHandler = NewObject<UObjectHandler>();
-	this->HistoryImageHandler->Setup(true);
+	this->HistoryImageHandler->setup(true);
 	this->sequenceAPI = new SequenceAPI::FSequenceWallet();
 }
 

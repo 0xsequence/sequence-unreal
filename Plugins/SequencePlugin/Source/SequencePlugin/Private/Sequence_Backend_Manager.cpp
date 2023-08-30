@@ -107,7 +107,7 @@ void ASequence_Backend_Manager::init_system_data()
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
 	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
 	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
-	builder->initBuildSystemData(this->indexer, this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
+	builder->initBuildSystemData(this->Indexer, this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
 }
 
 void ASequence_Backend_Manager::init_signin(FString email)
