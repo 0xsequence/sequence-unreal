@@ -12,7 +12,7 @@
 #include "Engine/Texture2D.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
-#include "Sequence_Backend_Manager.h"
+#include "SequenceBackendManager.h"
 #include "ObjectHandler.h"
 #include "Indexer.generated.h"
 

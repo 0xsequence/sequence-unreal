@@ -269,7 +269,7 @@ void USystemDataBuilder::initGetContactData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress,ASequence_Backend_Manager * manager)
+void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
 {
 	this->GIndexer = indexer;
 	this->GWallet = wallet;

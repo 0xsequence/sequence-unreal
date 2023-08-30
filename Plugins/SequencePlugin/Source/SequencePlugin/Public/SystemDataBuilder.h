@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Sequence/SequenceAPI.h"
-#include "Sequence_Backend_Manager.h"
+#include "SequenceBackendManager.h"
 #include "SystemDataBuilder.generated.h"
 
 /**
@@ -17,7 +17,7 @@ class SEQUENCEPLUGIN_API USystemDataBuilder : public UObject
 {
 	GENERATED_BODY()
 private:
-	ASequence_Backend_Manager* sqncMngr;
+	ASequenceBackendManager* sqncMngr;
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
 	UIndexer* GIndexer;
 	SequenceAPI::FSequenceWallet* GWallet;
@@ -84,7 +84,7 @@ public:
 	USystemDataBuilder();
 	~USystemDataBuilder();
 
-	void initBuildSystemData(UIndexer * indexer, SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress,ASequence_Backend_Manager * manager);
+	void initBuildSystemData(UIndexer * indexer, SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
 
 	void testGOTokenData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress);
 
