@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Sequence_Backend_Manager.h"
+#include "SequenceBackendManager.h"
 #include "Provider.h"
 #include "Util/HexUtility.h"
 #include "Misc/AutomationTest.h"
@@ -11,7 +11,7 @@
 #include "Eth/Crypto.h"
 #include "SystemDataBuilder.h"
 
-FUserDetails ASequence_Backend_Manager::getUserDetails()
+FUserDetails ASequenceBackendManager::getUserDetails()
 {
 	FUserDetails ret;
 	ret.account_id = this->account_id;
@@ -22,7 +22,7 @@ FUserDetails ASequence_Backend_Manager::getUserDetails()
 }
 
 // Sets default values
-ASequence_Backend_Manager::ASequence_Backend_Manager()
+ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,7 +48,7 @@ ASequence_Backend_Manager::ASequence_Backend_Manager()
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
-ASequence_Backend_Manager::~ASequence_Backend_Manager()
+ASequenceBackendManager::~ASequenceBackendManager()
 {
 	if (this->sequenceWallet)
 	{
@@ -57,13 +57,13 @@ ASequence_Backend_Manager::~ASequence_Backend_Manager()
 }
 
 // Called when the game starts or when spawned
-void ASequence_Backend_Manager::BeginPlay()
+void ASequenceBackendManager::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 // Called every frame
-void ASequence_Backend_Manager::Tick(float DeltaTime)
+void ASequenceBackendManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
@@ -73,14 +73,14 @@ void ASequence_Backend_Manager::Tick(float DeltaTime)
 /*
 	Used to copy data to the systems clipboard!
 */
-void ASequence_Backend_Manager::Copy_To_Clipboard(FString data)
+void ASequenceBackendManager::Copy_To_Clipboard(FString data)
 {
 	//rebuild these 2 functions using #ifdefs for platforms IOS, Android, Mac, Windows to clear out this warning!
 	//works for now
 	FGenericPlatformMisc::ClipboardCopy(*data);
 }
 
-FString ASequence_Backend_Manager::Get_From_Clipboard()
+FString ASequenceBackendManager::Get_From_Clipboard()
 {
 	FString retData;
 	//gets data from clipboard but it comes back invalid? this will be broken until we move up engine versions (hopefully epic actually implements a real solution)
@@ -88,12 +88,12 @@ FString ASequence_Backend_Manager::Get_From_Clipboard()
 	return retData;
 }
 
-FString ASequence_Backend_Manager::get_transaction_hash(FTransaction_FE Transaction)
+FString ASequenceBackendManager::get_transaction_hash(FTransaction_FE Transaction)
 {
 	return Transaction.ID();
 }
 
-FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
+FSecureKey ASequenceBackendManager::getSecureStorableAuth()
 {
 	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
 }
@@ -102,7 +102,7 @@ FSecureKey ASequence_Backend_Manager::getSecureStorableAuth()
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
-void ASequence_Backend_Manager::RandomReceive()
+void ASequenceBackendManager::RandomReceive()
 {
 	int32 Dist = FMath::RandRange(1, 100);
 	int32 AcceptRange = 10;
@@ -146,7 +146,7 @@ void ASequence_Backend_Manager::RandomReceive()
 	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1,15), false);
 }
 
-void ASequence_Backend_Manager::UpdateSystemTestableData(const FSystemData_BE& system_data)
+void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& system_data)
 {
 	this->testCoins = system_data.user_data.coins;
 	this->testNFTs = system_data.user_data.nfts;
@@ -161,7 +161,7 @@ void ASequence_Backend_Manager::UpdateSystemTestableData(const FSystemData_BE& s
 	this->update_system_data(system_data);
 }
 
-void ASequence_Backend_Manager::InitSystemData()
+void ASequenceBackendManager::InitSystemData()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
 	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
@@ -169,7 +169,7 @@ void ASequence_Backend_Manager::InitSystemData()
 	builder->initBuildSystemData(this->Indexer, this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
 }
 
-void ASequence_Backend_Manager::InitSignin(FString Email)
+void ASequenceBackendManager::InitSignin(FString Email)
 {
 	UE_LOG(LogTemp, Display, TEXT("[Signin Request Initiated]"));//first chunk simulates signin request code gen
 	FTimerHandle TH_signin_delay;
@@ -184,7 +184,7 @@ void ASequence_Backend_Manager::InitSignin(FString Email)
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2,3, false);
 }
 
-void ASequence_Backend_Manager::InitCoinSendTxn(FTransaction_FE TransactionData)
+void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[Coin Txn Request Initiated]"));//first chunk simulates signin request code gen
 
@@ -208,7 +208,7 @@ void ASequence_Backend_Manager::InitCoinSendTxn(FTransaction_FE TransactionData)
 	this->sequenceWallet->SendTransactionWithCallback(TransactionData,SendSuccess,SendFailure);
 }
 
-void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE TransactionData)
+void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE TransactionData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));
 	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
@@ -232,7 +232,7 @@ void ASequence_Backend_Manager::init_nft_send_txn(FTransaction_FE TransactionDat
 }
 
 //update this to be the encrypted json string
-void ASequence_Backend_Manager::InitAuthentication(FSecureKey storedAuthData)
+void ASequenceBackendManager::InitAuthentication(FSecureKey storedAuthData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
 	this->auth->SetSecureStorableAuth(storedAuthData);
@@ -242,7 +242,7 @@ void ASequence_Backend_Manager::InitAuthentication(FSecureKey storedAuthData)
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
-void ASequence_Backend_Manager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate)
+void ASequenceBackendManager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate)
 {	
 	UE_LOG(LogTemp, Display, TEXT("[Update Coin Fetch INITIATED]"));
 	
@@ -262,7 +262,7 @@ void ASequence_Backend_Manager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpd
 }
 
 
-void ASequence_Backend_Manager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpdate)
+void ASequenceBackendManager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpdate)
 {
 	UE_LOG(LogTemp, Display, TEXT("[Update NFT Fetch INITIATED]"));
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
@@ -288,7 +288,7 @@ void ASequence_Backend_Manager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUp
 * Signin is pending but I'm suspecting I will create a series of static signin function in a new 
 * signin Handler Object to clean this process up!
 */
-void ASequence_Backend_Manager::SigninHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void ASequenceBackendManager::SigninHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
 	if (bWasSuccessful)
@@ -308,7 +308,7 @@ void ASequence_Backend_Manager::SigninHandler(FHttpRequestPtr Request, FHttpResp
 	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 }
 
-void ASequence_Backend_Manager::GetBlkHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void ASequenceBackendManager::GetBlkHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
 	if (bWasSuccessful)
@@ -336,10 +336,10 @@ void ASequence_Backend_Manager::GetBlkHandler(FHttpRequestPtr Request, FHttpResp
 	}
 	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
 	if (bWasSuccessful)
-		PostJsonRequest(GetMainURL(), CreateHashRequest(this->recv_block_num, this->recv_id), &ASequence_Backend_Manager::GetHashHandler);
+		PostJsonRequest(GetMainURL(), CreateHashRequest(this->recv_block_num, this->recv_id), &ASequenceBackendManager::GetHashHandler);
 }
 
-void ASequence_Backend_Manager::GetHashHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void ASequenceBackendManager::GetHashHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
 	if (bWasSuccessful)
@@ -367,17 +367,17 @@ void ASequence_Backend_Manager::GetHashHandler(FHttpRequestPtr Request, FHttpRes
 	}
 
 	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
-	PostJsonRequest(GetSigninURL(), CreateRequestBody(this->user_email), &ASequence_Backend_Manager::SigninHandler);
+	PostJsonRequest(GetSigninURL(), CreateRequestBody(this->user_email), &ASequenceBackendManager::SigninHandler);
 }
 
 //PRIVATE HANDLERS//
 
-FString ASequence_Backend_Manager::CreateBlkRequest()
+FString ASequenceBackendManager::CreateBlkRequest()
 {
 	return "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":43,\"jsonrpc\":\"2.0\"}";
 }
 
-FString ASequence_Backend_Manager::CreateHashRequest(FString blk_num,int32 id)
+FString ASequenceBackendManager::CreateHashRequest(FString blk_num,int32 id)
 {
 	FString ret = "{\"method\":\"eth_getBlockByNumber\",\"params\":[\"";
 	ret.Append(blk_num);
@@ -387,7 +387,7 @@ FString ASequence_Backend_Manager::CreateHashRequest(FString blk_num,int32 id)
 	return ret;
 }
 
-void ASequence_Backend_Manager::PostJsonRequest(FString url, FString json,void (ASequence_Backend_Manager::*handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
+void ASequenceBackendManager::PostJsonRequest(FString url, FString json,void (ASequenceBackendManager::*handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
 {
 	FString response = "[FAILURE]";
 	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
@@ -399,7 +399,7 @@ void ASequence_Backend_Manager::PostJsonRequest(FString url, FString json,void (
 	http_post_req->ProcessRequest();
 }
 
-FString ASequence_Backend_Manager::CreateRequestBody(FString Email)
+FString ASequenceBackendManager::CreateRequestBody(FString Email)
 {
 	FString body = "{\"requestType\":\"EMAIL_SIGNIN\",\"email\":";
 	FString email_body = "\"";
@@ -421,7 +421,7 @@ FString ASequence_Backend_Manager::CreateRequestBody(FString Email)
 	return body;
 }
 
-FString ASequence_Backend_Manager::CreateIntent(FString Email)
+FString ASequenceBackendManager::CreateIntent(FString Email)
 {
 	FString Intent = "{\"email\":";
 	Intent.Append(Email);
@@ -449,7 +449,7 @@ FString ASequence_Backend_Manager::CreateIntent(FString Email)
 	return Intent;
 }
 
-FString ASequence_Backend_Manager::SetupRandomWallet()
+FString ASequenceBackendManager::SetupRandomWallet()
 {
 	//need to generate a random wallet!
 	FDateTime date = FDateTime::Now();
@@ -472,7 +472,7 @@ FString ASequence_Backend_Manager::SetupRandomWallet()
 	return lcl_pblc_key;
 }
 
-FString ASequence_Backend_Manager::GetMainURL()
+FString ASequenceBackendManager::GetMainURL()
 {
 	FString main_url;
 	FString result;
@@ -494,7 +494,7 @@ FString ASequence_Backend_Manager::GetMainURL()
 	return result;
 }
 
-FString ASequence_Backend_Manager::GetContinueURL()
+FString ASequenceBackendManager::GetContinueURL()
 {
 	FString cont_url;
 	FString result;
@@ -514,7 +514,7 @@ FString ASequence_Backend_Manager::GetContinueURL()
 	return result;
 }
 
-FString ASequence_Backend_Manager::GetSigninURL()
+FString ASequenceBackendManager::GetSigninURL()
 {
 	FString SigninURL;
 	FString Result;
