@@ -200,8 +200,10 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		this->itemGuard.Unlock();
 	};
 
+	this->walletGuard.Lock();
 	this->GWallet->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
 	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	this->walletGuard.Unlock();
 }
 
 void USystemDataBuilder::OnGetItemDataDone()
@@ -256,10 +258,10 @@ void USystemDataBuilder::initGetQRCode()
 
 	const TSuccessCallback<FAddress> GenericSuccess = [&, this](const FAddress address)
 	{//once wallet responds with the wallet address
-		this->GWalletAddress = address.ToHex();
-		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *this->GWalletAddress);
+		FString walletAddress = address.ToHex();
+		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *walletAddress);
 		//now we can request the QR code!
-		this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(this->GWalletAddress, 512);
+		this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(walletAddress, 512);
 		this->QRImageHandler->requestImage(this->qr_url);
 	};
 
@@ -268,7 +270,9 @@ void USystemDataBuilder::initGetQRCode()
 	{
 		this->decMasterSyncer();
 	};
+	this->walletGuard.Lock();
 	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
+	this->walletGuard.Unlock();
 }
 
 void USystemDataBuilder::initGetContactData()
@@ -286,8 +290,9 @@ void USystemDataBuilder::initGetContactData()
 	{
 		this->decMasterSyncer();
 	};
-
+	this->walletGuard.Lock();
 	this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
+	this->walletGuard.Unlock();
 }
 
 /*
@@ -303,6 +308,7 @@ void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* walle
 
 	//sync operations FIRST
 	//all of this we get from auth!
+	this->systemDataGuard.Lock();
 	this->systemData.user_data.public_address = publicAddress;
 	this->systemData.user_data.account_id = this->sqncMngr->getUserDetails().account_id;
 	this->systemData.user_data.email = this->sqncMngr->getUserDetails().email;
@@ -312,6 +318,7 @@ void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* walle
 	default_network.is_default = true;
 	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
 	this->systemData.user_data.networks.Add(default_network);
+	this->systemDataGuard.Unlock();
 	//ASYNC Operations next!
 	this->masterSyncer->incN(4);//+1 for each General Operation you have here!
 	this->initGetQRCode();
@@ -347,7 +354,9 @@ void USystemDataBuilder::OnDone()
 	this->masterGuard.Unlock();
 
 	this->systemDataGuard.Lock();
+	UE_LOG(LogTemp, Display, TEXT("Before Calling update_system_data"));
 	this->sqncMngr->update_system_data(this->systemData);
+	UE_LOG(LogTemp, Display, TEXT("After Calling update_system_data"));
 	this->systemDataGuard.Unlock();
 }
 
@@ -476,9 +485,10 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		this->getTxnHistorySyncer->dec();
 		this->historyGuard.Unlock();
 	};
-
+	this->walletGuard.Lock();
 	this->GWallet->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
 	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	this->walletGuard.Unlock();
 }
 
 void USystemDataBuilder::initGetTxnHistory()

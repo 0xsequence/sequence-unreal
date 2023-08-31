@@ -24,10 +24,10 @@ private:
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
 	
 	// these vars are read only
+	mutable FCriticalSection walletGuard;
 	SequenceAPI::FSequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
-	FString GWalletAddress;
 
 	mutable FCriticalSection systemDataGuard;//lock for system data
 	FSystemData_BE systemData;

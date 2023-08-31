@@ -42,9 +42,9 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->hex_data.Add("d");
 	this->hex_data.Add("e");
 	this->hex_data.Add("f");
-	this->auth = NewObject<UAuth>();//for authentication storage and handling
 	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
+	this->auth = NewObject<UAuth>();
 	this->request_handler = NewObject<UObjectHandler>();//create our handler!
 }
 
@@ -235,7 +235,6 @@ void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE TransactionData)
 void ASequenceBackendManager::InitAuthentication(FSecureKey storedAuthData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
-	this->auth->SetSecureStorableAuth(storedAuthData);
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
 	Delegate.BindUFunction(this, "update_authentication", this->auth->SetSecureStorableAuth(storedAuthData));
