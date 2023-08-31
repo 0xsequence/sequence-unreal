@@ -2,8 +2,6 @@
 
 
 #include "Indexer/Indexer.h"
-
-#include "../../../../../../../../../../../Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.0/include/stddef.h"
 #include "Util/Async.h"
 
 UIndexer::UIndexer()
