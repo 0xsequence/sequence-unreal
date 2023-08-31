@@ -18,9 +18,11 @@ class SEQUENCEPLUGIN_API USyncer : public UObject
 private:
 	int32 requestCount = 0;
 	mutable FCriticalSection Guard;
+	FString syncerName;//used for testing!
 public:
 
 	FOnDoneSignature OnDoneDelegate;
+	void setupForTesting(FString name);
 	void reset();//resets active request counter to zero and fires OnDone to clear everything out
 	void inc();
 	void incN(int32 n);
