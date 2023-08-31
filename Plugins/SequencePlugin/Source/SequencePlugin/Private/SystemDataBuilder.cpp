@@ -7,6 +7,9 @@
 USystemDataBuilder::USystemDataBuilder()
 {
 	//Create a syncer for request management
+
+	this->tIndexer = NewObject<UIndexer>();
+	this->hIndexer = NewObject<UIndexer>();
 	this->masterSyncer = NewObject<USyncer>();
 	this->getItemDataSyncer = NewObject<USyncer>();
 	this->getTxnHistorySyncer = NewObject<USyncer>();
@@ -202,7 +205,7 @@ void USystemDataBuilder::initGetTokenData()
 	FGetTokenBalancesArgs args;
 	args.accountAddress = this->GPublicAddress;
 	args.includeMetaData = true;
-	this->GIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
+	this->tIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
 }
 
 void USystemDataBuilder::initGetQRCode()
@@ -214,10 +217,6 @@ void USystemDataBuilder::initGetQRCode()
 			TMap<FString, UTexture2D*> images = this->QRImageHandler->getProcessedImages();
 			if (images.Contains(this->qr_url))
 			{
-				if (!*images.Find(this->qr_url))
-				{
-					UE_LOG(LogTemp, Error, TEXT("Resolved QR to null pointer"));
-				}
 				this->systemData.user_data.public_qr_address = *images.Find(this->qr_url);//here we assign the QRCode we received!
 			}
 			else
@@ -458,7 +457,7 @@ void USystemDataBuilder::initGetTxnHistory()
 	args.includeMetaData = true;
 	args.filter.accountAddress = this->GPublicAddress;
 
-	this->GIndexer->GetTransactionHistory(this->GChainId,args, GenericSuccess, GenericFailure);
+	this->hIndexer->GetTransactionHistory(this->GChainId,args, GenericSuccess, GenericFailure);
 }
 
 UFUNCTION()

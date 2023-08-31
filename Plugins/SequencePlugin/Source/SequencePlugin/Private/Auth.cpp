@@ -55,7 +55,8 @@ bool UAuth::SetSecureStorableAuth(FSecureKey SecureStoredAuth)
 FSecureKey UAuth::GetSecureStorableAuth() const
 {
 	FSecureKey Ret;
-	if (FString JSONAuthString; FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(this->auth, JSONAuthString))
+	FString JSONAuthString; 
+	if (FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(this->auth, JSONAuthString))
 	{
 		Ret.of = JSONAuthString.Len();//store the offset
 		Ret.ky = USequenceEncryptor::encrypt(JSONAuthString);//encrypt and store the jsonAuthObject

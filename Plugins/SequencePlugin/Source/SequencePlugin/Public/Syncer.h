@@ -17,6 +17,7 @@ class SEQUENCEPLUGIN_API USyncer : public UObject
 	GENERATED_BODY()
 private:
 	int32 requestCount = 0;
+	mutable FCriticalSection Guard;
 public:
 
 	FOnDoneSignature OnDoneDelegate;
