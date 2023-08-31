@@ -23,6 +23,7 @@ void UObjectHandler::OnDone()
 void UObjectHandler::setup(bool raw_cache_enabled)
 {
 	this->syncer = NewObject<USyncer>();
+	this->syncer->setupForTesting("ImageHandler_"+this->GetName());
 	//binding will occur here
 	//need to bind to OnDone
 	this->syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
@@ -179,6 +180,7 @@ bool UObjectHandler::request_raw_base(FString URL)
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
+	http_post_req->SetTimeout(5);
 	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::handle_request_raw);
 	http_post_req->ProcessRequest();
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;

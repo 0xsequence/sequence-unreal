@@ -18,6 +18,7 @@ class SEQUENCEPLUGIN_API USystemDataBuilder : public UObject
 	GENERATED_BODY()
 private:
 	ASequenceBackendManager* sqncMngr;
+	mutable FCriticalSection masterGuard;
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
 	UIndexer* GIndexer;
 
@@ -36,9 +37,13 @@ private:
 	//used for managing getting token data setup in systemdata//
 
 	//keeps track of requests regarding itemData! ie)tokens and coins
+	mutable FCriticalSection itemGuard;
 	USyncer *getItemDataSyncer;
 	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
 	UObjectHandler* tokenImageHandler;
+
+	void decMasterSyncer();
+
 	//this function gets bound to the getItemDataSyncer and fires off when we are done getting image and value data for tokens
 	UFUNCTION()
 	void OnGetItemDataDone();
@@ -54,6 +59,7 @@ private:
 	//used for managing anything that depends on the wallet address//
 
 	//Used for getting transaction history data in systemData//
+	mutable FCriticalSection historyGuard;
 	USyncer* getTxnHistorySyncer;
 	UObjectHandler* HistoryImageHandler;
 	void initGetTxnHistory();

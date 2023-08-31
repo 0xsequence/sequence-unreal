@@ -11,8 +11,11 @@ USystemDataBuilder::USystemDataBuilder()
 	this->tIndexer = NewObject<UIndexer>();
 	this->hIndexer = NewObject<UIndexer>();
 	this->masterSyncer = NewObject<USyncer>();
+	this->masterSyncer->setupForTesting("master");
 	this->getItemDataSyncer = NewObject<USyncer>();
+	this->getItemDataSyncer->setupForTesting("item");
 	this->getTxnHistorySyncer = NewObject<USyncer>();
+	this->getTxnHistorySyncer->setupForTesting("history");
 	this->QRImageHandler = NewObject<UObjectHandler>();
 	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
@@ -23,6 +26,13 @@ USystemDataBuilder::USystemDataBuilder()
 
 USystemDataBuilder::~USystemDataBuilder()
 {}
+
+void USystemDataBuilder::decMasterSyncer()
+{
+	this->masterGuard.Lock();
+	this->masterSyncer->dec();
+	this->masterGuard.Unlock();
+}
 
 TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 {
@@ -124,7 +134,9 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 				if (images.Contains(this->systemData.user_data.nfts[i].Collection_Icon_Url))
 					this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
 			}
+			this->itemGuard.Lock();
 			this->getItemDataSyncer->dec();
+			this->itemGuard.Unlock();
 		});
 	this->tokenImageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
@@ -147,7 +159,9 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			}
 			lclUItems.RemoveAt(0);
 		}//while
+		this->itemGuard.Lock();
 		this->getItemDataSyncer->dec();
+		this->itemGuard.Unlock();
 	};//lambda
 
 	const TSuccessCallback<TArray<FItemPrice_BE>> lclCollectibleSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
@@ -167,13 +181,17 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			}
 			lclUItems.RemoveAt(0);
 		}//while
+		this->itemGuard.Lock();
 		this->getItemDataSyncer->dec();
+		this->itemGuard.Unlock();
 	};//lambda
 
 	const FFailureCallback lclFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
+		this->itemGuard.Lock();
 		this->getItemDataSyncer->dec();
+		this->itemGuard.Unlock();
 	};
 
 	this->GWallet->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
@@ -182,7 +200,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 
 void USystemDataBuilder::OnGetItemDataDone()
 {//if we hit this function that means we are DONE getting the token data and we can decrement our master syncer!
-	this->masterSyncer->dec();
+	this->decMasterSyncer();
 }
 
 void USystemDataBuilder::initGetTokenData()
@@ -200,7 +218,7 @@ void USystemDataBuilder::initGetTokenData()
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		//dec the request & throw error?
-		this->masterSyncer->dec();
+		this->decMasterSyncer();
 	};
 	FGetTokenBalancesArgs args;
 	args.accountAddress = this->GPublicAddress;
@@ -223,7 +241,7 @@ void USystemDataBuilder::initGetQRCode()
 			{//log error with getting QR code
 				UE_LOG(LogTemp, Error, TEXT("Failed to fetch QR Code"));
 			}
-			this->masterSyncer->dec();
+			this->decMasterSyncer();
 		});
 
 	const TSuccessCallback<FAddress> GenericSuccess = [&, this](const FAddress address)
@@ -238,7 +256,7 @@ void USystemDataBuilder::initGetQRCode()
 	//GO Level
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
-		this->masterSyncer->dec();
+		this->decMasterSyncer();
 	};
 	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
 }
@@ -248,13 +266,13 @@ void USystemDataBuilder::initGetContactData()
 	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [&, this](const TArray<FContact_BE> contacts)
 	{//assign contact data!
 		this->systemData.user_data.contacts = contacts;
-		this->masterSyncer->dec();//possibly one of these causing an issue?
+		this->decMasterSyncer();
 	};
 
 	//GO Level
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
-		this->masterSyncer->dec();
+		this->decMasterSyncer();
 	};
 
 	this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
@@ -314,8 +332,10 @@ void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequen
 
 void USystemDataBuilder::OnDone()
 {
+	this->masterGuard.Lock();
 	this->masterSyncer->OnDoneDelegate.Unbind();//for safety reasons!
 	this->sqncMngr->update_system_data(this->systemData);
+	this->masterGuard.Unlock();
 }
 
 void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
@@ -372,7 +392,9 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 					}
 				}
 			}//for
+			this->historyGuard.Lock();
 			this->getTxnHistorySyncer->dec();
+			this->historyGuard.Unlock();
 		});
 	this->HistoryImageHandler->requestImages(urlList);//init the requests!
 	//need to compose the ID list!
@@ -399,7 +421,9 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 			}
 			lclUItems.RemoveAt(0);
 		}//while
+		this->historyGuard.Lock();
 		this->getTxnHistorySyncer->dec();
+		this->historyGuard.Unlock();
 	};//lambda
 
 	const TSuccessCallback<TArray<FItemPrice_BE>> lclCollectibleSuccess = [this](const TArray<FItemPrice_BE> updatedItems)
@@ -424,13 +448,17 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 			}
 			lclUItems.RemoveAt(0);
 		}//while
+		this->historyGuard.Lock();
 		this->getTxnHistorySyncer->dec();
+		this->historyGuard.Unlock();
 	};//lambda
 
 	const FFailureCallback lclFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
+		this->historyGuard.Lock();
 		this->getTxnHistorySyncer->dec();
+		this->historyGuard.Unlock();
 	};
 
 	this->GWallet->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
@@ -450,7 +478,7 @@ void USystemDataBuilder::initGetTxnHistory()
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		//dec the request & throw error?
-		this->masterSyncer->dec();
+		this->decMasterSyncer();
 	};
 
 	FGetTransactionHistoryArgs args;
@@ -463,5 +491,5 @@ void USystemDataBuilder::initGetTxnHistory()
 UFUNCTION()
 void USystemDataBuilder::OnGetTxnHistoryDone()
 {
-	this->masterSyncer->dec();
+	this->decMasterSyncer();
 }
