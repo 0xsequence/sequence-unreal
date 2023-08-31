@@ -14,9 +14,9 @@
 FUserDetails ASequenceBackendManager::getUserDetails()
 {
 	FUserDetails ret;
-	ret.account_id = this->account_id;
-	ret.email = this->user_email;
-	ret.email_service = this->email_service;
+	ret.accountID = this->accountID;
+	ret.email = this->userEmail;
+	ret.emailService = this->emailService;
 	ret.username = this->username;
 	return ret;
 }
@@ -26,26 +26,26 @@ ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	this->hex_data.Add("0");
-	this->hex_data.Add("1");
-	this->hex_data.Add("2");
-	this->hex_data.Add("3");
-	this->hex_data.Add("4");
-	this->hex_data.Add("5");
-	this->hex_data.Add("6");
-	this->hex_data.Add("7");
-	this->hex_data.Add("8");
-	this->hex_data.Add("9");
-	this->hex_data.Add("a");
-	this->hex_data.Add("b");
-	this->hex_data.Add("c");
-	this->hex_data.Add("d");
-	this->hex_data.Add("e");
-	this->hex_data.Add("f");
+	this->hexDataList.Add("0");
+	this->hexDataList.Add("1");
+	this->hexDataList.Add("2");
+	this->hexDataList.Add("3");
+	this->hexDataList.Add("4");
+	this->hexDataList.Add("5");
+	this->hexDataList.Add("6");
+	this->hexDataList.Add("7");
+	this->hexDataList.Add("8");
+	this->hexDataList.Add("9");
+	this->hexDataList.Add("a");
+	this->hexDataList.Add("b");
+	this->hexDataList.Add("c");
+	this->hexDataList.Add("d");
+	this->hexDataList.Add("e");
+	this->hexDataList.Add("f");
 	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
-	this->request_handler = NewObject<UObjectHandler>();//create our handler!
+	this->requestHandler = NewObject<UObjectHandler>();//create our handler!
 }
 
 ASequenceBackendManager::~ASequenceBackendManager()
@@ -146,10 +146,10 @@ void ASequenceBackendManager::RandomReceive()
 	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1,15), false);
 }
 
-void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& system_data)
+void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& systemData)
 {
-	this->testCoins = system_data.user_data.coins;
-	this->testNFTs = system_data.user_data.nfts;
+	this->testCoins = systemData.user_data.coins;
+	this->testNFTs = systemData.user_data.nfts;
 
 	//need to setup a special timer function delegate!
 
@@ -158,7 +158,7 @@ void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& sys
 	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
 	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate, 60, false);
 
-	this->UpdateSystemData(system_data);
+	this->UpdateSystemData(systemData);
 }
 
 void ASequenceBackendManager::InitSystemData()
@@ -166,21 +166,21 @@ void ASequenceBackendManager::InitSystemData()
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
 	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
 	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
-	builder->initBuildSystemData(this->sequenceWallet, this->glb_ChainID, this->glb_PublicAddress, this);
+	builder->initBuildSystemData(this->sequenceWallet, this->chainID, this->publicAddress, this);
 }
 
 void ASequenceBackendManager::InitSignin(FString Email)
 {
 	UE_LOG(LogTemp, Display, TEXT("[Signin Request Initiated]"));//first chunk simulates signin request code gen
-	FTimerHandle TH_signin_delay;
+	FTimerHandle THSigninDelay;
 	FTimerDelegate Delegate;
-	const FString oob_code = "123456";
-	Delegate.BindUFunction(this, "update_signin", oob_code);
-	GetWorld()->GetTimerManager().SetTimer(TH_signin_delay, Delegate,1, false);
+	const FString oobCode = "123456";
+	Delegate.BindUFunction(this, "UpdateSignin", oobCode);
+	GetWorld()->GetTimerManager().SetTimer(THSigninDelay, Delegate,1, false);
 
 	FTimerHandle TH_auth_delay;//second chunk simulates successful login this may be causing a crash
 	FTimerDelegate Delegate_2;
-	Delegate_2.BindUFunction(this, "update_authentication", true);
+	Delegate_2.BindUFunction(this, "UpdateAuthentication", true);
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2,3, false);
 }
 
@@ -237,7 +237,7 @@ void ASequenceBackendManager::InitAuthentication(FSecureKey storedAuthData)
 	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
 	FTimerHandle TH_auth_delay;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
-	Delegate.BindUFunction(this, "update_authentication", this->auth->SetSecureStorableAuth(storedAuthData));
+	Delegate.BindUFunction(this, "UpdateAuthentication", this->auth->SetSecureStorableAuth(storedAuthData));
 	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
@@ -309,20 +309,20 @@ void ASequenceBackendManager::SigninHandler(FHttpRequestPtr Request, FHttpRespon
 
 void ASequenceBackendManager::GetBlkHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	FString rep_content = "[error]";
+	FString repContent = "[error]";
 	if (bWasSuccessful)
 	{//Parse the json response
 		Response = Request.Get()->GetResponse();
-		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+		repContent = Response.Get()->GetContentAsString();//use our rep handler instead!
 
-		TSharedPtr<FJsonObject> json_step;
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(rep_content), json_step))//convert to json object!
+		TSharedPtr<FJsonObject> jsonStep;
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(repContent), jsonStep))//convert to json object!
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "),*rep_content);
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "),*repContent);
 		}
 		//we want result & id
-		this->recv_block_num = json_step.Get()->GetStringField("result");
-		this->recv_id = json_step.Get()->GetIntegerField("id");
+		this->receiveBlockNumber = jsonStep.Get()->GetStringField("result");
+		this->receiveID = jsonStep.Get()->GetIntegerField("id");
 	}
 	else
 	{
@@ -333,27 +333,27 @@ void ASequenceBackendManager::GetBlkHandler(FHttpRequestPtr Request, FHttpRespon
 			UE_LOG(LogTemp, Error, TEXT("Request failed."));
 		}
 	}
-	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *repContent);
 	if (bWasSuccessful)
-		PostJsonRequest(GetMainURL(), CreateHashRequest(this->recv_block_num, this->recv_id), &ASequenceBackendManager::GetHashHandler);
+		PostJsonRequest(GetMainURL(), CreateHashRequest(this->receiveBlockNumber, this->receiveID), &ASequenceBackendManager::GetHashHandler);
 }
 
 void ASequenceBackendManager::GetHashHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	FString rep_content = "[error]";
+	FString repContent = "[error]";
 	if (bWasSuccessful)
 	{//Parse the json response
 		Response = Request.Get()->GetResponse();
-		rep_content = Response.Get()->GetContentAsString();//use our rep handler instead!
+		repContent = Response.Get()->GetContentAsString();//use our rep handler instead!
 
-		TSharedPtr<FJsonObject> json_step;
-		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(rep_content), json_step))//convert to json object!
+		TSharedPtr<FJsonObject> jsonStep;
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(repContent), jsonStep))//convert to json object!
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "), *rep_content);
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse into json object: %s: "), *repContent);
 		}
 
-		TSharedPtr<FJsonObject> res_obj = json_step.Get()->GetObjectField("result");
-		this->recv_block_hsh = res_obj.Get()->GetStringField("hash");
+		TSharedPtr<FJsonObject> resObj = jsonStep.Get()->GetObjectField("result");
+		this->receiveBlockHash = resObj.Get()->GetStringField("hash");
 	}
 	else
 	{
@@ -365,8 +365,8 @@ void ASequenceBackendManager::GetHashHandler(FHttpRequestPtr Request, FHttpRespo
 		}
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *rep_content);
-	PostJsonRequest(GetSigninURL(), CreateRequestBody(this->user_email), &ASequenceBackendManager::SigninHandler);
+	UE_LOG(LogTemp, Display, TEXT("Response: %s"), *repContent);
+	PostJsonRequest(GetSigninURL(), CreateRequestBody(this->userEmail), &ASequenceBackendManager::SigninHandler);
 }
 
 //PRIVATE HANDLERS//
@@ -376,10 +376,10 @@ FString ASequenceBackendManager::CreateBlkRequest()
 	return "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":43,\"jsonrpc\":\"2.0\"}";
 }
 
-FString ASequenceBackendManager::CreateHashRequest(FString blk_num,int32 id)
+FString ASequenceBackendManager::CreateHashRequest(FString blockNumber,int32 id)
 {
 	FString ret = "{\"method\":\"eth_getBlockByNumber\",\"params\":[\"";
-	ret.Append(blk_num);
+	ret.Append(blockNumber);
 	ret.Append("\",false],\"id\":46");
 	ret.Append(", \"jsonrpc\":\"2.0\"}");
 	UE_LOG(LogTemp, Display, TEXT("Hsh Payload: %s"), *ret);
@@ -389,30 +389,30 @@ FString ASequenceBackendManager::CreateHashRequest(FString blk_num,int32 id)
 void ASequenceBackendManager::PostJsonRequest(FString url, FString json,void (ASequenceBackendManager::*handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful))
 {
 	FString response = "[FAILURE]";
-	FHttpRequestPtr http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("POST");
-	http_post_req->SetHeader("Content-Type", "application/json");
-	http_post_req->SetURL(url);
-	http_post_req->SetContentAsString(json);
-	http_post_req->OnProcessRequestComplete().BindUObject(this,handler);//here we pass in one of our handler functions to do the processing!
-	http_post_req->ProcessRequest();
+	FHttpRequestPtr httpPostReq = FHttpModule::Get().CreateRequest();
+	httpPostReq->SetVerb("POST");
+	httpPostReq->SetHeader("Content-Type", "application/json");
+	httpPostReq->SetURL(url);
+	httpPostReq->SetContentAsString(json);
+	httpPostReq->OnProcessRequestComplete().BindUObject(this,handler);//here we pass in one of our handler functions to do the processing!
+	httpPostReq->ProcessRequest();
 }
 
 FString ASequenceBackendManager::CreateRequestBody(FString Email)
 {
 	FString body = "{\"requestType\":\"EMAIL_SIGNIN\",\"email\":";
-	FString email_body = "\"";
-	email_body.Append(Email);
-	email_body.Append("\"");
-	body.Append(email_body);
+	FString emailBody = "\"";
+	emailBody.Append(Email);
+	emailBody.Append("\"");
+	body.Append(emailBody);
 	body.Append(",");
 	body.Append("\"clientType\":\"CLIENT_TYPE_WEB\",\"continueUrl\":\"");
 	body.Append(GetContinueURL());
 	body.Append(CreateIntent(Email));
 	body.Append("\",\"canHandleCodeInApp\":true}");
 	
-	TSharedPtr<FJsonObject> JSON_Step;
-	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(body), JSON_Step))
+	TSharedPtr<FJsonObject> jsonStep;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(body), jsonStep))
 	{//used for making sure my json in makes sense!
 		UE_LOG(LogTemp, Display, TEXT("Failed to parse to json!"));
 	}
@@ -431,12 +431,12 @@ FString ASequenceBackendManager::CreateIntent(FString Email)
 	//append session signer addr we need to generate a random public key and store it here!
 	Intent.Append(",\"timestamp\":");
 	FDateTime date = FDateTime::Now();
-	int64 time_in_seconds = date.ToUnixTimestamp();
-	Intent.Append(FString::Printf(TEXT("%lld"), time_in_seconds));//allows converting to int64 to FString!
+	int64 timeInSeconds = date.ToUnixTimestamp();
+	Intent.Append(FString::Printf(TEXT("%lld"), timeInSeconds));//allows converting to int64 to FString!
 	Intent.Append(",\"blockNumber\":");
-	Intent.Append(this->recv_block_num);
+	Intent.Append(this->receiveBlockNumber);
 	Intent.Append(",\"blockHash\":\"");
-	Intent.Append(this->recv_block_hsh);
+	Intent.Append(this->receiveBlockHash);
 	Intent.Append("\",\"deviceinfo\":{\"broswer\":\"chrome\",\"os\":\"windows\"}");
 	Intent.Append(",\"reLogin?\":false,\"testnet?\":false,\"appName?\":\"n/a\",\"origin?\":\"n/a\",\"bannerUrl?\":\"n/a\"}");
 
@@ -452,64 +452,64 @@ FString ASequenceBackendManager::SetupRandomWallet()
 {
 	//need to generate a random wallet!
 	FDateTime date = FDateTime::Now();
-	int64 time_in_seconds = date.ToUnixTimestamp();
+	int64 timeInSeconds = date.ToUnixTimestamp();
 	FString lcl_prv_key;
 	FString lcl_pblc_key;
 	for (int i = 0; i < 64; i++)
 	{
-		FMath::RandInit(time_in_seconds);//init based on time to get some pseudo random data!
-		FString rand_data = this->hex_data[FMath::RandRange(0,this->hex_data.Num()-1)];
+		FMath::RandInit(timeInSeconds);//init based on time to get some pseudo random data!
+		FString rand_data = this->hexDataList[FMath::RandRange(0,this->hexDataList.Num()-1)];
 		lcl_prv_key.Append(rand_data);
 	}
 
-	this->prvt_key = lcl_prv_key;
+	this->privateKey = lcl_prv_key;
 
 	auto PrivKey = FPrivateKey::From(lcl_prv_key);//setup the private_key for use!
 	FPublicKey gen_pblc_key_H = GetPublicKey(PrivKey);//Gen the public key!
 	lcl_pblc_key = gen_pblc_key_H.ToHex();//get the public key in hex form!
-	this->pblc_key = lcl_pblc_key;
+	this->publicKey = lcl_pblc_key;
 	return lcl_pblc_key;
 }
 
 FString ASequenceBackendManager::GetMainURL()
 {
-	FString main_url;
+	FString mainURL;
 	FString result;
-	TArray<FString> mn_u;
-	mn_u.Add("aHR0");
-	mn_u.Add("cHM6Ly9k");
-	mn_u.Add("ZXYt");
-	mn_u.Add("bm9kZX");
-	mn_u.Add("Mu");
-	mn_u.Add("c2Vx");
-	mn_u.Add("dWVuY2UuYX");
-	mn_u.Add("BwL21haW5uZXQ=");
+	TArray<FString> mnU;
+	mnU.Add("aHR0");
+	mnU.Add("cHM6Ly9k");
+	mnU.Add("ZXYt");
+	mnU.Add("bm9kZX");
+	mnU.Add("Mu");
+	mnU.Add("c2Vx");
+	mnU.Add("dWVuY2UuYX");
+	mnU.Add("BwL21haW5uZXQ=");
 
-	for (auto i : mn_u)
+	for (auto i : mnU)
 	{
-		main_url.Append(i);
+		mainURL.Append(i);
 	}
-	FBase64::Decode(main_url, result);
+	FBase64::Decode(mainURL, result);
 	return result;
 }
 
 FString ASequenceBackendManager::GetContinueURL()
 {
-	FString cont_url;
+	FString contURL;
 	FString result;
-	TArray<FString> ct_u;
-	ct_u.Add("aHR0cDo");
-	ct_u.Add("vL2xvY2Fs");
-	ct_u.Add("aG9zdDozMzM");
-	ct_u.Add("zL2F1dG");
-	ct_u.Add("g/aW50ZW50PQ==");
+	TArray<FString> ctU;
+	ctU.Add("aHR0cDo");
+	ctU.Add("vL2xvY2Fs");
+	ctU.Add("aG9zdDozMzM");
+	ctU.Add("zL2F1dG");
+	ctU.Add("g/aW50ZW50PQ==");
 
-	for (auto i : ct_u)
+	for (auto i : ctU)
 	{
-		cont_url.Append(i);
+		contURL.Append(i);
 	}
 
-	FBase64::Decode(cont_url, result);
+	FBase64::Decode(contURL, result);
 	return result;
 }
 
@@ -517,22 +517,22 @@ FString ASequenceBackendManager::GetSigninURL()
 {
 	FString SigninURL;
 	FString Result;
-	TArray<FString> sg_u;
-	sg_u.Add("aHR0cHM6");
-	sg_u.Add("Ly9pZGVu");
-	sg_u.Add("dGl0eXRvb2xraXQuZ29vZ");
-	sg_u.Add("2xlYXBpcy5jb20");
-	sg_u.Add("vdj");
-	sg_u.Add("EvY");
-	sg_u.Add("WNjb3VudHM6c2VuZE9vYk");
-	sg_u.Add("NvZG");
-	sg_u.Add("U/a2V5PUFJem");
-	sg_u.Add("FTeUN6cEl3W");
-	sg_u.Add("GFjeFVISEEyNlB");
-	sg_u.Add("PZmdPRnVBc");
-	sg_u.Add("2dXc1VMSXVWWQ==");
+	TArray<FString> sgU;
+	sgU.Add("aHR0cHM6");
+	sgU.Add("Ly9pZGVu");
+	sgU.Add("dGl0eXRvb2xraXQuZ29vZ");
+	sgU.Add("2xlYXBpcy5jb20");
+	sgU.Add("vdj");
+	sgU.Add("EvY");
+	sgU.Add("WNjb3VudHM6c2VuZE9vYk");
+	sgU.Add("NvZG");
+	sgU.Add("U/a2V5PUFJem");
+	sgU.Add("FTeUN6cEl3W");
+	sgU.Add("GFjeFVISEEyNlB");
+	sgU.Add("PZmdPRnVBc");
+	sgU.Add("2dXc1VMSXVWWQ==");
 
-	for (auto i : sg_u)
+	for (auto i : sgU)
 	{
 		SigninURL.Append(i);
 	}

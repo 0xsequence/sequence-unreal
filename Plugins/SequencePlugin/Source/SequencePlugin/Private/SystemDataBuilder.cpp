@@ -310,9 +310,9 @@ void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* walle
 	//all of this we get from auth!
 	this->systemDataGuard.Lock();
 	this->systemData.user_data.public_address = publicAddress;
-	this->systemData.user_data.account_id = this->sqncMngr->getUserDetails().account_id;
+	this->systemData.user_data.account_id = this->sqncMngr->getUserDetails().accountID;
 	this->systemData.user_data.email = this->sqncMngr->getUserDetails().email;
-	this->systemData.user_data.email_service = this->sqncMngr->getUserDetails().email_service;
+	this->systemData.user_data.email_service = this->sqncMngr->getUserDetails().emailService;
 	this->systemData.user_data.username = this->sqncMngr->getUserDetails().username;
 	FNetwork_BE default_network;
 	default_network.is_default = true;

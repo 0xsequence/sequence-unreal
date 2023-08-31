@@ -22,8 +22,8 @@ struct FUserDetails
 public:
 	FString username = "";
 	FString email = "";
-	FString email_service = "";
-	int32 account_id = -1;
+	FString emailService = "";
+	int32 accountID = -1;
 };
 
 UCLASS()
@@ -32,27 +32,27 @@ class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBacken
 	GENERATED_BODY()
 
 private:
-	FString glb_PublicAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";//this is the signed in public addr
-	int64 glb_ChainID = 137; //this is the chain we are currently using
+	FString publicAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";//this is the signed in public addr
+	int64 chainID = 137; //this is the chain we are currently using
 
-	FString prvt_key; // private key for signin
-	FString pblc_key; // public key for signin
-	TArray<FString> hex_data;//this is our LUT of hexidecimal data!
+	FString privateKey; // private key for signin
+	FString publicKey; // public key for signin
+	TArray<FString> hexDataList;//this is our LUT of hexidecimal data!
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;//indexer ref!
 
-	UObjectHandler* request_handler;//going to be reworked into an image handler
+	UObjectHandler* requestHandler;//going to be reworked into an image handler
 
 	UAuth* auth;//for auth handling
 	
 	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
 	bool ready = false;
-	FString recv_block_num;
-	int32 recv_id;
-	FString recv_block_hsh;
-	FString user_email;
-	int32 account_id;
-	FString email_service;
+	FString receiveBlockNumber;
+	int32 receiveID;
+	FString receiveBlockHash;
+	FString userEmail;
+	int32 accountID;
+	FString emailService;
 	FString username;
 	//end of signin variables
 
@@ -139,9 +139,9 @@ public:
 	* in an async manner
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
-		void UpdateSystemData(const FSystemData_BE &system_data);
+		void UpdateSystemData(const FSystemData_BE &systemData);
 
-		void UpdateSystemTestableData(const FSystemData_BE& system_data);
+		void UpdateSystemTestableData(const FSystemData_BE& systemData);
 
 	/*
 	* Used to initate the signin process from the frontend
@@ -158,7 +158,7 @@ public:
 	* Used to tell the frontend that the signin process has been initiated and the code here is present!
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
-		void UpdateSignin(const FString &oob_code);
+		void UpdateSignin(const FString &oobCode);
 
 	/*
 	* Used to initalize a send transaction!
@@ -173,7 +173,7 @@ public:
 	* Used to let the frontend know if a txn went through or not!
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
-		void UpdateTxn(FTxnCallback_BE txn_callback);
+		void UpdateTxn(FTxnCallback_BE txnCallback);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate);
@@ -217,7 +217,7 @@ private:
 	* Fetches this data from the sequence app
 	* @Return the block hash we want!
 	*/
-	FString CreateHashRequest(FString blk_num, int32 id);
+	FString CreateHashRequest(FString blockNumber, int32 id);
 
 	/*
 	* Sets up the signin request body
