@@ -83,21 +83,21 @@ public:
 	* Used to send data to clipboard for ease of use!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
-		void Copy_To_Clipboard(FString data);
+		void CopyToClipboard(FString data);
 
 	/*
 	* Used to get data from clipboard for ease of use
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		FString Get_From_Clipboard();
+		FString GetFromClipboard();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
-		FString get_transaction_hash(FTransaction_FE Transaction);
+		FString GetTransactionHash(FTransaction_FE Transaction);
 
 	//Used to get the stored auth credentials encrypt them and send them up
 	//to be stored in a game save object
 	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
-		FSecureKey getSecureStorableAuth();
+		FSecureKey GetSecureStorableAuth();
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
@@ -105,10 +105,10 @@ public:
 
 	//these are the 2 receive functions we have
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
-		void receiveCoin(FCoin_BE coin);
+		void ReceiveCoin(FCoin_BE coin);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
-		void receiveNFT(FNFT_Master_BE nft);
+		void ReceiveNFT(FNFT_Master_BE nft);
 	/*
 	* Used to initiate a stored authentication call from the frontend
 	*/
@@ -125,7 +125,7 @@ public:
 	* 
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Authentication")
-		void update_authentication(bool authenticated);
+		void UpdateAuthentication(bool authenticated);
 
 	/*
 	* Used to init. a call to fetch all system data needed by frontend in an async manner
@@ -139,7 +139,7 @@ public:
 	* in an async manner
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "SystemData")
-		void update_system_data(const FSystemData_BE &system_data);
+		void UpdateSystemData(const FSystemData_BE &system_data);
 
 		void UpdateSystemTestableData(const FSystemData_BE& system_data);
 
@@ -158,7 +158,7 @@ public:
 	* Used to tell the frontend that the signin process has been initiated and the code here is present!
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
-		void update_signin(const FString &oob_code);
+		void UpdateSignin(const FString &oob_code);
 
 	/*
 	* Used to initalize a send transaction!
@@ -167,13 +167,13 @@ public:
 		void InitCoinSendTxn(FTransaction_FE TransactionData);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
-		void init_nft_send_txn(FTransaction_FE TransactionData);
+		void InitNFTSendTxn(FTransaction_FE TransactionData);
 
 	/*
 	* Used to let the frontend know if a txn went through or not!
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
-		void update_txn(FTxnCallback_BE txn_callback);
+		void UpdateTxn(FTxnCallback_BE txn_callback);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate);
@@ -182,10 +182,10 @@ public:
 		void InitGetUpdateTokenData(TArray<FID_BE> TokensToUpdate);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
-		void updateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
+		void UpdateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
-		void updateTokenData(const TArray<FItemPrice_BE> &updatedTokenValues);
+		void UpdateTokenData(const TArray<FItemPrice_BE> &updatedTokenValues);
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
