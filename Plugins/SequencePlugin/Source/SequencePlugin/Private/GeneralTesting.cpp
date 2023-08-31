@@ -117,9 +117,8 @@ void AGeneralTesting::TestSequence() const
 void AGeneralTesting::testSystemDataBuilder()
 {//testing system data builder
 	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
-	UIndexer* indexer = NewObject<UIndexer>();
 	SequenceAPI::FSequenceWallet* wallet = new SequenceAPI::FSequenceWallet();
-	sysBuilder->testGOTokenData(indexer,wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
+	sysBuilder->testGOTokenData(wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
 }
 
 // Called every frame

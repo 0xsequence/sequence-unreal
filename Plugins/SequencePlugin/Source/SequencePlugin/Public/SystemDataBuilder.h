@@ -20,7 +20,6 @@ private:
 	ASequenceBackendManager* sqncMngr;
 	mutable FCriticalSection masterGuard;
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
-	UIndexer* GIndexer;
 
 	UIndexer* tIndexer;
 	UIndexer* hIndexer;
@@ -30,7 +29,8 @@ private:
 	FString GPublicAddress;
 	FString GWalletAddress;
 	FString qr_url;
-
+	
+	mutable FCriticalSection systemDataGuard;
 	FSystemData_BE systemData;
 	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
 
@@ -92,8 +92,8 @@ public:
 	USystemDataBuilder();
 	~USystemDataBuilder();
 
-	void initBuildSystemData(UIndexer * indexer, SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
+	void initBuildSystemData(SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
 
-	void testGOTokenData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress);
+	void testGOTokenData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress);
 
 };
