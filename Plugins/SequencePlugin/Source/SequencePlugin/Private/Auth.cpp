@@ -3,6 +3,7 @@
 
 #include "Auth.h"
 #include "JsonObjectConverter.h"
+#include "Indexer/IndexerSupport.h"
 #include "SequenceEncryptor.h"
 
 
@@ -23,7 +24,6 @@ void UAuth::SetNewSecureStorableAuth(FStoredAuthState_BE NewAuthData)
 bool UAuth::SetSecureStorableAuth(FSecureKey SecureStoredAuth)
 {
 	bool bSucceeded = false;
-
 	//decrypt the auth data
 	const FString DecryptedJsonAuth = USequenceEncryptor::decrypt(SecureStoredAuth.ky, SecureStoredAuth.of);
 	TSharedPtr<FJsonObject> JSONAuthObj = MakeShareable<FJsonObject>(new FJsonObject);
@@ -55,8 +55,9 @@ bool UAuth::SetSecureStorableAuth(FSecureKey SecureStoredAuth)
 FSecureKey UAuth::GetSecureStorableAuth() const
 {
 	FSecureKey Ret;
-	FString JSONAuthString; 
-	if (FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(this->auth, JSONAuthString))
+	FStoredAuthState_BE storedState = this->auth;
+	FString JSONAuthString = "";
+	if (FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(storedState, JSONAuthString))
 	{
 		Ret.of = JSONAuthString.Len();//store the offset
 		Ret.ky = USequenceEncryptor::encrypt(JSONAuthString);//encrypt and store the jsonAuthObject
@@ -65,6 +66,5 @@ FSecureKey UAuth::GetSecureStorableAuth() const
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Failed to convert stored auth data into a jsonAuthString]"));
 	}
-
 	return Ret;
 }

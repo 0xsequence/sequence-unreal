@@ -31,7 +31,6 @@ class SEQUENCEPLUGIN_API UAuth : public UObject
 public:
 	//Auth data
 	FStoredAuthState_BE auth;
-
 	/*
 	* Used for setting up fresh auth data for this session,
 	* used in the case when we had no auth data stored
