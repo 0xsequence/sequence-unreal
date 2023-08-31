@@ -355,7 +355,7 @@ void USystemDataBuilder::OnDone()
 
 	this->systemDataGuard.Lock();
 	UE_LOG(LogTemp, Display, TEXT("Before Calling update_system_data"));
-	this->sqncMngr->update_system_data(this->systemData);
+	this->sqncMngr->UpdateSystemData(this->systemData);
 	UE_LOG(LogTemp, Display, TEXT("After Calling update_system_data"));
 	this->systemDataGuard.Unlock();
 }

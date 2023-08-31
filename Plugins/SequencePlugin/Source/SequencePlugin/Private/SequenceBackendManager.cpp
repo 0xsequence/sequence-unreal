@@ -73,14 +73,14 @@ void ASequenceBackendManager::Tick(float DeltaTime)
 /*
 	Used to copy data to the systems clipboard!
 */
-void ASequenceBackendManager::Copy_To_Clipboard(FString data)
+void ASequenceBackendManager::CopyToClipboard(FString data)
 {
 	//rebuild these 2 functions using #ifdefs for platforms IOS, Android, Mac, Windows to clear out this warning!
 	//works for now
 	FGenericPlatformMisc::ClipboardCopy(*data);
 }
 
-FString ASequenceBackendManager::Get_From_Clipboard()
+FString ASequenceBackendManager::GetFromClipboard()
 {
 	FString retData;
 	//gets data from clipboard but it comes back invalid? this will be broken until we move up engine versions (hopefully epic actually implements a real solution)
@@ -88,12 +88,12 @@ FString ASequenceBackendManager::Get_From_Clipboard()
 	return retData;
 }
 
-FString ASequenceBackendManager::get_transaction_hash(FTransaction_FE Transaction)
+FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 {
 	return Transaction.ID();
 }
 
-FSecureKey ASequenceBackendManager::getSecureStorableAuth()
+FSecureKey ASequenceBackendManager::GetSecureStorableAuth()
 {
 	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
 }
@@ -117,7 +117,7 @@ void ASequenceBackendManager::RandomReceive()
 			RCoin.Coin_Long_Name = "NewRandomCoin:";
 			RCoin.Coin_Long_Name.AppendInt(FMath::RandRange(0,1000));
 		}
-		this->receiveCoin(RCoin);
+		this->ReceiveCoin(RCoin);
 	}
 	else
 	{//nft
@@ -138,7 +138,7 @@ void ASequenceBackendManager::RandomReceive()
 			RNft.Collection_Short_Name = "Tst";
 		}
 
-		this->receiveNFT(RNft);
+		this->ReceiveNFT(RNft);
 	}
 	FTimerHandle TimerTestReceive;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
@@ -158,7 +158,7 @@ void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& sys
 	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
 	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate, 60, false);
 
-	this->update_system_data(system_data);
+	this->UpdateSystemData(system_data);
 }
 
 void ASequenceBackendManager::InitSystemData()
@@ -193,7 +193,7 @@ void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
 		FTxnCallback_BE Callback;
 		Callback.good_txn = true;
 		Callback.txn_hash_id = ID;
-		this->update_txn(Callback);
+		this->UpdateTxn(Callback);
 	};
 
 	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const FSequenceError Error)
@@ -202,13 +202,13 @@ void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
 		FTxnCallback_BE Callback;
 		Callback.good_txn = false;
 		Callback.txn_hash_id = ID;
-		this->update_txn(Callback);
+		this->UpdateTxn(Callback);
 	};
 
 	this->sequenceWallet->SendTransactionWithCallback(TransactionData,SendSuccess,SendFailure);
 }
 
-void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE TransactionData)
+void ASequenceBackendManager::InitNFTSendTxn(FTransaction_FE TransactionData)
 {
 	UE_LOG(LogTemp, Display, TEXT("[NFT Txn Request Initiated]"));
 	const TSuccessCallback<FString> SendSuccess = [this](const FString ID)
@@ -216,7 +216,7 @@ void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE TransactionData)
 		FTxnCallback_BE Callback;
 		Callback.good_txn = true;
 		Callback.txn_hash_id = ID;
-		this->update_txn(Callback);
+		this->UpdateTxn(Callback);
 	};
 
 	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const FString ID, const FSequenceError Error)
@@ -225,7 +225,7 @@ void ASequenceBackendManager::init_nft_send_txn(FTransaction_FE TransactionData)
 		FTxnCallback_BE callback;
 		callback.good_txn = false;
 		callback.txn_hash_id = ID;
-		this->update_txn(callback);
+		this->UpdateTxn(callback);
 	};
 
 	this->sequenceWallet->SendTransactionWithCallback(TransactionData, SendSuccess, SendFailure);
@@ -247,14 +247,14 @@ void ASequenceBackendManager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdat
 	
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedCoinData)
 	{
-		this->updateCoinData(updatedCoinData);
+		this->UpdateCoinData(updatedCoinData);
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated coin data]"));
 		TArray<FItemPrice_BE> bList;
-		this->updateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
+		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
 	this->sequenceWallet->getUpdatedCoinPrices(CoinsToUpdate,GenericSuccess,GenericFailure);
@@ -266,14 +266,14 @@ void ASequenceBackendManager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpda
 	UE_LOG(LogTemp, Display, TEXT("[Update NFT Fetch INITIATED]"));
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
 	{
-		this->updateTokenData(updatedTokenData);
+		this->UpdateTokenData(updatedTokenData);
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated token data]"));
 		TArray<FItemPrice_BE> bList;
-		this->updateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
+		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
 	this->sequenceWallet->getUpdatedCollectiblePrices(TokensToUpdate, GenericSuccess, GenericFailure);
