@@ -78,6 +78,24 @@ void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePt
 	}
 }
 
+TArray<FString> UObjectHandler::filterURLs(TArray<FString> urls)
+{
+	TArray<FString> filteredUrls;
+
+	for (FString url : urls)
+	{//note we don't support .svg or .gif, and we should filter out empty / invalid urls
+		bool valid = true;
+		valid &= !url.Contains(".gif");
+		valid &= !url.Contains(".svg");
+		if (valid && url.Len() > 7 && (url.Contains("http://") || url.Contains("https://")))
+		{
+			filteredUrls.Add(url);
+		}
+	}
+
+	return filteredUrls;
+}
+
 bool UObjectHandler::check_raw_cache(FString URL, TArray<uint8>* raw_data)
 {
 	bool cache_hit = this->cache.Contains(URL);
@@ -174,8 +192,10 @@ void UObjectHandler::requestImage(FString URL)
 
 void UObjectHandler::requestImages(TArray<FString> URLs)
 {
-	this->syncer->incN(URLs.Num());//inc for all requests
-	for (FString url : URLs)
+	//this will filter out bad urls saving on compute
+	TArray<FString> filteredUrls = this->filterURLs(URLs);
+	this->syncer->incN(filteredUrls.Num());//inc for all requests
+	for (FString url : filteredUrls)
 	{
 		this->request_raw_base(url);
 	}

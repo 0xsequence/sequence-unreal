@@ -50,6 +50,12 @@ private:
 	USyncer* syncer;
 
 	/*
+	* Attempts to filter out bad urls to save on processing time
+	* Checks for http:// & https:// and length greater than 7
+	*/
+	TArray<FString> filterURLs(TArray<FString> urls);
+
+	/*
 	* Checks the cache to see if we already have the data needed in it
 	* if so fetch it from the cache.
 	* @return whether we had a cache hit or a cache miss

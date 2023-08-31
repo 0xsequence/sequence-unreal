@@ -20,6 +20,10 @@ private:
 	ASequenceBackendManager* sqncMngr;
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
 	UIndexer* GIndexer;
+
+	UIndexer* tIndexer;
+	UIndexer* hIndexer;
+
 	SequenceAPI::FSequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
