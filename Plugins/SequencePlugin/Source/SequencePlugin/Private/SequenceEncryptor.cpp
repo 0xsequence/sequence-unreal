@@ -10,9 +10,9 @@
 * for the time being I include this key for testing but in release builds no key will be provided and
 * NO state will be written unless a valid key is provided!
 */
-FString USequenceEncryptor::getStoredKey()
+FString USequenceEncryptor::GetStoredKey()
 {//***Replace this implementation with your own proper implementation***
-	FString ret;
+	FString Ret;
 
 //this is for testing only a proper implementation needs to be provided for this function to work!
 //#if UE_EDITOR //remove these comments for later when we ship this we want to force out these errors!
@@ -32,14 +32,14 @@ FString USequenceEncryptor::getStoredKey()
 	{
 		eK += kP;
 	}
-	FBase64::Decode(eK, ret);
+	FBase64::Decode(eK, Ret);
 //#endif // UE_EDITOR
-	return ret;
+	return Ret;
 }
 
-FString USequenceEncryptor::encrypt(FString payload)
+FString USequenceEncryptor::Encrypt(FString Payload)
 {
-	FString key = getStoredKey();
+	FString key = GetStoredKey();
 	if (key.Len() < 32)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
@@ -50,11 +50,11 @@ FString USequenceEncryptor::encrypt(FString payload)
 	uint8* keyBlob = new uint8[keySize];
 	StringToBytes(key, keyBlob, keySize);
 	
-	uint32 size = payload.Len();//computing size and respecting block offsets here!
+	uint32 size = Payload.Len();//computing size and respecting block offsets here!
 	size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));
 
 	uint8* payloadBlob = new uint8[size];
-	StringToBytes(payload, payloadBlob, payload.Len());
+	StringToBytes(Payload, payloadBlob, Payload.Len());
 
 	FAES::EncryptData(payloadBlob, size, keyBlob, keySize);//encrypt
 	FString encryptedData = BytesToString(payloadBlob, size);//get into usable form for storage
@@ -66,9 +66,9 @@ FString USequenceEncryptor::encrypt(FString payload)
 	return encryptedData;
 }
 
-FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength)
+FString USequenceEncryptor::Decrypt(FString Payload,int32 PayloadLength)
 {
-	FString key = getStoredKey();
+	FString key = GetStoredKey();
 	if (key.Len() < 32)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
@@ -79,16 +79,16 @@ FString USequenceEncryptor::decrypt(FString payload,int32 payloadLength)
 	uint8* keyBlob = new uint8[keySize];
 	StringToBytes(key, keyBlob, keySize);
 
-	uint32 size = payload.Len();
+	uint32 size = Payload.Len();
 	size = size + (FAES::AESBlockSize - (size % FAES::AESBlockSize));//align size with block size!
 	uint8 * payloadBlob = new uint8[size];
 
-	StringToBytes(payload, payloadBlob, payload.Len());
+	StringToBytes(Payload, payloadBlob, Payload.Len());
 	FAES::DecryptData(payloadBlob, size, keyBlob, keySize);
 	FString decryptedData = BytesToString(payloadBlob, size);
 
 	//because post encryption we can have some fat left, we trim it
-	decryptedData = decryptedData.Left(payloadLength);
+	decryptedData = decryptedData.Left(PayloadLength);
 
 	delete [] payloadBlob;
 	delete [] keyBlob;

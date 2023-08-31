@@ -22,11 +22,11 @@ private:
 public:
 
 	FOnDoneSignature OnDoneDelegate;
-	void setupForTesting(FString name);
-	void reset();//resets active request counter to zero and fires OnDone to clear everything out
-	void inc();
-	void incN(int32 n);
-	void dec();
-	void decN(int32 n);
+	void SetupForTesting(FString Name);
+	void Reset();//resets active request counter to zero and fires OnDone to clear everything out
+	void Increment();
+	void Increase(int32 Amount);
+	void Decrement();
+	void Decrease(int32 Amount);
 	
 };
