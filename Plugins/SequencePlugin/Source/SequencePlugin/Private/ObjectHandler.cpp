@@ -23,7 +23,7 @@ void UObjectHandler::OnDone()
 void UObjectHandler::setup(bool raw_cache_enabled)
 {
 	this->syncer = NewObject<USyncer>();
-	this->syncer->setupForTesting("ImageHandler_"+this->GetName());
+	this->syncer->SetupForTesting("ImageHandler_"+this->GetName());
 	//binding will occur here
 	//need to bind to OnDone
 	this->syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
@@ -47,7 +47,7 @@ void UObjectHandler::storeImageData(UTexture2D* image, FString url)
 {
 	this->storedResponses.Add(TPair<FString,UTexture2D*>(url,image));
 	UE_LOG(LogTemp, Display, TEXT("[Image stored]"));
-	this->syncer->dec();
+	this->syncer->Decrement();
 	//this is when we would consider a response satisfied
 }
 
@@ -75,7 +75,7 @@ void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePt
 			UE_LOG(LogTemp, Error, TEXT("Request failed."));
 		}
 		//in the event we failed or errored out we should decrement
-		this->syncer->dec();
+		this->syncer->Decrement();
 	}
 }
 
@@ -188,7 +188,7 @@ bool UObjectHandler::request_raw_base(FString URL)
 
 void UObjectHandler::requestImage(FString URL)
 {
-	this->syncer->inc();
+	this->syncer->Increment();
 	this->request_raw_base(URL);
 }
 
@@ -196,7 +196,7 @@ void UObjectHandler::requestImages(TArray<FString> URLs)
 {
 	//this will filter out bad urls saving on compute
 	TArray<FString> filteredUrls = this->filterURLs(URLs);
-	this->syncer->incN(filteredUrls.Num());//inc for all requests
+	this->syncer->Increase(filteredUrls.Num());//inc for all requests
 	for (FString url : filteredUrls)
 	{
 		this->request_raw_base(url);

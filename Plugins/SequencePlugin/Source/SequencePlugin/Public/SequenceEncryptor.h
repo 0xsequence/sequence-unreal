@@ -21,7 +21,7 @@ private:
 	* NO state will be written unless a valid key is provided!
 	*/
 	//***Replace this implementation with your own proper implementation***
-	static FString getStoredKey();
+	static FString GetStoredKey();
 
 public:
 
@@ -34,7 +34,7 @@ public:
 	* 
 	* @Return the AES encrypted data
 	*/
-	static FString encrypt(FString payload);
+	static FString Encrypt(FString Payload);
 
 	/*
 	* Decryptor built on Unreals FAES encryptor
@@ -48,5 +48,5 @@ public:
 	* 
 	* @Return the decrypted data
 	*/
-	static FString decrypt(FString payload,int32 payloadLength);
+	static FString Decrypt(FString Payload,int32 PayloadLength);
 };

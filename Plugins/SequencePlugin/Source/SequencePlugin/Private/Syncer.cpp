@@ -3,12 +3,12 @@
 
 #include "Syncer.h"
 
-void USyncer::setupForTesting(FString name)
+void USyncer::SetupForTesting(FString Name)
 {
-	this->syncerName = name;
+	this->syncerName = Name;
 }
 
-void USyncer::reset()
+void USyncer::Reset()
 {
 	this->Guard.Lock();
 	this->requestCount = 0;
@@ -17,7 +17,7 @@ void USyncer::reset()
 	this->Guard.Unlock();
 }
 
-void USyncer::inc()
+void USyncer::Increment()
 {
 	this->Guard.Lock();
 	this->requestCount++;
@@ -25,15 +25,15 @@ void USyncer::inc()
 	this->Guard.Unlock();
 }
 
-void USyncer::incN(int32 n)
+void USyncer::Increase(int32 Amount)
 {
 	this->Guard.Lock();
-	this->requestCount += n;
-	UE_LOG(LogTemp, Warning, TEXT("INC %d Syncer: [%s] rCount: [%d]"),n,*this->syncerName, this->requestCount);
+	this->requestCount += Amount;
+	UE_LOG(LogTemp, Warning, TEXT("INC %d Syncer: [%s] rCount: [%d]"),Amount,*this->syncerName, this->requestCount);
 	this->Guard.Unlock();
 }
 
-void USyncer::dec()
+void USyncer::Decrement()
 {
 	this->Guard.Lock();
 	this->requestCount = FMath::Max(this->requestCount-1, 0);//clamp to stop having values < 0
@@ -45,11 +45,11 @@ void USyncer::dec()
 	this->Guard.Unlock();
 }
 
-void USyncer::decN(int32 n)
+void USyncer::Decrease(int32 Amount)
 {
 	this->Guard.Lock();
-	this->requestCount = FMath::Max(this->requestCount - n, 0);//clamp to stop having values < 0
-	UE_LOG(LogTemp, Warning, TEXT("DEC %d Syncer: [%s] rCount: [%d]"),n,*this->syncerName, this->requestCount);
+	this->requestCount = FMath::Max(this->requestCount - Amount, 0);//clamp to stop having values < 0
+	UE_LOG(LogTemp, Warning, TEXT("DEC %d Syncer: [%s] rCount: [%d]"),Amount,*this->syncerName, this->requestCount);
 	if (this->requestCount == 0)
 	{
 		this->OnDoneDelegate.ExecuteIfBound();

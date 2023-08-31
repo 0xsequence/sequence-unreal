@@ -25,7 +25,7 @@ bool UAuth::SetSecureStorableAuth(FSecureKey SecureStoredAuth)
 {
 	bool bSucceeded = false;
 	//decrypt the auth data
-	const FString DecryptedJsonAuth = USequenceEncryptor::decrypt(SecureStoredAuth.ky, SecureStoredAuth.of);
+	const FString DecryptedJsonAuth = USequenceEncryptor::Decrypt(SecureStoredAuth.ky, SecureStoredAuth.of);
 	TSharedPtr<FJsonObject> JSONAuthObj = MakeShareable<FJsonObject>(new FJsonObject);
 	FStoredAuthState_BE StoredAuth;
 
@@ -60,7 +60,7 @@ FSecureKey UAuth::GetSecureStorableAuth() const
 	if (FJsonObjectConverter::UStructToJsonObjectString<FStoredAuthState_BE>(storedState, JSONAuthString))
 	{
 		Ret.of = JSONAuthString.Len();//store the offset
-		Ret.ky = USequenceEncryptor::encrypt(JSONAuthString);//encrypt and store the jsonAuthObject
+		Ret.ky = USequenceEncryptor::Encrypt(JSONAuthString);//encrypt and store the jsonAuthObject
 	}
 	else
 	{

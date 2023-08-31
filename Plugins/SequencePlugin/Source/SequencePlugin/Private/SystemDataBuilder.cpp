@@ -11,11 +11,11 @@ USystemDataBuilder::USystemDataBuilder()
 	this->tIndexer = NewObject<UIndexer>();
 	this->hIndexer = NewObject<UIndexer>();
 	this->masterSyncer = NewObject<USyncer>();
-	this->masterSyncer->setupForTesting("master");
+	this->masterSyncer->SetupForTesting("master");
 	this->getItemDataSyncer = NewObject<USyncer>();
-	this->getItemDataSyncer->setupForTesting("item");
+	this->getItemDataSyncer->SetupForTesting("item");
 	this->getTxnHistorySyncer = NewObject<USyncer>();
-	this->getTxnHistorySyncer->setupForTesting("history");
+	this->getTxnHistorySyncer->SetupForTesting("history");
 	this->QRImageHandler = NewObject<UObjectHandler>();
 	this->QRImageHandler->setupCustomFormat(true,EImageFormat::GrayscaleJPEG);//QR codes have special encodings!
 	this->tokenImageHandler = NewObject<UObjectHandler>();
@@ -30,7 +30,7 @@ USystemDataBuilder::~USystemDataBuilder()
 void USystemDataBuilder::decMasterSyncer()
 {
 	this->masterGuard.Lock();
-	this->masterSyncer->dec();
+	this->masterSyncer->Decrement();
 	this->masterGuard.Unlock();
 }
 
@@ -95,7 +95,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 {
 	//this->getItemDataSyncer->OnDoneDelegate.BindUFunction(this,"OnGetItemDataDone");
-	this->getItemDataSyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
+	this->getItemDataSyncer->Increase(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
 	TArray<FString> urlList;
@@ -137,7 +137,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			}
 			this->systemDataGuard.Unlock();
 			this->itemGuard.Lock();
-			this->getItemDataSyncer->dec();
+			this->getItemDataSyncer->Decrement();
 			this->itemGuard.Unlock();
 		});
 	this->tokenImageHandler->requestImages(urlList);//init the requests!
@@ -164,7 +164,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			lclUItems.RemoveAt(0);
 		}//while
 		this->itemGuard.Lock();
-		this->getItemDataSyncer->dec();
+		this->getItemDataSyncer->Decrement();
 		this->itemGuard.Unlock();
 	};//lambda
 
@@ -188,7 +188,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			lclUItems.RemoveAt(0);
 		}//while
 		this->itemGuard.Lock();
-		this->getItemDataSyncer->dec();
+		this->getItemDataSyncer->Decrement();
 		this->itemGuard.Unlock();
 	};//lambda
 
@@ -196,7 +196,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
 		this->itemGuard.Lock();
-		this->getItemDataSyncer->dec();
+		this->getItemDataSyncer->Decrement();
 		this->itemGuard.Unlock();
 	};
 
@@ -320,7 +320,7 @@ void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* walle
 	this->systemData.user_data.networks.Add(default_network);
 	this->systemDataGuard.Unlock();
 	//ASYNC Operations next!
-	this->masterSyncer->incN(4);//+1 for each General Operation you have here!
+	this->masterSyncer->Increase(4);//+1 for each General Operation you have here!
 	this->initGetQRCode();
 	this->initGetTokenData();
 	this->initGetTxnHistory();
@@ -341,7 +341,7 @@ void USystemDataBuilder::testGOTokenData(SequenceAPI::FSequenceWallet* wallet, i
 	this->GPublicAddress = publicAddress;
 	this->masterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
-	this->masterSyncer->incN(3);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
+	this->masterSyncer->Increase(3);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
 	this->initGetTokenData();
 	this->initGetQRCode();
 	this->initGetTxnHistory();//test the history fetching
@@ -362,7 +362,7 @@ void USystemDataBuilder::OnDone()
 
 void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
 {
-	this->getTxnHistorySyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
+	this->getTxnHistorySyncer->Increase(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
 	TArray<FString> urlList;
@@ -416,7 +416,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 			}//for
 			this->systemDataGuard.Unlock();
 			this->historyGuard.Lock();
-			this->getTxnHistorySyncer->dec();
+			this->getTxnHistorySyncer->Decrement();
 			this->historyGuard.Unlock();
 		});
 	this->HistoryImageHandler->requestImages(urlList);//init the requests!
@@ -446,7 +446,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 			lclUItems.RemoveAt(0);
 		}//while
 		this->historyGuard.Lock();
-		this->getTxnHistorySyncer->dec();
+		this->getTxnHistorySyncer->Decrement();
 		this->historyGuard.Unlock();
 	};//lambda
 
@@ -474,7 +474,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 			lclUItems.RemoveAt(0);
 		}//while
 		this->historyGuard.Lock();
-		this->getTxnHistorySyncer->dec();
+		this->getTxnHistorySyncer->Decrement();
 		this->historyGuard.Unlock();
 	};//lambda
 
@@ -482,7 +482,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error getting updated Item Prices:\n[%s]"), *Error.Message);
 		this->historyGuard.Lock();
-		this->getTxnHistorySyncer->dec();
+		this->getTxnHistorySyncer->Decrement();
 		this->historyGuard.Unlock();
 	};
 	this->walletGuard.Lock();
