@@ -110,6 +110,7 @@ void UIndexer::HTTPPost(const int64& chainID,const FString& endpoint,const FStri
 	http_post_req->SetVerb("POST");
 	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetTimeout(30);
 	http_post_req->SetURL(this->Url(chainID, endpoint));
 	http_post_req->SetContentAsString(args);//args will need to be a json object converted to a string
 

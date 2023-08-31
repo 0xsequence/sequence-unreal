@@ -180,7 +180,7 @@ bool UObjectHandler::request_raw_base(FString URL)
 	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
-	http_post_req->SetTimeout(5);
+	http_post_req->SetTimeout(15);
 	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::handle_request_raw);
 	http_post_req->ProcessRequest();
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;

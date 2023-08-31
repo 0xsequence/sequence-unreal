@@ -11,6 +11,7 @@
 URequestHandler* URequestHandler::PrepareRequest()
 {
 	Request = FHttpModule::Get().CreateRequest();
+	Request->SetTimeout(30);
 	return this;
 }
 
