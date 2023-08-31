@@ -120,6 +120,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		[this]()
 		{
 			TMap<FString, UTexture2D*> images = this->tokenImageHandler->getProcessedImages();
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{//index directly into systemData rather than jumping around
 				if (images.Contains(this->systemData.user_data.coins[i].Coin_Symbol_URL))
@@ -134,6 +135,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 				if (images.Contains(this->systemData.user_data.nfts[i].Collection_Icon_Url))
 					this->systemData.user_data.nfts[i].Collection_Icon = *images.Find(this->systemData.user_data.nfts[i].Collection_Icon_Url);
 			}
+			this->systemDataGuard.Unlock();
 			this->itemGuard.Lock();
 			this->getItemDataSyncer->dec();
 			this->itemGuard.Unlock();
@@ -149,6 +151,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		while (lclUItems.Num() > 0)
 		{
 			itemPrice = lclUItems[0];
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{
 				if (itemPrice.Token == this->systemData.user_data.coins[i].itemID)
@@ -157,6 +160,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 					break;
 				}
 			}
+			this->systemDataGuard.Unlock();
 			lclUItems.RemoveAt(0);
 		}//while
 		this->itemGuard.Lock();
@@ -172,6 +176,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 		while (lclUItems.Num() > 0)
 		{
 			itemPrice = lclUItems[0];
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
 			{//index directly into systemData rather than asigning it to some inbetween party
 				if (itemPrice.Token == this->systemData.user_data.nfts[i].NFT_Details.itemID)
@@ -179,6 +184,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 					this->systemData.user_data.nfts[i].Value = itemPrice.price.value;
 				}
 			}
+			this->systemDataGuard.Unlock();
 			lclUItems.RemoveAt(0);
 		}//while
 		this->itemGuard.Lock();
@@ -210,8 +216,10 @@ void USystemDataBuilder::initGetTokenData()
 	{//once indexer responds!
 		//only thing I can do is apply compression earlier for a cleaner setup
 		FUpdatableItemDataArgs semiParsedTokenBalance = UIndexerSupport::extractFromTokenBalances(tokenBalances);
+		this->systemDataGuard.Lock();
 		this->systemData.user_data.coins = semiParsedTokenBalance.semiParsedBalances.coins;
 		this->systemData.user_data.nfts = this->compressNFTData(semiParsedTokenBalance.semiParsedBalances.nfts);
+		this->systemDataGuard.Unlock();
 		this->initGetItemData(semiParsedTokenBalance);
 	};
 
@@ -235,7 +243,9 @@ void USystemDataBuilder::initGetQRCode()
 			TMap<FString, UTexture2D*> images = this->QRImageHandler->getProcessedImages();
 			if (images.Contains(this->qr_url))
 			{
+				this->systemDataGuard.Lock();
 				this->systemData.user_data.public_qr_address = *images.Find(this->qr_url);//here we assign the QRCode we received!
+				this->systemDataGuard.Unlock();
 			}
 			else
 			{//log error with getting QR code
@@ -265,7 +275,9 @@ void USystemDataBuilder::initGetContactData()
 {
 	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [&, this](const TArray<FContact_BE> contacts)
 	{//assign contact data!
+		this->systemDataGuard.Lock();
 		this->systemData.user_data.contacts = contacts;
+		this->systemDataGuard.Unlock();
 		this->decMasterSyncer();
 	};
 
@@ -281,9 +293,8 @@ void USystemDataBuilder::initGetContactData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::initBuildSystemData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
+void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
 {
-	this->GIndexer = indexer;
 	this->GWallet = wallet;
 	this->GChainId = chainId;
 	this->GPublicAddress = publicAddress;
@@ -316,9 +327,8 @@ void USystemDataBuilder::OnDoneTesting()
 	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
 }
 
-void USystemDataBuilder::testGOTokenData(UIndexer* indexer, SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress)
+void USystemDataBuilder::testGOTokenData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress)
 {
-	this->GIndexer = indexer;
 	this->GWallet = wallet;
 	this->GChainId = chainId;
 	this->GPublicAddress = publicAddress;
@@ -334,13 +344,15 @@ void USystemDataBuilder::OnDone()
 {
 	this->masterGuard.Lock();
 	this->masterSyncer->OnDoneDelegate.Unbind();//for safety reasons!
-	this->sqncMngr->update_system_data(this->systemData);
 	this->masterGuard.Unlock();
+
+	this->systemDataGuard.Lock();
+	this->sqncMngr->update_system_data(this->systemData);
+	this->systemDataGuard.Unlock();
 }
 
 void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
 {
-	//this->getTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
 	this->getTxnHistorySyncer->incN(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
 	//sequenceAPI can get all tokens and coins values in 2 calls
 	//we can get all images in 1 call with Object Handler now!
@@ -367,6 +379,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		{
 			TMap<FString, UTexture2D*> images = this->HistoryImageHandler->getProcessedImages();
 
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
 			{				
 				for (int j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_coins.Num(); j++)
@@ -392,6 +405,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 					}
 				}
 			}//for
+			this->systemDataGuard.Unlock();
 			this->historyGuard.Lock();
 			this->getTxnHistorySyncer->dec();
 			this->historyGuard.Unlock();
@@ -407,7 +421,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		while (lclUItems.Num() > 0)
 		{
 			itemPrice = lclUItems[0];
-
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
 			{//foreach txn
 				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_coins.Num(); j++)
@@ -419,6 +433,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 					}
 				}
 			}
+			this->systemDataGuard.Unlock();
 			lclUItems.RemoveAt(0);
 		}//while
 		this->historyGuard.Lock();
@@ -434,7 +449,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		while (lclUItems.Num() > 0)
 		{
 			itemPrice = lclUItems[0];
-
+			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.transaction_history.Num(); i++)
 			{//foreach txn
 				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_nfts.Num(); j++)
@@ -446,6 +461,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 					}
 				}
 			}
+			this->systemDataGuard.Unlock();
 			lclUItems.RemoveAt(0);
 		}//while
 		this->historyGuard.Lock();
@@ -471,7 +487,9 @@ void USystemDataBuilder::initGetTxnHistory()
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
 	{//once indexer responds!
 		FUpdatableHistoryArgs semiParsedHistory = UIndexerSupport::extractFromTransactionHistory(this->GPublicAddress,history);
+		this->systemDataGuard.Lock();
 		this->systemData.user_data.transaction_history = semiParsedHistory.semiParsedHistory;//assign what we have so far!
+		this->systemDataGuard.Unlock();
 		this->initGetHistoryAuxData(semiParsedHistory);
 	};
 
