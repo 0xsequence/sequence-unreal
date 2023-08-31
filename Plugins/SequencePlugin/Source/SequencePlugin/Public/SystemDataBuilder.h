@@ -17,61 +17,90 @@ class SEQUENCEPLUGIN_API USystemDataBuilder : public UObject
 {
 	GENERATED_BODY()
 private:
-	ASequenceBackendManager* sqncMngr;
-	mutable FCriticalSection masterGuard;
+	//Shared Variables//
+	ASequenceBackendManager* sqncMngr;//this is used to let the backend know when we are done
+
+	mutable FCriticalSection masterGuard;//lock for masterSyncer
 	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
-
-	UIndexer* tIndexer;
-	UIndexer* hIndexer;
-
+	
+	// these vars are read only
 	SequenceAPI::FSequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
 	FString GWalletAddress;
-	FString qr_url;
-	
-	mutable FCriticalSection systemDataGuard;
+
+	mutable FCriticalSection systemDataGuard;//lock for system data
 	FSystemData_BE systemData;
+	//Shared Variables//
+
+	//GO Get Token Data Variables//
+	UIndexer* tIndexer;
+	UObjectHandler* tokenImageHandler;
+	mutable FCriticalSection itemGuard;
+	USyncer* getItemDataSyncer;
+	//GO Get Token Data Variables//
+
+	//GO Get Txn history Data Variables//
+	UIndexer* hIndexer;
+	mutable FCriticalSection historyGuard;
+	USyncer* getTxnHistorySyncer;
+	UObjectHandler* HistoryImageHandler;
+	//GO Get Txn history Data Variables//
+
+	//GO Get QR Data Variables//
+	FString qr_url;
+	UObjectHandler* QRImageHandler;
+	//GO Get QR Data Variables//
+
+	/*
+	* Used to take and Array of FNFT_BE's and convert them into a compressed form
+	* FNFT_Master_BE list that the front actually uses
+	*/
 	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
 
-	//used for managing getting token data setup in systemdata//
-
-	//keeps track of requests regarding itemData! ie)tokens and coins
-	mutable FCriticalSection itemGuard;
-	USyncer *getItemDataSyncer;
-	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
-	UObjectHandler* tokenImageHandler;
-
+	/*
+	* Wrapper function for master syncer dec call,
+	* this function applies locking on the syncer in a clean and easily modifiable way
+	*/
 	void decMasterSyncer();
 
-	//this function gets bound to the getItemDataSyncer and fires off when we are done getting image and value data for tokens
-	UFUNCTION()
-	void OnGetItemDataDone();
 
 	//manager function for getting value and image data for tokens
 	void initGetTokenData();
 
-	//used for managing getting token data setup in systemdata//
+	/*
+	* Master function for controlling fetching of token data aux data such
+	* as values and images and updating the needed system data values
+	*/
+	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
 
-	//used for managing anything that depends on the wallet address!//
-	UObjectHandler* QRImageHandler;
+	/*
+	* Fires off when all token related tasks are done
+	*/
+	UFUNCTION()
+	void OnGetItemDataDone();
+
+	/*
+	* Used for managing and setting the QR code data
+	* ASYNC
+	*/
 	void initGetQRCode();
-	//used for managing anything that depends on the wallet address//
 
-	//Used for getting transaction history data in systemData//
-	mutable FCriticalSection historyGuard;
-	USyncer* getTxnHistorySyncer;
-	UObjectHandler* HistoryImageHandler;
+	/*
+	* Master controller for everything history data related
+	*/
 	void initGetTxnHistory();
 
-	//used for getting history images and value data!
+	/*
+	* Updates the received history data with images and values
+	*/
 	void initGetHistoryAuxData(FUpdatableHistoryArgs history_data);
 
+	//Fires off when history async processing is done
 	UFUNCTION()
 		void OnGetTxnHistoryDone();
-	//Used for getting transaction history data in systemData//
 
-	//used for getting contact data!
+	//used for getting contact data! Async
 	void initGetContactData();
 
 	//master OnDone//
