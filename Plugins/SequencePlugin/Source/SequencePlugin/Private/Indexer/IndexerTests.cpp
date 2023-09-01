@@ -939,13 +939,13 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSe
 	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 	UE_LOG(LogTemp, Display, TEXT("Start of System Tests"));
 	//system tests//
-	//pingTest(indexer, OnSuccess, OnFailure);
-	//versionTest(indexer, OnSuccess, OnFailure);
-	//runTimeStatusTest(indexer, OnSuccess, OnFailure);
-	//getChainIDTest(indexer, OnSuccess, OnFailure);
-	//getEtherBalanceTest(indexer, OnSuccess, OnFailure);
+	pingTest(indexer, OnSuccess, OnFailure);
+	versionTest(indexer, OnSuccess, OnFailure);
+	runTimeStatusTest(indexer, OnSuccess, OnFailure);
+	getChainIDTest(indexer, OnSuccess, OnFailure);
+	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 	getTokenBalanceTest(indexer, OnSuccess, OnFailure);
-	//getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
+	getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
 	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
 	getTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
