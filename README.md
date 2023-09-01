@@ -24,3 +24,22 @@ The subset of the SequenceAPI can be found at
 SequenceAPI.h
 
 You can directly interact with the chain via Provider.h found in the ETH folder
+
+//To setup your game with the sequence plugin//
+Simply attach the sequence pawn component to an actor,
+
+The sequence pawn component has functions to do the following:
+
+Setup Sequence (sets up the sequence based systems)
+
+Show GUI Shows the UI
+
+Hide GUI Hides the UI
+
+GUI Visible Simple Visibility test for the UI
+
+Switch Platform (Switches which mode the UI will be in and how it will be displayed)
+Modes:
+Desktop (default)
+Mobile Portrait (Custom built for portrait mode reducing the X width where ever possible)
+Mobile Landscape
