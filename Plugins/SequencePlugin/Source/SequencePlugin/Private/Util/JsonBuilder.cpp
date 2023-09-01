@@ -99,7 +99,7 @@ FJsonArray* FJsonArray::AddInt(int Value)
 
 FJsonBuilder* FJsonArray::EndArray() const
 {
-	Parent->AddField(ConvertString(Name), "[" + StringValue + "]");
+	Parent->AddField(Name, "[" + StringValue + "]");
 	return Parent;
 }
 
