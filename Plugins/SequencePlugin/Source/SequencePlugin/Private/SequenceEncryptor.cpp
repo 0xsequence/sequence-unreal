@@ -34,8 +34,10 @@ FString USequenceEncryptor::GetStoredKey()
 	}
 	FBase64::Decode(eK, Ret);
 //#endif // UE_EDITOR
-	return Ret;
+	return "aaaabbbbccccddddaaaabbbbccccdddd";
 }
+
+//need to write a couple new functions for this based on AES-CBC-256, IV 16 bytes
 
 FString USequenceEncryptor::Encrypt(FString Payload)
 {
