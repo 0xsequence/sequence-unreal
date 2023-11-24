@@ -14,6 +14,8 @@
 #include "Sequence/SequenceAPI.h"
 #include "tests/ContractTest.h"
 #include "Tests/TestSequenceAPI.h"
+#include "AES/aes.c"
+#include "AES/aes.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
@@ -65,23 +67,80 @@ void AGeneralTesting::TestIndexer()
 
 void AGeneralTesting::TestEncryption() const
 {
-	UAuth* Auth = NewObject<UAuth>();
-	const FStoredAuthState_BE TestingStruct;
+	//UAuth* Auth = NewObject<UAuth>();
+	//const FStoredAuthState_BE TestingStruct;
 
-	const FString PreEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(TestingStruct);
+	//const FString PreEncrypt = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(TestingStruct);
 
-	Auth->SetNewSecureStorableAuth(TestingStruct);
-	const FSecureKey DuringEncryptStruct = Auth->GetSecureStorableAuth();
+	//Auth->SetNewSecureStorableAuth(TestingStruct);
+	//const FSecureKey DuringEncryptStruct = Auth->GetSecureStorableAuth();
 
-	const FString EncryptedData = UIndexerSupport::structToSimpleString<FSecureKey>(DuringEncryptStruct);
+	//const FString EncryptedData = UIndexerSupport::structToSimpleString<FSecureKey>(DuringEncryptStruct);
 
-	Auth->SetSecureStorableAuth(DuringEncryptStruct);
+	//Auth->SetSecureStorableAuth(DuringEncryptStruct);
 
-	const FString DecryptedData = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(Auth->auth);
+	//const FString DecryptedData = UIndexerSupport::structToSimpleString<FStoredAuthState_BE>(Auth->auth);
 
-	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
-	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *EncryptedData);
-	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *DecryptedData);
+	//UAuth* Auth = NewObject<UAuth>();
+	//const FString PreEncrypt = "testing text";
+	//const FString EncryptedData = USequenceEncryptor::Encrypt(PreEncrypt);
+	//const FString DecryptedData = USequenceEncryptor::Decrypt(EncryptedData,PreEncrypt.Len());
+
+	//UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
+	//UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *EncryptedData);
+	//UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *DecryptedData);
+
+	//TODO need to setup PKCS7 padding
+	AES_ctx ctx;
+	struct AES_ctx * PtrCtx = &ctx;
+
+	const int32 keySize = 32;
+	uint8_t key[keySize];
+	uint8_t* PtrKey = &key[0];
+
+	const int32 IVSize = 16;
+	uint8_t iv[IVSize];
+	uint8_t* PtrIV = &iv[0];
+	
+
+	//setup the key
+	for (int i = 0; i < keySize; i++)
+	{
+		key[i] = i % 16;
+	}
+
+	for (int i = 0; i < IVSize; i++)
+	{
+		iv[i] = i;
+	}
+	
+	FString testData = "some epic testing data";
+	int32 cachedLen = testData.Len();
+	uint8_t* PtrString;
+	const int32 buffSize = 32;
+	uint8_t buff[buffSize];
+	PtrString = &buff[0];
+
+	UE_LOG(LogTemp, Display, TEXT("Pre Encrypted Data: %s"), *testData);
+
+	StringToBytes(testData,PtrString, buffSize);
+
+	AES_init_ctx_iv(PtrCtx, PtrKey,PtrIV);//init then use
+	AES_CBC_encrypt_buffer(PtrCtx, PtrString, buffSize);
+
+	FString DuringEncrypt = BytesToString(PtrString, buffSize);
+	UE_LOG(LogTemp, Display, TEXT("Encrypted Data: %s"), *DuringEncrypt);
+
+	AES_init_ctx_iv(PtrCtx, PtrKey, PtrIV);//init then use, need to re init this prior to decryption
+	AES_CBC_decrypt_buffer(PtrCtx, PtrString, buffSize);
+
+	testData = BytesToString(PtrString, buffSize);
+
+	testData = testData.Left(cachedLen);
+
+	UE_LOG(LogTemp, Display, TEXT("Pst Encrypted Data: %s"), *testData);
+
+
 }
 
 //dedicated encryption test!
