@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Sockets.h"
+#include "Interfaces/IPv4/IPv4Endpoint.h"
 #include "Authenticator.generated.h"
 
 /**
@@ -15,6 +17,7 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 	GENERATED_BODY()
 //vars
 private:
+	const uint16 WINDOWS_IPC_PORT = 52836;
 	FString StateToken = "";
 	FString Nonce = "";
 
@@ -45,5 +48,7 @@ public:
 
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
-	
+	void OpenBrowser(FString URL);
+	void StartListener();
+	bool ListenerCallback(FSocket* socket, const FIPv4Endpoint& endpoint);
 };
