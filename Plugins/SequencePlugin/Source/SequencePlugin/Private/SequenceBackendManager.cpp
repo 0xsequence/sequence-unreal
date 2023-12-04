@@ -46,6 +46,7 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
 	this->requestHandler = NewObject<UObjectHandler>();//create our handler!
+	this->authenticator = NewObject<UAuthenticator>();
 }
 
 ASequenceBackendManager::~ASequenceBackendManager()
@@ -96,6 +97,11 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 FSecureKey ASequenceBackendManager::GetSecureStorableAuth()
 {
 	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
+}
+
+FString ASequenceBackendManager::GetLoginURL()
+{
+	return this->authenticator->GetSigninURL();
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

@@ -11,6 +11,7 @@
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
+#include "Authenticator.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
@@ -40,9 +41,9 @@ private:
 	TArray<FString> hexDataList;//this is our LUT of hexidecimal data!
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;//indexer ref!
-
+	UAuthenticator* authenticator;
 	UObjectHandler* requestHandler;//going to be reworked into an image handler
-
+	//https://accounts.google.com/o/oauth2/auth?response_type=id_token&client_id=970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com&redirect_uri=https://3d41-142-115-54-118.ngrok-free.app/&scope=openid+profile+email&state=604063DB47CAAC7E7547A789E7BC3244&nonce=81C518BB46601888C649D9BDF58A2DAA
 	UAuth* auth;//for auth handling
 	
 	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
@@ -98,6 +99,9 @@ public:
 	//to be stored in a game save object
 	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
 		FSecureKey GetSecureStorableAuth();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		FString GetLoginURL();//this will eventually have an enum for our login type!
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 

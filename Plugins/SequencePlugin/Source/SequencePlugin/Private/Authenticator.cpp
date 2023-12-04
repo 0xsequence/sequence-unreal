@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#pragma once
 #include "Authenticator.h"
 #include "Misc/Guid.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
@@ -16,6 +15,11 @@ UAuthenticator::UAuthenticator()
 void UAuthenticator::GoogleSignin()
 {
 	this->OpenBrowser(this->GenerateSigninURL(GoogleAuthURL,GoogleClientID));
+}
+
+FString UAuthenticator::GetSigninURL()
+{
+	return this->GenerateSigninURL(GoogleAuthURL, GoogleClientID);
 }
 
 FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
