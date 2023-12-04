@@ -104,6 +104,11 @@ FString ASequenceBackendManager::GetLoginURL()
 	return this->authenticator->GetSigninURL();
 }
 
+FString ASequenceBackendManager::GetRedirectURL()
+{
+	return this->authenticator->GetRedirectURL();
+}
+
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
