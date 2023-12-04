@@ -18,24 +18,24 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 //vars
 private:
 	const uint16 WINDOWS_IPC_PORT = 52836;
-	FString StateToken = "";
-	FString Nonce = "";
+	FString StateToken = TEXT("");
+	FString Nonce = TEXT("");
 
-	FString UrlScheme = "powered-by-sequence";
+	FString UrlScheme = TEXT("powered-by-sequence");
 	//need to know how to override this / get this out of browser
-	FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
+	FString RedirectURL = TEXT("https://3d41-142-115-54-118.ngrok-free.app/");
 
-	FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
-	FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
+	FString GoogleAuthURL = TEXT("https://accounts.google.com/o/oauth2/auth");
+	FString GoogleClientID = TEXT("970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com");
 
-	FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
-	FString FacebookClientID = "";//TODO still need this
+	FString FacebookAuthURL = TEXT("https://www.facebook.com/v18.0/dialog/oauth");
+	FString FacebookClientID = TEXT("");//TODO still need this
 
-	FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
-	FString DiscordClientID = "";//TODO still need this
+	FString DiscordAuthURL = TEXT("https://discord.com/api/oauth2/authorize");
+	FString DiscordClientID = TEXT("");//TODO still need this
 
-	FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	FString AppleClientID = "";//TODO still need this
+	FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
+	FString AppleClientID = TEXT("");//TODO still need this
 	//funcs
 public:
 	UAuthenticator();
@@ -49,6 +49,7 @@ public:
 
 	FString GetSigninURL();
 
+	FString GetRedirectURL();
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
 	void OpenBrowser(FString URL);

@@ -103,6 +103,9 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetLoginURL();//this will eventually have an enum for our login type!
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		FString GetRedirectURL();
+
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]

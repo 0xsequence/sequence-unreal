@@ -22,10 +22,15 @@ FString UAuthenticator::GetSigninURL()
 	return this->GenerateSigninURL(GoogleAuthURL, GoogleClientID);
 }
 
+FString UAuthenticator::GetRedirectURL()
+{
+	return this->RedirectURL;
+}
+
 FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
 {
 	//watch for trailing /'s in redirectURL
-	FString ret = AuthURL + "?response_type=id_token&client_id="+ClientID+"&redirect_uri="+this->RedirectURL + "&scope=openid+profile+email&state=" + this->StateToken + "&nonce=" + this->Nonce;
+	FString ret = AuthURL + TEXT("?response_type=id_token&client_id=")+ClientID + TEXT("&redirect_uri=") + this->RedirectURL + TEXT("&scope=openid+profile+email&state=") + this->StateToken + TEXT("&nonce=") + this->Nonce;
 	UE_LOG(LogTemp, Display, TEXT("Generated Signin URL: %s"), *ret);
 	return ret;
 }
@@ -34,6 +39,7 @@ void UAuthenticator::OpenBrowser(FString URL)
 {
 	StartListener();
 	FPlatformProcess::LaunchURL(*URL, NULL, NULL);
+	
 }
 
 bool UAuthenticator::ListenerCallback(FSocket* socket, const FIPv4Endpoint& endpoint)
