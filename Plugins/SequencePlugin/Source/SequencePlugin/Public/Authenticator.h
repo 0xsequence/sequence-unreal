@@ -22,6 +22,7 @@ private:
 	FString Nonce = "";
 
 	FString UrlScheme = "powered-by-sequence";
+	//need to know how to override this / get this out of browser
 	FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
 
 	FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
@@ -45,6 +46,8 @@ public:
 	void FacebookSignin();
 	void DiscordSignin();
 	void AppleSignin();
+
+	FString GetSigninURL();
 
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
