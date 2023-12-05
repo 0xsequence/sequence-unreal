@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Sockets.h"
-#include "Interfaces/IPv4/IPv4Endpoint.h"
+#include "RequestHandler.h"
 #include "Authenticator.generated.h"
 
 /**
@@ -36,23 +35,40 @@ private:
 
 	FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
 	FString AppleClientID = TEXT("");//TODO still need this
-	//funcs
+
+	FString Cached_IDToken;//not sure if I need this or not permenately
+
+	//AWS
+	FString IdentityPoolID = TEXT("");//TODO still need this
+	FString Region = TEXT("us-east-2");
+	FString AppID;
+
 public:
 	UAuthenticator();
-
-	void GoogleSignin();
-
-	//still pending
-	void FacebookSignin();
-	void DiscordSignin();
-	void AppleSignin();
 
 	FString GetSigninURL();
 
 	FString GetRedirectURL();
+
+	void SocialLogin(const FString& IDTokenIn);
+
+	void EmailLogin(const FString& EmailIn);
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
-	void OpenBrowser(FString URL);
-	void StartListener();
-	bool ListenerCallback(FSocket* socket, const FIPv4Endpoint& endpoint);
+
+	FString BuildAWSURL(const FString& Service);
+
+	//RPC Calls//
+
+	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
+
+	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
+
+	void KMSGenerateDataKey();
+
+	void CognitoIdentityInitiateAuth(const FString& Email, const FString& ClientID);
+
+	//RPC Calls//
+
+	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 };

@@ -109,6 +109,16 @@ FString ASequenceBackendManager::GetRedirectURL()
 	return this->authenticator->GetRedirectURL();
 }
 
+void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
+{
+	this->authenticator->SocialLogin(IDTokenIn);
+}
+
+void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
+{
+
+}
+
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
