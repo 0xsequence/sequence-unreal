@@ -42,8 +42,6 @@ public class SequencePlugin : ModuleRules
                 "Json",
                 "JsonUtilities",
 				"ApplicationCore",
-				"Networking",
-				"Sockets"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
