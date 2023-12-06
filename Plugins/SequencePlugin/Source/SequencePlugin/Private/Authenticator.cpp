@@ -44,9 +44,11 @@ FString UAuthenticator::GetRedirectURL()
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	//CognitoIdentityGetID("","Google", IDTokenIn);//Outputs IdentityID
+	//CognitoIdentityGetID("", UEnum::GetValueAsString(this->SocialSigninType.GetValue()), IDTokenIn);//Outputs IdentityID
 	//CognitoIdentityGetCredentialsForIdentity("IdentityID",IDTokenIn,"Google");//Outputs {accessKeyID, secretKey, sessionToken}
 	//KMSGenerateDataKey();//outputs {plaintext, ciphertextblob, encryptedpayloadkey} the encryptedpayloadkey is the transport key
+	this->Manager->UpdateAuthentication(true);
+	//Now we do need to pass along credentials to be stored at runtime / stored in persistence too but for now we can use this!
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
