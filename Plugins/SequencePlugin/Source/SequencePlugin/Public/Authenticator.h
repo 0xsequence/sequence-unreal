@@ -20,7 +20,7 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 //vars
 private:
 	ASequenceBackendManager* Manager;
-	ESocialSigninType SocialSigninType;
+	TEnumAsByte<ESocialSigninType> SocialSigninType;
 
 	const uint16 WINDOWS_IPC_PORT = 52836;
 	FString StateToken = TEXT("");
