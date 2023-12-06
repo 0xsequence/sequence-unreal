@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
+#include "AES/aes.c"
+#include "AES/aes.h"
 #include "Authenticator.generated.h"
 
 class ASequenceBackendManager;
@@ -66,6 +68,8 @@ private:
 	//From InitiateAuth
 	FString ChallengeSession = TEXT("nil");
 
+	FString SessionWallet = TEXT("nil");
+
 private:
 	UAuthenticator();//hide this as we only want to be able to call the parameterized version
 public:
@@ -103,7 +107,19 @@ private:
 
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& CognitoID, const FString& Answer, const FString& ChallengeSessionString);
 
+	//Sequence Specific//
+
+	void AuthWithSequence(const FString& IDTokenIn);
+
+	//Sequence Specific//
+
 	//RPC Calls//
+
+	static uint8_t GetPaddingByte(int32 StringLength);
+
+	static int32 GetBytesInFString(FString in);
+
+	TArray<uint8_t> PKCS7(FString in);
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 
