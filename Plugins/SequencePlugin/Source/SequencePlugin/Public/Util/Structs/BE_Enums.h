@@ -19,3 +19,9 @@ enum EHistoryItemType
 	Token_HIT UMETA(DisplayName = "Token"),
 	Collection_HIT UMETA(DisplayName = "Collection")
 };
+
+UENUM(BlueprintType)
+enum ESocialSigninType
+{
+	Google UMETA(DisplayName = "Google"),
+};

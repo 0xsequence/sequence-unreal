@@ -119,12 +119,22 @@ namespace SequenceAPI
 
 		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void (TransactionID, FSequenceError)> OnFailure);
 
+		//deprecated?
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
 
+
+		//Frontend needs this if we even have a frontend anymore?
 		void getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 		void getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 
 		void getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 		void getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+		
+
+		//additional asks here
+		//transaction history
+		//token balances
+		//arbitrary func calls?
+	
 	};
 }

@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "RequestHandler.h"
+#include "Util/Structs/BE_Enums.h"
 #include "Authenticator.generated.h"
+
+class ASequenceBackendManager;
 
 /**
  * 
@@ -16,6 +19,9 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 	GENERATED_BODY()
 //vars
 private:
+	ASequenceBackendManager* Manager;
+	ESocialSigninType SocialSigninType;
+
 	const uint16 WINDOWS_IPC_PORT = 52836;
 	FString StateToken = TEXT("");
 	FString Nonce = TEXT("");
@@ -39,20 +45,45 @@ private:
 	FString Cached_IDToken;//not sure if I need this or not permenately
 
 	//AWS
-	FString IdentityPoolID = TEXT("");//TODO still need this
-	FString Region = TEXT("us-east-2");
-	FString AppID;
+	FString IdentityPoolID = TEXT("nil");//TODO still need this
+	FString Region = TEXT("us-east-2");//TODO need to know how we are doing region handling for AWS
+	FString CognitoClientID = TEXT("nil");//TODO still need this
+	FString KMSKeyID = TEXT("nil");//TODO still need this
+	FString ProjectID = TEXT("nil");//TODO still need this
 
+	//From GetId
+	FString IdentityId = TEXT("nil");
+
+	//From GetCredentialsForIdentity
+	FString AccessKeyId = TEXT("nil");
+	FString SecretKey = TEXT("nil");
+	FString SessionToken = TEXT("nil");
+
+	//From KMSGenerateDataKey
+	FString PlainText = TEXT("nil");
+	FString CipherTextBlob = TEXT("nil");//this is the transport key and needs to be secured
+
+	//From InitiateAuth
+	FString ChallengeSession = TEXT("nil");
+
+private:
+	UAuthenticator();//hide this as we only want to be able to call the parameterized version
 public:
-	UAuthenticator();
+	void Init(ASequenceBackendManager* ManagerIn);
 
 	FString GetSigninURL();
 
 	FString GetRedirectURL();
 
+	void SetSocialLoginType(ESocialSigninType Type);
+
 	void SocialLogin(const FString& IDTokenIn);
 
 	void EmailLogin(const FString& EmailIn);
+
+	void EmailLoginCode(const FString& CodeIn);
+
+	void EmailCodeCallout();
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
 
@@ -68,7 +99,14 @@ private:
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& ClientID);
 
+	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& CognitoID);
+
+	void AdminRespondToAuthChallenge(const FString& Email, const FString& CognitoID, const FString& Answer, const FString& ChallengeSessionString);
+
 	//RPC Calls//
+
+	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
+
 
 	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 };
