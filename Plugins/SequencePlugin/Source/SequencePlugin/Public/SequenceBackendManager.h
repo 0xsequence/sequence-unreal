@@ -8,6 +8,7 @@
 #include "ObjectHandler.h"
 #include "Indexer/Backend.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Util/Structs/BE_Enums.h"
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
@@ -16,6 +17,8 @@
 
 class UIndexer;
 
+
+//Move this to Structs.h
 USTRUCT(BlueprintType)
 struct FUserDetails
 {
@@ -38,6 +41,7 @@ private:
 
 	FString privateKey; // private key for signin
 	FString publicKey; // public key for signin
+
 	TArray<FString> hexDataList;//this is our LUT of hexidecimal data!
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;//indexer ref!
@@ -47,10 +51,6 @@ private:
 	UAuth* auth;//for auth handling
 	
 	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
-	bool ready = false;
-	FString receiveBlockNumber;
-	int32 receiveID;
-	FString receiveBlockHash;
 	FString userEmail;
 	int32 accountID;
 	FString emailService;
@@ -70,9 +70,6 @@ public:
 	ASequenceBackendManager();
 	//destructor for cleaning up old refs
 	~ASequenceBackendManager();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -101,16 +98,23 @@ public:
 		FSecureKey GetSecureStorableAuth();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		FString GetLoginURL();//this will eventually have an enum for our login type!
+		FString GetLoginURL();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetRedirectURL();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void SetSocialLoginType(ESocialSigninType Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void SocialLogin(const FString& IDTokenIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailLogin(const FString& EmailIn);
+
+	//This function signals to the frontend to display a prompt for the user to enter a received code in the UI
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Login")
+		void EmailCodeCallout();
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
@@ -132,7 +136,7 @@ public:
 	* Used to let the frontend know if authentication succeeded or not
 	* in an async. manner
 	* 
-	* if authenticated is false the we failed to auth the user or timed out
+	* if authenticated is false then we failed to auth the user or timed out
 	* if authenticated is true we successfully authenticated the user and we need to signal the ui that
 	* we are ready for next steps
 	* 
@@ -203,52 +207,6 @@ public:
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 private:
-	//Private handlers
-	void SigninHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void GetBlkHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void GetHashHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	//Private handlers
-
-	/*
-	* Used for sending out ASYNC requests used to handle signin
-	* NOTE: Looking at moving this code to a dedicated networking class for reuse
-	* @Param URL (the full url to send the json payload to)
-	* @Param json (the json payload in FString form) If invalid we will get a response but it'll be an error mesg from the server in json format
-	* @param Handler (The ASYNC handler that will process the payload once we have received it)
-	*/
-	void PostJsonRequest(FString url, FString json, void (ASequenceBackendManager::* handler)(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful));
-	
-	/*
-	* Used to request block information from
-	* the sequence app, 
-	* @Return the block data we want from the latest block on the chain
-	*/
-	FString CreateBlkRequest();
-
-	/*
-	* Used to get the block hash data based on the block number and givin id
-	* Fetches this data from the sequence app
-	* @Return the block hash we want!
-	*/
-	FString CreateHashRequest(FString blockNumber, int32 id);
-
-	/*
-	* Sets up the signin request body
-	* @Return the signin req in json format in an FString
-	*/
-	FString CreateRequestBody(FString Email);
-
-	/*
-	* Sets up the intent for Signin
-	* @Return the Intent in Json format in an FString
-	*/
-	FString CreateIntent(FString Email);
-
-	/*
-	* Generates a random wallet ID used to bootstrap signin
-	* @Return a Random wallet ID
-	*/
-	FString SetupRandomWallet();//returns the public key!
 
 	//These functions are used to generate the URL's need to interact with
 	//the various aspects of the sequence app
