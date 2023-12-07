@@ -14,8 +14,6 @@
 #include "Sequence/SequenceAPI.h"
 #include "tests/ContractTest.h"
 #include "Tests/TestSequenceAPI.h"
-#include "AES/aes.c"
-#include "AES/aes.h"
 #include "Authenticator.h"
 
 // Sets default values
@@ -140,8 +138,6 @@ void AGeneralTesting::TestEncryption() const
 	//testData = testData.Left(cachedLen);
 
 	//UE_LOG(LogTemp, Display, TEXT("Pst Encrypted Data: %s"), *testData);
-
-
 
 	//int32 bytes = 0;
 
