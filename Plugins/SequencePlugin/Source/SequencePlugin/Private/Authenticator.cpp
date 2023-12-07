@@ -3,6 +3,11 @@
 #include "Authenticator.h"
 #include "Misc/Guid.h"
 #include "SequenceBackendManager.h"
+#include "AES/aes.c"
+#include "AES/aes.h"
+#include "Eth/EthTransaction.h"
+#include "Eth/Crypto.h"
+#include "Types/Wallet.h"
 
 //we always require a default constructor
 UAuthenticator::UAuthenticator()
@@ -346,9 +351,17 @@ TArray<uint8_t> UAuthenticator::PKCS7(FString in)
 	return TBuff;
 }
 
-void UAuthenticator::AuthWithSequence(const FString& IDTokenIn)
+FString UAuthenticator::InlineEIP_191(FString in)
 {
-	FString TempSessionWallet = TEXT("random_addr_temp");
+	return "\x19 Ethereum Signed Message:\n"+in;
+}
+
+void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
+{
+	//Generate random wallet for initiating auth!
+	FWallet RWallet = FWallet();
+
+	FString TempSessionWallet = TEXT("random_addr_temp");//still need to generate this
 	this->SessionWallet = TempSessionWallet;
 	FString Intent = "{\"version\":\"1.0.0\",\"packet\":{\"code\":\"openSession\",\"session\":\""+ TempSessionWallet +"\",\"proof\":{\"idToken\":\""+ IDTokenIn +"\"}}}";
 	FString Payload = "{\"projectId\":\"projectID_IN\",\"idToken\":\""+IDTokenIn+"\",\"sessionAddress\":\""+TempSessionWallet+"\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\""+Intent+"\"}";
@@ -360,27 +373,19 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn)
 	AES_ctx ctx;
 	struct AES_ctx * PtrCtx = &ctx;
 
-	const int32 keySize = 32;
-	uint8_t key[keySize];
-	uint8_t* PtrKey = &key[0];
-
 	const int32 IVSize = 16;
-	uint8_t iv[IVSize];
-	uint8_t* PtrIV = &iv[0];
-
-	for (int i = 0; i < keySize; i++)
-	{
-		key[i] = i % 16;//the key here will be replaced with a Transport key
-	}
+	TArray<uint8_t> iv;
 
 	for (int i = 0; i < IVSize; i++)
 	{
-		iv[i] = (uint8_t)FMath::RandRange(0, MAX_int32);
-		
+		iv.Add((uint8_t)FMath::RandRange(0,MAX_int32));
 	}
 
-	AES_init_ctx_iv(PtrCtx, PtrKey,PtrIV);
+	AES_init_ctx_iv(PtrCtx, Key.GetData(), iv.GetData());
 	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
+
+	TPayload.Append(iv);//append the IV onto the encrypted payload
+	FString EncryptedPayload = BytesToString(TPayload.GetData(),TPayload.Num());
 
 }
 

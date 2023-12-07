@@ -6,8 +6,6 @@
 #include "UObject/NoExportTypes.h"
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
-#include "AES/aes.c"
-#include "AES/aes.h"
 #include "Authenticator.generated.h"
 
 class ASequenceBackendManager;
@@ -109,7 +107,7 @@ private:
 
 	//Sequence Specific//
 
-	void AuthWithSequence(const FString& IDTokenIn);
+	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
 
 	//Sequence Specific//
 
@@ -119,10 +117,13 @@ private:
 
 	static int32 GetBytesInFString(FString in);
 
+	static FString InlineEIP_191(FString in);
+
 	TArray<uint8_t> PKCS7(FString in);
 
-	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 
+
+	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 
 	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 };
