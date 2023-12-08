@@ -5,11 +5,11 @@
 
 FString IntToHexString(uint64 Num)
 {
-	if(Num == 0)
+	if (Num == 0)
 	{
 		return "0x0";
 	}
-	
+
 	FString String = "";
 
 	while (Num > 0)
@@ -19,49 +19,49 @@ FString IntToHexString(uint64 Num)
 		auto Numeral = IntToHexLetter(Remainder);
 
 		String = Numeral + String;
-		
+
 		Num -= Remainder;
 		Num = Num >> 4;
 	}
-	
+
 	return "0x" + String;
 }
 
 FString IntToHexLetter(uint8 Num)
 {
 	Num &= 0xf;
-	
-	if(Num <= 9)
+
+	if (Num <= 9)
 	{
 		return FString::FromInt(Num);
 	}
 
-	if(Num == 0xa)
+	if (Num == 0xa)
 	{
 		return "a";
 	}
 
-	if(Num == 0xb)
+	if (Num == 0xb)
 	{
 		return "b";
 	}
 
-	if(Num == 0xc)
+	if (Num == 0xc)
 	{
 		return "c";
 	}
 
-	if(Num == 0xd)
+	if (Num == 0xd)
 	{
 		return "d";
 	}
 
-	if(Num == 0xe)
+	if (Num == 0xe)
 	{
 		return "e";
 	}
 
-	if(Num == 0xf)
+	if (Num == 0xf)
 	{
 		return "f";
 	}
@@ -161,7 +161,7 @@ FString HashToHexString(ByteLength Size, uint8* Hash)
 	return String;
 }
 
-uint8* HexStringToHash(ByteLength Size, FString Hex)
+uint8* HexStringToBytes(ByteLength Size, FString Hex)
 {
 	const Hash Hash = new uint8[Size];
 	// Set it to 0s
@@ -195,6 +195,7 @@ uint8* HexStringToHash(ByteLength Size, FString Hex)
 
 		if(!Lower.IsSet() || !Upper.IsSet())
 		{
+			delete[] Hash;
 			return nullptr;
 		}
 

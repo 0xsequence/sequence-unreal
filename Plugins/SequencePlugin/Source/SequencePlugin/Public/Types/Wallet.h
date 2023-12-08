@@ -20,6 +20,8 @@ public:
 	*/
 	FWallet(FPrivateKey PrivateKey);
 
+	FWallet(const FString& PrivateKey);
+
 	TArray<uint8> SignMessage(FString message);
 
 	FPrivateKey GetWalletPrivateKey();
