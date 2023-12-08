@@ -22,13 +22,29 @@ FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
 	this->Address = GetAddress(this->PublicKey);
 }
 
+FWallet::FWallet(const FString& PrivateKey)
+{
+	if (PrivateKey.Len() == 64)
+	{
+		this->PrivateKey = FPrivateKey::From(PrivateKey);
+		this->PublicKey = GetPublicKey(this->PrivateKey);
+		this->Address = GetAddress(this->PublicKey);
+	}
+}
+
 TArray<uint8> FWallet::SignMessage(FString message)
 {
+	FUnsizedData MesgData = StringToUTF8(message);
+	FHash256 MesgHash = FHash256::New();
+	Keccak256::getHash(MesgData.Arr, MesgData.GetLength(), MesgHash.Arr);
+
+	FString InternalMessage = "\x19";
+	InternalMessage += "Ethereum Signed Message:\n32" + BytesToString(MesgHash.Arr,MesgHash.GetLength());
+
 	TArray<uint8> sig;
-	uint64 ChainID = 137;//default for now!
 	Uint256 BigR, BigS;
 	uint16 RecoveryParameter;
-	FUnsizedData EncodedSigningData = StringToUTF8(message);
+	FUnsizedData EncodedSigningData = StringToUTF8(InternalMessage);
 	FHash256 MyR = FHash256::New();
 	FHash256 MyS = FHash256::New();
 	FHash256 MyY = FHash256::New();
@@ -41,11 +57,10 @@ TArray<uint8> FWallet::SignMessage(FString message)
 		UE_LOG(LogTemp, Warning, TEXT("[Error Signing Message in FWallet]"));
 		return sig;//return something with nothing in it
 	}
+
 	BigR.getBigEndianBytes(MyR.Arr);
 	BigS.getBigEndianBytes(MyS.Arr);
 
-	const uint16 BigV = ChainID * 2 + 35 + RecoveryParameter;
-	FUnsizedData V = HexStringToBinary(IntToHexString(BigV));
 	FHash256 R = MyR;
 	FHash256 S = MyS;
 
@@ -60,9 +75,7 @@ TArray<uint8> FWallet::SignMessage(FString message)
 		sig.Add(S.Arr[i]);
 	}
 
-	sig.Add(V.Arr[0]);
-
-	//I'll need to verify this signature against something!
+	sig.Add((uint8)RecoveryParameter);
 	return sig;
 }
 

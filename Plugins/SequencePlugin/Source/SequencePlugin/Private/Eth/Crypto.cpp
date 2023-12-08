@@ -5,6 +5,8 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/CurvePoint.hpp"
 
+
+
 FPublicKey GetPublicKey(FPrivateKey PrivateKey)
 {
 	Uint256 PrivateKey256 = Uint256(PrivateKey.Arr);

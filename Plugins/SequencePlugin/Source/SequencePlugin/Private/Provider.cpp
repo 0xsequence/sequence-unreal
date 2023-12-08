@@ -142,7 +142,7 @@ void Provider::NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuc
 	TSuccessCallback<TSharedPtr<FJsonObject>> BlockCallback = [OnSuccess](TSharedPtr<FJsonObject> Json)
 	{
 		FString Hex = Json->GetStringField("nonce");
-		FBlockNonce Nonce = FBlockNonce::From(HexStringToHash(FBlockNonce::Size, Hex));
+		FBlockNonce Nonce = FBlockNonce::From(HexStringToBytes(FBlockNonce::Size, Hex));
 		OnSuccess(Nonce);
 	};
 	

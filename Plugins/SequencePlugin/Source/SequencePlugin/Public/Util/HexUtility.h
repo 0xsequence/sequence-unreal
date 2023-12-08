@@ -7,6 +7,6 @@ TOptional<uint8> HexLetterToInt(FString Hex);
 TOptional<uint64> HexStringToUint64(FString Hex);
 
 FString HashToHexString(ByteLength Size, Hash Hash);
-Hash HexStringToHash(ByteLength Size, FString Hex);
+Hash HexStringToBytes(ByteLength Size, FString Hex);
 
 FString TrimHex(FString Hex);

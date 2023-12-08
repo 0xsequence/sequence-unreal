@@ -127,7 +127,7 @@ FHash256 FHash256::From(uint8* Arr)
 
 FHash256 FHash256::From(const FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 FAddress FAddress::New()
@@ -146,7 +146,7 @@ FAddress FAddress::From(uint8* Arr)
 
 FAddress FAddress::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 FPublicKey FPublicKey::New()
@@ -165,7 +165,7 @@ FPublicKey FPublicKey::From(uint8* Arr)
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 
@@ -185,7 +185,7 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 FBloom FBloom::New()
@@ -204,7 +204,7 @@ FBloom FBloom::From(uint8* Arr)
 
 FBloom FBloom::From(FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 FBlockNonce FBlockNonce::New()
@@ -223,7 +223,7 @@ FBlockNonce FBlockNonce::From(uint8* Arr)
 
 FBlockNonce FBlockNonce::From(const FString Str)
 {
-	return From(HexStringToHash(Size, Str));
+	return From(HexStringToBytes(Size, Str));
 }
 
 void FBlockNonce::Increment() const
@@ -276,5 +276,5 @@ FUnsizedData HexStringToBinary(const FString Hex)
 	
 	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
 	
-	return FUnsizedData(HexStringToHash(Size, Hex), Size);
+	return FUnsizedData(HexStringToBytes(Size, Hex), Size);
 }
