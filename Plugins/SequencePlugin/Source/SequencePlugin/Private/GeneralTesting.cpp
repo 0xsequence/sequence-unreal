@@ -140,46 +140,18 @@ void AGeneralTesting::TestEncryption() const
 
 	//UE_LOG(LogTemp, Display, TEXT("Pst Encrypted Data: %s"), *testData);
 
-	//int32 bytes = 0;
-
-	//for (auto c : testData.GetCharArray())
-	//{
-	//	bytes += sizeof(c);
-	//}
-
-	//UE_LOG(LogTemp, Display, TEXT("Size: %d"), bytes);
-
-
-	//TArray<uint8> PKeyBytes;
-	//PKeyBytes.Reserve(64);
-	//const int32 size = 32;
-	//uint8* bytes = new uint8[size];
-
-	//HexToBytes("0123456789012345678901234567890123456789012345678901234567890123",bytes);
-
 	FString test = "0123456789012345678901234567890123456789012345678901234567890123";
 
-	//uint8* hexPtr = new uint8[32];
-	//HexToBytes(test, hexPtr);
-	//FString hexBytes = BytesToHex(hexPtr, 32);
-
-	//UE_LOG(LogTemp, Display, TEXT("[Length: %d]"), test.Len());
-	//UE_LOG(LogTemp, Display, TEXT("[Address: %s]"), *test);
-	//UE_LOG(LogTemp, Display, TEXT("[Address: %s]"), *hexBytes);
-
-
 	FWallet* TestWallet = new FWallet(test);
-
 	FString PrivateKey = TestWallet->GetWalletPrivateKey().ToHex();
 	FString PublicKey = TestWallet->GetWalletPublicKey().ToHex();
 	FString Address = TestWallet->GetWalletAddress().ToHex();
-	//060B0D33EF4CE801CA2D602A57257CDF0F3434BE5E63331FF0D2C4054E7EE46D45C3E07F6614478F52CE5984317710A91500B23C72A83870288E635731E1865501
-	UE_LOG(LogTemp, Display, TEXT("[In: 0123456789012345678901234567890123456789012345678901234567890123]"));
+
 	UE_LOG(LogTemp, Display, TEXT("[PrivateKey: %s]"), *PrivateKey);
 	UE_LOG(LogTemp, Display, TEXT("[PublicKey: %s]"), *PublicKey);
 	UE_LOG(LogTemp, Display, TEXT("[Address: %s]"), *Address);
 
-	FString Message = "Hello World";
+	FString Message = "This is some new epic message to cause massive amounts of math to occur and crippling damage to boot";
 	TArray<uint8> Sig = TestWallet->SignMessage(Message);
 
 	FString SigString = BytesToHex(Sig.GetData(),Sig.Num());

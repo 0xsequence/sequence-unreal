@@ -27,4 +27,7 @@ public:
 	FPrivateKey GetWalletPrivateKey();
 	FPublicKey GetWalletPublicKey();
 	FAddress GetWalletAddress();
+
+private: TArray<uint8_t> BuildSigningNonce(uint8_t* messageHash, int32 size);
+private: TArray<uint8_t> FStringToHexCharList(FString in);
 };
