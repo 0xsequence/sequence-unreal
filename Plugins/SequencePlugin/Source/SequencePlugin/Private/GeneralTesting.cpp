@@ -22,6 +22,8 @@ AGeneralTesting::AGeneralTesting()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//TODO SWAP TO STATIC TARRAY FOR THIS//
 	testingURLs.Add("https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389");
 	testingURLs.Add("https://www.circle.com/hubfs/share-USDC.png#keepProtocol");
 	testingURLs.Add("https://assets.skyweaver.net/i7FuksL3/webapp/cards/full-cards/4x/0-silver.png");
@@ -140,7 +142,7 @@ void AGeneralTesting::TestEncryption() const
 
 	//UE_LOG(LogTemp, Display, TEXT("Pst Encrypted Data: %s"), *testData);
 
-	FString test = "0123456789012345678901234567890123456789012345678901234567890123";
+	/*FString test = "0123456789012345678901234567890123456789012345678901234567890123";
 
 	FWallet* TestWallet = new FWallet(test);
 	FString PrivateKey = TestWallet->GetWalletPrivateKey().ToHex();
@@ -156,8 +158,21 @@ void AGeneralTesting::TestEncryption() const
 
 	FString SigString = BytesToHex(Sig.GetData(),Sig.Num());
 
-	UE_LOG(LogTemp, Display, TEXT("[TestWallet: %s\nSig Length: %d]"), *SigString,SigString.Len());
+	UE_LOG(LogTemp, Display, TEXT("[TestWallet: %s\nSig Length: %d]"), *SigString,SigString.Len());*/
 	//delete TestWallet;
+
+	//UAuthenticator* authenticator = NewObject<UAuthenticator>();
+	//authenticator->Init(nullptr);//this is only for testing
+	//authenticator->TestSequenceFlow();
+
+	FWallet testWallet = FWallet();
+	FString addr = BytesToHex(testWallet.GetWalletAddress().Arr,testWallet.GetWalletAddress().GetLength());
+	FString mesg = "Hello World";
+	TArray<uint8> sig = testWallet.SignMessage(mesg);
+	FString sigStr = BytesToHex(sig.GetData(), sig.Num());
+	UE_LOG(LogTemp, Display, TEXT("Adr: %s"), *addr);
+	UE_LOG(LogTemp, Display, TEXT("Msg: %s"), *mesg);
+	UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
 }
 
 //dedicated encryption test!
@@ -201,7 +216,6 @@ void AGeneralTesting::testSystemDataBuilder()
 void AGeneralTesting::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGeneralTesting::CallbackPassed(FString StateData) const

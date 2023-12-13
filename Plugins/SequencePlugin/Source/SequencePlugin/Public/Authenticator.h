@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
+#include "Types/Wallet.h"
 #include "Authenticator.generated.h"
 
 class ASequenceBackendManager;
@@ -66,10 +67,10 @@ private:
 	//From InitiateAuth
 	FString ChallengeSession = TEXT("nil");
 
-	FString SessionWallet = TEXT("nil");
-
+	//Gonna need to free this in a destructor unless I swap it to a UObject to use garbage collection
+	FWallet * SessionWallet;
 private:
-	UAuthenticator();//hide this as we only want to be able to call the parameterized version
+	UAuthenticator();
 public:
 	void Init(ASequenceBackendManager* ManagerIn);
 
@@ -86,6 +87,8 @@ public:
 	void EmailLoginCode(const FString& CodeIn);
 
 	void EmailCodeCallout();
+
+	void TestSequenceFlow();
 private:
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
 
@@ -120,8 +123,6 @@ private:
 	static FString InlineEIP_191(FString in);
 
 	TArray<uint8_t> PKCS7(FString in);
-
-
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 

@@ -290,7 +290,8 @@ void FABIArg::Log()
 	}
 	else if(this->Type == STATIC)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Static: %s"), *HashToHexString(GBlockByteLength, static_cast<Hash>(this->Data)));
+		//UE_LOG(LogTemp, Display, TEXT("Static: %s"), *HashToHexString(GBlockByteLength, static_cast<Hash>(this->Data)));
+		UE_LOG(LogTemp, Display, TEXT("Static: %s"), *BytesToHex(static_cast<Hash>(this->Data), GBlockByteLength));
 	}
 	else if(this->Type == STRING)
 	{
@@ -298,7 +299,8 @@ void FABIArg::Log()
 	}
 	else if(this->Type == BYTES)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Static: %s"), *HashToHexString(this->Length, static_cast<Hash>(this->Data)));
+		//UE_LOG(LogTemp, Display, TEXT("Static: %s"), *HashToHexString(this->Length, static_cast<Hash>(this->Data)));
+		UE_LOG(LogTemp, Display, TEXT("Static: %s"), *BytesToHex(static_cast<Hash>(this->Data), this->Length));
 	} else
 	{
 		UE_LOG(LogTemp, Display, TEXT("Array of size %i:"), this->Length);

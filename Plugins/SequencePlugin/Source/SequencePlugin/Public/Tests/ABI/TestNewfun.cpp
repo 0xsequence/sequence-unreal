@@ -32,11 +32,13 @@ bool TestNewfun::RunTest(const FString& Parameters)
 
 	if(false)
 	{
-		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &s.Arr[0]));
+		//UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &s.Arr[0]));
+		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(&s.Arr[0], GMethodIdByteLength));
 		for(auto i = 0; i < BlockNumInt; i++)
 		{
 			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
-			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &s.Arr[Addr]));
+			//UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &s.Arr[Addr]));
+			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(&s.Arr[Addr], GBlockByteLength));
 		}
 	}
 	

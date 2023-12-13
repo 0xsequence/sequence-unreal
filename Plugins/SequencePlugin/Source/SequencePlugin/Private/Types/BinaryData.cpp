@@ -30,7 +30,8 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	return HashToHexString(GetLength(), Arr);
+	//return HashToHexString(GetLength(), Arr);
+	return BytesToHex(Arr,GetLength());
 }
 
 void FBinaryData::Renew()
@@ -127,7 +128,8 @@ FHash256 FHash256::From(uint8* Arr)
 
 FHash256 FHash256::From(const FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str,Size));
 }
 
 FAddress FAddress::New()
@@ -146,7 +148,8 @@ FAddress FAddress::From(uint8* Arr)
 
 FAddress FAddress::From(FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str, Size));
 }
 
 FPublicKey FPublicKey::New()
@@ -165,7 +168,8 @@ FPublicKey FPublicKey::From(uint8* Arr)
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str,Size));
 }
 
 
@@ -185,7 +189,8 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str,Size));
 }
 
 FBloom FBloom::New()
@@ -204,7 +209,8 @@ FBloom FBloom::From(uint8* Arr)
 
 FBloom FBloom::From(FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str,Size));
 }
 
 FBlockNonce FBlockNonce::New()
@@ -223,7 +229,8 @@ FBlockNonce FBlockNonce::From(uint8* Arr)
 
 FBlockNonce FBlockNonce::From(const FString Str)
 {
-	return From(HexStringToBytes(Size, Str));
+	//return From(HexStringToBytes(Size, Str));
+	return From(HexToBytesInline(Str,Size));
 }
 
 void FBlockNonce::Increment() const
@@ -276,5 +283,6 @@ FUnsizedData HexStringToBinary(const FString Hex)
 	
 	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
 	
-	return FUnsizedData(HexStringToBytes(Size, Hex), Size);
+	//return FUnsizedData(HexStringToBytes(Size, Hex), Size);
+	return FUnsizedData(HexToBytesInline(Hex,Size),Size);
 }
