@@ -22,8 +22,105 @@ uint8 RandomByte()
 	return res;
 }
 
-//this isn't needed anymore but should be moved to hex utility and shouldn't be here
-//TArray<uint8_t> FWallet::FStringToHexCharList(FString in)
+TArray<uint8_t> PKCS7(FString in)
+{
+	int32 ByteLength = GetBytesInString(in);
+	int32 ModLength = ByteLength % 16;
+	uint8_t PaddingByte = GetPaddingByte(ByteLength);
+
+	TArray<uint8_t> TBuff;
+	TBuff.Reserve(ByteLength + ModLength);
+
+	uint8_t* buff = new uint8_t[ByteLength];
+	StringToBytes(in, buff, ByteLength);
+
+	for (int i = 0; i < ByteLength; i++)
+	{
+		TBuff.Add(buff[i]);
+	}
+
+	for (int i = 0; i < ModLength; i++)
+	{
+		TBuff.Add(PaddingByte);
+	}
+
+	delete[] buff;
+
+	return TBuff;
+}
+
+uint8_t GetPaddingByte(int32 StringLength)
+{
+	uint8_t Byte = 0x00;
+	int32 ModLength = StringLength % 16;
+	switch (ModLength)
+	{
+	case 0:
+		Byte = 0x10;
+		break;
+	case 1:
+		Byte = 0x0F;
+		break;
+	case 2:
+		Byte = 0x0E;
+		break;
+	case 3:
+		Byte = 0x0D;
+		break;
+	case 4:
+		Byte = 0x0C;
+		break;
+	case 5:
+		Byte = 0x0B;
+		break;
+	case 6:
+		Byte = 0x0A;
+		break;
+	case 7:
+		Byte = 0x09;
+		break;
+	case 8:
+		Byte = 0x08;
+		break;
+	case 9:
+		Byte = 0x07;
+		break;
+	case 10:
+		Byte = 0x06;
+		break;
+	case 11:
+		Byte = 0x05;
+		break;
+	case 12:
+		Byte = 0x04;
+		break;
+	case 13:
+		Byte = 0x03;
+		break;
+	case 14:
+		Byte = 0x02;
+		break;
+	case 15:
+		Byte = 0x01;
+		break;
+	}
+
+	return Byte;
+}
+
+int32 GetBytesInString(FString in)
+{
+	int32 Bytes = 0;
+
+	for (auto c : in.GetCharArray())
+	{
+		Bytes += sizeof(c);
+	}
+
+	return Bytes;
+}
+
+//TArray<uint8_t> HexToHexCharList(FString in)
 //{
 //	TArray<uint8_t> result;
 //	for (int i = 0; i < in.Len(); i++)

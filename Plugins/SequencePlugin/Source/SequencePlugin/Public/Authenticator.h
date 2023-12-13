@@ -23,12 +23,10 @@ private:
 	ASequenceBackendManager* Manager;
 	TEnumAsByte<ESocialSigninType> SocialSigninType;
 
-	const uint16 WINDOWS_IPC_PORT = 52836;
 	FString StateToken = TEXT("");
 	FString Nonce = TEXT("");
 
 	FString UrlScheme = TEXT("powered-by-sequence");
-	//need to know how to override this / get this out of browser
 	FString RedirectURL = TEXT("https://3d41-142-115-54-118.ngrok-free.app/");
 
 	FString GoogleAuthURL = TEXT("https://accounts.google.com/o/oauth2/auth");
@@ -115,14 +113,6 @@ private:
 	//Sequence Specific//
 
 	//RPC Calls//
-
-	static uint8_t GetPaddingByte(int32 StringLength);
-
-	static int32 GetBytesInFString(FString in);
-
-	static FString InlineEIP_191(FString in);
-
-	TArray<uint8_t> PKCS7(FString in);
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 

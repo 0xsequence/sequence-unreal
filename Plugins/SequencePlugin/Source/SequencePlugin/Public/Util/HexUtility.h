@@ -14,6 +14,17 @@ FString IntToHexLetter(uint8 Num);
 TOptional<uint64> HexStringToUint64(FString Hex); //used only a handful of times not sure if TOpt is needed though
 
 /*
+* Used to take a HexString and convert it into a list of hex chars
+*/
+//TArray<uint8_t> HexToHexCharList(FString in);
+
+int32 GetBytesInString(FString in);
+
+uint8_t GetPaddingByte(int32 StringLength);
+
+TArray<uint8_t> PKCS7(FString in);
+
+/*
 * Generates a random hex character
 */
 FString RandomHexCharacter();

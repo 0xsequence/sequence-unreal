@@ -9,6 +9,7 @@
 #include "Eth/Crypto.h"
 #include "Types/Wallet.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+#include "Util/HexUtility.h"
 
 //we always require a default constructor
 UAuthenticator::UAuthenticator()
@@ -254,110 +255,6 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 
 }
 
-int32 UAuthenticator::GetBytesInFString(FString in)
-{
-	int32 Bytes = 0;
-
-	for (auto c : in.GetCharArray())
-	{
-		Bytes += sizeof(c);
-	}
-
-	return Bytes;
-}
-
-uint8_t UAuthenticator::GetPaddingByte(int32 StringLength)
-{
-	uint8_t Byte = 0x00;
-	int32 ModLength = StringLength % 16;
-	switch (ModLength)
-	{
-	case 0:
-		Byte = 0x10;
-		break;
-	case 1:
-		Byte = 0x0F;
-		break;
-	case 2:
-		Byte = 0x0E;
-		break;
-	case 3:
-		Byte = 0x0D;
-		break;
-	case 4:
-		Byte = 0x0C;
-		break;
-	case 5:
-		Byte = 0x0B;
-		break;
-	case 6:
-		Byte = 0x0A;
-		break;
-	case 7:
-		Byte = 0x09;
-		break;
-	case 8:
-		Byte = 0x08;
-		break;
-	case 9:
-		Byte = 0x07;
-		break;
-	case 10:
-		Byte = 0x06;
-		break;
-	case 11:
-		Byte = 0x05;
-		break;
-	case 12:
-		Byte = 0x04;
-		break;
-	case 13:
-		Byte = 0x03;
-		break;
-	case 14:
-		Byte = 0x02;
-		break;
-	case 15:
-		Byte = 0x01;
-		break;
-	}
-
-	return Byte;
-}
-
-TArray<uint8_t> UAuthenticator::PKCS7(FString in)
-{
-	int32 ByteLength = UAuthenticator::GetBytesInFString(in);
-	int32 ModLength = ByteLength % 16;
-	uint8_t PaddingByte = GetPaddingByte(ByteLength);
-	
-	TArray<uint8_t> TBuff;
-	TBuff.Reserve(ByteLength + ModLength);
-
-	uint8_t * buff = new uint8_t[ByteLength];
-	StringToBytes(in,buff, ByteLength);
-
-	for (int i = 0; i < ByteLength; i++)
-	{
-		TBuff.Add(buff[i]);
-	}
-
-	for (int i = 0; i < ModLength; i++)
-	{
-		TBuff.Add(PaddingByte);
-	}
-
-	delete[] buff;
-
-	return TBuff;
-}
-
-FString UAuthenticator::InlineEIP_191(FString in)
-{
-	//this is wrong flatout
-	return "\x19 Ethereum Signed Message:\n"+in;
-}
-
 void UAuthenticator::TestSequenceFlow()
 {
 	FString testToken = "testToken";
@@ -375,7 +272,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString Intent = "{\"version\":\"1.0.0\",\"packet\":{\"code\":\"openSession\",\"session\":\""+ CachedWalletAddress + "\",\"proof\":{\"idToken\":\"" + IDTokenIn + "\"}}}";
 	FString Payload = "{\"projectId\":\"projectID_IN\",\"idToken\":\""+IDTokenIn+"\",\"sessionAddress\":\""+ CachedWalletAddress +"\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\""+Intent+"\"}";
 
-	TArray<uint8_t> TPayload = this->PKCS7(Payload);
+	TArray<uint8_t> TPayload = PKCS7(Payload);
 
 	//need to encrypt the payload string now
 	AES_ctx ctx;
