@@ -3,6 +3,34 @@
 #pragma warning(disable: 4104)
 #include "Util/HexUtility.h"
 
+FString RandomHexCharacter()
+{
+	return HexLUTNew[FMath::RandRange(0, HexLUTSize)];
+}
+
+FString RandomHexByte()
+{
+	return RandomHexCharacter() + RandomHexCharacter();
+}
+
+uint8 RandomByte()
+{
+	uint8* byte = new uint8[1];
+	HexToBytes(RandomHexByte(), byte);
+	uint8 res = byte[0];
+	delete[] byte;
+	return res;
+}
+
+//this isn't needed anymore but should be moved to hex utility and shouldn't be here
+//TArray<uint8_t> FWallet::FStringToHexCharList(FString in)
+//{
+//	TArray<uint8_t> result;
+//	for (int i = 0; i < in.Len(); i++)
+//		result.Add((unsigned char)in[i]);
+//	return result;
+//}
+
 FString IntToHexString(uint64 Num)
 {
 	if (Num == 0)
@@ -144,69 +172,77 @@ TOptional<uint64> HexStringToUint64(FString Hex)
 	return Sum;
 }
 
-FString HashToHexString(ByteLength Size, uint8* Hash)
+//deprecated and superceded by BytesToHex (Unreal provided Util)
+//FString HashToHexString(ByteLength Size, uint8* Hash)
+//{
+//	FString String = "";
+//	
+//	for(uint32 i = 0; i < Size; i++)
+//	{
+//		const uint8 Byte = Hash[i];
+//
+//		FString Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
+//		String = String + Added;
+//	}
+//
+//	//String.RemoveFromStart("0x");
+//
+//	return String;
+//}
+
+uint8* HexToBytesInline(FString in, uint32 size)
 {
-	FString String = "";
-	
-	for(uint32 i = 0; i < Size; i++)
-	{
-		const uint8 Byte = Hash[i];
-
-		FString Added = IntToHexLetter(Byte >> 4) + IntToHexLetter(Byte & 0xf);
-		String = String + Added;
-	}
-
-	//String.RemoveFromStart("0x");
-
-	return String;
+	uint8* bytes = new uint8[size];
+	HexToBytes(in, bytes);
+	return bytes;
 }
 
-uint8* HexStringToBytes(ByteLength Size, FString Hex)
-{
-	const Hash Hash = new uint8[Size];
-	// Set it to 0s
-	for(uint32 i = 0; i < Size; i++)
-	{
-		Hash[i] = 0x00;
-	}
-
-	// Compensation for 0x
-	int Offset = 0;
-	if(Hex.StartsWith("0x"))
-	{
-		Offset = 2;
-	}
-
-	if(Hex.Len() % 2 == 1)
-	{
-		Hex.InsertAt(Offset, '0');
-	}
-	
-	for(int Counter = 0; Counter < Size; Counter++)
-	{
-		
-		if(Hex.Len() - 1 - 2 * Counter < Offset)
-		{
-			break;
-		}
-
-		TOptional<uint8> Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
-		TOptional<uint8> Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
-
-		if(!Lower.IsSet() || !Upper.IsSet())
-		{
-			delete[] Hash;
-			return nullptr;
-		}
-
-		const int LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
-		const int UpperVal = Lower.GetValue() & 0x0000000F;
-		const uint32 Pos = Size - 1 - Counter;
-		Hash[Pos] = LowerVal + UpperVal;
-	}
-
-	return Hash;	
-}
+//uint8* HexStringToBytes(ByteLength Size, FString Hex)
+//{
+//	const Hash Hash = new uint8[Size];
+//	// Set it to 0s
+//	for(uint32 i = 0; i < Size; i++)
+//	{
+//		Hash[i] = 0x00;
+//	}
+//
+//	// Compensation for 0x
+//	int Offset = 0;
+//	if(Hex.StartsWith("0x"))
+//	{
+//		Offset = 2;
+//	}
+//
+//	if(Hex.Len() % 2 == 1)
+//	{
+//		Hex.InsertAt(Offset, '0');
+//	}
+//	
+//	for(int Counter = 0; Counter < Size; Counter++)
+//	{
+//		
+//		if(Hex.Len() - 1 - 2 * Counter < Offset)
+//		{
+//			break;
+//		}
+//
+//		TOptional<uint8> Lower = HexLetterToInt(Hex[Hex.Len() - 1 - 2 * Counter]);
+//		TOptional<uint8> Upper = HexLetterToInt(Hex[Hex.Len() - 2 - 2 * Counter]);
+//
+//		if(!Lower.IsSet() || !Upper.IsSet())
+//		{
+//			delete[] Hash;
+//			return nullptr;
+//		}
+//
+//		const int LowerVal = (Upper.GetValue() << 4) & 0x000000F0;
+//		const int UpperVal = Lower.GetValue() & 0x0000000F;
+//		const uint32 Pos = Size - 1 - Counter;
+//		Hash[Pos] = LowerVal + UpperVal;
+//	}
+//
+//	return Hash;	
+//}
 
 
 

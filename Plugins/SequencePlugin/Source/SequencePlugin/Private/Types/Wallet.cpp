@@ -9,9 +9,10 @@
 
 FWallet::FWallet()
 {
+	this->PrivateKey = FPrivateKey::New();
 	for (int i = 0; i < 32; i++)
 	{
-		this->PrivateKey.Arr[i] = (uint8)FMath::RandRange(MIN_int32, MAX_int32);
+		this->PrivateKey.Arr[i] = RandomByte();
 	}
 	this->PublicKey = GetPublicKey(this->PrivateKey);
 	this->Address = GetAddress(this->PublicKey);
@@ -31,23 +32,6 @@ FWallet::FWallet(const FString& PrivateKey)
 		this->PublicKey = GetPublicKey(this->PrivateKey);
 		this->Address = GetAddress(this->PublicKey);
 	}
-}
-
-// "\x19 Ethereum Signed Message:\n" + message.Len() + BytesToString(MesgHash.Arr, MesgHash.GetLength());
-// 12B1013E3EEBC2C6D11C4371D8919E87D54BBC572F14D74112AFF3F0224D361430BDB5F04554749B4CD4F5EACCF46A4F0966E538BC597726611F2D35DA9E711301
-
-// "\x19" + "Ethereum Signed Message:\n" + message.Len() + BytesToString(MesgHash.Arr, MesgHash.GetLength());
-// 7B893AAFCDD55830A641B209A803F2599B6D40A0A9F25441C45AE4B58EEEE43632F6D11218548D0ADF0D4EEFAFE6116AF3346AA75CC8316CD22BDC99A2662AD900
-
-// "\x19" + "Ethereum Signed Message:\n32" + "BytesToString(MesgHash.Arr, MesgHash.GetLength())"
-// 343E2C893CC66979AD7E9BF15C25C32C351FF4F0F8F03CFD4D9664286D61487B67CAC33B23C211A92477FC757D9740077D54873F654B67F87F1A48DF47E7FB3901
-
-TArray<uint8_t> FWallet::FStringToHexCharList(FString in)
-{
-	TArray<uint8_t> result;
-	for (int i = 0; i < in.Len(); i++)
-		result.Add((unsigned char)in[i]);
-	return result;
 }
 
 TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)

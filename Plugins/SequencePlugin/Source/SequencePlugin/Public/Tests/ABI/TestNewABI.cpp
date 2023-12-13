@@ -43,11 +43,13 @@ bool TestNewABI::RunTest(const FString& Parameters)
 
 	if(true)
 	{
-		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
+		//UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
+		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(&Obj.Arr[0], GMethodIdByteLength));
 		for(auto i = 0; i < BlockNum; i++)
 		{
 			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
-			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+			//UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
+			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(&Obj.Arr[Addr], GBlockByteLength));
 		}
 	}
 

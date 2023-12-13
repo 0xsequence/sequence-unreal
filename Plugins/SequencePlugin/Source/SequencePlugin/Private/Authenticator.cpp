@@ -8,6 +8,7 @@
 #include "Eth/EthTransaction.h"
 #include "Eth/Crypto.h"
 #include "Types/Wallet.h"
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
 //we always require a default constructor
 UAuthenticator::UAuthenticator()
@@ -353,23 +354,30 @@ TArray<uint8_t> UAuthenticator::PKCS7(FString in)
 
 FString UAuthenticator::InlineEIP_191(FString in)
 {
+	//this is wrong flatout
 	return "\x19 Ethereum Signed Message:\n"+in;
+}
+
+void UAuthenticator::TestSequenceFlow()
+{
+	FString testToken = "testToken";
+	TArray<uint8_t> testKey;
+	for (int i = 0; i < 32; i++)
+		testKey.Add((uint8_t)i);
+	this->AuthWithSequence(testToken,testKey);
 }
 
 void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
 {
-	//Generate random wallet for initiating auth!
-	FWallet RWallet = FWallet();
-
-	FString TempSessionWallet = TEXT("random_addr_temp");//still need to generate this
-	this->SessionWallet = TempSessionWallet;
-	FString Intent = "{\"version\":\"1.0.0\",\"packet\":{\"code\":\"openSession\",\"session\":\""+ TempSessionWallet +"\",\"proof\":{\"idToken\":\""+ IDTokenIn +"\"}}}";
-	FString Payload = "{\"projectId\":\"projectID_IN\",\"idToken\":\""+IDTokenIn+"\",\"sessionAddress\":\""+TempSessionWallet+"\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\""+Intent+"\"}";
+	//Generates a new Random Wallet
+	this->SessionWallet = new FWallet();
+	FString CachedWalletAddress = BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
+	FString Intent = "{\"version\":\"1.0.0\",\"packet\":{\"code\":\"openSession\",\"session\":\""+ CachedWalletAddress + "\",\"proof\":{\"idToken\":\"" + IDTokenIn + "\"}}}";
+	FString Payload = "{\"projectId\":\"projectID_IN\",\"idToken\":\""+IDTokenIn+"\",\"sessionAddress\":\""+ CachedWalletAddress +"\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\""+Intent+"\"}";
 
 	TArray<uint8_t> TPayload = this->PKCS7(Payload);
 
 	//need to encrypt the payload string now
-
 	AES_ctx ctx;
 	struct AES_ctx * PtrCtx = &ctx;
 
@@ -378,14 +386,41 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 
 	for (int i = 0; i < IVSize; i++)
 	{
-		iv.Add((uint8_t)FMath::RandRange(0,MAX_int32));
+		//iv.Add((uint8_t)FMath::RandRange(MIN_int32,MAX_int32));
 	}
 
 	AES_init_ctx_iv(PtrCtx, Key.GetData(), iv.GetData());
 	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
 
 	TPayload.Append(iv);//append the IV onto the encrypted payload
-	FString EncryptedPayload = BytesToString(TPayload.GetData(),TPayload.Num());
+	FString EncryptedPayload = BytesToHex(TPayload.GetData(),TPayload.Num());//cipher text
+
+	FHash256 SuffixHash = FHash256::New();
+	FUnsizedData EncryptedSigningData = StringToUTF8(EncryptedPayload);
+	Keccak256::getHash(EncryptedSigningData.Arr, EncryptedSigningData.GetLength(), SuffixHash.Arr);
+	
+	//this below may not actually be needed?
+
+	//FString prefix = "\x19";
+	//FString mid = "Ethereum Signed Message:\n32";
+	//FString suffix = BytesToHex(SuffixHash.Arr, SuffixHash.GetLength());
+
+	//FString testString = prefix + mid + suffix;
+
+	//FHash256 MesgHash = FHash256::New();
+	//FUnsizedData MesgData = StringToUTF8(prefix + mid + suffix);
+	//Keccak256::getHash(MesgData.Arr,MesgData.GetLength(),MesgHash.Arr);
+
+	//FString MesgStr = BytesToHex(MesgHash.Arr,MesgHash.GetLength());
+
+	//TArray<uint8> sig = this->SessionWallet->SignMessage(MesgStr);
+	//FString sigStr = BytesToHex(sig.GetData(),sig.Num());
+
+	////for signature verification incase something is going wrong we can verify this data using ext. tools
+	//UE_LOG(LogTemp, Display, TEXT("Adr: %s"), *CachedWalletAddress);
+	//UE_LOG(LogTemp, Display, TEXT("Msg: %s"), *MesgStr);
+	//UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
+
 
 }
 

@@ -20,14 +20,22 @@ public:
 	*/
 	FWallet(FPrivateKey PrivateKey);
 
+	/*
+	* Generates a wallet based on a given private key in string form
+	*/
 	FWallet(const FString& PrivateKey);
 
+	/*
+	* Signs the given message
+	*/
 	TArray<uint8> SignMessage(FString message);
 
+	//Accessors//
 	FPrivateKey GetWalletPrivateKey();
 	FPublicKey GetWalletPublicKey();
 	FAddress GetWalletAddress();
+	//Accessors//
 
+	//Used to build out the nonce used during the signing process
 private: TArray<uint8_t> BuildSigningNonce(uint8_t* messageHash, int32 size);
-private: TArray<uint8_t> FStringToHexCharList(FString in);
 };
