@@ -26,26 +26,9 @@ ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	this->hexDataList.Add("0");
-	this->hexDataList.Add("1");
-	this->hexDataList.Add("2");
-	this->hexDataList.Add("3");
-	this->hexDataList.Add("4");
-	this->hexDataList.Add("5");
-	this->hexDataList.Add("6");
-	this->hexDataList.Add("7");
-	this->hexDataList.Add("8");
-	this->hexDataList.Add("9");
-	this->hexDataList.Add("a");
-	this->hexDataList.Add("b");
-	this->hexDataList.Add("c");
-	this->hexDataList.Add("d");
-	this->hexDataList.Add("e");
-	this->hexDataList.Add("f");
 	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
-	this->requestHandler = NewObject<UObjectHandler>();//create our handler!
 	this->authenticator = NewObject<UAuthenticator>();
 	this->authenticator->Init(this);
 }
@@ -190,22 +173,7 @@ void ASequenceBackendManager::InitSystemData()
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
 	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
 	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
-	builder->initBuildSystemData(this->sequenceWallet, this->chainID, this->publicAddress, this);
-}
-
-void ASequenceBackendManager::InitSignin(FString Email)
-{
-	UE_LOG(LogTemp, Display, TEXT("[Signin Request Initiated]"));//first chunk simulates signin request code gen
-	FTimerHandle THSigninDelay;
-	FTimerDelegate Delegate;
-	const FString oobCode = "123456";
-	Delegate.BindUFunction(this, "UpdateSignin", oobCode);
-	GetWorld()->GetTimerManager().SetTimer(THSigninDelay, Delegate,1, false);
-
-	FTimerHandle TH_auth_delay;//second chunk simulates successful login this may be causing a crash
-	FTimerDelegate Delegate_2;
-	Delegate_2.BindUFunction(this, "UpdateAuthentication", true);
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate_2,3, false);
+	//builder->initBuildSystemData(this->sequenceWallet, this->chainID, this->publicAddress, this);
 }
 
 void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
@@ -304,74 +272,3 @@ void ASequenceBackendManager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpda
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-FString ASequenceBackendManager::GetMainURL()
-{
-	FString mainURL;
-	FString result;
-	TArray<FString> mnU;
-	mnU.Add("aHR0");
-	mnU.Add("cHM6Ly9k");
-	mnU.Add("ZXYt");
-	mnU.Add("bm9kZX");
-	mnU.Add("Mu");
-	mnU.Add("c2Vx");
-	mnU.Add("dWVuY2UuYX");
-	mnU.Add("BwL21haW5uZXQ=");
-
-	for (auto i : mnU)
-	{
-		mainURL.Append(i);
-	}
-	FBase64::Decode(mainURL, result);
-	return result;
-}
-
-FString ASequenceBackendManager::GetContinueURL()
-{
-	FString contURL;
-	FString result;
-	TArray<FString> ctU;
-	ctU.Add("aHR0cDo");
-	ctU.Add("vL2xvY2Fs");
-	ctU.Add("aG9zdDozMzM");
-	ctU.Add("zL2F1dG");
-	ctU.Add("g/aW50ZW50PQ==");
-
-	for (auto i : ctU)
-	{
-		contURL.Append(i);
-	}
-
-	FBase64::Decode(contURL, result);
-	return result;
-}
-
-FString ASequenceBackendManager::GetSigninURL()
-{
-	FString SigninURL;
-	FString Result;
-	TArray<FString> sgU;
-	sgU.Add("aHR0cHM6");
-	sgU.Add("Ly9pZGVu");
-	sgU.Add("dGl0eXRvb2xraXQuZ29vZ");
-	sgU.Add("2xlYXBpcy5jb20");
-	sgU.Add("vdj");
-	sgU.Add("EvY");
-	sgU.Add("WNjb3VudHM6c2VuZE9vYk");
-	sgU.Add("NvZG");
-	sgU.Add("U/a2V5PUFJem");
-	sgU.Add("FTeUN6cEl3W");
-	sgU.Add("GFjeFVISEEyNlB");
-	sgU.Add("PZmdPRnVBc");
-	sgU.Add("2dXc1VMSXVWWQ==");
-
-	for (auto i : sgU)
-	{
-		SigninURL.Append(i);
-	}
-
-	FBase64::Decode(SigninURL, Result);
-	return Result;
-}
-
-//end of old signin stuff
