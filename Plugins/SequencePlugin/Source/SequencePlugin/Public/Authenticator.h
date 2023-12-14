@@ -41,14 +41,37 @@ private:
 	FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
 	FString AppleClientID = TEXT("");//TODO still need this
 
-	FString Cached_IDToken;//not sure if I need this or not permenately
-
+	FString Cached_IDToken;
+	FString Cached_Email;
 	//AWS
-	FString IdentityPoolID = TEXT("nil");//TODO still need this
-	FString Region = TEXT("us-east-2");//TODO need to know how we are doing region handling for AWS
-	FString CognitoClientID = TEXT("nil");//TODO still need this
-	FString KMSKeyID = TEXT("nil");//TODO still need this
-	FString ProjectID = TEXT("nil");//TODO still need this
+	FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
+	FString Region = TEXT("us-east-2");
+	FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
+	FString KMSKeyID = TEXT("arn:aws:kms:us-east-2:170768627592:key/0fd8f803-9cb5-4de5-86e4-41963fb6043d");//TODO still need this
+	FString ProjectID = TEXT("nil");//TODO still need this we get this from builder?
+	FString WaasVersion = TEXT("1.0.0");
+	FString X_Sequence_Tenant = TEXT("9");
+	FString WaasRPCURL = TEXT("https://d14tu8valot5m0.cloudfront.net/rpc");
+
+	/*
+	* Region: "us-east-2"
+	* IdentityPoolId: "us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3"
+	* kmsEncryptionKeyId: "arn:aws:kms:us-east-2:170768627592:key/0fd8f803-9cb5-4de5-86e4-41963fb6043d"
+	* CognitoClientId: "5fl7dg7mvu534o9vfjbc6hj31p"
+	* X-Sequence-Tenant: 9
+	* WaaSVerion: "1.0.0"
+	* WaaS RPC URL: https://d14tu8valot5m0.cloudfront.net/rpc
+	*/
+	//I need the user pool id not the identity poolid for AWS based Issuer
+	//cognito-idp.us-east-2.amazonaws.com/us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3
+	//cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789
+	//Amazon Cognito user pool: cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>, for example, cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789. 
+	const FString AWSIssuer = "cognito-idp."+this->Region+".amazonaws.com/"+this->IdentityPoolID;
+	TMap<ESocialSigninType, FString> ProviderMap = { {ESocialSigninType::Google,"accounts.google.com"},{ESocialSigninType::FaceBook,"graph.facebook.com"},{ESocialSigninType::AWS,AWSIssuer} };
+	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
+
+	const int32 EmailAuthMaxRetries = 2;
+	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
 
 	//From GetId
 	FString IdentityId = TEXT("nil");
@@ -84,13 +107,17 @@ public:
 
 	void EmailLoginCode(const FString& CodeIn);
 
-	void EmailCodeCallout();
-
 	void TestSequenceFlow();
 private:
+	bool CanRetryEmailLogin();
+
+	void ResetRetryEmailLogin();
+
 	FString GenerateSigninURL(FString AuthURL, FString ClientID);
 
 	FString BuildAWSURL(const FString& Service);
+
+	FString GenerateSignUpPassword();
 
 	//RPC Calls//
 
@@ -100,11 +127,11 @@ private:
 
 	void KMSGenerateDataKey();
 
-	void CognitoIdentityInitiateAuth(const FString& Email, const FString& ClientID);
+	void CognitoIdentityInitiateAuth(const FString& Email);
 
-	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& CognitoID);
+	void CognitoIdentitySignUp(const FString& Email, const FString& Password);
 
-	void AdminRespondToAuthChallenge(const FString& Email, const FString& CognitoID, const FString& Answer, const FString& ChallengeSessionString);
+	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString);
 
 	//Sequence Specific//
 

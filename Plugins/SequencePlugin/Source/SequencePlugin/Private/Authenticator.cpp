@@ -51,17 +51,18 @@ FString UAuthenticator::GetRedirectURL()
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	//CognitoIdentityGetID("", UEnum::GetValueAsString(this->SocialSigninType.GetValue()), IDTokenIn);//Outputs IdentityID
+	CognitoIdentityGetID(this->IdentityPoolID, *ProviderMap.Find(this->SocialSigninType), IDTokenIn);//Outputs IdentityID
 	//CognitoIdentityGetCredentialsForIdentity("IdentityID",IDTokenIn,"Google");//Outputs {accessKeyID, secretKey, sessionToken}
 	//KMSGenerateDataKey();//outputs {plaintext, ciphertextblob, encryptedpayloadkey} the encryptedpayloadkey is the transport key
-	this->Manager->UpdateAuthentication(true);
+	//this->Manager->UpdateAuthentication(true);
 	//Now we do need to pass along credentials to be stored at runtime / stored in persistence too but for now we can use this!
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
-	//CognitoIdentityInitiateAuth(TEXT("cc@cc.cc"), this->CognitoClientID);// returns a challengeSession //responds back with some poolid error (probably needs a proper cognito id to work
-	//CognitoIdentitySignUp("cc@cc.cc", "password", this->CognitoClientID);
+	this->ResetRetryEmailLogin();
+	this->Cached_Email = EmailIn;
+	CognitoIdentityInitiateAuth(this->Cached_Email);
 	//AdminRespondToAuthChallenge("cc@cc.cc", this->CognitoClientID, "AnswerCode", "challengeSession");
 }
 
@@ -81,7 +82,7 @@ FString UAuthenticator::BuildAWSURL(const FString& Service)
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
 	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
-	FString RequestBody = "{\"IdentityPoolId\":\""+PoolID+"\",\"Logins\":{\""+Issuer+"\":\""+IDToken+"\"}}";
+	FString RequestBody = "{\"IdentityPoolId\":\""+PoolID+"\",\"Logins\":{\""+Issuer+"\":\"" + IDToken + "\"}}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -91,6 +92,7 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 		if (responseObj->TryGetStringField("IdentityId",IdentityIdPtr))
 		{//good state
 			this->IdentityId = IdentityIdPtr;
+			CognitoIdentityGetCredentialsForIdentity(this->IdentityId, this->Cached_IDToken, *ProviderMap.Find(this->SocialSigninType));
 		}
 		else
 		{//error state
@@ -109,7 +111,7 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
 	FString URL = this->BuildAWSURL("cognito-identity");
-	FString RequestBody = "{\"IdentityID\":\""+IdentityID+"\",\"Logins\":{\""+Issuer+"\":\""+IDToken+"\"}}";
+	FString RequestBody = "{\"identityId\":\"" + IdentityID + "\",\"Logins\":{\""+Issuer+ "\":\"" + IDToken + "\"}}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -166,10 +168,22 @@ void UAuthenticator::KMSGenerateDataKey()
 	this->RPC(URL,TEXT("TrentService.GenerateDataKey"), RequestBody,GenericSuccess,GenericFailure);
 }
 
-void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& ClientID)
+bool UAuthenticator::CanRetryEmailLogin()
+{
+	bool CanRetry = this->EmailAuthCurrRetries > 0;
+	this->EmailAuthCurrRetries--;
+	return CanRetry;
+}
+void UAuthenticator::ResetRetryEmailLogin()
+{
+	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
+}
+//{"ChallengeName":"CUSTOM_CHALLENGE","ChallengeParameters":{"USERNAME":"calvin.kork@zemind.ca","email":"calvin.kork@zemind.ca"},"Session":"AYABeDRBNTXwjDdiKReC6gz1ujgAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xzAAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMjo0MTc1Njc5MDM0Njk6a2V5LzVjZDI0ZDRjLWVjNWItNGU4Ny05MGI2LTVkODdkOTZmY2RkMgC4AQIBAHjif3k0w30uAyP92ifoZ0jN6g50UW_KR0w9Vv2c_wlQAgFcD3AeLz40hN6qT3brTZ14AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNlP9U8GQpdzKhhSIAgEQgDuzQ0-ZIhlhiPAPD6PhfA0hJBr7eaC5h9YtxCqfKUSTkHMLUPU4o_nb6KL_0AIS_LWOOiTVOLyV-F8PswI
+//AAAAADAAAEAAAAAAAAAAAAAAAAADTKxE0R7eYB6eh6L3UcbNY_____wAAAAEAAAAAAAAAAAAAAAEAAAEIZlxYuRBZtLGmlhHZXvCtX_9mdLhLnMZa9fuiq6DTmE19KO1KabO1swIRPG0ZPe42zfeoCoR0E9lyNneZSiNvp9duX1srgL9qFGLHsLg2lXLRFprFsWqyLU988yfVx5744buyg1m0JVuZrdiZx5zTlotlw4kehBQNz1SDJgkAVrn_GD4Da76pWE6yZbqu_7XkmPPOGCxIFEWpPz0e143FlZQtFkDKd1m1oSMVhbybK3F4JLKIqW5o5sfS8IyO71RdSX4opcWz8xoxkvHbPbAKqH7w2GKJxNsidhgsDHirDMHzQFKw0CRZg5AYHoiXPKaWqWAfxVZVVvq28cfGejOvVfLCAiX9txeDJSZ2IPvBb9TOc87mRVF3og"}
+void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 {
 	FString URL = BuildAWSURL(TEXT("cognito-idp"));
-	FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+Email+"\"},\"ClientId\":\""+ClientID+"\"}";
+	FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+Email+"\"},\"ClientId\":\""+this->CognitoClientID+"\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -179,10 +193,22 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 		if (responseObj->TryGetStringField("Session", SessionPtr))
 		{//good state
 			this->ChallengeSession = SessionPtr;
+			this->Manager->ReadyToReceiveCodeDelegate.Broadcast();
+			//we need to signal the frontend that the code display window needs to be shown
+			//this->Manager->ReadyToReceiveCodeDelegate->Execute();
 		}
 		else
 		{//error state
-
+			if (response.Contains("user not found", ESearchCase::IgnoreCase))
+			{//no user exists so create one!
+				UE_LOG(LogTemp, Display, TEXT("Need to create user"));
+				this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword());
+			}
+			else
+			{//unknown error
+				//need a frontend error signal
+				//preferred way would be via event dispatchers
+			}
 		}
 	};
 
@@ -191,18 +217,32 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 	};
 	
-	this->RPC(URL,TEXT("AWSCognitoIdentityProviderService.InitiateAuth"), RequestBody,GenericSuccess,GenericFailure);
+	if (this->CanRetryEmailLogin())
+		this->RPC(URL,TEXT("AWSCognitoIdentityProviderService.InitiateAuth"), RequestBody,GenericSuccess,GenericFailure);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Max login attempts reached]"));
 }
 
-void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& CognitoID)
+FString UAuthenticator::GenerateSignUpPassword()
+{
+	FString pw = "aB1%";
+	const int32 len = 12;
+	for (int i = 0; i < len; i++)
+	{
+		pw += this->PWCharList[FMath::RandRange(0,this->PWCharList.Num()-1)];
+	}
+	return pw;
+}
+
+void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password)
 {
 	FString URL = BuildAWSURL("cognito-idp");
-	FString RequestBody = "{\"ClientId\":\""+ CognitoID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\""+ Email +"\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
+	FString RequestBody = "{\"ClientId\":\""+ this->CognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		//don't need anything from this other than status code 200
+		this->CognitoIdentityInitiateAuth(this->Cached_Email);
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
@@ -213,22 +253,32 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	this->RPC(URL, TEXT("AWSCognitoIdentityProviderService.SignUp"), RequestBody, GenericSuccess, GenericFailure);
 }
 
-void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& CognitoID, const FString& Answer, const FString& ChallengeSessionString)
+void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString)
 {
 	FString URL = BuildAWSURL("cognito-idp");
-	FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+CognitoID+"\",\"Session\":\""+ChallengeSession+"\",\"ChallengeResponses\":{\"USERNAME\":\""+Email+"\",\"ANSWER\":\""+Answer+"\"}}";
+	FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+this->CognitoClientID+"\",\"Session\":\""+ChallengeSession+"\",\"ChallengeResponses\":{\"USERNAME\":\""+Email+"\",\"ANSWER\":\""+Answer+"\"}}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString IDTokenPtr;
-		if (responseObj->TryGetStringField("IdToken", IDTokenPtr))
-		{//good state
-			this->Cached_IDToken = IDTokenPtr;
+		const TSharedPtr<FJsonObject> *AuthObject;
+		if (responseObj->TryGetObjectField("AuthenticationResult", AuthObject))
+		{
+			if (AuthObject->Get()->TryGetStringField("IdToken", IDTokenPtr))
+			{//good state
+				this->Cached_IDToken = IDTokenPtr;
+				this->SetSocialLoginType(ESocialSigninType::AWS);
+				this->SocialLogin(this->Cached_IDToken);
+			}
+			else
+			{//error state
+
+			}
 		}
 		else
-		{//error state
+		{
 
 		}
 	};
@@ -252,7 +302,9 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-
+	UE_LOG(LogTemp, Display, TEXT("[Code Input: %s]"), *CodeIn);
+	//Here we send AWS RPC call to continue Auth process
+	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession);
 }
 
 void UAuthenticator::TestSequenceFlow()
@@ -283,7 +335,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 
 	for (int i = 0; i < IVSize; i++)
 	{
-		//iv.Add((uint8_t)FMath::RandRange(MIN_int32,MAX_int32));
+		iv.Add(RandomByte());
 	}
 
 	AES_init_ctx_iv(PtrCtx, Key.GetData(), iv.GetData());
@@ -329,6 +381,6 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 		->WithHeader("Content-type", "application/x-amz-json-1.1")
 		->WithHeader("X-AMZ-TARGET", AMZTarget)
 		->WithVerb("POST")
-		->WithContentAsString(RequestBody)
+		->WithContentAsString(RequestBody)//might need keep alive?
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
