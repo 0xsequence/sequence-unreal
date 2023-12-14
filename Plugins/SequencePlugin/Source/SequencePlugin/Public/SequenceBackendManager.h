@@ -47,22 +47,13 @@ public:
 	FOnShowLoadingScreen ShowLoadingScreenDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnShowLoginScreen ShowLoginScreenDelegate;
-private:
-	FString publicAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";//this is the signed in public addr
-	int64 chainID = 137; //this is the chain we are currently using
-
-	FString privateKey; // private key for signin
-	FString publicKey; // public key for signin
-
-	//Deprecated we now utilize the HexLUT list instead
-	TArray<FString> hexDataList;//this is our LUT of hexidecimal data!
+private:	
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;
 	UAuthenticator* authenticator;
-	UObjectHandler* requestHandler;//going to be reworked into an image handler
-	//https://accounts.google.com/o/oauth2/auth?response_type=id_token&client_id=970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com&redirect_uri=https://3d41-142-115-54-118.ngrok-free.app/&scope=openid+profile+email&state=604063DB47CAAC7E7547A789E7BC3244&nonce=81C518BB46601888C649D9BDF58A2DAA
-	UAuth* auth;//for auth handling
+	UAuth* auth;//for persistent auth, used to read persistent stored data for automatic authentication
 	
+	//Vars beneath need to go
 	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
 	FString userEmail;
 	int32 accountID;
@@ -105,6 +96,7 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString GetTransactionHash(FTransaction_FE Transaction);
 
+	//this needs to be changed such that our creds stay within the C++ realm not the blueprint realm for ease of use
 	//Used to get the stored auth credentials encrypt them and send them up
 	//to be stored in a game save object
 	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
@@ -173,23 +165,6 @@ public:
 		void UpdateSystemTestableData(const FSystemData_BE& systemData);
 
 	/*
-	* Used to initate the signin process from the frontend
-	* This call will make 2 calls
-	* 1) to generate an oob code and send that back to the front end
-	* 2) a call to authenticate user credentials in relation to the oob code that was sent out
-	* If authentication succeeds we send update_authentication(true)
-	* If authentication fails (times out / error) we send update_authentication(false)
-	*/
-	UFUNCTION(BlueprintCallable, CATEGORY="Signin")
-		void InitSignin(FString Email);
-
-	/*
-	* Used to tell the frontend that the signin process has been initiated and the code here is present!
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Signin")
-		void UpdateSignin(const FString &oobCode);
-
-	/*
 	* Used to initalize a send transaction!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Send_Txn")
@@ -219,13 +194,6 @@ public:
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
 private:
-
-	//These functions are used to generate the URL's need to interact with
-	//the various aspects of the sequence app
-	FString GetMainURL();
-	FString GetContinueURL();
-	FString GetSigninURL();
-
 	//testing functions//
 
 	UFUNCTION()
