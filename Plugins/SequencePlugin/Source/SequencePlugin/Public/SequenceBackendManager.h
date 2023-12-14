@@ -30,11 +30,23 @@ public:
 	int32 accountID = -1;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyToReceiveCode);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShowLoadingScreen);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShowLoginScreen);
+
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBackend
 {
 	GENERATED_BODY()
-
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnReadyToReceiveCode ReadyToReceiveCodeDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnShowLoadingScreen ShowLoadingScreenDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnShowLoginScreen ShowLoginScreenDelegate;
 private:
 	FString publicAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";//this is the signed in public addr
 	int64 chainID = 137; //this is the chain we are currently using
@@ -42,9 +54,10 @@ private:
 	FString privateKey; // private key for signin
 	FString publicKey; // public key for signin
 
+	//Deprecated we now utilize the HexLUT list instead
 	TArray<FString> hexDataList;//this is our LUT of hexidecimal data!
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
-	UIndexer* Indexer;//indexer ref!
+	UIndexer* Indexer;
 	UAuthenticator* authenticator;
 	UObjectHandler* requestHandler;//going to be reworked into an image handler
 	//https://accounts.google.com/o/oauth2/auth?response_type=id_token&client_id=970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com&redirect_uri=https://3d41-142-115-54-118.ngrok-free.app/&scope=openid+profile+email&state=604063DB47CAAC7E7547A789E7BC3244&nonce=81C518BB46601888C649D9BDF58A2DAA
@@ -112,9 +125,8 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailLogin(const FString& EmailIn);
 
-	//This function signals to the frontend to display a prompt for the user to enter a received code in the UI
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Login")
-		void EmailCodeCallout();
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void EmailCode(const FString& CodeIn);
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 

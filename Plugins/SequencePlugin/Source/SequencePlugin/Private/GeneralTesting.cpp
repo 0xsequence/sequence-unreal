@@ -161,18 +161,10 @@ void AGeneralTesting::TestEncryption() const
 	UE_LOG(LogTemp, Display, TEXT("[TestWallet: %s\nSig Length: %d]"), *SigString,SigString.Len());*/
 	//delete TestWallet;
 
-	//UAuthenticator* authenticator = NewObject<UAuthenticator>();
+	UAuthenticator* authenticator = NewObject<UAuthenticator>();
+	authenticator->TestSequenceFlow();
 	//authenticator->Init(nullptr);//this is only for testing
 	//authenticator->TestSequenceFlow();
-
-	FWallet testWallet = FWallet();
-	FString addr = BytesToHex(testWallet.GetWalletAddress().Arr,testWallet.GetWalletAddress().GetLength());
-	FString mesg = "Hello World";
-	TArray<uint8> sig = testWallet.SignMessage(mesg);
-	FString sigStr = BytesToHex(sig.GetData(), sig.Num());
-	UE_LOG(LogTemp, Display, TEXT("Adr: %s"), *addr);
-	UE_LOG(LogTemp, Display, TEXT("Msg: %s"), *mesg);
-	UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
 }
 
 //dedicated encryption test!

@@ -71,14 +71,14 @@ void ASequenceBackendManager::BeginPlay()
 */
 void ASequenceBackendManager::CopyToClipboard(FString data)
 {
-	FGenericPlatformMisc::ClipboardCopy(*data);
+	//FGenericPlatformMisc::ClipboardCopy(*data);
 }
 
 FString ASequenceBackendManager::GetFromClipboard()
 {
 	FString retData;
 	//gets data from clipboard but it comes back invalid? this will be broken until we move up engine versions (hopefully epic actually implements a real solution)
-	FGenericPlatformMisc::ClipboardPaste(retData);
+	//FGenericPlatformMisc::ClipboardPaste(retData);
 	return retData;
 }
 
@@ -115,6 +115,11 @@ void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
 void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
 {
 	this->authenticator->EmailLogin(EmailIn);
+}
+
+void ASequenceBackendManager::EmailCode(const FString& CodeIn)
+{
+	this->authenticator->EmailLoginCode(CodeIn);
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
