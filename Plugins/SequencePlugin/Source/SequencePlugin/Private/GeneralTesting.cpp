@@ -162,7 +162,6 @@ void AGeneralTesting::TestEncryption() const
 	//delete TestWallet;
 
 	UAuthenticator* authenticator = NewObject<UAuthenticator>();
-	authenticator->TestSequenceFlow();
 	//authenticator->Init(nullptr);//this is only for testing
 	//authenticator->TestSequenceFlow();
 }

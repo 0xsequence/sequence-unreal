@@ -21,6 +21,22 @@ FUserDetails ASequenceBackendManager::getUserDetails()
 	return ret;
 }
 
+
+void ASequenceBackendManager::CallReadyToReceiveCode()
+{
+	this->ReadyToReceiveCodeDelegate.Broadcast();
+}
+
+void ASequenceBackendManager::CallShowLoadingScreen()
+{
+	this->ShowLoadingScreenDelegate.Broadcast();
+}
+
+void ASequenceBackendManager::CallShowLoginScreen()
+{
+	this->ShowLoginScreenDelegate.Broadcast();
+}
+
 // Sets default values
 ASequenceBackendManager::ASequenceBackendManager()
 {
@@ -30,7 +46,8 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
 	this->authenticator = NewObject<UAuthenticator>();
-	this->authenticator->Init(this);
+	//setup up delegate bindings
+	this->authenticator->AuthRequiresCode.AddDynamic(this,&ASequenceBackendManager::CallReadyToReceiveCode);
 }
 
 ASequenceBackendManager::~ASequenceBackendManager()

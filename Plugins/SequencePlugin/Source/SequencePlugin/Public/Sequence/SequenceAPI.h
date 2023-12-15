@@ -9,6 +9,7 @@ namespace SequenceAPI
 {
 	using FSignature = FUnsizedData;
 
+	//This is already defined elsewhere
 	enum ESortOrder {
 		DESC,
 		ASC
@@ -17,6 +18,7 @@ namespace SequenceAPI
 	FString SortOrderToString(ESortOrder SortOrder);
 	ESortOrder StringToSortOrder(FString String);
 
+	//This is already defined elsewhere
 	struct FSortBy
 	{
 		FString Column;
@@ -26,6 +28,7 @@ namespace SequenceAPI
 		static FSortBy From(TSharedPtr<FJsonObject> Json);
 	};
 
+	//This is already defined Barring the TOptional<>
 	struct FPage
 	{
 		TOptional<uint64> PageSize;
@@ -39,6 +42,8 @@ namespace SequenceAPI
 	};
 
 	using TransactionID = FString;
+
+	//This is already Defined
 	struct FTransaction
 	{
 		uint64 ChainId;
@@ -58,6 +63,7 @@ namespace SequenceAPI
 		const TransactionID ID();
 	};
 
+	//This might not be defined else where
 	struct FPartnerWallet
 	{
 		uint64 Number;
@@ -68,17 +74,20 @@ namespace SequenceAPI
 		static FPartnerWallet From(TSharedPtr<FJsonObject> Json);
 	};
 
+	//This isn't defined anywhere but here
 	struct FDeployWalletReturn
 	{
 		FString Address;
 		FString TransactionHash;
 	};
 
+	//This isn't defined anywhere but here
 	struct FWalletsReturn
 	{
 		TArray<FPartnerWallet> Wallets;
 		FPage Page;
 	};
+
 	const static FString sequenceURL_QR = "https://api.sequence.app/qr/";
 	class FSequenceWallet : public RPCCaller
 	{
@@ -98,7 +107,7 @@ namespace SequenceAPI
 		//Raw request functions
 		virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) override;
 
-		//Response helper functions
+		//Response helper functions might be dead code but who knows?
 		TArray<FContact_BE> buildFriendListFromJson(FString json);
 		TArray<FItemPrice_BE> buildItemUpdateListFromJson(FString json);
 		
@@ -121,9 +130,7 @@ namespace SequenceAPI
 
 		//deprecated?
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
-
-
-		//Frontend needs this if we even have a frontend anymore?
+		
 		void getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 		void getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 
