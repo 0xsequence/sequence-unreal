@@ -30,11 +30,11 @@ public:
 	int32 accountID = -1;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReadyToReceiveCode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShowLoadingScreen);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShowLoginScreen);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBackend
@@ -42,20 +42,20 @@ class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBacken
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable)
-		FOnReadyToReceiveCode ReadyToReceiveCodeDelegate;
+		FOnAuthIRequiresCode ReadyToReceiveCodeDelegate;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnShowLoadingScreen ShowLoadingScreenDelegate;
+		FOnAuthIFailure ShowAuthFailureDelegate;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnShowLoginScreen ShowLoginScreenDelegate;
+		FOnAuthISuccess ShowAuthSuccessDelegate;
 private:
 	UFUNCTION()
 		void CallReadyToReceiveCode();
 	UFUNCTION()
-		void CallShowLoadingScreen();
+		void CallShowAuthFailureScreen();
 	UFUNCTION()
-		void CallShowLoginScreen();
+		void CallShowAuthSuccessScreen();
 private:	
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;

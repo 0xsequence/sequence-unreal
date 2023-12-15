@@ -24,17 +24,26 @@ FUserDetails ASequenceBackendManager::getUserDetails()
 
 void ASequenceBackendManager::CallReadyToReceiveCode()
 {
-	this->ReadyToReceiveCodeDelegate.Broadcast();
+	if (this->ReadyToReceiveCodeDelegate.IsBound())
+		this->ReadyToReceiveCodeDelegate.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ReadyToReceiveCodeDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowLoadingScreen()
+void ASequenceBackendManager::CallShowAuthFailureScreen()
 {
-	this->ShowLoadingScreenDelegate.Broadcast();
+	if (this->ShowAuthFailureDelegate.IsBound())
+		this->ShowAuthFailureDelegate.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowLoginScreen()
+void ASequenceBackendManager::CallShowAuthSuccessScreen()
 {
-	this->ShowLoginScreenDelegate.Broadcast();
+	if (this->ShowAuthSuccessDelegate.IsBound())
+		this->ShowAuthSuccessDelegate.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
 }
 
 // Sets default values
