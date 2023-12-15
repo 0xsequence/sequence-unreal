@@ -42,11 +42,20 @@ class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBacken
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnReadyToReceiveCode ReadyToReceiveCodeDelegate;
+		FOnReadyToReceiveCode ReadyToReceiveCodeDelegate;
+
 	UPROPERTY(BlueprintAssignable)
-	FOnShowLoadingScreen ShowLoadingScreenDelegate;
+		FOnShowLoadingScreen ShowLoadingScreenDelegate;
+
 	UPROPERTY(BlueprintAssignable)
-	FOnShowLoginScreen ShowLoginScreenDelegate;
+		FOnShowLoginScreen ShowLoginScreenDelegate;
+private:
+	UFUNCTION()
+		void CallReadyToReceiveCode();
+	UFUNCTION()
+		void CallShowLoadingScreen();
+	UFUNCTION()
+		void CallShowLoginScreen();
 private:	
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;

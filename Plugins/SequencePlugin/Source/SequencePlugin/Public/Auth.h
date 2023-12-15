@@ -24,7 +24,7 @@ public:
 /**
  * 
  */
-UCLASS()
+UCLASS()//rename this to UPersistentAuth for a better representation of this objects purpose
 class SEQUENCEPLUGIN_API UAuth : public UObject
 {
 	GENERATED_BODY()

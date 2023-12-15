@@ -2,7 +2,6 @@
 
 #include "Authenticator.h"
 #include "Misc/Guid.h"
-#include "SequenceBackendManager.h"
 #include "AES/aes.c"
 #include "AES/aes.h"
 #include "Eth/EthTransaction.h"
@@ -16,14 +15,30 @@ UAuthenticator::UAuthenticator()
 {
 	this->Nonce = FGuid::NewGuid().ToString();
 	this->StateToken = FGuid::NewGuid().ToString();
-	this->Manager = nullptr;
 }
 
-void UAuthenticator::Init(ASequenceBackendManager * ManagerIn)
+void UAuthenticator::CallAuthRequiresCode()
 {
-	this->Nonce = FGuid::NewGuid().ToString();
-	this->StateToken = FGuid::NewGuid().ToString();
-	this->Manager = ManagerIn;
+	if (this->AuthRequiresCode.IsBound())
+		this->AuthRequiresCode.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
+}
+
+void UAuthenticator::CallAuthFailure()
+{
+	if (this->AuthFailure.IsBound())
+		this->AuthFailure.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
+}
+
+void UAuthenticator::CallAuthSuccess()
+{
+	if (this->AuthSuccess.IsBound())
+		this->AuthSuccess.Broadcast();
+	else
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
 void UAuthenticator::SetSocialLoginType(ESocialSigninType Type)
@@ -51,11 +66,7 @@ FString UAuthenticator::GetRedirectURL()
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	CognitoIdentityGetID(this->IdentityPoolID, *ProviderMap.Find(this->SocialSigninType), IDTokenIn);//Outputs IdentityID
-	//CognitoIdentityGetCredentialsForIdentity("IdentityID",IDTokenIn,"Google");//Outputs {accessKeyID, secretKey, sessionToken}
-	//KMSGenerateDataKey();//outputs {plaintext, ciphertextblob, encryptedpayloadkey} the encryptedpayloadkey is the transport key
-	//this->Manager->UpdateAuthentication(true);
-	//Now we do need to pass along credentials to be stored at runtime / stored in persistence too but for now we can use this!
+	CognitoIdentityGetID(this->IdentityPoolID, *ProviderMap.Find(this->SocialSigninType), IDTokenIn);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
@@ -63,7 +74,6 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	this->ResetRetryEmailLogin();
 	this->Cached_Email = EmailIn;
 	CognitoIdentityInitiateAuth(this->Cached_Email);
-	//AdminRespondToAuthChallenge("cc@cc.cc", this->CognitoClientID, "AnswerCode", "challengeSession");
 }
 
 FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
@@ -96,13 +106,15 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 		}
 		else
 		{//error state
-
+			UE_LOG(LogTemp, Error, TEXT("[No IdentityID found in AWS Response]"));
+			this->CallAuthFailure();
 		}
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"),*Error.Message);
+		this->CallAuthFailure();
 	};
 
 	this->RPC(URL,TEXT("com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetId"), RequestBody, GenericSuccess, GenericFailure);
@@ -123,16 +135,19 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 			this->AccessKeyId = AccessKeyPtr;
 			this->SecretKey = SecretKeyPtr;
 			this->SessionToken = SessionTokenPtr;
+			//We move onto sequence Auth aspect from here
 		}
 		else
 		{//error state
-
+			UE_LOG(LogTemp, Error, TEXT("[Missing Credentials in AWS Response]"));
+			this->CallAuthFailure();
 		}
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
 	};
 
 	this->RPC(URL,TEXT("com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetCredentialsForIdentity"),RequestBody,GenericSuccess,GenericFailure);
@@ -156,13 +171,15 @@ void UAuthenticator::KMSGenerateDataKey()
 		}
 		else
 		{//error state
-
+			UE_LOG(LogTemp, Error, TEXT("[Missing Credentials in AWS Response]"));
+			this->CallAuthFailure();
 		}
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
 	};
 
 	this->RPC(URL,TEXT("TrentService.GenerateDataKey"), RequestBody,GenericSuccess,GenericFailure);
@@ -174,12 +191,12 @@ bool UAuthenticator::CanRetryEmailLogin()
 	this->EmailAuthCurrRetries--;
 	return CanRetry;
 }
+
 void UAuthenticator::ResetRetryEmailLogin()
 {
 	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
 }
-//{"ChallengeName":"CUSTOM_CHALLENGE","ChallengeParameters":{"USERNAME":"calvin.kork@zemind.ca","email":"calvin.kork@zemind.ca"},"Session":"AYABeDRBNTXwjDdiKReC6gz1ujgAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xzAAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMjo0MTc1Njc5MDM0Njk6a2V5LzVjZDI0ZDRjLWVjNWItNGU4Ny05MGI2LTVkODdkOTZmY2RkMgC4AQIBAHjif3k0w30uAyP92ifoZ0jN6g50UW_KR0w9Vv2c_wlQAgFcD3AeLz40hN6qT3brTZ14AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNlP9U8GQpdzKhhSIAgEQgDuzQ0-ZIhlhiPAPD6PhfA0hJBr7eaC5h9YtxCqfKUSTkHMLUPU4o_nb6KL_0AIS_LWOOiTVOLyV-F8PswI
-//AAAAADAAAEAAAAAAAAAAAAAAAAADTKxE0R7eYB6eh6L3UcbNY_____wAAAAEAAAAAAAAAAAAAAAEAAAEIZlxYuRBZtLGmlhHZXvCtX_9mdLhLnMZa9fuiq6DTmE19KO1KabO1swIRPG0ZPe42zfeoCoR0E9lyNneZSiNvp9duX1srgL9qFGLHsLg2lXLRFprFsWqyLU988yfVx5744buyg1m0JVuZrdiZx5zTlotlw4kehBQNz1SDJgkAVrn_GD4Da76pWE6yZbqu_7XkmPPOGCxIFEWpPz0e143FlZQtFkDKd1m1oSMVhbybK3F4JLKIqW5o5sfS8IyO71RdSX4opcWz8xoxkvHbPbAKqH7w2GKJxNsidhgsDHirDMHzQFKw0CRZg5AYHoiXPKaWqWAfxVZVVvq28cfGejOvVfLCAiX9txeDJSZ2IPvBb9TOc87mRVF3og"}
+
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 {
 	FString URL = BuildAWSURL(TEXT("cognito-idp"));
@@ -193,21 +210,19 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 		if (responseObj->TryGetStringField("Session", SessionPtr))
 		{//good state
 			this->ChallengeSession = SessionPtr;
-			this->Manager->ReadyToReceiveCodeDelegate.Broadcast();
-			//we need to signal the frontend that the code display window needs to be shown
-			//this->Manager->ReadyToReceiveCodeDelegate->Execute();
+			this->CallAuthRequiresCode();
 		}
 		else
 		{//error state
 			if (response.Contains("user not found", ESearchCase::IgnoreCase))
 			{//no user exists so create one!
-				UE_LOG(LogTemp, Display, TEXT("Need to create user"));
+				UE_LOG(LogTemp, Display, TEXT("Creating New User"));
 				this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword());
 			}
 			else
 			{//unknown error
-				//need a frontend error signal
-				//preferred way would be via event dispatchers
+				UE_LOG(LogTemp, Error, TEXT("[Unexpected error when trying to authenticate]"));
+				this->CallAuthFailure();
 			}
 		}
 	};
@@ -215,12 +230,18 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
 	};
 	
 	if (this->CanRetryEmailLogin())
-		this->RPC(URL,TEXT("AWSCognitoIdentityProviderService.InitiateAuth"), RequestBody,GenericSuccess,GenericFailure);
+	{
+		this->RPC(URL, TEXT("AWSCognitoIdentityProviderService.InitiateAuth"), RequestBody, GenericSuccess, GenericFailure);
+	}
 	else
+	{
 		UE_LOG(LogTemp, Error, TEXT("[Max login attempts reached]"));
+		this->CallAuthFailure();
+	}
 }
 
 FString UAuthenticator::GenerateSignUpPassword()
@@ -248,6 +269,7 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
 	};
 
 	this->RPC(URL, TEXT("AWSCognitoIdentityProviderService.SignUp"), RequestBody, GenericSuccess, GenericFailure);
@@ -274,18 +296,21 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 			}
 			else
 			{//error state
-
+				UE_LOG(LogTemp, Error, TEXT("[No idToken found in AuthenticationResult]"));
+				this->CallAuthFailure();
 			}
 		}
 		else
 		{
-
+			UE_LOG(LogTemp, Error, TEXT("[No Authentication Result found]"));
+			this->CallAuthFailure();
 		}
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
 	};
 
 	this->RPC(URL, TEXT("AWSCognitoIdentityProviderService.RespondToAuthChallenge"), RequestBody, GenericSuccess, GenericFailure);
@@ -302,18 +327,7 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-	UE_LOG(LogTemp, Display, TEXT("[Code Input: %s]"), *CodeIn);
-	//Here we send AWS RPC call to continue Auth process
 	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession);
-}
-
-void UAuthenticator::TestSequenceFlow()
-{
-	FString testToken = "testToken";
-	TArray<uint8_t> testKey;
-	for (int i = 0; i < 32; i++)
-		testKey.Add((uint8_t)i);
-	this->AuthWithSequence(testToken,testKey);
 }
 
 void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
@@ -369,8 +383,6 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	//UE_LOG(LogTemp, Display, TEXT("Adr: %s"), *CachedWalletAddress);
 	//UE_LOG(LogTemp, Display, TEXT("Msg: %s"), *MesgStr);
 	//UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
-
-
 }
 
 void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
