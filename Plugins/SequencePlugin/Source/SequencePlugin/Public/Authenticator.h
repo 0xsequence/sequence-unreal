@@ -58,10 +58,10 @@ private:
 	FString Cached_Email;
 	//AWS
 	FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
-	FString UserPoolID = TEXT("170768627592");//looks like this number is the AWS account ID not the UserPoolID
+	FString UserPoolID = TEXT("FpPUBLAGt");
 	FString Region = TEXT("us-east-2");
 	FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
-	FString KMSKeyID = TEXT("arn:aws:kms:us-east-2:170768627592:key/0fd8f803-9cb5-4de5-86e4-41963fb6043d");//TODO still need this
+	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
 	FString ProjectID = TEXT("nil");//TODO still need this we get this from builder?
 	FString WaasVersion = TEXT("1.0.0");
 	FString X_Sequence_Tenant = TEXT("9");
@@ -140,6 +140,8 @@ private:
 
 	FString GenerateSignUpPassword();
 
+	FString BuildKMSAuthorizationHeader();
+
 	//RPC Calls//
 
 	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
@@ -161,7 +163,6 @@ private:
 	//Sequence Specific//
 
 	//RPC Calls//
-
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 

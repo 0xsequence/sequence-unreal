@@ -123,19 +123,29 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
 	FString URL = this->BuildAWSURL("cognito-identity");
-	FString RequestBody = "{\"identityId\":\"" + IdentityID + "\",\"Logins\":{\""+Issuer+ "\":\"" + IDToken + "\"}}";
-
+	FString RequestBody = "{\"IdentityId\":\"" + IdentityID + "\",\"Logins\":{\""+Issuer+ "\":\"" + IDToken + "\"}}";
+							
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
-		FString AccessKeyPtr, SecretKeyPtr, SessionTokenPtr;
-		if (responseObj->TryGetStringField("AccessKeyId", AccessKeyPtr) && responseObj->TryGetStringField("SecretKey", SecretKeyPtr) && responseObj->TryGetStringField("SessionToken", SessionTokenPtr))
-		{//good state
-			this->AccessKeyId = AccessKeyPtr;
-			this->SecretKey = SecretKeyPtr;
-			this->SessionToken = SessionTokenPtr;
-			//We move onto sequence Auth aspect from here
+		const TSharedPtr<FJsonObject> *credObj;
+
+		if (responseObj->TryGetObjectField("Credentials", credObj))
+		{
+			FString AccessKeyPtr, SecretKeyPtr, SessionTokenPtr;
+			if (credObj->Get()->TryGetStringField("AccessKeyId", AccessKeyPtr) && credObj->Get()->TryGetStringField("SecretKey", SecretKeyPtr) && credObj->Get()->TryGetStringField("SessionToken", SessionTokenPtr))
+			{//good state
+				this->AccessKeyId = AccessKeyPtr;
+				this->SecretKey = SecretKeyPtr;
+				this->SessionToken = SessionTokenPtr;
+				this->KMSGenerateDataKey();
+			}
+			else
+			{//error state
+				UE_LOG(LogTemp, Error, TEXT("[Missing Credentials in AWS Response]"));
+				this->CallAuthFailure();
+			}
 		}
 		else
 		{//error state
@@ -150,14 +160,38 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 		this->CallAuthFailure();
 	};
 
-	this->RPC(URL,TEXT("com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetCredentialsForIdentity"),RequestBody,GenericSuccess,GenericFailure);
+	this->RPC(URL,TEXT("AWSCognitoIdentityService.GetCredentialsForIdentity"),RequestBody,GenericSuccess,GenericFailure);
+}
+
+FString UAuthenticator::BuildKMSAuthorizationHeader()
+{
+	FString tempId = "accountIdTemp";
+
+	FString AuthHeader = "AWS4-HMAC-SHA256 Credential=";
+
+	FDateTime currDate = FDateTime::Now();
+	FString dateString = "";
+	dateString.AppendInt(currDate.GetYear());
+	dateString.AppendInt(currDate.GetMonth());
+	dateString.AppendInt(currDate.GetDay());
+
+	AuthHeader += tempId + "/" + dateString + "/" + this->Region + "/kms/aws4_request,SignedHeaders=content-type;host;x-amz-date;x-amz-target,Signature=";
+
+	/*
+	* Authorization: AWS4-HMAC-SHA256 
+	* Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, 
+	* SignedHeaders=host;range;x-amz-date,
+	* Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024
+	*/
+
+	return AuthHeader;
 }
 
 void UAuthenticator::KMSGenerateDataKey()
 {
 	FString URL = BuildAWSURL("kms");
-	//what is kmsKeyId? this isn't mentioned anywhere?
-	FString RequestBody = "{\"KeyId\":\"kmsKeyId\",\"KeySpec\":\"AES_256\"}";
+
+	FString RequestBody = "{\"KeyId\":\""+this->KMSKeyID+"\",\"KeySpec\":\"AES_256\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
