@@ -166,10 +166,7 @@ void AGeneralTesting::TestEncryption() const
 	FDateTime Date = FDateTime::MinValue();//FDateTime::UtcNow();
 	FString URI = "https://#RealURIs.epc";
 	FString Payload = "Payload data!";
-	FString CanReq = authenticator->BuildCanonicalRequest(URI,Date,Payload);
-	FString StringToSign = authenticator->BuildStringToSign(Date,CanReq);
-	FString SigningKey = authenticator->BuildSigningKey(Date);
-	authenticator->BuildSignature(SigningKey, StringToSign);
+	authenticator->BuildKMSAuthorizationHeader(Date, URI, Payload);
 }
 
 //dedicated encryption test!

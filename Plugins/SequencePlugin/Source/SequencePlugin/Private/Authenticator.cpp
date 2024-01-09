@@ -292,21 +292,19 @@ FString UAuthenticator::BuildSignature(const FString& SigningKey, const FString&
 	return Signature;
 }
 
-FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date)
+FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload)
 {
 	FString tempId = "accountIdTemp";
 
 	FString AuthHeader = "AWS4-HMAC-SHA256 Credential=";
 	FString dateString = this->BuildYYYYMMDD(Date);
+	
+	FString CanReq = this->BuildCanonicalRequest(URI, Date, Payload);
+	FString StringToSign = this->BuildStringToSign(Date, CanReq);
+	FString SigningKey = this->BuildSigningKey(Date);
+	FString Signature = this->BuildSignature(SigningKey, StringToSign);
 
-	AuthHeader += "AKIAIOSFODNN7EXAMPLE/"+ dateString +"/"+this->Region+"/kms/aws4_request,SignedHeaders=host;x-amz-date;x-amz-target,Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024";
-
-	/*
-	* Authorization: AWS4-HMAC-SHA256 
-	* Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, 
-	* SignedHeaders=host;range;x-amz-date,
-	* Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024
-	*/
+	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->Region + "/kms/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
 
 	return AuthHeader;
 }
@@ -340,7 +338,7 @@ void UAuthenticator::KMSGenerateDataKey()
 		this->CallAuthFailure();
 	};
 	FDateTime cachedDate = FDateTime::UtcNow();
-	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate), cachedDate.ToIso8601(), URL, TEXT("TrentService.GenerateDataKey"), RequestBody, GenericSuccess, GenericFailure);
+	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL,RequestBody), cachedDate.ToIso8601(), URL, TEXT("TrentService.GenerateDataKey"), RequestBody, GenericSuccess, GenericFailure);
 }
 
 bool UAuthenticator::CanRetryEmailLogin()
