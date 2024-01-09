@@ -162,8 +162,14 @@ void AGeneralTesting::TestEncryption() const
 	//delete TestWallet;
 
 	UAuthenticator* authenticator = NewObject<UAuthenticator>();
-	//authenticator->Init(nullptr);//this is only for testing
-	//authenticator->TestSequenceFlow();
+
+	FDateTime Date = FDateTime::MinValue();//FDateTime::UtcNow();
+	FString URI = "https://#RealURIs.epc";
+	FString Payload = "Payload data!";
+	FString CanReq = authenticator->BuildCanonicalRequest(URI,Date,Payload);
+	FString StringToSign = authenticator->BuildStringToSign(Date,CanReq);
+	FString SigningKey = authenticator->BuildSigningKey(Date);
+	authenticator->BuildSignature(SigningKey, StringToSign);
 }
 
 //dedicated encryption test!
