@@ -140,7 +140,19 @@ private:
 
 	FString GenerateSignUpPassword();
 
-	FString BuildKMSAuthorizationHeader();
+	FString BuildYYYYMMDD(const FDateTime& Date);
+
+	FString BuildScope(const FDateTime& Date);
+
+public: FString BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload);//step 1
+
+public:	FString BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest);//step 2
+
+public:	FString BuildSigningKey(const FDateTime& Date);//step 3
+
+public:	FString BuildSignature(const FString& SigningKey, const FString& StringToSign);//step 4
+
+public:	FString BuildKMSAuthorizationHeader(const FDateTime& Date);
 
 	//RPC Calls//
 
@@ -165,6 +177,8 @@ private:
 	//RPC Calls//
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
+
+	void AuthorizedRPC(const FString& Authorization, const FString& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 };
