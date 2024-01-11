@@ -167,144 +167,156 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 
 FString UAuthenticator::BuildYYYYMMDD(const FDateTime& Date)
 {
-	FString YYYYMMDD = "";
+	return Date.ToString(TEXT("%Y%m%d"));//YYYYMMDD
+}
 
-	YYYYMMDD.AppendInt(Date.GetYear());
-	if (Date.GetMonth() < 10)
-	{
-		YYYYMMDD.AppendInt(0);
-		YYYYMMDD.AppendInt(Date.GetMonth());
-	}
-	else
-	{
-		YYYYMMDD.AppendInt(Date.GetMonth());
-	}
-
-	if (Date.GetDay() < 10)
-	{
-		YYYYMMDD.AppendInt(0);
-		YYYYMMDD.AppendInt(Date.GetDay());
-	}
-	else
-	{
-		YYYYMMDD.AppendInt(Date.GetDay());
-	}
-
-	return YYYYMMDD;
+FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
+{
+	return Date.ToString(TEXT("%Y%m%dT%H%M%SZ"));//YYYYMMDDTHHMMSSZ
 }
 
 FString UAuthenticator::BuildScope(const FDateTime& Date)
 {
-	FString Scope = BuildYYYYMMDD(Date);
-	Scope += "/" + this->Region + "/kms/aws4_request";
-	return Scope;
+	return BuildYYYYMMDD(Date) + "/" + this->Region + "/" + this->AWSService + "/aws4_request";
 }
+
+//In Testing
+//FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
+//{
+//	FUnsizedData PayloadBytes = StringToUTF8(Payload);
+//	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+//
+//	FString Verb = "POST";
+//	FString CanonicalURI = "/";//we have none
+//	FString CanQueryString = "";//no query parameters so leave this blank
+//	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+//	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
+//	FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
+//
+//	//build the CanonicalRequest
+//	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
+//	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
+//	return CanReq;
+//}
 
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
 {
+	FUnsizedData PayloadBytes = StringToUTF8(Payload);
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+
+	FString Verb = "POST";
+	FString CanonicalURI = "/";//we have none
 	FString CanQueryString = "";//no query parameters so leave this blank
-
-	int32 PayloadSize = Payload.Len();
-	uint8_t* PayloadBytePtr = new uint8_t[PayloadSize];
-	PayloadSize = StringToBytes(Payload,PayloadBytePtr,PayloadSize);
-
-	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytePtr, PayloadSize);
-	delete[] PayloadBytePtr;
-	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN);
-	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI.TrimStartAndEnd() + "\nx-amz-content-sha256:" + HashPayload.TrimStartAndEnd() + "\nx-amz-date:" + Date.ToIso8601().TrimStartAndEnd() + "\nx-amz-target:TrentService.GenerateDataKey";
+	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
 	FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
 
 	//build the CanonicalRequest
-	FString CanReq = "POST\n";
-	CanReq += URI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
+	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
 	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
 	return CanReq;
 }
 
+//Good Copy (Works!)
+//FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
+//{
+//	FUnsizedData PayloadBytes = StringToUTF8(Payload);
+//	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+//
+//	FString Host = URI;
+//	FString Verb = "GET";
+//	FString CanonicalURI = "/test.txt";
+//	FString CanQueryString = "";//no query parameters so leave this blank
+//	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+//	FString CanHeaders = "host:" + Host + "\nrange:bytes=0-9\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\n";
+//	FString SignedHeaders = "host;range;x-amz-content-sha256;x-amz-date";
+//
+//	//build the CanonicalRequest
+//	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
+//	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
+//	return CanReq;
+//}
+
+/*
+* DateKey = hmac( AWS4wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY , 20130524 ) = 68896419206d6240ad4cd7dc8ba658efbf3b43b53041950083a10833824fcfbb
+* DateRegionKey = hmac( DateKey , us-east-1 ) = b1d69b01d01fbfab62ce62e2b354dc81fa797232685c3de02919930c87f3db5d
+* DateRegionServiceKey hmac( DateRegionKey , s3 ) = ec603b02e46102b2c2563dd47216472c5c0aba27edeb8308255e4c60bb07bda0
+* SigningKey hmac( DateRegionServiceKey , aws4_request) = d949da6fe2897897d73557446db35c06dc34feb7f74e7d949c6fe9d674a02103
+* Signature: f03131e53fcdcd3605054f5ead58370d14a672add94bda5da0a69d65d03e7edc
+*/
 FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest)
 {
-	int32 PayloadSize = CanonicalRequest.Len();
-	uint8_t* PayloadBytePtr = new uint8_t[PayloadSize];
-	PayloadSize = StringToBytes(CanonicalRequest, PayloadBytePtr, PayloadSize);
-
-	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytePtr, PayloadSize);
-	delete[] PayloadBytePtr;
+	FUnsizedData PayloadBytes = StringToUTF8(CanonicalRequest);
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
 
 	FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
-	FString StringToSign = "AWS4-HMAC-SHA256\n";
-	StringToSign += Date.ToIso8601() + "\n" + this->BuildScope(Date) + "\n" + CanonicalHash;
+	FString FullDate = BuildFullDateTime(Date);
+	FString StringToSign = "AWS4-HMAC-SHA256\n"+FullDate+"\n"+this->BuildScope(Date)+"\n"+CanonicalHash.ToLower();
 	UE_LOG(LogTemp, Display, TEXT("StringToSign:\n%s"), *StringToSign);
+
+	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
+	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
+	FString StringToSignHash = BytesToHex(StringToSignHashBytes.value, StringToSignHashBytes.HASH_LEN).ToLower();
+	UE_LOG(LogTemp, Display, TEXT("StringToSignHash:\n%s"), *StringToSignHash);
+
 	return StringToSign;
 }
 
-FString UAuthenticator::BuildSigningKey(const FDateTime& Date)
+TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 {
-	FString DateKeyEncryptKey = "AWS4" + this->SecretKey;
-	FString TimeStamp = BuildYYYYMMDD(Date);
-
-	FUnsizedData DateKeyEncryptBytes = StringToUTF8(DateKeyEncryptKey);
-	FUnsizedData TimeStampBytes = StringToUTF8(TimeStamp);
+	FUnsizedData DateKeyEncryptBytes = StringToUTF8("AWS4" + this->SecretKey);
+	FUnsizedData TimeStampBytes = StringToUTF8(BuildYYYYMMDD(Date));
 	FUnsizedData RegionBytes = StringToUTF8(this->Region);
-	FUnsizedData KMSBytes = StringToUTF8(this->KMSKeyID);
+	FUnsizedData KMSBytes = StringToUTF8(this->AWSService);
 	FUnsizedData AWSReqBytes = StringToUTF8("aws4_request");
 
 	Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Arr,DateKeyEncryptBytes.GetLength(),TimeStampBytes.Arr,TimeStampBytes.GetLength());
-	Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value,DateKeyHash.HASH_LEN,RegionBytes.Arr,RegionBytes.GetLength());
-	Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value,DateRegionKeyHash.HASH_LEN,KMSBytes.Arr,KMSBytes.GetLength());
-	Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value,DateRegionServiceKeyHash.HASH_LEN,AWSReqBytes.Arr,AWSReqBytes.GetLength());
-	FString SigningKey = BytesToHex(SigningKeyHash.value, SigningKeyHash.HASH_LEN);
-	//DateKey = "hmac-sha256(AWS4+secret_access_key, yyyymmdd)";
-	//DateRegionKey = "hmac-sha256(datekey,awsregion)";
-	//DateRegionServiceKey = "hmac-sha256(dateregionkey,kms)";
-	//SigningKey = "hmac-sha256(dateregionservicekey, aws4_request)";
+	Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Arr, RegionBytes.GetLength());
+	Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value, DateRegionKeyHash.HASH_LEN, KMSBytes.Arr, KMSBytes.GetLength());
+	Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN, AWSReqBytes.Arr, AWSReqBytes.GetLength());
 
-	FString DateKey = BytesToHex(DateKeyHash.value, DateKeyHash.HASH_LEN);
-	FString DateRegionKey = BytesToHex(DateRegionKeyHash.value,DateRegionKeyHash.HASH_LEN);
-	FString DateRegionServiceKey = BytesToHex(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN);
+	FString DateKey = BytesToHex(DateKeyHash.value, DateKeyHash.HASH_LEN).ToLower();
+	FString DateRegionKey = BytesToHex(DateRegionKeyHash.value,DateRegionKeyHash.HASH_LEN).ToLower();
+	FString DateRegionServiceKey = BytesToHex(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN).ToLower();
+	FString SigningKey = BytesToHex(SigningKeyHash.value, SigningKeyHash.HASH_LEN).ToLower();
 
+	TArray<uint8_t> SigningBytes;
+	SigningBytes.Append(SigningKeyHash.value,SigningKeyHash.HASH_LEN);
+
+	UE_LOG(LogTemp, Display, TEXT("InitialKey: %s"), *("AWS4" + this->SecretKey));
+	UE_LOG(LogTemp, Display, TEXT("Date: %s"), *BuildYYYYMMDD(Date));
 	UE_LOG(LogTemp, Display, TEXT("DateKey: %s"), *DateKey);
 	UE_LOG(LogTemp, Display, TEXT("DateRegionKey: %s"), *DateRegionKey);
 	UE_LOG(LogTemp, Display, TEXT("DateRegionServiceKey: %s"), *DateRegionServiceKey);
 	UE_LOG(LogTemp, Display, TEXT("SigningKey: %s"), *SigningKey);
 
-	return SigningKey;
+	return SigningBytes;
 }
 
-FString UAuthenticator::BuildSignature(const FString& SigningKey, const FString& StringToSign)
+FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign)
 {
 	//Signature = "hex(hmac-sha256(signingkey,stringtosign))";
-	int32 SigningKeySize = SigningKey.Len() / 2;//2 chars per byte
-	uint8_t* SigningKeyBytes = new uint8_t[SigningKeySize];
-	SigningKeySize = HexToBytes(SigningKey,SigningKeyBytes);
-
-	int32 StringToSignSize = GetBytesInString(StringToSign);
-	uint8_t* StringToSignPtr = new uint8_t[StringToSignSize];
-	UE_LOG(LogTemp, Display, TEXT("Resulting Size: %d"), StringToSignSize);
-	StringToSignSize = StringToBytes(StringToSign,StringToSignPtr,StringToSignSize);
-	UE_LOG(LogTemp, Display, TEXT("Resulting Size: %d"), StringToSignSize);
-	Sha256Hash SignatureHash = Sha256::getHmac(SigningKeyBytes,SigningKeySize,StringToSignPtr,StringToSignSize);
-	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN);
+	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
+	Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
+	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN).ToLower();
 	UE_LOG(LogTemp, Display, TEXT("Signature: %s"), *Signature);
-
-	delete[] SigningKeyBytes;
-	delete[] StringToSignPtr;
-
 	return Signature;
 }
 
 FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload)
 {
-	FString tempId = "accountIdTemp";
-
 	FString AuthHeader = "AWS4-HMAC-SHA256 Credential=";
 	FString dateString = this->BuildYYYYMMDD(Date);
-	
 	FString CanReq = this->BuildCanonicalRequest(URI, Date, Payload);
 	FString StringToSign = this->BuildStringToSign(Date, CanReq);
-	FString SigningKey = this->BuildSigningKey(Date);
+	TArray<uint8_t> SigningKey = this->BuildSigningKey(Date);
 	FString Signature = this->BuildSignature(SigningKey, StringToSign);
+	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->Region + "/" + this->AWSService + "/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
 
-	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->Region + "/kms/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
+	UE_LOG(LogTemp, Display, TEXT("AccessKey: %s"), *this->AccessKeyId);
+	UE_LOG(LogTemp, Display, TEXT("SecretKey: %s"), *this->SecretKey);
+	UE_LOG(LogTemp, Display, TEXT("SessionToken: %s"), *this->SessionToken);
+
 
 	return AuthHeader;
 }
@@ -338,8 +350,10 @@ void UAuthenticator::KMSGenerateDataKey()
 		this->CallAuthFailure();
 	};
 	FDateTime cachedDate = FDateTime::UtcNow();
-	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL,RequestBody), cachedDate.ToIso8601(), URL, TEXT("TrentService.GenerateDataKey"), RequestBody, GenericSuccess, GenericFailure);
+	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL.RightChop(8), RequestBody),cachedDate, URL, TEXT("TrentService.GenerateDataKey"), RequestBody, GenericSuccess, GenericFailure);
 }
+
+//curl https://kms.us-east-2.amazonaws.com -X POST -H "x-amz-target: TrentService.GenerateDataKey" -H "Host: kms.us-east-2.amazonaws.com" -H "Content-Type: application/x-www-form-urlencoded; charset=utf-8" -H "X-Amz-Date: 20240111T162901Z" -H "Authorization: AWS4-HMAC-SHA256 Credential=ASIASPQU2O6EONAHVAND/20240111/us-east-2/kms/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date, Signature=2d55c1460bc46dc42a8d716496ddd8f83ef647ac5fa459d9a57254dedeec1076" --data-binary '{"KeyId":"0fd8f803-9cb5-4de5-86e4-41963fb6043d","KeySpec":"AES_256"}'
 
 bool UAuthenticator::CanRetryEmailLogin()
 {
@@ -541,16 +555,23 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	//UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
 }
 
-void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FString& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
+	FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+
 	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
+		->WithVerb("POST")
+		->WithHeader("Host", Url.RightChop(8))
 		->WithHeader("Content-type", "application/x-amz-json-1.1")
 		->WithHeader("X-AMZ-TARGET", AMZTarget)
-		->WithHeader("x-amz-date",Date)
+		->WithHeader("X-AMZ-DATE", BuildFullDateTime(Date))
+		->WithHeader("X-AMZ-CONTENT-SHA256", HashPayload)
+		->WithHeader("x-amz-security-token", this->SessionToken)
 		->WithHeader("Authorization",Authorization)
-		->WithVerb("POST")
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
