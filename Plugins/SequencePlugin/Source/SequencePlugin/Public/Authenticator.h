@@ -60,6 +60,9 @@ private:
 	FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
 	FString UserPoolID = TEXT("FpPUBLAGt");
 	FString Region = TEXT("us-east-2");
+	FString AWSService = TEXT("kms");
+	//FString Region = TEXT("us-east-1");//for testing!
+	//FString AWSService = TEXT("s3");
 	FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
 	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
 	FString ProjectID = TEXT("nil");//TODO still need this we get this from builder?
@@ -102,8 +105,9 @@ private:
 	FString IdentityId = TEXT("nil");
 
 	//From GetCredentialsForIdentity
-	FString AccessKeyId = TEXT("nil");
-	FString SecretKey = TEXT("nil");
+	FString AccessKeyId = TEXT("AKIAIOSFODNN7EXAMPLE");
+	FString SecretKey = TEXT("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
+	//FString SecretKey = TEXT("wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 	FString SessionToken = TEXT("nil");
 
 	//From KMSGenerateDataKey
@@ -142,15 +146,17 @@ private:
 
 	FString BuildYYYYMMDD(const FDateTime& Date);
 
+	FString BuildFullDateTime(const FDateTime& Date);
+
 	FString BuildScope(const FDateTime& Date);
 
 	FString BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload);//step 1
 
 	FString BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest);//step 2
 
-	FString BuildSigningKey(const FDateTime& Date);//step 3
+	TArray<uint8_t> BuildSigningKey(const FDateTime& Date);//step 3
 
-	FString BuildSignature(const FString& SigningKey, const FString& StringToSign);//step 4
+	FString BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign);//step 4
 
 public:	FString BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload);
 
@@ -178,7 +184,7 @@ public:	FString BuildKMSAuthorizationHeader(const FDateTime& Date, const FString
 
 	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 
-	void AuthorizedRPC(const FString& Authorization, const FString& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 };
