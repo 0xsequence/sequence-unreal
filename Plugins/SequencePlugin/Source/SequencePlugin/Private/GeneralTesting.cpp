@@ -165,12 +165,14 @@ void AGeneralTesting::TestEncryption() const
 	//20130524T000000Z for testing
 	//20240110T 20 43 45 Z
 	//20150830
-	FDateTime Date = FDateTime(2013,5,24,0,0,0,0);
+	//FDateTime Date = FDateTime(2013,5,24,0,0,0,0);
 	
 	//Date.
-	FString URI = "examplebucket.s3.amazonaws.com";
-	FString Payload = "";
-	authenticator->BuildKMSAuthorizationHeader(Date, URI, Payload);
+	//FString URI = "examplebucket.s3.amazonaws.com";
+	//FString Payload = "";
+	//authenticator->BuildKMSAuthorizationHeader(Date, URI, Payload);
+
+	//authenticator->AuthWithSequence();
 }
 
 //dedicated encryption test!
