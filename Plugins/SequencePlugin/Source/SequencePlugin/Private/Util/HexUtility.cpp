@@ -2,10 +2,11 @@
 #pragma warning(disable: 4146)
 #pragma warning(disable: 4104)
 #include "Util/HexUtility.h"
+#include "Types/BinaryData.h"
 
 FString RandomHexCharacter()
 {
-	return HexLUTNew[FMath::RandRange(0, HexLUTSize)];
+	return HexLUTNew[FMath::RandRange(0, HexLUTSize-1)];
 }
 
 FString RandomHexByte()
@@ -24,27 +25,22 @@ uint8 RandomByte()
 
 TArray<uint8_t> PKCS7(FString in)
 {
-	int32 ByteLength = GetBytesInString(in);
+	FUnsizedData ByteBuff = StringToUTF8(in);
+
+	int32 ByteLength = ByteBuff.GetLength();
 	int32 ModLength = ByteLength % 16;
+
 	uint8_t PaddingByte = GetPaddingByte(ByteLength);
 
 	TArray<uint8_t> TBuff;
-	TBuff.Reserve(ByteLength + ModLength);
+	TBuff.Reserve(ByteLength + (16-ModLength));
+	TBuff.Append(ByteBuff.Arr,ByteBuff.GetLength());
 
-	uint8_t* buff = new uint8_t[ByteLength];
-	StringToBytes(in, buff, ByteLength);
-
-	for (int i = 0; i < ByteLength; i++)
-	{
-		TBuff.Add(buff[i]);
-	}
-
-	for (int i = 0; i < ModLength; i++)
+	for (int i = 0; i < (16 - ModLength); i++)
 	{
 		TBuff.Add(PaddingByte);
 	}
-
-	delete[] buff;
+	delete[] ByteBuff.Arr;
 
 	return TBuff;
 }

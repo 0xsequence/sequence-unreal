@@ -334,8 +334,15 @@ void UAuthenticator::KMSGenerateDataKey()
 		FString PlainTextPtr, CipherTextBlobPtr;
 		if (responseObj->TryGetStringField("Plaintext", PlainTextPtr) && responseObj->TryGetStringField("CipherTextBlob", CipherTextBlobPtr))
 		{//good state
-			this->PlainText = PlainTextPtr;
-			this->CipherTextBlob = CipherTextBlobPtr;
+			TArray<uint8> PlainTextBytes;
+			FBase64::Decode(PlainTextPtr, PlainTextBytes);
+			this->PlainText = BytesToHex(PlainTextBytes.GetData(),PlainTextBytes.Num()).ToLower();
+
+			TArray<uint8> CipherTextBytes;
+			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);
+			this->CipherTextBlob = BytesToHex(CipherTextBytes.GetData(), CipherTextBytes.Num()).ToLower();
+
+			this->AuthWithSequence(this->Cached_IDToken,PlainTextBytes);
 		}
 		else
 		{//error state
@@ -352,8 +359,6 @@ void UAuthenticator::KMSGenerateDataKey()
 	FDateTime cachedDate = FDateTime::UtcNow();
 	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL.RightChop(8), RequestBody),cachedDate, URL, TEXT("TrentService.GenerateDataKey"), RequestBody, GenericSuccess, GenericFailure);
 }
-
-//curl https://kms.us-east-2.amazonaws.com -X POST -H "x-amz-target: TrentService.GenerateDataKey" -H "Host: kms.us-east-2.amazonaws.com" -H "Content-Type: application/x-www-form-urlencoded; charset=utf-8" -H "X-Amz-Date: 20240111T162901Z" -H "Authorization: AWS4-HMAC-SHA256 Credential=ASIASPQU2O6EONAHVAND/20240111/us-east-2/kms/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date, Signature=2d55c1460bc46dc42a8d716496ddd8f83ef647ac5fa459d9a57254dedeec1076" --data-binary '{"KeyId":"0fd8f803-9cb5-4de5-86e4-41963fb6043d","KeySpec":"AES_256"}'
 
 bool UAuthenticator::CanRetryEmailLogin()
 {
@@ -504,55 +509,75 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 {
 	//Generates a new Random Wallet
 	this->SessionWallet = new FWallet();
-	FString CachedWalletAddress = BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
-	FString Intent = "{\"version\":\"1.0.0\",\"packet\":{\"code\":\"openSession\",\"session\":\""+ CachedWalletAddress + "\",\"proof\":{\"idToken\":\"" + IDTokenIn + "\"}}}";
-	FString Payload = "{\"projectId\":\"projectID_IN\",\"idToken\":\""+IDTokenIn+"\",\"sessionAddress\":\""+ CachedWalletAddress +"\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\""+Intent+"\"}";
+	int64 UnixIssueTime = FDateTime::UtcNow().ToUnixTimestamp();
+	int64 UnixExpireTime = UnixIssueTime + 30;
+	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
+	FString UnixExpireString = FString::Printf(TEXT("%lld"), UnixExpireTime);
 
+	FString CachedWalletAddress = "0x" + BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
+	FString Intent = "{\\\"version\\\":\\\"" + this->WaasVersion + "\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":" + UnixExpireString + ",\\\"issued\\\":" + UnixIssueString + ",\\\"session\\\":\\\"" + CachedWalletAddress + "\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"" + IDTokenIn + "\\\"}}}";
+	FString Payload = "{\"projectId\":" + this->ProjectID + ",\"idToken\":\"" + IDTokenIn + "\",\"sessionAddress\":\"" + CachedWalletAddress + "\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"" + Intent + "\"}";
+
+	UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *Payload);
+
+	//"intentJSON":""
+	//{"version":"1.0.0", "packet" : {"code":"openSession", "expires" : 1705089810, "issued" : 1705089780, "session" : "0xFD2EC97E05EC419421C7AC844284952703958CCB", "proof" : {"idToken":""}}}
 	TArray<uint8_t> TPayload = PKCS7(Payload);
-
-	//need to encrypt the payload string now
 	AES_ctx ctx;
-	struct AES_ctx * PtrCtx = &ctx;
+	struct AES_ctx* PtrCtx = &ctx;
 
 	const int32 IVSize = 16;
 	TArray<uint8_t> iv;
 
 	for (int i = 0; i < IVSize; i++)
-	{
 		iv.Add(RandomByte());
-	}
 
 	AES_init_ctx_iv(PtrCtx, Key.GetData(), iv.GetData());
 	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
 
-	TPayload.Append(iv);//append the IV onto the encrypted payload
-	FString EncryptedPayload = BytesToHex(TPayload.GetData(),TPayload.Num());//cipher text
+	FString PrePendedKey = BytesToHex(Key.GetData(),Key.Num());
+	FString PrePendedIV = BytesToHex(iv.GetData(),iv.Num());
+	FString PrePendedCipher = BytesToHex(TPayload.GetData(), TPayload.Num());
 
-	FHash256 SuffixHash = FHash256::New();
-	FUnsizedData EncryptedSigningData = StringToUTF8(EncryptedPayload);
-	Keccak256::getHash(EncryptedSigningData.Arr, EncryptedSigningData.GetLength(), SuffixHash.Arr);
-	
-	//this below may not actually be needed?
+	UE_LOG(LogTemp, Display, TEXT("IV: %s"), *PrePendedIV);
+	UE_LOG(LogTemp, Display, TEXT("Key: %s"), *PrePendedKey);
+	UE_LOG(LogTemp, Display, TEXT("Key Length: %d"), Key.Num());
+	UE_LOG(LogTemp, Display, TEXT("Cipher: %s"), *PrePendedCipher);
 
-	//FString prefix = "\x19";
-	//FString mid = "Ethereum Signed Message:\n32";
-	//FString suffix = BytesToHex(SuffixHash.Arr, SuffixHash.GetLength());
+	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
 
-	//FString testString = prefix + mid + suffix;
+	TArray<uint8_t> PayloadSigBytes = this->SessionWallet->SignMessage(Payload);
+	FString PayloadSig = "0x" + BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower();
 
-	//FHash256 MesgHash = FHash256::New();
-	//FUnsizedData MesgData = StringToUTF8(prefix + mid + suffix);
-	//Keccak256::getHash(MesgData.Arr,MesgData.GetLength(),MesgHash.Arr);
+	FString EncryptedPayloadKey = "0x" + this->CipherTextBlob;
+	FString FinalPayload = "{\"payloadSig\":\"" + PayloadSig + "\",\"encryptedPayloadKey\":\"" + EncryptedPayloadKey + "\",\"payloadCiphertext\":\"" + PayloadCipherText + "\"}";
 
-	//FString MesgStr = BytesToHex(MesgHash.Arr,MesgHash.GetLength());
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
+	};
 
-	//TArray<uint8> sig = this->SessionWallet->SignMessage(MesgStr);
-	//FString sigStr = BytesToHex(sig.GetData(),sig.Num());
+	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	{
+		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
+		this->CallAuthFailure();
+	};
 
-	////for signature verification incase something is going wrong we can verify this data using ext. tools
-	//UE_LOG(LogTemp, Display, TEXT("Adr: %s"), *CachedWalletAddress);
-	//UE_LOG(LogTemp, Display, TEXT("Msg: %s"), *MesgStr);
-	//UE_LOG(LogTemp, Display, TEXT("Sig: %s"), *sigStr);
+	this->SequenceRPC(this->WaasAuthRPCURL, FinalPayload, GenericSuccess, GenericFailure);
+}
+
+void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{
+	NewObject<URequestHandler>()
+		->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept","application/json")
+		->WithHeader("X-Sequence-Tenant", "9")
+		->WithHeader("X-Access-Key",this->ProjectAccessKey)
+		->WithVerb("POST")
+		->WithContentAsString(RequestBody)
+		->ProcessAndThen(OnSuccess, OnFailure);
 }
 
 void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
@@ -587,3 +612,4 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
+
