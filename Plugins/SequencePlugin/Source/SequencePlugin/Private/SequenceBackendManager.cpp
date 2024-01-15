@@ -57,6 +57,7 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->authenticator = NewObject<UAuthenticator>();
 	//setup up delegate bindings
 	this->authenticator->AuthRequiresCode.AddDynamic(this,&ASequenceBackendManager::CallReadyToReceiveCode);
+	
 }
 
 ASequenceBackendManager::~ASequenceBackendManager()
@@ -176,7 +177,7 @@ void ASequenceBackendManager::RandomReceive()
 	FTimerHandle TimerTestReceive;
 	FTimerDelegate Delegate; // Delegate to bind function with parameters
 	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
-	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1,15), false);
+	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1.0f,15.0f), false);
 }
 
 void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& systemData)
