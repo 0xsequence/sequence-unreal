@@ -57,18 +57,21 @@ private:
 	FString Cached_IDToken;
 	FString Cached_Email;
 	//AWS
-	FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
+	//FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
+	FString IdentityPoolID = TEXT("us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53");
 	FString UserPoolID = TEXT("FpPUBLAGt");
 	FString Region = TEXT("us-east-2");
 	FString AWSService = TEXT("kms");
-	FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
+	//FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
+	FString CognitoClientID = TEXT("3fd4tq7gvroie1romfslk2nvv8");
 	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
+	//arn:aws:kms:us-east-2:170768627592:key/0fd8f803-9cb5-4de5-86e4-41963fb6043d
 	FString ProjectID = TEXT("124");
-	FString ProjectAccessKey = TEXT("PXjUrkflseITe72Qsrz9adPBAAAAAAAAA");
+	FString ProjectAccessKey = TEXT("AAAAAAAAAAAfAAAAAAAAAA");
 	FString WaasVersion = TEXT("1.0.0");
-	FString X_Sequence_Tenant = TEXT("9");
 	FString WaasRPCURL = TEXT("https://d14tu8valot5m0.cloudfront.net/rpc");
-	FString WaasAuthRPCURL = TEXT("https://d14tu8valot5m0.cloudfront.net/rpc/WaasAuthenticator/RegisterSession");
+	//"https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator"
+	FString WaasAuthRPCURL = TEXT("https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession");
 
 	// //us-east-2:170768627592
 	//cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789

@@ -520,8 +520,6 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 
 	UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *Payload);
 
-	//"intentJSON":""
-	//{"version":"1.0.0", "packet" : {"code":"openSession", "expires" : 1705089810, "issued" : 1705089780, "session" : "0xFD2EC97E05EC419421C7AC844284952703958CCB", "proof" : {"idToken":""}}}
 	TArray<uint8_t> TPayload = PKCS7(Payload);
 	AES_ctx ctx;
 	struct AES_ctx* PtrCtx = &ctx;
@@ -539,14 +537,24 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString PrePendedIV = BytesToHex(iv.GetData(),iv.Num());
 	FString PrePendedCipher = BytesToHex(TPayload.GetData(), TPayload.Num());
 
+	UE_LOG(LogTemp, Display, TEXT("Token: %s"), *IDTokenIn);
+
 	UE_LOG(LogTemp, Display, TEXT("IV: %s"), *PrePendedIV);
 	UE_LOG(LogTemp, Display, TEXT("Key: %s"), *PrePendedKey);
 	UE_LOG(LogTemp, Display, TEXT("Key Length: %d"), Key.Num());
 	UE_LOG(LogTemp, Display, TEXT("Cipher: %s"), *PrePendedCipher);
 
-	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
+	FString PublicKey = BytesToHex(this->SessionWallet->GetWalletPublicKey().Arr,this->SessionWallet->GetWalletPublicKey().GetLength()).ToLower();
+	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr,this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Arr,this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
 
+	UE_LOG(LogTemp, Display, TEXT("PrivateKey: %s"), *PrivateKey);
+	UE_LOG(LogTemp, Display, TEXT("PublicKey: %s"), *PublicKey);
+	UE_LOG(LogTemp, Display, TEXT("Address: %s"), *Address);
+
+	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
 	TArray<uint8_t> PayloadSigBytes = this->SessionWallet->SignMessage(Payload);
+
 	FString PayloadSig = "0x" + BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower();
 
 	FString EncryptedPayloadKey = "0x" + this->CipherTextBlob;
@@ -573,7 +581,6 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
 		->WithHeader("Accept","application/json")
-		->WithHeader("X-Sequence-Tenant", "9")
 		->WithHeader("X-Access-Key",this->ProjectAccessKey)
 		->WithVerb("POST")
 		->WithContentAsString(RequestBody)
