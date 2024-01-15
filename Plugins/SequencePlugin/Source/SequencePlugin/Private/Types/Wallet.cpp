@@ -92,17 +92,21 @@ TArray<uint8> FWallet::SignMessage(FString message)
 	Uint256 BigR, BigS;
 	uint16 RecoveryParameter;
 
+	FString LeadingByte = "\x19";//leading byte
+	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
+	Payload.AppendInt(message.Len());
+	Payload += message;
+
+	UE_LOG(LogTemp, Display, TEXT("EIP-191 Payload: %s"), *Payload);
 	FHash256 SigningHash = FHash256::New();
-	FUnsizedData EncodedSigningData = StringToUTF8(message);
+	FUnsizedData EncodedSigningData = StringToUTF8(Payload);
 	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
 	
 	FString rawHash = SigningHash.ToHex();
-	//UE_LOG(LogTemp, Display, TEXT("Hash: %s"), *rawHash);
 	
 	TArray<uint8_t> result_nonce = this->BuildSigningNonce(SigningHash.Arr,SigningHash.GetLength());
 
 	FString result_nonce_str = BytesToHex(result_nonce.GetData(), result_nonce.Num());
-	//UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *result_nonce_str);
 
 	Ecdsa::sign(Uint256(this->PrivateKey.Arr), Sha256Hash(SigningHash.Arr,SigningHash.GetLength()),Uint256(result_nonce.GetData()), BigR, BigS, RecoveryParameter);
 
