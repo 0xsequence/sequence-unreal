@@ -18,6 +18,24 @@ FWallet::FWallet()
 	this->Address = GetAddress(this->PublicKey);
 }
 
+FWallet::~FWallet()
+{
+	if (this->PrivateKey.Arr)
+	{
+		delete[] this->PrivateKey.Arr;
+	}
+
+	if (this->PublicKey.Arr)
+	{
+		delete[] this->PublicKey.Arr;
+	}
+
+	if (this->Address.Arr)
+	{
+		delete[] this->Address.Arr;
+	}
+}
+
 FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
 {
 	this->PublicKey = GetPublicKey(this->PrivateKey);
@@ -50,12 +68,7 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	mesgBuff.Append(messageHash, size);
 
 	const Sha256Hash k_1 = Sha256::getHmac(k_0, 32,mesgBuff.GetData(),mesgBuff.Num());
-	//FString k_1_str = BytesToHex(k_1.value, 32);
-	//UE_LOG(LogTemp, Display, TEXT("k1: %s"), *k_1_str);
-
 	const Sha256Hash v_1 = Sha256::getHmac(k_1.value,32,v_0,32);
-	//FString v_1_str = BytesToHex(v_1.value, 32);
-	//UE_LOG(LogTemp, Display, TEXT("v1: %s"), *v_1_str);
 
 	TArray<uint8_t> k_2_msg;//v_1 + b'\x01' + private_key_bytes + msg_hash
 	k_2_msg.Append(v_1.value, 32);
@@ -67,16 +80,8 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	k_2_msg.Append(messageHash, size);
 
 	const Sha256Hash k_2 = Sha256::getHmac(k_1.value, 32, k_2_msg.GetData(), k_2_msg.Num());
-	//FString k_2_str = BytesToHex(k_2.value, 32);
-	//UE_LOG(LogTemp, Display, TEXT("k2: %s"), *k_2_str);
-
 	const Sha256Hash v_2 = Sha256::getHmac(k_2.value,32,v_1.value,32);
-	//FString v_2_str = BytesToHex(v_2.value, 32);
-	//UE_LOG(LogTemp, Display, TEXT("v2: %s"), *v_2_str);
-
 	const Sha256Hash kb = Sha256::getHmac(k_2.value, 32, v_2.value, 32);
-	//FString kb_str = BytesToHex(kb.value, 32);
-	//UE_LOG(LogTemp, Display, TEXT("kb: %s"), *kb_str);
 
 	nonce.Append(kb.value, 32);
 
@@ -97,7 +102,6 @@ TArray<uint8> FWallet::SignMessage(FString message)
 	Payload.AppendInt(message.Len());
 	Payload += message;
 
-	UE_LOG(LogTemp, Display, TEXT("EIP-191 Payload: %s"), *Payload);
 	FHash256 SigningHash = FHash256::New();
 	FUnsizedData EncodedSigningData = StringToUTF8(Payload);
 	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
@@ -128,6 +132,13 @@ TArray<uint8> FWallet::SignMessage(FString message)
 		sig.Add(S.Arr[i]);
 
 	sig.Add((uint8)RecoveryParameter);
+
+	//cleanup
+	delete[] EncodedSigningData.Arr;
+	delete[] SigningHash.Arr;
+	delete[] MyR.Arr;
+	delete[] MyS.Arr;
+
 	return sig;
 }
 

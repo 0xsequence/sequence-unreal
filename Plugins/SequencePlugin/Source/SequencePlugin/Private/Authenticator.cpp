@@ -35,10 +35,10 @@ void UAuthenticator::CallAuthFailure()
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
 
-void UAuthenticator::CallAuthSuccess()
+void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials)
 {
 	if (this->AuthSuccess.IsBound())
-		this->AuthSuccess.Broadcast();
+		this->AuthSuccess.Broadcast(Credentials);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
@@ -180,25 +180,6 @@ FString UAuthenticator::BuildScope(const FDateTime& Date)
 	return BuildYYYYMMDD(Date) + "/" + this->Region + "/" + this->AWSService + "/aws4_request";
 }
 
-//In Testing
-//FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
-//{
-//	FUnsizedData PayloadBytes = StringToUTF8(Payload);
-//	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
-//
-//	FString Verb = "POST";
-//	FString CanonicalURI = "/";//we have none
-//	FString CanQueryString = "";//no query parameters so leave this blank
-//	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
-//	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
-//	FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
-//
-//	//build the CanonicalRequest
-//	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
-//	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
-//	return CanReq;
-//}
-
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
 {
 	FUnsizedData PayloadBytes = StringToUTF8(Payload);
@@ -214,35 +195,14 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 	//build the CanonicalRequest
 	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
 	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
+
+	//cleanup
+	delete[] PayloadBytes.Arr;
 	return CanReq;
 }
 
-//Good Copy (Works!)
-//FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
-//{
-//	FUnsizedData PayloadBytes = StringToUTF8(Payload);
-//	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
-//
-//	FString Host = URI;
-//	FString Verb = "GET";
-//	FString CanonicalURI = "/test.txt";
-//	FString CanQueryString = "";//no query parameters so leave this blank
-//	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
-//	FString CanHeaders = "host:" + Host + "\nrange:bytes=0-9\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\n";
-//	FString SignedHeaders = "host;range;x-amz-content-sha256;x-amz-date";
-//
-//	//build the CanonicalRequest
-//	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
-//	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
-//	return CanReq;
-//}
-
 /*
-* DateKey = hmac( AWS4wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY , 20130524 ) = 68896419206d6240ad4cd7dc8ba658efbf3b43b53041950083a10833824fcfbb
-* DateRegionKey = hmac( DateKey , us-east-1 ) = b1d69b01d01fbfab62ce62e2b354dc81fa797232685c3de02919930c87f3db5d
-* DateRegionServiceKey hmac( DateRegionKey , s3 ) = ec603b02e46102b2c2563dd47216472c5c0aba27edeb8308255e4c60bb07bda0
-* SigningKey hmac( DateRegionServiceKey , aws4_request) = d949da6fe2897897d73557446db35c06dc34feb7f74e7d949c6fe9d674a02103
-* Signature: f03131e53fcdcd3605054f5ead58370d14a672add94bda5da0a69d65d03e7edc
+* 
 */
 FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest)
 {
@@ -258,6 +218,10 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString StringToSignHash = BytesToHex(StringToSignHashBytes.value, StringToSignHashBytes.HASH_LEN).ToLower();
 	UE_LOG(LogTemp, Display, TEXT("StringToSignHash:\n%s"), *StringToSignHash);
+
+	//cleanup
+	delete[] PayloadBytes.Arr;
+	delete[] StringToSignBytes.Arr;
 
 	return StringToSign;
 }
@@ -283,23 +247,26 @@ TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 	TArray<uint8_t> SigningBytes;
 	SigningBytes.Append(SigningKeyHash.value,SigningKeyHash.HASH_LEN);
 
-	UE_LOG(LogTemp, Display, TEXT("InitialKey: %s"), *("AWS4" + this->SecretKey));
-	UE_LOG(LogTemp, Display, TEXT("Date: %s"), *BuildYYYYMMDD(Date));
-	UE_LOG(LogTemp, Display, TEXT("DateKey: %s"), *DateKey);
-	UE_LOG(LogTemp, Display, TEXT("DateRegionKey: %s"), *DateRegionKey);
-	UE_LOG(LogTemp, Display, TEXT("DateRegionServiceKey: %s"), *DateRegionServiceKey);
-	UE_LOG(LogTemp, Display, TEXT("SigningKey: %s"), *SigningKey);
+	//cleanup
+	delete[] DateKeyEncryptBytes.Arr;
+	delete[] TimeStampBytes.Arr;
+	delete[] RegionBytes.Arr;
+	delete[] KMSBytes.Arr;
+	delete[] AWSReqBytes.Arr;
 
 	return SigningBytes;
 }
 
 FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign)
 {
-	//Signature = "hex(hmac-sha256(signingkey,stringtosign))";
 	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN).ToLower();
 	UE_LOG(LogTemp, Display, TEXT("Signature: %s"), *Signature);
+
+	//cleanup
+	delete[] StringToSignBytes.Arr;
+
 	return Signature;
 }
 
@@ -313,18 +280,12 @@ FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const
 	FString Signature = this->BuildSignature(SigningKey, StringToSign);
 	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->Region + "/" + this->AWSService + "/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
 
-	UE_LOG(LogTemp, Display, TEXT("AccessKey: %s"), *this->AccessKeyId);
-	UE_LOG(LogTemp, Display, TEXT("SecretKey: %s"), *this->SecretKey);
-	UE_LOG(LogTemp, Display, TEXT("SessionToken: %s"), *this->SessionToken);
-
-
 	return AuthHeader;
 }
 
 void UAuthenticator::KMSGenerateDataKey()
 {
 	FString URL = BuildAWSURL("kms");
-
 	FString RequestBody = "{\"KeyId\":\""+this->KMSKeyID+"\",\"KeySpec\":\"AES_256\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
@@ -341,7 +302,6 @@ void UAuthenticator::KMSGenerateDataKey()
 			TArray<uint8> CipherTextBytes;
 			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);
 			this->CipherTextBlob = BytesToHex(CipherTextBytes.GetData(), CipherTextBytes.Num()).ToLower();
-
 			this->AuthWithSequence(this->Cached_IDToken,PlainTextBytes);
 		}
 		else
@@ -537,20 +497,9 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString PrePendedIV = BytesToHex(iv.GetData(),iv.Num());
 	FString PrePendedCipher = BytesToHex(TPayload.GetData(), TPayload.Num());
 
-	UE_LOG(LogTemp, Display, TEXT("Token: %s"), *IDTokenIn);
-
-	UE_LOG(LogTemp, Display, TEXT("IV: %s"), *PrePendedIV);
-	UE_LOG(LogTemp, Display, TEXT("Key: %s"), *PrePendedKey);
-	UE_LOG(LogTemp, Display, TEXT("Key Length: %d"), Key.Num());
-	UE_LOG(LogTemp, Display, TEXT("Cipher: %s"), *PrePendedCipher);
-
 	FString PublicKey = BytesToHex(this->SessionWallet->GetWalletPublicKey().Arr,this->SessionWallet->GetWalletPublicKey().GetLength()).ToLower();
 	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr,this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Arr,this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
-
-	UE_LOG(LogTemp, Display, TEXT("PrivateKey: %s"), *PrivateKey);
-	UE_LOG(LogTemp, Display, TEXT("PublicKey: %s"), *PublicKey);
-	UE_LOG(LogTemp, Display, TEXT("Address: %s"), *Address);
 
 	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
 	TArray<uint8_t> PayloadSigBytes = this->SessionWallet->SignMessage(Payload);
@@ -563,6 +512,29 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
+		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject>* SessionObj = nullptr;
+		const TSharedPtr<FJsonObject>* DataObj = nullptr;
+		FString PlainTextPtr, CipherTextBlobPtr;
+		if (responseObj->TryGetObjectField("session", SessionObj) && responseObj->TryGetObjectField("data", DataObj))
+		{//good state
+			FString Id, Address, UserId, Subject, SessionId, Wallet, Issuer;
+			if (SessionObj->Get()->TryGetStringField("issuer",Issuer) && SessionObj->Get()->TryGetStringField("id", Id) && SessionObj->Get()->TryGetStringField("address", Address) && SessionObj->Get()->TryGetStringField("userId", UserId) && SessionObj->Get()->TryGetStringField("subject", Subject) && DataObj->Get()->TryGetStringField("sessionId", SessionId) && DataObj->Get()->TryGetStringField("wallet", Wallet))
+			{
+				FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+				this->CallAuthSuccess(FCredentials_BE(this->PlainText, SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer));
+			}
+			else
+			{//error state
+				UE_LOG(LogTemp, Error, TEXT("[Missing Credentials in Sequence Session Response]"));
+				this->CallAuthFailure();
+			}
+		}
+		else
+		{//error state
+			UE_LOG(LogTemp, Error, TEXT("[Missing Credentials in Sequence Response]"));
+			this->CallAuthFailure();
+		}
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
@@ -606,6 +578,9 @@ void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime&
 		->WithHeader("Authorization",Authorization)
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
+
+	//cleanup
+	delete[] PayloadBytes.Arr;
 }
 
 void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
@@ -619,4 +594,3 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
-

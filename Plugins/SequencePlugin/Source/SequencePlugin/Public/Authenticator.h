@@ -9,11 +9,127 @@
 #include "Types/Wallet.h"
 #include "Authenticator.generated.h"
 
+//C++ only for the time being FWallet needs to be converted to a UStruct for proper serialization
+USTRUCT(BlueprintType)
+struct FCredentials_BE
+{
+    GENERATED_USTRUCT_BODY()
+private:
+    FString TransportKey;
+    FString SessionPrivateKey = "";
+    FString Id = "";
+    FString Address = "";
+    FString UserId = "";
+    FString Subject = "";
+    FString SessionId = "";
+    FString WalletAddress = "";
+    FString IDToken = "";
+    FString Email = "";
+    FString Issuer = "";
+public:
+	FCredentials_BE(){}
+
+    FCredentials_BE(const FString& TransportKeyIn,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn)
+    {
+		TransportKey = TransportKeyIn;
+		SessionPrivateKey = SessionPrivateKeyIn;
+		Id = IdIn;
+		Address = AddressIn;
+		UserId = UserIdIn;
+		Subject = SubjectIn;
+		SessionId = SessionIdIn;
+		WalletAddress = WalletAddressIn;
+		IDToken = IDTokenIn;
+		Email = EmailIn;
+		Issuer = IssuerIn;
+    }
+
+	FString GetTransportKey()
+	{
+		return TransportKey;
+	}
+
+	FString GetSessionPrivateKey()
+	{
+		return SessionPrivateKey;
+	}
+
+	FString GetSessionPublicKey()
+	{
+		FWallet TWallet = FWallet(SessionPrivateKey);
+		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Arr,TWallet.GetWalletPublicKey().GetLength()).ToLower();
+		TWallet.~FWallet();
+		return PublicKeyStr;
+	}
+
+	FString GetSessionAddress()
+	{
+		FWallet TWallet = FWallet(SessionPrivateKey);
+		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Arr, TWallet.GetWalletAddress().GetLength()).ToLower();
+		TWallet.~FWallet();
+		return AddressStr;
+	}
+
+	FString SignMessageWithSessionWallet(const FString& Message)
+	{
+		FWallet TWallet = FWallet(SessionPrivateKey);
+		TArray<uint8> SigBytes = TWallet.SignMessage(Message);
+		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+		TWallet.~FWallet();
+		return Signature;
+	}
+
+	FString GetId()
+	{
+		return Id;
+	}
+
+	FString GetAddress()
+	{
+		return Address;
+	}
+
+	FString GetUserId()
+	{
+		return UserId;
+	}
+
+	FString GetSubject()
+	{
+		return Subject;
+	}
+
+	FString GetSessionId()
+	{
+		return SessionId;
+	}
+
+	FString GetWalletAddress()
+	{
+		return WalletAddress;
+	}
+
+	FString GetIDToken()
+	{
+		return IDToken;
+	}
+
+	FString GetEmail()
+	{
+		return Email;
+	}
+
+	FString GetIssuer()
+	{
+		return Issuer;
+	}
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthSuccess, FCredentials_BE, Credentials);
 
 /**
  * 
@@ -31,7 +147,7 @@ public:
 private://Broadcast handlers
 	void CallAuthRequiresCode();
 	void CallAuthFailure();
-	void CallAuthSuccess();
+	void CallAuthSuccess(const FCredentials_BE& Credentials);
 //vars
 private:
 	TEnumAsByte<ESocialSigninType> SocialSigninType;
@@ -57,15 +173,12 @@ private:
 	FString Cached_IDToken;
 	FString Cached_Email;
 	//AWS
-	//FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
 	FString IdentityPoolID = TEXT("us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53");
 	FString UserPoolID = TEXT("FpPUBLAGt");
 	FString Region = TEXT("us-east-2");
 	FString AWSService = TEXT("kms");
-	//FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
 	FString CognitoClientID = TEXT("3fd4tq7gvroie1romfslk2nvv8");
 	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
-	//arn:aws:kms:us-east-2:170768627592:key/0fd8f803-9cb5-4de5-86e4-41963fb6043d
 	FString ProjectID = TEXT("124");
 	FString ProjectAccessKey = TEXT("AAAAAAAAAAAfAAAAAAAAAA");
 	FString WaasVersion = TEXT("1.0.0");
@@ -158,7 +271,7 @@ private:
 
 	//Sequence Specific//
 
-public:	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
+	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
 
 	//Sequence Specific//
 
