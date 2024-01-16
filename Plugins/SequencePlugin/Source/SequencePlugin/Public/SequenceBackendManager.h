@@ -55,20 +55,13 @@ private:
 	UFUNCTION()
 		void CallShowAuthFailureScreen();
 	UFUNCTION()
-		void CallShowAuthSuccessScreen();
+		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
 private:	
 	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
 	UIndexer* Indexer;
+	FCredentials_BE Credentials;
 	UAuthenticator* authenticator;
 	UAuth* auth;//for persistent auth, used to read persistent stored data for automatic authentication
-	
-	//Vars beneath need to go
-	//for right now we use these variables to bootstrap signin TBD (this may get moved an AuthManager.cpp / .h setup instead for a cleaner setup
-	FString userEmail;
-	int32 accountID;
-	FString emailService;
-	FString username;
-	//end of signin variables
 
 	//testing variables//
 	bool enableTesting = true;
