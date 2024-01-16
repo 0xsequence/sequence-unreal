@@ -226,7 +226,7 @@ public:
 
 	FString GetRedirectURL();
 
-	void SetSocialLoginType(ESocialSigninType Type);
+	void SetSocialLoginType(const ESocialSigninType& Type);
 
 	void SocialLogin(const FString& IDTokenIn);
 
@@ -240,7 +240,7 @@ private:
 
 	void ResetRetryEmailLogin();
 
-	FString GenerateSigninURL(FString AuthURL, FString ClientID);
+	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID);
 
 	FString BuildAWSURL(const FString& Service);
 
