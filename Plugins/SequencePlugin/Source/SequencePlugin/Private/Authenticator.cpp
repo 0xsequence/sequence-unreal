@@ -43,7 +43,7 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials)
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-void UAuthenticator::SetSocialLoginType(ESocialSigninType Type)
+void UAuthenticator::SetSocialLoginType(const ESocialSigninType& Type)
 {
 	this->SocialSigninType = Type;
 }
@@ -83,7 +83,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	CognitoIdentityInitiateAuth(this->Cached_Email);
 }
 
-FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
+FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID)
 {
 	//watch for trailing /'s in redirectURL
 	FString ret = AuthURL + TEXT("?response_type=id_token&client_id=")+ClientID + TEXT("&redirect_uri=") + this->RedirectURL + TEXT("&scope=openid+profile+email&state=") + this->StateToken + TEXT("&nonce=") + this->Nonce;
@@ -94,12 +94,12 @@ FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
 
 FString UAuthenticator::BuildAWSURL(const FString& Service)
 {
-	return "https://" + Service + "." + this->Region+".amazonaws.com";
+	return TEXT("https://") + Service + TEXT(".") + this->Region + TEXT(".amazonaws.com");
 }
 
 FString UAuthenticator::GetISSClaim(const FString& JWT)
 {
-	FString ISSClaim = "";
+	FString ISSClaim = TEXT("");
 
 	TArray<FString> B64Json;
 	JWT.ParseIntoArray(B64Json, TEXT("."), true);
@@ -116,10 +116,9 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 	{
 		TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
 		FString iss;
-		if (json.Get()->TryGetStringField("iss", iss))
+		if (json.Get()->TryGetStringField(TEXT("iss"), iss))
 		{
-			//https:\/\/ 8 or 10
-			if (iss.Contains("https://",ESearchCase::IgnoreCase))
+			if (iss.Contains(TEXT("https://"),ESearchCase::IgnoreCase))
 				ISSClaim = iss.RightChop(8);
 			else
 				ISSClaim = iss;
@@ -139,7 +138,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
 	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
-	FString RequestBody = "{\"IdentityPoolId\":\""+PoolID+"\",\"Logins\":{\""+Issuer+"\":\"" + IDToken + "\"}}";
+	FString RequestBody = TEXT("{\"IdentityPoolId\":\"")+PoolID+TEXT("\",\"Logins\":{\"")+Issuer+TEXT("\":\"") + IDToken + TEXT("\"}}");
 	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
@@ -169,8 +168,8 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
-	FString URL = this->BuildAWSURL("cognito-identity");
-	FString RequestBody = "{\"IdentityId\":\"" + IdentityID + "\",\"Logins\":{\""+Issuer+ "\":\"" + IDToken + "\"}}";
+	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
+	FString RequestBody = TEXT("{\"IdentityId\":\"") + IdentityID + TEXT("\",\"Logins\":{\"")+Issuer+ TEXT("\":\"") + IDToken + TEXT("\"}}");
 							
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -178,10 +177,10 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		const TSharedPtr<FJsonObject> *credObj;
 
-		if (responseObj->TryGetObjectField("Credentials", credObj))
+		if (responseObj->TryGetObjectField(TEXT("Credentials"), credObj))
 		{
 			FString AccessKeyPtr, SecretKeyPtr, SessionTokenPtr;
-			if (credObj->Get()->TryGetStringField("AccessKeyId", AccessKeyPtr) && credObj->Get()->TryGetStringField("SecretKey", SecretKeyPtr) && credObj->Get()->TryGetStringField("SessionToken", SessionTokenPtr))
+			if (credObj->Get()->TryGetStringField(TEXT("AccessKeyId"), AccessKeyPtr) && credObj->Get()->TryGetStringField(TEXT("SecretKey"), SecretKeyPtr) && credObj->Get()->TryGetStringField(TEXT("SessionToken"), SessionTokenPtr))
 			{//good state
 				this->AccessKeyId = AccessKeyPtr;
 				this->SecretKey = SecretKeyPtr;
@@ -222,7 +221,7 @@ FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
 
 FString UAuthenticator::BuildScope(const FDateTime& Date)
 {
-	return BuildYYYYMMDD(Date) + "/" + this->Region + "/" + this->AWSService + "/aws4_request";
+	return BuildYYYYMMDD(Date) + TEXT("/") + this->Region + TEXT("/") + this->AWSService + TEXT("/aws4_request");
 }
 
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
@@ -230,15 +229,15 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 	FUnsizedData PayloadBytes = StringToUTF8(Payload);
 	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
 
-	FString Verb = "POST";
-	FString CanonicalURI = "/";//we have none
-	FString CanQueryString = "";//no query parameters so leave this blank
+	FString Verb = TEXT("POST");
+	FString CanonicalURI = TEXT("/");//we have none
+	FString CanQueryString = TEXT("");//no query parameters so leave this blank
 	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
-	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
-	FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
+	FString CanHeaders = TEXT("content-type:application/x-amz-json-1.1\nhost:") + URI + TEXT("\nx-amz-content-sha256:") + HashPayload + TEXT("\nx-amz-date:") + BuildFullDateTime(Date) + TEXT("\nx-amz-target:TrentService.GenerateDataKey\n");
+	FString SignedHeaders = TEXT("content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target");
 
 	//build the CanonicalRequest
-	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
+	FString CanReq = Verb + TEXT("\n") + CanonicalURI + TEXT("\n") + CanQueryString + TEXT("\n") + CanHeaders + TEXT("\n") + SignedHeaders + TEXT("\n") + HashPayload;
 
 	//cleanup
 	delete[] PayloadBytes.Arr;
@@ -255,7 +254,7 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 
 	FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
 	FString FullDate = BuildFullDateTime(Date);
-	FString StringToSign = "AWS4-HMAC-SHA256\n"+FullDate+"\n"+this->BuildScope(Date)+"\n"+CanonicalHash.ToLower();
+	FString StringToSign = TEXT("AWS4-HMAC-SHA256\n")+FullDate+TEXT("\n")+this->BuildScope(Date)+TEXT("\n")+CanonicalHash.ToLower();
 
 	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
@@ -270,11 +269,11 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 
 TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 {
-	FUnsizedData DateKeyEncryptBytes = StringToUTF8("AWS4" + this->SecretKey);
+	FUnsizedData DateKeyEncryptBytes = StringToUTF8(TEXT("AWS4") + this->SecretKey);
 	FUnsizedData TimeStampBytes = StringToUTF8(BuildYYYYMMDD(Date));
 	FUnsizedData RegionBytes = StringToUTF8(this->Region);
 	FUnsizedData KMSBytes = StringToUTF8(this->AWSService);
-	FUnsizedData AWSReqBytes = StringToUTF8("aws4_request");
+	FUnsizedData AWSReqBytes = StringToUTF8(TEXT("aws4_request"));
 
 	Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Arr,DateKeyEncryptBytes.GetLength(),TimeStampBytes.Arr,TimeStampBytes.GetLength());
 	Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Arr, RegionBytes.GetLength());
@@ -313,28 +312,28 @@ FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const 
 
 FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload)
 {
-	FString AuthHeader = "AWS4-HMAC-SHA256 Credential=";
+	FString AuthHeader = TEXT("AWS4-HMAC-SHA256 Credential=");
 	FString dateString = this->BuildYYYYMMDD(Date);
 	FString CanReq = this->BuildCanonicalRequest(URI, Date, Payload);
 	FString StringToSign = this->BuildStringToSign(Date, CanReq);
 	TArray<uint8_t> SigningKey = this->BuildSigningKey(Date);
 	FString Signature = this->BuildSignature(SigningKey, StringToSign);
-	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->Region + "/" + this->AWSService + "/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
+	AuthHeader += this->AccessKeyId + TEXT("/") + dateString + TEXT("/") + this->Region + TEXT("/") + this->AWSService + TEXT("/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=") + Signature;
 
 	return AuthHeader;
 }
 
 void UAuthenticator::KMSGenerateDataKey()
 {
-	FString URL = BuildAWSURL("kms");
-	FString RequestBody = "{\"KeyId\":\""+this->KMSKeyID+"\",\"KeySpec\":\"AES_256\"}";
+	FString URL = BuildAWSURL(TEXT("kms"));
+	FString RequestBody = TEXT("{\"KeyId\":\"")+this->KMSKeyID+TEXT("\",\"KeySpec\":\"AES_256\"}");
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString PlainTextPtr, CipherTextBlobPtr;
-		if (responseObj->TryGetStringField("Plaintext", PlainTextPtr) && responseObj->TryGetStringField("CipherTextBlob", CipherTextBlobPtr))
+		if (responseObj->TryGetStringField(TEXT("Plaintext"), PlainTextPtr) && responseObj->TryGetStringField(TEXT("CipherTextBlob"), CipherTextBlobPtr))
 		{//good state
 			TArray<uint8> PlainTextBytes;
 			FBase64::Decode(PlainTextPtr, PlainTextBytes);
@@ -376,21 +375,21 @@ void UAuthenticator::ResetRetryEmailLogin()
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 {
 	FString URL = BuildAWSURL(TEXT("cognito-idp"));
-	FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+Email+"\"},\"ClientId\":\""+this->CognitoClientID+"\"}";
+	FString RequestBody = TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"")+Email+TEXT("\"},\"ClientId\":\"")+this->CognitoClientID+TEXT("\"}");
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString SessionPtr;
-		if (responseObj->TryGetStringField("Session", SessionPtr))
+		if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
 		{//good state
 			this->ChallengeSession = SessionPtr;
 			this->CallAuthRequiresCode();
 		}
 		else
 		{//error state
-			if (response.Contains("user not found", ESearchCase::IgnoreCase))
+			if (response.Contains(TEXT("user not found"), ESearchCase::IgnoreCase))
 			{//no user exists so create one!
 				UE_LOG(LogTemp, Display, TEXT("Creating New User"));
 				this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword());
@@ -422,7 +421,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 
 FString UAuthenticator::GenerateSignUpPassword()
 {
-	FString pw = "aB1%";
+	FString pw = TEXT("aB1%");
 	const int32 len = 12;
 	for (int i = 0; i < len; i++)
 	{
@@ -433,8 +432,8 @@ FString UAuthenticator::GenerateSignUpPassword()
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password)
 {
-	FString URL = BuildAWSURL("cognito-idp");
-	FString RequestBody = "{\"ClientId\":\""+ this->CognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
+	FString URL = BuildAWSURL(TEXT("cognito-idp"));
+	FString RequestBody = TEXT("{\"ClientId\":\"")+ this->CognitoClientID +TEXT("\",\"Password\":\"")+ Password +TEXT("\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"")+ Email +TEXT("\"}],\"Username\":\"")+ Email +TEXT("\"}");
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -453,8 +452,8 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString)
 {
-	FString URL = BuildAWSURL("cognito-idp");
-	FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+this->CognitoClientID+"\",\"Session\":\""+ChallengeSession+"\",\"ChallengeResponses\":{\"USERNAME\":\""+Email+"\",\"ANSWER\":\""+Answer+"\"}}";
+	FString URL = BuildAWSURL(TEXT("cognito-idp"));
+	FString RequestBody = TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"")+this->CognitoClientID+TEXT("\",\"Session\":\"")+ChallengeSession+TEXT("\",\"ChallengeResponses\":{\"USERNAME\":\"")+Email+TEXT("\",\"ANSWER\":\"")+Answer+TEXT("\"}}");
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -462,9 +461,9 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString IDTokenPtr;
 		const TSharedPtr<FJsonObject> *AuthObject;
-		if (responseObj->TryGetObjectField("AuthenticationResult", AuthObject))
+		if (responseObj->TryGetObjectField(TEXT("AuthenticationResult"), AuthObject))
 		{
-			if (AuthObject->Get()->TryGetStringField("IdToken", IDTokenPtr))
+			if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
 			{//good state
 				this->Cached_IDToken = IDTokenPtr;
 				this->SetSocialLoginType(ESocialSigninType::AWS);
@@ -515,9 +514,9 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
 	FString UnixExpireString = FString::Printf(TEXT("%lld"), UnixExpireTime);
 
-	FString CachedWalletAddress = "0x" + BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
-	FString Intent = "{\\\"version\\\":\\\"" + this->WaasVersion + "\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":" + UnixExpireString + ",\\\"issued\\\":" + UnixIssueString + ",\\\"session\\\":\\\"" + CachedWalletAddress + "\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"" + IDTokenIn + "\\\"}}}";
-	FString Payload = "{\"projectId\":" + this->ProjectID + ",\"idToken\":\"" + IDTokenIn + "\",\"sessionAddress\":\"" + CachedWalletAddress + "\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"" + Intent + "\"}";
+	FString CachedWalletAddress = TEXT("0x") + BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
+	FString Intent = TEXT("{\\\"version\\\":\\\"") + this->WaasVersion + TEXT("\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":") + UnixExpireString + TEXT(",\\\"issued\\\":") + UnixIssueString + TEXT(",\\\"session\\\":\\\"") + CachedWalletAddress + TEXT("\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"") + IDTokenIn + TEXT("\\\"}}}");
+	FString Payload = TEXT("{\"projectId\":") + this->ProjectID + TEXT(",\"idToken\":\"") + IDTokenIn + TEXT("\",\"sessionAddress\":\"") + CachedWalletAddress + TEXT("\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"") + Intent + TEXT("\"}");
 
 	UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *Payload);
 
@@ -542,13 +541,13 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr,this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Arr,this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
 
-	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
+	FString PayloadCipherText = TEXT("0x") + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
 	TArray<uint8_t> PayloadSigBytes = this->SessionWallet->SignMessage(Payload);
 
-	FString PayloadSig = "0x" + BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower();
+	FString PayloadSig = TEXT("0x") + BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower();
 
-	FString EncryptedPayloadKey = "0x" + this->CipherTextBlob;
-	FString FinalPayload = "{\"payloadSig\":\"" + PayloadSig + "\",\"encryptedPayloadKey\":\"" + EncryptedPayloadKey + "\",\"payloadCiphertext\":\"" + PayloadCipherText + "\"}";
+	FString EncryptedPayloadKey = TEXT("0x") + this->CipherTextBlob;
+	FString FinalPayload = TEXT("{\"payloadSig\":\"") + PayloadSig + TEXT("\",\"encryptedPayloadKey\":\"") + EncryptedPayloadKey + TEXT("\",\"payloadCiphertext\":\"") + PayloadCipherText + TEXT("\"}");
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -557,10 +556,10 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 		const TSharedPtr<FJsonObject>* SessionObj = nullptr;
 		const TSharedPtr<FJsonObject>* DataObj = nullptr;
 		FString PlainTextPtr, CipherTextBlobPtr;
-		if (responseObj->TryGetObjectField("session", SessionObj) && responseObj->TryGetObjectField("data", DataObj))
+		if (responseObj->TryGetObjectField(TEXT("session"), SessionObj) && responseObj->TryGetObjectField(TEXT("data"), DataObj))
 		{//good state
 			FString Id, Address, UserId, Subject, SessionId, Wallet, Issuer;
-			if (SessionObj->Get()->TryGetStringField("issuer",Issuer) && SessionObj->Get()->TryGetStringField("id", Id) && SessionObj->Get()->TryGetStringField("address", Address) && SessionObj->Get()->TryGetStringField("userId", UserId) && SessionObj->Get()->TryGetStringField("subject", Subject) && DataObj->Get()->TryGetStringField("sessionId", SessionId) && DataObj->Get()->TryGetStringField("wallet", Wallet))
+			if (SessionObj->Get()->TryGetStringField(TEXT("issuer"),Issuer) && SessionObj->Get()->TryGetStringField(TEXT("id"), Id) && SessionObj->Get()->TryGetStringField(TEXT("address"), Address) && SessionObj->Get()->TryGetStringField(TEXT("userId"), UserId) && SessionObj->Get()->TryGetStringField(TEXT("subject"), Subject) && DataObj->Get()->TryGetStringField(TEXT("sessionId"), SessionId) && DataObj->Get()->TryGetStringField(TEXT("wallet"), Wallet))
 			{
 				FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 				this->CallAuthSuccess(FCredentials_BE(this->PlainText, SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer));
@@ -592,10 +591,10 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
-		->WithHeader("Content-type", "application/json")
-		->WithHeader("Accept","application/json")
-		->WithHeader("X-Access-Key",this->ProjectAccessKey)
-		->WithVerb("POST")
+		->WithHeader(TEXT("Content-type"), TEXT("application/json"))
+		->WithHeader(TEXT("Accept"), TEXT("application/json"))
+		->WithHeader(TEXT("X-Access-Key"),this->ProjectAccessKey)
+		->WithVerb(TEXT("POST"))
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
@@ -609,14 +608,14 @@ void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime&
 	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
-		->WithVerb("POST")
-		->WithHeader("Host", Url.RightChop(8))
-		->WithHeader("Content-type", "application/x-amz-json-1.1")
-		->WithHeader("X-AMZ-TARGET", AMZTarget)
-		->WithHeader("X-AMZ-DATE", BuildFullDateTime(Date))
-		->WithHeader("X-AMZ-CONTENT-SHA256", HashPayload)
-		->WithHeader("x-amz-security-token", this->SessionToken)
-		->WithHeader("Authorization",Authorization)
+		->WithVerb(TEXT("POST"))
+		->WithHeader(TEXT("Host"), Url.RightChop(8))
+		->WithHeader(TEXT("Content-type"), TEXT("application/x-amz-json-1.1"))
+		->WithHeader(TEXT("X-AMZ-TARGET"), AMZTarget)
+		->WithHeader(TEXT("X-AMZ-DATE"), BuildFullDateTime(Date))
+		->WithHeader(TEXT("X-AMZ-CONTENT-SHA256"), HashPayload)
+		->WithHeader(TEXT("x-amz-security-token"), this->SessionToken)
+		->WithHeader(TEXT("Authorization"),Authorization)
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 
@@ -629,9 +628,9 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
-		->WithHeader("Content-type", "application/x-amz-json-1.1")
-		->WithHeader("X-AMZ-TARGET", AMZTarget)
-		->WithVerb("POST")
+		->WithHeader(TEXT("Content-type"), TEXT("application/x-amz-json-1.1"))
+		->WithHeader(TEXT("X-AMZ-TARGET"), AMZTarget)
+		->WithVerb(TEXT("POST"))
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
