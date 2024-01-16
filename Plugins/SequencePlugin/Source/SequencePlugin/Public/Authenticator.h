@@ -10,12 +10,23 @@
 #include "Authenticator.generated.h"
 
 //C++ only for the time being FWallet needs to be converted to a UStruct for proper serialization
+struct FSSOCredentials
+{
+	FString URL = "";
+	FString ClientID = "";
+	FSSOCredentials(const FString& URLIn, const FString& ClientIDIn)
+	{
+		URL = URLIn;
+		ClientID = ClientIDIn;
+	}
+};
+
 USTRUCT(BlueprintType)
 struct FCredentials_BE
 {
     GENERATED_USTRUCT_BODY()
 private:
-    FString TransportKey;
+    FString TransportKey = "";
     FString SessionPrivateKey = "";
     FString Id = "";
     FString Address = "";
@@ -175,12 +186,9 @@ private:
 	//AWS
 
 	FString IdentityPoolID = TEXT("us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53");
-	//FString IdentityPoolID = TEXT("us-east-2:42c9f39d-c935-4d5c-a845-5c8815c79ee3");
-	FString UserPoolID = TEXT("FpPUBLAGt");
 	FString Region = TEXT("us-east-2");
 	FString AWSService = TEXT("kms");
 	FString CognitoClientID = TEXT("3fd4tq7gvroie1romfslk2nvv8");
-	//FString CognitoClientID = TEXT("5fl7dg7mvu534o9vfjbc6hj31p");
 	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
 	FString ProjectID = TEXT("124");
 	FString ProjectAccessKey = TEXT("AAAAAAAAAAAfAAAAAAAAAA");
@@ -188,12 +196,7 @@ private:
 	FString WaasRPCURL = TEXT("https://d14tu8valot5m0.cloudfront.net/rpc");
 	FString WaasAuthRPCURL = TEXT("https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession");
 
-	//us-east-2:170768627592
-	//cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789
-	//Amazon Cognito user pool: cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>, for example, cognito-idp.us-east-1.amazonaws.com/us-east-1_123456789 
-	//"cognito-idp.us-east-2.amazonaws.com/170768627592"
-	const FString AWSIssuer = "cognito-idp."+this->Region+".amazonaws.com/"+this->Region+"_"+this->UserPoolID;
-	TMap<ESocialSigninType, FString> ProviderMap = { {ESocialSigninType::Google,"accounts.google.com"},{ESocialSigninType::FaceBook,"graph.facebook.com"},{ESocialSigninType::AWS,AWSIssuer} };
+	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 
 	const int32 EmailAuthMaxRetries = 2;
@@ -231,6 +234,8 @@ public:
 
 	void EmailLoginCode(const FString& CodeIn);
 private:
+	FString GetISSClaim(const FString& JWT);
+
 	bool CanRetryEmailLogin();
 
 	void ResetRetryEmailLogin();
