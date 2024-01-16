@@ -142,37 +142,33 @@ void AGeneralTesting::TestEncryption() const
 
 	//UE_LOG(LogTemp, Display, TEXT("Pst Encrypted Data: %s"), *testData);
 
-	/*FString test = "0123456789012345678901234567890123456789012345678901234567890123";
+	FString test = "0123456789012345678901234567890123456789012345678901234567890123";
 
 	FWallet* TestWallet = new FWallet(test);
-	FString PrivateKey = TestWallet->GetWalletPrivateKey().ToHex();
-	FString PublicKey = TestWallet->GetWalletPublicKey().ToHex();
-	FString Address = TestWallet->GetWalletAddress().ToHex();
+	FString PrivateKey = TestWallet->GetWalletPrivateKey().ToHex().ToLower();
+	FString PublicKey = TestWallet->GetWalletPublicKey().ToHex().ToLower();
+	FString Address = TestWallet->GetWalletAddress().ToHex().ToLower();
 
-	UE_LOG(LogTemp, Display, TEXT("[PrivateKey: %s]"), *PrivateKey);
-	UE_LOG(LogTemp, Display, TEXT("[PublicKey: %s]"), *PublicKey);
-	UE_LOG(LogTemp, Display, TEXT("[Address: %s]"), *Address);
 
-	FString Message = "This is some new epic message to cause massive amounts of math to occur and crippling damage to boot";
+
+	UE_LOG(LogTemp, Display, TEXT("PrivateKey: %s , %d"), *PrivateKey , PrivateKey.Len());
+	UE_LOG(LogTemp, Display, TEXT("PublicKey: %s"), *PublicKey);
+	UE_LOG(LogTemp, Display, TEXT("Address: %s"), *Address);
+
+	FString UnixIssueString = "120";
+	FString UnixExpireString = "123";
+
+	FString CachedWalletAddress = "0x" + Address;
+	FString Token = "";// "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFmNDBmMGE4ZWYzZDg4MDk3OGRjODJmMjVjM2VjMzE3YzZhNWI3ODEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiOTcwOTg3NzU2NjYwLTM1YTZ0YzQ4aHZpOGNldjljbmtucDBpdWd2OXBvYTIzLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiOTcwOTg3NzU2NjYwLTM1YTZ0YzQ4aHZpOGNldjljbmtucDBpdWd2OXBvYTIzLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA0OTkyNTExOTA0MzcxMTk2MDYxIiwiaGQiOiJ6ZW1pbmQuY2EiLCJlbWFpbCI6ImNhbHZpbi5rb3JrQHplbWluZC5jYSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJub25jZSI6IjFGMTdGQkQzNDFCREQ1NzQ4NEM0QUZCNkFCQzIzNTJEIiwibmJmIjoxNzA1MzMwMjgyLCJpYXQiOjE3MDUzMzA1ODIsImV4cCI6MTcwNTMzNDE4MiwianRpIjoiOTA0NGZiZTA5N2IxYjIzYzgyMDI1ODk4YjczZmQyNTE4YTU0MTFiYyJ9.isa5HXnkRpbg8kscxLsTT3b - WA8DRAddIMf5_I5XlkDLgNMLeNRI2yOzEPdFpmoLCgyYfHtOq2ODetDgkbreytRslbHOIq0ptAVesZXRb - Wyb7tJgwmuypNvMxZNMPHyXbM4TDzrucTrSKhLeR20pSE8dcncreNlK4BTfkPrn5tPIlgFP9HzvAkpFa99MGPM06jfCO695qgk2TZ - ntXVRmp327GRlmosCKFqdkVIRL0POSLlZa0prGZtl_xVEYmZPxArldkG7M1jBdFTyN1S0jOQI2sS57sWOM5fLBJqSCEuMlFpJakiZGr4TFhaSg9XOHiNcK2aRJfr8j3Szv1Rsg";
+	FString Intent = "{\\\"version\\\":\\\"1.0.0\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":" + UnixExpireString + ",\\\"issued\\\":" + UnixIssueString + ",\\\"session\\\":\\\"" + CachedWalletAddress + "\\\",\\\"proof\\\":{\\\"idToken\\\":\\\""+Token+"\\\"}}}";
+	FString Message = "{\"projectId\":124,\"idToken\":\""+Token+"\",\"sessionAddress\":\"" + CachedWalletAddress + "\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"" + Intent + "\"}";
+
 	TArray<uint8> Sig = TestWallet->SignMessage(Message);
 
 	FString SigString = BytesToHex(Sig.GetData(),Sig.Num());
 
-	UE_LOG(LogTemp, Display, TEXT("[TestWallet: %s\nSig Length: %d]"), *SigString,SigString.Len());*/
-	//delete TestWallet;
-
-	UAuthenticator* authenticator = NewObject<UAuthenticator>();
-	//20130524T000000Z for testing
-	//20240110T 20 43 45 Z
-	//20150830
-	//FDateTime Date = FDateTime(2013,5,24,0,0,0,0);
-	
-	//Date.
-	//FString URI = "examplebucket.s3.amazonaws.com";
-	//FString Payload = "";
-	//authenticator->BuildKMSAuthorizationHeader(Date, URI, Payload);
-
-	//authenticator->AuthWithSequence();
+	UE_LOG(LogTemp, Display, TEXT("Message: %s"), *Message);
+	UE_LOG(LogTemp, Display, TEXT("Signature: %s"), *SigString);
 }
 
 //dedicated encryption test!

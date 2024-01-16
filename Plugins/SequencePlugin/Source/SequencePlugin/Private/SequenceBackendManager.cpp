@@ -11,13 +11,14 @@
 #include "Eth/Crypto.h"
 #include "SystemDataBuilder.h"
 
+//TODO: when Horizon wants the UI back in this needs to be updated!//
 FUserDetails ASequenceBackendManager::getUserDetails()
 {
 	FUserDetails ret;
-	ret.accountID = this->accountID;
-	ret.email = this->userEmail;
-	ret.emailService = this->emailService;
-	ret.username = this->username;
+	//ret.accountID = this->accountID;
+	//ret.email = this->userEmail;
+	//ret.emailService = this->emailService;
+	//ret.username = this->username;
 	return ret;
 }
 
@@ -38,8 +39,9 @@ void ASequenceBackendManager::CallShowAuthFailureScreen()
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowAuthSuccessScreen()
+void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn)
 {
+	this->Credentials = Credentials;
 	if (this->ShowAuthSuccessDelegate.IsBound())
 		this->ShowAuthSuccessDelegate.Broadcast();
 	else
@@ -55,9 +57,13 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
 	this->authenticator = NewObject<UAuthenticator>();
+
 	//setup up delegate bindings
-	this->authenticator->AuthRequiresCode.AddDynamic(this,&ASequenceBackendManager::CallReadyToReceiveCode);
-	
+	FScriptDelegate del;
+	del.BindUFunction(this, "CallShowAuthSuccessScreen");
+	this->authenticator->AuthSuccess.Add(del);
+	this->authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
+	this->authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 }
 
 ASequenceBackendManager::~ASequenceBackendManager()
