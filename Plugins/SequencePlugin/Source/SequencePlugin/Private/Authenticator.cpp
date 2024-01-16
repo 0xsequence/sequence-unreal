@@ -51,12 +51,17 @@ void UAuthenticator::SetSocialLoginType(ESocialSigninType Type)
 FString UAuthenticator::GetSigninURL()
 {
 	FString SigninURL = TEXT("");
-	switch (this->SocialSigninType)
+	
+	if (this->SSOProviderMap.Contains(this->SocialSigninType))
 	{
-	case ESocialSigninType::Google:
-		SigninURL = this->GenerateSigninURL(GoogleAuthURL, GoogleClientID);
-		break;
+		SigninURL = this->GenerateSigninURL(this->SSOProviderMap[this->SocialSigninType].URL, this->SSOProviderMap[this->SocialSigninType].ClientID);
 	}
+	else
+	{
+		FString SSOType = UEnum::GetValueAsString(this->SocialSigninType.GetValue());
+		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: %s in SSOProviderMap"));
+	}
+
 	return SigninURL;
 }
 
@@ -68,7 +73,7 @@ FString UAuthenticator::GetRedirectURL()
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	CognitoIdentityGetID(this->IdentityPoolID, *ProviderMap.Find(this->SocialSigninType), IDTokenIn);
+	CognitoIdentityGetID(this->IdentityPoolID,GetISSClaim(IDTokenIn), IDTokenIn);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
@@ -83,6 +88,7 @@ FString UAuthenticator::GenerateSigninURL(FString AuthURL, FString ClientID)
 	//watch for trailing /'s in redirectURL
 	FString ret = AuthURL + TEXT("?response_type=id_token&client_id=")+ClientID + TEXT("&redirect_uri=") + this->RedirectURL + TEXT("&scope=openid+profile+email&state=") + this->StateToken + TEXT("&nonce=") + this->Nonce;
 	UE_LOG(LogTemp, Display, TEXT("Generated Signin URL: %s"), *ret);
+	UE_LOG(LogTemp, Display, TEXT("Signin Length: %d"), ret.Len());
 	return ret;
 }
 
@@ -91,12 +97,50 @@ FString UAuthenticator::BuildAWSURL(const FString& Service)
 	return "https://" + Service + "." + this->Region+".amazonaws.com";
 }
 
+FString UAuthenticator::GetISSClaim(const FString& JWT)
+{
+	FString ISSClaim = "";
+
+	TArray<FString> B64Json;
+	JWT.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+		UE_LOG(LogTemp, Display, TEXT("JWTPart: %s"), *T);
+	}
+
+	if (B64Json.Num() > 1)
+	{
+		TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
+		FString iss;
+		if (json.Get()->TryGetStringField("iss", iss))
+		{
+			//https:\/\/ 8 or 10
+			if (iss.Contains("https://",ESearchCase::IgnoreCase))
+				ISSClaim = iss.RightChop(8);
+			else
+				ISSClaim = iss;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("[JWT didn't contain an ISS field]"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[JWT Parse Failure]"));
+	}
+	return ISSClaim;
+}
+
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
 	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
 	FString RequestBody = "{\"IdentityPoolId\":\""+PoolID+"\",\"Logins\":{\""+Issuer+"\":\"" + IDToken + "\"}}";
-
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -104,7 +148,8 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 		if (responseObj->TryGetStringField("IdentityId",IdentityIdPtr))
 		{//good state
 			this->IdentityId = IdentityIdPtr;
-			CognitoIdentityGetCredentialsForIdentity(this->IdentityId, this->Cached_IDToken, *ProviderMap.Find(this->SocialSigninType));
+			UE_LOG(LogTemp, Display, TEXT("Issuer %s"), *Issuer);
+			CognitoIdentityGetCredentialsForIdentity(this->IdentityId, this->Cached_IDToken, Issuer);
 		}
 		else
 		{//error state
@@ -194,7 +239,6 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 
 	//build the CanonicalRequest
 	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
-	UE_LOG(LogTemp, Display, TEXT("Canonical Request:\n%s"), *CanReq);
 
 	//cleanup
 	delete[] PayloadBytes.Arr;
@@ -212,12 +256,10 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 	FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
 	FString FullDate = BuildFullDateTime(Date);
 	FString StringToSign = "AWS4-HMAC-SHA256\n"+FullDate+"\n"+this->BuildScope(Date)+"\n"+CanonicalHash.ToLower();
-	UE_LOG(LogTemp, Display, TEXT("StringToSign:\n%s"), *StringToSign);
 
 	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString StringToSignHash = BytesToHex(StringToSignHashBytes.value, StringToSignHashBytes.HASH_LEN).ToLower();
-	UE_LOG(LogTemp, Display, TEXT("StringToSignHash:\n%s"), *StringToSignHash);
 
 	//cleanup
 	delete[] PayloadBytes.Arr;
@@ -262,7 +304,6 @@ FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const 
 	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN).ToLower();
-	UE_LOG(LogTemp, Display, TEXT("Signature: %s"), *Signature);
 
 	//cleanup
 	delete[] StringToSignBytes.Arr;
