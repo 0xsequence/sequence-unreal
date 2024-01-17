@@ -166,35 +166,34 @@ private:
 	FString StateToken = TEXT("");
 	FString Nonce = TEXT("");
 
-	FString UrlScheme = TEXT("powered-by-sequence");
-	FString RedirectURL = TEXT("https://3d41-142-115-54-118.ngrok-free.app/");
+	const FString UrlScheme = "powered-by-sequence";
+	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
 
-	FString GoogleAuthURL = TEXT("https://accounts.google.com/o/oauth2/auth");
-	FString GoogleClientID = TEXT("970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com");
+	const FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
+	const FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
 
-	FString FacebookAuthURL = TEXT("https://www.facebook.com/v18.0/dialog/oauth");
-	FString FacebookClientID = TEXT("");//TODO still need this
+	const FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
+	const FString FacebookClientID = TEXT("");//TODO still need this
 
-	FString DiscordAuthURL = TEXT("https://discord.com/api/oauth2/authorize");
-	FString DiscordClientID = TEXT("");//TODO still need this
+	const FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
+	const FString DiscordClientID = TEXT("");//TODO still need this
 
-	FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
-	FString AppleClientID = TEXT("");//TODO still need this
+	const FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
+	const FString AppleClientID = TEXT("");//TODO still need this
 
 	FString Cached_IDToken;
 	FString Cached_Email;
 	//AWS
 
-	FString IdentityPoolID = TEXT("us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53");
-	FString Region = TEXT("us-east-2");
-	FString AWSService = TEXT("kms");
-	FString CognitoClientID = TEXT("3fd4tq7gvroie1romfslk2nvv8");
-	FString KMSKeyID = TEXT("0fd8f803-9cb5-4de5-86e4-41963fb6043d");
-	FString ProjectID = TEXT("124");
-	FString ProjectAccessKey = TEXT("AAAAAAAAAAAfAAAAAAAAAA");
-	FString WaasVersion = TEXT("1.0.0");
-	FString WaasRPCURL = TEXT("https://d14tu8valot5m0.cloudfront.net/rpc");
-	FString WaasAuthRPCURL = TEXT("https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession");
+	const FString IdentityPoolID = "us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53";
+	const FString Region = "us-east-2";
+	const FString AWSService = "kms";
+	const FString CognitoClientID = "3fd4tq7gvroie1romfslk2nvv8";
+	const FString KMSKeyID = "0fd8f803-9cb5-4de5-86e4-41963fb6043d";
+	const FString ProjectID = "124";
+	const FString ProjectAccessKey = "AAAAAAAAAAAfAAAAAAAAAA";
+	const FString WaasVersion = "1.0.0";
+	const FString WaasAuthRPCURL = "https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession";
 
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
@@ -242,7 +241,7 @@ private:
 
 	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID);
 
-	FString BuildAWSURL(const FString& Service);
+	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
 
 	FString GenerateSignUpPassword();
 
@@ -268,13 +267,13 @@ private:
 
 	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
 
-	void KMSGenerateDataKey();
+	void KMSGenerateDataKey(const FString& AWSKMSKeyID);
 
-	void CognitoIdentityInitiateAuth(const FString& Email);
+	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 
-	void CognitoIdentitySignUp(const FString& Email, const FString& Password);
+	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID);
 
-	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString);
+	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 
 	//Sequence Specific//
 

@@ -12,7 +12,6 @@
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 #include "Util/HexUtility.h"
 
-//we always require a default constructor
 UAuthenticator::UAuthenticator()
 {
 	this->Nonce = FGuid::NewGuid().ToString();
@@ -59,7 +58,7 @@ FString UAuthenticator::GetSigninURL()
 	else
 	{
 		FString SSOType = UEnum::GetValueAsString(this->SocialSigninType.GetValue());
-		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: %s in SSOProviderMap"));
+		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: %s in SSOProviderMap"),*SSOType);
 	}
 
 	return SigninURL;
@@ -67,34 +66,30 @@ FString UAuthenticator::GetSigninURL()
 
 FString UAuthenticator::GetRedirectURL()
 {
-	return this->RedirectURL;
+	return FString::Printf(TEXT("%s"), *this->RedirectURL);
 }
 
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	CognitoIdentityGetID(this->IdentityPoolID,GetISSClaim(IDTokenIn), IDTokenIn);
+	CognitoIdentityGetID(this->IdentityPoolID,GetISSClaim(this->Cached_IDToken), this->Cached_IDToken);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
 	this->ResetRetryEmailLogin();
 	this->Cached_Email = EmailIn;
-	CognitoIdentityInitiateAuth(this->Cached_Email);
+	CognitoIdentityInitiateAuth(this->Cached_Email,this->CognitoClientID);
 }
 
 FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID)
 {
-	//watch for trailing /'s in redirectURL
-	FString ret = AuthURL + TEXT("?response_type=id_token&client_id=")+ClientID + TEXT("&redirect_uri=") + this->RedirectURL + TEXT("&scope=openid+profile+email&state=") + this->StateToken + TEXT("&nonce=") + this->Nonce;
-	UE_LOG(LogTemp, Display, TEXT("Generated Signin URL: %s"), *ret);
-	UE_LOG(LogTemp, Display, TEXT("Signin Length: %d"), ret.Len());
-	return ret;
+	return FString::Printf(TEXT("%s?response_type=id_token&client_id=%s&redirect_uri=%s&scope=openid+profile+email&state=%s&nonce=%s"),*AuthURL,*ClientID,*this->RedirectURL,*this->StateToken, *this->Nonce);
 }
 
-FString UAuthenticator::BuildAWSURL(const FString& Service)
+FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
 {
-	return TEXT("https://") + Service + TEXT(".") + this->Region + TEXT(".amazonaws.com");
+	return FString::Printf(TEXT("https://%s.%s.amazonaws.com"),*Service,*AWSRegion);
 }
 
 FString UAuthenticator::GetISSClaim(const FString& JWT)
@@ -109,7 +104,6 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 		FString T;
 		FBase64::Decode(B64Json[i], T);
 		B64Json[i] = T;
-		UE_LOG(LogTemp, Display, TEXT("JWTPart: %s"), *T);
 	}
 
 	if (B64Json.Num() > 1)
@@ -137,17 +131,16 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
-	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
-	FString RequestBody = TEXT("{\"IdentityPoolId\":\"")+PoolID+TEXT("\",\"Logins\":{\"")+Issuer+TEXT("\":\"") + IDToken + TEXT("\"}}");
+	FString URL = this->BuildAWSURL(TEXT("cognito-identity"),this->Region);
+	FString RequestBody = FString::Printf(TEXT("{\"IdentityPoolId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"),*PoolID,*Issuer, *IDToken);
 	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
 		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString IdentityIdPtr = TEXT("nil");
-		if (responseObj->TryGetStringField("IdentityId",IdentityIdPtr))
+		if (responseObj->TryGetStringField(TEXT("IdentityId"),IdentityIdPtr))
 		{//good state
 			this->IdentityId = IdentityIdPtr;
-			UE_LOG(LogTemp, Display, TEXT("Issuer %s"), *Issuer);
 			CognitoIdentityGetCredentialsForIdentity(this->IdentityId, this->Cached_IDToken, Issuer);
 		}
 		else
@@ -168,8 +161,8 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
-	FString URL = this->BuildAWSURL(TEXT("cognito-identity"));
-	FString RequestBody = TEXT("{\"IdentityId\":\"") + IdentityID + TEXT("\",\"Logins\":{\"")+Issuer+ TEXT("\":\"") + IDToken + TEXT("\"}}");
+	FString URL = this->BuildAWSURL(TEXT("cognito-identity"),this->Region);
+	FString RequestBody = FString::Printf(TEXT("{\"IdentityId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"), *IdentityID, *Issuer, *IDToken);
 							
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -185,7 +178,7 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 				this->AccessKeyId = AccessKeyPtr;
 				this->SecretKey = SecretKeyPtr;
 				this->SessionToken = SessionTokenPtr;
-				this->KMSGenerateDataKey();
+				this->KMSGenerateDataKey(this->KMSKeyID);
 			}
 			else
 			{//error state
@@ -221,7 +214,7 @@ FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
 
 FString UAuthenticator::BuildScope(const FDateTime& Date)
 {
-	return BuildYYYYMMDD(Date) + TEXT("/") + this->Region + TEXT("/") + this->AWSService + TEXT("/aws4_request");
+	return FString::Printf(TEXT("%s"), *BuildYYYYMMDD(Date)) + TEXT("/") + FString::Printf(TEXT("%s"), *this->Region) + TEXT("/") + FString::Printf(TEXT("%s"), *this->AWSService) + TEXT("/aws4_request");
 }
 
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
@@ -233,11 +226,11 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 	FString CanonicalURI = TEXT("/");//we have none
 	FString CanQueryString = TEXT("");//no query parameters so leave this blank
 	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
-	FString CanHeaders = TEXT("content-type:application/x-amz-json-1.1\nhost:") + URI + TEXT("\nx-amz-content-sha256:") + HashPayload + TEXT("\nx-amz-date:") + BuildFullDateTime(Date) + TEXT("\nx-amz-target:TrentService.GenerateDataKey\n");
+	FString CanHeaders = TEXT("content-type:application/x-amz-json-1.1\nhost:") + FString::Printf(TEXT("%s"), *URI) + TEXT("\nx-amz-content-sha256:") + FString::Printf(TEXT("%s"), *HashPayload) + TEXT("\nx-amz-date:") + FString::Printf(TEXT("%s"), *BuildFullDateTime(Date)) + TEXT("\nx-amz-target:TrentService.GenerateDataKey\n");
 	FString SignedHeaders = TEXT("content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target");
 
 	//build the CanonicalRequest
-	FString CanReq = Verb + TEXT("\n") + CanonicalURI + TEXT("\n") + CanQueryString + TEXT("\n") + CanHeaders + TEXT("\n") + SignedHeaders + TEXT("\n") + HashPayload;
+	FString CanReq = FString::Printf(TEXT("%s"), *Verb) + TEXT("\n") + FString::Printf(TEXT("%s"), *CanonicalURI) + TEXT("\n") + FString::Printf(TEXT("%s"), *CanQueryString) + TEXT("\n") + FString::Printf(TEXT("%s"), *CanHeaders) + TEXT("\n") + FString::Printf(TEXT("%s"), *SignedHeaders) + TEXT("\n") + FString::Printf(TEXT("%s"), *HashPayload);
 
 	//cleanup
 	delete[] PayloadBytes.Arr;
@@ -254,7 +247,7 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 
 	FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
 	FString FullDate = BuildFullDateTime(Date);
-	FString StringToSign = TEXT("AWS4-HMAC-SHA256\n")+FullDate+TEXT("\n")+this->BuildScope(Date)+TEXT("\n")+CanonicalHash.ToLower();
+	FString StringToSign = TEXT("AWS4-HMAC-SHA256\n") + FString::Printf(TEXT("%s"), *FullDate) + TEXT("\n") + FString::Printf(TEXT("%s"), *this->BuildScope(Date)) + TEXT("\n") + FString::Printf(TEXT("%s"), *CanonicalHash.ToLower());
 
 	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
@@ -318,15 +311,15 @@ FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const
 	FString StringToSign = this->BuildStringToSign(Date, CanReq);
 	TArray<uint8_t> SigningKey = this->BuildSigningKey(Date);
 	FString Signature = this->BuildSignature(SigningKey, StringToSign);
-	AuthHeader += this->AccessKeyId + TEXT("/") + dateString + TEXT("/") + this->Region + TEXT("/") + this->AWSService + TEXT("/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=") + Signature;
+	AuthHeader += FString::Printf(TEXT("%s"), *this->AccessKeyId) + TEXT("/") + FString::Printf(TEXT("%s"), *dateString) + TEXT("/") + FString::Printf(TEXT("%s"), *this->Region) + TEXT("/") + FString::Printf(TEXT("%s"), *this->AWSService) + TEXT("/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=") + FString::Printf(TEXT("%s"), *Signature);
 
 	return AuthHeader;
 }
 
-void UAuthenticator::KMSGenerateDataKey()
+void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 {
-	FString URL = BuildAWSURL(TEXT("kms"));
-	FString RequestBody = TEXT("{\"KeyId\":\"")+this->KMSKeyID+TEXT("\",\"KeySpec\":\"AES_256\"}");
+	FString URL = BuildAWSURL(TEXT("kms"),this->Region);
+	FString RequestBody = FString::Printf(TEXT("{\"KeyId\":\"%s\",\"KeySpec\":\"AES_256\"}"), *AWSKMSKeyID);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -372,10 +365,10 @@ void UAuthenticator::ResetRetryEmailLogin()
 	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
 }
 
-void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
+void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL(TEXT("cognito-idp"));
-	FString RequestBody = TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"")+Email+TEXT("\"},\"ClientId\":\"")+this->CognitoClientID+TEXT("\"}");
+	FString URL = BuildAWSURL(TEXT("cognito-idp"),this->Region);
+	FString RequestBody = FString::Printf(TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"%s\"},\"ClientId\":\"%s\"}"), *Email, *AWSCognitoClientID);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -392,7 +385,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email)
 			if (response.Contains(TEXT("user not found"), ESearchCase::IgnoreCase))
 			{//no user exists so create one!
 				UE_LOG(LogTemp, Display, TEXT("Creating New User"));
-				this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword());
+				this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->CognitoClientID);
 			}
 			else
 			{//unknown error
@@ -430,15 +423,16 @@ FString UAuthenticator::GenerateSignUpPassword()
 	return pw;
 }
 
-void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password)
+void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL(TEXT("cognito-idp"));
-	FString RequestBody = TEXT("{\"ClientId\":\"")+ this->CognitoClientID +TEXT("\",\"Password\":\"")+ Password +TEXT("\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"")+ Email +TEXT("\"}],\"Username\":\"")+ Email +TEXT("\"}");
+	FString URL = BuildAWSURL(TEXT("cognito-idp"),this->Region);
+	//FString RequestBody = TEXT("{\"ClientId\":\"") + FString::Printf(TEXT("%s"), *this->CognitoClientID) + TEXT("\",\"Password\":\"") + FString::Printf(TEXT("%s"), *Password) + TEXT("\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"") + FString::Printf(TEXT("%s"), *Email) + TEXT("\"}],\"Username\":\"") + FString::Printf(TEXT("%s"), *Email) + TEXT("\"}");
+	FString RequestBody = FString::Printf(TEXT("{\"ClientId\":\"%s\",\"Password\":\"%s\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"%s\"}],\"Username\":\"%s\"}"), *AWSCognitoClientID, *Password, *Email, *Email);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		this->CognitoIdentityInitiateAuth(this->Cached_Email);
+		this->CognitoIdentityInitiateAuth(this->Cached_Email,this->CognitoClientID);
 	};
 
 	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
@@ -450,10 +444,10 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	this->RPC(URL, TEXT("AWSCognitoIdentityProviderService.SignUp"), RequestBody, GenericSuccess, GenericFailure);
 }
 
-void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString)
+void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL(TEXT("cognito-idp"));
-	FString RequestBody = TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"")+this->CognitoClientID+TEXT("\",\"Session\":\"")+ChallengeSession+TEXT("\",\"ChallengeResponses\":{\"USERNAME\":\"")+Email+TEXT("\",\"ANSWER\":\"")+Answer+TEXT("\"}}");
+	FString URL = BuildAWSURL(TEXT("cognito-idp"),this->Region);
+	FString RequestBody = FString::Printf(TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"%s\",\"Session\":\"%s\",\"ChallengeResponses\":{\"USERNAME\":\"%s\",\"ANSWER\":\"%s\"}}"), *AWSCognitoClientID, *ChallengeSessionString, *Email, *Answer);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -502,7 +496,7 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession);
+	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->CognitoClientID);
 }
 
 void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
@@ -514,10 +508,10 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
 	FString UnixExpireString = FString::Printf(TEXT("%lld"), UnixExpireTime);
 
-	FString CachedWalletAddress = TEXT("0x") + BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength());
-	FString Intent = TEXT("{\\\"version\\\":\\\"") + this->WaasVersion + TEXT("\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":") + UnixExpireString + TEXT(",\\\"issued\\\":") + UnixIssueString + TEXT(",\\\"session\\\":\\\"") + CachedWalletAddress + TEXT("\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"") + IDTokenIn + TEXT("\\\"}}}");
-	FString Payload = TEXT("{\"projectId\":") + this->ProjectID + TEXT(",\"idToken\":\"") + IDTokenIn + TEXT("\",\"sessionAddress\":\"") + CachedWalletAddress + TEXT("\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"") + Intent + TEXT("\"}");
+	FString CachedWalletAddress = FString::Printf(TEXT("0x%s"),*BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength()).ToLower());
 
+	FString Intent = FString::Printf(TEXT("{\\\"version\\\":\\\"%s\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":%s,\\\"issued\\\":%s,\\\"session\\\":\\\"%s\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"%s\\\"}}}"),*this->WaasVersion, *UnixExpireString, *UnixIssueString, *CachedWalletAddress, *IDTokenIn);
+	FString Payload = FString::Printf(TEXT("{\"projectId\":%s,\"idToken\":\"%s\",\"sessionAddress\":\"%s\",\"friendlyName\":\"FRIENDLY SESSION WALLET\",\"intentJSON\":\"%s\"}"),*this->ProjectID, *IDTokenIn, *CachedWalletAddress, *Intent);
 	UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *Payload);
 
 	TArray<uint8_t> TPayload = PKCS7(Payload);
@@ -541,13 +535,13 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr,this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Arr,this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
 
-	FString PayloadCipherText = TEXT("0x") + BytesToHex(iv.GetData(),iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
+	FString PayloadCipherText = FString::Printf(TEXT("0x%s%s"), *BytesToHex(iv.GetData(), iv.Num()).ToLower(), *BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower());
+	
 	TArray<uint8_t> PayloadSigBytes = this->SessionWallet->SignMessage(Payload);
 
-	FString PayloadSig = TEXT("0x") + BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower();
-
-	FString EncryptedPayloadKey = TEXT("0x") + this->CipherTextBlob;
-	FString FinalPayload = TEXT("{\"payloadSig\":\"") + PayloadSig + TEXT("\",\"encryptedPayloadKey\":\"") + EncryptedPayloadKey + TEXT("\",\"payloadCiphertext\":\"") + PayloadCipherText + TEXT("\"}");
+	FString PayloadSig = FString::Printf(TEXT("0x%s"),*BytesToHex(PayloadSigBytes.GetData(), PayloadSigBytes.Num()).ToLower());
+	FString EncryptedPayloadKey = FString::Printf(TEXT("0x%s"),*this->CipherTextBlob);
+	FString FinalPayload = FString::Printf(TEXT("{\"payloadSig\":\"%s\",\"encryptedPayloadKey\":\"%s\",\"payloadCiphertext\":\"%s\"}"),*PayloadSig,*EncryptedPayloadKey,*PayloadCipherText);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -590,12 +584,12 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
-		->WithUrl(Url)
+		->WithUrl(FString::Printf(TEXT("%s"), *Url))
 		->WithHeader(TEXT("Content-type"), TEXT("application/json"))
 		->WithHeader(TEXT("Accept"), TEXT("application/json"))
-		->WithHeader(TEXT("X-Access-Key"),this->ProjectAccessKey)
+		->WithHeader(TEXT("X-Access-Key"), FString::Printf(TEXT("%s"), *this->ProjectAccessKey))
 		->WithVerb(TEXT("POST"))
-		->WithContentAsString(RequestBody)
+		->WithContentAsString(FString::Printf(TEXT("%s"), *RequestBody))
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
 
@@ -607,16 +601,16 @@ void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime&
 
 	NewObject<URequestHandler>()
 		->PrepareRequest()
-		->WithUrl(Url)
+		->WithUrl(FString::Printf(TEXT("%s"), *Url))
 		->WithVerb(TEXT("POST"))
-		->WithHeader(TEXT("Host"), Url.RightChop(8))
+		->WithHeader(TEXT("Host"), FString::Printf(TEXT("%s"), *Url.RightChop(8)))
 		->WithHeader(TEXT("Content-type"), TEXT("application/x-amz-json-1.1"))
-		->WithHeader(TEXT("X-AMZ-TARGET"), AMZTarget)
-		->WithHeader(TEXT("X-AMZ-DATE"), BuildFullDateTime(Date))
-		->WithHeader(TEXT("X-AMZ-CONTENT-SHA256"), HashPayload)
-		->WithHeader(TEXT("x-amz-security-token"), this->SessionToken)
-		->WithHeader(TEXT("Authorization"),Authorization)
-		->WithContentAsString(RequestBody)
+		->WithHeader(TEXT("X-AMZ-TARGET"), FString::Printf(TEXT("%s"), *AMZTarget))
+		->WithHeader(TEXT("X-AMZ-DATE"), FString::Printf(TEXT("%s"), *BuildFullDateTime(Date)))
+		->WithHeader(TEXT("X-AMZ-CONTENT-SHA256"), FString::Printf(TEXT("%s"), *HashPayload))
+		->WithHeader(TEXT("x-amz-security-token"), FString::Printf(TEXT("%s"), *this->SessionToken))
+		->WithHeader(TEXT("Authorization"), FString::Printf(TEXT("%s"), *Authorization))
+		->WithContentAsString(FString::Printf(TEXT("%s"), *RequestBody))
 		->ProcessAndThen(OnSuccess, OnFailure);
 
 	//cleanup
@@ -627,10 +621,10 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
-		->WithUrl(Url)
+		->WithUrl(FString::Printf(TEXT("%s"), *Url))
 		->WithHeader(TEXT("Content-type"), TEXT("application/x-amz-json-1.1"))
-		->WithHeader(TEXT("X-AMZ-TARGET"), AMZTarget)
+		->WithHeader(TEXT("X-AMZ-TARGET"), FString::Printf(TEXT("%s"), *AMZTarget))
 		->WithVerb(TEXT("POST"))
-		->WithContentAsString(RequestBody)
+		->WithContentAsString(FString::Printf(TEXT("%s"), *RequestBody))
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
