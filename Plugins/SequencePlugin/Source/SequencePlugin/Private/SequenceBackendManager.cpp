@@ -108,19 +108,14 @@ FSecureKey ASequenceBackendManager::GetSecureStorableAuth()
 	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
 }
 
-FString ASequenceBackendManager::GetLoginURL()
+FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 {
-	return this->authenticator->GetSigninURL();
+	return this->authenticator->GetSigninURL(Type);
 }
 
 FString ASequenceBackendManager::GetRedirectURL()
 {
 	return this->authenticator->GetRedirectURL();
-}
-
-void ASequenceBackendManager::SetSocialLoginType(ESocialSigninType Type)
-{
-	this->authenticator->SetSocialLoginType(Type);
 }
 
 void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)

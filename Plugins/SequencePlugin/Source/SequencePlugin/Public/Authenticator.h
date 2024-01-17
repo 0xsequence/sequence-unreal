@@ -161,8 +161,6 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials);
 //vars
 private:
-	TEnumAsByte<ESocialSigninType> SocialSigninType;
-
 	FString StateToken = TEXT("");
 	FString Nonce = TEXT("");
 
@@ -195,7 +193,7 @@ private:
 	const FString WaasVersion = "1.0.0";
 	const FString WaasAuthRPCURL = "https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession";
 
-	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
+	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 
 	const int32 EmailAuthMaxRetries = 2;
@@ -221,11 +219,9 @@ private:
 private:
 	UAuthenticator();
 public:
-	FString GetSigninURL();
+	FString GetSigninURL(const ESocialSigninType& Type);
 
 	FString GetRedirectURL();
-
-	void SetSocialLoginType(const ESocialSigninType& Type);
 
 	void SocialLogin(const FString& IDTokenIn);
 
