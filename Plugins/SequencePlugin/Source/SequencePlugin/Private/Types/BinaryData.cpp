@@ -31,7 +31,7 @@ FString FBinaryData::ToHex() const
 	}
 	
 	//return HashToHexString(GetLength(), Arr);
-	return BytesToHex(Arr,GetLength());
+	return BytesToHex(Arr,GetLength()).ToLower();
 }
 
 void FBinaryData::Renew()
