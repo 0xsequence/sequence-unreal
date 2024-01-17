@@ -42,23 +42,18 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials)
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-void UAuthenticator::SetSocialLoginType(const ESocialSigninType& Type)
-{
-	this->SocialSigninType = Type;
-}
-
-FString UAuthenticator::GetSigninURL()
+FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 {
 	FString SigninURL = TEXT("");
 	
-	if (this->SSOProviderMap.Contains(this->SocialSigninType))
+	if (this->SSOProviderMap.Contains(Type))
 	{
-		SigninURL = this->GenerateSigninURL(this->SSOProviderMap[this->SocialSigninType].URL, this->SSOProviderMap[this->SocialSigninType].ClientID);
+		SigninURL = this->GenerateSigninURL(this->SSOProviderMap[Type].URL, this->SSOProviderMap[Type].ClientID);
 	}
 	else
 	{
-		FString SSOType = UEnum::GetValueAsString(this->SocialSigninType.GetValue());
-		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: %s in SSOProviderMap"),*SSOType);
+		FString SSOType = UEnum::GetValueAsString(Type);
+		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
 	return SigninURL;
@@ -426,7 +421,6 @@ FString UAuthenticator::GenerateSignUpPassword()
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
 	FString URL = BuildAWSURL(TEXT("cognito-idp"),this->Region);
-	//FString RequestBody = TEXT("{\"ClientId\":\"") + FString::Printf(TEXT("%s"), *this->CognitoClientID) + TEXT("\",\"Password\":\"") + FString::Printf(TEXT("%s"), *Password) + TEXT("\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"") + FString::Printf(TEXT("%s"), *Email) + TEXT("\"}],\"Username\":\"") + FString::Printf(TEXT("%s"), *Email) + TEXT("\"}");
 	FString RequestBody = FString::Printf(TEXT("{\"ClientId\":\"%s\",\"Password\":\"%s\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"%s\"}],\"Username\":\"%s\"}"), *AWSCognitoClientID, *Password, *Email, *Email);
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
@@ -460,7 +454,6 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 			if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
 			{//good state
 				this->Cached_IDToken = IDTokenPtr;
-				this->SetSocialLoginType(ESocialSigninType::AWS);
 				this->SocialLogin(this->Cached_IDToken);
 			}
 			else

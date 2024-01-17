@@ -105,13 +105,10 @@ public:
 		FSecureKey GetSecureStorableAuth();
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		FString GetLoginURL();
+		FString GetLoginURL(const ESocialSigninType& Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetRedirectURL();
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void SetSocialLoginType(ESocialSigninType Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void SocialLogin(const FString& IDTokenIn);
