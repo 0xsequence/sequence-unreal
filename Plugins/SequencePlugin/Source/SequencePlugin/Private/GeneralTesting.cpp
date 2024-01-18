@@ -15,6 +15,7 @@
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
 #include "Types/Wallet.h"
+#include "Indexer/Indexer_Enums.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
@@ -75,10 +76,9 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	imgHandler = NewObject<UObjectHandler>();
-	imgHandler->setup(true);//we want to test caching!
-	imgHandler->FOnDoneImageProcessingDelegate.BindUFunction(this, "OnDoneImageProcessing");
-	imgHandler->requestImages(this->testingURLs);
+	ESortOrder TestOrder = ESortOrder::ASC;
+	FString TestResult = UEnum::GetValueAsString(TestOrder);
+	UE_LOG(LogTemp, Display, TEXT("Printed UEnum: %s"), *TestResult);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()
