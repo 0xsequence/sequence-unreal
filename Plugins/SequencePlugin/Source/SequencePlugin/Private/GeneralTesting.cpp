@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GeneralTesting.h"
 #include "Indexer/IndexerTests.h"
 #include "ObjectHandler.h"
@@ -22,12 +21,6 @@ AGeneralTesting::AGeneralTesting()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	//TODO SWAP TO STATIC TARRAY FOR THIS//
-	testingURLs.Add("https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389");
-	testingURLs.Add("https://www.circle.com/hubfs/share-USDC.png#keepProtocol");
-	testingURLs.Add("https://assets.skyweaver.net/i7FuksL3/webapp/cards/full-cards/4x/0-silver.png");
-	testingURLs.Add("https://skyweaver.net/images/skyweavercover.jpg");
 }
 
 // Called when the game starts or when spawned
@@ -93,27 +86,29 @@ void AGeneralTesting::OnDoneImageProcessing()
 	this->testMiscForwarder(this->imgHandler->getProcessedImages());
 }
 
-void AGeneralTesting::TestSequence() const
-{
-	TFunction<void(FString)> OnSuccess = [this](FString State)
-	{
-		CallbackPassed(State);
-	};
+//Not being used in V1
+//void AGeneralTesting::TestSequence() const
+//{
+//	TFunction<void(FString)> OnSuccess = [this](FString State)
+//	{
+//		CallbackPassed(State);
+//	};
+//
+//	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
+//	{
+//		CallbackFailed(data, Err);
+//	};
+//
+//	TestSequenceData(OnSuccess, OnFailure);
+//}
 
-	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
-	{
-		CallbackFailed(data, Err);
-	};
-
-	TestSequenceData(OnSuccess, OnFailure);
-}
-
-void AGeneralTesting::testSystemDataBuilder()
-{//testing system data builder
-	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
-	SequenceAPI::FSequenceWallet* wallet = new SequenceAPI::FSequenceWallet();
-	sysBuilder->testGOTokenData(wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
-}
+//Not being used in V1
+//void AGeneralTesting::testSystemDataBuilder()
+//{//testing system data builder
+//	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
+//	SequenceAPI::FSequenceWallet* wallet = new SequenceAPI::FSequenceWallet();
+//	sysBuilder->testGOTokenData(wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
+//}
 
 // Called every frame
 void AGeneralTesting::Tick(const float DeltaTime)

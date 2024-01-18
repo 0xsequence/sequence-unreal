@@ -175,15 +175,16 @@ void SequenceAPI::FSequenceWallet::SendRPC(FString Url, FString Content, TSucces
 			->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-//Another dead constructor?
-SequenceAPI::FSequenceWallet::FSequenceWallet(FString Hostname) : Hostname(Hostname)
-{
-	
-}
-
-//blank constructor?
+//Pass in credentials in our constructor!
 SequenceAPI::FSequenceWallet::FSequenceWallet()
 {
+	this->Indexer = NewObject<UIndexer>();
+}
+
+SequenceAPI::FSequenceWallet::FSequenceWallet(FCredentials_BE CredentialsIn)
+{
+	this->Credentials = CredentialsIn;
+	this->Indexer = NewObject<UIndexer>();
 }
 
 void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,
@@ -458,8 +459,6 @@ void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE T
 	});
 }
 
-//appending functions from sequenceData.cpp
-
 FString SequenceAPI::FSequenceWallet::getSequenceURL(FString endpoint)
 {
 	return this->sequenceURL + endpoint;
@@ -495,9 +494,11 @@ TArray<FContact_BE> SequenceAPI::FSequenceWallet::buildFriendListFromJson(FStrin
 	return friendList;
 }
 
+//DEPRECATED
 /*
 * Gets the friend data from the given username!
 * This function appears to require some form of authentication (perhaps all of the sequence api does)
+* @Deprecated
 */
 void SequenceAPI::FSequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
 {
@@ -619,4 +620,66 @@ FString SequenceAPI::FSequenceWallet::encodeB64_URL(FString data)
 	UE_LOG(LogTemp, Display, TEXT("B64-URL encoded addr: [%s]"), *ret);
 
 	return ret;
+}
+
+//Indexer Calls
+
+void SequenceAPI::FSequenceWallet::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->Ping(chainID, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->Version(chainID,OnSuccess,OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->RunTimeStatus(chainID, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetChainID(chainID, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetEtherBalance(chainID, accountAddr, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetTokenBalances(chainID, args, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetTokenSupplies(chainID, args, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetTokenSuppliesMap(chainID, args, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetBalanceUpdates(chainID, args, OnSuccess, OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
+{
+	if (this->Indexer)
+		this->Indexer->GetTransactionHistory(chainID, args, OnSuccess, OnFailure);
 }

@@ -9,7 +9,7 @@
 #include "Types/Wallet.h"
 #include "Authenticator.generated.h"
 
-//C++ only for the time being FWallet needs to be converted to a UStruct for proper serialization
+
 struct FSSOCredentials
 {
 	FString URL = "";

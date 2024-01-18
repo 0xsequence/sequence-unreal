@@ -11,14 +11,9 @@
 #include "Eth/Crypto.h"
 #include "SystemDataBuilder.h"
 
-//TODO: when Horizon wants the UI back in this needs to be updated!//
 FUserDetails ASequenceBackendManager::getUserDetails()
 {
 	FUserDetails ret;
-	//ret.accountID = this->accountID;
-	//ret.email = this->userEmail;
-	//ret.emailService = this->emailService;
-	//ret.username = this->username;
 	return ret;
 }
 
@@ -53,7 +48,7 @@ ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	this->sequenceWallet = new SequenceAPI::FSequenceWallet();
+	//this->sequenceWallet = new SequenceAPI::FSequenceWallet();
 	this->Indexer = NewObject<UIndexer>();//for handling indexer data
 	this->auth = NewObject<UAuth>();
 	this->authenticator = NewObject<UAuthenticator>();
@@ -68,10 +63,10 @@ ASequenceBackendManager::ASequenceBackendManager()
 
 ASequenceBackendManager::~ASequenceBackendManager()
 {
-	if (this->sequenceWallet)
-	{
-		delete this->sequenceWallet;//free memory only if it's valid!
-	}
+	//if (this->sequenceWallet)
+	//{
+		//delete this->sequenceWallet;//free memory only if it's valid!
+	//}
 }
 
 // Called when the game starts or when spawned
@@ -225,7 +220,7 @@ void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
 		this->UpdateTxn(Callback);
 	};
 
-	this->sequenceWallet->SendTransactionWithCallback(TransactionData,SendSuccess,SendFailure);
+	//this->sequenceWallet->SendTransactionWithCallback(TransactionData,SendSuccess,SendFailure);
 }
 
 void ASequenceBackendManager::InitNFTSendTxn(FTransaction_FE TransactionData)
@@ -248,7 +243,7 @@ void ASequenceBackendManager::InitNFTSendTxn(FTransaction_FE TransactionData)
 		this->UpdateTxn(callback);
 	};
 
-	this->sequenceWallet->SendTransactionWithCallback(TransactionData, SendSuccess, SendFailure);
+	//this->sequenceWallet->SendTransactionWithCallback(TransactionData, SendSuccess, SendFailure);
 }
 
 //update this to be the encrypted json string
@@ -277,7 +272,7 @@ void ASequenceBackendManager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdat
 		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
-	this->sequenceWallet->getUpdatedCoinPrices(CoinsToUpdate,GenericSuccess,GenericFailure);
+	//this->sequenceWallet->getUpdatedCoinPrices(CoinsToUpdate,GenericSuccess,GenericFailure);
 }
 
 
@@ -296,7 +291,7 @@ void ASequenceBackendManager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpda
 		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
-	this->sequenceWallet->getUpdatedCollectiblePrices(TokensToUpdate, GenericSuccess, GenericFailure);
+	//this->sequenceWallet->getUpdatedCollectiblePrices(TokensToUpdate, GenericSuccess, GenericFailure);
 }
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]

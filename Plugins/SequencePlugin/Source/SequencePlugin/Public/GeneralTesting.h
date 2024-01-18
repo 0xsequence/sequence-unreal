@@ -15,7 +15,7 @@ class SEQUENCEPLUGIN_API AGeneralTesting : public AActor
 	GENERATED_BODY()
 
 private:
-	TArray<FString> testingURLs;
+	TArray<FString> testingURLs = {"https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389","https://www.circle.com/hubfs/share-USDC.png#keepProtocol","https://assets.skyweaver.net/i7FuksL3/webapp/cards/full-cards/4x/0-silver.png","https://skyweaver.net/images/skyweavercover.jpg"};
 	UObjectHandler* imgHandler;
 public:	
 	// Sets default values for this actor's properties
@@ -39,6 +39,9 @@ protected:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Indexer")
 		void TestIndexer();
 
+	/*
+	* Called by frontend to test the Encryptor
+	*/
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Encryption")
 		void TestEncryption() const;
 
@@ -52,14 +55,19 @@ protected:
 	UFUNCTION()
 		void OnDoneImageProcessing();
 
+	/*
+	* Used for forwarding data to the Frontend for displaying the images we received in testing
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Test_Misc")
 		void testMiscForwarder(const TMap<FString, UTexture2D*>& imageMap);
 
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
-		void TestSequence() const;
+	//These 2 functions were used to test functionality that is no longer in the current version
+	//UFUNCTION(BlueprintCallable, CATEGORY = "Test_Sequence_Layer")
+	//	void TestSequence() const;
 
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_SystemDataBuiler")
-		void testSystemDataBuilder();
+	//UFUNCTION(BlueprintCallable, CATEGORY = "Test_SystemDataBuiler")
+	//	void testSystemDataBuilder();
+
 //End of Testing Functions//
 public:	
 	// Called every frame
@@ -84,5 +92,4 @@ private:
 	* Used to convert an enum to a readable string
 	*/
 	static FString ErrorToString(EErrorType Error);
-
 };
