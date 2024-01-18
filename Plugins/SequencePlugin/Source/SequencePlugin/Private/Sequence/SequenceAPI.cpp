@@ -12,19 +12,12 @@
 
 FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 {
-	switch(SortOrder)
-	{
-	case SequenceAPI::ASC:
-		return "ASC";
-	case SequenceAPI::DESC:
-		return "DESC";
-	default: return "";
-	}
+	return UEnum::GetValueAsString(SortOrder);
 }
 
-SequenceAPI::ESortOrder SequenceAPI::StringToSortOrder(FString String)
+ESortOrder SequenceAPI::StringToSortOrder(FString String)
 {
-	return String == "ASC" ? ASC : DESC;
+	return String == "ASC" ? ESortOrder::ASC : ESortOrder::DESC;
 }
 
 FString SequenceAPI::FSortBy::ToJson()

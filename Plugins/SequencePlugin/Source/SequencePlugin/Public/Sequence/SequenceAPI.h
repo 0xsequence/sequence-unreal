@@ -6,16 +6,11 @@
 #include "RPCCaller.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
+#include "Indexer/Indexer_Enums.h"
 
 namespace SequenceAPI
 {
 	using FSignature = FUnsizedData;
-
-	//This is already defined elsewhere
-	enum ESortOrder {
-		DESC,
-		ASC
-	};
 
 	FString SortOrderToString(ESortOrder SortOrder);
 	ESortOrder StringToSortOrder(FString String);
