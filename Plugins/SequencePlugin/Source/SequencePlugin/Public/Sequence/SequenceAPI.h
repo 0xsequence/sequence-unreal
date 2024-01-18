@@ -114,7 +114,12 @@ namespace SequenceAPI
 	public:
 		FSequenceWallet();
 		FSequenceWallet(FCredentials_BE CredentialsIn);
-		
+
+		/*
+		* Used to get the Eth Wallet Address Associated with this SequenceWallet
+		*/
+		FString GetWalletAddress();
+
 		void CreateWallet(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void GetWalletAddress(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void DeployWallet(uint64 ChainId, TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure);

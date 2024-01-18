@@ -10,7 +10,7 @@
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
-//#include "SequenceAuth.h"
+#include "Authenticator.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
