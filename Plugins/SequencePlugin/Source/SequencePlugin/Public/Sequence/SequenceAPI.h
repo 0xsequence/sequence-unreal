@@ -7,6 +7,7 @@
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Indexer/Indexer_Enums.h"
+#include "Indexer/Structs/SortBy.h"
 
 namespace SequenceAPI
 {
@@ -14,16 +15,6 @@ namespace SequenceAPI
 
 	FString SortOrderToString(ESortOrder SortOrder);
 	ESortOrder StringToSortOrder(FString String);
-
-	//This is already defined elsewhere
-	struct FSortBy
-	{
-		FString Column;
-		ESortOrder Order;
-
-		FString ToJson();
-		static FSortBy From(TSharedPtr<FJsonObject> Json);
-	};
 
 	//This is already defined Barring the TOptional<>
 	struct FPage

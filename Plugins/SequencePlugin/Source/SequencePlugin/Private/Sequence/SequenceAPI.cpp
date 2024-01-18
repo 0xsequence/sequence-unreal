@@ -1,4 +1,3 @@
-
 #include "Sequence/SequenceAPI.h"
 
 #include "Eth/Crypto.h"
@@ -18,22 +17,6 @@ FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 ESortOrder SequenceAPI::StringToSortOrder(FString String)
 {
 	return String == "ASC" ? ESortOrder::ASC : ESortOrder::DESC;
-}
-
-FString SequenceAPI::FSortBy::ToJson()
-{
-	return FJsonBuilder().ToPtr()
-		->AddString("column", Column)
-		->AddString("order", SortOrderToString(Order))
-		->ToString();
-}
-
-SequenceAPI::FSortBy SequenceAPI::FSortBy::From(TSharedPtr<FJsonObject> Json)
-{
-	FSortBy Sort = FSortBy{};
-	Sort.Column = Json->GetStringField("column");
-	Sort.Order = StringToSortOrder(Json->GetStringField("order"));
-	return Sort;
 }
 
 FString SequenceAPI::FPage::ToJson()
@@ -62,7 +45,7 @@ FString SequenceAPI::FPage::ToJson()
 
 		for(FSortBy SortBy : Sort.GetValue())
 		{
-			Array.AddValue(SortBy.ToJson());
+			Array.AddValue(SortBy.GetJsonString());
 		}
 	}
 	
@@ -96,7 +79,9 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 
 		for(TSharedPtr<FJsonValue> JsonVal : JsonArray)
 		{
-			Array.Push(FSortBy::From(JsonVal->AsObject()));
+			FSortBy Result;
+			if (!FJsonObjectConverter::JsonObjectToUStruct<FSortBy>(JsonVal->AsObject().ToSharedRef(), &Result))
+				Array.Push(Result);
 		}
 		
 		page.Sort = Array;
