@@ -6,13 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "Http.h"
 #include "ObjectHandler.h"
-#include "Indexer/Backend.h"
 #include "Util/Structs/BE_Structs.h"
-#include "Util/Structs/BE_Enums.h"
 #include "Misc/AES.h"
 #include "Auth.h"
 #include "Sequence/SequenceAPI.h"
-#include "Authenticator.h"
+//#include "SequenceAuth.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
@@ -37,7 +35,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
 UCLASS()
-class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor, public IBackend
+class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor//, public ISequenceAuth
 {
 	GENERATED_BODY()
 public:
@@ -57,8 +55,8 @@ private:
 	UFUNCTION()
 		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
 private:	
-	SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
-	UIndexer* Indexer;
+	//SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
+	UIndexer* Indexer;//Remove this!
 	FCredentials_BE Credentials;
 	UAuthenticator* authenticator;
 	UAuth* auth;//for persistent auth, used to read persistent stored data for automatic authentication

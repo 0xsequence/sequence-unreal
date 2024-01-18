@@ -16,8 +16,6 @@
 #include "ObjectHandler.h"
 #include "Indexer.generated.h"
 
-
-
 /**
  * 
  */
@@ -27,17 +25,15 @@ class SEQUENCEPLUGIN_API UIndexer : public UObject
 {
 	GENERATED_BODY()
 
-
 public:
 	static TMap<int64, FString> GetIndexerNames();
 	static FString GetIndexerName(int64 chainId);
 private:
+	static const TMap<int64, FString> IndexerNames;
 	const FString PATH = "/rpc/Indexer/";
 	
-
 //private functions
-	
-	
+
 	/*
 		Creates the URL from a given chainID and endpoint
 	*/

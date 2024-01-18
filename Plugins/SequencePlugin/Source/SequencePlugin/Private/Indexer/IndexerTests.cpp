@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Indexer/IndexerTests.h"
-
-
 
 void pingTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {

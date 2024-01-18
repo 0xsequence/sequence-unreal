@@ -1,7 +1,6 @@
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
 
-
 uint8* BlankArray(ByteLength Size)
 {
 	uint8* Arr = new uint8[Size];
@@ -30,7 +29,6 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	//return HashToHexString(GetLength(), Arr);
 	return BytesToHex(Arr,GetLength()).ToLower();
 }
 
@@ -128,7 +126,6 @@ FHash256 FHash256::From(uint8* Arr)
 
 FHash256 FHash256::From(const FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str,Size));
 }
 
@@ -148,7 +145,6 @@ FAddress FAddress::From(uint8* Arr)
 
 FAddress FAddress::From(FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str, Size));
 }
 
@@ -168,10 +164,8 @@ FPublicKey FPublicKey::From(uint8* Arr)
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str,Size));
 }
-
 
 FPrivateKey FPrivateKey::New()
 {
@@ -189,7 +183,6 @@ FPrivateKey FPrivateKey::From(uint8* Arr)
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str,Size));
 }
 
@@ -209,7 +202,6 @@ FBloom FBloom::From(uint8* Arr)
 
 FBloom FBloom::From(FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str,Size));
 }
 
@@ -229,7 +221,6 @@ FBlockNonce FBlockNonce::From(uint8* Arr)
 
 FBlockNonce FBlockNonce::From(const FString Str)
 {
-	//return From(HexStringToBytes(Size, Str));
 	return From(HexToBytesInline(Str,Size));
 }
 
@@ -276,6 +267,7 @@ FString UTF8ToString(FUnsizedData BinaryData)
 	Buffer.Add('\0');
 	return reinterpret_cast<const char*>(Buffer.GetData());
 }
+
 FUnsizedData HexStringToBinary(const FString Hex)
 {
 	FString HexCopy = FString(Hex);
@@ -283,6 +275,5 @@ FUnsizedData HexStringToBinary(const FString Hex)
 	
 	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
 	
-	//return FUnsizedData(HexStringToBytes(Size, Hex), Size);
 	return FUnsizedData(HexToBytesInline(Hex,Size),Size);
 }

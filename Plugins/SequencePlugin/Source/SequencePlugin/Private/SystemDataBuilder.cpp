@@ -90,6 +90,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 }
 
 /*
+*	[[[ Currently non functional and will result in a soft-lock ]]]
 * Gets all the value & image data injected into itemsToUpdate
 */
 void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
@@ -201,8 +202,8 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 	};
 
 	this->walletGuard.Lock();
-	this->GWallet->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
-	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	//this->GWallet->getUpdatedCoinPrices(idCoinList,lclCoinSuccess,lclFailure);
+	//this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 	this->walletGuard.Unlock();
 }
 
@@ -236,6 +237,7 @@ void USystemDataBuilder::initGetTokenData()
 	this->tIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
 }
 
+//[[[ Currently non functional and will result in a soft-lock ]]]
 void USystemDataBuilder::initGetQRCode()
 {
 	//GO Level
@@ -261,7 +263,7 @@ void USystemDataBuilder::initGetQRCode()
 		FString walletAddress = address.ToHex();
 		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *walletAddress);
 		//now we can request the QR code!
-		this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(walletAddress, 512);
+		//this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(walletAddress, 512);
 		this->QRImageHandler->requestImage(this->qr_url);
 	};
 
@@ -275,6 +277,7 @@ void USystemDataBuilder::initGetQRCode()
 	this->walletGuard.Unlock();
 }
 
+//[[[ Currently non functional and will result in a soft-lock ]]]
 void USystemDataBuilder::initGetContactData()
 {
 	const TSuccessCallback<TArray<FContact_BE>> GenericSuccess = [&, this](const TArray<FContact_BE> contacts)
@@ -291,7 +294,7 @@ void USystemDataBuilder::initGetContactData()
 		this->decMasterSyncer();
 	};
 	this->walletGuard.Lock();
-	this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
+	//this->GWallet->getFriends(this->GPublicAddress,GenericSuccess,GenericFailure);
 	this->walletGuard.Unlock();
 }
 
@@ -360,6 +363,7 @@ void USystemDataBuilder::OnDone()
 	this->systemDataGuard.Unlock();
 }
 
+//[[[ Currently non functional and will result in a soft - lock ]] ]
 void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_data)
 {
 	this->getTxnHistorySyncer->Increase(3);//1 for getting images 1 for getting Coin values and 1 for getting Collectible Values
@@ -486,8 +490,8 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 		this->historyGuard.Unlock();
 	};
 	this->walletGuard.Lock();
-	this->GWallet->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
-	this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
+	//this->GWallet->getUpdatedCoinPrices(idCoinList, lclCoinSuccess, lclFailure);
+	//this->GWallet->getUpdatedCollectiblePrices(idCollectibleList, lclCollectibleSuccess, lclFailure);
 	this->walletGuard.Unlock();
 }
 

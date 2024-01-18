@@ -1,67 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Indexer/Indexer.h"
 #include "Util/Async.h"
+
+const TMap<int64, FString> UIndexer::IndexerNames = {{1,"mainnet"},{137,"polygon"},{1101,"polygon-zkevm"},{42161,"arbitrum"},{42170,"arbitrum-nova"},{10,"optimism"},{56,"bsc"},{43114,"avalanche"},{8453,"base"},{100,"gnosis"},{1337,"testchain"},{5,"goerli"},{11155111,"sepolia"},{421613,"arbitrum-goerli"},{80001,"mumbai"},{84531,"base-goerli"},{97,"bsc-testnet"},{43113,"testnetavalanchefuji"} };
 
 UIndexer::UIndexer()
 {
 }
 
 TMap<int64, FString> UIndexer::GetIndexerNames()
-{
-	TMap<int64, FString> IndexerNames;
-	//Mainnets
-	IndexerNames.Add(1, "mainnet");
-	IndexerNames.Add(137, "polygon");
-	IndexerNames.Add(1101, "polygon-zkevm");
-	IndexerNames.Add(42161, "arbitrum");
-	IndexerNames.Add(42170, "arbitrum-nova");
-	IndexerNames.Add(10, "optimism");
-	IndexerNames.Add(56, "bsc");
-	IndexerNames.Add(43114, "avalanche");
-	IndexerNames.Add(8453, "base");
-	IndexerNames.Add(100, "gnosis");
-
-	//Testnets
-	IndexerNames.Add(1337, "testchain");
-	IndexerNames.Add(5, "goerli");
-	IndexerNames.Add(11155111, "sepolia");
-	IndexerNames.Add(421613, "arbitrum-goerli");
-	IndexerNames.Add(80001, "mumbai");
-	IndexerNames.Add(84531, "base-goerli");
-	IndexerNames.Add(97, "bsc-testnet");
-	IndexerNames.Add(43113, "testnetavalanchefuji");
-	
+{	
 	return IndexerNames;
 }
 
 FString UIndexer::GetIndexerName(int64 chainId)
 {
-	TMap<int64, FString> IndexerNames;
-
-	//Mainnets
-	IndexerNames.Add(1, "mainnet");
-	IndexerNames.Add(137, "polygon");
-	IndexerNames.Add(1101, "polygon-zkevm");
-	IndexerNames.Add(42161, "arbitrum");
-	IndexerNames.Add(42170, "arbitrum-nova");
-	IndexerNames.Add(10, "optimism");
-	IndexerNames.Add(56, "bsc");
-	IndexerNames.Add(43114, "avalanche");
-	IndexerNames.Add(8453, "base");
-	IndexerNames.Add(100, "gnosis");
-
-	//Testnets
-	IndexerNames.Add(1337, "testchain");
-	IndexerNames.Add(5, "goerli");
-	IndexerNames.Add(11155111, "sepolia");
-	IndexerNames.Add(421613,"arbitrum-goerli");
-	IndexerNames.Add(80001, "mumbai");
-	IndexerNames.Add(84531, "base-goerli");
-	IndexerNames.Add(97, "bsc-testnet");
-	IndexerNames.Add(43113, "testnetavalanchefuji");
-
 	FString ret = "[ERROR][Name not found]";
 
 	if (IndexerNames.Contains(chainId))
