@@ -185,6 +185,12 @@ SequenceAPI::FSequenceWallet::FSequenceWallet(FCredentials_BE CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
+	this->AuthToken = "Bearer " + this->Credentials.GetIDToken();
+}
+
+FString SequenceAPI::FSequenceWallet::GetWalletAddress()
+{
+	return this->Credentials.GetWalletAddress();
 }
 
 void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,
