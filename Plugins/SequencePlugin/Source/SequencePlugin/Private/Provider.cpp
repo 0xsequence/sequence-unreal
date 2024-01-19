@@ -11,7 +11,6 @@
 #include "Util/JsonBuilder.h"
 #include "JsonObjectConverter.h"
 #include "RequestHandler.h"
-#include "Types/ContractCall.h"
 #include "Types/Header.h"
 
 FString TagToString(EBlockTag Tag)
