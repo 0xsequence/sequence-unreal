@@ -83,7 +83,7 @@ namespace SequenceAPI
 	private:
 		FCredentials_BE Credentials;
 		UIndexer* Indexer;
-		Provider* Provider;
+		FString ProviderUrl = "https://temp";
 		//Replace this with credentials
 		FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 		const FString Hostname = "https://next-api.sequence.app";
@@ -103,7 +103,8 @@ namespace SequenceAPI
 		TArray<FItemPrice_BE> buildItemUpdateListFromJson(FString json);
 	public:
 		FSequenceWallet();
-		FSequenceWallet(FCredentials_BE CredentialsIn);
+		FSequenceWallet(const FCredentials_BE& CredentialsIn);
+		FSequenceWallet(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
 		/*
 		* Used to get the Eth Wallet Address Associated with this SequenceWallet
