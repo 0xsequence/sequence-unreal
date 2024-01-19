@@ -161,8 +161,8 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials);
 //vars
 private:
-	FString StateToken = TEXT("");
-	FString Nonce = TEXT("");
+	FString StateToken = "";
+	FString Nonce = "";
 
 	const FString UrlScheme = "powered-by-sequence";
 	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
@@ -171,13 +171,13 @@ private:
 	const FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
 
 	const FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
-	const FString FacebookClientID = TEXT("");//TODO still need this
+	const FString FacebookClientID = "";//TODO still need this
 
 	const FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
-	const FString DiscordClientID = TEXT("");//TODO still need this
+	const FString DiscordClientID = "";//TODO still need this
 
-	const FString AppleAuthURL = TEXT("https://appleid.apple.com/auth/authorize");
-	const FString AppleClientID = TEXT("");//TODO still need this
+	const FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
+	const FString AppleClientID = "";//TODO still need this
 
 	FString Cached_IDToken;
 	FString Cached_Email;
@@ -200,19 +200,19 @@ private:
 	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
 
 	//From GetId
-	FString IdentityId = TEXT("nil");
+	FString IdentityId = "";
 
 	//From GetCredentialsForIdentity
-	FString AccessKeyId = TEXT("AKIAIOSFODNN7EXAMPLE");
-	FString SecretKey = TEXT("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
-	FString SessionToken = TEXT("nil");
+	FString AccessKeyId = "AKIAIOSFODNN7EXAMPLE";
+	FString SecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+	FString SessionToken = "";
 
 	//From KMSGenerateDataKey
-	FString PlainText = TEXT("nil");
-	FString CipherTextBlob = TEXT("nil");
+	FString PlainText = "";
+	FString CipherTextBlob = "";
 
 	//From InitiateAuth
-	FString ChallengeSession = TEXT("nil");
+	FString ChallengeSession = "";
 
 	//Gonna need to free this in a destructor unless I swap it to a UObject to use garbage collection
 	FWallet * SessionWallet;
