@@ -501,6 +501,7 @@ public:
         FSelectableCurrency_BE selected_currency;//this is defaulted to USD so ignore it nothing needs to be done here
 };
 
+//REMOVE THIS!
 USTRUCT(BlueprintType)
 struct FStoredAuthState_BE
 {

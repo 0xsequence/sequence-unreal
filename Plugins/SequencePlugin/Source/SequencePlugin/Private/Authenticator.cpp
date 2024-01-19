@@ -11,11 +11,57 @@
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 #include "Util/HexUtility.h"
+#include "StorableCredentials.h"
+#include "Kismet/GameplayStatics.h"
+#include "Indexer/IndexerSupport.h"
+#include "SequenceEncryptor.h"
+#include "JsonObjectConverter.h"
 
 UAuthenticator::UAuthenticator()
 {
 	this->Nonce = FGuid::NewGuid().ToString();
 	this->StateToken = FGuid::NewGuid().ToString();
+}
+
+/*
+* For monday:
+* go through the new on client auth setup make sure everything is working,
+* remove Auth.h & Auth.cpp not needed anymore, remove FStorableAuth too
+* Remove any front end dependencies because of that change
+* Update authenticator flow to allow for sending credentials up if persistent credentials are 
+* found and are valid
+* build out the validation method simple for now just look at the dates and verify if needed!
+* Once done starting final rounds of testing for the SequenceAPI / Auth Flow etc ensure reliability and
+* consistency
+*/
+
+void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials)
+{
+	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
+	{
+		FString CTS_Json = UIndexerSupport::structToString<FCredentials_BE>(Credentials);
+		int32 CTS_Json_Length = CTS_Json.Len();
+
+		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
+		StorableCredentials->KL = CTS_Json_Length;
+
+		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Data Saved Correctly!"));
+		}
+	}
+}
+
+bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials)
+{
+	bool ret = false;
+	if (UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
+	{
+		ret = true;
+		FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		ret = UIndexerSupport::jsonStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+	}
+	return ret;
 }
 
 void UAuthenticator::CallAuthRequiresCode()
