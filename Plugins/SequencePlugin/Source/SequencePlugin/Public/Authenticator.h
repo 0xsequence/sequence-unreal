@@ -26,16 +26,27 @@ struct FCredentials_BE
 {
     GENERATED_USTRUCT_BODY()
 private:
+	UPROPERTY()
     FString TransportKey = "";
+	UPROPERTY()
     FString SessionPrivateKey = "";
+	UPROPERTY()
     FString Id = "";
+	UPROPERTY()
     FString Address = "";
+	UPROPERTY()
     FString UserId = "";
+	UPROPERTY()
     FString Subject = "";
+	UPROPERTY()
     FString SessionId = "";
+	UPROPERTY()
     FString WalletAddress = "";
+	UPROPERTY()
     FString IDToken = "";
+	UPROPERTY()
     FString Email = "";
+	UPROPERTY()
     FString Issuer = "";
 public:
 	FCredentials_BE(){}
@@ -161,6 +172,9 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials);
 //vars
 private:
+	const FString SaveSlot = "Cr";
+	const uint32 UserIndex = 0;
+
 	FString StateToken = "";
 	FString Nonce = "";
 
@@ -229,6 +243,9 @@ public:
 
 	void EmailLoginCode(const FString& CodeIn);
 private:
+	void StoreCredentials(const FCredentials_BE& Credentials);
+	bool GetStoredCredentials(FCredentials_BE * Credentials);
+
 	FString GetISSClaim(const FString& JWT);
 
 	bool CanRetryEmailLogin();

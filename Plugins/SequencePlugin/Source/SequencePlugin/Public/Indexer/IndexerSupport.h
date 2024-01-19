@@ -63,6 +63,51 @@ public:
 		return ret;
 	}
 
+	template < typename T > static T jsonStringToStruct(FString json)
+	{
+		T ret;
+
+		TSharedPtr<FJsonObject> JsonObj = MakeShareable<FJsonObject>(new FJsonObject);
+
+		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), JsonObj))
+		{
+			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &ret))
+				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *json);
+		}
+		else
+		{//failed to convert the decrypted string into a jsonObject
+			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *json);
+		}
+
+		return ret;
+	}
+
+	template < typename T > static bool jsonStringToStruct(FString json, T * ptrRet)
+	{
+		T TStruct;
+		bool ret = false;
+		TSharedPtr<FJsonObject> JsonObj = MakeShareable<FJsonObject>(new FJsonObject);
+
+		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), JsonObj))
+		{
+			if (FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &TStruct))
+			{
+				*ptrRet = TStruct;
+				ret = true;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *json);
+			}
+		}
+		else
+		{//failed to convert the decrypted string into a jsonObject
+			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *json);
+		}
+
+		return ret;
+	}
+
 	static FString stringListToSimpleString(TArray<FString> stringData);
 
 	//for maintaining valid json for args in RPC calls

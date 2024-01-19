@@ -13,27 +13,7 @@
 FString USequenceEncryptor::GetStoredKey()
 {//***Replace this implementation with your own proper implementation***
 	FString Ret;
-
 //this is for testing only a proper implementation needs to be provided for this function to work!
-//#if UE_EDITOR //remove these comments for later when we ship this we want to force out these errors!
-	TArray<FString> kData;
-	kData.Add("cmpnb");
-	kData.Add("kFlZWYwbFJ");
-	kData.Add("TRGJrOE5");
-	kData.Add("nT282QTc5Uj");
-	kData.Add("E4aFQ");
-	kData.Add("2MFJEO");
-	kData.Add("ExW");
-	kData.Add("Y0RkRWN");
-	kData.Add("ad");
-	kData.Add("z0=");
-	FString eK;
-	for (FString kP : kData)
-	{
-		eK += kP;
-	}
-	FBase64::Decode(eK, Ret);
-//#endif // UE_EDITOR
 	return "aaaabbbbccccddddaaaabbbbccccdddd";
 }
 
