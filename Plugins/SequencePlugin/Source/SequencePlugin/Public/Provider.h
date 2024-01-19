@@ -14,6 +14,7 @@
 #include "Types/TransactionReceipt.h"
 #include "Eth/EthTransaction.h"
 #include "RPCCaller.h"
+#include "Types/ContractCall.h"
 
 struct FContractCall;
 
@@ -58,9 +59,9 @@ public:
 	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
 
-	void GetGasPrice(TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
-	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
-	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData>, FFailureCallback OnFailure);
+	void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
 	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
