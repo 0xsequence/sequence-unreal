@@ -19,7 +19,7 @@ ESortOrder SequenceAPI::StringToSortOrder(FString String)
 	return String == "ASC" ? ESortOrder::ASC : ESortOrder::DESC;
 }
 
-FString SequenceAPI::FPage::ToJson()
+FString SequenceAPI::FPage_Sequence::ToJson()
 {
 	FJsonBuilder Json = FJsonBuilder();
 
@@ -52,9 +52,20 @@ FString SequenceAPI::FPage::ToJson()
 	return Json.ToString();
 }
 
-SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
+SequenceAPI::FPage_Sequence SequenceAPI::FPage_Sequence::Convert(FPage Page,int64 TotalRecords)
 {
-	FPage page = FPage{};
+	SequenceAPI::FPage_Sequence Ret;
+	Ret.Column = Page.column;
+	Ret.PageNum = Page.page;
+	Ret.PageSize = Page.pageSize;
+	Ret.Sort = Page.sort;
+	Ret.TotalRecords = TotalRecords;
+	return Ret;
+}
+
+SequenceAPI::FPage_Sequence SequenceAPI::FPage_Sequence::From(TSharedPtr<FJsonObject> Json)
+{
+	FPage_Sequence page = FPage_Sequence{};
 
 	if(Json->HasField("pageSize"))
 	{
@@ -90,9 +101,10 @@ SequenceAPI::FPage SequenceAPI::FPage::From(TSharedPtr<FJsonObject> Json)
 	return page;
 }
 
-SequenceAPI::FTransaction SequenceAPI::FTransaction::Convert(FTransaction_FE Transaction_Fe)
+//Hide for now
+SequenceAPI::FTransaction_Sequence SequenceAPI::FTransaction_Sequence::Convert(FTransaction_FE Transaction_Fe)
 {
-	return FTransaction{
+	return FTransaction_Sequence{
 		static_cast<uint64>(Transaction_Fe.chainId),
 		FAddress::From(Transaction_Fe.From),
 		FAddress::From(Transaction_Fe.To),
@@ -107,7 +119,7 @@ SequenceAPI::FTransaction SequenceAPI::FTransaction::Convert(FTransaction_FE Tra
 	};
 }
 
-const FString SequenceAPI::FTransaction::ToJson()
+const FString SequenceAPI::FTransaction_Sequence::ToJson()
 {
 	FJsonBuilder Json = FJsonBuilder();
 
@@ -120,7 +132,7 @@ const FString SequenceAPI::FTransaction::ToJson()
 	return Json.ToString();
 }
 
-const SequenceAPI::TransactionID SequenceAPI::FTransaction::ID()
+const SequenceAPI::TransactionID SequenceAPI::FTransaction_Sequence::ID()
 {
 	FUnsizedData Data = StringToUTF8(ToJson());
 	return GetKeccakHash(Data).ToHex();
@@ -258,7 +270,7 @@ void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::Wallets(FPage Page, TSuccessCallback<FWalletsReturn> OnSuccess,
+void SequenceAPI::FSequenceWallet::Wallets(FPage_Sequence Page, TSuccessCallback<FWalletsReturn> OnSuccess,
 	FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FWalletsReturn> (FString)> ExtractWallets = [=](FString Content)
@@ -282,7 +294,7 @@ void SequenceAPI::FSequenceWallet::Wallets(FPage Page, TSuccessCallback<FWallets
 				Wallets.Push(FPartnerWallet::From(WalletJson->AsObject()));
 			}
 			
-			ReturnVal = MakeValue(FWalletsReturn{Wallets, FPage::From(PageJson)});
+			ReturnVal = MakeValue(FWalletsReturn{Wallets, FPage_Sequence::From(PageJson)});
 		}
 		
 		return ReturnVal;
@@ -298,7 +310,7 @@ void SequenceAPI::FSequenceWallet::Wallets(FPage Page, TSuccessCallback<FWallets
 
 void SequenceAPI::FSequenceWallet::Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	this->Wallets(FPage{}, OnSuccess, OnFailure);
+	this->Wallets(FPage_Sequence{}, OnSuccess, OnFailure);
 }
 
 void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message,
@@ -366,7 +378,7 @@ void SequenceAPI::FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddr
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSuccessCallback<FHash256> OnSuccess,
+void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess,
 	FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
@@ -396,7 +408,7 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction Transaction, TSu
 	OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Transactions,
+void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction_Sequence> Transactions,
 	TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
@@ -419,7 +431,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 	};
 
 	FJsonArray JsonArray = FJsonBuilder().AddArray("txs");
-	for(FTransaction Transaction : Transactions)
+	for(FTransaction_Sequence Transaction : Transactions)
 	{
 		JsonArray.AddValue(Transaction.ToJson());
 	}
@@ -432,7 +444,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction> Tra
 void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
                                                                TSuccessCallback<TransactionID> OnSuccess, TFunction<void(TransactionID, FSequenceError)> OnFailure)
 {
-	FTransaction Converted = FTransaction::Convert(Transaction);
+	FTransaction_Sequence Converted = FTransaction_Sequence::Convert(Transaction);
 	FString ID = Converted.ID();
 	SendTransaction(Converted, [=](FHash256 Hash)
 	{
