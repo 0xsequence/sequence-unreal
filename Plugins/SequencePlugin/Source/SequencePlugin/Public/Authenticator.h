@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
@@ -18,6 +17,115 @@ struct FSSOCredentials
 	{
 		URL = URLIn;
 		ClientID = ClientIDIn;
+	}
+};
+
+USTRUCT()
+struct FWaasJWT
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	int32 projectId = 0;
+	UPROPERTY()
+	FString identityPoolId = "";
+	UPROPERTY()
+	FString idpRegion = "";
+	UPROPERTY()
+	FString rpcServer = "";
+	UPROPERTY()
+	FString kmsRegion = "";
+	UPROPERTY()
+	FString KeyId = "";
+	UPROPERTY()
+	FString alg = "";
+	UPROPERTY()
+	FString emailClientId = "";
+};
+
+struct FWaasCredentials
+{
+private:
+	FString projectId = "";
+	FString identityPoolId = "";
+	FString idpRegion = "";
+	FString rpcServer = "";
+	FString kmsRegion = "";
+	FString alg = "";
+	FString CognitoClientId = "";
+	FString KMSArn = "";
+	FString KMSKeyId = "";
+	bool EmailEnabled = false;
+public:
+	FWaasCredentials(){}
+	FWaasCredentials(const FWaasJWT& JWT)
+	{	//parse for the kms key to start right away!		
+		TArray<FString> KeyParts;
+		KMSArn = JWT.KeyId;
+		JWT.KeyId.ParseIntoArray(KeyParts, TEXT(":"), true);
+		FString KMS = "";
+		if (KeyParts.Num() > 0)
+			KMS = KeyParts.Last().RightChop(4);
+		
+		projectId.AppendInt(JWT.projectId);
+		identityPoolId = JWT.identityPoolId;
+		idpRegion = JWT.idpRegion;
+		
+		if (JWT.rpcServer.EndsWith("/"))
+			rpcServer = JWT.rpcServer + "rpc/WaasAuthenticator/RegisterSession";
+		else
+			rpcServer = JWT.rpcServer + "/rpc/WaasAuthenticator/RegisterSession";
+		
+		kmsRegion = JWT.kmsRegion;
+		alg = JWT.alg;
+		CognitoClientId = JWT.emailClientId;
+		KMSKeyId = KMS;
+		EmailEnabled = (CognitoClientId.Len() > 0);
+	}
+
+	FString GetKMSArn() const
+	{
+		return KMSArn;
+	}
+	
+	FString GetProjectID() const
+	{
+		return projectId;
+	}
+
+	FString GetIdentityPoolId() const
+	{
+		return identityPoolId;
+	}
+
+	FString GetIDPRegion() const
+	{
+		return idpRegion;
+	}
+
+	FString GetRPCServer() const
+	{
+		return rpcServer;
+	}
+
+	FString GetKMSRegion() const
+	{
+		return kmsRegion;
+	}
+
+	FString GetAlg() const
+	{
+		return alg;
+	}
+
+	FString GetCognitoClientId() const
+	{
+		return CognitoClientId;
+	}
+
+	FString GetKMSKeyId() const
+	{
+		return KMSKeyId;
 	}
 };
 
@@ -48,10 +156,16 @@ private:
     FString Email = "";
 	UPROPERTY()
     FString Issuer = "";
+	UPROPERTY()
+	int64 Issued = -1;
+	UPROPERTY()
+	int64 Refreshed = -1;
+	UPROPERTY()
+	int64 Expires = -1;
 public:
 	FCredentials_BE(){}
 
-    FCredentials_BE(const FString& TransportKeyIn,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn)
+    FCredentials_BE(const FString& TransportKeyIn,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn, const int64& RefreshedIn, const int64& ExpiresIn)
     {
 		TransportKey = TransportKeyIn;
 		SessionPrivateKey = SessionPrivateKeyIn;
@@ -64,19 +178,22 @@ public:
 		IDToken = IDTokenIn;
 		Email = EmailIn;
 		Issuer = IssuerIn;
+		Issued = IssuedIn;
+		Refreshed = RefreshedIn;
+		Expires = ExpiresIn;
     }
 
-	FString GetTransportKey()
+	FString GetTransportKey() const
 	{
 		return TransportKey;
 	}
 
-	FString GetSessionPrivateKey()
+	FString GetSessionPrivateKey() const
 	{
 		return SessionPrivateKey;
 	}
 
-	FString GetSessionPublicKey()
+	FString GetSessionPublicKey() const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Arr,TWallet.GetWalletPublicKey().GetLength()).ToLower();
@@ -84,7 +201,7 @@ public:
 		return PublicKeyStr;
 	}
 
-	FString GetSessionAddress()
+	FString GetSessionAddress() const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Arr, TWallet.GetWalletAddress().GetLength()).ToLower();
@@ -92,7 +209,7 @@ public:
 		return AddressStr;
 	}
 
-	FString SignMessageWithSessionWallet(const FString& Message)
+	FString SignMessageWithSessionWallet(const FString& Message) const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		TArray<uint8> SigBytes = TWallet.SignMessage(Message);
@@ -101,49 +218,92 @@ public:
 		return Signature;
 	}
 
-	FString GetId()
+	FString GetId() const
 	{
 		return Id;
 	}
 
-	FString GetAddress()
+	FString GetAddress() const
 	{
 		return Address;
 	}
 
-	FString GetUserId()
+	FString GetUserId() const
 	{
 		return UserId;
 	}
 
-	FString GetSubject()
+	FString GetSubject() const
 	{
 		return Subject;
 	}
 
-	FString GetSessionId()
+	FString GetSessionId() const
 	{
 		return SessionId;
 	}
 
-	FString GetWalletAddress()
+	FString GetWalletAddress() const
 	{
 		return WalletAddress;
 	}
 
-	FString GetIDToken()
+	FString GetIDToken() const
 	{
 		return IDToken;
 	}
 
-	FString GetEmail()
+	FString GetEmail() const
 	{
 		return Email;
 	}
 
-	FString GetIssuer()
+	FString GetIssuer() const
 	{
 		return Issuer;
+	}
+
+	int64 GetIssued() const
+	{
+		return Issued;
+	}
+
+	int64 GetRefreshed() const
+	{
+		return Refreshed;
+	}
+
+	int64 GetExpires() const
+	{
+		return Expires;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FStoredCredentials_BE
+{
+	GENERATED_USTRUCT_BODY()
+private:
+	UPROPERTY()
+	bool Valid = false;
+	UPROPERTY()
+	FCredentials_BE Credentials;
+public:
+	FStoredCredentials_BE(){}
+	FStoredCredentials_BE(const bool& ValidIn, const FCredentials_BE& CredentialsIn)
+	{
+		Valid = ValidIn;
+		Credentials = CredentialsIn;
+	}
+
+	bool GetValid() const
+	{
+		return Valid;
+	}
+
+	FCredentials_BE GetCredentials()
+	{
+		return Credentials;
 	}
 };
 
@@ -196,16 +356,10 @@ private:
 	FString Cached_IDToken;
 	FString Cached_Email;
 	//AWS
-
-	const FString IdentityPoolID = "us-east-2:9747b3b1-c831-4efd-8aee-ac362373ad53";
-	const FString Region = "us-east-2";
-	const FString AWSService = "kms";
-	const FString CognitoClientID = "3fd4tq7gvroie1romfslk2nvv8";
-	const FString KMSKeyID = "0fd8f803-9cb5-4de5-86e4-41963fb6043d";
-	const FString ProjectID = "124";
-	const FString ProjectAccessKey = "AAAAAAAAAAAfAAAAAAAAAA";
+	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImlkZW50aXR5UG9vbElkIjoidXMtZWFzdC0yOjQyZGMyZjE4LTJmOWItNGZkNS05NDI5LWUwZGE1MjFmOWNmNCIsImlkcFJlZ2lvbiI6InVzLWVhc3QtMiIsInJwY1NlcnZlciI6Imh0dHBzOi8vZGV2LXdhYXMuc2VxdWVuY2UuYXBwIiwia21zUmVnaW9uIjoidXMtZWFzdC0yIiwia2V5SWQiOiJhcm46YXdzOmttczp1cy1lYXN0LTI6MzgxNDkyMjQ3Njk3OmtleS8xODgxZTY3My1mMThkLTQ1NTgtODI5YS0xM2I4MThjMDMwNjUifQ";
+	FWaasCredentials WaasCredentials;
+	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";
 	const FString WaasVersion = "1.0.0";
-	const FString WaasAuthRPCURL = "https://d3jwb7a1rcpkmp.cloudfront.net/rpc/WaasAuthenticator/RegisterSession";
 
 	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
@@ -242,10 +396,15 @@ public:
 	void EmailLogin(const FString& EmailIn);
 
 	void EmailLoginCode(const FString& CodeIn);
+
+	FStoredCredentials_BE GetStoredCredentials();
 private:
 	void StoreCredentials(const FCredentials_BE& Credentials);
+	
 	bool GetStoredCredentials(FCredentials_BE * Credentials);
 
+	bool CredentialsValid(const FCredentials_BE& Credentials);
+	
 	FString GetISSClaim(const FString& JWT);
 
 	bool CanRetryEmailLogin();
