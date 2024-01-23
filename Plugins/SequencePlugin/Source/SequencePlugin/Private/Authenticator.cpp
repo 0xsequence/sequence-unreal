@@ -23,23 +23,12 @@ UAuthenticator::UAuthenticator()
 	this->WaasCredentials = FWaasCredentials(UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT));
 }
 
-/*
-* For monday:
-* go through the new on client auth setup make sure everything is working,
-* remove Auth.h & Auth.cpp not needed anymore, remove FStorableAuth too
-* Remove any front end dependencies because of that change
-
-* build out the validation method simple for now just look at the dates and verify if needed!
-* Once done starting final rounds of testing for the SequenceAPI / Auth Flow etc ensure reliability and
-* consistency
-*/
-
 void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials)
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		FString CTS_Json = UIndexerSupport::structToString<FCredentials_BE>(Credentials);
-		int32 CTS_Json_Length = CTS_Json.Len();
+		const FString CTS_Json = UIndexerSupport::structToString<FCredentials_BE>(Credentials);
+		const int32 CTS_Json_Length = CTS_Json.Len();
 
 		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
 		StorableCredentials->KL = CTS_Json_Length;
@@ -54,9 +43,9 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials)
 bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials)
 {
 	bool ret = false;
-	if (UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
+	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
 	{
-		FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 		ret = UIndexerSupport::jsonStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= this->CredentialsValid(*Credentials);
 	}
@@ -102,7 +91,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 	}
 	else
 	{
-		FString SSOType = UEnum::GetValueAsString(Type);
+		const FString SSOType = UEnum::GetValueAsString(Type);
 		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
@@ -178,14 +167,14 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
-	FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
+	const FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityPoolId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"),*PoolID,*Issuer, *IDToken);
-	FString RequestBody = "{\"IdentityPoolId\":\""+ PoolID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
+	const FString RequestBody = "{\"IdentityPoolId\":\""+ PoolID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
 	
 	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString IdentityIdPtr = "nil";
 		if (responseObj->TryGetStringField("IdentityId",IdentityIdPtr))
 		{//good state
@@ -210,14 +199,14 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
-	FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
+	const FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"), *IdentityID, *Issuer, *IDToken);
-	FString RequestBody = "{\"IdentityId\":\""+ IdentityID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
+	const FString RequestBody = "{\"IdentityId\":\""+ IdentityID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
 							
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		const TSharedPtr<FJsonObject> *credObj;
 
 		if (responseObj->TryGetObjectField("Credentials", credObj))
@@ -269,15 +258,15 @@ FString UAuthenticator::BuildScope(const FDateTime& Date)
 
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
 {
-	FUnsizedData PayloadBytes = StringToUTF8(Payload);
+	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
 	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
 
-	FString Verb = "POST";
-	FString CanonicalURI = "/";//we have none
-	FString CanQueryString = "";//no query parameters so leave this blank
-	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
-	FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
-	FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
+	const FString Verb = "POST";
+	const FString CanonicalURI = "/";//we have none
+	const FString CanQueryString = "";//no query parameters so leave this blank
+	const FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+	const FString CanHeaders = "content-type:application/x-amz-json-1.1\nhost:" + URI + "\nx-amz-content-sha256:" + HashPayload + "\nx-amz-date:" + BuildFullDateTime(Date) + "\nx-amz-target:TrentService.GenerateDataKey\n";
+	const FString SignedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target";
 
 	//build the CanonicalRequest
 	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
@@ -292,14 +281,14 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 */
 FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest)
 {
-	FUnsizedData PayloadBytes = StringToUTF8(CanonicalRequest);
+	const FUnsizedData PayloadBytes = StringToUTF8(CanonicalRequest);
 	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
 
-	FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
-	FString FullDate = BuildFullDateTime(Date);
+	const FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
+	const FString FullDate = BuildFullDateTime(Date);
 	FString StringToSign = "AWS4-HMAC-SHA256\n" + FullDate + "\n" + this->BuildScope(Date) + "\n" + CanonicalHash.ToLower();
 
-	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
+	const FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
 	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString StringToSignHash = BytesToHex(StringToSignHashBytes.value, StringToSignHashBytes.HASH_LEN).ToLower();
 
@@ -312,16 +301,16 @@ FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& 
 
 TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 {
-	FUnsizedData DateKeyEncryptBytes = StringToUTF8("AWS4" + this->SecretKey);
-	FUnsizedData TimeStampBytes = StringToUTF8(BuildYYYYMMDD(Date));
-	FUnsizedData RegionBytes = StringToUTF8(this->WaasCredentials.GetKMSRegion());
-	FUnsizedData KMSBytes = StringToUTF8("kms");
-	FUnsizedData AWSReqBytes = StringToUTF8("aws4_request");
+	const FUnsizedData DateKeyEncryptBytes = StringToUTF8("AWS4" + this->SecretKey);
+	const FUnsizedData TimeStampBytes = StringToUTF8(BuildYYYYMMDD(Date));
+	const FUnsizedData RegionBytes = StringToUTF8(this->WaasCredentials.GetKMSRegion());
+	const FUnsizedData KMSBytes = StringToUTF8("kms");
+	const FUnsizedData AWSReqBytes = StringToUTF8("aws4_request");
 
-	Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Arr,DateKeyEncryptBytes.GetLength(),TimeStampBytes.Arr,TimeStampBytes.GetLength());
-	Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Arr, RegionBytes.GetLength());
-	Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value, DateRegionKeyHash.HASH_LEN, KMSBytes.Arr, KMSBytes.GetLength());
-	Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN, AWSReqBytes.Arr, AWSReqBytes.GetLength());
+	const Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Arr,DateKeyEncryptBytes.GetLength(),TimeStampBytes.Arr,TimeStampBytes.GetLength());
+	const Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Arr, RegionBytes.GetLength());
+	const Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value, DateRegionKeyHash.HASH_LEN, KMSBytes.Arr, KMSBytes.GetLength());
+	const Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN, AWSReqBytes.Arr, AWSReqBytes.GetLength());
 
 	FString DateKey = BytesToHex(DateKeyHash.value, DateKeyHash.HASH_LEN).ToLower();
 	FString DateRegionKey = BytesToHex(DateRegionKeyHash.value,DateRegionKeyHash.HASH_LEN).ToLower();
@@ -343,8 +332,8 @@ TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 
 FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign)
 {
-	FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
-	Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
+	const FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
+	const Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
 	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN).ToLower();
 
 	//cleanup
@@ -356,11 +345,11 @@ FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const 
 FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload)
 {
 	FString AuthHeader = "AWS4-HMAC-SHA256 Credential=";
-	FString dateString = this->BuildYYYYMMDD(Date);
-	FString CanReq = this->BuildCanonicalRequest(URI, Date, Payload);
-	FString StringToSign = this->BuildStringToSign(Date, CanReq);
-	TArray<uint8_t> SigningKey = this->BuildSigningKey(Date);
-	FString Signature = this->BuildSignature(SigningKey, StringToSign);
+	const FString dateString = this->BuildYYYYMMDD(Date);
+	const FString CanReq = this->BuildCanonicalRequest(URI, Date, Payload);
+	const FString StringToSign = this->BuildStringToSign(Date, CanReq);
+	const TArray<uint8_t> SigningKey = this->BuildSigningKey(Date);
+	const FString Signature = this->BuildSignature(SigningKey, StringToSign);
 	//AuthHeader += FString::Printf(TEXT("%s"), *this->AccessKeyId) + TEXT("/") + FString::Printf(TEXT("%s"), *dateString) + TEXT("/") + FString::Printf(TEXT("%s"), *this->Region) + TEXT("/") + FString::Printf(TEXT("%s"), *this->AWSService) + TEXT("/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=") + FString::Printf(TEXT("%s"), *Signature);
 	AuthHeader += this->AccessKeyId + "/" + dateString + "/" + this->WaasCredentials.GetKMSRegion() + "/kms/aws4_request,SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-target,Signature=" + Signature;
 	return AuthHeader;
@@ -368,14 +357,14 @@ FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const
 
 void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 {
-	FString URL = BuildAWSURL("kms",this->WaasCredentials.GetKMSRegion());
+	const FString URL = BuildAWSURL("kms",this->WaasCredentials.GetKMSRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"KeyId\":\"%s\",\"KeySpec\":\"AES_256\"}"), *AWSKMSKeyID);
-	FString RequestBody = "{\"KeyId\":\""+ AWSKMSKeyID +"\",\"KeySpec\":\"AES_256\"}";
+	const FString RequestBody = "{\"KeyId\":\""+ AWSKMSKeyID +"\",\"KeySpec\":\"AES_256\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString PlainTextPtr, CipherTextBlobPtr;
 		if (responseObj->TryGetStringField("Plaintext", PlainTextPtr) && responseObj->TryGetStringField("CipherTextBlob", CipherTextBlobPtr))
 		{//good state
@@ -400,13 +389,13 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
 	};
-	FDateTime cachedDate = FDateTime::UtcNow();
+	const FDateTime cachedDate = FDateTime::UtcNow();
 	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL.RightChop(8), RequestBody),cachedDate, URL, "TrentService.GenerateDataKey", RequestBody, GenericSuccess, GenericFailure);
 }
 
 bool UAuthenticator::CanRetryEmailLogin()
 {
-	bool CanRetry = this->EmailAuthCurrRetries > 0;
+	const bool CanRetry = this->EmailAuthCurrRetries > 0;
 	this->EmailAuthCurrRetries--;
 	return CanRetry;
 }
@@ -418,14 +407,14 @@ void UAuthenticator::ResetRetryEmailLogin()
 
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"%s\"},\"ClientId\":\"%s\"}"), *Email, *AWSCognitoClientID);
-	FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
+	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString SessionPtr;
 		if (responseObj->TryGetStringField("Session", SessionPtr))
 		{//good state
@@ -477,9 +466,9 @@ FString UAuthenticator::GenerateSignUpPassword()
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"ClientId\":\"%s\",\"Password\":\"%s\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"%s\"}],\"Username\":\"%s\"}"), *AWSCognitoClientID, *Password, *Email, *Email);
-	FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
+	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
@@ -498,14 +487,14 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
-	FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"%s\",\"Session\":\"%s\",\"ChallengeResponses\":{\"USERNAME\":\"%s\",\"ANSWER\":\"%s\"}}"), *AWSCognitoClientID, *ChallengeSessionString, *Email, *Answer);
-	FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"}}";
+	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"}}";
 
 	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		FString IDTokenPtr;
 		const TSharedPtr<FJsonObject> *AuthObject;
 		if (responseObj->TryGetObjectField("AuthenticationResult", AuthObject))
@@ -681,9 +670,9 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 
 void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
+	const FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
 	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
-	FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+	const FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
 
 	NewObject<URequestHandler>()
 		->PrepareRequest()
