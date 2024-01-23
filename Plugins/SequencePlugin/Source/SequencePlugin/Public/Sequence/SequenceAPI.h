@@ -105,26 +105,22 @@ namespace SequenceAPI
 		FSequenceWallet();
 		FSequenceWallet(const FCredentials_BE& CredentialsIn);
 		FSequenceWallet(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
-
-		/*
-		* Used to get the Eth Wallet Address Associated with this SequenceWallet
-		*/
+		
+		void SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message, TSuccessCallback<FSignature> OnSuccess, FFailureCallback OnFailure);
+		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+		void ListSessions();
+		void CloseSession();
+		void SessionValidation();
+		
+	private://these are all out of scope
 		FString GetWalletAddress();
-
+		void SendTransactionBatch(TArray<FTransaction_Sequence> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+		void IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message, FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 		void CreateWallet(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void GetWalletAddress(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
 		void DeployWallet(uint64 ChainId, TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure);
 		void Wallets(FPage_Sequence Page, TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure);
 		void Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure);
-		void SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message, TSuccessCallback<FSignature> OnSuccess, FFailureCallback OnFailure);
-		void IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message, FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
-		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
-		void SendTransactionBatch(TArray<FTransaction_Sequence> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
-		
-		//1) SequenceAPI::FPage_Sequence <-> FPage
-		
-		//Overload Wallets
-
 	private:
 		//these functions are meant for the UI Only and have been removed for this version
 		void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
@@ -134,6 +130,8 @@ namespace SequenceAPI
 		void getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
 		static FString buildQR_Request_URL(FString data, int32 size);
 		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void(TransactionID, FSequenceError)> OnFailure);
+	private:
+		template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);	
 	public:
 		//Indexer Specific Calls
 		

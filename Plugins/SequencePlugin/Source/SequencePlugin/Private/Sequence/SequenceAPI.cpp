@@ -192,8 +192,31 @@ FString SequenceAPI::FSequenceWallet::GetWalletAddress()
 	return this->Credentials.GetWalletAddress();
 }
 
-void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,
-                                                FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,FFailureCallback OnFailure)
+{
+	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
+	{
+		TSharedPtr<FJsonObject> Json = Parse(Content);
+		TResult<FAddress> Retval = MakeValue(FAddress{});
+		if(!Json)
+		{
+			Retval = MakeError(FSequenceError{RequestFail, "Json did not parse"});
+		}
+		else
+		{
+			const FString AddressString = Json->GetStringField("address");
+			Retval = MakeValue(FAddress::From(AddressString));
+		}
+		
+		return Retval;
+	};
+
+	FString Content = FJsonBuilder().ToPtr()->ToString();
+	
+	this->SendRPCAndExtract(Url("CreateWallet"), Content, OnSuccess, ExtractAddress,OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
 {
 	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
 	{
@@ -209,47 +232,13 @@ void SequenceAPI::FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuc
 			const FString AddressString = Json->GetStringField("address");
 			Retval = MakeValue(FAddress::From(AddressString));
 		}
-		
 		return Retval;
 	};
-
-	FString Content = FJsonBuilder().ToPtr()
-		->ToString();
-	
-	this->SendRPCAndExtract(Url("CreateWallet"), Content, OnSuccess, ExtractAddress,
-	OnFailure);
+	FString Content = FJsonBuilder().ToPtr()->ToString();
+	this->SequenceRPC(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> OnSuccess,
-	FFailureCallback OnFailure)
-{
-	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
-	{
-		
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FAddress> Retval = MakeValue(FAddress{});
-
-		if(!Json)
-		{
-			Retval = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString AddressString = Json->GetStringField("address");
-			Retval = MakeValue(FAddress::From(AddressString));
-		}
-		return Retval;
-	};
-
-	FString Content = FJsonBuilder().ToPtr()
-		->ToString();
-	
-	this->SendRPCAndExtract(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,
-	OnFailure);
-}
-
-void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,
-	TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	TFunction<TResult<FDeployWalletReturn> (FString)> ExtractDeployWalletReturn = [=](FString Content)
 	{
@@ -267,6 +256,12 @@ void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,
 			const FString TransactionHashString = Json->GetStringField("txnHash");
 			Retval = MakeValue(FDeployWalletReturn{AddressString, TransactionHashString});
 		}
+//quinn provides (NOTE this is just intent and the final payload looks nothing like this)
+//{"sessionId":"","intentJson":"{\"version\":\"1.0.0\",\"packet\":{\"code\":\"signMessage\",\"expires\":1706033925,\"issued\":1706033895,\"message\":\"\",\"network\":\"137\",\"wallet\":\"\"},\"signatures\":[{\"session\":\"\",\"signature\":\"\"}]}"}
+//They Provide this in their SequenceWeb
+//                              {"version": "1.0.0","packet": {"code": "signMessage","expires": 1600086400,"issued": 1600000000,"message": "Join game: #284892","network": "1","wallet": "0xBc5F07A5852fdF3DBd57A76835109220D0ADd8E8",},"signatures": [{"session": "0xCF67BCbD9D5DFD373b03f4fc8143e1c6744B5696","signature": "0x4f9555c73908b6a5b61e0a744cb4e00fce7b20743d5799e4cb1774081bc6b2ec192c740e50f1adec84605636e09c9cdf4d2f6629f9ce64d8d0f3ae10305ef90400"}]}
+
+//What they used to provide for a payload
 		
 		return Retval;
 	};
@@ -322,12 +317,10 @@ void SequenceAPI::FSequenceWallet::Wallets(TSuccessCallback<FWalletsReturn> OnSu
 	this->Wallets(FPage_Sequence{}, OnSuccess, OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message,
-                                               const TSuccessCallback<FSignature> OnSuccess, const FFailureCallback OnFailure)
+void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message,const TSuccessCallback<FSignature> OnSuccess, const FFailureCallback OnFailure)
 {
 	const TFunction<TResult<FSignature> (FString)> ExtractSignature = [=](FString Content)
 	{
-		
 		TSharedPtr<FJsonObject> Json = Parse(Content);
 		TResult<FSignature> ReturnVal = MakeValue(FUnsizedData::Empty());
 
@@ -349,7 +342,7 @@ void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountA
           ->AddString("accountAddress", "0x" + AccountAddress.ToHex())
           ->AddString("message", "0x" +Message.ToHex())
           ->ToString();
-	
+	UE_LOG(LogTemp,Display,TEXT("Content before sending: %s"),*Content);
 	this->SendRPCAndExtract(Url("SignMessage"), Content, OnSuccess, ExtractSignature,
 	OnFailure);
 }
@@ -462,6 +455,26 @@ void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE T
 	{
 		OnFailure(ID, Error);
 	});
+}
+
+template <typename T> void SequenceAPI::FSequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, Extractor<T> Extractor, FFailureCallback OnFailure)
+{
+	NewObject<URequestHandler>()
+	->PrepareRequest()
+	->WithUrl(Url)
+	->WithHeader("Content-type", "application/json")
+	->WithHeader("Accept", "application/json")
+	->WithHeader("X-Access-Key", Credentials.GetProjectAccessKey())
+	->WithVerb("POST")
+	->WithContentAsString(Content)
+	->ProcessAndThen([OnSuccess,Extractor](FString Result)
+	{
+		TResult<T> Value = Extractor(Result);
+		if (Value.HasValue())
+		{
+			OnSuccess(Value.GetValue());
+		}
+	}, OnFailure);
 }
 
 FString SequenceAPI::FSequenceWallet::getSequenceURL(FString endpoint)
