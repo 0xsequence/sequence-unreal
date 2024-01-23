@@ -21,9 +21,10 @@ UAuthenticator::UAuthenticator()
 	FString ParsedJWT;
 	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
 	this->WaasCredentials = FWaasCredentials(UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT));
+	this->SessionWallet = nullptr;
 }
 
-void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials)
+void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
@@ -40,7 +41,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials)
 	}
 }
 
-bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials)
+bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
 	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
@@ -57,7 +58,7 @@ bool UAuthenticator::CredentialsValid(const FCredentials_BE& Credentials)
 	return FDateTime::UtcNow().ToUnixTimestamp() < Credentials.GetExpires();
 }
 
-void UAuthenticator::CallAuthRequiresCode()
+void UAuthenticator::CallAuthRequiresCode() const
 {
 	if (this->AuthRequiresCode.IsBound())
 		this->AuthRequiresCode.Broadcast();
@@ -65,7 +66,7 @@ void UAuthenticator::CallAuthRequiresCode()
 		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
 }
 
-void UAuthenticator::CallAuthFailure()
+void UAuthenticator::CallAuthFailure() const
 {
 	if (this->AuthFailure.IsBound())
 		this->AuthFailure.Broadcast();
@@ -73,7 +74,7 @@ void UAuthenticator::CallAuthFailure()
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
 
-void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials)
+void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 {
 	if (this->AuthSuccess.IsBound())
 		this->AuthSuccess.Broadcast(Credentials);
@@ -81,7 +82,7 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials)
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
+FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 {
 	FString SigninURL = "";
 	
@@ -98,7 +99,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 	return SigninURL;
 }
 
-FString UAuthenticator::GetRedirectURL()
+FString UAuthenticator::GetRedirectURL() const
 {
 	return this->RedirectURL;
 }
@@ -116,7 +117,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetCognitoClientId());
 }
 
-FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID)
+FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const
 {
 	//return FString::Printf(TEXT("%s?response_type=id_token&client_id=%s&redirect_uri=%s&scope=openid+profile+email&state=%s&nonce=%s"),*AuthURL,*ClientID,*this->RedirectURL,*this->StateToken, *this->Nonce);
 	return AuthURL +"?response_type=id_token&client_id="+ ClientID +"&redirect_uri="+ this->RedirectURL +"&scope=openid+profile+email&state="+ this->StateToken +"&nonce="+ this->Nonce;
@@ -128,7 +129,7 @@ FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRe
 	return "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
 }
 
-FString UAuthenticator::GetISSClaim(const FString& JWT)
+FString UAuthenticator::GetISSClaim(const FString& JWT) const
 {
 	FString ISSClaim = "";
 
@@ -144,7 +145,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT)
 
 	if (B64Json.Num() > 1)
 	{
-		TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
+		const TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
 		FString iss;
 		if (json.Get()->TryGetStringField("iss", iss))
 		{
@@ -171,7 +172,7 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityPoolId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"),*PoolID,*Issuer, *IDToken);
 	const FString RequestBody = "{\"IdentityPoolId\":\""+ PoolID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
 	
-	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this,Issuer](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
 		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -188,7 +189,7 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"),*Error.Message);
 		this->CallAuthFailure();
@@ -203,7 +204,7 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"), *IdentityID, *Issuer, *IDToken);
 	const FString RequestBody = "{\"IdentityId\":\""+ IdentityID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
 							
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -232,7 +233,7 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -361,7 +362,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 	//FString RequestBody = FString::Printf(TEXT("{\"KeyId\":\"%s\",\"KeySpec\":\"AES_256\"}"), *AWSKMSKeyID);
 	const FString RequestBody = "{\"KeyId\":\""+ AWSKMSKeyID +"\",\"KeySpec\":\"AES_256\"}";
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -384,7 +385,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -411,7 +412,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 	//FString RequestBody = FString::Printf(TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"%s\"},\"ClientId\":\"%s\"}"), *Email, *AWSCognitoClientID);
 	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -436,7 +437,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -456,7 +457,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 FString UAuthenticator::GenerateSignUpPassword()
 {
 	FString pw = "aB1%";
-	const int32 len = 12;
+	constexpr int32 len = 12;
 	for (int i = 0; i < len; i++)
 	{
 		pw += this->PWCharList[FMath::RandRange(0,this->PWCharList.Num()-1)];
@@ -470,13 +471,13 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	//FString RequestBody = FString::Printf(TEXT("{\"ClientId\":\"%s\",\"Password\":\"%s\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"%s\"}],\"Username\":\"%s\"}"), *AWSCognitoClientID, *Password, *Email, *Email);
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetCognitoClientId());
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -491,7 +492,7 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 	//FString RequestBody = FString::Printf(TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"%s\",\"Session\":\"%s\",\"ChallengeResponses\":{\"USERNAME\":\"%s\",\"ANSWER\":\"%s\"}}"), *AWSCognitoClientID, *ChallengeSessionString, *Email, *Answer);
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"}}";
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
@@ -517,7 +518,7 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -540,7 +541,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasCredentials.GetCognitoClientId());
 }
 
-FStoredCredentials_BE UAuthenticator::GetStoredCredentials()
+FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 {
 	FCredentials_BE CredData;
 	FCredentials_BE* Credentials = &CredData;
@@ -571,7 +572,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	AES_ctx ctx;
 	struct AES_ctx* PtrCtx = &ctx;
 
-	const int32 IVSize = 16;
+	constexpr int32 IVSize = 16;
 	TArray<uint8_t> iv;
 
 	for (int i = 0; i < IVSize; i++)
@@ -602,10 +603,10 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	//FString FinalPayload = FString::Printf(TEXT("{\"payloadSig\":\"%s\",\"encryptedPayloadKey\":\"%s\",\"payloadCiphertext\":\"%s\"}"),*PayloadSig,*EncryptedPayloadKey,*PayloadCipherText);
 	FString FinalPayload = "{\"payloadSig\":\""+ PayloadSig +"\",\"encryptedPayloadKey\":\""+ EncryptedPayloadKey +"\",\"payloadCiphertext\":\""+ PayloadCipherText +"\"}";
 
-	const TSuccessCallback<FString> GenericSuccess = [this](const FString response)
+	const TSuccessCallback<FString> GenericSuccess = [this](const FString& response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-		TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+		const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 		const TSharedPtr<FJsonObject>* SessionObj = nullptr;
 		const TSharedPtr<FJsonObject>* DataObj = nullptr;
 		FString PlainTextPtr, CipherTextBlobPtr;
@@ -628,8 +629,8 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 				FDateTime::ParseIso8601(*Issued, IssuedDT);
 				FDateTime::ParseIso8601(*Refreshed, RefreshedDT);
 				FDateTime::ParseIso8601(*Expires, ExpiresDT);
-				FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-				FCredentials_BE Credentials(this->PlainText, SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
+				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+				const FCredentials_BE Credentials(this->PlainText, SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
 				this->StoreCredentials(Credentials);
 				this->CallAuthSuccess(Credentials);
 			}
@@ -646,7 +647,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 		}
 	};
 
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error: %s]"), *Error.Message);
 		this->CallAuthFailure();
@@ -655,7 +656,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	this->SequenceRPC(this->WaasCredentials.GetRPCServer(), FinalPayload, GenericSuccess, GenericFailure);
 }
 
-void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -668,7 +669,7 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 		->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
 	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
@@ -692,7 +693,7 @@ void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime&
 	delete[] PayloadBytes.Arr;
 }
 
-void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
