@@ -4,19 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Http.h"
 #include "ObjectHandler.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/AES.h"
-#include "Auth.h"
 #include "Sequence/SequenceAPI.h"
 #include "Authenticator.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
 
-
-//Move this to Structs.h
 USTRUCT(BlueprintType)
 struct FUserDetails
 {
@@ -35,7 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
 UCLASS()
-class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor//, public ISequenceAuth
+class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor
 {
 	GENERATED_BODY()
 public:
@@ -56,10 +52,8 @@ private:
 		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
 private:	
 	//SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
-	UIndexer* Indexer;//Remove this!
 	FCredentials_BE Credentials;
 	UAuthenticator* authenticator;
-	UAuth* auth;//for persistent auth, used to read persistent stored data for automatic authentication
 
 	//testing variables//
 	bool enableTesting = true;
@@ -96,12 +90,6 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString GetTransactionHash(FTransaction_FE Transaction);
 
-	//this needs to be changed such that our creds stay within the C++ realm not the blueprint realm for ease of use
-	//Used to get the stored auth credentials encrypt them and send them up
-	//to be stored in a game save object
-	UFUNCTION(BlueprintCallable, CATEGORY = "SecureStorage")
-		FSecureKey GetSecureStorableAuth();
-
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetLoginURL(const ESocialSigninType& Type);
 
@@ -116,6 +104,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
+	UFUNCTION(BlueprintCallable, Category = "Login")
+		bool StoredCredentialsValid();
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
@@ -127,11 +117,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
 		void ReceiveNFT(FNFT_Master_BE nft);
-	/*
-	* Used to initiate a stored authentication call from the frontend
-	*/
-	UFUNCTION(BlueprintCallable, CATEGORY = "Authentication")
-		void InitAuthentication(FSecureKey storedAuthData);
 
 	/*
 	* Used to let the frontend know if authentication succeeded or not

@@ -501,26 +501,6 @@ public:
         FSelectableCurrency_BE selected_currency;//this is defaulted to USD so ignore it nothing needs to be done here
 };
 
-//REMOVE THIS!
-USTRUCT(BlueprintType)
-struct FStoredAuthState_BE
-{
-    GENERATED_USTRUCT_BODY()
-public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString key1 = "epic key";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString key2 = "legendary key";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString public_address = "0xbignumber0117";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        FString email = "someepickeybasedemail@gmail.com";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FActiveSession_BE> active_Sessions;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-        TArray<FSystemSession_BE> system_sessions;
-};
-
 /*
 * Used by the frontend to keep track of a pending txn's
 * state! The idea is when a txn is initiated the UI will update to a 

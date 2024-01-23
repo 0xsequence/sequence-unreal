@@ -49,8 +49,6 @@ ASequenceBackendManager::ASequenceBackendManager()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	//this->sequenceWallet = new SequenceAPI::FSequenceWallet();
-	this->Indexer = NewObject<UIndexer>();//for handling indexer data
-	this->auth = NewObject<UAuth>();
 	this->authenticator = NewObject<UAuthenticator>();
 
 	//setup up delegate bindings
@@ -98,11 +96,6 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 	return Transaction.ID();
 }
 
-FSecureKey ASequenceBackendManager::GetSecureStorableAuth()
-{
-	return this->auth->GetSecureStorableAuth();//get the stored auth data ready for storage!
-}
-
 FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 {
 	return this->authenticator->GetSigninURL(Type);
@@ -126,6 +119,18 @@ void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
 void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 {
 	this->authenticator->EmailLoginCode(CodeIn);
+}
+
+bool ASequenceBackendManager::StoredCredentialsValid()
+{
+	bool valid = false;
+	FStoredCredentials_BE PCred = this->authenticator->GetStoredCredentials();
+	valid = PCred.GetValid();
+	if (valid)
+	{
+		this->Credentials = PCred.GetCredentials();
+	}
+	return valid;
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -244,16 +249,6 @@ void ASequenceBackendManager::InitNFTSendTxn(FTransaction_FE TransactionData)
 	};
 
 	//this->sequenceWallet->SendTransactionWithCallback(TransactionData, SendSuccess, SendFailure);
-}
-
-//update this to be the encrypted json string
-void ASequenceBackendManager::InitAuthentication(FSecureKey storedAuthData)
-{
-	UE_LOG(LogTemp, Display, TEXT("[AUTH INITIATED]"));
-	FTimerHandle TH_auth_delay;
-	FTimerDelegate Delegate; // Delegate to bind function with parameters
-	Delegate.BindUFunction(this, "UpdateAuthentication", this->auth->SetSecureStorableAuth(storedAuthData));
-	GetWorld()->GetTimerManager().SetTimer(TH_auth_delay, Delegate, FMath::RandRange(1,4), false);
 }
 
 void ASequenceBackendManager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate)

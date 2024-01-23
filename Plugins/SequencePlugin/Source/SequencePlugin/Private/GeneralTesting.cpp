@@ -7,7 +7,6 @@
 #include "Containers/UnrealString.h"
 #include "Util/HexUtility.h"
 #include "Indexer/IndexerSupport.h"
-#include "Auth.h"
 #include "SequenceEncryptor.h"
 #include "SystemDataBuilder.h"
 #include "Sequence/SequenceAPI.h"
