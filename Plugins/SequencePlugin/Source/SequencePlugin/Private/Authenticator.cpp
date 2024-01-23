@@ -228,7 +228,7 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 				this->AccessKeyId = AccessKeyPtr;
 				this->SecretKey = SecretKeyPtr;
 				this->SessionToken = SessionTokenPtr;
-				this->KMSGenerateDataKey(this->WaasCredentials.GetKMSKeyId());
+				this->KMSGenerateDataKey(this->WaasCredentials.GetKMSArn());
 			}
 			else
 			{//error state
