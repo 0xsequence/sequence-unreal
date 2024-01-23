@@ -327,9 +327,9 @@ public:
 	FOnAuthSuccess AuthSuccess;
 
 private://Broadcast handlers
-	void CallAuthRequiresCode();
-	void CallAuthFailure();
-	void CallAuthSuccess(const FCredentials_BE& Credentials);
+	void CallAuthRequiresCode() const;
+	void CallAuthFailure() const;
+	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
 	const FString SaveSlot = "Cr";
@@ -387,9 +387,9 @@ private:
 private:
 	UAuthenticator();
 public:
-	FString GetSigninURL(const ESocialSigninType& Type);
+	FString GetSigninURL(const ESocialSigninType& Type) const;
 
-	FString GetRedirectURL();
+	FString GetRedirectURL() const;
 
 	void SocialLogin(const FString& IDTokenIn);
 
@@ -397,21 +397,21 @@ public:
 
 	void EmailLoginCode(const FString& CodeIn);
 
-	FStoredCredentials_BE GetStoredCredentials();
+	FStoredCredentials_BE GetStoredCredentials() const;
 private:
-	void StoreCredentials(const FCredentials_BE& Credentials);
+	void StoreCredentials(const FCredentials_BE& Credentials) const;
 	
-	bool GetStoredCredentials(FCredentials_BE * Credentials);
+	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 
-	bool CredentialsValid(const FCredentials_BE& Credentials);
+	static bool CredentialsValid(const FCredentials_BE& Credentials);
 	
-	FString GetISSClaim(const FString& JWT);
+	FString GetISSClaim(const FString& JWT) const;
 
 	bool CanRetryEmailLogin();
 
 	void ResetRetryEmailLogin();
 
-	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID);
+	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const;
 
 	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
 
@@ -419,17 +419,17 @@ private:
 
 	FString BuildYYYYMMDD(const FDateTime& Date);
 
-	FString BuildFullDateTime(const FDateTime& Date);
+	static FString BuildFullDateTime(const FDateTime& Date);
 
 	FString BuildScope(const FDateTime& Date);
 
-	FString BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload);//step 1
+	static FString BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload);//step 1
 
 	FString BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest);//step 2
 
 	TArray<uint8_t> BuildSigningKey(const FDateTime& Date);//step 3
 
-	FString BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign);//step 4
+	static FString BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign);//step 4
 
 	FString BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload);
 
@@ -455,11 +455,11 @@ private:
 
 	//RPC Calls//
 
-	TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
+	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
 
-	void SequenceRPC(const FString& Url, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	static void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 };
