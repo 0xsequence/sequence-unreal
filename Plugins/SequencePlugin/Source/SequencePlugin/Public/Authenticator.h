@@ -59,7 +59,7 @@ private:
 public:
 	FWaasCredentials(){}
 	FWaasCredentials(const FWaasJWT& JWT)
-	{	//parse for the kms key to start right away!		
+	{	//parse for the kms key to start right away!
 		TArray<FString> KeyParts;
 		KMSArn = JWT.KeyId;
 		JWT.KeyId.ParseIntoArray(KeyParts, TEXT(":"), true);
@@ -82,7 +82,7 @@ public:
 		KMSKeyId = KMS;
 		EmailEnabled = (CognitoClientId.Len() > 0);
 	}
-
+	
 	FString GetKMSArn() const
 	{
 		return KMSArn;
@@ -162,12 +162,15 @@ private:
 	int64 Refreshed = -1;
 	UPROPERTY()
 	int64 Expires = -1;
+	UPROPERTY()
+	FString ProjectAccessKey = "";
 public:
 	FCredentials_BE(){}
 
-    FCredentials_BE(const FString& TransportKeyIn,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn, const int64& RefreshedIn, const int64& ExpiresIn)
+    FCredentials_BE(const FString& TransportKeyIn,const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn, const int64& RefreshedIn, const int64& ExpiresIn)
     {
 		TransportKey = TransportKeyIn;
+		ProjectAccessKey = ProjectAccessKeyIn;
 		SessionPrivateKey = SessionPrivateKeyIn;
 		Id = IdIn;
 		Address = AddressIn;
@@ -186,6 +189,11 @@ public:
 	FString GetTransportKey() const
 	{
 		return TransportKey;
+	}
+
+	FString GetProjectAccessKey() const
+	{
+		return ProjectAccessKey;
 	}
 
 	FString GetSessionPrivateKey() const

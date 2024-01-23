@@ -23,8 +23,7 @@ public:
 template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
 
 template <typename T>
-void RPCCaller::SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess,
-	Extractor<T> Extractor, FFailureCallback OnFailure)
+void RPCCaller::SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, Extractor<T> Extractor, FFailureCallback OnFailure)
 {
 	SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
 	{

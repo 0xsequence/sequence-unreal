@@ -630,7 +630,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 				FDateTime::ParseIso8601(*Refreshed, RefreshedDT);
 				FDateTime::ParseIso8601(*Expires, ExpiresDT);
 				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-				const FCredentials_BE Credentials(this->PlainText, SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
+				const FCredentials_BE Credentials(this->PlainText, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
 				this->StoreCredentials(Credentials);
 				this->CallAuthSuccess(Credentials);
 			}

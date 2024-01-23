@@ -273,7 +273,7 @@ void USystemDataBuilder::initGetQRCode()
 		this->decMasterSyncer();
 	};
 	this->walletGuard.Lock();
-	this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
+	//this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
 	this->walletGuard.Unlock();
 }
 

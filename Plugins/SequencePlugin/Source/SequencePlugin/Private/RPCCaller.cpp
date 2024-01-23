@@ -19,7 +19,6 @@ TSharedPtr<FJsonObject> RPCCaller::Parse(FString JsonRaw)
 
 TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString JsonRaw)
 {
-	UE_LOG(LogTemp, Display, TEXT("I got this raw json: %s"), *JsonRaw);
 	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
