@@ -1,5 +1,5 @@
+#pragma once
 #include "Sequence/SequenceAPI.h"
-
 #include "Eth/Crypto.h"
 #include "Http.h"
 #include "HttpManager.h"
@@ -8,7 +8,10 @@
 #include "Util/JsonBuilder.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
+#include "AES/aes.h"
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Types/ContractCall.h"
+#include "Util/HexUtility.h"
 
 FString SequenceAPI::SortOrderToString(ESortOrder SortOrder)
 {
@@ -82,7 +85,7 @@ SequenceAPI::FPage_Sequence SequenceAPI::FPage_Sequence::From(TSharedPtr<FJsonOb
 	}
 	if(Json->HasField("Column"))
 	{
-		page.Column = Json->GetStringField("Column"); 
+		page.Column = Json->GetStringField("Column");
 	}
 	if(Json->HasField("Sort"))
 	{
@@ -235,7 +238,7 @@ void SequenceAPI::FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> O
 		return Retval;
 	};
 	FString Content = FJsonBuilder().ToPtr()->ToString();
-	this->SequenceRPC(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,OnFailure);
+	//this->SequenceRPC(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,OnFailure);
 }
 
 void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure)
@@ -255,14 +258,7 @@ void SequenceAPI::FSequenceWallet::DeployWallet(uint64 ChainId,TSuccessCallback<
 			const FString AddressString = Json->GetStringField("address");
 			const FString TransactionHashString = Json->GetStringField("txnHash");
 			Retval = MakeValue(FDeployWalletReturn{AddressString, TransactionHashString});
-		}
-//quinn provides (NOTE this is just intent and the final payload looks nothing like this)
-//{"sessionId":"","intentJson":"{\"version\":\"1.0.0\",\"packet\":{\"code\":\"signMessage\",\"expires\":1706033925,\"issued\":1706033895,\"message\":\"\",\"network\":\"137\",\"wallet\":\"\"},\"signatures\":[{\"session\":\"\",\"signature\":\"\"}]}"}
-//They Provide this in their SequenceWeb
-//                              {"version": "1.0.0","packet": {"code": "signMessage","expires": 1600086400,"issued": 1600000000,"message": "Join game: #284892","network": "1","wallet": "0xBc5F07A5852fdF3DBd57A76835109220D0ADd8E8",},"signatures": [{"session": "0xCF67BCbD9D5DFD373b03f4fc8143e1c6744B5696","signature": "0x4f9555c73908b6a5b61e0a744cb4e00fce7b20743d5799e4cb1774081bc6b2ec192c740e50f1adec84605636e09c9cdf4d2f6629f9ce64d8d0f3ae10305ef90400"}]}
-
-//What they used to provide for a payload
-		
+		}		
 		return Retval;
 	};
 
@@ -315,36 +311,6 @@ void SequenceAPI::FSequenceWallet::Wallets(FPage_Sequence Page, TSuccessCallback
 void SequenceAPI::FSequenceWallet::Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	this->Wallets(FPage_Sequence{}, OnSuccess, OnFailure);
-}
-
-void SequenceAPI::FSequenceWallet::SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message,const TSuccessCallback<FSignature> OnSuccess, const FFailureCallback OnFailure)
-{
-	const TFunction<TResult<FSignature> (FString)> ExtractSignature = [=](FString Content)
-	{
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FSignature> ReturnVal = MakeValue(FUnsizedData::Empty());
-
-		if(!Json)
-		{
-			ReturnVal = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString SignatureString = Json->GetStringField("signature");
-			ReturnVal = MakeValue(HexStringToBinary(SignatureString));
-		}
-		
-		return ReturnVal;
-	};
-
-	const FString Content = FJsonBuilder().ToPtr()
-          ->AddInt("chainId", ChainId)
-          ->AddString("accountAddress", "0x" + AccountAddress.ToHex())
-          ->AddString("message", "0x" +Message.ToHex())
-          ->ToString();
-	UE_LOG(LogTemp,Display,TEXT("Content before sending: %s"),*Content);
-	this->SendRPCAndExtract(Url("SignMessage"), Content, OnSuccess, ExtractSignature,
-	OnFailure);
 }
 
 void SequenceAPI::FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message,
@@ -410,6 +376,115 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction_Sequence Transac
 	OnFailure);
 }
 
+void SequenceAPI::FSequenceWallet::ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildListSessionIntent()),OnSuccess,OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
+}
+
+void SequenceAPI::FSequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	OnSuccess("[RPC_NotActive]");
+}
+
+FString SequenceAPI::FSequenceWallet::GeneratePacketSignature(const FString& Packet) const
+{
+	//keccakhash of the packet first
+	const FHash256 SigningHash = FHash256::New();
+	const FUnsizedData EncodedSigningData = StringToUTF8(Packet);
+	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
+	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(BytesToHex(SigningHash.Arr,SigningHash.GetLength()));
+	return Signature;
+}
+
+FString SequenceAPI::FSequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
+{
+	const FString PreEncryptedPayload = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"intentJson\":\""+Intent+"\"}";
+	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
+	TArray<uint8_t> TPayload = PKCS7(PreEncryptedPayload);
+	
+	AES_ctx ctx;
+	struct AES_ctx* PtrCtx = &ctx;
+	constexpr int32 IVSize = 16;
+	TArray<uint8_t> iv;
+
+	for (int i = 0; i < IVSize; i++)
+		iv.Add(RandomByte());
+
+	AES_init_ctx_iv(PtrCtx,this->Credentials.GetTransportKey().GetData(), iv.GetData());
+	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
+	const FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(), iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
+	const FString PayloadSig = "0x" + this->Credentials.SignMessageWithSessionWallet(Intent);
+	const FString EncryptedPayloadKey = "0x" + this->Credentials.GetEncryptedPayloadKey();
+	FString FinalPayload = "{\"encryptedPayloadKey\":\""+ EncryptedPayloadKey +"\",\"payloadCiphertext\":\""+ PayloadCipherText +"\",\"payloadSig\":\""+PayloadSig+"\"}";
+	UE_LOG(LogTemp,Display,TEXT("FinalPayload: %s"),*FinalPayload);
+	return FinalPayload;
+}
+
+void SequenceAPI::FSequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
+}
+
+FString SequenceAPI::FSequenceWallet::BuildSignMessageIntent(const FString& message)
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"message\\\":\\\""+message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
+	const FString Signature = this->GeneratePacketSignature(Packet);
+	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
+	UE_LOG(LogTemp,Display,TEXT("SignMessageIntent: %s"),*Intent);
+	return Intent;
+}
+
+FString SequenceAPI::FSequenceWallet::BuildSendTransactionIntent()
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString Identifier = "???";//need this?
+	const FString Txns = "[]";//need to build out the function for this
+	const FString Packet = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+Identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(Packet);
+	FString Intent = "{\"version\":\""+this->Credentials.GetWaasVersin()+"\",\"packet\":"+Packet+",\"signatures\":[{\"session\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}]}";
+	UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
+	return Intent;
+}
+
+FString SequenceAPI::FSequenceWallet::BuildListSessionIntent()
+{
+	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
+	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
+	return Intent;
+}
+
+FString SequenceAPI::FSequenceWallet::BuildCloseSessionIntent()
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->GetWalletAddress()+"\\\"}";
+	const FString Signature = this->GeneratePacketSignature(Packet);
+	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signatures\\\":\\\""+Signature+"\\\"}]}";
+	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
+	return Intent;
+}
+
+FString SequenceAPI::FSequenceWallet::BuildSessionValidationIntent()
+{
+	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
+	UE_LOG(LogTemp,Display,TEXT("SessionValidationIntent: %s"),*Intent);
+	return Intent;
+}
+
 void SequenceAPI::FSequenceWallet::SendTransactionBatch(TArray<FTransaction_Sequence> Transactions,
 	TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure)
 {
@@ -457,7 +532,7 @@ void SequenceAPI::FSequenceWallet::SendTransactionWithCallback(FTransaction_FE T
 	});
 }
 
-template <typename T> void SequenceAPI::FSequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, Extractor<T> Extractor, FFailureCallback OnFailure)
+template <typename T> void SequenceAPI::FSequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -467,14 +542,7 @@ template <typename T> void SequenceAPI::FSequenceWallet::SequenceRPC(FString Url
 	->WithHeader("X-Access-Key", Credentials.GetProjectAccessKey())
 	->WithVerb("POST")
 	->WithContentAsString(Content)
-	->ProcessAndThen([OnSuccess,Extractor](FString Result)
-	{
-		TResult<T> Value = Extractor(Result);
-		if (Value.HasValue())
-		{
-			OnSuccess(Value.GetValue());
-		}
-	}, OnFailure);
+	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
 FString SequenceAPI::FSequenceWallet::getSequenceURL(FString endpoint)
