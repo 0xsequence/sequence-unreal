@@ -105,12 +105,22 @@ namespace SequenceAPI
 		FSequenceWallet();
 		FSequenceWallet(const FCredentials_BE& CredentialsIn);
 		FSequenceWallet(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
-		
-		void SignMessage(uint64 ChainId, FAddress AccountAddress, FUnsizedData Message, TSuccessCallback<FSignature> OnSuccess, FFailureCallback OnFailure);
+
+		void SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
-		void ListSessions();
-		void CloseSession();
-		void SessionValidation();
+		void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+		void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+		void SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	private:
+		FString BuildSignMessageIntent(const FString& message);
+		FString BuildSendTransactionIntent();
+		FString BuildListSessionIntent();
+		FString BuildCloseSessionIntent();
+		FString BuildSessionValidationIntent();
+
+		FString GeneratePacketSignature(const FString& Packet) const;
+
+		FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 		
 	private://these are all out of scope
 		FString GetWalletAddress();
@@ -131,7 +141,7 @@ namespace SequenceAPI
 		static FString buildQR_Request_URL(FString data, int32 size);
 		void SendTransactionWithCallback(FTransaction_FE Transaction, TSuccessCallback<TransactionID> OnSuccess, TFunction<void(TransactionID, FSequenceError)> OnFailure);
 	private:
-		template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);	
+		template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
 	public:
 		//Indexer Specific Calls
 		

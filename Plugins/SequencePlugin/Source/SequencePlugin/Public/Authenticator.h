@@ -135,7 +135,9 @@ struct FCredentials_BE
     GENERATED_USTRUCT_BODY()
 private:
 	UPROPERTY()
-    FString TransportKey = "";
+    TArray<uint8> TransportKey;
+	UPROPERTY()
+	FString EncryptedPayloadKey = "";
 	UPROPERTY()
     FString SessionPrivateKey = "";
 	UPROPERTY()
@@ -164,12 +166,21 @@ private:
 	int64 Expires = -1;
 	UPROPERTY()
 	FString ProjectAccessKey = "";
+	UPROPERTY()
+	FString WaasVersion = "";
+	UPROPERTY()
+	int64 Network = 137;
 public:
 	FCredentials_BE(){}
 
-    FCredentials_BE(const FString& TransportKeyIn,const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn, const FString& IdIn, const FString& AddressIn,const FString& UserIdIn, const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn, const int64& RefreshedIn, const int64& ExpiresIn)
+    FCredentials_BE(const TArray<uint8>& TransportKeyIn,const FString& EncryptedPayloadKeyIn,const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn,
+    	const FString& IdIn, const FString& AddressIn,const FString& UserIdIn,
+    	const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,
+    	const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn,
+    	const int64& RefreshedIn, const int64& ExpiresIn, const FString& WaasVersionIn)
     {
 		TransportKey = TransportKeyIn;
+		EncryptedPayloadKey = EncryptedPayloadKeyIn;
 		ProjectAccessKey = ProjectAccessKeyIn;
 		SessionPrivateKey = SessionPrivateKeyIn;
 		Id = IdIn;
@@ -184,9 +195,30 @@ public:
 		Issued = IssuedIn;
 		Refreshed = RefreshedIn;
 		Expires = ExpiresIn;
+		WaasVersion = WaasVersionIn;
     }
 
-	FString GetTransportKey() const
+	FString GetEncryptedPayloadKey() const
+	{
+		return EncryptedPayloadKey;
+	}
+	
+	FString GetNetworkString() const
+	{
+		return FString::Printf(TEXT("%lld"),Network);
+	}
+	
+	int64 GetNetwork() const
+	{
+		return Network;
+	}
+	
+	FString GetWaasVersin() const
+	{
+		return WaasVersion;
+	}
+	
+	TArray<uint8> GetTransportKey() const
 	{
 		return TransportKey;
 	}
@@ -209,7 +241,7 @@ public:
 		return PublicKeyStr;
 	}
 
-	FString GetSessionAddress() const
+	FString GetSessionWalletAddress() const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Arr, TWallet.GetWalletAddress().GetLength()).ToLower();
@@ -222,7 +254,7 @@ public:
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		TArray<uint8> SigBytes = TWallet.SignMessage(Message);
 		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		TWallet.~FWallet();
+		//TWallet.~FWallet();
 		return Signature;
 	}
 
@@ -385,6 +417,7 @@ private:
 
 	//From KMSGenerateDataKey
 	FString PlainText = "";
+	TArray<uint8> PlainTextBytes;
 	FString CipherTextBlob = "";
 
 	//From InitiateAuth
@@ -413,7 +446,7 @@ private:
 
 	static bool CredentialsValid(const FCredentials_BE& Credentials);
 	
-	FString GetISSClaim(const FString& JWT) const;
+	FString GetISSClaim(const FString& JWT) const ;
 
 	bool CanRetryEmailLogin();
 
