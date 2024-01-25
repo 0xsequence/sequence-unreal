@@ -258,9 +258,20 @@ TOptional<uint64> HexStringToUint64(FString Hex)
 
 TArray<uint8> HexToBytesInline(FString in)
 {
-	TArray<uint8> Arr;
-	HexToBytes(in, Arr.GetData());
-	return Arr;
+	if(in.StartsWith("0x"))
+	{
+		in.RemoveFromStart("0x");
+	}
+	
+	int length = in.Len();
+	uint8* Arr = new uint8[length];
+	HexToBytes(in, Arr);
+
+	TArray<uint8> FinalArr;
+	FinalArr.Append(Arr, length);
+	delete [] Arr;
+	
+	return FinalArr;
 }
 
 FString TrimHex(FString Hex)
