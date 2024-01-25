@@ -5,6 +5,175 @@
 #include "Indexer/Indexer_Enums.h"
 #include "BE_Structs.generated.h"
 
+//Sequence API Structs
+
+USTRUCT(BlueprintType)
+struct FSequenceTransaction
+{
+    GENERATED_USTRUCT_BODY()
+private:
+    UPROPERTY()
+    FString type = "transaction";
+public:
+    UPROPERTY()
+    FString to = "";
+    UPROPERTY()
+    FString data = "";
+    UPROPERTY()
+    FString value = "";
+
+    FSequenceTransaction(){}
+		
+    FSequenceTransaction(const FString& ToIn, const FString& DataIn, const int32& ValueIn)
+    {
+        to = ToIn;
+        data = DataIn;
+        value = FString::Printf(TEXT("%d"),ValueIn);
+    }
+
+    FSequenceTransaction(const FString& ToIn, const FString& DataIn, const FString& ValueIn)
+    {
+        to = ToIn;
+        data = DataIn;
+        value = ValueIn;
+    }
+
+    FString GetType() const
+    {
+        return type;
+    }
+};
+
+USTRUCT(BlueprintType)
+struct FERC20Transaction
+{
+	GENERATED_USTRUCT_BODY()
+private:
+	UPROPERTY()
+	FString type = "erc20send";
+public:
+	UPROPERTY()
+	FString to = "";
+	UPROPERTY()
+	FString value = "";
+	UPROPERTY()
+	FString token = "";
+
+	FERC20Transaction(){}
+	FERC20Transaction(const FString& ToIn, const int32& ValueIn, const FString& TokenIn)
+	{
+		to = ToIn;
+		value = FString::Printf(TEXT("%d"),ValueIn);
+		token = TokenIn;
+	}
+	FERC20Transaction(const FString& ToIn, const FString& ValueIn, const FString& TokenIn)
+	{
+		to = ToIn;
+		value = ValueIn;
+		token = TokenIn;
+	}
+
+	FString GetType() const
+	{
+		return type;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FERC721Transaction
+{
+	GENERATED_USTRUCT_BODY()
+private:
+	UPROPERTY()
+	FString type = "erc721send";
+public:
+	UPROPERTY()
+	FString to = "";
+	UPROPERTY()
+	FString data = "";
+	UPROPERTY()
+	FString token = "";
+	UPROPERTY()
+	bool safe = true;
+
+	FERC721Transaction(){}
+		
+	FERC721Transaction(const FString& ToIn, const FString& DataIn, const FString& TokenIn, const bool& SafeIn)
+	{
+		to = ToIn;
+		data = DataIn;
+		token = TokenIn;
+		safe = SafeIn;
+	}
+
+	FString GetType() const
+	{
+		return type;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FERC1155TxnValue
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	UPROPERTY()
+	FString amount = "";
+	UPROPERTY()
+	FString id = "";
+
+	FERC1155TxnValue(){}
+		
+	FERC1155TxnValue(const int32& AmountIn, const FString& IdIn)
+	{
+		amount = FString::Printf(TEXT("%d"),AmountIn);
+		id = IdIn;
+	}
+
+	FERC1155TxnValue(const FString& AmountIn, const FString& IdIn)
+	{
+		amount = AmountIn;
+		id = IdIn;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FERC1155Transaction
+{
+	GENERATED_USTRUCT_BODY()
+private:
+	UPROPERTY()
+	FString type = "erc1155send";
+public:
+	UPROPERTY()
+	FString to = "";
+	UPROPERTY()
+	FString data = "";
+	UPROPERTY()
+	FString token = "";
+	UPROPERTY()
+	TArray<FERC1155TxnValue> vals;
+		
+	FERC1155Transaction(){}
+		
+	FERC1155Transaction(const FString& ToIn, const FString& DataIn, const FString& TokenIn, TArray<FERC1155TxnValue> ValsIn)
+	{
+		to = ToIn;
+		data = DataIn;
+		token = TokenIn;
+		vals.Reset(ValsIn.Num());
+		vals.Append(ValsIn);
+	}
+
+	FString GetType() const
+	{
+		return type;
+	}
+};
+
+//Sequence API Structs
+
+
 /*
 * Used to store connected network settings
 * info
