@@ -356,7 +356,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 			TArray<uint8> PlainTextBytes;
 			FBase64::Decode(PlainTextPtr, PlainTextBytes);
 			this->PlainText = BytesToHex(PlainTextBytes.GetData(),PlainTextBytes.Num()).ToLower();
-			this->PlainTextBytes = PlainTextBytes;
+
 			TArray<uint8> CipherTextBytes;
 			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);
 			this->CipherTextBlob = BytesToHex(CipherTextBytes.GetData(), CipherTextBytes.Num()).ToLower();
@@ -614,9 +614,12 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 				FDateTime::ParseIso8601(*Refreshed, RefreshedDT);
 				FDateTime::ParseIso8601(*Expires, ExpiresDT);
 				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+<<<<<<< HEAD
 				const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(),this->PlainTextBytes, this->CipherTextBlob, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp(),this->WaasVersion);
+=======
+				const FCredentials_BE Credentials(this->PlainText, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
+>>>>>>> 1dc60d7 (conflict_01)
 				this->StoreCredentials(Credentials);
-				UE_LOG(LogTemp, Display, TEXT("Credentials:\n%s"), *UIndexerSupport::structToString(Credentials));
 				this->CallAuthSuccess(Credentials);
 			}
 			else
