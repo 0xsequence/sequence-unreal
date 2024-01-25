@@ -1,4 +1,6 @@
 #include "Types/BinaryData.h"
+
+#include "VectorTypes.h"
 #include "Util/HexUtility.h"
 
 TArray<uint8> BlankArray(ByteLength Size)
@@ -20,7 +22,7 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	return BytesToHex(Arr.Get()->GetData(),GetLength()).ToLower();
+	return BytesToHex(Ptr(),GetLength()).ToLower();
 }
 
 void FBinaryData::Renew()
@@ -239,19 +241,20 @@ FUnsizedData StringToUTF8(FString String)
 {
 	const uint32 Length = String.Len();
 
-	FUnsizedData Binary = FUnsizedData::Empty();
-	Binary.Arr->Reserve(Length);
-	uint8* ArrayPtr = Binary.Arr.Get()->GetData();
+	uint8* Binary = new uint8[Length];
 
-	StringToBytes(String, ArrayPtr, Length);
+	StringToBytes(String, Binary, Length);
 
 	// I have no idea why I need to add 1 but it works
-	for(uint32 i = 0; i < Binary.GetLength(); i++)
+	for(uint32 i = 0; i < Length; i++)
 	{
-		ArrayPtr[i] = ArrayPtr[i] + 1;
+		Binary[i] = Binary[i] + 1;
 	}
 
-	return Binary;
+	FUnsizedData Data = FUnsizedData{MakeArray(Binary, Length)};
+	delete [] Binary;
+	
+	return Data;
 }
 
 FString UTF8ToString(FUnsizedData BinaryData)
@@ -268,9 +271,5 @@ FString UTF8ToString(FUnsizedData BinaryData)
 FUnsizedData HexStringToBinary(const FString Hex)
 {
 	FString HexCopy = FString(Hex);
-	HexCopy.RemoveFromStart("0x");
-	
-	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
-	
 	return FUnsizedData(HexToBytesInline(Hex));
 }
