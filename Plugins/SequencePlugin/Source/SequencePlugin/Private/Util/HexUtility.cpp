@@ -258,12 +258,9 @@ TOptional<uint64> HexStringToUint64(FString Hex)
 
 TArray<uint8> HexToBytesInline(FString in)
 {
-	if(in.StartsWith("0x"))
-	{
-		in.RemoveFromStart("0x");
-	}
-	
-	int length = in.Len();
+	in.RemoveFromStart("0x");
+
+	const uint32 length = (in.Len() / 2) + (in.Len() % 2);
 	uint8* Arr = new uint8[length];
 	HexToBytes(in, Arr);
 
