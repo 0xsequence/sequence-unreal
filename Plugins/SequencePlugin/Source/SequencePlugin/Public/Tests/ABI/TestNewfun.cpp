@@ -13,7 +13,7 @@ bool TestNewfun::RunTest(const FString& Parameters)
 	UE_LOG(LogTemp, Display, TEXT("The addy is %s"), *addy.ToHex());
 	
 	auto addy_arg = FABIArg{
-		STATIC, FAddress::Size, addy.Arr
+		STATIC, FAddress::Size, addy.Ptr()
 	};
 	addy_arg.Log();
 	FABIArg* Args = new FABIArg[2]{FABIArg::New(static_cast<uint32>(15)), addy_arg};
@@ -33,12 +33,12 @@ bool TestNewfun::RunTest(const FString& Parameters)
 	if(false)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &s.Arr[0]));
-		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(&s.Arr[0], GMethodIdByteLength));
+		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(s.Ptr(), GMethodIdByteLength));
 		for(auto i = 0; i < BlockNumInt; i++)
 		{
 			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
 			//UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &s.Arr[Addr]));
-			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(&s.Arr[Addr], GBlockByteLength));
+			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(s.Ptr(), GBlockByteLength));
 		}
 	}
 	

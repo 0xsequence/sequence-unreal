@@ -15,7 +15,6 @@ public:
 	*/
 	FWallet();
 
-	~FWallet();
 
 	/*
 	* Generates a wallet based on a given private key

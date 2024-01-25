@@ -7,17 +7,13 @@
 #include "Util/HexUtility.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 
-FUnsizedData NewEmptyBlock()
+uint8* NewEmptyBlock()
 {
-	auto block = FUnsizedData
-	{
-		new uint8[GBlockByteLength],
-		GBlockByteLength
-	};
+	auto block = new uint8[GBlockByteLength];
 
 	for(auto i = 0; i < GBlockByteLength; i++)
 	{
-		block.Arr[i] = 0x00;
+		block[i] = 0x00;
 	}
 
 	return block;
@@ -255,7 +251,7 @@ FABIArg FABIArg::Decode(uint8* TrueStart, uint8* Start, uint8* Head)
 
 FUnsizedData FABIArg::ToBinary() const
 {
-	return FUnsizedData{static_cast<uint8*>(Data), Length};
+	return FUnsizedData{MakeArray(static_cast<uint8*>(Data), Length)};
 }
 
 FString FABIArg::ToHex() const
@@ -332,7 +328,9 @@ FABIArg FABIArg::Empty(EABIArgType Type)
 FABIArg FABIArg::New(FString Value)
 {
 	auto Data = StringToUTF8(Value);
-	return FABIArg{STRING, Data.Length, Data.Arr};
+	uint8* arr = new uint8[Data.GetLength()];
+	for(int i = 0; i < Data.GetLength(); i++) arr[i] = Data.Ptr()[i];
+	return FABIArg{STRING, Data.GetLength(), arr};
 }
 
 FABIArg FABIArg::New(uint8 Value)
@@ -401,18 +399,14 @@ FUnsizedData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 	
 	auto Msg = StringToUTF8(Method);
 	
-	Keccak256::getHash(Msg.Arr, Msg.GetLength(), Signature.Arr);
+	Keccak256::getHash(Msg.Ptr(), Msg.GetLength(), Signature.Ptr());
 
 	for(auto i = 0; i < GMethodIdByteLength; i++)
 	{
-		Blocks[i] = Signature.Arr[i];
+		Blocks[i] = Signature.Ptr()[i];
 	}
 
 	//UE_LOG(LogTemp, Display, TEXT("%s"), *Signature.ToHex());
-
-	// Free calculation data
-	Signature.Destroy();
-	Msg.Destroy();
 	
 	uint8* HeadPtr = &Blocks[GMethodIdByteLength];
 	uint8* Start = HeadPtr;
@@ -425,7 +419,7 @@ FUnsizedData ABI::EncodeArgs(FString Method, FABIArg* Args, uint8 ArgNum)
 	}
 
 	return FUnsizedData{
-		Blocks, TotalByteLength
+		MakeArray(Blocks, TotalByteLength)
 	};
 }
 
@@ -458,7 +452,7 @@ FUnsizedData ABI::EncodeArgsWithoutSignature(FABIArg* Args, uint8 ArgNum)
 	}
 
 	return FUnsizedData{
-		Blocks, TotalByteLength
+		MakeArray(Blocks, TotalByteLength)
 	};
 }
 
@@ -478,9 +472,9 @@ void ABI::DecodeArgs(FUnsizedData Data, FABIArg* Args, uint8 ArgNum)
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{
-		uint8* Start = &Data.Arr[GMethodIdByteLength];
-		uint8* Head = &Data.Arr[GMethodIdByteLength + (i * GBlockByteLength)];
-		Args[i] = Args[i].Decode(Data.Arr, Start, Head);
+		uint8* Start = &Data.Ptr()[GMethodIdByteLength];
+		uint8* Head = &Data.Ptr()[GMethodIdByteLength + (i * GBlockByteLength)];
+		Args[i] = Args[i].Decode(Data.Ptr(), Start, Head);
 	}
 }
 
@@ -488,9 +482,9 @@ void ABI::DecodeArgsWithoutSignature(FUnsizedData Data, FABIArg* Args, uint8 Arg
 {
 	for(auto i = 0; i < ArgNum; i++)
 	{
-		uint8* Start = &Data.Arr[0];
-		uint8* Head = &Data.Arr[0 + (i * GBlockByteLength)];
-		Args[i] = Args[i].Decode(Data.Arr, Start, Head);
+		uint8* Start = &Data.Ptr()[0];
+		uint8* Head = &Data.Ptr()[0 + (i * GBlockByteLength)];
+		Args[i] = Args[i].Decode(Data.Ptr(), Start, Head);
 	}
 }
 

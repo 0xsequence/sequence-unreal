@@ -19,7 +19,7 @@ FHeader JsonToHeader(TSharedPtr<FJsonObject> Json)
 	FUnsizedData ExtraData = HexStringToBinary(Json->GetStringField("extraData"));
 	FHash256 MixDigest = FHash256::From(Json->GetStringField("mixHash"));
 	FBlockNonce Nonce = FBlockNonce::From(Json->GetStringField("nonce"));
-	FUnsizedData BaseFee = FUnsizedData{nullptr, 0};
+	FUnsizedData BaseFee = FUnsizedData::Empty();
 
 	return FHeader{
 		ParentHash, UncleHash, Coinbase, Root, TxHash, ReceiptHash, Bloom, Difficulty, Number, GasLimit, GasUsed, Time, ExtraData, MixDigest, Nonce, BaseFee

@@ -1,25 +1,16 @@
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
 
-uint8* BlankArray(ByteLength Size)
+TArray<uint8> BlankArray(ByteLength Size)
 {
-	uint8* Arr = new uint8[Size];
+	TArray<uint8> Arr;
 
 	for(uint32 i = 0; i < Size; i++)
 	{
-		Arr[i] = 0x00;
+		Arr.Push(0x00);
 	}
 
 	return Arr;
-}
-
-void FBinaryData::Destroy()
-{
-	if(this->Arr != nullptr)
-	{
-		delete [] this->Arr;
-		this->Arr = nullptr;
-	}
 }
 
 FString FBinaryData::ToHex() const
@@ -29,44 +20,45 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	return BytesToHex(Arr,GetLength()).ToLower();
+	return BytesToHex(Arr.Get()->GetData(),GetLength()).ToLower();
 }
 
 void FBinaryData::Renew()
 {
-	this->Arr = BlankArray(this->GetLength());
+	this->Arr.Reset();
+	this->Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	this->Arr.Get()->Append(BlankArray(this->GetLength()));
+}
+
+uint8* FBinaryData::Ptr() const
+{
+	return this->Arr.Get()->GetData();
 }
 
 FUnsizedData FUnsizedData::Empty()
 {
-	return FUnsizedData{nullptr, 0};
+	return FUnsizedData{TArray<uint8>()};
 }
 
-FUnsizedData::FUnsizedData(uint8* Arr, ByteLength Length) : Length(Length)
+FUnsizedData::FUnsizedData(const TArray<uint8> &Array)
 {
-	this->Arr = Arr;
+	this->Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	this->Arr->Append(Array);
 }
 
 FUnsizedData FUnsizedData::Copy() const
 {
-	uint8* NewArr = new uint8[Length];
-	for(uint32 i = 0; i < Length; i++)
-	{
-		NewArr[i] = Arr[i];
-	}
-	return FUnsizedData{NewArr, Length};
+	return FUnsizedData{* this->Arr.Get()};
 }
 
 ByteLength FUnsizedData::GetLength() const
 {
-	return this->Length;
+	return this->Arr->Num();
 }
 
 FUnsizedData FUnsizedData::Trim()
 {
 	FUnsizedData trimmed = Trimmed(*this);
-	delete [] this->Arr;
-	this->Arr = trimmed.Arr;
 	return trimmed;
 }
 
@@ -78,160 +70,165 @@ FUnsizedData FUnsizedData::From(const FString Hex)
 
 FUnsizedData Trimmed(const FBinaryData& Data)
 {
-	uint32 Empty_Count = 0;
-	const uint32 Length = Data.GetLength();
+	TArray<uint8> NewArray = *Data.Arr.Get();
 
-	for(uint32 i = 0; i < Length; i++)
+	while(NewArray.Num() > 0 && NewArray[0] == 0x00)
 	{
-		if(Data.Arr[i] == 0x00)
-		{
-			Empty_Count += 1;
-		}
-		else
-		{
-			break;
-		}
+		NewArray.RemoveAt(0);
 	}
 
-	const ByteLength NewLength = Data.GetLength() - Empty_Count;
-
-	if(NewLength == 0)
-	{
-		return FUnsizedData{new uint8[1]{0x00}, 1};
-	}
-	
-	uint8* NewData = new uint8[NewLength];
-
-	for(uint32 i = 0u; i < NewLength; i++)
-	{
-		NewData[i] = Data.Arr[i + Empty_Count];
-	}
-
-	return FUnsizedData(NewData, NewLength);
+	return FUnsizedData{ NewArray };
 }
 
 FHash256 FHash256::New()
 {
 	FHash256 Data = FHash256{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FHash256 FHash256::From(uint8* Arr)
+FHash256 FHash256::From(TStaticArray<uint8, Size> &Arr)
 {
 	FHash256 Data = FHash256{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
+	return Data;
+}
+
+FHash256 FHash256::From(TArray<uint8>& Arr)
+{
+	FHash256 Data = FHash256{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr->Append(Arr);
 	return Data;
 }
 
 FHash256 FHash256::From(const FString Str)
 {
-	return From(HexToBytesInline(Str,Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 FAddress FAddress::New()
 {
 	FAddress Data = FAddress{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FAddress FAddress::From(uint8* Arr)
+FAddress FAddress::From(TStaticArray<uint8, Size>& Arr)
 {
 	FAddress Data = FAddress{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
 	return Data;
 }
 
 FAddress FAddress::From(FString Str)
 {
-	return From(HexToBytesInline(Str, Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 FPublicKey FPublicKey::New()
 {
 	FPublicKey Data = FPublicKey{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FPublicKey FPublicKey::From(uint8* Arr)
+FPublicKey FPublicKey::From(TStaticArray<uint8, Size>& Arr)
 {
 	FPublicKey Data = FPublicKey{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
 	return Data;
 }
 
 FPublicKey FPublicKey::From(FString Str)
 {
-	return From(HexToBytesInline(Str,Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 FPrivateKey FPrivateKey::New()
 {
 	FPrivateKey Data = FPrivateKey{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FPrivateKey FPrivateKey::From(uint8* Arr)
+FPrivateKey FPrivateKey::From(TStaticArray<uint8, Size>& Arr)
 {
 	FPrivateKey Data = FPrivateKey{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
 	return Data;
 }
 
 FPrivateKey FPrivateKey::From(FString Str)
 {
-	return From(HexToBytesInline(Str,Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 FBloom FBloom::New()
 {
 	FBloom Data = FBloom{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FBloom FBloom::From(uint8* Arr)
+FBloom FBloom::From(TStaticArray<uint8, 256>& Arr)
 {
 	FBloom Data = FBloom{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
 	return Data;
 }
 
 FBloom FBloom::From(FString Str)
 {
-	return From(HexToBytesInline(Str,Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 FBlockNonce FBlockNonce::New()
 {
 	FBlockNonce Data = FBlockNonce{};
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
 	Data.Renew();
 	return Data;
 }
 
-FBlockNonce FBlockNonce::From(uint8* Arr)
+FBlockNonce FBlockNonce::From(TStaticArray<uint8, 8>& Arr)
 {
 	FBlockNonce Data = FBlockNonce{};
-	Data.Arr = Arr;
+	Data.Arr = MakeShared<TArray<uint8>>(TArray<uint8>());
+	Data.Arr.Get()->Append(Arr);
 	return Data;
 }
 
 FBlockNonce FBlockNonce::From(const FString Str)
 {
-	return From(HexToBytesInline(Str,Size));
+	auto Arr = HexToBytesInline<Size>(Str);
+	return From(Arr);
 }
 
 void FBlockNonce::Increment() const
 {
+	uint8* ArrayPtr = Arr.Get()->GetData();
 	for(uint32 i = 0; i < GetLength(); i--)
 	{
 		const int Index = GetLength() - 1 - i;
-		this->Arr[Index] += 1;
+		ArrayPtr[Index] += 1;
 
-		if(this->Arr[Index] != 0x00)
+		if(ArrayPtr[Index] != 0x00)
 		{
 			return;
 		}
@@ -242,16 +239,16 @@ FUnsizedData StringToUTF8(FString String)
 {
 	const uint32 Length = String.Len();
 
-	FUnsizedData Binary = FUnsizedData{
-		new uint8[Length], Length
-	};
+	FUnsizedData Binary = FUnsizedData::Empty();
+	Binary.Arr->Reserve(Length);
+	uint8* ArrayPtr = Binary.Arr.Get()->GetData();
 
-	StringToBytes(String, Binary.Arr, Length);
+	StringToBytes(String, ArrayPtr, Length);
 
 	// I have no idea why I need to add 1 but it works
 	for(uint32 i = 0; i < Binary.GetLength(); i++)
 	{
-		Binary.Arr[i] = Binary.Arr[i] + 1;
+		ArrayPtr[i] = ArrayPtr[i] + 1;
 	}
 
 	return Binary;
@@ -262,7 +259,7 @@ FString UTF8ToString(FUnsizedData BinaryData)
 	TArray<uint8> Buffer;
 	for(uint32 i = 0; i < BinaryData.GetLength(); i++)
 	{
-		Buffer.Add(BinaryData.Arr[i]);
+		Buffer.Add(BinaryData.Arr.Get()->GetData()[i]);
 	}
 	Buffer.Add('\0');
 	return reinterpret_cast<const char*>(Buffer.GetData());
@@ -275,5 +272,5 @@ FUnsizedData HexStringToBinary(const FString Hex)
 	
 	const uint32 Size = (HexCopy.Len() / 2) + (HexCopy.Len() % 2);
 	
-	return FUnsizedData(HexToBytesInline(Hex,Size),Size);
+	return FUnsizedData(HexToBytesInline(Hex));
 }

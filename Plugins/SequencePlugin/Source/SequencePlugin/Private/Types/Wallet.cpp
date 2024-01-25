@@ -12,28 +12,10 @@ FWallet::FWallet()
 	this->PrivateKey = FPrivateKey::New();
 	for (int i = 0; i < 32; i++)
 	{
-		this->PrivateKey.Arr[i] = RandomByte();
+		this->PrivateKey.Arr.Get()->GetData()[i] = RandomByte();
 	}
 	this->PublicKey = GetPublicKey(this->PrivateKey);
 	this->Address = GetAddress(this->PublicKey);
-}
-
-FWallet::~FWallet()
-{
-	if (this->PrivateKey.Arr)
-	{
-		delete[] this->PrivateKey.Arr;
-	}
-
-	if (this->PublicKey.Arr)
-	{
-		delete[] this->PublicKey.Arr;
-	}
-
-	if (this->Address.Arr)
-	{
-		delete[] this->Address.Arr;
-	}
 }
 
 FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
@@ -64,7 +46,7 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 
 	TArray<uint8_t> mesgBuff;
 	mesgBuff.Append(v_0, 33);//append v_0 + 00
-	mesgBuff.Append(this->PrivateKey.Arr,this->PrivateKey.GetLength());//append private key
+	mesgBuff.Append(this->PrivateKey.Arr.Get()->GetData(),this->PrivateKey.GetLength());//append private key
 	mesgBuff.Append(messageHash, size);
 
 	const Sha256Hash k_1 = Sha256::getHmac(k_0, 32,mesgBuff.GetData(),mesgBuff.Num());
@@ -76,7 +58,7 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	uint8_t* k_2_c_ptr = new uint8[1];//delete[]
 	HexToBytes(k_2_constant,k_2_c_ptr);
 	k_2_msg.Append(k_2_c_ptr,1);
-	k_2_msg.Append(this->PrivateKey.Arr, this->PrivateKey.GetLength());
+	k_2_msg.Append(this->PrivateKey.Arr.Get()->GetData(), this->PrivateKey.GetLength());
 	k_2_msg.Append(messageHash, size);
 
 	const Sha256Hash k_2 = Sha256::getHmac(k_1.value, 32, k_2_msg.GetData(), k_2_msg.Num());
@@ -104,20 +86,20 @@ TArray<uint8> FWallet::SignMessage(FString message)
 
 	FHash256 SigningHash = FHash256::New();
 	FUnsizedData EncodedSigningData = StringToUTF8(Payload);
-	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
+	Keccak256::getHash(EncodedSigningData.Ptr(), EncodedSigningData.GetLength(), SigningHash.Ptr());
 	
 	FString rawHash = SigningHash.ToHex();
 	
-	TArray<uint8_t> result_nonce = this->BuildSigningNonce(SigningHash.Arr,SigningHash.GetLength());
+	TArray<uint8_t> result_nonce = this->BuildSigningNonce(SigningHash.Ptr(),SigningHash.GetLength());
 
 	FString result_nonce_str = BytesToHex(result_nonce.GetData(), result_nonce.Num());
 
-	Ecdsa::sign(Uint256(this->PrivateKey.Arr), Sha256Hash(SigningHash.Arr,SigningHash.GetLength()),Uint256(result_nonce.GetData()), BigR, BigS, RecoveryParameter);
+	Ecdsa::sign(Uint256(this->PrivateKey.Ptr()), Sha256Hash(SigningHash.Ptr(),SigningHash.GetLength()),Uint256(result_nonce.GetData()), BigR, BigS, RecoveryParameter);
 
 	FHash256 MyR = FHash256::New();
 	FHash256 MyS = FHash256::New();
-	BigR.getBigEndianBytes(MyR.Arr);
-	BigS.getBigEndianBytes(MyS.Arr);
+	BigR.getBigEndianBytes(MyR.Ptr());
+	BigS.getBigEndianBytes(MyS.Ptr());
 
 	FHash256 R = MyR;
 	FHash256 S = MyS;
@@ -126,18 +108,12 @@ TArray<uint8> FWallet::SignMessage(FString message)
 	FString SString = MyS.ToHex();
 
 	for (int i = 0; i < 32; i++)
-		sig.Add(R.Arr[i]);
+		sig.Add(R.Ptr()[i]);
 
 	for (int i = 0; i < 32; i++)
-		sig.Add(S.Arr[i]);
+		sig.Add(S.Ptr()[i]);
 
 	sig.Add((uint8)RecoveryParameter);
-
-	//cleanup
-	delete[] EncodedSigningData.Arr;
-	delete[] SigningHash.Arr;
-	delete[] MyR.Arr;
-	delete[] MyS.Arr;
 
 	return sig;
 }
