@@ -14,7 +14,7 @@ bool EncoderTest(FABIProperty* MProperty, const FString& MethodSig, const FStrin
 	TArray<FABIProperty*> Properties;
 	Properties.Push(MProperty);
 	const FString encoding = ABI::Encode(MethodSig, Properties).ToHex();
-	UE_LOG(LogTemp, Display, TEXT("String encoding: %s"), *encoding);
+	UE_LOG(LogTemp, Display, TEXT("String encoding: %s, Correct Val %s"), *encoding, *CorrectVal);
 	return encoding.Equals(CorrectVal);
 }
 
@@ -128,8 +128,10 @@ bool TestABI::RunTest(const FString& Parameters)
 	//TestBytes(bytes)
 	//TestBytes("abcdeabcde")
 	//0x229bb9e90000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a6162636465616263646500000000000000000000000000000000000000000000
-	char s[] = "abcdeabcde";
-	auto P14 = FABIBytesProperty(FUnsizedData((uint8*)s, 10));
+	uint8 s[] = "abcdeabcde";
+	TArray<uint8> arr;
+	for(int i = 0; i < 10; i++) arr.Push(s[i]);
+	auto P14 = FABIBytesProperty(FUnsizedData(arr));
 	if(!EncoderTest(&P14, FString("TestBytes(bytes)"), FString("229bb9e90000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a6162636465616263646500000000000000000000000000000000000000000000"))) return false;
 
 	//Test 15

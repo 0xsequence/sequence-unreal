@@ -34,13 +34,12 @@ TArray<uint8_t> PKCS7(FString in)
 
 	TArray<uint8_t> TBuff;
 	TBuff.Reserve(ByteLength + (16-ModLength));
-	TBuff.Append(ByteBuff.Arr,ByteBuff.GetLength());
+	TBuff.Append(ByteBuff.Arr.Get()->GetData(),ByteBuff.GetLength());
 
 	for (int i = 0; i < (16 - ModLength); i++)
 	{
 		TBuff.Add(PaddingByte);
 	}
-	delete[] ByteBuff.Arr;
 
 	return TBuff;
 }
@@ -257,11 +256,11 @@ TOptional<uint64> HexStringToUint64(FString Hex)
 	return Sum;
 }
 
-uint8* HexToBytesInline(FString in, uint32 size)
+TArray<uint8> HexToBytesInline(FString in)
 {
-	uint8* bytes = new uint8[size];
-	HexToBytes(in, bytes);
-	return bytes;
+	TArray<uint8> Arr;
+	HexToBytes(in, Arr.GetData());
+	return Arr;
 }
 
 FString TrimHex(FString Hex)
@@ -286,4 +285,11 @@ FString TrimHex(FString Hex)
 	}
 
 	return HexCopy;
+}
+
+TArray<uint8> MakeArray(uint8* ptr, int len)
+{
+	TArray<uint8> arr;
+	for(int i = 0; i < len; i++) arr.Push(ptr[i]);
+	return arr;
 }

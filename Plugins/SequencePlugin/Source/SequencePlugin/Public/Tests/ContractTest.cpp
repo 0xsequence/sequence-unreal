@@ -181,7 +181,7 @@ void ContractTest::DeployContract4(const FString Url, const FString VMByteCode, 
 	//deploy PrivateKey2
 	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey2, 1337, [=](FAddress ContractAddress4, FUnsizedData Hash)
 	{
-		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
+		Provider(Url).TransactionReceipt(FHash256::From(*Hash.Arr.Get()), [=](FTransactionReceipt Receipt)
 		{	
 			if(Receipt.ContractAddress.ToHex() != ContractAddress4.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt address 4 doesn't match contract address 4"});
 			if(Receipt.From.ToHex() != Address2.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt field FROM doesn't match address 2"});
@@ -198,7 +198,7 @@ void ContractTest::DeployContract3(const FString Url, const FString VMByteCode, 
 {
 	Provider(Url).DeployContractWithHash(VMByteCode, PrivateKey1, 1337, [=](const FAddress ContractAddress3, FUnsizedData Hash)
 	{
-		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
+		Provider(Url).TransactionReceipt(FHash256::From(*Hash.Arr.Get()), [=](FTransactionReceipt Receipt)
 		{	
 			if(Receipt.ContractAddress.ToHex() != ContractAddress3.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt address 3 doesn't match contract address 3"});
 			if(Receipt.From.ToHex() != Address1.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt field FROM doesn't match address 1"});
@@ -216,7 +216,7 @@ void ContractTest::DeployContract2(FString Url, FString LongByteCode, FString VM
 	Provider(Url).DeployContractWithHash(LongByteCode, PrivateKey1, 1337, [=](FAddress ContractAddress2, FUnsizedData Hash)
 	{
 		UE_LOG(LogTemp, Display, TEXT("My deployed address is %s"), *ContractAddress2.ToHex());
-		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
+		Provider(Url).TransactionReceipt(FHash256::From(*Hash.Arr.Get()), [=](FTransactionReceipt Receipt)
 		{	
 			if(Receipt.ContractAddress.ToHex() != ContractAddress2.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt address 2 doesn't match contract address 2"});
 			if(Receipt.From.ToHex() != Address1.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt field FROM doesn't match address 1"});
@@ -233,7 +233,7 @@ void ContractTest::DeployContracts(FString Url,  FString LongByteCode, FString S
 {
 	Provider(Url).DeployContractWithHash(SmallByteCode, PrivateKey1, 1337, [=](FAddress Address, FUnsizedData Hash)
 	{
-		Provider(Url).TransactionReceipt(FHash256::From(Hash.Arr), [=](FTransactionReceipt Receipt)
+		Provider(Url).TransactionReceipt(FHash256::From(*Hash.Arr.Get()), [=](FTransactionReceipt Receipt)
 		{
 			if(Receipt.ContractAddress.ToHex() != Address.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt address 1 doesn't match contract address 1"});
 			if(Receipt.From.ToHex() != Address1.ToHex()) return OnFailure("", FSequenceError{TestFail, "Receipt field FROM doesn't match address 1"});

@@ -37,19 +37,19 @@ bool TestNewABI::RunTest(const FString& Parameters)
     Properties.Push(&ArrayProp3);
     Properties.Push(&ArrayProp4);
     auto Obj = ABI::Encode("newFun(string,address)", Properties);
-	uint32 BlockNum = (Obj.Length - GMethodIdByteLength) / GBlockByteLength;
+	uint32 BlockNum = (Obj.GetLength() - GMethodIdByteLength) / GBlockByteLength;
 	
 	UE_LOG(LogTemp, Display, TEXT("The length is %i"), BlockNum);
 
 	if(true)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *HashToHexString(GMethodIdByteLength, &Obj.Arr[0]));
-		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(&Obj.Arr[0], GMethodIdByteLength));
+		UE_LOG(LogTemp, Display, TEXT("HEADER: %s"), *BytesToHex(Obj.Ptr(), GMethodIdByteLength));
 		for(auto i = 0; i < BlockNum; i++)
 		{
 			auto Addr = GMethodIdByteLength + GBlockByteLength * i;
 			//UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *HashToHexString(GBlockByteLength, &Obj.Arr[Addr]));
-			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(&Obj.Arr[Addr], GBlockByteLength));
+			UE_LOG(LogTemp, Display, TEXT("%i %s"), Addr, *BytesToHex(Obj.Ptr(), GBlockByteLength));
 		}
 	}
 

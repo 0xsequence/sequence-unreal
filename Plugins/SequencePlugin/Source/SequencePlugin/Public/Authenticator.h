@@ -247,14 +247,16 @@ public:
 	FString GetSessionPublicKey() const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
-		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Arr,TWallet.GetWalletPublicKey().GetLength()).ToLower();
+		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Ptr(),TWallet.GetWalletPublicKey().GetLength()).ToLower();
+		TWallet.~FWallet();
 		return PublicKeyStr;
 	}
 
 	FString GetSessionWalletAddress() const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
-		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Arr, TWallet.GetWalletAddress().GetLength()).ToLower();
+		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Ptr(), TWallet.GetWalletAddress().GetLength()).ToLower();
+		TWallet.~FWallet();
 		return AddressStr;
 	}
 

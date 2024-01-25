@@ -7,6 +7,7 @@
 #include "Http.h"
 #include "HttpManager.h"
 #include "Types/BinaryData.h"
+#include "Util/HexUtility.h"
 
 URequestHandler* URequestHandler::PrepareRequest()
 {
@@ -75,7 +76,7 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 		FString str = "";
 		for (auto i : content)
 		{
-			str += UTF8ToString(FUnsizedData{ &i, 1 });
+			str += UTF8ToString(FUnsizedData{ MakeArray(&i, 1) });
 		}
 		UE_LOG(LogTemp, Display, TEXT("QR Content: %s"), *str);
 
@@ -140,7 +141,7 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 		FString str = "";
 		for(auto i : content)
 		{
-			str += UTF8ToString(FUnsizedData{&i, 1});
+			str += UTF8ToString(FUnsizedData{MakeArray(&i, 1)});
 		}
 
 		auto headers = Req->GetAllHeaders();

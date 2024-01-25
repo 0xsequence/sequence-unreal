@@ -34,7 +34,7 @@ FABIArg FABIStaticFixedBytesProperty<Size>::Serialize()
 	{
 		if(i < this->value.GetLength())
 		{
-			Data[i] = this->value.Arr[i];
+			Data[i] = this->value.Ptr()[i];
 		}
 		else
 		{
@@ -63,7 +63,7 @@ void FABIStaticFixedBytesProperty<Size>::Deserialize(FABIArg Arg)
 		Data[i] = ArgData[i];
 	}
 	auto mUniformData = TSizedData<Size>();
-	mUniformData.Arr = Data;
+	*mUniformData.Arr.Get() = MakeArray(Data, Size);
 	this->SetValue(mUniformData);
 	Arg.Destroy();
 }

@@ -14,10 +14,14 @@ FABIStringProperty::FABIStringProperty(FString InitialValue): TABIPropertyWithVa
 FABIArg FABIStringProperty::Serialize()
 {
 	auto BinaryData = StringToUTF8(value);
+
+	uint8* arr = new uint8[BinaryData.GetLength()];
+	for(uint32 i = 0; i < BinaryData.GetLength(); i++) arr[i] = BinaryData.Ptr()[i];
+	
 	return FABIArg {
 		STRING,
-		BinaryData.Length,
-		BinaryData.Arr
+		BinaryData.GetLength(),
+		arr
 	};
 }
 
@@ -35,7 +39,7 @@ void FABIStringProperty::Deserialize(FABIArg Arg)
 
 	const auto StringData = FUnsizedData
 	{
-		Data, Length
+		MakeArray(Data, Length)
 	};
 
 	const auto String = UTF8ToString(StringData);
@@ -58,17 +62,17 @@ FABIArg FABIInt32Property::Serialize()
 	{
 		for(auto i = 0; i < GBlockByteLength; i++)
 		{
-			ArgData.Arr[i] = 0xFF;
+			ArgData[i] = 0xFF;
 		}
 	}
 
-	ArgData.Arr[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
-	ArgData.Arr[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
-	ArgData.Arr[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
-	ArgData.Arr[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
+	ArgData[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
+	ArgData[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
+	ArgData[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
+	ArgData[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
 	
 	return FABIArg{
-		STATIC, GBlockByteLength, ArgData.Arr
+		STATIC, GBlockByteLength, ArgData
 	};
 }
 
@@ -101,13 +105,13 @@ FABIArg FABIUInt32Property::Serialize()
 {
 	const auto ArgData = NewEmptyBlock();
 
-	ArgData.Arr[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
-	ArgData.Arr[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
-	ArgData.Arr[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
-	ArgData.Arr[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
+	ArgData[GBlockByteLength - 4] = (value & 0xFF000000) >> 24;
+	ArgData[GBlockByteLength - 3] = (value & 0x00FF0000) >> 16;
+	ArgData[GBlockByteLength - 2] = (value & 0x0000FF00) >> 8;
+	ArgData[GBlockByteLength - 1] = (value & 0x000000FF) >> 0;
 	
 	return FABIArg{
-		STATIC, GBlockByteLength, ArgData.Arr
+		STATIC, GBlockByteLength, ArgData
 	};
 }
 
@@ -142,11 +146,11 @@ FABIArg FABIBooleanProperty::Serialize()
 
 	if(value)
 	{
-		ArgData.Arr[GBlockByteLength - 1] = 0x01;
+		ArgData[GBlockByteLength - 1] = 0x01;
 	}
 
 	return FABIArg{
-		STATIC, GBlockByteLength, ArgData.Arr
+		STATIC, GBlockByteLength, ArgData
 	};
 }
 
@@ -173,15 +177,15 @@ FABIBytesProperty::FABIBytesProperty(FUnsizedData InitialValue): TABIPropertyWit
 
 FABIArg FABIBytesProperty::Serialize()
 {
-	const auto Data = new uint8[value.Length];
+	const auto Data = new uint8[value.GetLength()];
 
-	for(uint32 i = 0; i < value.Length; i++)
+	for(uint32 i = 0; i < value.GetLength(); i++)
 	{
-		Data[i] = value.Arr[i];
+		Data[i] = value.Ptr()[i];
 	}
 
 	return FABIArg{
-		BYTES, value.Length, Data
+		BYTES, value.GetLength(), Data
 	};
 }
 
@@ -203,7 +207,7 @@ void FABIBytesProperty::Deserialize(FABIArg Arg)
 	}
 
 	SetValue(FUnsizedData{
-		Data, Arg.Length
+		MakeArray(Data, Arg.Length)
 	});
 	Arg.Destroy();
 }
@@ -216,16 +220,16 @@ FABIAddressProperty::FABIAddressProperty(FAddress Address):  TABIPropertyWithVal
 
 FABIArg FABIAddressProperty::Serialize()
 {
-	FUnsizedData ArgData = NewEmptyBlock();
+	uint8* ArgData = NewEmptyBlock();
 	auto buffer = GBlockByteLength - FAddress::Size;
 
 	for(auto i = 0; i < FAddress::Size; i++)
 	{
-		ArgData.Arr[buffer + i] = value.Arr[i];
+		ArgData[buffer + i] = value.Ptr()[i];
 	}
 
 	return FABIArg{
-		STATIC, GBlockByteLength, ArgData.Arr
+		STATIC, GBlockByteLength, ArgData
 	};
 }
 
@@ -243,7 +247,7 @@ void FABIAddressProperty::Deserialize(FABIArg Arg)
 
 	for(auto i = 0; i < FAddress::Size; i++)
 	{
-		Address.Arr[i] = CopyData[i];
+		Address.Ptr()[i] = CopyData[i];
 	}
 
 	SetValue(Address);
