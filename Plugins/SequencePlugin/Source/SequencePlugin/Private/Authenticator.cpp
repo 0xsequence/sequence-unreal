@@ -614,11 +614,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 				FDateTime::ParseIso8601(*Refreshed, RefreshedDT);
 				FDateTime::ParseIso8601(*Expires, ExpiresDT);
 				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-<<<<<<< HEAD
 				const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(),this->PlainTextBytes, this->CipherTextBlob, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp(),this->WaasVersion);
-=======
-				const FCredentials_BE Credentials(this->PlainText, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp());
->>>>>>> 1dc60d7 (conflict_01)
 				this->StoreCredentials(Credentials);
 				this->CallAuthSuccess(Credentials);
 			}
