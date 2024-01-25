@@ -11,7 +11,6 @@
 #include "Indexer/Structs/Page.h"
 #include "Provider.h"
 
-
 namespace SequenceAPI
 {
 	using FSignature = FUnsizedData;
@@ -35,6 +34,7 @@ namespace SequenceAPI
 
 	using TransactionID = FString;
 
+	
 	//Sequence Specific Version of Transaction
 	struct FTransaction_Sequence
 	{
@@ -107,22 +107,34 @@ namespace SequenceAPI
 		FSequenceWallet(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
 		void SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
+
+		void SendSequenceTransaction(FSequenceTransaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+		void SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+		void SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+		void SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+
+		void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+		//NOP
 		void SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	private:
 		FString BuildSignMessageIntent(const FString& message);
-		FString BuildSendTransactionIntent();
+		FString BuildSendTransactionIntent(const FString& Identifier,const FString& Txns);
+		FString BuildRegisterSessionIntent();
 		FString BuildListSessionIntent();
 		FString BuildCloseSessionIntent();
+		
+		//NOP
 		FString BuildSessionValidationIntent();
-
 		FString GeneratePacketSignature(const FString& Packet) const;
-
 		FString GenerateSignedEncryptedPayload(const FString& Intent) const;
+		FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
+		FString SignAndEncryptPayload(const FString& PrePayload, const FString& Intent) const;
 		
 	private://these are all out of scope
+		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		FString GetWalletAddress();
 		void SendTransactionBatch(TArray<FTransaction_Sequence> Transactions, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
 		void IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message, FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);

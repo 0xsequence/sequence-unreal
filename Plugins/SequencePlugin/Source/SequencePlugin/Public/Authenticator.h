@@ -170,15 +170,19 @@ private:
 	FString WaasVersion = "";
 	UPROPERTY()
 	int64 Network = 137;
+	UPROPERTY()
+	FString ProjectId = "";
 public:
 	FCredentials_BE(){}
 
-    FCredentials_BE(const TArray<uint8>& TransportKeyIn,const FString& EncryptedPayloadKeyIn,const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn,
+    FCredentials_BE(const FString& ProjectIdIn, const TArray<uint8>& TransportKeyIn,const FString& EncryptedPayloadKeyIn,
+    	const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn,
     	const FString& IdIn, const FString& AddressIn,const FString& UserIdIn,
     	const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,
     	const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn,
     	const int64& RefreshedIn, const int64& ExpiresIn, const FString& WaasVersionIn)
     {
+		ProjectId = ProjectIdIn;
 		TransportKey = TransportKeyIn;
 		EncryptedPayloadKey = EncryptedPayloadKeyIn;
 		ProjectAccessKey = ProjectAccessKeyIn;
@@ -198,6 +202,11 @@ public:
 		WaasVersion = WaasVersionIn;
     }
 
+	FString GetProjectId() const
+	{
+		return ProjectId;
+	}
+	
 	FString GetEncryptedPayloadKey() const
 	{
 		return EncryptedPayloadKey;
