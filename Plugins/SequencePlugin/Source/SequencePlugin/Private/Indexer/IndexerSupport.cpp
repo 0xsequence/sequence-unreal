@@ -42,6 +42,15 @@ TMap<FString, FString> UIndexerSupport::jsonObjectParser(TSharedPtr<FJsonObject>
 	return ret;
 }
 
+TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& json)
+{
+	TSharedPtr<FJsonObject> Ret;
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), Ret))
+		return Ret;
+	else
+		return nullptr;
+}
+
 FString UIndexerSupport::simplifyString(FString string)
 {
 	FString* ret = &string;

@@ -113,7 +113,7 @@ namespace SequenceAPI
 		void SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 		void SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
-		void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+		void RegisterSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure);
 		void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
@@ -131,7 +131,7 @@ namespace SequenceAPI
 		FString GeneratePacketSignature(const FString& Packet) const;
 		FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 		FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
-		FString SignAndEncryptPayload(const FString& PrePayload, const FString& Intent) const;
+		FString SignAndEncryptPayload(const FString& Intent) const;
 		
 	private://these are all out of scope
 		void SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure);
