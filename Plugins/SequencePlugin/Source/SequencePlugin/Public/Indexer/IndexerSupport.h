@@ -23,11 +23,14 @@ class UIndexerSupport : public UObject
 public:
 	static float getAmount(int64 amount,int32 decimals);
 	static float getAmount(int64 amount,float decimals);
+	
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings
 	*/
 	static TMap<FString, FString> jsonObjectParser(TSharedPtr<FJsonObject> jsonData);
 
+	static TSharedPtr<FJsonObject> JsonStringToObject(const FString& json);
+	
 	/*
 	* Used to remove
 	* \n, \", \t, \r, spaces etc

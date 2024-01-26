@@ -172,6 +172,8 @@ private:
 	int64 Network = 137;
 	UPROPERTY()
 	FString ProjectId = "";
+	UPROPERTY()
+	bool Registered = false;
 public:
 	FCredentials_BE(){}
 
@@ -246,7 +248,6 @@ public:
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Arr,TWallet.GetWalletPublicKey().GetLength()).ToLower();
-		TWallet.~FWallet();
 		return PublicKeyStr;
 	}
 
@@ -254,7 +255,6 @@ public:
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Arr, TWallet.GetWalletAddress().GetLength()).ToLower();
-		TWallet.~FWallet();
 		return AddressStr;
 	}
 
@@ -263,7 +263,6 @@ public:
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		TArray<uint8> SigBytes = TWallet.SignMessage(Message);
 		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		//TWallet.~FWallet();
 		return Signature;
 	}
 
@@ -325,6 +324,13 @@ public:
 	int64 GetExpires() const
 	{
 		return Expires;
+	}
+
+	void RegisterSessionData(const FString& RegisteredSessionId, const FString& RegisteredWallet)
+	{
+		Registered = true;
+		SessionId = RegisteredSessionId;
+		WalletAddress = RegisteredWallet;
 	}
 };
 
