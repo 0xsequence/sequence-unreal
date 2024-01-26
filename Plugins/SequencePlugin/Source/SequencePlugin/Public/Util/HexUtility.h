@@ -46,7 +46,24 @@ uint8 RandomByte();
 /*
 * Inline wrapper function for HexToBytes allowing for cleaner usage
 */
-uint8* HexToBytesInline(FString in, uint32 size);
+TArray<uint8> HexToBytesInline(FString in);
+template<ByteLength TSize>
+TStaticArray<uint8, TSize> HexToBytesInline(FString in)
+{
+	TStaticArray<uint8, TSize> Arr;
+	HexToBytes(in, Arr.GetData());
+	return Arr;
+}
 
 //trims the 0x in front used in couple places
 FString TrimHex(FString Hex);
+
+//Makes
+TArray<uint8> MakeArray(uint8* ptr, int len);
+template<ByteLength TSize>
+TStaticArray<uint8, TSize> MakeArray(uint8* ptr)
+{
+	TStaticArray<uint8, TSize> arr;
+	for(int i = 0; i < TSize; i++) arr[i] = ptr[i];
+	return arr;
+}
