@@ -25,7 +25,7 @@ private:
 	
 	// these vars are read only
 	mutable FCriticalSection walletGuard;
-	SequenceAPI::FSequenceWallet* GWallet;
+	FSequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
 
@@ -121,8 +121,8 @@ public:
 	USystemDataBuilder();
 	~USystemDataBuilder();
 
-	void initBuildSystemData(SequenceAPI::FSequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
+	void initBuildSystemData(FSequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
 
-	void testGOTokenData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress);
+	void testGOTokenData(FSequenceWallet* wallet, int64 chainId, FString publicAddress);
 
 };

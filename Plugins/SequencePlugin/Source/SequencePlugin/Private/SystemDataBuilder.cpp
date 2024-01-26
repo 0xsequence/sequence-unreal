@@ -301,7 +301,7 @@ void USystemDataBuilder::initGetContactData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::initBuildSystemData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
+void USystemDataBuilder::initBuildSystemData(FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
 {
 	this->GWallet = wallet;
 	this->GChainId = chainId;
@@ -337,7 +337,7 @@ void USystemDataBuilder::OnDoneTesting()
 	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
 }
 
-void USystemDataBuilder::testGOTokenData(SequenceAPI::FSequenceWallet* wallet, int64 chainId, FString publicAddress)
+void USystemDataBuilder::testGOTokenData(FSequenceWallet* wallet, int64 chainId, FString publicAddress)
 {
 	this->GWallet = wallet;
 	this->GChainId = chainId;

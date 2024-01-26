@@ -11,8 +11,6 @@
 #include "Indexer/Structs/Page.h"
 #include "Provider.h"
 
-namespace SequenceAPI
-{
 	using FSignature = FUnsizedData;
 
 	FString SortOrderToString(ESortOrder SortOrder);
@@ -84,7 +82,7 @@ namespace SequenceAPI
 		FCredentials_BE Credentials;
 		UIndexer* Indexer;
 		FString ProviderUrl = "https://temp";
-		//Replace this with credentials
+		//replace this later
 		FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 		const FString Hostname = "https://next-api.sequence.app";
 		const FString sequenceURL = "https://api.sequence.app/rpc/API/";
@@ -243,4 +241,3 @@ namespace SequenceAPI
 		void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 		void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	};
-}

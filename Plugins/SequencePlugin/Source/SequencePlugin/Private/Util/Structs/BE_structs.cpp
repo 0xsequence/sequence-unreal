@@ -3,5 +3,5 @@
 
 FString FTransaction_FE::ID() const
 {
-	return SequenceAPI::FTransaction_Sequence::Convert(*this).ID();
+	return FTransaction_Sequence::Convert(*this).ID();
 }
