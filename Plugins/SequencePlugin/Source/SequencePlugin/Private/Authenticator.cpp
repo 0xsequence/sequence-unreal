@@ -356,6 +356,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 			TArray<uint8> PlainTextBytes;
 			FBase64::Decode(PlainTextPtr, PlainTextBytes);
 			this->PlainText = BytesToHex(PlainTextBytes.GetData(),PlainTextBytes.Num()).ToLower();
+			this->PlainTextBytes = PlainTextBytes;
 
 			TArray<uint8> CipherTextBytes;
 			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);
