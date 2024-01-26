@@ -216,7 +216,7 @@ void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)
 		this->UpdateTxn(Callback);
 	};
 
-	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const SequenceAPI::TransactionID ID, const FSequenceError Error)
+	const TFunction<void (FString, FSequenceError)> SendFailure = [this](const TransactionID ID, const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("[Error With Transaction] [%s]"),*Error.Message);
 		FTxnCallback_BE Callback;

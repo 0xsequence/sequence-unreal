@@ -248,7 +248,6 @@ public:
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Ptr(),TWallet.GetWalletPublicKey().GetLength()).ToLower();
-		TWallet.~FWallet();
 		return PublicKeyStr;
 	}
 
@@ -256,7 +255,6 @@ public:
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);
 		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Ptr(), TWallet.GetWalletAddress().GetLength()).ToLower();
-		TWallet.~FWallet();
 		return AddressStr;
 	}
 

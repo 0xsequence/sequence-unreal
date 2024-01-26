@@ -5,8 +5,8 @@
 
 void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UAuthenticator * Auth = NewObject<UAuthenticator>();	
-	SequenceAPI::FSequenceWallet Api = SequenceAPI::FSequenceWallet(Auth->GetStoredCredentials().GetCredentials());
+	UAuthenticator * Auth = NewObject<UAuthenticator>();
+	FSequenceWallet * Api = new FSequenceWallet(Auth->GetStoredCredentials().GetCredentials());
 
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
@@ -15,8 +15,8 @@ void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Tests]========================"));
 
-	Api.RegisterSession(OnSuccess,GenericFailure);
-	//Api.ListSessions(OnSuccess,GenericFailure);
+	//Api->RegisterSession(OnSuccess,GenericFailure);
+	Api->ListSessions(OnSuccess,GenericFailure);
 	//Api.SignMessage("Epic Message",OnSuccess,GenericFailure);
 	//Api.CloseSession(OnSuccess,GenericFailure);
 }
