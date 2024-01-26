@@ -113,7 +113,7 @@ namespace SequenceAPI
 		void SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 		void SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
-		void RegisterSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure);
+		void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 		void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
