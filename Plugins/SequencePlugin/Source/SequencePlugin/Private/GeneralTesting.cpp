@@ -104,7 +104,7 @@ void AGeneralTesting::OnDoneImageProcessing()
 //void AGeneralTesting::testSystemDataBuilder()
 //{//testing system data builder
 //	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
-//	SequenceAPI::FSequenceWallet* wallet = new SequenceAPI::FSequenceWallet();
+//	SequenceAPI::USequenceWallet* wallet = new SequenceAPI::USequenceWallet();
 //	sysBuilder->testGOTokenData(wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
 //}
 

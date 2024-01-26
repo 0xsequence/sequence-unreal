@@ -263,7 +263,7 @@ void USystemDataBuilder::initGetQRCode()
 		FString walletAddress = address.ToHex();
 		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *walletAddress);
 		//now we can request the QR code!
-		//this->qr_url = SequenceAPI::FSequenceWallet::buildQR_Request_URL(walletAddress, 512);
+		//this->qr_url = SequenceAPI::USequenceWallet::buildQR_Request_URL(walletAddress, 512);
 		this->QRImageHandler->requestImage(this->qr_url);
 	};
 
@@ -301,7 +301,7 @@ void USystemDataBuilder::initGetContactData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::initBuildSystemData(FSequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
+void USystemDataBuilder::initBuildSystemData(USequenceWallet* wallet, int64 chainId, FString publicAddress, ASequenceBackendManager* manager)
 {
 	this->GWallet = wallet;
 	this->GChainId = chainId;
@@ -337,7 +337,7 @@ void USystemDataBuilder::OnDoneTesting()
 	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
 }
 
-void USystemDataBuilder::testGOTokenData(FSequenceWallet* wallet, int64 chainId, FString publicAddress)
+void USystemDataBuilder::testGOTokenData(USequenceWallet* wallet, int64 chainId, FString publicAddress)
 {
 	this->GWallet = wallet;
 	this->GChainId = chainId;

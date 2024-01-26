@@ -49,7 +49,7 @@ private:
 	UFUNCTION()
 		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
 private:	
-	//SequenceAPI::FSequenceWallet* sequenceWallet = nullptr;
+	//SequenceAPI::USequenceWallet* sequenceWallet = nullptr;
 	FCredentials_BE Credentials;
 	UAuthenticator* authenticator;
 
