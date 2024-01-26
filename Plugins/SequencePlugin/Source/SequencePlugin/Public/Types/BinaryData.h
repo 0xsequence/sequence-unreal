@@ -1,25 +1,23 @@
 #pragma once
 #include "Types.h"
 
-uint8* BlankArray(ByteLength Size);
+TArray<uint8> BlankArray(ByteLength Size);
 
 struct FBinaryData
 {
 	virtual ~FBinaryData() = default; // Does NOT free Data pointer. Must do so manually!
-	uint8* Arr;
+	TSharedPtr<TArray<uint8>> Arr;
 	virtual ByteLength GetLength() const = 0;
-	void Destroy();
 	FString ToHex() const;
 	void Renew(); // Makes new blank array. Clean up the old one!
+	uint8* Ptr() const;
 };
 
 // Number of arbitrary length
-// Must be deallocated
 struct FUnsizedData final : FBinaryData
 {
 	static FUnsizedData Empty();
-	ByteLength Length;
-	FUnsizedData(uint8* Arr, ByteLength Length);
+	FUnsizedData(const TArray<uint8> &Array);
 	FUnsizedData Copy() const; // This creates new data that must be freed
 	virtual ByteLength GetLength() const override;
 	FUnsizedData Trim(); // Destroys itself
@@ -54,58 +52,58 @@ inline ByteLength TSizedData<Size>::GetLength() const
 template <ByteLength Size>
 FUnsizedData TSizedData<Size>::Copy() const
 {
-	auto Length = GetLength();
-	auto NewArr = new uint8[Length];
-	for(auto i = 0u; i < Length; i++) NewArr[i] = Arr[i];
-	return FUnsizedData{NewArr, Length};
+	FUnsizedData data = FUnsizedData::Empty();
+	data.Arr.Get()->Append(this->Arr);
+	return data;
 }
 
 template <ByteLength TSize>
 TSizedData<TSize> TSizedData<TSize>::Empty()
 {
-	return TSizedData<TSize>{};
+	return TSizedData{};
 }
 
 // Basic Binary Types
 struct FHash256 final : TSizedData<32>
 {
 	static FHash256 New(); // This creates new data that must be freed
-	static FHash256 From(uint8* Arr);
+	static FHash256 From(TStaticArray<uint8, 32> &Arr);
+	static FHash256 From(TArray<uint8> &Arr);
 	static FHash256 From(FString Str);
 };
 
 struct FAddress final : TSizedData<20>
 {
 	static FAddress New(); // This creates new data that must be freed
-	static FAddress From(uint8* Arr);
+	static FAddress From(TStaticArray<uint8, 20> &Arr);
 	static FAddress From(FString Str);
 };
 
 struct FPublicKey final : TSizedData<64>
 {
 	static FPublicKey New(); // This creates new data that must be freed
-	static FPublicKey From(uint8* Arr);
+	static FPublicKey From(TStaticArray<uint8, 64> &Arr);
 	static FPublicKey From(FString Str);
 };
 
 struct FPrivateKey final : TSizedData<32>
 {
 	static FPrivateKey New(); // This creates new data that must be freed
-	static FPrivateKey From(uint8* Arr);
+	static FPrivateKey From(TStaticArray<uint8, 32> &Arr);
 	static FPrivateKey From(FString Str);
 };
 
 struct FBloom final : TSizedData<256>
 {
 	static FBloom New(); // This creates new data that must be freed
-	static FBloom From(uint8* Arr);
+	static FBloom From(TStaticArray<uint8, 256> &Arr);
 	static FBloom From(FString Str);
 };
 
 struct FBlockNonce final : TSizedData<8>
 {
 	static FBlockNonce New(); // This creates new data that must be freed
-	static FBlockNonce From(uint8* Arr);
+	static FBlockNonce From(TStaticArray<uint8, 8> &Arr);
 	static FBlockNonce From(FString Str);
 	void Increment() const;
 };

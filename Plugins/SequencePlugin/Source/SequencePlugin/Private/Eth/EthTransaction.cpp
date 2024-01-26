@@ -10,7 +10,7 @@
 
 FEthTransaction::FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsizedData GasLimit, FAddress To,
 	FUnsizedData Value, FUnsizedData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
-	                                               Value(Value), Data(Data), V(nullptr, 0), R(FHash256{}), S(FHash256{})
+	                                               Value(Value), Data(Data), V(TArray<uint8>()), R(FHash256{}), S(FHash256{})
 {
 }
 
@@ -36,10 +36,8 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 		Itemize(HexStringToBinary("")), // S
 	}, 9));
 
-	TrimmedNonce.Destroy();
-
 	FHash256 SigningHash = FHash256::New();
-	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
+	Keccak256::getHash(EncodedSigningData.Ptr(), EncodedSigningData.GetLength(), SigningHash.Ptr());
 
 	FPublicKey PublicKey = GetPublicKey(PrivateKey);
 	FAddress Addr = GetAddress(PublicKey);
@@ -48,9 +46,9 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	FHash256 MyY = FHash256::New();
 	Uint256 BigR, BigS;
 	uint16 RecoveryParameter;
-	bool IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Arr), Sha256Hash(SigningHash.Arr, FHash256::Size), BigR, BigS, RecoveryParameter);
-	BigR.getBigEndianBytes(MyR.Arr);
-	BigS.getBigEndianBytes(MyS.Arr);
+	bool IsSuccess = Ecdsa::signWithHmacNonce(Uint256(PrivateKey.Ptr()), Sha256Hash(SigningHash.Ptr(), FHash256::Size), BigR, BigS, RecoveryParameter);
+	BigR.getBigEndianBytes(MyR.Ptr());
+	BigS.getBigEndianBytes(MyS.Ptr());
 	
 	const uint16 BigV = ChainID * 2 + 35 + RecoveryParameter;
 	UE_LOG(LogTemp, Display, TEXT("Recovery Bit: %d"), RecoveryParameter);
@@ -70,7 +68,7 @@ FHash256 FEthTransaction::GetSignedTransactionHash(FPrivateKey Key, int ChainID)
 {
 	FUnsizedData SignedData = GetSignedTransaction(Key, ChainID);
 	FHash256 Hash = FHash256::New();
-	Keccak256::getHash(SignedData.Arr, SignedData.GetLength(), Hash.Arr);
+	Keccak256::getHash(SignedData.Ptr(), SignedData.GetLength(), Hash.Ptr());
 	return Hash;
 }
 
@@ -94,10 +92,8 @@ FHash256 FEthTransaction::GetUnsignedTransactionHash(int ChainID)
 		Itemize(HexStringToBinary("")), // S
 	}, 9));
 
-	TrimmedNonce.Destroy();
-
 	FHash256 SigningHash = FHash256::New();
-	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
+	Keccak256::getHash(EncodedSigningData.Ptr(), EncodedSigningData.GetLength(), SigningHash.Ptr());
 
 	return SigningHash;
 }

@@ -9,32 +9,30 @@
 
 FPublicKey GetPublicKey(FPrivateKey PrivateKey)
 {
-	Uint256 PrivateKey256 = Uint256(PrivateKey.Arr);
+	Uint256 PrivateKey256 = Uint256(PrivateKey.Ptr());
 	CurvePoint CurvePoint = CurvePoint::privateExponentToPublicPoint(PrivateKey256);
 	FPublicKey PublicKey = FPublicKey::New();
-	CurvePoint.x.getBigEndianBytes(PublicKey.Arr);
-	CurvePoint.y.getBigEndianBytes(&PublicKey.Arr[FPublicKey::Size / 2]);
+	CurvePoint.x.getBigEndianBytes(PublicKey.Ptr());
+	CurvePoint.y.getBigEndianBytes(&PublicKey.Ptr()[FPublicKey::Size / 2]);
 	return PublicKey;
 }
 
 FAddress GetAddress(FPublicKey PublicKey)
 {
 	FHash256 Hash = FHash256::New();
-	Keccak256::getHash(PublicKey.Arr, FPublicKey::Size, Hash.Arr);
+	Keccak256::getHash(PublicKey.Ptr(), FPublicKey::Size, Hash.Ptr());
 	FAddress Address = FAddress::New();
 	for(uint32 i = 0; i < FAddress::Size; i++)
 	{
-		Address.Arr[i] = Hash.Arr[i + 12];
+		Address.Ptr()[i] = Hash.Ptr()[i + 12];
 	}
-
-	Hash.Destroy();
 	return Address;
 }
 
 FHash256 GetKeccakHash(FBinaryData& Data)
 {
 	FHash256 HashData = FHash256::New();
-	Keccak256::getHash(Data.Arr, Data.GetLength(), HashData.Arr);
+	Keccak256::getHash(Data.Ptr(), Data.GetLength(), HashData.Ptr());
 	return HashData;
 }
 
@@ -50,13 +48,11 @@ FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce)
 	const FAddress Address = FAddress::New();
 	for(uint32 i = 0; i < FAddress::Size; i++)
 	{
-		Address.Arr[i] = Hash.Arr[i + 12];
+		Address.Ptr()[i] = Hash.Ptr()[i + 12];
 	}
 
 	//cleanup
 	delete[] RLPArray;
-	delete[] Hash.Arr;
-	delete[] Data.Arr;
 
 	return Address;
 }

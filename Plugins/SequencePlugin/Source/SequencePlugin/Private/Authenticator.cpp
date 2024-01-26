@@ -260,7 +260,7 @@ FString UAuthenticator::BuildScope(const FDateTime& Date)
 FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload)
 {
 	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
-	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Ptr(), PayloadBytes.GetLength());
 
 	const FString Verb = "POST";
 	const FString CanonicalURI = "/";//we have none
@@ -272,8 +272,6 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 	//build the CanonicalRequest
 	FString CanReq = Verb + "\n" + CanonicalURI + "\n" + CanQueryString + "\n" + CanHeaders + "\n" + SignedHeaders + "\n" + HashPayload;
 
-	//cleanup
-	delete[] PayloadBytes.Arr;
 	return CanReq;
 }
 
@@ -283,19 +281,15 @@ FString UAuthenticator::BuildCanonicalRequest(const FString& URI, const FDateTim
 FString UAuthenticator::BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest)
 {
 	const FUnsizedData PayloadBytes = StringToUTF8(CanonicalRequest);
-	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Ptr(), PayloadBytes.GetLength());
 
 	const FString CanonicalHash = BytesToHex(PayloadHashBytes.value,PayloadHashBytes.HASH_LEN);
 	const FString FullDate = BuildFullDateTime(Date);
 	FString StringToSign = "AWS4-HMAC-SHA256\n" + FullDate + "\n" + this->BuildScope(Date) + "\n" + CanonicalHash.ToLower();
 
 	const FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
-	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Arr, StringToSignBytes.GetLength());
+	const Sha256Hash StringToSignHashBytes = Sha256::getHash(StringToSignBytes.Ptr(), StringToSignBytes.GetLength());
 	FString StringToSignHash = BytesToHex(StringToSignHashBytes.value, StringToSignHashBytes.HASH_LEN).ToLower();
-
-	//cleanup
-	delete[] PayloadBytes.Arr;
-	delete[] StringToSignBytes.Arr;
 
 	return StringToSign;
 }
@@ -308,10 +302,10 @@ TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 	const FUnsizedData KMSBytes = StringToUTF8("kms");
 	const FUnsizedData AWSReqBytes = StringToUTF8("aws4_request");
 
-	const Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Arr,DateKeyEncryptBytes.GetLength(),TimeStampBytes.Arr,TimeStampBytes.GetLength());
-	const Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Arr, RegionBytes.GetLength());
-	const Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value, DateRegionKeyHash.HASH_LEN, KMSBytes.Arr, KMSBytes.GetLength());
-	const Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN, AWSReqBytes.Arr, AWSReqBytes.GetLength());
+	const Sha256Hash DateKeyHash = Sha256::getHmac(DateKeyEncryptBytes.Ptr(),DateKeyEncryptBytes.GetLength(),TimeStampBytes.Ptr(),TimeStampBytes.GetLength());
+	const Sha256Hash DateRegionKeyHash = Sha256::getHmac(DateKeyHash.value, DateKeyHash.HASH_LEN, RegionBytes.Ptr(), RegionBytes.GetLength());
+	const Sha256Hash DateRegionServiceKeyHash = Sha256::getHmac(DateRegionKeyHash.value, DateRegionKeyHash.HASH_LEN, KMSBytes.Ptr(), KMSBytes.GetLength());
+	const Sha256Hash SigningKeyHash = Sha256::getHmac(DateRegionServiceKeyHash.value, DateRegionServiceKeyHash.HASH_LEN, AWSReqBytes.Ptr(), AWSReqBytes.GetLength());
 
 	FString DateKey = BytesToHex(DateKeyHash.value, DateKeyHash.HASH_LEN).ToLower();
 	FString DateRegionKey = BytesToHex(DateRegionKeyHash.value,DateRegionKeyHash.HASH_LEN).ToLower();
@@ -321,24 +315,14 @@ TArray<uint8_t> UAuthenticator::BuildSigningKey(const FDateTime& Date)
 	TArray<uint8_t> SigningBytes;
 	SigningBytes.Append(SigningKeyHash.value,SigningKeyHash.HASH_LEN);
 
-	//cleanup
-	delete[] DateKeyEncryptBytes.Arr;
-	delete[] TimeStampBytes.Arr;
-	delete[] RegionBytes.Arr;
-	delete[] KMSBytes.Arr;
-	delete[] AWSReqBytes.Arr;
-
 	return SigningBytes;
 }
 
 FString UAuthenticator::BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign)
 {
 	const FUnsizedData StringToSignBytes = StringToUTF8(StringToSign);
-	const Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Arr, StringToSignBytes.GetLength());
+	const Sha256Hash SignatureHash = Sha256::getHmac(SigningKey.GetData(),SigningKey.Num(), StringToSignBytes.Ptr(), StringToSignBytes.GetLength());
 	FString Signature = BytesToHex(SignatureHash.value,SignatureHash.HASH_LEN).ToLower();
-
-	//cleanup
-	delete[] StringToSignBytes.Arr;
 
 	return Signature;
 }
@@ -373,6 +357,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 			FBase64::Decode(PlainTextPtr, PlainTextBytes);
 			this->PlainText = BytesToHex(PlainTextBytes.GetData(),PlainTextBytes.Num()).ToLower();
 			this->PlainTextBytes = PlainTextBytes;
+
 			TArray<uint8> CipherTextBytes;
 			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);
 			this->CipherTextBlob = BytesToHex(CipherTextBytes.GetData(), CipherTextBytes.Num()).ToLower();
@@ -558,7 +543,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
 	FString UnixExpireString = FString::Printf(TEXT("%lld"), UnixExpireTime);
 
-	FString CachedWalletAddress = FString::Printf(TEXT("0x%s"),*BytesToHex(this->SessionWallet->GetWalletAddress().Arr, this->SessionWallet->GetWalletAddress().GetLength()).ToLower());
+	FString CachedWalletAddress = FString::Printf(TEXT("0x%s"),*BytesToHex(this->SessionWallet->GetWalletAddress().Ptr(), this->SessionWallet->GetWalletAddress().GetLength()).ToLower());
 
 	//FString Intent = FString::Printf(TEXT("{\\\"version\\\":\\\"%s\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":%s,\\\"issued\\\":%s,\\\"session\\\":\\\"%s\\\",\\\"proof\\\":{\\\"idToken\\\":\\\"%s\\\"}}}"),*this->WaasVersion, *UnixExpireString, *UnixIssueString, *CachedWalletAddress, *IDTokenIn);
 	FString Intent = "{\\\"version\\\":\\\""+ this->WaasVersion +"\\\",\\\"packet\\\":{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":"+ UnixExpireString +",\\\"issued\\\":"+ UnixIssueString +",\\\"session\\\":\\\""+ CachedWalletAddress +"\\\",\\\"proof\\\":{\\\"idToken\\\":\\\""+ IDTokenIn +"\\\"}}}";
@@ -585,9 +570,9 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 	FString PrePendedIV = BytesToHex(iv.GetData(),iv.Num());
 	FString PrePendedCipher = BytesToHex(TPayload.GetData(), TPayload.Num());
 
-	FString PublicKey = BytesToHex(this->SessionWallet->GetWalletPublicKey().Arr,this->SessionWallet->GetWalletPublicKey().GetLength()).ToLower();
-	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr,this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Arr,this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
+	FString PublicKey = BytesToHex(this->SessionWallet->GetWalletPublicKey().Ptr(),this->SessionWallet->GetWalletPublicKey().GetLength()).ToLower();
+	FString PrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(),this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+	FString Address = BytesToHex(this->SessionWallet->GetWalletAddress().Ptr(),this->SessionWallet->GetWalletAddress().GetLength()).ToLower();
 
 	//FString PayloadCipherText = FString::Printf(TEXT("0x%s%s"), *BytesToHex(iv.GetData(), iv.Num()).ToLower(), *BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower());
 	FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(), iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
@@ -629,10 +614,9 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 				FDateTime::ParseIso8601(*Issued, IssuedDT);
 				FDateTime::ParseIso8601(*Refreshed, RefreshedDT);
 				FDateTime::ParseIso8601(*Expires, ExpiresDT);
-				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Arr, this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+				const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 				const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(),this->PlainTextBytes, this->CipherTextBlob, this->ProjectAccessKey , SessionPrivateKey, Id, Address, UserId, Subject, SessionId, Wallet, this->Cached_IDToken, this->Cached_Email, Issuer,IssuedDT.ToUnixTimestamp(), RefreshedDT.ToUnixTimestamp(), ExpiresDT.ToUnixTimestamp(),this->WaasVersion);
 				this->StoreCredentials(Credentials);
-				UE_LOG(LogTemp, Display, TEXT("Credentials:\n%s"), *UIndexerSupport::structToString(Credentials));
 				this->CallAuthSuccess(Credentials);
 			}
 			else
@@ -673,7 +657,7 @@ void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody,
 void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
-	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Arr, PayloadBytes.GetLength());
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Ptr(), PayloadBytes.GetLength());
 	const FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
 
 	NewObject<URequestHandler>()
@@ -689,9 +673,6 @@ void UAuthenticator::AuthorizedRPC(const FString& Authorization,const FDateTime&
 		->WithHeader("Authorization", Authorization)
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
-
-	//cleanup
-	delete[] PayloadBytes.Arr;
 }
 
 void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)

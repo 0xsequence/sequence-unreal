@@ -156,12 +156,13 @@ RLPItem Itemize(FString String)
 
 RLPItem Itemize(const FBinaryData &Data)
 {
-	return Itemize(Data.Arr, Data.GetLength());
+	
+	return Itemize(Data.Ptr(), Data.GetLength());
 }
 
 RLPItem Itemize(const FUnsizedData Data)
 {
-	return Itemize(Data.Arr, Data.GetLength());
+	return Itemize(Data.Ptr(), Data.GetLength());
 }
 
 RLPItem Itemize(const Hash Hash, const ByteLength Length)
@@ -190,6 +191,6 @@ FUnsizedData RLP::Encode(RLPItem Item)
 	Item.Encode(Data);
 	return FUnsizedData
 	{
-		Data, Length
+		MakeArray(Data, Length)
 	};
 }

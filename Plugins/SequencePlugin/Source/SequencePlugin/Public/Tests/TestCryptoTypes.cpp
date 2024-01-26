@@ -9,12 +9,17 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCryptoTypes, "Public.Tests.TestCryptoTypes"
 
 bool TestCryptoTypes::RunTest(const FString& Parameters)
 {
-	uint8 arr[32];
+	TStaticArray<uint8, 32> arr;
 	for(auto i = 0; i < 32; i++) arr[i] = 0x00;
 	arr[31] = 0x01;
-	auto test = Uint256(arr);
-	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(reinterpret_cast<uint8*>(test.value)).ToHex());
-	test.getBigEndianBytes(arr);
+	Uint256 test = Uint256(arr.GetData());
+	uint8* testPtr = reinterpret_cast<uint8*>(test.value);
+
+	TStaticArray<uint8, 32> testArr;
+	for(int i = 0; i < 32; i++) testArr[i] = testPtr[i];
+	
+	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(testArr).ToHex());
+	test.getBigEndianBytes(arr.GetData());
 	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(arr).ToHex());
 	
 	// Make the test pass by returning true, or fail by returning false.

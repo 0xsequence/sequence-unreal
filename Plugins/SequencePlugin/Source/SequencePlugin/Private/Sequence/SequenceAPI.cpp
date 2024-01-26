@@ -423,8 +423,8 @@ FString SequenceAPI::FSequenceWallet::GeneratePacketSignature(const FString& Pac
 	//keccakhash of the packet first
 	const FHash256 SigningHash = FHash256::New();
 	const FUnsizedData EncodedSigningData = StringToUTF8(Packet);
-	Keccak256::getHash(EncodedSigningData.Arr, EncodedSigningData.GetLength(), SigningHash.Arr);
-	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(BytesToHex(SigningHash.Arr,SigningHash.GetLength()));
+	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SigningHash.Arr.Get()->GetData());
+	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(BytesToHex(SigningHash.Arr.Get()->GetData(),SigningHash.GetLength()));
 	return Signature;
 }
 
