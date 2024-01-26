@@ -375,29 +375,30 @@ void SequenceAPI::FSequenceWallet::SendTransaction(FTransaction_Sequence Transac
 	this->SendRPCAndExtract(Url("SendTransaction"), Content, OnSuccess, ExtractSignature,OnFailure);
 }
 
-void SequenceAPI::FSequenceWallet::RegisterSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure)
+void SequenceAPI::FSequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TFunction<void (FString)> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		//{"session":{"id":"0x9B46FFE09030A1685376b62cd9E68eC73FF39256","address":"0x9b46ffe09030a1685376b62cd9e68ec73ff39256","userId":"2#accounts.google.com#104992511904371196061","projectId":2,"issuer":"accounts.google.com","subject":"104992511904371196061","friendlyName":"FRIENDLY SESSION WALLET","createdAt":"2024-01-26T15:10:30.40026102Z","refreshedAt":"2024-01-26T15:10:30.419231526Z","expiresAt":"2124-01-02T15:10:30.40026111Z"},"data":{"sessionId":"0x9B46FFE09030A1685376b62cd9E68eC73FF39256","wallet":"0xDdF51fe5a7D618144E117fD23Ac21A487e397C91"}}
-		//now extract everything we care about now and update auth credentials with registered ones! everything in data
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		const TSharedPtr<FJsonObject> * Data = nullptr;
 		if (Json.Get()->TryGetObjectField("data",Data))
 		{
 			FString RegisteredSessionId, RegisteredWalletAddress;
 			if (Data->Get()->TryGetStringField("sessionId",RegisteredSessionId) && Data->Get()->TryGetStringField("wallet",RegisteredWalletAddress))
 			{
-				
+				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
+				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
+				TUAuth->StoreCredentials(this->Credentials);//Update them right away with the new registered data!
+				OnSuccess("Session Registered");
 			}
 			else
 			{
-				
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 			}
 		}
 		else
 		{
-			
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->GenerateSignedEncryptedRegisterSessionPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
@@ -526,7 +527,6 @@ FString SequenceAPI::FSequenceWallet::BuildRegisterSessionIntent()
 	UE_LOG(LogTemp,Display,TEXT("RegisterSessionIntent: %s"),*Intent);
 	return Intent;
 }
-//{"session":{"id":"0x9B46FFE09030A1685376b62cd9E68eC73FF39256","address":"0x9b46ffe09030a1685376b62cd9e68ec73ff39256","userId":"2#accounts.google.com#104992511904371196061","projectId":2,"issuer":"accounts.google.com","subject":"104992511904371196061","friendlyName":"FRIENDLY SESSION WALLET","createdAt":"2024-01-26T15:10:30.40026102Z","refreshedAt":"2024-01-26T15:10:30.419231526Z","expiresAt":"2124-01-02T15:10:30.40026111Z"},"data":{"sessionId":"0x9B46FFE09030A1685376b62cd9E68eC73FF39256","wallet":"0xDdF51fe5a7D618144E117fD23Ac21A487e397C91"}}
 
 FString SequenceAPI::FSequenceWallet::BuildListSessionIntent()
 {
@@ -541,7 +541,7 @@ FString SequenceAPI::FSequenceWallet::BuildCloseSessionIntent()
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->GetWalletAddress()+"\\\"}";
+	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
 	const FString Signature = this->GeneratePacketSignature(Packet);
 	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signatures\\\":\\\""+Signature+"\\\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);

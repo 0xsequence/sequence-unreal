@@ -456,9 +456,9 @@ public:
 	void EmailLoginCode(const FString& CodeIn);
 
 	FStoredCredentials_BE GetStoredCredentials() const;
-private:
+
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
-	
+private:
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 
 	static bool CredentialsValid(const FCredentials_BE& Credentials);
