@@ -18,7 +18,7 @@
 //	};
 //
 //	//because of the way this code was structured we can't rely on unreal GC for this
-//	SequenceAPI::FSequenceWallet* lclWallet = new SequenceAPI::FSequenceWallet();
+//	SequenceAPI::USequenceWallet* lclWallet = new SequenceAPI::USequenceWallet();
 //
 //	//lclWallet->getFriends(testingAddress, GenericSuccess, GenericFailure);
 //
@@ -41,7 +41,7 @@
 //	args.contractAddress = "0xeac222c7f2456b393621fa3f2eff9e410832e8f0";
 //
 //	//because of the way this code was structured we can't rely on unreal GC for this
-//	SequenceAPI::FSequenceWallet* lclWallet = new SequenceAPI::FSequenceWallet();
+//	SequenceAPI::USequenceWallet* lclWallet = new SequenceAPI::USequenceWallet();
 //
 //	//lclWallet->getUpdatedCoinPrice(args, GenericSuccess, GenericFailure);
 //

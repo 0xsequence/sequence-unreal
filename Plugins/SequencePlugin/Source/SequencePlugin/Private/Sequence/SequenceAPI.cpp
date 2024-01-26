@@ -150,12 +150,12 @@ FPartnerWallet FPartnerWallet::From(TSharedPtr<FJsonObject> Json)
 	};
 }
 
-FString FSequenceWallet::Url(const FString Name) const
+FString USequenceWallet::Url(const FString Name) const
 {
 	return this->Hostname + this->Path + Name;
 }
 
-void FSequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	NewObject<URequestHandler>()
 			->PrepareRequest()
@@ -168,19 +168,33 @@ void FSequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FSt
 }
 
 //Pass in credentials in our constructor!
-FSequenceWallet::FSequenceWallet()
+USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<UIndexer>();
 }
 
-FSequenceWallet::FSequenceWallet(const FCredentials_BE& CredentialsIn)
+USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn)
+{
+	USequenceWallet * Wallet = NewObject<USequenceWallet>();
+	Wallet->Init(CredentialsIn);
+	return Wallet;
+}
+
+USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn, const FString& ProviderURL)
+{
+	USequenceWallet * Wallet = NewObject<USequenceWallet>();
+	Wallet->Init(CredentialsIn,ProviderURL);
+	return Wallet;
+}
+
+void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
 	this->AuthToken = "Bearer " + this->Credentials.GetIDToken();
 }
 
-FSequenceWallet::FSequenceWallet(const FCredentials_BE& CredentialsIn, const FString& ProviderURL)
+void USequenceWallet::Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
@@ -188,189 +202,12 @@ FSequenceWallet::FSequenceWallet(const FCredentials_BE& CredentialsIn, const FSt
 	this->ProviderUrl = ProviderURL;
 }
 
-FString FSequenceWallet::GetWalletAddress()
+FString USequenceWallet::GetWalletAddress()
 {
 	return this->Credentials.GetWalletAddress();
 }
 
-void FSequenceWallet::CreateWallet(TSuccessCallback<FAddress> OnSuccess,FFailureCallback OnFailure)
-{
-	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
-	{
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FAddress> Retval = MakeValue(FAddress{});
-		if(!Json)
-		{
-			Retval = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString AddressString = Json->GetStringField("address");
-			Retval = MakeValue(FAddress::From(AddressString));
-		}
-		
-		return Retval;
-	};
-
-	FString Content = FJsonBuilder().ToPtr()->ToString();
-	
-	this->SendRPCAndExtract(Url("CreateWallet"), Content, OnSuccess, ExtractAddress,OnFailure);
-}
-
-void FSequenceWallet::GetWalletAddress(TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
-{
-	TFunction<TResult<FAddress> (FString)> ExtractAddress = [=](FString Content)
-	{
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FAddress> Retval = MakeValue(FAddress{});
-
-		if(!Json)
-		{
-			Retval = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString AddressString = Json->GetStringField("address");
-			Retval = MakeValue(FAddress::From(AddressString));
-		}
-		return Retval;
-	};
-	FString Content = FJsonBuilder().ToPtr()->ToString();
-	//this->SequenceRPC(Url("GetWalletAddress"), Content, OnSuccess, ExtractAddress,OnFailure);
-}
-
-void FSequenceWallet::DeployWallet(uint64 ChainId,TSuccessCallback<FDeployWalletReturn> OnSuccess, FFailureCallback OnFailure)
-{
-	TFunction<TResult<FDeployWalletReturn> (FString)> ExtractDeployWalletReturn = [=](FString Content)
-	{
-		
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FDeployWalletReturn> Retval = MakeValue(FDeployWalletReturn{"", ""});
-
-		if(!Json)
-		{
-			Retval = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString AddressString = Json->GetStringField("address");
-			const FString TransactionHashString = Json->GetStringField("txnHash");
-			Retval = MakeValue(FDeployWalletReturn{AddressString, TransactionHashString});
-		}		
-		return Retval;
-	};
-
-	FString Content = FJsonBuilder().ToPtr()
-		->AddInt("chainId", ChainId)
-		->ToString();
-	
-	this->SendRPCAndExtract(Url("DeployWallet"), Content, OnSuccess, ExtractDeployWalletReturn,
-	OnFailure);
-}
-
-void FSequenceWallet::Wallets(FPage_Sequence Page, TSuccessCallback<FWalletsReturn> OnSuccess,FFailureCallback OnFailure)
-{
-	const TFunction<TResult<FWalletsReturn> (FString)> ExtractWallets = [=](FString Content)
-	{
-		
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FWalletsReturn> ReturnVal = MakeValue(FWalletsReturn{});
-
-		if(!Json)
-		{
-			ReturnVal = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			TArray<TSharedPtr<FJsonValue>> WalletsJsonArray = Json->GetArrayField("wallets");
-			const TSharedPtr<FJsonObject> PageJson = Json->GetObjectField("page");
-			TArray<FPartnerWallet> Wallets;
-
-			for(TSharedPtr<FJsonValue> WalletJson : WalletsJsonArray)
-			{
-				Wallets.Push(FPartnerWallet::From(WalletJson->AsObject()));
-			}
-			
-			ReturnVal = MakeValue(FWalletsReturn{Wallets, FPage_Sequence::From(PageJson)});
-		}
-		
-		return ReturnVal;
-	};
-
-	const FString Content = FJsonBuilder().ToPtr()
-          ->AddField("page", Page.ToJson())
-          ->ToString();
-	
-	this->SendRPCAndExtract(Url("Wallets"), Content, OnSuccess, ExtractWallets,
-	OnFailure); 
-}
-
-void FSequenceWallet::Wallets(TSuccessCallback<FWalletsReturn> OnSuccess, FFailureCallback OnFailure)
-{
-	this->Wallets(FPage_Sequence{}, OnSuccess, OnFailure);
-}
-
-void FSequenceWallet::IsValidMessageSignature(uint64 ChainId, FAddress WalletAddress, FUnsizedData Message,FSignature Signature, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
-{
-	const TFunction<TResult<bool> (FString)> ExtractSignature = [=](FString Content)
-	{
-		
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<bool> ReturnVal = MakeValue(false);
-
-		if(!Json)
-		{
-			ReturnVal = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const bool bIsValid = Json->GetBoolField("isValid");
-			ReturnVal = MakeValue(bIsValid);
-		}
-		
-		return ReturnVal;
-	};
-
-	const FString Content = FJsonBuilder().ToPtr()
-		  ->AddInt("chainId", ChainId)
-		  ->AddString("walletAddress", "0x" + WalletAddress.ToHex())
-		  ->AddString("message", "0x" + Message.ToHex())
-		  ->AddString("signature", "0x" + Signature.ToHex())
-		  ->ToString();
-	
-	this->SendRPCAndExtract(Url("isValidMessageSignature"), Content, OnSuccess, ExtractSignature,
-	OnFailure);
-}
-
-void FSequenceWallet::SendTransaction(FTransaction_Sequence Transaction, TSuccessCallback<FHash256> OnSuccess,FFailureCallback OnFailure)
-{
-	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
-	{
-		
-		TSharedPtr<FJsonObject> Json = Parse(Content);
-		TResult<FHash256> ReturnVal = MakeValue(FHash256{});
-
-		if(!Json)
-		{
-			ReturnVal = MakeError(FSequenceError{RequestFail, "Json did not parse"});
-		}
-		else
-		{
-			const FString HashString = Json->GetStringField("txHash");
-			ReturnVal = MakeValue(FHash256::From(HashString));
-		}
-		
-		return ReturnVal;
-	};
-
-	const FString Content = FJsonBuilder().ToPtr()
-		  ->AddField("tx", Transaction.ToJson())
-		  ->ToString();
-	
-	this->SendRPCAndExtract(Url("SendTransaction"), Content, OnSuccess, ExtractSignature,OnFailure);
-}
-
-void FSequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
@@ -384,10 +221,7 @@ void FSequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
 				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
 				TUAuth->StoreCredentials(this->Credentials);
-				OnSuccess("Session Registered");
-
-				UIndexerSupport::jsonStringToStruct<FCredentials_BE>("json in");
-				
+				OnSuccess("Session Registered");				
 			}
 			else
 			{
@@ -402,22 +236,22 @@ void FSequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->GenerateSignedEncryptedRegisterSessionPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
 }
 
-void FSequenceWallet::ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	OnSuccess("[RPC_NotActive]");
 }
 
-FString FSequenceWallet::GeneratePacketSignature(const FString& Packet) const
+FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 {
 	//keccakhash of the packet first
 	const FHash256 SigningHash = FHash256::New();
@@ -427,7 +261,7 @@ FString FSequenceWallet::GeneratePacketSignature(const FString& Packet) const
 	return Signature;
 }
 
-FString FSequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const
+FString USequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const
 {
 	const FString SessionAddr = "0x" + this->Credentials.GetSessionWalletAddress();
 	const FString PreEncryptedPayload = "{\"projectId\": "+this->Credentials.GetProjectId()+",\"idToken\": \""+this->Credentials.GetIDToken()+"\",\"sessionAddress\": \""+SessionAddr+"\",\"friendlyName\": \"FRIENDLY SESSION WALLET\",\"intentJSON\": \""+Intent+"\"}";
@@ -435,14 +269,14 @@ FString FSequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FSt
 	return SignAndEncryptPayload(PreEncryptedPayload);
 }
 
-FString FSequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
+FString USequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
 {
 	const FString PreEncryptedPayload = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"intentJson\":\""+Intent+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
 	return SignAndEncryptPayload(Intent);
 }
 
-FString FSequenceWallet::SignAndEncryptPayload(const FString& Intent) const
+FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
 {
 	TArray<uint8_t> TPayload = PKCS7(Intent);
 	AES_ctx ctx;
@@ -463,31 +297,31 @@ FString FSequenceWallet::SignAndEncryptPayload(const FString& Intent) const
 	return FinalPayload;
 }
 
-void FSequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::SendSequenceTransaction(FSequenceTransaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendSequenceTransaction(FSequenceTransaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 }
 
-void FSequenceWallet::SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{
-	
-}
-
-void FSequenceWallet::SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	
 }
 
-void FSequenceWallet::SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	
 }
 
-FString FSequenceWallet::BuildSignMessageIntent(const FString& message)
+void USequenceWallet::SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+{
+	
+}
+
+FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
 	const int64 expires = issued + 86400;
@@ -501,7 +335,7 @@ FString FSequenceWallet::BuildSignMessageIntent(const FString& message)
 	return Intent;
 }
 
-FString FSequenceWallet::BuildSendTransactionIntent(const FString& Identifier, const FString& Txns)
+FString USequenceWallet::BuildSendTransactionIntent(const FString& Identifier, const FString& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
 	const int64 expires = issued + 86400;
@@ -514,7 +348,7 @@ FString FSequenceWallet::BuildSendTransactionIntent(const FString& Identifier, c
 	return Intent;
 }
 
-FString FSequenceWallet::BuildRegisterSessionIntent()
+FString USequenceWallet::BuildRegisterSessionIntent()
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
 	const int64 expires = issued + 86400;
@@ -526,14 +360,14 @@ FString FSequenceWallet::BuildRegisterSessionIntent()
 	return Intent;
 }
 
-FString FSequenceWallet::BuildListSessionIntent()
+FString USequenceWallet::BuildListSessionIntent()
 {
 	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
 	return Intent;
 }
 
-FString FSequenceWallet::BuildCloseSessionIntent()
+FString USequenceWallet::BuildCloseSessionIntent()
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
 	const int64 expires = issued + 86400;
@@ -546,61 +380,14 @@ FString FSequenceWallet::BuildCloseSessionIntent()
 	return Intent;
 }
 
-FString FSequenceWallet::BuildSessionValidationIntent()
+FString USequenceWallet::BuildSessionValidationIntent()
 {
 	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
 	UE_LOG(LogTemp,Display,TEXT("SessionValidationIntent: %s"),*Intent);
 	return Intent;
 }
 
-void FSequenceWallet::SendTransactionBatch(TArray<FTransaction_Sequence> Transactions,
-	TSuccessCallback<FHash256> OnSuccess, FFailureCallback OnFailure)
-{
-	const TFunction<TResult<FHash256> (FString)> ExtractSignature = [=](FString Content)
-	{
-		
-		TResult<TSharedPtr<FJsonObject>> Json = ExtractJsonObjectResult(Content);
-		TResult<FHash256> ReturnVal = MakeValue(FHash256{});
-
-		if(Json.HasError())
-		{
-			ReturnVal = MakeError(Json.GetError());
-		}
-		else
-		{
-			const FString HashString = Json.GetValue()->GetStringField("txHash");
-			ReturnVal = MakeValue(FHash256::From(HashString));
-		}
-		
-		return ReturnVal;
-	};
-
-	FJsonArray JsonArray = FJsonBuilder().AddArray("txs");
-	for(FTransaction_Sequence Transaction : Transactions)
-	{
-		JsonArray.AddValue(Transaction.ToJson());
-	}
-	const FString Content = JsonArray.EndArray()->ToString();
-	
-	this->SendRPCAndExtract(Url("sendTransactionBatch"), Content, OnSuccess, ExtractSignature,
-	OnFailure);
-}
-
-void FSequenceWallet::SendTransactionWithCallback(FTransaction_FE Transaction,
-                                                               TSuccessCallback<TransactionID> OnSuccess, TFunction<void(TransactionID, FSequenceError)> OnFailure)
-{
-	FTransaction_Sequence Converted = FTransaction_Sequence::Convert(Transaction);
-	FString ID = Converted.ID();
-	SendTransaction(Converted, [=](FHash256 Hash)
-	{
-		OnSuccess(ID);
-	}, [=](FSequenceError Error)
-	{
-		OnFailure(ID, Error);
-	});
-}
-
-template <typename T> void FSequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
+template <typename T> void USequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -613,12 +400,12 @@ template <typename T> void FSequenceWallet::SequenceRPC(FString Url, FString Con
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-FString FSequenceWallet::getSequenceURL(FString endpoint)
+FString USequenceWallet::getSequenceURL(FString endpoint)
 {
 	return this->sequenceURL + endpoint;
 }
 
-TArray<FContact_BE> FSequenceWallet::buildFriendListFromJson(FString json)
+TArray<FContact_BE> USequenceWallet::buildFriendListFromJson(FString json)
 {
 	TArray<FContact_BE> friendList;
 	TSharedPtr<FJsonObject> jsonObj;
@@ -654,7 +441,7 @@ TArray<FContact_BE> FSequenceWallet::buildFriendListFromJson(FString json)
 * This function appears to require some form of authentication (perhaps all of the sequence api does)
 * @Deprecated
 */
-void FSequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString json_arg = "{}";
 	
@@ -664,7 +451,7 @@ void FSequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FCont
 		}, OnFailure);
 }
 
-TArray<FItemPrice_BE> FSequenceWallet::buildItemUpdateListFromJson(FString json)
+TArray<FItemPrice_BE> USequenceWallet::buildItemUpdateListFromJson(FString json)
 {
 	UE_LOG(LogTemp, Error, TEXT("Received json: %s"), *json);
 	TSharedPtr<FJsonObject> jsonObj;
@@ -685,14 +472,14 @@ TArray<FItemPrice_BE> FSequenceWallet::buildItemUpdateListFromJson(FString json)
 	return updatedItems;
 }
 
-void FSequenceWallet::getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	TArray<FID_BE> items;
 	items.Add(itemToUpdate);
 	getUpdatedCoinPrices(items, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString args = "{\"tokens\":";
 	FString jsonObjString = "";
@@ -711,14 +498,14 @@ void FSequenceWallet::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSucces
 		}, OnFailure);
 }
 
-void FSequenceWallet::getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	TArray<FID_BE> items;
 	items.Add(itemToUpdate);
 	getUpdatedCollectiblePrices(items, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure)
 {
 	FString args = "{\"tokens\":";
 	FString jsonObjString = "";
@@ -737,7 +524,7 @@ void FSequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, 
 		}, OnFailure);
 }
 
-FString FSequenceWallet::buildQR_Request_URL(FString walletAddress,int32 size)
+FString USequenceWallet::buildQR_Request_URL(FString walletAddress,int32 size)
 {
 	int32 lclSize = FMath::Max(size, 64);//ensures a nice valid size
 
@@ -748,7 +535,7 @@ FString FSequenceWallet::buildQR_Request_URL(FString walletAddress,int32 size)
 }
 
 //we only need to encode base64URL we don't decode them as we receive the QR code
-FString FSequenceWallet::encodeB64_URL(FString data)
+FString USequenceWallet::encodeB64_URL(FString data)
 {
 	FString ret;
 	UE_LOG(LogTemp, Display, TEXT("Pre encoded addr: [%s]"), *data);
@@ -778,177 +565,177 @@ FString FSequenceWallet::encodeB64_URL(FString data)
 
 //Indexer Calls
 
-void FSequenceWallet::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->Ping(chainID, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->Version(chainID,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->RunTimeStatus(chainID, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetChainID(chainID, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetEtherBalance(chainID, accountAddr, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenBalances(chainID, args, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenSupplies(chainID, args, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenSuppliesMap(chainID, args, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetBalanceUpdates(chainID, args, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
 		this->Indexer->GetTransactionHistory(chainID, args, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).BlockByNumber(Number, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).BlockByNumber(Tag,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).BlockByHash(Hash, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).BlockNumber(OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).HeaderByNumber(Id, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).HeaderByNumber(Tag, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).HeaderByHash(Hash,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).TransactionByHash(Hash,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).TransactionCount(Addr,Number,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).TransactionCount(Addr,Tag,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).TransactionReceipt(Hash,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).GetGasPrice(OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).EstimateContractCallGas(ContractCall,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).EstimateDeploymentGas(From,Bytecode,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).DeployContract(Bytecode, PrivKey, ChainId, OnSuccess, OnFailure);
 }
 
-void FSequenceWallet::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).DeployContractWithHash(Bytecode,PrivKey,ChainId,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).NonceAt(Number,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).NonceAt(Tag,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).SendRawTransaction(Data,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).ChainId(OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
 }
 
-void FSequenceWallet::NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
 	Provider::Provider(this->ProviderUrl).NonViewCall(transaction, PrivateKey, ChainID, OnSuccess, OnFailure);
 }
