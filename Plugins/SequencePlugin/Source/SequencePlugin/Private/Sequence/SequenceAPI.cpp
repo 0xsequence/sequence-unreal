@@ -281,7 +281,6 @@ FString USequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FSt
 
 FString USequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
 {
-	//const FString PreEncryptedPayload = "{\"sessionId\":\"0x3d95F190C7432D7e932DA1E2050beD6F40B19F6c\",\"intentJson\":\"{\\\"version\\\":\\\"1.0.0\\\",\\\"packet\\\":{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":1706300395,\\\"issued\\\":1706300365,\\\"message\\\":\\\"0x19457468657265756D205369676E6564204D6573736167653A0A326869\\\",\\\"network\\\":\\\"137\\\",\\\"wallet\\\":\\\"0x2D566542570771c264b98959B037f4eb7534caaA\\\"},\\\"signatures\\\":[{\\\"session\\\":\\\"0x3d95F190C7432D7e932DA1E2050beD6F40B19F6c\\\",\\\"signature\\\":\\\"0x7979751f2914b4e0a051b570af1369435d7dc63b8b18d76dce0e7a88e1d07c3d381aa64f1099ea508dad3f9a32a3cf858653fb442c3b8b31df1a51c70fafbb971c\\\"}]}\"}";
 	const FString PreEncryptedPayload = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"intentJson\":\""+Intent+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
 	UE_LOG(LogTemp,Display,TEXT("IntentJson: %s"),*Intent);
@@ -361,8 +360,8 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	//const FString expiresString = "1706657398";//FString::Printf(TEXT("%lld"),expires);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	
 	const FString Wallet = this->Credentials.GetWalletAddress();
 	//eip-191 and keccak hashing the message
 	const FString LeadingByte = "\x19";//leading byte
@@ -375,14 +374,8 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	//EIP-191
 	
 	const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"message\\\":\\\""+EIP_Message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
-	//const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"message\\\":\\\""+EIP_Message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
 	const FString PacketRaw = "{\"code\":\"signMessage\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+Wallet+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("PacketRaw: %s"),*PacketRaw);
-	//Keccak has this
-
 	const FString Signature = this->GeneratePacketSignature(PacketRaw);
-
-
 	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("SignMessageIntent: %s"),*Intent);
 	return Intent;
@@ -427,7 +420,8 @@ FString USequenceWallet::BuildCloseSessionIntent()
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
-	const FString Signature = this->GeneratePacketSignature(Packet);
+	const FString RawPacket = "{\"code\":\"closeSession\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"session\":\""+this->Credentials.GetSessionId()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(RawPacket);
 	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signatures\\\":\\\""+Signature+"\\\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
 	return Intent;
