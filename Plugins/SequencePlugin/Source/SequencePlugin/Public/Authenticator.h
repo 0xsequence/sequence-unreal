@@ -258,6 +258,14 @@ public:
 		return AddressStr;
 	}
 
+	FString SignMessageWithSessionWallet(const TArray<uint8>& Message, const int32 MessageLength) const
+	{
+		FWallet TWallet = FWallet(SessionPrivateKey);
+		TArray<uint8> SigBytes = TWallet.SignMessage(Message, MessageLength);
+		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+		return Signature;
+	}
+	
 	FString SignMessageWithSessionWallet(const FString& Message) const
 	{
 		FWallet TWallet = FWallet(SessionPrivateKey);

@@ -128,13 +128,13 @@ private:
 	FString BuildRegisterSessionIntent();
 	FString BuildListSessionIntent();
 	FString BuildCloseSessionIntent();
-	
-	//NOP
 	FString BuildSessionValidationIntent();
+	
 	FString GeneratePacketSignature(const FString& Packet) const;
 	FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 	FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
 	FString SignAndEncryptPayload(const FString& Intent) const;
+	FString SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const;
 	FString GetWalletAddress();
 	
 private:

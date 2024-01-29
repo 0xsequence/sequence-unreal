@@ -26,6 +26,8 @@ public:
 	*/
 	FWallet(const FString& PrivateKey);
 
+	TArray<uint8> SignMessage(TArray<uint8> messageBytes,int32 messageLength);
+	
 	/*
 	* Signs the given message
 	*/

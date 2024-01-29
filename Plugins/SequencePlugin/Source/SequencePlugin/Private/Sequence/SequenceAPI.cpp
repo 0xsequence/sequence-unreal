@@ -209,6 +209,7 @@ FString USequenceWallet::GetWalletAddress()
 
 void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	FDateTime test;
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
@@ -221,7 +222,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
 				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
 				TUAuth->StoreCredentials(this->Credentials);
-				OnSuccess("Session Registered");				
+				OnSuccess("Session Registered");			
 			}
 			else
 			{
@@ -251,13 +252,22 @@ void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSucce
 	OnSuccess("[RPC_NotActive]");
 }
 
+/*
+ * For monday
+ * Login logic tweaks you need a check to make sure you Credentials are valid otherwise AES receives blank keys and crashes
+ * Finish SignMessage debugging,
+ * Wrap up Close & Send for API
+ */
+
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 {
 	//keccakhash of the packet first
 	const FHash256 SigningHash = FHash256::New();
 	const FUnsizedData EncodedSigningData = StringToUTF8(Packet);
-	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SigningHash.Arr.Get()->GetData());
-	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(BytesToHex(SigningHash.Arr.Get()->GetData(),SigningHash.GetLength()));
+	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SigningHash.Ptr());
+	TArray<uint8> SigningBytes;
+	SigningBytes.Append(SigningHash.Ptr(),SigningHash.GetLength());
+	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(SigningBytes,32);
 	return Signature;
 }
 
@@ -271,9 +281,32 @@ FString USequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FSt
 
 FString USequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
 {
+	//const FString PreEncryptedPayload = "{\"sessionId\":\"0x3d95F190C7432D7e932DA1E2050beD6F40B19F6c\",\"intentJson\":\"{\\\"version\\\":\\\"1.0.0\\\",\\\"packet\\\":{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":1706300395,\\\"issued\\\":1706300365,\\\"message\\\":\\\"0x19457468657265756D205369676E6564204D6573736167653A0A326869\\\",\\\"network\\\":\\\"137\\\",\\\"wallet\\\":\\\"0x2D566542570771c264b98959B037f4eb7534caaA\\\"},\\\"signatures\\\":[{\\\"session\\\":\\\"0x3d95F190C7432D7e932DA1E2050beD6F40B19F6c\\\",\\\"signature\\\":\\\"0x7979751f2914b4e0a051b570af1369435d7dc63b8b18d76dce0e7a88e1d07c3d381aa64f1099ea508dad3f9a32a3cf858653fb442c3b8b31df1a51c70fafbb971c\\\"}]}\"}";
 	const FString PreEncryptedPayload = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"intentJson\":\""+Intent+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
-	return SignAndEncryptPayload(Intent);
+	UE_LOG(LogTemp,Display,TEXT("IntentJson: %s"),*Intent);
+	return SignAndEncryptPayload(PreEncryptedPayload);
+}
+
+FString USequenceWallet::SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const
+{
+	TArray<uint8_t> TPayload = PKCS7(PreEncryptedPayload);
+	AES_ctx ctx;
+	struct AES_ctx* PtrCtx = &ctx;
+	constexpr int32 IVSize = 16;
+	TArray<uint8_t> iv;
+
+	for (int i = 0; i < IVSize; i++)
+		iv.Add(RandomByte());
+
+	AES_init_ctx_iv(PtrCtx,this->Credentials.GetTransportKey().GetData(), iv.GetData());
+	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
+	const FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(), iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
+	const FString PayloadSig = "0x" + this->Credentials.SignMessageWithSessionWallet(Intent);
+	const FString EncryptedPayloadKey = "0x" + this->Credentials.GetEncryptedPayloadKey();
+	FString FinalPayload = "{\"encryptedPayloadKey\":\""+ EncryptedPayloadKey +"\",\"payloadCiphertext\":\""+ PayloadCipherText +"\",\"payloadSig\":\""+PayloadSig+"\"}";
+	UE_LOG(LogTemp,Display,TEXT("FinalPayload: %s"),*FinalPayload);
+	return FinalPayload;
 }
 
 FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
@@ -299,6 +332,8 @@ FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
 
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	FString creds = UIndexerSupport::structToString(this->Credentials);
+	UE_LOG(LogTemp,Display,TEXT("Credentials: %s"),*creds);
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
 }
 
@@ -323,13 +358,31 @@ void USequenceWallet::SendERC1155Transaction(FERC1155Transaction,TSuccessCallbac
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	//const FString expiresString = "1706657398";//FString::Printf(TEXT("%lld"),expires);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString Wallet = this->Credentials.GetWalletAddress();
-	const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"message\\\":\\\""+message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
-	const FString Signature = this->GeneratePacketSignature(Packet);
+	//eip-191 and keccak hashing the message
+	const FString LeadingByte = "\x19";//leading byte
+	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
+	Payload.AppendInt(message.Len());
+	Payload += message;
+	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
+	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
+	UE_LOG(LogTemp,Display,TEXT("EIP_191: %s"),*EIP_Message);
+	//EIP-191
+	
+	const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"message\\\":\\\""+EIP_Message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
+	//const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"message\\\":\\\""+EIP_Message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
+	const FString PacketRaw = "{\"code\":\"signMessage\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+Wallet+"\"}";
+	UE_LOG(LogTemp,Display,TEXT("PacketRaw: %s"),*PacketRaw);
+	//Keccak has this
+
+	const FString Signature = this->GeneratePacketSignature(PacketRaw);
+
+
 	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("SignMessageIntent: %s"),*Intent);
 	return Intent;
