@@ -73,6 +73,50 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	return nonce;
 }
 
+TArray<uint8> FWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLength)
+{
+	TArray<uint8> sig;
+	Uint256 BigR, BigS;
+	uint16 RecoveryParameter;	
+	FString LeadingByte = "\x19";//leading byte
+	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
+	Payload.AppendInt(messageLength);
+
+	FHash256 SigningHash = FHash256::New();
+	FUnsizedData EncodedSigningData = StringToUTF8(Payload);
+	EncodedSigningData.Arr->Append(messageBytes);
+	Keccak256::getHash(EncodedSigningData.Ptr(), EncodedSigningData.GetLength(), SigningHash.Ptr());
+	
+	FString rawHash = SigningHash.ToHex();
+	
+	TArray<uint8_t> result_nonce = this->BuildSigningNonce(SigningHash.Ptr(),SigningHash.GetLength());
+
+	FString result_nonce_str = BytesToHex(result_nonce.GetData(), result_nonce.Num());
+
+	Ecdsa::sign(Uint256(this->PrivateKey.Ptr()), Sha256Hash(SigningHash.Ptr(),SigningHash.GetLength()),Uint256(result_nonce.GetData()), BigR, BigS, RecoveryParameter);
+
+	FHash256 MyR = FHash256::New();
+	FHash256 MyS = FHash256::New();
+	BigR.getBigEndianBytes(MyR.Ptr());
+	BigS.getBigEndianBytes(MyS.Ptr());
+
+	FHash256 R = MyR;
+	FHash256 S = MyS;
+
+	FString RString = MyR.ToHex();
+	FString SString = MyS.ToHex();
+
+	for (int i = 0; i < 32; i++)
+		sig.Add(R.Ptr()[i]);
+
+	for (int i = 0; i < 32; i++)
+		sig.Add(S.Ptr()[i]);
+
+	sig.Add((uint8)RecoveryParameter);
+
+	return sig;
+}
+
 TArray<uint8> FWallet::SignMessage(FString message)
 {
 	TArray<uint8> sig;
