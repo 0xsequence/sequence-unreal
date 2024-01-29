@@ -109,7 +109,7 @@ public:
 
 	void SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FString Identifier, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
@@ -121,7 +121,7 @@ private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 	FString BuildSignMessageIntent(const FString& message);
-	FString BuildSendTransactionIntent(const FString& Identifier,const FString& Txns);
+	FString BuildSendTransactionIntent(const FString& Txns);
 	FString BuildRegisterSessionIntent();
 	FString BuildListSessionIntent();
 	FString BuildCloseSessionIntent();

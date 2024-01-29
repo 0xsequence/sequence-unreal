@@ -360,7 +360,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 
 void USequenceWallet::SendTransaction(
 	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,
-	FString Identifier,
+	FString WalletAddress, 
 	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FJsonArray TransactionJsonArray;
@@ -384,7 +384,7 @@ void USequenceWallet::SendTransaction(
 
 	FString TransactionsPayload = TransactionJsonArray.ToString();
 	
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(Identifier, TransactionsPayload), OnSuccess, OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(TransactionsPayload), OnSuccess, OnFailure);
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
@@ -413,13 +413,14 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	return Intent;
 }
 
-FString USequenceWallet::BuildSendTransactionIntent(const FString& Identifier, const FString& Txns)
+FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+Identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
+	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
+	const FString Packet = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(Packet);
 	FString Intent = "{\"version\":\""+this->Credentials.GetWaasVersin()+"\",\"packet\":"+Packet+",\"signatures\":[{\"session\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
