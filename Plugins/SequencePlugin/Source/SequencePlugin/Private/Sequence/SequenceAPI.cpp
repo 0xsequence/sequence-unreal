@@ -10,6 +10,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Types/ContractCall.h"
 #include "Util/HexUtility.h"
+#include "WorldPartition/ContentBundle/ContentBundleStatus.h"
 
 FString SortOrderToString(ESortOrder SortOrder)
 {
@@ -359,33 +360,31 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 
 void USequenceWallet::SendTransaction(
 	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,
+	FString Identifier,
 	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
+	FJsonArray TransactionJsonArray;
+	
+	for (auto Transaction : Transactions)
 	{
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		const TSharedPtr<FJsonObject> * Data = nullptr;
-		if (Json.Get()->TryGetObjectField("data",Data))
+		switch(Transaction.GetCurrentSubtypeIndex())
 		{
-			FString RegisteredSessionId, RegisteredWalletAddress;
-			if (Data->Get()->TryGetStringField("sessionId",RegisteredSessionId) && Data->Get()->TryGetStringField("wallet",RegisteredWalletAddress))
-			{
-				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
-				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
-				TUAuth->StoreCredentials(this->Credentials);
-				OnSuccess("Session Registered");				
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-			}
+		case 0: //RawTransaction
+			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FRawTransaction>()));
+		case 1: //ERC20
+			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC20Transaction>()));
+		case 2: //ERC721
+			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC721Transaction>()));
+		case 3: //ERC1155
+			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC1155Transaction>()));
+		default: //Doesn't match
+			break;
 		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-		}
-	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction",,OnResponse,OnFailure);
+	}
+
+	FString TransactionsPayload = TransactionJsonArray.ToString();
+	
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(Identifier, TransactionsPayload), OnSuccess, OnFailure);
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
