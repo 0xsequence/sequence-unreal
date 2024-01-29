@@ -61,6 +61,9 @@ FJsonBuilder* FJsonBuilder::ToPtr()
 }
 
 
+FJsonArray::FJsonArray() : Parent(nullptr)
+{
+}
 
 FJsonArray::FJsonArray(FJsonBuilder* Parent, const FString Name) : Name(Name), Parent(Parent)
 {
@@ -99,8 +102,16 @@ FJsonArray* FJsonArray::AddInt(int Value)
 
 FJsonBuilder* FJsonArray::EndArray() const
 {
-	Parent->AddField(Name, "[" + StringValue + "]");
+	if(Parent != nullptr)
+	{
+		Parent->AddField(Name, ToString());
+	}
 	return Parent;
+}
+
+FString FJsonArray::ToString() const
+{
+	return "[" + StringValue + "]";
 }
 
 
