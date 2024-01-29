@@ -429,7 +429,12 @@ FString USequenceWallet::BuildRegisterSessionIntent()
 
 FString USequenceWallet::BuildListSessionIntent()
 {
-	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString Packet = "{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"proof\\\":{\\\"idToken\\\":\\\""+this->Credentials.GetIDToken()+"\\\"}}";
+	const FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+"}";
 	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
 	return Intent;
 }
