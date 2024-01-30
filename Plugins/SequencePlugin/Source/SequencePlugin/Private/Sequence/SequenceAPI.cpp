@@ -234,7 +234,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->GenerateSignedEncryptedRegisterSessionPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->SignAndEncryptPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
 }
 
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
@@ -455,8 +455,8 @@ FString USequenceWallet::BuildCloseSessionIntent()
 
 FString USequenceWallet::BuildSessionValidationIntent()
 {
-	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
-	UE_LOG(LogTemp,Display,TEXT("SessionValidationIntent: %s"),*Intent);
+	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
+	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
 	return Intent;
 }
 
