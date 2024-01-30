@@ -409,6 +409,7 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	return Intent;
 }
 
+//TODO need to introduce proper intent here
 FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
@@ -617,7 +618,7 @@ FString USequenceWallet::encodeB64_URL(FString data)
 	UE_LOG(LogTemp, Display, TEXT("Pre encoded addr: [%s]"), *data);
 	ret = FBase64::Encode(data);
 	UE_LOG(LogTemp, Display, TEXT("Post encoded addr: [%s]"), *ret);
-	//now we just gotta do some swaps to make it base64 URL complient
+	//now we just gotta do some swaps to make it base64 URL compliant
 	// + -> -
 	// / -> _ 
 

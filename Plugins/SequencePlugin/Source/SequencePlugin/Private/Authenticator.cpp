@@ -16,7 +16,8 @@
 
 UAuthenticator::UAuthenticator()
 {
-	this->Nonce = FGuid::NewGuid().ToString();
+	this->SessionWallet = UWallet::Make();//Generate a new Random UWallet
+	this->Nonce = "0x" + this->SessionWallet->GetWalletAddress().ToHex().ToLower();
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
 	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
@@ -536,8 +537,6 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 
 void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
 {
-	//Generates a new Random Wallet
-	this->SessionWallet = new FWallet();
 	int64 UnixIssueTime = FDateTime::UtcNow().ToUnixTimestamp();
 	int64 UnixExpireTime = UnixIssueTime + 30;
 	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
