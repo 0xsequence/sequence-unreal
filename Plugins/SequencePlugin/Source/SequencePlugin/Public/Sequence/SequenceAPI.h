@@ -3,7 +3,6 @@
 #include "Authenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
-#include "RPCCaller.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Indexer/Indexer_Enums.h"
@@ -81,8 +80,10 @@ class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
 	GENERATED_BODY()
 private:
-	FCredentials_BE Credentials;
+	UPROPERTY()
 	UIndexer* Indexer;
+	
+	FCredentials_BE Credentials;
 	FString ProviderUrl = "https://temp";
 	//replace this later
 	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
@@ -112,10 +113,10 @@ public:
 	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
-	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	//NOP
 	void SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
@@ -130,7 +131,6 @@ private:
 	FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 	FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
 	FString SignAndEncryptPayload(const FString& Intent) const;
-	FString SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const;
 	FString GetWalletAddress();
 	
 private:
