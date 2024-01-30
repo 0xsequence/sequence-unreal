@@ -208,7 +208,6 @@ FString USequenceWallet::GetWalletAddress()
 
 void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FDateTime test;
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
@@ -631,8 +630,6 @@ void USequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, 
 
 FString USequenceWallet::buildQR_Request_URL(FString walletAddress,int32 size)
 {
-	int32 lclSize = FMath::Max(size, 64);//ensures a nice valid size
-
 	FString urlSize = "/";
 	urlSize.AppendInt(size);
 
