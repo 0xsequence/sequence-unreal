@@ -8,16 +8,7 @@
 #include "Eth/Crypto.h"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 
-UWallet::UWallet()
-{
-	this->PrivateKey = FPrivateKey::New();
-	for (int i = 0; i < 32; i++)
-	{
-		this->PrivateKey.Arr.Get()->GetData()[i] = RandomByte();
-	}
-	this->PublicKey = GetPublicKey(this->PrivateKey);
-	this->Address = GetAddress(this->PublicKey);
-}
+UWallet::UWallet(){}
 
 UWallet* UWallet::Make()
 {
@@ -35,6 +26,7 @@ UWallet* UWallet::Make()
 UWallet* UWallet::Make(FPrivateKey PrivateKey)
 {
 	UWallet * Wallet = NewObject<UWallet>();
+	Wallet->PrivateKey = PrivateKey;
 	Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
 	Wallet->Address = GetAddress(Wallet->PublicKey);
 	return Wallet;
