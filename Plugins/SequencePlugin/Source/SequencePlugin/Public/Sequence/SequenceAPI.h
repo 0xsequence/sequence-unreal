@@ -3,7 +3,6 @@
 #include "Authenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
-#include "RPCCaller.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Indexer/Indexer_Enums.h"
@@ -82,8 +81,10 @@ class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
 	GENERATED_BODY()
 private:
-	FCredentials_BE Credentials;
+	UPROPERTY()
 	UIndexer* Indexer;
+	
+	FCredentials_BE Credentials;
 	FString ProviderUrl = "https://temp";
 	//replace this later
 	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
@@ -131,7 +132,6 @@ private:
 	FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 	FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
 	FString SignAndEncryptPayload(const FString& Intent) const;
-	FString SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const;
 	FString GetWalletAddress();
 	
 private:

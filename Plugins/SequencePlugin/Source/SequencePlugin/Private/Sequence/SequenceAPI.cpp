@@ -277,7 +277,7 @@ void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, cons
 			OnFailure(FSequenceError(RequestFail, "Malformed response: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
 }
 
 void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
@@ -320,29 +320,14 @@ FString USequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) c
 	return SignAndEncryptPayload(PreEncryptedPayload);
 }
 
-FString USequenceWallet::SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const
-{
-	TArray<uint8_t> TPayload = PKCS7(PreEncryptedPayload);
-	AES_ctx ctx;
-	struct AES_ctx* PtrCtx = &ctx;
-	constexpr int32 IVSize = 16;
-	TArray<uint8_t> iv;
-
-	for (int i = 0; i < IVSize; i++)
-		iv.Add(RandomByte());
-
-	AES_init_ctx_iv(PtrCtx,this->Credentials.GetTransportKey().GetData(), iv.GetData());
-	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
-	const FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(), iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
-	const FString PayloadSig = "0x" + this->Credentials.SignMessageWithSessionWallet(Intent);
-	const FString EncryptedPayloadKey = "0x" + this->Credentials.GetEncryptedPayloadKey();
-	FString FinalPayload = "{\"encryptedPayloadKey\":\""+ EncryptedPayloadKey +"\",\"payloadCiphertext\":\""+ PayloadCipherText +"\",\"payloadSig\":\""+PayloadSig+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("FinalPayload: %s"),*FinalPayload);
-	return FinalPayload;
-}
-
 FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
 {
+	if (!this->Credentials.Valid())
+	{
+		UE_LOG(LogTemp,Error,TEXT("[Credentials are not valid! They are either expired or not built correctly, Please ReAuthenticate]"));
+		return "{Credentials Invalid!}";
+	}
+	
 	TArray<uint8_t> TPayload = PKCS7(Intent);
 	AES_ctx ctx;
 	struct AES_ctx* PtrCtx = &ctx;
@@ -476,15 +461,7 @@ FString USequenceWallet::BuildListSessionIntent()
 
 FString USequenceWallet::BuildCloseSessionIntent()
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
-	const FString RawPacket = "{\"code\":\"closeSession\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"session\":\""+this->Credentials.GetSessionId()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(RawPacket);
-	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signatures\\\":\\\""+Signature+"\\\"}]}";
-	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
+	FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"dropSessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	return Intent;
 }
 

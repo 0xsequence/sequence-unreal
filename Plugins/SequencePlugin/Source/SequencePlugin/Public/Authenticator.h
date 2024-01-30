@@ -340,6 +340,14 @@ public:
 		SessionId = RegisteredSessionId;
 		WalletAddress = RegisteredWallet;
 	}
+
+	bool Valid() const
+	{
+		bool IsValid = true;
+		IsValid &= !TransportKey.IsEmpty();
+		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		return IsValid;
+	}
 };
 
 USTRUCT(BlueprintType)
