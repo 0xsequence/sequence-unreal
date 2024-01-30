@@ -10,6 +10,7 @@
 #include "Indexer/Structs/SortBy.h"
 #include "Indexer/Structs/Page.h"
 #include "Provider.h"
+#include "Session.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -113,9 +114,9 @@ public:
 	void SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-
+	
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	//NOP
