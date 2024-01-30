@@ -10,7 +10,6 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Types/ContractCall.h"
 #include "Util/HexUtility.h"
-#include "WorldPartition/ContentBundle/ContentBundleStatus.h"
 
 FString SortOrderToString(ESortOrder SortOrder)
 {
@@ -358,10 +357,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
 }
 
-void USequenceWallet::SendTransaction(
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,
-	FString WalletAddress, 
-	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FJsonArray TransactionJsonArray;
 	
