@@ -28,7 +28,7 @@ void AGeneralTesting::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AGeneralTesting::TestProvider() const
+void AGeneralTesting::TestRegisterSession() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
 	{
@@ -39,9 +39,68 @@ void AGeneralTesting::TestProvider() const
 	{
 		CallbackFailed(Data, Err);
 	};
+	
+	SequenceAPITest::RegisterSession(OnSuccess, OnFailure);
+}
 
-	//ContractTest::RunTest(OnSuccess, OnFailure);
-	SequenceAPITest::RunTest(OnSuccess, OnFailure);
+void AGeneralTesting::TestSignMessage() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SignMessage(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListSessions() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListSessions(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestSendTransaction() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendTransaction(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestCloseSessions() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::CloseSession(OnSuccess, OnFailure);
 }
 
 void AGeneralTesting::TestIndexer()

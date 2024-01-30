@@ -26,13 +26,21 @@ protected:
 	virtual void BeginPlay() override;
 
 //Testing Functions//
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestRegisterSession() const;
 
-	/*
-	* Called by frontend to test the provider!
-	*/
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_Provider")
-		void TestProvider() const;
-
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSignMessage() const;
+	
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListSessions() const;
+	
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendTransaction() const;
+	
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestCloseSessions() const;
+	
 	/*
 	* Called by frontend to test the indexer
 	*/
