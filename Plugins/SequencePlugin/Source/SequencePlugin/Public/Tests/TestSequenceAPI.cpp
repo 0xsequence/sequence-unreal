@@ -75,8 +75,8 @@ void SequenceAPITest::SendTransaction(TFunction<void(FString)> OnSuccess, TFunct
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SendTransaction Test]========================"));
 	
-	//TArray<FRawTransaction> Txn;
-	//Api->SendTransaction(OnSuccess,GenericFailure);
+	const TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
 }
 
 void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
