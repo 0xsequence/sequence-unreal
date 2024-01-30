@@ -15,8 +15,8 @@ void SequenceAPITest::RunTest(TFunction<void(FString)> OnSuccess, TFunction<void
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Tests]========================"));
 
-	//Api->RegisterSession(OnSuccess,GenericFailure);
+	Api->RegisterSession(OnSuccess,GenericFailure);
 	//Api->ListSessions(OnSuccess,GenericFailure);
 	//Api->SignMessage("hi",OnSuccess,GenericFailure);
-	Api->CloseSession(OnSuccess,GenericFailure);
+	//Api->CloseSession(OnSuccess,GenericFailure);
 }
