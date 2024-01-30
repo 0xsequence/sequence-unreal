@@ -167,7 +167,6 @@ void USequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FSt
 			->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-//Pass in credentials in our constructor!
 USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<UIndexer>();
@@ -296,13 +295,6 @@ void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSucce
 {
 	OnSuccess("[RPC_NotActive]");
 }
-
-/*
- * For monday
- * Login logic tweaks you need a check to make sure you Credentials are valid otherwise AES receives blank keys and crashes
- * Finish SignMessage debugging,
- * Wrap up Close & Send for API
- */
 
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 {
