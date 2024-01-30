@@ -8,7 +8,7 @@
 //Sequence API Structs
 
 USTRUCT(BlueprintType)
-struct FSequenceTransaction
+struct FRawTransaction
 {
     GENERATED_USTRUCT_BODY()
 private:
@@ -22,16 +22,16 @@ public:
     UPROPERTY()
     FString value = "";
 
-    FSequenceTransaction(){}
+    FRawTransaction(){}
 		
-    FSequenceTransaction(const FString& ToIn, const FString& DataIn, const int32& ValueIn)
+    FRawTransaction(const FString& ToIn, const FString& DataIn, const int32& ValueIn)
     {
         to = ToIn;
         data = DataIn;
         value = FString::Printf(TEXT("%d"),ValueIn);
     }
 
-    FSequenceTransaction(const FString& ToIn, const FString& DataIn, const FString& ValueIn)
+    FRawTransaction(const FString& ToIn, const FString& DataIn, const FString& ValueIn)
     {
         to = ToIn;
         data = DataIn;
