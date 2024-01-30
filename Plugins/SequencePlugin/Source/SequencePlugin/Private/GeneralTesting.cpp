@@ -143,30 +143,6 @@ void AGeneralTesting::OnDoneImageProcessing()
 	this->testMiscForwarder(this->imgHandler->getProcessedImages());
 }
 
-//Not being used in V1
-//void AGeneralTesting::TestSequence() const
-//{
-//	TFunction<void(FString)> OnSuccess = [this](FString State)
-//	{
-//		CallbackPassed(State);
-//	};
-//
-//	TFunction<void(FString, FSequenceError)> OnFailure = [this](FString data, FSequenceError Err)
-//	{
-//		CallbackFailed(data, Err);
-//	};
-//
-//	TestSequenceData(OnSuccess, OnFailure);
-//}
-
-//Not being used in V1
-//void AGeneralTesting::testSystemDataBuilder()
-//{//testing system data builder
-//	USystemDataBuilder* sysBuilder = NewObject<USystemDataBuilder>();
-//	SequenceAPI::USequenceWallet* wallet = new SequenceAPI::USequenceWallet();
-//	sysBuilder->testGOTokenData(wallet,137, "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2");
-//}
-
 // Called every frame
 void AGeneralTesting::Tick(const float DeltaTime)
 {

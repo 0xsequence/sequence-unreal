@@ -386,7 +386,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
-void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FJsonArray TransactionJsonArray;
 	
@@ -410,7 +410,7 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	FString TransactionsPayload = TransactionJsonArray.ToString();
 
 	if (this->Credentials.IsRegistered())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(TransactionsPayload), OnSuccess, OnFailure);
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", this->GenerateSignedEncryptedPayload(BuildSendTransactionIntent(TransactionsPayload)), OnSuccess, OnFailure);
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }

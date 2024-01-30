@@ -111,7 +111,7 @@ public:
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
-	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure);
