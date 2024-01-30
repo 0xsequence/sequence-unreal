@@ -10,7 +10,6 @@
 #include "Indexer/Structs/SortBy.h"
 #include "Indexer/Structs/Page.h"
 #include "Provider.h"
-#include "Session.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -110,13 +109,14 @@ public:
 
 	void SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void SendSequenceTransaction(FSequenceTransaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-	void SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-	void SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-	void SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-	
+	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendSequenceTransaction(FRawTransaction Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendERC20Transaction(FERC20Transaction Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendERC721Transaction(FERC721Transaction Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SendERC1155Transaction(FERC1155Transaction Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
+	void ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	//NOP
@@ -129,13 +129,13 @@ private:
 	FString BuildRegisterSessionIntent();
 	FString BuildListSessionIntent();
 	FString BuildCloseSessionIntent();
-	FString BuildSessionValidationIntent();
 	
+	//NOP
+	FString BuildSessionValidationIntent();
 	FString GeneratePacketSignature(const FString& Packet) const;
 	FString GenerateSignedEncryptedPayload(const FString& Intent) const;
 	FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
 	FString SignAndEncryptPayload(const FString& Intent) const;
-	FString SignAndEncryptPayload(const FString& PreEncryptedPayload, const FString& Intent) const;
 	FString GetWalletAddress();
 	
 private:

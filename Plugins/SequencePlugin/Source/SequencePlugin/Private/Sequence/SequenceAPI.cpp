@@ -357,23 +357,35 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
 }
 
-void USequenceWallet::SendSequenceTransaction(FSequenceTransaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendTransaction(
+	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,
+	TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-}
-
-void USequenceWallet::SendERC20Transaction(FERC20Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{
-	
-}
-
-void USequenceWallet::SendERC721Transaction(FERC721Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{
-	
-}
-
-void USequenceWallet::SendERC1155Transaction(FERC1155Transaction,TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
-{
-	
+	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
+	{
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		const TSharedPtr<FJsonObject> * Data = nullptr;
+		if (Json.Get()->TryGetObjectField("data",Data))
+		{
+			FString RegisteredSessionId, RegisteredWalletAddress;
+			if (Data->Get()->TryGetStringField("sessionId",RegisteredSessionId) && Data->Get()->TryGetStringField("wallet",RegisteredWalletAddress))
+			{
+				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
+				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
+				TUAuth->StoreCredentials(this->Credentials);
+				OnSuccess("Session Registered");				
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction",,OnResponse,OnFailure);
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
