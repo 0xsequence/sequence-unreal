@@ -260,7 +260,11 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnResponse,OnFailure);
+	
+	if (this->Credentials.IsRegistered())
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnResponse,OnFailure);
+	else
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
 void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure)
@@ -270,6 +274,9 @@ void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, cons
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		if(Json.IsValid() && Json->GetBoolField("ok"))
 		{
+			this->Credentials.UnRegisterCredentials();
+			UAuthenticator *Auth = NewObject<UAuthenticator>();
+			Auth->StoreCredentials(this->Credentials);//update credentials to ensure we remember that this session is now closed
 			OnSuccess();
 		}
 		else
@@ -277,7 +284,10 @@ void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, cons
 			OnFailure(FSequenceError(RequestFail, "Malformed response: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnResponse,OnFailure);
+	if (this->Credentials.IsRegistered())
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnResponse,OnFailure);
+	else
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
 void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
@@ -370,7 +380,10 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnResponse,OnFailure);
+	if (this->Credentials.IsRegistered())
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnResponse,OnFailure);
+	else
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
 void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
@@ -395,8 +408,11 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	}
 
 	FString TransactionsPayload = TransactionJsonArray.ToString();
-	
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(TransactionsPayload), OnSuccess, OnFailure);
+
+	if (this->Credentials.IsRegistered())
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", BuildSendTransactionIntent(TransactionsPayload), OnSuccess, OnFailure);
+	else
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)

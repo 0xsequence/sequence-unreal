@@ -341,12 +341,22 @@ public:
 		WalletAddress = RegisteredWallet;
 	}
 
+	bool IsRegistered() const
+	{
+		return Registered;
+	}
+
 	bool Valid() const
 	{
 		bool IsValid = true;
 		IsValid &= !TransportKey.IsEmpty();
 		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
 		return IsValid;
+	}
+
+	void UnRegisterCredentials()
+	{
+		Registered = false;
 	}
 };
 
