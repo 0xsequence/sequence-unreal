@@ -265,7 +265,7 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 
 void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
 }
 
 void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
@@ -430,15 +430,7 @@ FString USequenceWallet::BuildListSessionIntent()
 
 FString USequenceWallet::BuildCloseSessionIntent()
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\\\"code\\\":\\\"closeSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
-	const FString RawPacket = "{\"code\":\"closeSession\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"session\":\""+this->Credentials.GetSessionId()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(RawPacket);
-	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signatures\\\":\\\""+Signature+"\\\"}]}";
-	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
+	FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"dropSessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	return Intent;
 }
 
