@@ -136,7 +136,7 @@ void AGeneralTesting::TestTokenBalances() const
 	FGetTokenBalancesArgs args;
 	args.accountAddress = Credentials.GetWalletAddress();
 	args.includeMetaData = true;
-	indexer->GetTokenBalances(137, args,GenericSuccess,GenericFailure);
+	indexer->GetTokenBalances(Credentials.GetNetwork(), args,GenericSuccess,GenericFailure);
 }
 
 void AGeneralTesting::TestHistory() const
@@ -163,7 +163,7 @@ void AGeneralTesting::TestHistory() const
 	args.includeMetaData = true;
 	args.page.page = 0;
 	args.page.more = true;
-	indexer->GetTransactionHistory(137, args, GenericSuccess, GenericFailure);
+	indexer->GetTransactionHistory(Credentials.GetNetwork(), args, GenericSuccess, GenericFailure);
 }
 
 void AGeneralTesting::TestEncryption() const
