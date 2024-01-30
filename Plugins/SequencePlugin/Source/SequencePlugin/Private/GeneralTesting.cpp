@@ -118,6 +118,54 @@ void AGeneralTesting::TestIndexer()
 	IndexerTest(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestTokenBalances() const
+{
+	UIndexer * indexer = NewObject<UIndexer>();
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
+	{
+		FString ret = UIndexerSupport::structToString<FGetTokenBalancesReturn>(tokenBalances);
+		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
+	};
+
+	const FFailureCallback GenericFailure = [](const FSequenceError Error)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Error with getting balances"));
+	};
+	FGetTokenBalancesArgs args;
+	args.accountAddress = Credentials.GetWalletAddress();
+	args.includeMetaData = true;
+	indexer->GetTokenBalances(137, args,GenericSuccess,GenericFailure);
+}
+
+void AGeneralTesting::TestHistory() const
+{
+	UIndexer * indexer = NewObject<UIndexer>();
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
+	{
+		if (printAll)
+		{
+			FString ret = UIndexerSupport::structToString<FGetTransactionHistoryReturn>(transactionHistory);
+			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
+		}
+	};
+
+	const FFailureCallback GenericFailure = [](const FSequenceError Error)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
+	};
+
+	FGetTransactionHistoryArgs args;
+	args.filter.accountAddress =  Credentials.GetWalletAddress();
+	args.includeMetaData = true;
+	args.page.page = 0;
+	args.page.more = true;
+	indexer->GetTransactionHistory(137, args, GenericSuccess, GenericFailure);
+}
+
 void AGeneralTesting::TestEncryption() const
 {
 	const FString PreEncrypt = "testing text";
