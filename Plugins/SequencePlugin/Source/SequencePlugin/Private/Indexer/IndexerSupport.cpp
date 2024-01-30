@@ -51,6 +51,28 @@ TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& json)
 		return nullptr;
 }
 
+FString UIndexerSupport::partialSimpleString(FString string)
+{
+	FString* ret = &string;
+
+	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
+	FString srch_r = TEXT("\r");
+	FString srch_t = TEXT("\t");
+	FString replace = TEXT("");
+
+	const TCHAR* srch_ptr_n = *srch_n;
+	const TCHAR* srch_ptr_r = *srch_r;
+	const TCHAR* srch_ptr_t = *srch_t;
+	const TCHAR* rep_ptr = *replace;
+
+	(*ret).RemoveSpacesInline();//remove spaces
+	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
+	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
+	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
+
+	return (*ret);
+}
+
 FString UIndexerSupport::simplifyString(FString string)
 {
 	FString* ret = &string;

@@ -37,6 +37,8 @@ public:
 	*/
 	static FString simplifyString(FString string);
 
+	static FString partialSimpleString(FString string);
+
 	/*
 	* Similar to simplify string EXCEPT we keept he /" because we are trying
 	* to maintain json correctness for parsing!
@@ -63,6 +65,14 @@ public:
 		FString ret;
 		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
 		ret = simplifyString(ret);
+		return ret;
+	}
+
+	template < typename T > static FString structToPartialSimpleString(T structVar)
+	{
+		FString ret;
+		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
+		ret = partialSimpleString(ret);
 		return ret;
 	}
 
