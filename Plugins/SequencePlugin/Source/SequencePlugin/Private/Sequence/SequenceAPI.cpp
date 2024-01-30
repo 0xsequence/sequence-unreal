@@ -263,8 +263,20 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnResponse,OnFailure);
 }
 
-void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
+	{
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		if(Json.IsValid() && Json->GetBoolField("ok"))
+		{
+			OnSuccess();
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Malformed response: " + Response));
+		}
+	};
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
 }
 
