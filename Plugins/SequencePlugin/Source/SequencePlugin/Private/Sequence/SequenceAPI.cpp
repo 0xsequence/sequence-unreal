@@ -234,7 +234,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->SignAndEncryptPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->GenerateSignedEncryptedRegisterSessionPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
 }
 
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
@@ -429,12 +429,7 @@ FString USequenceWallet::BuildRegisterSessionIntent()
 
 FString USequenceWallet::BuildListSessionIntent()
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"proof\\\":{\\\"idToken\\\":\\\""+this->Credentials.GetIDToken()+"\\\"}}";
-	const FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+"}";
+	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
 	return Intent;
 }
@@ -455,8 +450,8 @@ FString USequenceWallet::BuildCloseSessionIntent()
 
 FString USequenceWallet::BuildSessionValidationIntent()
 {
-	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
+	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
+	UE_LOG(LogTemp,Display,TEXT("SessionValidationIntent: %s"),*Intent);
 	return Intent;
 }
 
