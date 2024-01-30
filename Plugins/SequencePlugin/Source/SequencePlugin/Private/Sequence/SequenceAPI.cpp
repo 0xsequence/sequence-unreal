@@ -222,7 +222,9 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
 				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
 				TUAuth->StoreCredentials(this->Credentials);
-				OnSuccess("Session Registered");			
+				FString Creds = UIndexerSupport::structToString(this->Credentials);
+				UE_LOG(LogTemp,Display,TEXT("Creds: %s"),*Creds);
+				OnSuccess("Session Registered");
 			}
 			else
 			{
@@ -389,28 +391,38 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FJsonArray TransactionJsonArray;
+	FString JsonTxn = "[";
 	
-	for (auto Transaction : Transactions)
+	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
 	{
 		switch(Transaction.GetCurrentSubtypeIndex())
 		{
 		case 0: //RawTransaction
-			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FRawTransaction>()));
+			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FRawTransaction>()));
+			break;
 		case 1: //ERC20
-			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC20Transaction>()));
+			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC20Transaction>()));
+			break;
 		case 2: //ERC721
-			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC721Transaction>()));
+			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC721Transaction>()));
+			break;
 		case 3: //ERC1155
-			TransactionJsonArray.AddValue(UIndexerSupport::structToString(Transaction.GetSubtype<FERC1155Transaction>()));
+			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC1155Transaction>()));
+			break;
 		default: //Doesn't match
 			break;
 		}
 	}
 
 	FString TransactionsPayload = TransactionJsonArray.ToString();
-
+	const FString srch_slash = TEXT("\"");
+	const FString replace = TEXT("\\\"");
+	const TCHAR* srch_ptr_slash = *srch_slash;
+	const TCHAR* rep_ptr = *replace;
+	(TransactionsPayload).ReplaceInline(srch_ptr_slash, rep_ptr, ESearchCase::IgnoreCase);
+	
 	if (this->Credentials.IsRegistered())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendTransaction", this->GenerateSignedEncryptedPayload(BuildSendTransactionIntent(TransactionsPayload)), OnSuccess, OnFailure);
+		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent", this->GenerateSignedEncryptedPayload(BuildSendTransactionIntent(TransactionsPayload)), OnSuccess, OnFailure);
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
@@ -444,14 +456,15 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 //TODO need to introduce proper intent here
 FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
-	const FString Packet = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(Packet);
-	FString Intent = "{\"version\":\""+this->Credentials.GetWaasVersin()+"\",\"packet\":"+Packet+",\"signatures\":[{\"session\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}]}";
+	const FString Packet = "{\\\"code\\\":\\\"sendTransaction\\\",\\\"expires\\\":"+expiresString+",\\\"identifier\\\":\\\""+identifier+"\\\",\\\"issued\\\":"+issuedString+",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"transactions\\\":"+Txns+",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
+	const FString RawPacket = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(RawPacket);
+	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
 	UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
 	return Intent;
 }
