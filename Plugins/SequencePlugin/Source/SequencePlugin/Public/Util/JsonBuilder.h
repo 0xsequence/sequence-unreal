@@ -25,6 +25,7 @@ class FJsonArray
 	FString StringValue;
 	FJsonBuilder* Parent;
 public:
+	FJsonArray();
 	FJsonArray(FJsonBuilder* Parent, FString Name);
 	FJsonArray* ToPtr();
 	FJsonArray* AddValue(FString Value);
@@ -32,4 +33,5 @@ public:
 	FJsonArray* AddBool(bool Value);
 	FJsonArray* AddInt(int Value);
 	FJsonBuilder* EndArray() const;
+	FString ToString() const;
 };
