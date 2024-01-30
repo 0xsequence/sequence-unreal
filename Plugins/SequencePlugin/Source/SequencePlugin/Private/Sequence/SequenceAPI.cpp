@@ -237,9 +237,30 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->GenerateSignedEncryptedRegisterSessionPayload(this->BuildRegisterSessionIntent()),OnResponse,OnFailure);
 }
 
-void USequenceWallet::ListSessions(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnSuccess,OnFailure);
+	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
+	{
+		TArray<FSession> Sessions;
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		TArray<TSharedPtr<FJsonValue>> Arr;
+		const TArray<TSharedPtr<FJsonValue>>* Data = &Arr;
+		if (Json.Get()->TryGetArrayField("sessions",Data))
+		{
+			for (int i = 0; i < Arr.Num(); i++) {
+				TSharedPtr<FJsonValue> SessionJson = Arr[i];
+				FSession Session = UIndexerSupport::jsonStringToStruct<FSession>(SessionJson.Get()->AsString());
+				Sessions.Push(Session);
+			}
+
+			OnSuccess(Sessions);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/ListSessions",this->SignAndEncryptPayload(this->BuildListSessionIntent()),OnResponse,OnFailure);
 }
 
 void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
