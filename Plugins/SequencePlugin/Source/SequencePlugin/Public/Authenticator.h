@@ -445,7 +445,8 @@ private:
 
 	//From InitiateAuth
 	FString ChallengeSession = "";
-	
+
+	UPROPERTY()
 	UWallet * SessionWallet;
 private:
 	UAuthenticator();

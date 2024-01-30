@@ -22,7 +22,6 @@ UAuthenticator::UAuthenticator()
 	FString ParsedJWT;
 	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
 	this->WaasCredentials = FWaasCredentials(UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT));
-	this->SessionWallet = nullptr;
 }
 
 void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
