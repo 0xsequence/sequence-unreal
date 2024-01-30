@@ -373,7 +373,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnResponse,OnFailure);
 }
 
 void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions,FString WalletAddress, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
