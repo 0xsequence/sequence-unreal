@@ -462,7 +462,7 @@ FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 
 FString USequenceWallet::BuildRegisterSessionIntent()
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp();
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
