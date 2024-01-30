@@ -40,6 +40,12 @@ protected:
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestCloseSessions() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestTokenBalances() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestHistory() const;
 	
 	/*
 	* Called by frontend to test the indexer
