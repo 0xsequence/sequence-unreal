@@ -5,9 +5,10 @@
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
 #include "Util/HexUtility.h"
+#include "Eth/Crypto.h"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 
-FWallet::FWallet()
+UWallet::UWallet()
 {
 	this->PrivateKey = FPrivateKey::New();
 	for (int i = 0; i < 32; i++)
@@ -18,23 +19,40 @@ FWallet::FWallet()
 	this->Address = GetAddress(this->PublicKey);
 }
 
-FWallet::FWallet(const FPrivateKey PrivateKey) : PrivateKey(PrivateKey)
+UWallet* UWallet::Make()
 {
-	this->PublicKey = GetPublicKey(this->PrivateKey);
-	this->Address = GetAddress(this->PublicKey);
+	UWallet * Wallet = NewObject<UWallet>();
+	Wallet->PrivateKey = FPrivateKey::New();
+	for (int i = 0; i < 32; i++)
+	{
+		Wallet->PrivateKey.Arr.Get()->GetData()[i] = RandomByte();
+	}
+	Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
+	Wallet->Address = GetAddress(Wallet->PublicKey);
+	return Wallet;
 }
 
-FWallet::FWallet(const FString& PrivateKey)
+UWallet* UWallet::Make(FPrivateKey PrivateKey)
 {
+	UWallet * Wallet = NewObject<UWallet>();
+	Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
+	Wallet->Address = GetAddress(Wallet->PublicKey);
+	return Wallet;
+}
+
+UWallet* UWallet::Make(const FString& PrivateKey)
+{
+	UWallet * Wallet = NewObject<UWallet>();
 	if (PrivateKey.Len() == 64)
 	{
-		this->PrivateKey = FPrivateKey::From(PrivateKey);
-		this->PublicKey = GetPublicKey(this->PrivateKey);
-		this->Address = GetAddress(this->PublicKey);
+		Wallet->PrivateKey = FPrivateKey::From(PrivateKey);
+		Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
+		Wallet->Address = GetAddress(Wallet->PublicKey);
 	}
+	return Wallet;
 }
 
-TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
+TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 {
 	TArray<uint8_t> nonce;
 	FString v_0_str = "010101010101010101010101010101010101010101010101010101010101010100";
@@ -73,7 +91,7 @@ TArray<uint8_t> FWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	return nonce;
 }
 
-TArray<uint8> FWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLength)
+TArray<uint8> UWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLength)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
@@ -117,7 +135,7 @@ TArray<uint8> FWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLeng
 	return sig;
 }
 
-TArray<uint8> FWallet::SignMessage(FString message)
+TArray<uint8> UWallet::SignMessage(FString message)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
@@ -162,17 +180,17 @@ TArray<uint8> FWallet::SignMessage(FString message)
 	return sig;
 }
 
-FPrivateKey FWallet::GetWalletPrivateKey()
+FPrivateKey UWallet::GetWalletPrivateKey()
 {
 	return this->PrivateKey;
 }
 
-FPublicKey FWallet::GetWalletPublicKey()
+FPublicKey UWallet::GetWalletPublicKey()
 {
 	return this->PublicKey;
 }
 
-FAddress FWallet::GetWalletAddress()
+FAddress UWallet::GetWalletAddress()
 {
 	return this->Address;
 }

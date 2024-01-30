@@ -246,30 +246,30 @@ public:
 
 	FString GetSessionPublicKey() const
 	{
-		FWallet TWallet = FWallet(SessionPrivateKey);
-		FString PublicKeyStr = BytesToHex(TWallet.GetWalletPublicKey().Ptr(),TWallet.GetWalletPublicKey().GetLength()).ToLower();
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		FString PublicKeyStr = BytesToHex(TWallet->GetWalletPublicKey().Ptr(),TWallet->GetWalletPublicKey().GetLength()).ToLower();
 		return PublicKeyStr;
 	}
 
 	FString GetSessionWalletAddress() const
 	{
-		FWallet TWallet = FWallet(SessionPrivateKey);
-		FString AddressStr = BytesToHex(TWallet.GetWalletAddress().Ptr(), TWallet.GetWalletAddress().GetLength()).ToLower();
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		FString AddressStr = BytesToHex(TWallet->GetWalletAddress().Ptr(), TWallet->GetWalletAddress().GetLength()).ToLower();
 		return AddressStr;
 	}
 
 	FString SignMessageWithSessionWallet(const TArray<uint8>& Message, const int32 MessageLength) const
 	{
-		FWallet TWallet = FWallet(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet.SignMessage(Message, MessageLength);
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		TArray<uint8> SigBytes = TWallet->SignMessage(Message, MessageLength);
 		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 		return Signature;
 	}
 	
 	FString SignMessageWithSessionWallet(const FString& Message) const
 	{
-		FWallet TWallet = FWallet(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet.SignMessage(Message);
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		TArray<uint8> SigBytes = TWallet->SignMessage(Message);
 		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 		return Signature;
 	}
@@ -445,9 +445,8 @@ private:
 
 	//From InitiateAuth
 	FString ChallengeSession = "";
-
-	//Gonna need to free this in a destructor unless I swap it to a UObject to use garbage collection
-	FWallet * SessionWallet;
+	
+	UWallet * SessionWallet;
 private:
 	UAuthenticator();
 public:

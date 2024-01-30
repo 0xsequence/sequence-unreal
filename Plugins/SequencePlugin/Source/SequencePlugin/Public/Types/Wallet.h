@@ -1,10 +1,11 @@
 #pragma once
 #include "BinaryData.h"
-#include "Eth/EthTransaction.h"
-#include "Eth/Crypto.h"
+#include "Wallet.generated.h"
 
-class FWallet
+UCLASS()
+class SEQUENCEPLUGIN_API UWallet : public UObject
 {
+	GENERATED_BODY()
 private:
 	FPrivateKey PrivateKey;
 	FPublicKey PublicKey;
@@ -13,18 +14,11 @@ public:
 	/*
 	* Generates a random wallet
 	*/
-	FWallet();
+	UWallet();
 
-
-	/*
-	* Generates a wallet based on a given private key
-	*/
-	FWallet(FPrivateKey PrivateKey);
-
-	/*
-	* Generates a wallet based on a given private key in string form
-	*/
-	FWallet(const FString& PrivateKey);
+	static UWallet* Make();
+	static UWallet* Make(FPrivateKey PrivateKey);
+	static UWallet* Make(const FString& PrivateKey);
 
 	TArray<uint8> SignMessage(TArray<uint8> messageBytes,int32 messageLength);
 	
