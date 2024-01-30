@@ -350,10 +350,29 @@ FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
 	return FinalPayload;
 }
 
-void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FString creds = UIndexerSupport::structToString(this->Credentials);
-	UE_LOG(LogTemp,Display,TEXT("Credentials: %s"),*creds);
+	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
+	{
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		const TSharedPtr<FJsonObject> * Data = nullptr;
+		FSignedMessage Msg;
+		if (Json.Get()->TryGetObjectField("data",Data))
+		{
+			if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessage>(Data->ToSharedRef(), &Msg))
+			{
+				OnSuccess(Msg);
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Malformed Response: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
 	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->GenerateSignedEncryptedPayload(this->BuildSignMessageIntent(Message)),OnSuccess,OnFailure);
 }
 
