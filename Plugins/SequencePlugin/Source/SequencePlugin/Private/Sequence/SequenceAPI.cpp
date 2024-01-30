@@ -277,7 +277,7 @@ void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, cons
 			OnFailure(FSequenceError(RequestFail, "Malformed response: " + Response));
 		}
 	};
-	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnSuccess,OnFailure);
+	this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/DropSession",this->SignAndEncryptPayload(this->BuildCloseSessionIntent()),OnResponse,OnFailure);
 }
 
 void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
