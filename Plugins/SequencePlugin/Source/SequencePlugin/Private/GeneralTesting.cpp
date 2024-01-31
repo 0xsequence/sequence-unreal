@@ -10,6 +10,7 @@
 #include "SequenceEncryptor.h"
 #include "SystemDataBuilder.h"
 #include "Sequence/SequenceAPI.h"
+#include "tests/ContractTest.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
 #include "Types/Wallet.h"
