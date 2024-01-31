@@ -18,7 +18,7 @@ public:
     UPROPERTY()
     FString to = "";
     UPROPERTY()
-    FString data = "";
+    FString data = "null";
     UPROPERTY()
     FString value = "";
 
@@ -111,8 +111,10 @@ private:
 public:
 	UPROPERTY()
 	FString to = "";
+    UPROPERTY()
+    FString id = "";
 	UPROPERTY()
-	FString data = "";
+	FString data = "null";
 	UPROPERTY()
 	FString token = "";
 	UPROPERTY()
@@ -120,9 +122,10 @@ public:
 
 	FERC721Transaction(){}
 		
-	FERC721Transaction(const FString& ToIn, const FString& DataIn, const FString& TokenIn, const bool& SafeIn)
+	FERC721Transaction(const FString& ToIn, const FString& IdIn, const FString& DataIn, const FString& TokenIn, const bool& SafeIn)
 	{
 		to = ToIn;
+	    id = IdIn;
 		data = DataIn;
 		token = TokenIn;
 		safe = SafeIn;
@@ -135,10 +138,11 @@ public:
 
     FString GetJsonString() const
 	{
+	    const FString safeState = (safe) ? "true" : "false";
 	    FString Json = "{";
 	    Json += "\"data\":\"" + data + "\",";
-	    Json += "\"safe\":" + (safe)? "true" : "false";
-	    Json += ",";
+	    Json += "\"id\":\"" + id + "\",";
+	    Json += "\"safe\":" + safeState + ",";
 	    Json += "\"to\":\"" + to + "\",";
 	    Json += "\"token\":\"" + token + "\",";
 	    Json += "\"type\":\"" + type + "\"";
@@ -192,7 +196,7 @@ public:
 	UPROPERTY()
 	FString to = "";
 	UPROPERTY()
-	FString data = "";
+	FString data = "null";
 	UPROPERTY()
 	FString token = "";
 	UPROPERTY()

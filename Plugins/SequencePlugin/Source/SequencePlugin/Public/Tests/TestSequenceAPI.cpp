@@ -78,7 +78,7 @@ void SequenceAPITest::SendTransaction(TFunction<void(FString)> OnSuccess, TFunct
 	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
 	FRawTransaction T;
 	T.data = "data?";
-	T.to = "0xsomebody";
+	T.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T.value = "0";
 	
 	FERC20Transaction T20;
@@ -87,25 +87,24 @@ void SequenceAPITest::SendTransaction(TFunction<void(FString)> OnSuccess, TFunct
 	T20.value = "100000";
 
 	FERC721Transaction T721;
-	T721.data = "data?";
-	T721.safe = false;
-	T721.to = "0xepic person";
-	T721.token = "token";
+	T721.safe = true;
+	T721.id = "54530968763798660137294927684252503703134533114052628080002308208148824588621";
+	T721.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	T721.token = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 
 	FERC1155Transaction T1155;
-	T1155.data = "data?";
 	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T1155.token = "token";
+	T1155.token = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
 	
 	FERC1155TxnValue val;
-	val.amount = "0";
-	val.id = "0x";
+	val.amount = "1";
+	val.id = "66635";
 	T1155.vals.Add(val);
 	
 	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
-	/*Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));*/
+	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
+	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
 	
 	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
 }

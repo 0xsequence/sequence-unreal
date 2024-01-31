@@ -440,6 +440,8 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	return Intent;
 }
 
+//{"sessionId":"0xA4057588629C81Dac0e67870b2Aa6359f981C6Bc","intentJson":"{\"version\":\"1.0.0\",\"packet\":{\"code\":\"sendTransaction\",\"expires\":1706804837,\"identifier\":\"unreal-sdk-2024.01.31-16.27.47-0xDdF51fe5a7D618144E117fD23Ac21A487e397C91\",\"issued\":1706718437,\"network\":\"137\",\"transactions\":[{\"data\":\"null\",\"true\",\"to\":\"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2\",\"token\":\"0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f\",\"type\":\"erc721send\"}],\"wallet\":\"0xDdF51fe5a7D618144E117fD23Ac21A487e397C91\"},\"signatures\":[{\"session\":\"0xA4057588629C81Dac0e67870b2Aa6359f981C6Bc\",\"signature\":\"0xb3261d36798830bcc26ab784151d1c5db8332bc154846eafe6b54992e09dcdb41b00c804b721c6bc784e6e3fa1f8dbfb423088d8ff2190a84cd9ba3635bed4b800\"}]}"}
+
 FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
