@@ -46,6 +46,18 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestHistory() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendRaw() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendERC20() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendERC721() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendERC1155() const;
 	
 	/*
 	* Called by frontend to test the indexer
