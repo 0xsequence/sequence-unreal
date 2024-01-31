@@ -42,6 +42,17 @@ public:
     {
         return type;
     }
+
+    FString GetJsonString() const
+    {
+        FString Json = "{";
+        Json += "\"data\":\"" + data + "\",";
+        Json += "\"to\":\"" + to + "\",";
+        Json += "\"type\":\"" + type + "\",";
+        Json += "\"value\":\"" + value + "\"";
+        Json += "}";
+        return Json;
+    }
 };
 
 USTRUCT(BlueprintType)
@@ -77,6 +88,17 @@ public:
 	{
 		return type;
 	}
+
+    FString GetJsonString() const
+	{
+	    FString Json = "{";
+        Json += "\"to\":\"" + to + "\",";
+	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"type\":\"" + type + "\",";
+	    Json += "\"value\":\"" + value + "\"";
+	    Json += "}";
+	    return Json;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -110,6 +132,19 @@ public:
 	{
 		return type;
 	}
+
+    FString GetJsonString() const
+	{
+	    FString Json = "{";
+	    Json += "\"data\":\"" + data + "\",";
+	    Json += "\"safe\":" + (safe)? "true" : "false";
+	    Json += ",";
+	    Json += "\"to\":\"" + to + "\",";
+	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"type\":\"" + type + "\"";
+	    Json += "}";
+	    return Json;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -134,6 +169,15 @@ public:
 	{
 		amount = AmountIn;
 		id = IdIn;
+	}
+
+    FString GetJsonString() const
+	{
+	    FString Json = "{";
+	    Json += "\"amount\":\"" + amount + "\",";
+	    Json += "\"id\":\"" + id + "\"";
+	    Json += "}";
+	    return Json;
 	}
 };
 
@@ -168,6 +212,25 @@ public:
 	FString GetType() const
 	{
 		return type;
+	}
+
+    FString GetJsonString() const
+	{
+	    FString Json = "{";
+	    Json += "\"data\":\"" + data + "\",";
+	    Json += "\"to\":\"" + to + "\",";
+	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"type\":\"" + type + "\",";
+	    Json += "\"vals\":";
+	    Json += "[";
+	    for (auto val : vals)
+	    {
+	        Json += val.GetJsonString() + ",";
+	    }
+	    Json.RemoveAt(Json.Len()-1);//remove the last trailing ,
+	    Json += "]";
+	    Json += "}";
+	    return Json;
 	}
 };
 
