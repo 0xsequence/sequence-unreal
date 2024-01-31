@@ -11,6 +11,7 @@ struct FBinaryData
 	FString ToHex() const;
 	void Renew(); // Makes new blank array. Clean up the old one!
 	uint8* Ptr() const;
+	TArray<uint8> ToArray();
 };
 
 // Number of arbitrary length
