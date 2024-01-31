@@ -37,6 +37,11 @@ uint8* FBinaryData::Ptr() const
 	return this->Arr.Get()->GetData();
 }
 
+TArray<uint8> FBinaryData::ToArray()
+{
+	return *this->Arr.Get();
+}
+
 FUnsizedData FUnsizedData::Empty()
 {
 	return FUnsizedData{TArray<uint8>()};
