@@ -381,37 +381,33 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 
 void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	FJsonArray TransactionJsonArray;
-	FString JsonTxn = "[";
+	FString TransactionsPayload = "[";
 	
 	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
 	{
 		switch(Transaction.GetCurrentSubtypeIndex())
 		{
 		case 0: //RawTransaction
-			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FRawTransaction>()));
+			TransactionsPayload += Transaction.GetSubtype<FRawTransaction>().GetJsonString() + ",";
 			break;
 		case 1: //ERC20
-			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC20Transaction>()));
+			TransactionsPayload += Transaction.GetSubtype<FERC20Transaction>().GetJsonString() + ",";
 			break;
 		case 2: //ERC721
-			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC721Transaction>()));
+			TransactionsPayload += Transaction.GetSubtype<FERC721Transaction>().GetJsonString() + ",";
 			break;
 		case 3: //ERC1155
-			TransactionJsonArray.AddValue(UIndexerSupport::structToPartialSimpleString(Transaction.GetSubtype<FERC1155Transaction>()));
+			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
 			break;
 		default: //Doesn't match
 			break;
 		}
 	}
+	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	TransactionsPayload += "]";
+	//{"sessionId":"0x2Ccf0230f4f04CCA0f89E785fA82D4E6a8bb4aBe","intentJson":"{\"version\":\"1.0.0\",\"packet\":{\"code\":\"sendTransaction\",\"expires\":1706708327,\"identifier\":\"75c636f2-3084-4d94-bcc1-668dbb53d6f7\",\"issued\":1706708297,\"network\":\"137\",\"transactions\":[{\"to\":\"0x9766bf76b2E3e7BCB8c61410A3fC873f1e89b43f\",\"token\":\"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270\",\"type\":\"erc20send\",\"value\":\"1\"}],\"wallet\":\"0x2D566542570771c264b98959B037f4eb7534caaA\"},\"signatures\":[{\"session\":\"0x2Ccf0230f4f04CCA0f89E785fA82D4E6a8bb4aBe\",\"signature\":\"0xb988f79a670ec047e1705e18c848deecea1aa2f3e3f5e5137387c6237b0ee5510fe02abb770a42353a7801876077353ea6b88897141d74c741dccabdf17429101b\"}]}"}
+	//{"sessionId":"0x116dca29ce380C38fddBA2D0716753f314725207","intentJson":"{\"version\":\"1.0.0\",\"packet\":{\"code\":\"sendTransaction\",\"expires\":1706798484,\"identifier\":\"unreal-sdk-2024.01.31-14.41.54-0xDdF\",\"issued\":1706712084,\"network\":\"137\",\"transactions\":[{\"to\":\"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2\",\"token\":\"0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174\",\"type\":\"erc20send\",\"value\":\"1\"}],\"wallet\":\"0xDdF51fe5a7D618144E117fD23Ac21A487e397C91\"},\"signatures\":[{\"session\":\"0x116dca29ce380C38fddBA2D0716753f314725207\",\"signature\":\"0x3e48897217bf82dec4d61b57173cf891e4668f03b909a709274b14f885ae1a1153e92ac15baba468fd558098e145beb030ecd8f0b324ae56c9751ae934dcddbc00\"}]}"}
 
-	FString TransactionsPayload = TransactionJsonArray.ToString();
-	const FString srch_slash = TEXT("\"");
-	const FString replace = TEXT("\\\"");
-	const TCHAR* srch_ptr_slash = *srch_slash;
-	const TCHAR* rep_ptr = *replace;
-	(TransactionsPayload).ReplaceInline(srch_ptr_slash, rep_ptr, ESearchCase::IgnoreCase);
-	
 	if (this->Credentials.IsRegistered())
 		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent", this->GenerateSignedEncryptedPayload(BuildSendTransactionIntent(TransactionsPayload)), OnSuccess, OnFailure);
 	else
@@ -451,7 +447,14 @@ FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
-	const FString Packet = "{\\\"code\\\":\\\"sendTransaction\\\",\\\"expires\\\":"+expiresString+",\\\"identifier\\\":\\\""+identifier+"\\\",\\\"issued\\\":"+issuedString+",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"transactions\\\":"+Txns+",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
+	FString PaddedTxns = Txns;
+	const FString srch_slash = TEXT("\"");
+	const FString replace = TEXT("\\\"");
+	const TCHAR* srch_ptr_slash = *srch_slash;
+	const TCHAR* rep_ptr = *replace;
+	(PaddedTxns).ReplaceInline(srch_ptr_slash, rep_ptr, ESearchCase::IgnoreCase);
+	
+	const FString Packet = "{\\\"code\\\":\\\"sendTransaction\\\",\\\"expires\\\":"+expiresString+",\\\"identifier\\\":\\\""+identifier+"\\\",\\\"issued\\\":"+issuedString+",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"transactions\\\":"+PaddedTxns+",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
 	const FString RawPacket = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(RawPacket);
 	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
