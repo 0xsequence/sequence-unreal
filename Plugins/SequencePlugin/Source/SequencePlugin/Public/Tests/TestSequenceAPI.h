@@ -9,6 +9,7 @@ public:
 	static void ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendTransaction(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void CallContract(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendERC20(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendERC721(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);

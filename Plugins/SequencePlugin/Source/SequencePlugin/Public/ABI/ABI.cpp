@@ -193,6 +193,19 @@ TFixedABIData ABI::Bool(bool Input)
 	return TFixedABIData(Arr);
 }
 
+TFixedABIData ABI::Address(FAddress Address)
+{
+	TArray<uint8> Arr = Address.ToArray();
+
+	// Left padded
+	for(auto i = 0; i < GBlockByteLength - FAddress::Size; i++)
+	{
+		Arr.Insert(0x00, 0);
+	}
+
+	return TFixedABIData{Arr};
+}
+
 TDynamicABIData ABI::String(FString Input)
 {
 	TArray<uint8> Arr = StringToUTF8(Input).ToArray();

@@ -1,6 +1,7 @@
 #include "TestSequenceAPI.h"
 #include "Sequence/SequenceAPI.h"
 #include "Authenticator.h"
+#include "ABI/ABI.h"
 
 void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
@@ -81,8 +82,55 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
+	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	{
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		OnSuccess(OutputString);
+	},GenericFailure);
 }
+
+void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
+
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Test Failed", Error);
+	};
+	
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Call Contract Test]========================"));
+
+	// CALL DATA
+	FString FunctionSignature = "balanceOf(address,uint256)";
+	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
+	TFixedABIData Id = ABI::UInt32(0x01);
+	TArray<ABIEncodeable*> Arr;
+	Arr.Add(&Account);
+	Arr.Add(&Id);
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+	
+	
+	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+	FRawTransaction T;
+	
+	T.data = "0x" + EncodedData.ToHex();
+	T.to = "0x64d9f9d527abe2a1c1ce3fada98601c4ac5bfdd2";
+	T.value = "0";
+	
+	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
+	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	{
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		OnSuccess(OutputString);
+	},GenericFailure);
+}
+
 void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
@@ -103,7 +151,13 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	T20.value = "100000";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
-	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
+	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	{
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		OnSuccess(OutputString);
+	},GenericFailure);
 }
 void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
@@ -126,7 +180,13 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	T721.token = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
-	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
+	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	{
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		OnSuccess(OutputString);
+	},GenericFailure);
 }
 void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
@@ -151,7 +211,13 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	T1155.vals.Add(val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
-	Api->SendTransaction(Txn,OnSuccess,GenericFailure);
+	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	{
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		OnSuccess(OutputString);
+	},GenericFailure);
 }
 
 void SequenceAPITest::SendTransaction(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)

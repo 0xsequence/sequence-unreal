@@ -103,6 +103,21 @@ void AGeneralTesting::TestSendRaw() const
 	SequenceAPITest::SendRaw(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestCallContract() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::CallContract(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestSendERC20() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
