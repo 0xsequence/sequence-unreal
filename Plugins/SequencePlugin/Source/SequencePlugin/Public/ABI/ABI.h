@@ -10,7 +10,8 @@ public:
 	virtual ~ABIEncodeable() = default;
 	virtual void EncodeHead(TArray<uint8> &Data) = 0;
 	/*
-	 * The HeadPosition is 
+	 * The Headposition is how far back the head of the entire array of arguments is,
+	 *  while the offset is the argument number 
 	 */
 	virtual void EncodeTail(TArray<uint8> &Data, int HeadPosition, int Offset) = 0;
 	static void PushEmptyBlock(TArray<uint8> &Data);

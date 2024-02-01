@@ -89,6 +89,66 @@ void AGeneralTesting::TestSendTransaction() const
 	SequenceAPITest::SendTransaction(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestSendRaw() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendRaw(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestSendERC20() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendERC20(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestSendERC721() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendERC721(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestSendERC1155() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendERC1155(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestCloseSessions() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
