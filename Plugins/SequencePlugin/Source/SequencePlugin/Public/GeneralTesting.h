@@ -51,6 +51,9 @@ protected:
 	void TestSendRaw() const;
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestCallContract() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestSendERC20() const;
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
