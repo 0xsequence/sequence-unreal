@@ -41,7 +41,7 @@ public class SequencePlugin : ModuleRules
 				"Projects",
                 "Json",
                 "JsonUtilities",
-				"ApplicationCore",
+				"ApplicationCore", "WebBrowser",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

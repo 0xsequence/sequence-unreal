@@ -13,6 +13,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Indexer/IndexerSupport.h"
 #include "SequenceEncryptor.h"
+#include "IWebBrowserCookieManager.h"
+#include "IWebBrowserSingleton.h"
+#include "WebBrowserModule.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -96,6 +99,19 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
+	//clear webcache here so signin will be clean eachtime!
+	if (this->PurgeCache)
+	{
+		if (const IWebBrowserSingleton* WebBrowserSingleton = IWebBrowserModule::Get().GetSingleton())
+		{
+			const TSharedPtr<IWebBrowserCookieManager> CookieManager = WebBrowserSingleton->GetCookieManager();
+			if (CookieManager.IsValid())
+			{
+				CookieManager->DeleteCookies();
+			}
+		}
+	}
+	
 	return SigninURL;
 }
 
