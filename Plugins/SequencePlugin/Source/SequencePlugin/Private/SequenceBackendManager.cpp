@@ -36,7 +36,7 @@ void ASequenceBackendManager::CallShowAuthFailureScreen()
 
 void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn)
 {
-	this->Credentials = Credentials;
+	this->Credentials = CredentialsIn;
 	if (this->ShowAuthSuccessDelegate.IsBound())
 		this->ShowAuthSuccessDelegate.Broadcast();
 	else

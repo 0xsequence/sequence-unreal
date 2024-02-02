@@ -353,10 +353,10 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 		FString PlainTextPtr, CipherTextBlobPtr;
 		if (responseObj->TryGetStringField("Plaintext", PlainTextPtr) && responseObj->TryGetStringField("CipherTextBlob", CipherTextBlobPtr))
 		{//good state
-			TArray<uint8> PlainTextBytes;
-			FBase64::Decode(PlainTextPtr, PlainTextBytes);
-			this->PlainText = BytesToHex(PlainTextBytes.GetData(),PlainTextBytes.Num()).ToLower();
-			this->PlainTextBytes = PlainTextBytes;
+			TArray<uint8> PlainTextBytes_cached;
+			FBase64::Decode(PlainTextPtr, PlainTextBytes_cached);
+			this->PlainText = BytesToHex(PlainTextBytes_cached.GetData(),PlainTextBytes_cached.Num()).ToLower();
+			this->PlainTextBytes = PlainTextBytes_cached;
 
 			TArray<uint8> CipherTextBytes;
 			FBase64::Decode(CipherTextBlobPtr, CipherTextBytes);

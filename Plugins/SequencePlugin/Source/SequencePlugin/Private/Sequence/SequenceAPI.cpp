@@ -1,4 +1,3 @@
-#pragma once
 #include "Sequence/SequenceAPI.h"
 #include "Eth/Crypto.h"
 #include "RequestHandler.h"
@@ -748,115 +747,115 @@ void USequenceWallet::GetTransactionHistory(int64 chainID, FGetTransactionHistor
 
 void USequenceWallet::BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).BlockByNumber(Number, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).BlockByNumber(Number, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).BlockByNumber(Tag,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).BlockByNumber(Tag,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).BlockByHash(Hash, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).BlockByHash(Hash, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).BlockNumber(OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).BlockNumber(OnSuccess, OnFailure);
 }
 
 void USequenceWallet::HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).HeaderByNumber(Id, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).HeaderByNumber(Id, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).HeaderByNumber(Tag, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).HeaderByNumber(Tag, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).HeaderByHash(Hash,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).HeaderByHash(Hash,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).TransactionByHash(Hash,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).TransactionByHash(Hash,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).TransactionCount(Addr,Number,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).TransactionCount(Addr,Number,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).TransactionCount(Addr,Tag,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).TransactionCount(Addr,Tag,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).TransactionReceipt(Hash,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).TransactionReceipt(Hash,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).GetGasPrice(OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).GetGasPrice(OnSuccess, OnFailure);
 }
 
 void USequenceWallet::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).EstimateContractCallGas(ContractCall,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).EstimateContractCallGas(ContractCall,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).EstimateDeploymentGas(From,Bytecode,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).EstimateDeploymentGas(From,Bytecode,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).DeployContract(Bytecode, PrivKey, ChainId, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).DeployContract(Bytecode, PrivKey, ChainId, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).DeployContractWithHash(Bytecode,PrivKey,ChainId,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).DeployContractWithHash(Bytecode,PrivKey,ChainId,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).NonceAt(Number,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).NonceAt(Number,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).NonceAt(Tag,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).NonceAt(Tag,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).SendRawTransaction(Data,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).SendRawTransaction(Data,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).ChainId(OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).ChainId(OnSuccess,OnFailure);
 }
 
 void USequenceWallet::Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
+	Provider(this->ProviderUrl).Call(ContractCall,Number,OnSuccess,OnFailure);
 }
 
 void USequenceWallet::NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
-	Provider::Provider(this->ProviderUrl).NonViewCall(transaction, PrivateKey, ChainID, OnSuccess, OnFailure);
+	Provider(this->ProviderUrl).NonViewCall(transaction, PrivateKey, ChainID, OnSuccess, OnFailure);
 }
