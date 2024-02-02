@@ -466,6 +466,8 @@ private:
 
 	UPROPERTY()
 	UWallet * SessionWallet;
+
+	bool PurgeCache = true;
 private:
 	UAuthenticator();
 public:
