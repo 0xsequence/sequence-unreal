@@ -267,7 +267,7 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
-void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
@@ -277,7 +277,7 @@ void USequenceWallet::CloseSession(const TSuccessCallback<void>& OnSuccess, cons
 			this->Credentials.UnRegisterCredentials();
 			UAuthenticator *Auth = NewObject<UAuthenticator>();
 			Auth->StoreCredentials(this->Credentials);//update credentials to ensure we remember that this session is now closed
-			OnSuccess();
+			OnSuccess("[SessionClosed]");
 		}
 		else
 		{

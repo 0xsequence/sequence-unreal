@@ -271,7 +271,7 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
-	const TFunction<void(void)> OnResponse = [OnSuccess]()
+	const TFunction<void(FString)> OnResponse = [OnSuccess](const FString& Response)
 	{
 		OnSuccess("CloseSession Test Passed");
 	};
