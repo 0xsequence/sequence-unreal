@@ -8,6 +8,7 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 #include "UObject/NoExportTypes.h"
+#include "Modules/ModuleManager.h"
 #include "Syncer.h"
 #include "ObjectHandler.generated.h"
 

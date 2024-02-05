@@ -1,7 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,6 +8,7 @@
 #include "Types/Header.h"
 #include "Http.h"
 #include "Util/JsonBuilder.h"
+#include "Dom/JsonObject.h"
 #include "Types/TransactionReceipt.h"
 #include "Eth/EthTransaction.h"
 #include "RPCCaller.h"

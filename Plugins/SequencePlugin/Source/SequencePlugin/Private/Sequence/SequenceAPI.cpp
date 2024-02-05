@@ -9,6 +9,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "JsonUtils/JsonPointer.h"
 #include "Types/ContractCall.h"
+#include "Misc/Base64.h"
 #include "Util/HexUtility.h"
 
 FString SortOrderToString(ESortOrder SortOrder)
