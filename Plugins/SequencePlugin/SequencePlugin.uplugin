@@ -14,13 +14,21 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": true,
-
-	"SupportedTargetPlatforms": [ "Win64", "Android","IOS","Mac" ],
+	"SupportedTargetPlatforms": [
+		"Win64",
+		"Android"
+	],
 	"Modules": [
 		{
 			"Name": "SequencePlugin",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "WebBrowserWidget",
+			"Enabled": true
 		}
 	]
 }
