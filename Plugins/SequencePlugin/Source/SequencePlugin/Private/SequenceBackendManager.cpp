@@ -9,6 +9,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Indexer/Indexer.h"
 #include "Eth/Crypto.h"
+#include "TimerManager.h"
 #include "SystemDataBuilder.h"
 
 FUserDetails ASequenceBackendManager::getUserDetails()

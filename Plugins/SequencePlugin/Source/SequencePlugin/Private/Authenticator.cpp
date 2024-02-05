@@ -4,6 +4,7 @@
 #include "Misc/Guid.h"
 #include "AES/aes.c"
 #include "AES/aes.h"
+#include "Misc/Base64.h"
 #include "Eth/EthTransaction.h"
 #include "Types/Wallet.h"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"

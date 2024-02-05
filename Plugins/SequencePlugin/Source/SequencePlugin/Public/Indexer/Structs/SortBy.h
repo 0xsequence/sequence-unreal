@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Indexer/Indexer_Enums.h"
+#include "Dom/JsonObject.h"
 #include "SortBy.generated.h"
 
 USTRUCT(BlueprintType)

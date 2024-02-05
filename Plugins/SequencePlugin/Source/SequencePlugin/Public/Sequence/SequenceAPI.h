@@ -11,6 +11,7 @@
 #include "Provider.h"
 #include "Session.h"
 #include "SignedMessage.h"
+#include "Containers/Union.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;

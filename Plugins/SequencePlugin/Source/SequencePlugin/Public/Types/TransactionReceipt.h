@@ -1,4 +1,5 @@
 #pragma once
+#include "Dom/JsonObject.h"
 #include "BinaryData.h"
 
 struct FTransactionReceipt

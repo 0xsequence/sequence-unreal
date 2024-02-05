@@ -1,6 +1,7 @@
 #pragma once
 #include "Util/Async.h"
 #include "Errors.h"
+#include "Dom/JsonObject.h"
 #include "Util/JsonBuilder.h"
 
 class RPCCaller
