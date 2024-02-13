@@ -43,18 +43,30 @@ struct FWaasJWT
 	FString emailClientId = "";
 };
 
+USTRUCT()
 struct FWaasCredentials
 {
+	GENERATED_USTRUCT_BODY()
 private:
+	UPROPERTY()
 	FString projectId = "";
+	UPROPERTY()
 	FString identityPoolId = "";
+	UPROPERTY()
 	FString idpRegion = "";
+	UPROPERTY()
 	FString rpcServer = "";
+	UPROPERTY()
 	FString kmsRegion = "";
+	UPROPERTY()
 	FString alg = "";
+	UPROPERTY()
 	FString CognitoClientId = "";
+	UPROPERTY()
 	FString KMSArn = "";
+	UPROPERTY()
 	FString KMSKeyId = "";
+	UPROPERTY()
 	bool EmailEnabled = false;
 public:
 	FWaasCredentials(){}
@@ -413,6 +425,8 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
+	void PrintAll();
+private:
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 
@@ -421,6 +435,7 @@ private:
 
 	const FString UrlScheme = "powered-by-sequence";
 	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
+	const FString BRedirectURL = "some text to check with";
 
 	const FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
 	const FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
@@ -436,6 +451,7 @@ private:
 
 	FString Cached_IDToken;
 	FString Cached_Email;
+	FString Cached_Issuer;
 	//AWS
 	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImlkZW50aXR5UG9vbElkIjoidXMtZWFzdC0yOjQyZGMyZjE4LTJmOWItNGZkNS05NDI5LWUwZGE1MjFmOWNmNCIsImlkcFJlZ2lvbiI6InVzLWVhc3QtMiIsInJwY1NlcnZlciI6Imh0dHBzOi8vZGV2LXdhYXMuc2VxdWVuY2UuYXBwIiwia21zUmVnaW9uIjoidXMtZWFzdC0yIiwia2V5SWQiOiJhcm46YXdzOmttczp1cy1lYXN0LTI6MzgxNDkyMjQ3Njk3OmtleS8xODgxZTY3My1mMThkLTQ1NTgtODI5YS0xM2I4MThjMDMwNjUifQ";
 	FWaasCredentials WaasCredentials;
@@ -467,7 +483,7 @@ private:
 	UPROPERTY()
 	UWallet * SessionWallet;
 
-	bool PurgeCache = true;
+	bool PurgeCache = false;
 private:
 	UAuthenticator();
 public:
@@ -518,19 +534,31 @@ private:
 	FString BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload);
 
 	//RPC Calls//
-
+	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
 	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
+	
+	void ProcessCognitoGetID(FString response);
 
 	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
 
+	void ProcessCognitoIdentityGetCredentialsForIdentity(const FString& response);
+
 	void KMSGenerateDataKey(const FString& AWSKMSKeyID);
+
+	void ProcessKMSGenerateDataKey(const FString& response);
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 
+	void ProcessCognitoIdentityInitiateAuth(const FString& response);
+
 	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID);
+
+	void ProcessCognitoIdentitySignUp(const FString& response);
 
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 
+	void ProcessAdminRespondToAuthChallenge(const FString& response);
+	
 	//Sequence Specific//
 
 	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
@@ -546,4 +574,12 @@ private:
 	void AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	static void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void UE_RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void UE_AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void UE_SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void UE_RPC(const FString& Url, const FString& RequestBody,void(UAuthenticator::Callback)(FString));
 };
