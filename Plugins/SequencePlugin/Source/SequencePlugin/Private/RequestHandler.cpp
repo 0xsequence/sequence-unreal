@@ -137,35 +137,16 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{		
-		auto content = Req->GetContent();
-		FString str = "";
-		for(auto i : content)
-		{
-			str += UTF8ToString(FUnsizedData{MakeArray(&i, 1)});
-		}
-
-		auto headers = Req->GetAllHeaders();
-		FString headers_str = "";
-		for(auto header : headers) { headers_str += "\n" + header; }
-		UE_LOG(LogTemp, Display, TEXT("========================================================================="));
-		UE_LOG(LogTemp, Display, TEXT("Request URL: %s"), *Req->GetURL());
-		UE_LOG(LogTemp, Display, TEXT("Request Headers: %s"), *headers_str);
-		UE_LOG(LogTemp, Display, TEXT("Request Content: %s"), *str);
-		UE_LOG(LogTemp, Display, TEXT("========================================================================="));
 		if(bWasSuccessful)
 		{
-			auto Content = Response->GetContentAsString();
-			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);
-			OnSuccess(Content);
+			OnSuccess(Response.Get()->GetContentAsString());
 		}
 		else
 		{
-			if(!Response.IsValid())
-			{
-				return OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-			}
-			
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+			if(Response.IsValid())
+				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+			else
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}
 	});
 }

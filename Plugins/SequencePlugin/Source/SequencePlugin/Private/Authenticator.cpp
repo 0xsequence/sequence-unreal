@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Authenticator.h"
+
+#include "HttpModule.h"
 #include "Misc/Guid.h"
 #include "AES/aes.c"
 #include "AES/aes.h"
@@ -17,6 +19,7 @@
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
 #include "WebBrowserModule.h"
+#include "Interfaces/IHttpResponse.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -118,6 +121,9 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 
 FString UAuthenticator::GetRedirectURL() const
 {
+	UE_LOG(LogTemp,Display,TEXT(""));
+	UE_LOG(LogTemp,Display,TEXT("RedirectURL: %s"),*this->RedirectURL);
+	UE_LOG(LogTemp,Display,TEXT("Padder: %s"),*this->BRedirectURL);
 	return this->RedirectURL;
 }
 
@@ -143,7 +149,11 @@ FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString&
 FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
 {
 	//return FString::Printf(TEXT("https://%s.%s.amazonaws.com"),*Service,*AWSRegion);
-	return "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
+	UE_LOG(LogTemp,Display,TEXT("(In build AWS URL) Service: %s"), *Service);
+	UE_LOG(LogTemp,Display,TEXT("(In build AWS URL) Region: %s"), *AWSRegion);
+	FString Ret = "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
+	UE_LOG(LogTemp, Display, TEXT("AWSURL: %s"), *Ret);
+	return Ret;
 }
 
 FString UAuthenticator::GetISSClaim(const FString& JWT) const
@@ -183,8 +193,46 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	return ISSClaim;
 }
 
+FString UAuthenticator::ParseResponse(FHttpResponsePtr Response,bool WasSuccessful)
+{
+	FString Ret = "";
+
+	if(WasSuccessful)
+	{
+		Ret = Response.Get()->GetContentAsString();
+	}
+	else
+	{
+		if(Response.IsValid())
+			Ret = "Request is invalid!";
+		else
+			Ret = "Request failed: " + Response->GetContentAsString();
+	}
+	
+	return Ret;
+}
+
+void UAuthenticator::ProcessCognitoGetID(FString response)
+{
+	UE_LOG(LogTemp, Display, TEXT("Response %s"),*response);
+	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
+	FString IdentityIdPtr = "nil";
+	if (responseObj->TryGetStringField("IdentityId",IdentityIdPtr))
+	{//good state
+		this->IdentityId = IdentityIdPtr;
+		CognitoIdentityGetCredentialsForIdentity(this->IdentityId, this->Cached_IDToken, this->Cached_Issuer);
+	}
+	else
+	{//error state
+		UE_LOG(LogTemp, Error, TEXT("[No IdentityID found in AWS Response]"));
+		this->CallAuthFailure();
+	}
+}
+
 void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken)
 {
+	PrintAll();
+	this->Cached_Issuer = Issuer;
 	const FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityPoolId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"),*PoolID,*Issuer, *IDToken);
 	const FString RequestBody = "{\"IdentityPoolId\":\""+ PoolID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
@@ -212,11 +260,13 @@ void UAuthenticator::CognitoIdentityGetID(const FString& PoolID,const FString& I
 		this->CallAuthFailure();
 	};
 
-	this->RPC(URL,"com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetId", RequestBody, GenericSuccess, GenericFailure);
+	//this->UE_RPC(URL,"com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetId", RequestBody, GenericSuccess, GenericFailure);
+	this->UE_RPC(URL,"com.amazonaws.cognito.identity.model.AWSCognitoIdentityService.GetId", RequestBody,&UAuthenticator::ProcessCognitoGetID);
 }
 
 void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer)
 {
+	PrintAll();
 	const FString URL = this->BuildAWSURL("cognito-identity",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"IdentityId\":\"%s\",\"Logins\":{\"%s\":\"%s\"}}"), *IdentityID, *Issuer, *IDToken);
 	const FString RequestBody = "{\"IdentityId\":\""+ IdentityID +"\",\"Logins\":{\""+ Issuer +"\":\""+ IDToken +"\"}}";
@@ -256,7 +306,7 @@ void UAuthenticator::CognitoIdentityGetCredentialsForIdentity(const FString& Ide
 		this->CallAuthFailure();
 	};
 
-	this->RPC(URL,"AWSCognitoIdentityService.GetCredentialsForIdentity",RequestBody,GenericSuccess,GenericFailure);
+	this->UE_RPC(URL,"AWSCognitoIdentityService.GetCredentialsForIdentity",RequestBody,GenericSuccess,GenericFailure);
 }
 
 FString UAuthenticator::BuildYYYYMMDD(const FDateTime& Date)
@@ -359,6 +409,7 @@ FString UAuthenticator::BuildKMSAuthorizationHeader(const FDateTime& Date, const
 
 void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 {
+	PrintAll();
 	const FString URL = BuildAWSURL("kms",this->WaasCredentials.GetKMSRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"KeyId\":\"%s\",\"KeySpec\":\"AES_256\"}"), *AWSKMSKeyID);
 	const FString RequestBody = "{\"KeyId\":\""+ AWSKMSKeyID +"\",\"KeySpec\":\"AES_256\"}";
@@ -393,7 +444,7 @@ void UAuthenticator::KMSGenerateDataKey(const FString& AWSKMSKeyID)
 		this->CallAuthFailure();
 	};
 	const FDateTime cachedDate = FDateTime::UtcNow();
-	this->AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL.RightChop(8), RequestBody),cachedDate, URL, "TrentService.GenerateDataKey", RequestBody, GenericSuccess, GenericFailure);
+	this->UE_AuthorizedRPC(this->BuildKMSAuthorizationHeader(cachedDate,URL.RightChop(8), RequestBody),cachedDate, URL, "TrentService.GenerateDataKey", RequestBody, GenericSuccess, GenericFailure);
 }
 
 bool UAuthenticator::CanRetryEmailLogin()
@@ -410,6 +461,7 @@ void UAuthenticator::ResetRetryEmailLogin()
 
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
+	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\"%s\"},\"ClientId\":\"%s\"}"), *Email, *AWSCognitoClientID);
 	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
@@ -447,7 +499,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 	
 	if (this->CanRetryEmailLogin())
 	{
-		this->RPC(URL, "AWSCognitoIdentityProviderService.InitiateAuth", RequestBody, GenericSuccess, GenericFailure);
+		this->UE_RPC(URL, "AWSCognitoIdentityProviderService.InitiateAuth", RequestBody, GenericSuccess, GenericFailure);
 	}
 	else
 	{
@@ -469,6 +521,7 @@ FString UAuthenticator::GenerateSignUpPassword()
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
+	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"ClientId\":\"%s\",\"Password\":\"%s\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\"%s\"}],\"Username\":\"%s\"}"), *AWSCognitoClientID, *Password, *Email, *Email);
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
@@ -485,11 +538,12 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 		this->CallAuthFailure();
 	};
 
-	this->RPC(URL, "AWSCognitoIdentityProviderService.SignUp", RequestBody, GenericSuccess, GenericFailure);
+	this->UE_RPC(URL, "AWSCognitoIdentityProviderService.SignUp", RequestBody, GenericSuccess, GenericFailure);
 }
 
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
+	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
 	//FString RequestBody = FString::Printf(TEXT("{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\"%s\",\"Session\":\"%s\",\"ChallengeResponses\":{\"USERNAME\":\"%s\",\"ANSWER\":\"%s\"}}"), *AWSCognitoClientID, *ChallengeSessionString, *Email, *Answer);
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"}}";
@@ -526,7 +580,7 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 		this->CallAuthFailure();
 	};
 
-	this->RPC(URL, "AWSCognitoIdentityProviderService.RespondToAuthChallenge", RequestBody, GenericSuccess, GenericFailure);
+	this->UE_RPC(URL, "AWSCognitoIdentityProviderService.RespondToAuthChallenge", RequestBody, GenericSuccess, GenericFailure);
 }
 
 TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
@@ -551,8 +605,53 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	return FStoredCredentials_BE(IsValid, *Credentials);
 }
 
+/*
+	const uint32 UserIndex = 0;
+ */
+
+//re write RPC stuff in naked unreal calls rather than Jan's implementation see if that stabilizes anything
+
+void UAuthenticator::PrintAll()
+{
+	const FString creds = UIndexerSupport::structToString<FWaasCredentials>(this->WaasCredentials);
+	UE_LOG(LogTemp,Display,TEXT("FWaasCredentials: %s"), *creds);
+	FString PurgeCacheString = (this->PurgeCache) ? "true" : "false";
+	UE_LOG(LogTemp,Display,TEXT("PurgeCache: %s"), *PurgeCacheString);
+	UE_LOG(LogTemp,Display,TEXT("ChallengeSession: %s"), *this->ChallengeSession);
+	UE_LOG(LogTemp,Display,TEXT("CipherTextBlob: %s"), *this->CipherTextBlob);
+	UE_LOG(LogTemp,Display,TEXT("PlainText: %s"), *this->PlainText);
+	UE_LOG(LogTemp,Display,TEXT("SessionToken: %s"), *this->SessionToken);
+	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
+	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
+	UE_LOG(LogTemp,Display,TEXT("AccessKeyId: %s"), *this->AccessKeyId);
+	UE_LOG(LogTemp,Display,TEXT("IdentityId: %s"), *this->IdentityId);
+	UE_LOG(LogTemp,Display,TEXT("EmailAuthMaxRetries: %d"), this->EmailAuthMaxRetries);
+	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
+	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *this->WaasVersion);
+	UE_LOG(LogTemp,Display,TEXT("ProjectAccessKey: %s"), *this->ProjectAccessKey);
+	UE_LOG(LogTemp,Display,TEXT("VITE_SEQUENCE_WAAS_CONFIG_KEY: %s"), *this->VITE_SEQUENCE_WAAS_CONFIG_KEY);
+	UE_LOG(LogTemp,Display,TEXT("cached_email: %s"), *this->Cached_Email);
+	UE_LOG(LogTemp,Display,TEXT("cachedidtoken: %s"), *this->Cached_IDToken);
+	UE_LOG(LogTemp,Display,TEXT("appleclientid: %s"), *this->AppleClientID);
+	UE_LOG(LogTemp,Display,TEXT("appleauthurl: %s"), *this->AppleAuthURL);
+	UE_LOG(LogTemp,Display,TEXT("discordclientid: %s"), *this->DiscordClientID);
+	UE_LOG(LogTemp,Display,TEXT("discordurl: %s"), *this->DiscordAuthURL);
+	UE_LOG(LogTemp,Display,TEXT("facebookclientid: %s"), *this->FacebookClientID);
+	UE_LOG(LogTemp,Display,TEXT("facebookurl: %s"), *this->FacebookAuthURL);
+	UE_LOG(LogTemp,Display,TEXT("googleclientid: %s"), *this->GoogleClientID);
+	UE_LOG(LogTemp,Display,TEXT("googleauthurl: %s"), *this->GoogleAuthURL);
+	UE_LOG(LogTemp,Display,TEXT("bredirecturl: %s"), *this->BRedirectURL);
+	UE_LOG(LogTemp,Display,TEXT("redirecturl: %s"), *this->RedirectURL);
+	UE_LOG(LogTemp,Display,TEXT("urlscheme: %s"), *this->UrlScheme);
+	UE_LOG(LogTemp,Display,TEXT("nonce: %s"), *this->Nonce);
+	UE_LOG(LogTemp,Display,TEXT("statetoken: %s"), *this->StateToken);
+	UE_LOG(LogTemp,Display,TEXT("saveslot: %s"), *this->SaveSlot);
+	UE_LOG(LogTemp,Display,TEXT("UserIndex 0 : %d"), this->UserIndex);
+}
+
 void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key)
 {
+	PrintAll();
 	int64 UnixIssueTime = FDateTime::UtcNow().ToUnixTimestamp();
 	int64 UnixExpireTime = UnixIssueTime + 30;
 	FString UnixIssueString = FString::Printf(TEXT("%lld"), UnixIssueTime);
@@ -653,7 +752,7 @@ void UAuthenticator::AuthWithSequence(const FString& IDTokenIn, const TArray<uin
 		this->CallAuthFailure();
 	};
 
-	this->SequenceRPC(this->WaasCredentials.GetRPCServer(), FinalPayload, GenericSuccess, GenericFailure);
+	this->UE_SequenceRPC(this->WaasCredentials.GetRPCServer(), FinalPayload, GenericSuccess, GenericFailure);
 }
 
 void UAuthenticator::SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -700,4 +799,121 @@ void UAuthenticator::RPC(const FString& Url, const FString& AMZTarget, const FSt
 		->WithVerb("POST")
 		->WithContentAsString(RequestBody)
 		->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+void UAuthenticator::UE_AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FUnsizedData PayloadBytes = StringToUTF8(RequestBody);
+	const Sha256Hash PayloadHashBytes = Sha256::getHash(PayloadBytes.Ptr(), PayloadBytes.GetLength());
+	const FString HashPayload = BytesToHex(PayloadHashBytes.value, PayloadHashBytes.HASH_LEN).ToLower();
+	
+	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetURL(Url);
+	http_post_req->SetHeader("Host", Url.RightChop(8));
+	http_post_req->SetHeader("Content-type", "application/x-amz-json-1.1");
+	http_post_req->SetHeader("X-AMZ-TARGET", AMZTarget);
+	http_post_req->SetHeader("X-AMZ-DATE", BuildFullDateTime(Date));
+	http_post_req->SetHeader("X-AMZ-CONTENT-SHA256" , HashPayload);
+	http_post_req->SetHeader("x-amz-security-token", this->SessionToken);
+	http_post_req->SetHeader("Authorization", Authorization);
+	http_post_req->SetContentAsString(RequestBody);
+	http_post_req->SetTimeout(15);
+	http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+	if(bWasSuccessful)
+	{
+		OnSuccess(Response.Get()->GetContentAsString());
+	}
+	else
+	{
+		if(Response.IsValid())
+			OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+		else
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+	}
+	});
+	http_post_req->ProcessRequest();
+}
+
+void UAuthenticator::UE_SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetURL(Url);
+	http_post_req->SetHeader("Content-type", "application/json");
+	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetHeader("X-Access-Key", this->ProjectAccessKey);
+	http_post_req->SetContentAsString(RequestBody);
+	http_post_req->SetTimeout(15);
+	http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+	if(bWasSuccessful)
+	{
+		OnSuccess(Response.Get()->GetContentAsString());
+	}
+	else
+	{
+		if(Response.IsValid())
+			OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+		else
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+	}
+	});
+	http_post_req->ProcessRequest();
+	
+}
+
+void UAuthenticator::UE_RPC(const FString& Url, const FString& RequestBody,void(UAuthenticator::Callback)(FString))
+{
+	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetURL(Url);
+	http_post_req->SetHeader("Content-type", "application/json");
+	http_post_req->SetHeader("Accept", "application/json");
+	http_post_req->SetHeader("X-Access-Key", this->ProjectAccessKey);
+	http_post_req->SetContentAsString(RequestBody);
+	http_post_req->SetTimeout(15);
+	http_post_req->OnProcessRequestComplete().BindLambda([this, Callback](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+	if(bWasSuccessful)
+	{
+		Callback(Response.Get()->GetContentAsString());
+	}
+	else
+	{
+		if(Response.IsValid())
+			Callback("Invalid Response!");
+		else
+			Callback("Invalid Response: " + Response.Get()->GetContentAsString());
+	}
+	});
+	http_post_req->ProcessRequest();
+	
+}
+
+void UAuthenticator::UE_RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	http_post_req->SetVerb("POST");
+	http_post_req->SetURL(Url);
+	http_post_req->SetHeader("Content-type", "application/x-amz-json-1.1");
+	http_post_req->SetHeader("X-AMZ-TARGET", AMZTarget);
+	http_post_req->SetContentAsString(RequestBody);
+	http_post_req->SetTimeout(15);
+	http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	{
+	if(bWasSuccessful)
+	{
+		OnSuccess(Response.Get()->GetContentAsString());
+	}
+	else
+	{
+		if(Response.IsValid())
+			OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+		else
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+	}
+	});
+	http_post_req->ProcessRequest();
 }
