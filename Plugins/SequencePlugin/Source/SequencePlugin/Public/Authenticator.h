@@ -406,6 +406,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthSuccess, FCredentials_BE, Credentials);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRPC, FString, Response);
+
 /**
  * 
  */
@@ -414,6 +416,23 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 {
 	GENERATED_BODY()
 //Delegates
+
+	/*
+	* 	void ProcessCognitoGetID(const FString& ResponsePtr);
+
+	void ProcessCognitoIdentityGetCredentialsForIdentity(const FString& response);
+
+	void ProcessKMSGenerateDataKey(const FString& response);
+
+	void ProcessCognitoIdentityInitiateAuth(const FString& response);
+
+	void ProcessCognitoIdentitySignUp(const FString& response);
+
+	void ProcessAdminRespondToAuthChallenge(const FString& response);
+	 */
+	
+private:
+	FOnRPC ProcessRPCResponse;
 public:
 	FOnAuthRequiresCode AuthRequiresCode;
 	FOnAuthFailure AuthFailure;
@@ -458,6 +477,7 @@ private:
 	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";
 	const FString WaasVersion = "1.0.0";
 
+	//this provider map fails to init so I'm going to swap over to a runtime made map instead due to unreliability
 	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 
@@ -535,51 +555,34 @@ private:
 
 	//RPC Calls//
 	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
-	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
 	
-	void ProcessCognitoGetID(FString response);
+	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
+	void ProcessCognitoGetID(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
-
-	void ProcessCognitoIdentityGetCredentialsForIdentity(const FString& response);
+	void ProcessCognitoIdentityGetCredentialsForIdentity(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void KMSGenerateDataKey(const FString& AWSKMSKeyID);
-
-	void ProcessKMSGenerateDataKey(const FString& response);
+	void ProcessKMSGenerateDataKey(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
-
-	void ProcessCognitoIdentityInitiateAuth(const FString& response);
+	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID);
-
-	void ProcessCognitoIdentitySignUp(const FString& response);
+	void ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
-
-	void ProcessAdminRespondToAuthChallenge(const FString& response);
+	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 	
 	//Sequence Specific//
-
 	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
-
+	void ProcessAuthWithSequence(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 	//Sequence Specific//
 
 	//RPC Calls//
 
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
-
-	void SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	void AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	static void RPC(const FString& Url,const FString& AMZTarget,const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void UE_RPC(const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void UE_AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void UE_SequenceRPC(const FString& Url, const FString& RequestBody, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void UE_RPC(const FString& Url, const FString& RequestBody,void(UAuthenticator::Callback)(FString));
+	void UE_AWS_AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
+	void UE_SequenceRPC(const FString& Url, const FString& RequestBody, void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
+	void UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 };
