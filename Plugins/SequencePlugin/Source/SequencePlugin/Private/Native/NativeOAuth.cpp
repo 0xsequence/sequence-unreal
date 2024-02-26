@@ -1,3 +1,4 @@
+#include "NativeOAuth.h"
 #if PLATFORM_ANDROID
 #include "Native/Android/AndroidOAuth.h"
 #endif // PLATFORM_ANDROID
