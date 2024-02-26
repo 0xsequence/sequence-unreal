@@ -19,7 +19,12 @@ struct FSSOCredentials
 		ClientID = ClientIDIn;
 	}
 };
-
+/*
+ *{"projectId":2,
+ *"emailRegion":"us-east-2",
+ *"emailClientId":"5gp9mh2fbqbj8l6prjgo75p0f6",
+ *"rpcServer":"https://next-waas.sequence.app"} 
+ */
 USTRUCT()
 struct FWaasJWT
 {
@@ -415,22 +420,6 @@ UCLASS()
 class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 {
 	GENERATED_BODY()
-//Delegates
-
-	/*
-	* 	void ProcessCognitoGetID(const FString& ResponsePtr);
-
-	void ProcessCognitoIdentityGetCredentialsForIdentity(const FString& response);
-
-	void ProcessKMSGenerateDataKey(const FString& response);
-
-	void ProcessCognitoIdentityInitiateAuth(const FString& response);
-
-	void ProcessCognitoIdentitySignUp(const FString& response);
-
-	void ProcessAdminRespondToAuthChallenge(const FString& response);
-	 */
-	
 private:
 	FOnRPC ProcessRPCResponse;
 public:
@@ -466,15 +455,15 @@ private:
 	const FString DiscordClientID = "";//TODO still need this
 
 	const FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	const FString AppleClientID = "";//TODO still need this
+	const FString AppleClientID = "com.horizon.sequence.waas";
 
 	FString Cached_IDToken;
 	FString Cached_Email;
 	FString Cached_Issuer;
 	//AWS
-	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImlkZW50aXR5UG9vbElkIjoidXMtZWFzdC0yOjQyZGMyZjE4LTJmOWItNGZkNS05NDI5LWUwZGE1MjFmOWNmNCIsImlkcFJlZ2lvbiI6InVzLWVhc3QtMiIsInJwY1NlcnZlciI6Imh0dHBzOi8vZGV2LXdhYXMuc2VxdWVuY2UuYXBwIiwia21zUmVnaW9uIjoidXMtZWFzdC0yIiwia2V5SWQiOiJhcm46YXdzOmttczp1cy1lYXN0LTI6MzgxNDkyMjQ3Njk3OmtleS8xODgxZTY3My1mMThkLTQ1NTgtODI5YS0xM2I4MThjMDMwNjUifQ";
+	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
 	FWaasCredentials WaasCredentials;
-	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";
+	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";//Builder Key
 	const FString WaasVersion = "1.0.0";
 
 	//this provider map fails to init so I'm going to swap over to a runtime made map instead due to unreliability
