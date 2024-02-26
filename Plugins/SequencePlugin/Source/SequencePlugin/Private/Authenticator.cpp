@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Authenticator.h"
-
 #include "HttpModule.h"
 #include "Misc/Guid.h"
 #include "AES/aes.c"
@@ -29,7 +28,9 @@ UAuthenticator::UAuthenticator()
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
 	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
+	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasCredentials = FWaasCredentials(UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT));
+	
 }
 
 void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
