@@ -77,6 +77,7 @@ struct FWalletsReturn
 	TArray<FPartnerWallet> Wallets;
 	FPage_Sequence Page;
 };
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
@@ -86,7 +87,8 @@ private:
 	UIndexer* Indexer;
 	
 	FCredentials_BE Credentials;
-	FString ProviderUrl = "https://temp";
+	FString ProviderUrl = "";
+	
 	//replace this later
 	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 	const FString Hostname = "https://next-api.sequence.app";
@@ -130,9 +132,6 @@ private:
 	FString BuildSessionValidationIntent();
 	
 	FString GeneratePacketSignature(const FString& Packet) const;
-	FString GenerateSignedEncryptedPayload(const FString& Intent) const;
-	FString GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const;
-	FString SignAndEncryptPayload(const FString& Intent) const;
 	FString GetWalletAddress();
 	
 private:

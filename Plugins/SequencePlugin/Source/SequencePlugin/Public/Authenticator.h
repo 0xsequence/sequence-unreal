@@ -8,7 +8,6 @@
 #include "Types/Wallet.h"
 #include "Authenticator.generated.h"
 
-
 struct FSSOCredentials
 {
 	FString URL = "";
@@ -19,12 +18,7 @@ struct FSSOCredentials
 		ClientID = ClientIDIn;
 	}
 };
-/*
- *{"projectId":2,
- *"emailRegion":"us-east-2",
- *"emailClientId":"5gp9mh2fbqbj8l6prjgo75p0f6",
- *"rpcServer":"https://next-waas.sequence.app"} 
- */
+
 USTRUCT()
 struct FWaasJWT
 {
@@ -60,13 +54,14 @@ public:
 	FWaasCredentials(const FWaasJWT& JWT)
 	{		
 		projectId.AppendInt(JWT.projectId);
+		emailRegion = JWT.emailRegion;
+		emailClientId = JWT.emailClientId;
+		EmailEnabled = (emailClientId.Len() > 0);
 		
 		if (JWT.rpcServer.EndsWith("/"))
 			rpcServer = JWT.rpcServer + "rpc/WaasAuthenticator/RegisterSession";
 		else
 			rpcServer = JWT.rpcServer + "/rpc/WaasAuthenticator/RegisterSession";
-		
-		EmailEnabled = (emailClientId.Len() > 0);
 	}
 	
 	FString GetProjectID() const
@@ -96,19 +91,7 @@ struct FCredentials_BE
     GENERATED_USTRUCT_BODY()
 private:
 	UPROPERTY()
-    TArray<uint8> TransportKey;
-	UPROPERTY()
-	FString EncryptedPayloadKey = "";
-	UPROPERTY()
     FString SessionPrivateKey = "";
-	UPROPERTY()
-    FString Id = "";
-	UPROPERTY()
-    FString Address = "";
-	UPROPERTY()
-    FString UserId = "";
-	UPROPERTY()
-    FString Subject = "";
 	UPROPERTY()
     FString SessionId = "";
 	UPROPERTY()
@@ -142,47 +125,20 @@ public:
 		ProjectId = ProjectIdIn;
 		ProjectAccessKey = ProjectAccessKeyIn;
 		SessionPrivateKey = SessionPrivateKeyIn;
-		SessionId = SessionIdIn;//might not be available at this stage
+		SessionId = SessionIdIn;
 		IDToken = IdTokenIn;
 		Email = EmailIn;
 		WaasVersion = WaasVersionIn;
 	}
-	
-    FCredentials_BE(const FString& ProjectIdIn, const TArray<uint8>& TransportKeyIn,const FString& EncryptedPayloadKeyIn,
-    	const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn,
-    	const FString& IdIn, const FString& AddressIn,const FString& UserIdIn,
-    	const FString& SubjectIn, const FString& SessionIdIn, const FString& WalletAddressIn,
-    	const FString& IDTokenIn, const FString& EmailIn, const FString& IssuerIn, const int64& IssuedIn,
-    	const int64& RefreshedIn, const int64& ExpiresIn, const FString& WaasVersionIn)
-    {
-		ProjectId = ProjectIdIn;
-		TransportKey = TransportKeyIn;
-		EncryptedPayloadKey = EncryptedPayloadKeyIn;
-		ProjectAccessKey = ProjectAccessKeyIn;
-		SessionPrivateKey = SessionPrivateKeyIn;
-		Id = IdIn;
-		Address = AddressIn;
-		UserId = UserIdIn;
-		Subject = SubjectIn;
-		SessionId = SessionIdIn;
-		WalletAddress = WalletAddressIn;
-		IDToken = IDTokenIn;
-		Email = EmailIn;
-		Issuer = IssuerIn;
-		Issued = IssuedIn;
-		Refreshed = RefreshedIn;
-		Expires = ExpiresIn;
-		WaasVersion = WaasVersionIn;
-    }
+
+	void RegisterCredentials()
+	{
+		
+	}
 
 	FString GetProjectId() const
 	{
 		return ProjectId;
-	}
-	
-	FString GetEncryptedPayloadKey() const
-	{
-		return EncryptedPayloadKey;
 	}
 	
 	FString GetNetworkString() const
@@ -198,11 +154,6 @@ public:
 	FString GetWaasVersin() const
 	{
 		return WaasVersion;
-	}
-	
-	TArray<uint8> GetTransportKey() const
-	{
-		return TransportKey;
 	}
 
 	FString GetProjectAccessKey() const
@@ -243,26 +194,6 @@ public:
 		TArray<uint8> SigBytes = TWallet->SignMessage(Message);
 		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 		return Signature;
-	}
-
-	FString GetId() const
-	{
-		return Id;
-	}
-
-	FString GetAddress() const
-	{
-		return Address;
-	}
-
-	FString GetUserId() const
-	{
-		return UserId;
-	}
-
-	FString GetSubject() const
-	{
-		return Subject;
 	}
 
 	FString GetSessionId() const
@@ -320,7 +251,6 @@ public:
 	bool Valid() const
 	{
 		bool IsValid = true;
-		IsValid &= !TransportKey.IsEmpty();
 		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
 		return IsValid;
 	}
@@ -392,6 +322,8 @@ private:
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 
+	FString SessionId = "";
+	FString SessionHash = "";
 	FString StateToken = "";
 	FString Nonce = "";
 
@@ -486,12 +418,6 @@ private:
 
 	//RPC Calls//
 	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
-	
-	void CognitoIdentityGetID(const FString& PoolID,const FString& Issuer, const FString& IDToken);
-	void ProcessCognitoGetID(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
-	void ProcessCognitoIdentityGetCredentialsForIdentity(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
