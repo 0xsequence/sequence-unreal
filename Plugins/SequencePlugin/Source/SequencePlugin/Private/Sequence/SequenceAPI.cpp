@@ -311,49 +311,6 @@ FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 	return Signature;
 }
 
-FString USequenceWallet::GenerateSignedEncryptedRegisterSessionPayload(const FString& Intent) const
-{
-	const FString SessionAddr = "0x" + this->Credentials.GetSessionWalletAddress();
-	const FString PreEncryptedPayload = "{\"projectId\": "+this->Credentials.GetProjectId()+",\"idToken\": \""+this->Credentials.GetIDToken()+"\",\"sessionAddress\": \""+SessionAddr+"\",\"friendlyName\": \"FRIENDLY SESSION WALLET\",\"intentJSON\": \""+Intent+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
-	return SignAndEncryptPayload(PreEncryptedPayload);
-}
-
-FString USequenceWallet::GenerateSignedEncryptedPayload(const FString& Intent) const
-{
-	const FString PreEncryptedPayload = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"intentJson\":\""+Intent+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("PreEncryptedPayload:\n%s"),*PreEncryptedPayload);
-	UE_LOG(LogTemp,Display,TEXT("IntentJson: %s"),*Intent);
-	return SignAndEncryptPayload(PreEncryptedPayload);
-}
-
-FString USequenceWallet::SignAndEncryptPayload(const FString& Intent) const
-{
-	if (!this->Credentials.Valid())
-	{
-		UE_LOG(LogTemp,Error,TEXT("[Credentials are not valid! They are either expired or not built correctly, Please ReAuthenticate]"));
-		return "{Credentials Invalid!}";
-	}
-	
-	TArray<uint8_t> TPayload = PKCS7(Intent);
-	AES_ctx ctx;
-	struct AES_ctx* PtrCtx = &ctx;
-	constexpr int32 IVSize = 16;
-	TArray<uint8_t> iv;
-
-	for (int i = 0; i < IVSize; i++)
-		iv.Add(RandomByte());
-
-	AES_init_ctx_iv(PtrCtx,this->Credentials.GetTransportKey().GetData(), iv.GetData());
-	AES_CBC_encrypt_buffer(PtrCtx, TPayload.GetData(), TPayload.Num());
-	const FString PayloadCipherText = "0x" + BytesToHex(iv.GetData(), iv.Num()).ToLower() + BytesToHex(TPayload.GetData(), TPayload.Num()).ToLower();
-	const FString PayloadSig = "0x" + this->Credentials.SignMessageWithSessionWallet(Intent);
-	const FString EncryptedPayloadKey = "0x" + this->Credentials.GetEncryptedPayloadKey();
-	FString FinalPayload = "{\"encryptedPayloadKey\":\""+ EncryptedPayloadKey +"\",\"payloadCiphertext\":\""+ PayloadCipherText +"\",\"payloadSig\":\""+PayloadSig+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("FinalPayload: %s"),*FinalPayload);
-	return FinalPayload;
-}
-
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
