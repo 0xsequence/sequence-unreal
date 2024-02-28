@@ -33,17 +33,9 @@ struct FWaasJWT
 	UPROPERTY()
 	int32 projectId = 0;
 	UPROPERTY()
-	FString identityPoolId = "";
-	UPROPERTY()
-	FString idpRegion = "";
-	UPROPERTY()
 	FString rpcServer = "";
 	UPROPERTY()
-	FString kmsRegion = "";
-	UPROPERTY()
-	FString KeyId = "";
-	UPROPERTY()
-	FString alg = "";
+	FString emailRegion = "";
 	UPROPERTY()
 	FString emailClientId = "";
 };
@@ -56,53 +48,25 @@ private:
 	UPROPERTY()
 	FString projectId = "";
 	UPROPERTY()
-	FString identityPoolId = "";
-	UPROPERTY()
-	FString idpRegion = "";
-	UPROPERTY()
 	FString rpcServer = "";
 	UPROPERTY()
-	FString kmsRegion = "";
+	FString emailRegion = "";
 	UPROPERTY()
-	FString alg = "";
-	UPROPERTY()
-	FString CognitoClientId = "";
-	UPROPERTY()
-	FString KMSArn = "";
-	UPROPERTY()
-	FString KMSKeyId = "";
+	FString emailClientId = "";
 	UPROPERTY()
 	bool EmailEnabled = false;
 public:
 	FWaasCredentials(){}
 	FWaasCredentials(const FWaasJWT& JWT)
-	{	//parse for the kms key to start right away!
-		TArray<FString> KeyParts;
-		KMSArn = JWT.KeyId;
-		JWT.KeyId.ParseIntoArray(KeyParts, TEXT(":"), true);
-		FString KMS = "";
-		if (KeyParts.Num() > 0)
-			KMS = KeyParts.Last().RightChop(4);
-		
+	{		
 		projectId.AppendInt(JWT.projectId);
-		identityPoolId = JWT.identityPoolId;
-		idpRegion = JWT.idpRegion;
 		
 		if (JWT.rpcServer.EndsWith("/"))
 			rpcServer = JWT.rpcServer + "rpc/WaasAuthenticator/RegisterSession";
 		else
 			rpcServer = JWT.rpcServer + "/rpc/WaasAuthenticator/RegisterSession";
 		
-		kmsRegion = JWT.kmsRegion;
-		alg = JWT.alg;
-		CognitoClientId = JWT.emailClientId;
-		KMSKeyId = KMS;
-		EmailEnabled = (CognitoClientId.Len() > 0);
-	}
-	
-	FString GetKMSArn() const
-	{
-		return KMSArn;
+		EmailEnabled = (emailClientId.Len() > 0);
 	}
 	
 	FString GetProjectID() const
@@ -110,39 +74,19 @@ public:
 		return projectId;
 	}
 
-	FString GetIdentityPoolId() const
-	{
-		return identityPoolId;
-	}
-
-	FString GetIDPRegion() const
-	{
-		return idpRegion;
-	}
-
 	FString GetRPCServer() const
 	{
 		return rpcServer;
 	}
 
-	FString GetKMSRegion() const
+	FString GetEmailRegion() const
 	{
-		return kmsRegion;
+		return emailRegion;
 	}
 
-	FString GetAlg() const
+	FString GetEmailClientId() const
 	{
-		return alg;
-	}
-
-	FString GetCognitoClientId() const
-	{
-		return CognitoClientId;
-	}
-
-	FString GetKMSKeyId() const
-	{
-		return KMSKeyId;
+		return emailClientId;
 	}
 };
 
@@ -193,7 +137,17 @@ private:
 	bool Registered = false;
 public:
 	FCredentials_BE(){}
-
+	FCredentials_BE(const FString& ProjectIdIn, const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
+	{
+		ProjectId = ProjectIdIn;
+		ProjectAccessKey = ProjectAccessKeyIn;
+		SessionPrivateKey = SessionPrivateKeyIn;
+		SessionId = SessionIdIn;//might not be available at this stage
+		IDToken = IdTokenIn;
+		Email = EmailIn;
+		WaasVersion = WaasVersionIn;
+	}
+	
     FCredentials_BE(const FString& ProjectIdIn, const TArray<uint8>& TransportKeyIn,const FString& EncryptedPayloadKeyIn,
     	const FString& ProjectAccessKeyIn ,const FString& SessionPrivateKeyIn,
     	const FString& IdIn, const FString& AddressIn,const FString& UserIdIn,
@@ -530,18 +484,6 @@ private:
 
 	static FString BuildFullDateTime(const FDateTime& Date);
 
-	FString BuildScope(const FDateTime& Date);
-
-	static FString BuildCanonicalRequest(const FString& URI, const FDateTime& Date, const FString& Payload);//step 1
-
-	FString BuildStringToSign(const FDateTime& Date, const FString& CanonicalRequest);//step 2
-
-	TArray<uint8_t> BuildSigningKey(const FDateTime& Date);//step 3
-
-	static FString BuildSignature(const TArray<uint8_t>& SigningKey, const FString& StringToSign);//step 4
-
-	FString BuildKMSAuthorizationHeader(const FDateTime& Date, const FString& URI, const FString& Payload);
-
 	//RPC Calls//
 	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
 	
@@ -551,9 +493,6 @@ private:
 	void CognitoIdentityGetCredentialsForIdentity(const FString& IdentityID, const FString& IDToken, const FString& Issuer);
 	void ProcessCognitoIdentityGetCredentialsForIdentity(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
-	void KMSGenerateDataKey(const FString& AWSKMSKeyID);
-	void ProcessKMSGenerateDataKey(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
@@ -562,16 +501,8 @@ private:
 
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-	
-	//Sequence Specific//
-	void AuthWithSequence(const FString& IDTokenIn, const TArray<uint8_t>& Key);
-	void ProcessAuthWithSequence(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-	//Sequence Specific//
 
 	//RPC Calls//
-
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
-	void UE_AWS_AuthorizedRPC(const FString& Authorization, const FDateTime& Date, const FString& Url, const FString& AMZTarget, const FString& RequestBody,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
-	void UE_SequenceRPC(const FString& Url, const FString& RequestBody, void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 	void UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 };

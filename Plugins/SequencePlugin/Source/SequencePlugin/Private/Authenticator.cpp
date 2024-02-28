@@ -132,14 +132,17 @@ FString UAuthenticator::GetRedirectURL() const
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
-	CognitoIdentityGetID(this->WaasCredentials.GetIdentityPoolId(),GetISSClaim(this->Cached_IDToken), this->Cached_IDToken);
+	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+	const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(), this->ProjectAccessKey,SessionPrivateKey,"",this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
+	this->StoreCredentials(Credentials);
+	this->CallAuthSuccess(Credentials);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
 	this->ResetRetryEmailLogin();
 	this->Cached_Email = EmailIn;
-	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetCognitoClientId());
+	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetEmailClientId());
 }
 
 FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const
@@ -439,7 +442,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 		if (response.Contains("user not found", ESearchCase::IgnoreCase))
 		{//no user exists so create one!
 			UE_LOG(LogTemp, Display, TEXT("Creating New User"));
-			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasCredentials.GetCognitoClientId());
+			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasCredentials.GetEmailClientId());
 		}
 		else
 		{//unknown error
@@ -452,7 +455,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
 	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 	
 	if (this->CanRetryEmailLogin())
@@ -481,13 +484,13 @@ void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResp
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
 	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetCognitoClientId());
+	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetEmailClientId());
 }
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
 	this->UE_AWS_RPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
@@ -505,7 +508,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 		if (AuthObject->Get()->TryGetStringField("IdToken", IDTokenPtr))
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
-			this->SocialLogin(this->Cached_IDToken);
+			this->CallAuthSuccess();
 		}
 		else
 		{//error state
@@ -523,8 +526,8 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetIDPRegion());
-	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"}}";
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
+	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},{\"ClientMetaData\":\"sessionHash\"}}";
 	this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
@@ -539,7 +542,7 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasCredentials.GetCognitoClientId());
+	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasCredentials.GetEmailClientId());
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
