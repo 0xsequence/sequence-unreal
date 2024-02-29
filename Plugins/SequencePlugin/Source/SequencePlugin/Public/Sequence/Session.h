@@ -7,31 +7,61 @@
 #include "Session.generated.h"
 
 /**
- * 
+* {"id":"","projectId":2,"userId":"","identity":{"type":"","iss":"","sub":""},"friendlyName":"5B05F9AA4EA089C227ABFD880F1DB2CB","createdAt":"2024-02-29T16:16:16.884986934Z","refreshedAt":"2024-02-29T16:16:16.910342395Z","expiresAt":"2124-02-05T16:16:16.884987064Z"}
  */
+USTRUCT()
+struct FIdentity
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString type = "";
+	UPROPERTY()
+	FString iss = "";
+	UPROPERTY()
+	FString sub = "";
+};
+
 USTRUCT()
 struct FSession
 {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	FString Id;
+	FString id = "";
 	UPROPERTY()
-	FString Address;
+	int64 projectId = -1;
 	UPROPERTY()
-	FString UserID;
+	FString userId = "";
 	UPROPERTY()
-	FString ProjectID;
+	FIdentity identity;
 	UPROPERTY()
-	FString Issuer;
+	FString friendlyName = "";
 	UPROPERTY()
-	FString Subject;
+	FString createdAt = "";
 	UPROPERTY()
-	FString FriendlyName;
+	FString refreshedAt = "";
 	UPROPERTY()
-	FString CreatedAt;
+	FString expiresAt = "";
+};
+
+/*
+*  {"response":{"code":"sessionsListed","data":[]}}
+*/
+
+USTRUCT()
+struct FListSessionResponse
+{
+	GENERATED_BODY()
 	UPROPERTY()
-	FString RefreshedAt;
+	TArray<FSession> data;
+};
+
+USTRUCT()
+struct FListSessionsResponseObj
+{
+	GENERATED_BODY()
+
 	UPROPERTY()
-	FString ExpiresAt;
+	FListSessionResponse response;
 };

@@ -74,7 +74,7 @@ private:
 	UPROPERTY()
     FString Issuer = "";
 	UPROPERTY()
-	int64 Issued = -1;
+	int64 Created = -1;
 	UPROPERTY()
 	int64 Refreshed = -1;
 	UPROPERTY()
@@ -89,6 +89,12 @@ private:
 	FString ProjectId = "";
 	UPROPERTY()
 	FString RPCServer = "";
+	UPROPERTY()
+	FString Type = "";
+	UPROPERTY()
+	FString UserId = "";
+	UPROPERTY()
+	FString Sub = "";
 	UPROPERTY()
 	bool Registered = false;
 public:
@@ -105,9 +111,18 @@ public:
 		RPCServer = RPCServerIn;
 	}
 
-	void RegisterCredentials()
+	void RegisterCredentials(const FString& WalletIn, const FString& EmailIn, const FString& IssuerIn, const FString& TypeIn, const FString& SubIn, const FString& UserIdIn, const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
 	{
-		
+		WalletAddress = WalletIn;
+		Email = EmailIn;
+		Issuer = IssuerIn;
+		Type = TypeIn;
+		Sub = SubIn;
+		UserId = UserIdIn;
+		Created = CreatedAtIn;
+		Refreshed = RefreshedAtIn;
+		Expires = ExpiresAtIn;
+		Registered = true;
 	}
 
 	FString GetRPCServer() const
@@ -200,9 +215,9 @@ public:
 		return Issuer;
 	}
 
-	int64 GetIssued() const
+	int64 GetCreated() const
 	{
-		return Issued;
+		return Created;
 	}
 
 	int64 GetRefreshed() const
@@ -215,13 +230,6 @@ public:
 		return Expires;
 	}
 
-	void RegisterSessionData(const FString& RegisteredSessionId, const FString& RegisteredWallet)
-	{
-		Registered = true;
-		SessionId = RegisteredSessionId;
-		WalletAddress = RegisteredWallet;
-	}
-
 	bool IsRegistered() const
 	{
 		return Registered;
@@ -230,7 +238,7 @@ public:
 	bool Valid() const
 	{
 		bool IsValid = true;
-		//IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
 		return IsValid;
 	}
 
