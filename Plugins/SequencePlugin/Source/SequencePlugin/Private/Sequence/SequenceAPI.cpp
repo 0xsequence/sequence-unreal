@@ -211,42 +211,70 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		//const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		//const TSharedPtr<FJsonObject> * Data = nullptr;
-
-		UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
+		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		const TSharedPtr<FJsonObject> * SessionObj = nullptr;
+		const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 		
-		/*if (Json.Get()->TryGetObjectField("data",Data))
+		UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
+
+		if (Json.Get()->TryGetObjectField("session",SessionObj) && Json.Get()->TryGetObjectField("response",ResponseObj))
 		{
-			FString RegisteredSessionId, RegisteredWalletAddress;
-			if (Data->Get()->TryGetStringField("sessionId",RegisteredSessionId) && Data->Get()->TryGetStringField("wallet",RegisteredWalletAddress))
+			//we can createdAt, issuedAt, refreshedAt, userId
+			const TSharedPtr<FJsonObject> * DataObj = nullptr;
+			const TSharedPtr<FJsonObject> * IdentityObj = nullptr;
+
+			FString CreatedAt = "", RefreshedAt = "", ExpiresAt = "", UserId = "";
+			if (ResponseObj->Get()->TryGetObjectField("data", DataObj) && SessionObj->Get()->TryGetObjectField("identity", IdentityObj) && SessionObj->Get()->TryGetStringField("userId",UserId) && SessionObj->Get()->TryGetStringField("createdAt",CreatedAt) && SessionObj->Get()->TryGetStringField("refreshedAt", RefreshedAt) && SessionObj->Get()->TryGetStringField("expiresAt", ExpiresAt))
 			{
-				this->Credentials.RegisterSessionData(RegisteredSessionId,RegisteredWalletAddress);
-				const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
-				TUAuth->StoreCredentials(this->Credentials);
-				FString Creds = UIndexerSupport::structToString(this->Credentials);
-				UE_LOG(LogTemp,Display,TEXT("Creds: %s"),*Creds);
-				OnSuccess("Session Registered");
+				FString Wallet = "", Type = "", ISS = "", Sub = "", Email = "";
+				if (IdentityObj->Get()->TryGetStringField("email", Email) && IdentityObj->Get()->TryGetStringField("sub", Sub) && IdentityObj->Get()->TryGetStringField("iss",ISS) && IdentityObj->Get()->TryGetStringField("type",Type) && DataObj->Get()->TryGetStringField("wallet",Wallet))
+				{
+					FDateTime ParsedCreatedAt, ParsedRefreshedAt, ParsedExpiresAt;
+					FDateTime::ParseIso8601(*CreatedAt,ParsedCreatedAt);
+					FDateTime::ParseIso8601(*RefreshedAt,ParsedRefreshedAt);
+					FDateTime::ParseIso8601(*ExpiresAt,ParsedExpiresAt);
+					const int64 UnixIssuedAt = ParsedCreatedAt.ToUnixTimestamp();
+					const int64 UnixRefreshedAt = ParsedRefreshedAt.ToUnixTimestamp();
+					const int64 UnixExpiresAt = ParsedExpiresAt.ToUnixTimestamp();
+					this->Credentials.RegisterCredentials(Wallet,Email,ISS,Type,Sub,UserId,UnixIssuedAt,UnixRefreshedAt,UnixExpiresAt);
+					const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
+					TUAuth->StoreCredentials(this->Credentials);
+					const FString Creds = UIndexerSupport::structToString(this->Credentials);
+					UE_LOG(LogTemp,Display,TEXT("Creds: %s"),*Creds);
+					OnSuccess("Session Registered");
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "3rd Level parsing: Request failed: " + Response));
+				}
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				OnFailure(FSequenceError(RequestFail, "2nd Level parsing: Request failed: " + Response));
 			}
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-		}*/
+			OnFailure(FSequenceError(RequestFail, "1st Level parsing: Request failed: " + Response));
+		}
 	};
-	if (this->Credentials.Valid())
+
+	if (this->Credentials.IsRegistered())
 	{
-		//https://next-waas.sequence.app/rpc/WaasAuthenticator/rpc/WaasAuthenticator/RegisterSession
-		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
-		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
+		if (this->Credentials.Valid())
+		{
+			const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
+			this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
+		}
 	}
 	else
 	{
-		OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
+		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
 	}
 }
 
@@ -256,21 +284,16 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 	{
 		TArray<FSession> Sessions;
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		TArray<TSharedPtr<FJsonValue>> Arr;
-		const TArray<TSharedPtr<FJsonValue>>* Data = &Arr;
-		if (Json.Get()->TryGetArrayField("sessions",Data))
+		FListSessionsResponseObj ResponseStruct;
+		if (FJsonObjectConverter::JsonObjectToUStruct<FListSessionsResponseObj>(Json.ToSharedRef(), &ResponseStruct))
 		{
-			for (int i = 0; i < Arr.Num(); i++) {
-				TSharedPtr<FJsonValue> SessionJson = Arr[i];
-				FSession Session = UIndexerSupport::jsonStringToStruct<FSession>(SessionJson.Get()->AsString());
-				Sessions.Push(Session);
-			}
-
-			OnSuccess(Sessions);
+			const FString ParsedResponse = UIndexerSupport::structToString(ResponseStruct);
+			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
+			OnSuccess(ResponseStruct.response.data);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
 		}
 	};
 	
@@ -478,54 +501,20 @@ FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 	return Intent;
 }
 
-/*FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
+FString USequenceWallet::BuildRegisterSessionIntent()
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
-	FString PaddedTxns = Txns;
-	const FString srch_slash = TEXT("\"");
-	const FString replace = TEXT("\\\"");
-	const TCHAR* srch_ptr_slash = *srch_slash;
-	const TCHAR* rep_ptr = *replace;
-	(PaddedTxns).ReplaceInline(srch_ptr_slash, rep_ptr, ESearchCase::IgnoreCase);
-	
-	const FString Packet = "{\\\"code\\\":\\\"sendTransaction\\\",\\\"expires\\\":"+expiresString+",\\\"identifier\\\":\\\""+identifier+"\\\",\\\"issued\\\":"+issuedString+",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"transactions\\\":"+PaddedTxns+",\\\"wallet\\\":\\\""+this->Credentials.GetWalletAddress()+"\\\"}";
-	const FString RawPacket = "{\"code\":\"sendTransaction\",\"expires\":"+expiresString+",\"identifier\":\""+identifier+"\",\"issued\":"+issuedString+",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(RawPacket);
-	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
-	UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
-	return Intent;
-}*/
-
-FString USequenceWallet::BuildRegisterSessionIntent()
-{//updated to match new RPC setup
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Data = "{\"idToken\":\""+this->Credentials.GetIDToken()+"\",\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	const FString GUID = FGuid::NewGuid().ToString();
-	const FString SigIntent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"},\"friendlyName\":\""+GUID+"\"}";
+	const FString Data = "{\"idToken\":\""+this->Credentials.GetIDToken()+"\",\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
+	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"},\"friendlyName\":\""+GUID+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("RegisterSession Intent: %s"),*Intent);
 	return Intent;
 }
-
-/*FString USequenceWallet::BuildRegisterSessionIntent()
-{
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString Packet = "{\\\"code\\\":\\\"openSession\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"proof\\\":{\\\"idToken\\\":\\\""+this->Credentials.GetIDToken()+"\\\"}}";
-	const FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+"}";
-	UE_LOG(LogTemp,Display,TEXT("RegisterSessionIntent: %s"),*Intent);
-	return Intent;
-}*/
 
 FString USequenceWallet::BuildListSessionIntent()
 {
@@ -533,7 +522,7 @@ FString USequenceWallet::BuildListSessionIntent()
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString SigIntent = "{\"intent\":{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
+	const FString SigIntent = "{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	const FString Intent = "{\"intent\":{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
 	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
