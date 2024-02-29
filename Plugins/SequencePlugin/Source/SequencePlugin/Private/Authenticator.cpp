@@ -3,14 +3,9 @@
 #include "Authenticator.h"
 #include "HttpModule.h"
 #include "Misc/Guid.h"
-#include "AES/aes.c"
-#include "AES/aes.h"
 #include "Misc/Base64.h"
 #include "Eth/EthTransaction.h"
 #include "Types/Wallet.h"
-#include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
-#include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
-#include "Util/HexUtility.h"
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
 #include "Indexer/IndexerSupport.h"
@@ -19,7 +14,6 @@
 #include "IWebBrowserSingleton.h"
 #include "WebBrowserModule.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "Core/Tests/Containers/TestUtils.h"
 #include "Interfaces/IHttpResponse.h"
 
 UAuthenticator::UAuthenticator()
@@ -40,7 +34,7 @@ UAuthenticator::UAuthenticator()
 	FString ParsedJWT;
 	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
-	this->WaasCredentials = FWaasCredentials(UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT));
+	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
 	
 }
 
@@ -144,7 +138,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
+	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
 	this->StoreCredentials(Credentials);
 	this->CallAuthSuccess(Credentials);
 }
@@ -153,7 +147,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
 	this->ResetRetryEmailLogin();
 	this->Cached_Email = EmailIn;
-	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetEmailClientId());
+	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
 FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const
@@ -264,7 +258,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 		if (response.Contains("user not found", ESearchCase::IgnoreCase))
 		{//no user exists so create one!
 			UE_LOG(LogTemp, Display, TEXT("Creating New User"));
-			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasCredentials.GetEmailClientId());
+			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasSettings.GetEmailClientId());
 		}
 		else
 		{//unknown error
@@ -277,7 +271,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 	
 	if (this->CanRetryEmailLogin())
@@ -306,13 +300,13 @@ void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResp
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
 	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
-	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasCredentials.GetEmailClientId());
+	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
 	this->UE_AWS_RPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
@@ -331,7 +325,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			const FCredentials_BE Credentials(this->WaasCredentials.GetProjectID(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
+			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
 			this->StoreCredentials(Credentials);
 			this->CallAuthSuccess(Credentials);
 		}
@@ -351,8 +345,8 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
 	PrintAll();
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasCredentials.GetEmailRegion());
-	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetaData\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
+	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
+	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
 	this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
@@ -367,7 +361,7 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasCredentials.GetEmailClientId());
+	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasSettings.GetEmailClientId());
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
@@ -380,8 +374,8 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 
 void UAuthenticator::PrintAll()
 {
-	const FString creds = UIndexerSupport::structToString<FWaasCredentials>(this->WaasCredentials);
-	UE_LOG(LogTemp,Display,TEXT("FWaasCredentials: %s"), *creds);
+	const FString creds = UIndexerSupport::structToString<FWaasJWT>(this->WaasSettings);
+	UE_LOG(LogTemp,Display,TEXT("FWaasSettings: %s"), *creds);
 	FString PurgeCacheString = (this->PurgeCache) ? "true" : "false";
 	UE_LOG(LogTemp,Display,TEXT("PurgeCache: %s"), *PurgeCacheString);
 	UE_LOG(LogTemp,Display,TEXT("ChallengeSession: %s"), *this->ChallengeSession);
@@ -391,7 +385,6 @@ void UAuthenticator::PrintAll()
 	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
 	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
 	UE_LOG(LogTemp,Display,TEXT("AccessKeyId: %s"), *this->AccessKeyId);
-	UE_LOG(LogTemp,Display,TEXT("IdentityId: %s"), *this->IdentityId);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthMaxRetries: %d"), this->EmailAuthMaxRetries);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
 	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *this->WaasVersion);
