@@ -306,6 +306,8 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
+
+
 void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
@@ -349,28 +351,25 @@ FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 	return Signature;
 }
 
+
+
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
-	{
+	{		
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		const TSharedPtr<FJsonObject> * Data = nullptr;
-		FSignedMessage Msg;
-		if (Json.Get()->TryGetObjectField("data",Data))
+		FSignedMessageResponseObj Msg;
+		if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessageResponseObj>(Json.ToSharedRef(), &Msg))
 		{
-			if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessage>(Data->ToSharedRef(), &Msg))
-			{
-				OnSuccess(Msg);
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "Malformed Response: " + Response));
-			}
+			const FString ParsedResponse = UIndexerSupport::structToString(Msg);
+			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
+			OnSuccess(Msg.response);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Malformed Response: " + Response));
 		}
+		
 	};
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
 	{
@@ -429,6 +428,9 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
+//{"data":{"message":"0x19457468657265756D205369676E6564204D6573736167653A0A326869","network":"137","wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466023,"issuedAt":1708465993,"name":"signMessage","version":"1.0.0"}
+//{"data":{"idToken":$idToken,"sessionId":$sessionId},"issuedAt":1708107597,"expiresAt":1708109397,"name":"openSession","version":"1.0.0"}
+
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 {//updated to match new RPC setup
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
@@ -448,41 +450,13 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	
 	//EIP-191
 	const FString Data = "{\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString SigIntent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
+	//{"data":{"message":"0x19457468657265756D205369676E6564204D6573736167653A0A326869","network":"137","wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466023,"issuedAt":1708465993,"name":"signMessage","version":"1.0.0"}
+	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"signatures\":{[\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"]},\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
-
+	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
 	UE_LOG(LogTemp,Display,TEXT("SignMessage Intent: %s"),*Intent);
 	return Intent;
 }
-
-/*
-FString USequenceWallet::BuildSignMessageIntent(const FString& message)
-{
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	
-	const FString Wallet = this->Credentials.GetWalletAddress();
-	//eip-191 and keccak hashing the message
-	const FString LeadingByte = "\x19";//leading byte
-	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
-	Payload.AppendInt(message.Len());
-	Payload += message;
-	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
-	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
-	UE_LOG(LogTemp,Display,TEXT("EIP_191: %s"),*EIP_Message);
-	//EIP-191
-	
-	const FString Packet = "{\\\"code\\\":\\\"signMessage\\\",\\\"expires\\\":"+expiresString+",\\\"issued\\\":"+issuedString+",\\\"message\\\":\\\""+EIP_Message+"\\\",\\\"network\\\":\\\""+this->Credentials.GetNetworkString()+"\\\",\\\"wallet\\\":\\\""+Wallet+"\\\"}";
-	const FString PacketRaw = "{\"code\":\"signMessage\",\"expires\":"+expiresString+",\"issued\":"+issuedString+",\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+Wallet+"\"}";
-	const FString Signature = this->GeneratePacketSignature(PacketRaw);
-	FString Intent = "{\\\"version\\\":\\\""+this->Credentials.GetWaasVersin()+"\\\",\\\"packet\\\":"+Packet+",\\\"signatures\\\":[{\\\"session\\\":\\\""+this->Credentials.GetSessionId()+"\\\",\\\"signature\\\":\\\""+Signature+"\\\"}]}";
-	UE_LOG(LogTemp,Display,TEXT("SignMessageIntent: %s"),*Intent);
-	return Intent;
-}
-*/
 
 
 //{"intent":{"data":{"identifier":"","network":"137","transactions":[{"to":"0x9766bf76b2E3e7BCB8c61410A3fC873f1e89b43f","type":"transaction","value":"1000000047497451"}],"wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466035,"issuedAt":1708466005,"name":"sendTransaction","signatures":[{"sessionId":"0x00bab99b6f4a25e44e9654515fc0b9232f6f87fa3b","signature":"0x56444d46815935d3e2420bc5aaa5060016efbf060c9f002f0dd6bd64c82162e06b4ebc46f6b6d991c6a1abe7de356f05b61f673c43fb0a50da0116a0b7d7ff4e1c"}],"version":"1.0.0"}}'
