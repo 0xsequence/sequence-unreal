@@ -23,7 +23,7 @@ USTRUCT()
 struct FWaasJWT
 {
 	GENERATED_USTRUCT_BODY()
-
+private:
 	UPROPERTY()
 	int32 projectId = 0;
 	UPROPERTY()
@@ -32,41 +32,12 @@ struct FWaasJWT
 	FString emailRegion = "";
 	UPROPERTY()
 	FString emailClientId = "";
-};
-
-USTRUCT()
-struct FWaasCredentials
-{
-	GENERATED_USTRUCT_BODY()
-private:
-	UPROPERTY()
-	FString projectId = "";
-	UPROPERTY()
-	FString rpcServer = "";
-	UPROPERTY()
-	FString emailRegion = "";
-	UPROPERTY()
-	FString emailClientId = "";
-	UPROPERTY()
-	bool EmailEnabled = false;
 public:
-	FWaasCredentials(){}
-	FWaasCredentials(const FWaasJWT& JWT)
-	{		
-		projectId.AppendInt(JWT.projectId);
-		emailRegion = JWT.emailRegion;
-		emailClientId = JWT.emailClientId;
-		EmailEnabled = (emailClientId.Len() > 0);
-		
-		if (JWT.rpcServer.EndsWith("/"))
-			rpcServer = JWT.rpcServer + "rpc/WaasAuthenticator/RegisterSession";
-		else
-			rpcServer = JWT.rpcServer + "/rpc/WaasAuthenticator/RegisterSession";
-	}
-	
-	FString GetProjectID() const
+	FString GetProjectId() const
 	{
-		return projectId;
+		FString ret = "";
+		ret.AppendInt(projectId);
+		return ret;
 	}
 
 	FString GetRPCServer() const
@@ -117,10 +88,12 @@ private:
 	UPROPERTY()
 	FString ProjectId = "";
 	UPROPERTY()
+	FString RPCServer = "";
+	UPROPERTY()
 	bool Registered = false;
 public:
 	FCredentials_BE(){}
-	FCredentials_BE(const FString& ProjectIdIn, const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
+	FCredentials_BE(const FString& RPCServerIn,const FString& ProjectIdIn, const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
 	{
 		ProjectId = ProjectIdIn;
 		ProjectAccessKey = ProjectAccessKeyIn;
@@ -129,6 +102,7 @@ public:
 		IDToken = IdTokenIn;
 		Email = EmailIn;
 		WaasVersion = WaasVersionIn;
+		RPCServer = RPCServerIn;
 	}
 
 	void RegisterCredentials()
@@ -136,6 +110,11 @@ public:
 		
 	}
 
+	FString GetRPCServer() const
+	{
+		return RPCServer;
+	}
+	
 	FString GetProjectId() const
 	{
 		return ProjectId;
@@ -251,7 +230,7 @@ public:
 	bool Valid() const
 	{
 		bool IsValid = true;
-		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		//IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
 		return IsValid;
 	}
 
@@ -348,7 +327,8 @@ private:
 	FString Cached_Issuer;
 	//AWS
 	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
-	FWaasCredentials WaasCredentials;
+	//FWaasSettings WaasSettings;
+	FWaasJWT WaasSettings;
 	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";//Builder Key
 	const FString WaasVersion = "1.0.0";
 
@@ -358,9 +338,6 @@ private:
 
 	const int32 EmailAuthMaxRetries = 2;
 	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
-
-	//From GetId
-	FString IdentityId = "";
 
 	//From GetCredentialsForIdentity
 	FString AccessKeyId = "AKIAIOSFODNN7EXAMPLE";

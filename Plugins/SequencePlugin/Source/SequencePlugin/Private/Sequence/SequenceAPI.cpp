@@ -211,9 +211,12 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		const TSharedPtr<FJsonObject> * Data = nullptr;
-		if (Json.Get()->TryGetObjectField("data",Data))
+		//const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
+		//const TSharedPtr<FJsonObject> * Data = nullptr;
+
+		UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
+		
+		/*if (Json.Get()->TryGetObjectField("data",Data))
 		{
 			FString RegisteredSessionId, RegisteredWalletAddress;
 			if (Data->Get()->TryGetStringField("sessionId",RegisteredSessionId) && Data->Get()->TryGetStringField("wallet",RegisteredWalletAddress))
@@ -233,12 +236,18 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 		else
 		{
 			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-		}
+		}*/
 	};
 	if (this->Credentials.Valid())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/RegisterSession",this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
+	{
+		//https://next-waas.sequence.app/rpc/WaasAuthenticator/rpc/WaasAuthenticator/RegisterSession
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
+		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
+	}
 	else
+	{
 		OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
+	}
 }
 
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
@@ -266,7 +275,10 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 	};
 	
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->BuildListSessionIntent(),OnResponse,OnFailure);
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,this->BuildListSessionIntent(),OnResponse,OnFailure);
+	}
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
@@ -289,7 +301,10 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 		}
 	};
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->BuildCloseSessionIntent(),OnResponse,OnFailure);
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,this->BuildCloseSessionIntent(),OnResponse,OnFailure);
+	}
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
@@ -335,7 +350,10 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 		}
 	};
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent",this->BuildSignMessageIntent(Message),OnResponse,OnFailure);
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,this->BuildSignMessageIntent(Message),OnResponse,OnFailure);
+	}
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
@@ -380,7 +398,10 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	};
 	
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
-		this->SequenceRPC("https://dev-waas.sequence.app/rpc/WaasAuthenticator/SendIntent", BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
+	}
 	else
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
@@ -487,9 +508,9 @@ FString USequenceWallet::BuildRegisterSessionIntent()
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString Data = "{\"idToken\":\""+this->Credentials.GetIDToken()+"\",\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
 	const FString GUID = FGuid::NewGuid().ToString();
-	const FString SigIntent = "{\"intent\":{\"data\":"+Data+"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\",\"friendlyName\":\""+GUID+"\"}";
+	const FString SigIntent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"},\"friendlyName\":\""+GUID+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":"+Data+"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\",\"friendlyName\":\""+GUID+"\"}";
+	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"},\"friendlyName\":\""+GUID+"\"}";
 	UE_LOG(LogTemp,Display,TEXT("RegisterSession Intent: %s"),*Intent);
 	return Intent;
 }
@@ -550,6 +571,7 @@ FString USequenceWallet::BuildSessionValidationIntent()
 
 template <typename T> void USequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
 {
+	UE_LOG(LogTemp,Display,TEXT("Dest: %s"),*Url);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
