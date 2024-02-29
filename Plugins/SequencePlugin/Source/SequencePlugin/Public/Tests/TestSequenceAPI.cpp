@@ -262,6 +262,8 @@ void SequenceAPITest::SendTransaction(TFunction<void(FString)> OnSuccess, TFunct
 	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
 	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
 	//Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
+
+	//Api->SendTransaction(Txn, OnSuccess, GenericFailure);
 	
 	//Api->SendTransaction(Txn,OnSuccess,GenericFailure);
 }
