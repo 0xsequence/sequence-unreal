@@ -10,6 +10,7 @@
 #include "JsonUtils/JsonPointer.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
+#include "Sequence/Close.h"
 #include "Util/HexUtility.h"
 
 FString SortOrderToString(ESortOrder SortOrder)
@@ -312,17 +313,21 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
+		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		if(Json.IsValid() && Json->GetBoolField("ok"))
+		FCloseResponseObj ResponseStruct;
+		if (FJsonObjectConverter::JsonObjectToUStruct<FCloseResponseObj>(Json.ToSharedRef(), &ResponseStruct))
 		{
-			this->Credentials.UnRegisterCredentials();
-			UAuthenticator *Auth = NewObject<UAuthenticator>();
-			Auth->StoreCredentials(this->Credentials);//update credentials to ensure we remember that this session is now closed
-			OnSuccess("[SessionClosed]");
+			const FString ParsedResponse = UIndexerSupport::structToString(ResponseStruct);
+			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
+			if (ResponseStruct.response.code.Compare("sessionClosed")==0)
+				OnSuccess(ResponseStruct.response.code);
+			else
+				OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Malformed response: " + Response));
+			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
 		}
 	};
 	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
@@ -428,9 +433,6 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
-//{"data":{"message":"0x19457468657265756D205369676E6564204D6573736167653A0A326869","network":"137","wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466023,"issuedAt":1708465993,"name":"signMessage","version":"1.0.0"}
-//{"data":{"idToken":$idToken,"sessionId":$sessionId},"issuedAt":1708107597,"expiresAt":1708109397,"name":"openSession","version":"1.0.0"}
-
 FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 {//updated to match new RPC setup
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
@@ -450,7 +452,6 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	
 	//EIP-191
 	const FString Data = "{\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	//{"data":{"message":"0x19457468657265756D205369676E6564204D6573736167653A0A326869","network":"137","wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466023,"issuedAt":1708465993,"name":"signMessage","version":"1.0.0"}
 	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
@@ -503,24 +504,15 @@ FString USequenceWallet::BuildListSessionIntent()
 	return Intent;
 }
 
-/*FString USequenceWallet::BuildListSessionIntent()
-{
-	const FString Intent = "{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
-	UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
-	return Intent;
-}*/
-
-//'{"intent":{"data":{"sessionId":"0x00fea7a37d92b02c31258dc3a3732a1fc62ac37e65"},"expiresAt":1708548573,"issuedAt":1708548543,"name":"closeSession","signatures":[{"sessionId":"0x00fea7a37d92b02c31258dc3a3732a1fc62ac37e65","signature":"0x15bb79be1d1a1e692c225b47a8689cdafea5a6722743f0f24158d0830ba0af6f68f78603c31963fe5d851b1706a71e0af81b6b41f4e9a9a261281b1137b76f9f1b"}],"version":"1.0.0"}}'
 FString USequenceWallet::BuildCloseSessionIntent()
-{//updated
+{
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-
-	const FString SigIntent = "{\"intent\":{\"data\":{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"closeSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
+	const FString SigIntent = "{\"data\":{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"closeSession\",\"version\":\""+this->Credentials.GetWaasVersin()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":{\"sessionId\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
+	const FString Intent = "{\"intent\":{\"data\":{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"closeSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersin()+"\"}}";
 	UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
 	return Intent;
 }
