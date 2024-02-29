@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "SignedMessage.generated.h"
-//{"response":{"code":"signedMessage","data":{"message":"","signature":""}}}
 
 USTRUCT()
 struct FSignedMessageSignature
