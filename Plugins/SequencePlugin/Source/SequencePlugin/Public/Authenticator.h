@@ -244,6 +244,9 @@ public:
 
 	void UnRegisterCredentials()
 	{
+		Expires = -1;
+		Created = -1;
+		Refreshed = -1;
 		Registered = false;
 	}
 };
