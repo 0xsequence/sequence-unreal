@@ -85,8 +85,10 @@ class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 private:
 	UPROPERTY()
 	UIndexer* Indexer;
-	
+
+	UPROPERTY()
 	FCredentials_BE Credentials;
+	
 	FString ProviderUrl = "";
 	
 	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
