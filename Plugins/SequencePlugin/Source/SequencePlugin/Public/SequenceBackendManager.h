@@ -26,20 +26,20 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthISuccess, FCredentials_BE, Credentials);
 
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category="Auth")
 		FOnAuthIRequiresCode ReadyToReceiveCodeDelegate;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category="Auth")
 		FOnAuthIFailure ShowAuthFailureDelegate;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category="Auth")
 		FOnAuthISuccess ShowAuthSuccessDelegate;
 private:
 	UFUNCTION()
@@ -48,9 +48,10 @@ private:
 		void CallShowAuthFailureScreen();
 	UFUNCTION()
 		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
-private:	
-	//SequenceAPI::USequenceWallet* sequenceWallet = nullptr;
+private:
 	FCredentials_BE Credentials;
+	
+	UPROPERTY()
 	UAuthenticator* authenticator;
 
 	//testing variables//
@@ -104,26 +105,7 @@ public:
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
-//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-
-	//these are the 2 receive functions we have
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
-		void ReceiveCoin(FCoin_BE coin);
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Receive")
-		void ReceiveNFT(FNFT_Master_BE nft);
-
-	/*
-	* Used to let the frontend know if authentication succeeded or not
-	* in an async. manner
-	* 
-	* if authenticated is false then we failed to auth the user or timed out
-	* if authenticated is true we successfully authenticated the user and we need to signal the ui that
-	* we are ready for next steps
-	* 
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Authentication")
-		void UpdateAuthentication(bool authenticated);
+//ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA
 
 	/*
 	* Used to init. a call to fetch all system data needed by frontend in an async manner
@@ -162,19 +144,5 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void InitGetUpdateTokenData(TArray<FID_BE> TokensToUpdate);
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
-		void UpdateCoinData(const TArray<FItemPrice_BE> &updatedCoinValues);
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Get_Updated_Data")
-		void UpdateTokenData(const TArray<FItemPrice_BE> &updatedTokenValues);
-
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
-
-private:
-	//testing functions//
-
-	UFUNCTION()
-		void RandomReceive();
-
-	//testing functions//
 };

@@ -400,4 +400,8 @@ For Android
 https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Mobile/Android/PackagingAndroidProject/
 For IOS
 https://docs.unrealengine.com/5.0/en-US/packaging-ios-projects-in-unreal-engine/
+
+For IOS you also need to setup provisioning refer to these docs to achieve that:
+
+https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/
 ************** Packaging **************

@@ -2,13 +2,6 @@
 
 #include "SequenceBackendManager.h"
 #include "Provider.h"
-#include "Util/HexUtility.h"
-#include "Misc/AutomationTest.h"
-#include "GenericPlatform/GenericPlatformApplicationMisc.h"
-#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
-#include "Indexer/Indexer.h"
-#include "Eth/Crypto.h"
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
 
@@ -39,7 +32,7 @@ void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& C
 {
 	this->Credentials = CredentialsIn;
 	if (this->ShowAuthSuccessDelegate.IsBound())
-		this->ShowAuthSuccessDelegate.Broadcast();
+		this->ShowAuthSuccessDelegate.Broadcast(Credentials);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
 }
@@ -49,7 +42,13 @@ ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//this->sequenceWallet = new SequenceAPI::USequenceWallet();
+	this->authenticator = nullptr;
+}
+
+// Called when the game starts or when spawned
+void ASequenceBackendManager::BeginPlay()
+{
+	Super::BeginPlay();
 	this->authenticator = NewObject<UAuthenticator>();
 
 	//setup up delegate bindings
@@ -58,12 +57,6 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->authenticator->AuthSuccess.Add(del);
 	this->authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 	this->authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
-}
-
-// Called when the game starts or when spawned
-void ASequenceBackendManager::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -91,12 +84,28 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 
 FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 {
-	return this->authenticator->GetSigninURL(Type);
+	if (this->authenticator)
+	{
+		return this->authenticator->GetSigninURL(Type);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
+		return "invalid";
+	}
 }
 
 FString ASequenceBackendManager::GetRedirectURL()
 {
-	return this->authenticator->GetRedirectURL();
+	if (this->authenticator)
+	{
+		return this->authenticator->GetRedirectURL();
+	}
+	else
+	{
+		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
+		return "invalid";
+	}
 }
 
 void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
@@ -130,49 +139,6 @@ bool ASequenceBackendManager::StoredCredentialsValid()
 
 //ASYNC FUNCTIONAL CALLS// [THESE ARE NON BLOCKING CALLS AND WILL USE A MATCHING UPDATE...FUNC TO RETURN DATA]
 
-void ASequenceBackendManager::RandomReceive()
-{
-	int32 Dist = FMath::RandRange(1, 100);
-	int32 AcceptRange = 10;
-	bool bGenNew = (Dist <= AcceptRange);//acceptRange % of the time we will generate something new!
-
-	if (FMath::RandBool())
-	{//coin
-		FCoin_BE RCoin = this->testCoins[FMath::RandRange(0, this->testCoins.Num() - 1)];
-		RCoin.Coin_Amount = FMath::FRandRange(0.001, 100);
-		if (bGenNew)
-		{
-			RCoin.Coin_Long_Name = "NewRandomCoin:";
-			RCoin.Coin_Long_Name.AppendInt(FMath::RandRange(0,1000));
-		}
-		this->ReceiveCoin(RCoin);
-	}
-	else
-	{//nft
-		FNFT_Master_BE RNft = this->testNFTs[FMath::RandRange(0, this->testNFTs.Num() - 1)];
-		
-		int32 RCount = FMath::RandRange(1, 100);
-		for (int32 i = 0; i < RCount; i++)
-		{
-			FNFT_UData_BE uData;
-			RNft.nft_data.Add(uData);
-		}
-
-		if (bGenNew)
-		{
-			RNft.NFT_Name = "NewRandomNFT";
-			RNft.NFT_Name.AppendInt(FMath::RandRange(0, 1000));
-			RNft.Collection_Long_Name = "Testing_Collection";
-			RNft.Collection_Short_Name = "Tst";
-		}
-
-		this->ReceiveNFT(RNft);
-	}
-	FTimerHandle TimerTestReceive;
-	FTimerDelegate Delegate; // Delegate to bind function with parameters
-	Delegate.BindUFunction(this, "randomReceive"); // Character is the parameter we wish to pass with the function.
-	GetWorld()->GetTimerManager().SetTimer(TimerTestReceive, Delegate,FMath::FRandRange(1.0f,15.0f), false);
-}
 
 void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& systemData)
 {
@@ -250,14 +216,12 @@ void ASequenceBackendManager::InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdat
 	
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedCoinData)
 	{
-		this->UpdateCoinData(updatedCoinData);
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated coin data]"));
 		TArray<FItemPrice_BE> bList;
-		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
 	//this->sequenceWallet->getUpdatedCoinPrices(CoinsToUpdate,GenericSuccess,GenericFailure);
@@ -269,14 +233,12 @@ void ASequenceBackendManager::InitGetUpdateTokenData(TArray<FID_BE> TokensToUpda
 	UE_LOG(LogTemp, Display, TEXT("[Update NFT Fetch INITIATED]"));
 	const TSuccessCallback<TArray<FItemPrice_BE>> GenericSuccess = [this](const TArray<FItemPrice_BE> updatedTokenData)
 	{
-		this->UpdateTokenData(updatedTokenData);
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("[Error in fetching updated token data]"));
 		TArray<FItemPrice_BE> bList;
-		this->UpdateTokenData(bList);//we need to continue if possible otherwise the frontend hangs
 	};
 
 	//this->sequenceWallet->getUpdatedCollectiblePrices(TokensToUpdate, GenericSuccess, GenericFailure);

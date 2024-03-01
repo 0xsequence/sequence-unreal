@@ -293,8 +293,11 @@ class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY()
 	FOnAuthRequiresCode AuthRequiresCode;
+	UPROPERTY()
 	FOnAuthFailure AuthFailure;
+	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
 
 private://Broadcast handlers
@@ -308,9 +311,13 @@ private:
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 
+	UPROPERTY()
 	FString SessionId = "";
+	UPROPERTY()
 	FString SessionHash = "";
+	UPROPERTY()
 	FString StateToken = "";
+	UPROPERTY()
 	FString Nonce = "";
 
 	const FString UrlScheme = "powered-by-sequence";
@@ -329,39 +336,52 @@ private:
 	const FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
 	const FString AppleClientID = "com.horizon.sequence.waas";
 
+	UPROPERTY()
 	FString Cached_IDToken;
+	UPROPERTY()
 	FString Cached_Email;
+	UPROPERTY()
 	FString Cached_Issuer;
 	//AWS
 	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
-	//FWaasSettings WaasSettings;
+	UPROPERTY()
 	FWaasJWT WaasSettings;
 	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";//Builder Key
 	const FString WaasVersion = "1.0.0";
 
 	//this provider map fails to init so I'm going to swap over to a runtime made map instead due to unreliability
 	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
-	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 
+	UPROPERTY()
+	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
+	
 	const int32 EmailAuthMaxRetries = 2;
+	UPROPERTY()
 	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
 
 	//From GetCredentialsForIdentity
+	UPROPERTY()
 	FString AccessKeyId = "AKIAIOSFODNN7EXAMPLE";
+	UPROPERTY()
 	FString SecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+	UPROPERTY()
 	FString SessionToken = "";
 
 	//From KMSGenerateDataKey
+	UPROPERTY()
 	FString PlainText = "";
+	UPROPERTY()
 	TArray<uint8> PlainTextBytes;
+	UPROPERTY()
 	FString CipherTextBlob = "";
 
 	//From InitiateAuth
+	UPROPERTY()
 	FString ChallengeSession = "";
 
 	UPROPERTY()
 	UWallet * SessionWallet;
-
+	UPROPERTY()
 	bool PurgeCache = false;
 private:
 	UAuthenticator();
