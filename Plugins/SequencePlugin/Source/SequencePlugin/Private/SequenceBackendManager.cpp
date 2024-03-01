@@ -60,14 +60,6 @@ ASequenceBackendManager::ASequenceBackendManager()
 	this->authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 }
 
-ASequenceBackendManager::~ASequenceBackendManager()
-{
-	//if (this->sequenceWallet)
-	//{
-		//delete this->sequenceWallet;//free memory only if it's valid!
-	//}
-}
-
 // Called when the game starts or when spawned
 void ASequenceBackendManager::BeginPlay()
 {

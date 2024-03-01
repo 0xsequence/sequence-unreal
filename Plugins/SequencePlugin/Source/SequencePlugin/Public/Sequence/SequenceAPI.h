@@ -89,7 +89,6 @@ private:
 	FCredentials_BE Credentials;
 	FString ProviderUrl = "";
 	
-	//replace this later
 	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString sequenceURL_QR = "https://api.sequence.app/qr/";
@@ -118,10 +117,10 @@ public:
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
+	
+private:
 	//NOP
 	void SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 	FString BuildSignMessageIntent(const FString& message);

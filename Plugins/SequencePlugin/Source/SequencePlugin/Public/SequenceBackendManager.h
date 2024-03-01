@@ -61,11 +61,8 @@ private:
 
 public:
 	FUserDetails getUserDetails();
-
-	// Sets default values for this actor's properties
+	
 	ASequenceBackendManager();
-	//destructor for cleaning up old refs
-	~ASequenceBackendManager();
 
 protected:
 	// Called when the game starts or when spawned
