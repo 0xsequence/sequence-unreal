@@ -6,7 +6,7 @@ This plugin comes with everything needed to get connected and send transactions 
 Note: all files and folders talked about in this readme will be found in the following directories with in your project folder
 /Plugins/SequencePlugin/Source/SequencePlugin/Private 
 or
-/Plugins/SequencePlugin/Source/SequencePlugin/Public 
+/Plugins/SequencePlugin/Source/SequencePlugin/Public
 
 =========================================================================================================================
 
@@ -28,9 +28,33 @@ and create a Plugins Folder in it, then copy over the Sequence Plugin folder int
 3) To find the SequencePlugin content folder in your content drawer enable view plugin content
 
 4) If you wish to use the in built sequence UI for login
+4a) Create an actor you wish to be responsible for the SequenceUI then attach the sequence pawn to it
+4b) Setup your actor similar to how it's setup in Custom_Spectator_Pawn being sure to bind to the delegate
+that gives you Credentials (TODO set this up)
 
+5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI
 
+6) Using a USequenceWallet::Make(Credentials) or USequenceWallet::Make(Credentials,ProviderURL), you'll create a SequenceWallet
+with all the API calls you require.
 
+7) Once you've created the USequenceWallet, be sure to call Register immediately to get registered credentials.
+
+IF you are using your own UI you'll need to do the following
+
+In a C++ backend with a series of UFUNCTIONS setup similarly to SequenceBackendManager you'll want to create a
+UAuthenticator Object, this object will manage the authentication side of Sequence.
+
+Be sure to bind to the Delegates for AuthSuccess, AuthFailure, AuthRequires Code prior to making any signin calls
+
+You'll initiate Auth with either SocialSignin(SigninType) OR EmailSignin(email) calls.
+
+If using emailSignin be sure to have a call routed for EmailCode(codeIn) to the Authenticator in order to continue the
+auth process.
+
+Up on successful Auth intercept the credentials from AuthSuccess and pass them into your USequenceWallet object
+using a USequenceWallet::Make(Credentials) or USequenceWallet::Make(Credentials, ProviderURL);
+
+Then call Register to get your session registered and you'll be able to use all other SequenceAPI calls from this point on
 
 =========================================================================================================================
 
@@ -368,3 +392,12 @@ void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsize
 void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 ************** USequenceAPI **************
 
+************** Packaging **************
+To set your system up for Packaging please refer to the following links
+For Windows, Mac
+https://docs.unrealengine.com/5.0/en-US/packaging-unreal-engine-projects/#:~:text=Clicking%20File%20%3E%20Package%20Project%20%3E%20Packaging,options%20for%20the%20packaging%20feature.&text=The%20build%20configuration%20to%20compile,a%20code%20project%2C%20select%20DebugGame.
+For Android
+https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Mobile/Android/PackagingAndroidProject/
+For IOS
+https://docs.unrealengine.com/5.0/en-US/packaging-ios-projects-in-unreal-engine/
+************** Packaging **************
