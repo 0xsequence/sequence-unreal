@@ -121,7 +121,7 @@ void getTokenBalanceTest(UIndexer* indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("Token Balances Failure", Error);
 	};
 	FGetTokenBalancesArgs args;
-	args.accountAddress = testingAddress;//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";//"0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"
+	args.accountAddress = testingAddress;
 	args.includeMetaData = true;
 	indexer->GetTokenBalances(testingChainID, args, GenericSuccess, GenericFailure);
 }
@@ -215,7 +215,7 @@ void getTransactionHistoryTest(UIndexer* indexer, TFunction<void(FString)> OnSuc
 		OnFailure("transactionHistory Failure", Error);
 	};
 
-	FGetTransactionHistoryArgs args;			// 0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9
+	FGetTransactionHistoryArgs args;
 	args.filter.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	args.includeMetaData = true;
 	args.page.page = 0;
@@ -942,6 +942,7 @@ void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSe
 	getChainIDTest(indexer, OnSuccess, OnFailure);
 	getEtherBalanceTest(indexer, OnSuccess, OnFailure);
 	getTokenBalanceTest(indexer, OnSuccess, OnFailure);
+	getTokenSuppliesTest(indexer,OnSuccess, OnFailure);
 	getTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
 	getBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
 	getTransactionHistoryTest(indexer, OnSuccess, OnFailure);

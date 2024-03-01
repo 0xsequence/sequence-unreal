@@ -285,8 +285,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthSuccess, FCredentials_BE, Credentials);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRPC, FString, Response);
-
 /**
  * 
  */
@@ -294,8 +292,6 @@ UCLASS()
 class SEQUENCEPLUGIN_API UAuthenticator : public UObject
 {
 	GENERATED_BODY()
-private:
-	FOnRPC ProcessRPCResponse;
 public:
 	FOnAuthRequiresCode AuthRequiresCode;
 	FOnAuthFailure AuthFailure;
