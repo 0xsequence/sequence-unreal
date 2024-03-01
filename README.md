@@ -30,7 +30,7 @@ and create a Plugins Folder in it, then copy over the Sequence Plugin folder int
 4) If you wish to use the in built sequence UI for login
 4a) Create an actor you wish to be responsible for the SequenceUI then attach the sequence pawn to it
 4b) Setup your actor similar to how it's setup in Custom_Spectator_Pawn being sure to bind to the delegate
-that gives you Credentials (TODO set this up)
+that gives you Credentials (AuthSuccess)
 
 5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI
 
@@ -39,22 +39,22 @@ with all the API calls you require.
 
 7) Once you've created the USequenceWallet, be sure to call Register immediately to get registered credentials.
 
-IF you are using your own UI you'll need to do the following
+[IF you are using your own UI you'll need to do the following]
 
-In a C++ backend with a series of UFUNCTIONS setup similarly to SequenceBackendManager you'll want to create a
+1) In a C++ backend with a series of UFUNCTIONS setup similarly to SequenceBackendManager you'll want to create a
 UAuthenticator Object, this object will manage the authentication side of Sequence.
 
-Be sure to bind to the Delegates for AuthSuccess, AuthFailure, AuthRequires Code prior to making any signin calls
+2) Be sure to bind to the Delegates for AuthSuccess, AuthFailure, AuthRequires Code prior to making any signin calls
 
-You'll initiate Auth with either SocialSignin(SigninType) OR EmailSignin(email) calls.
+3) You'll initiate Auth with either SocialSignin(SigninType) OR EmailSignin(email) calls.
 
-If using emailSignin be sure to have a call routed for EmailCode(codeIn) to the Authenticator in order to continue the
+4) If using emailSignin be sure to have a call routed for EmailCode(codeIn) to the Authenticator in order to continue the
 auth process.
 
-Up on successful Auth intercept the credentials from AuthSuccess and pass them into your USequenceWallet object
+5) Upon successful Auth intercept the credentials from AuthSuccess and pass them into your USequenceWallet object
 using a USequenceWallet::Make(Credentials) or USequenceWallet::Make(Credentials, ProviderURL);
 
-Then call Register to get your session registered and you'll be able to use all other SequenceAPI calls from this point on
+6) Then call Register to get your session registered and you'll be able to use all other SequenceAPI calls from this point on
 
 =========================================================================================================================
 
@@ -182,13 +182,33 @@ USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL) where 
 
 SequenceAPI calls:
 
+[Note]
+We make use of TFunctions with some callbacks here I'll list some example syntax for them
+
+TSuccessCallback
+const TFunction<void(FString)> OnResponse = [Capturable variables](const FString& Response)
+{
+//callback body where we can process Response
+};
+
+FFailureCallback
+const TFunction<void(FSequenceError)> OnFailureTest = [Capturable variables](const FSequenceError& Error)
+{
+//callback body where we can process Error
+};
+
+One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
+something and start over writing memory. If you require lots of nesting swapping to a more unreal esque approach using
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in the UAuthenticator.cpp
+
+[Note]
+
 /*
 Used to sign the given string with sequence
 TSuccessCallback<FSignedMessage> OnSuccess the TFunction that is used as a callback on successful signing the provided
 struct contains the desired response
 
 FFailureCallback Callback that is sent when something goes wrong during the signing process contains an error message
-
 */
 SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
 
@@ -216,9 +236,7 @@ RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallba
 Used to list the sessions on sequence
 
 OnSuccess Calls back on success with a list of sessions
-
 OnFailure calls when something went wrong
-
 */
 ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 
@@ -226,7 +244,6 @@ ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailure
 Used to close the current session with sequence
 
 OnSuccess calls back on successful close
-
 OnFailure calls when something went wrong
 */
 CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
