@@ -11,7 +11,7 @@ or
 =========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
-You must provide an encryption key implementation at SequenceEncryptor.cpp Function GetStoredKey,
+You must provide an encryption key implementation at [SequenceEncryptor.cpp] Function [GetStoredKey],
 This function must be implemented to provide a securely stored private key that will be used to encrypt &
 decrypt client information. Failure to do so will result in NO information being stored or in the event you
 do not use a securely stored key, can result in client information being stored insecurely on their systems.
@@ -20,41 +20,110 @@ do not use a securely stored key, can result in client information being stored 
 =========================================================================================================================
 Getting Started
 
-1) Once you have the the SequencePlugin folder & if you are on a fresh project, you'll need to go to your project directory
-and create a Plugins Folder in it, then copy over the Sequence Plugin folder into that Plugins folder.
+1) Once you have the the SequencePlugin folder & if you're on a fresh project, you'll need to go to your project directory
+and create a Plugins Folder in it, then copy over the Sequence Plugin folder into that Plugins folder, if a Plugins folder
+already exists just copy this SequencePlugin folder into it.
 
 2) Launch your project, once open allow it to update the UProject Settings.
 
 3) To find the SequencePlugin content folder in your content drawer enable view plugin content
 
 4) If you wish to use the in built sequence UI for login
-4a) Create an actor you wish to be responsible for the SequenceUI then attach the sequence pawn to it
-4b) Setup your actor similar to how it's setup in Custom_Spectator_Pawn being sure to bind to the delegate
-that gives you Credentials (AuthSuccess)
+4a) Create an [Actor] you wish to be responsible for the SequenceUI then attach the [Sequence_Pawn_Component_BP] to it
+4b) Setup your [Actor] Blueprint similar to how it's setup in [Custom_Spectator_Pawn] being sure to bind to the delegate
+that gives you Credentials [Auth_Success_Forwarder]
 
-5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI
+5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI,
+an example of this is with the [Custom_Spectator_Pawn] here this Pawn inherits from a C++ class [Sqnc_Spec_Pawn]
+that class implements a blueprint Callable function [SetupCredentials(FCredentials_BE CredentialsIn)] which is callable
+within the child class [Custom_Spectator_Pawn]. Calling this function will forward the credentials to a C++ backend.
 
-6) Using a USequenceWallet::Make(Credentials) or USequenceWallet::Make(Credentials,ProviderURL), you'll create a SequenceWallet
-with all the API calls you require.
-
-7) Once you've created the USequenceWallet, be sure to call Register immediately to get registered credentials.
+6) before we get into using the Rest of the SequenceAPI we'll
+cover how to handle the Authentication side of things first.
 
 [IF you are using your own UI you'll need to do the following]
 
-1) In a C++ backend with a series of UFUNCTIONS setup similarly to SequenceBackendManager you'll want to create a
-UAuthenticator Object, this object will manage the authentication side of Sequence.
+1) In a C++ backend with a series of pass through [UFUNCTIONS] setup similarly to [SequenceBackendManager.h/.cpp]
+Each of these calls are implemented in [UAuthenticator] you just need to pass through the data with YOUR UAuthenticator UObject
 
-2) Be sure to bind to the Delegates for AuthSuccess, AuthFailure, AuthRequires Code prior to making any signin calls
+//This call is platform dependent on windows & mac this is required for SSO WIP
+   UFUNCTION(BlueprintCallable, CATEGORY = "Login")                      
+   FString GetLoginURL(const ESocialSigninType& Type); 
 
-3) You'll initiate Auth with either SocialSignin(SigninType) OR EmailSignin(email) calls.
+//This Call is made after you've collected the ID_Token (Mac & Windows only) WIP
+   UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+   void SocialLogin(const FString& IDTokenIn);
 
-4) If using emailSignin be sure to have a call routed for EmailCode(codeIn) to the Authenticator in order to continue the
-auth process.
+//This Call is made after you've collected the email address from the Users in the UI
+   UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+   void EmailLogin(const FString& EmailIn);
 
-5) Upon successful Auth intercept the credentials from AuthSuccess and pass them into your USequenceWallet object
-using a USequenceWallet::Make(Credentials) or USequenceWallet::Make(Credentials, ProviderURL);
+//This is call is made after the Delegate [AuthRequiresCode] is fired
+   UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+   void EmailCode(const FString& CodeIn);
 
-6) Then call Register to get your session registered and you'll be able to use all other SequenceAPI calls from this point on
+//Optional call used to check if the credentials on disk are valid or not//
+   UFUNCTION(BlueprintCallable, Category = "Login")
+   bool StoredCredentialsValid();
+
+To start you'll want to create a [UAuthenticator] UObject like so [UAuthenticator * Auth = NewObject<UAuthenticator>()],
+this UObject manages the authentication side of Sequence.
+
+2) Be sure to bind to the Delegates for [AuthSuccess], [AuthFailure], [AuthRequiresCode] prior to making any signin calls
+You can bind to these delegates like so:
+   this->authenticator->AuthRequiresCode.AddDynamic(this, &AYourClass::YourCallReadyToReceiveCode);
+   this->authenticator->AuthFailure.AddDynamic(this, &AYourClass::YourCallShowAuthFailureScreen);
+
+   In the case of [AuthSuccess] since a parameter is also passed we bind to it like this
+   FScriptDelegate del;
+   del.BindUFunction(this, "CallShowAuthSuccessScreen");
+   this->authenticator->AuthSuccess.Add(del);
+   
+   Where [CallShowAuthSuccessScreen] is defined in SequenceBackendManager.h like so:
+
+   UFUNCTION()
+   void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
+
+   & in SequenceBackendManager.cpp like so:
+
+   void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn) 
+   {
+   this->Credentials = CredentialsIn;
+   if (this->ShowAuthSuccessDelegate.IsBound())
+      this->ShowAuthSuccessDelegate.Broadcast(Credentials);
+   else
+      UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
+   }
+
+[Email based Authentication]
+1) To start email based authentication you'll start it with this call [EmailLogin(const FString& EmailIn)], supplying
+   an email you've collected from the User in your GUI.
+
+2) Next [AuthRequiresCode] will fire when the backend is ready to receive the Code from your UI. Collect this code from
+   your GUI and send it to the authenticator using [EmailCode(CodeIn)].
+
+3) Finally [AuthSuccess] will fire with a Credentials_BE struct as a parameter. This is your non registered credentials
+   from EmailAuth. You are done Email Based Auth.
+
+[Social Signin based Authentication DESKTOP]
+1) To start SSO based authentication with desktop you'll want to ensure you have the Epic Games provided WebBrowser plugin
+   enabled. WIP
+
+2) With the web browser plugin enabled
+
+3) Once the id_token is parsed out from the redirect url. You can forward it to the UAuthenticator backend using 
+   [SocialLogin(const FString& IDTokenIn)], after which [AuthSuccess] will fire and You're done desktop based SSO!
+
+[Social Signin based Authentication MOBILE]
+WIP
+
+[SequenceAPI]
+1) After you've completed initial authentication and have intercepted the credentials either through your UI or ours,
+   to use the Sequence API you'll need to create a [USequenceWallet] by using:
+   [USequenceWallet * Api = USequenceWallet(CredentialsIn)] or [USequenceWallet * Api = USequenceWallet::Make(CredentialsIn, ProviderURL)]
+   Once you have your [USequenceWallet] UObject call [Api->RegisterSession(OnSuccess,GenericFailure)] this will register
+   your credentials with the SequenceBackend. Note not calling Register prior to make any others calls will result in errors
+   as a UserWallet hasn't been supplied until this point.
 
 =========================================================================================================================
 
@@ -136,11 +205,6 @@ provider IE) Google or Apple
 GetSigninURL(ESocialSigninType Type)
 
 /*
-Gets the redirect URL for SSO
-*/
-GetRedirectURL()
-
-/*
 This is for dealing with Social based Login,
 (WIP)
 */
@@ -199,7 +263,7 @@ const TFunction<void(FSequenceError)> OnFailureTest = [Capturable variables](con
 
 One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
 something and start over writing memory. If you require lots of nesting swapping to a more unreal esque approach using
-UFUNCTION callbacks helps to avoid these problems similar to how things are done in the UAuthenticator.cpp
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in [UAuthenticator.h/cpp]
 
 [Note]
 

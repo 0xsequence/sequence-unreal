@@ -126,14 +126,6 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-FString UAuthenticator::GetRedirectURL() const
-{
-	UE_LOG(LogTemp,Display,TEXT(""));
-	UE_LOG(LogTemp,Display,TEXT("RedirectURL: %s"),*this->RedirectURL);
-	UE_LOG(LogTemp,Display,TEXT("Padder: %s"),*this->BRedirectURL);
-	return this->RedirectURL;
-}
-
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;

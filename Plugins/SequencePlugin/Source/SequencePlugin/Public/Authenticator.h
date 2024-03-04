@@ -388,8 +388,6 @@ private:
 public:
 	FString GetSigninURL(const ESocialSigninType& Type) const;
 
-	FString GetRedirectURL() const;
-
 	void SocialLogin(const FString& IDTokenIn);
 
 	void EmailLogin(const FString& EmailIn);
