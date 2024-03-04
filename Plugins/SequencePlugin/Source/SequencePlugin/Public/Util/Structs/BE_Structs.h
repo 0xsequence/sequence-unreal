@@ -69,20 +69,20 @@ public:
 	UPROPERTY()
 	FString value = "";
 	UPROPERTY()
-	FString token = "";
+	FString tokenAddress = "";
 
 	FERC20Transaction(){}
-	FERC20Transaction(const FString& ToIn, const int32& ValueIn, const FString& TokenIn)
+	FERC20Transaction(const FString& ToIn, const int32& ValueIn, const FString& TokenAddressIn)
 	{
 		to = ToIn;
 		value = FString::Printf(TEXT("%d"),ValueIn);
-		token = TokenIn;
+		tokenAddress = TokenAddressIn;
 	}
-	FERC20Transaction(const FString& ToIn, const FString& ValueIn, const FString& TokenIn)
+	FERC20Transaction(const FString& ToIn, const FString& ValueIn, const FString& TokenAddressIn)
 	{
 		to = ToIn;
 		value = ValueIn;
-		token = TokenIn;
+		tokenAddress = TokenAddressIn;
 	}
 
 	FString GetType() const
@@ -94,7 +94,7 @@ public:
 	{
 	    FString Json = "{";
         Json += "\"to\":\"" + to + "\",";
-	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"tokenAddress\":\"" + tokenAddress + "\",";
 	    Json += "\"type\":\"" + type + "\",";
 	    Json += "\"value\":\"" + value + "\"";
 	    Json += "}";
@@ -117,18 +117,18 @@ public:
 	UPROPERTY()
 	FString data = "null";
 	UPROPERTY()
-	FString token = "";
+	FString tokenAddress = "";
 	UPROPERTY()
 	bool safe = true;
 
 	FERC721Transaction(){}
 		
-	FERC721Transaction(const FString& ToIn, const FString& IdIn, const FString& DataIn, const FString& TokenIn, const bool& SafeIn)
+	FERC721Transaction(const FString& ToIn, const FString& IdIn, const FString& DataIn, const FString& TokenAddressIn, const bool& SafeIn)
 	{
 		to = ToIn;
 	    id = IdIn;
 		data = DataIn;
-		token = TokenIn;
+		tokenAddress = TokenAddressIn;
 		safe = SafeIn;
 	}
 
@@ -145,7 +145,7 @@ public:
 	    Json += "\"id\":\"" + id + "\",";
 	    Json += "\"safe\":" + safeState + ",";
 	    Json += "\"to\":\"" + to + "\",";
-	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"token\":\"" + tokenAddress + "\",";
 	    Json += "\"type\":\"" + type + "\"";
 	    Json += "}";
 	    return Json;
@@ -199,17 +199,17 @@ public:
 	UPROPERTY()
 	FString data = "null";
 	UPROPERTY()
-	FString token = "";
+	FString tokenAddress = "";
 	UPROPERTY()
 	TArray<FERC1155TxnValue> vals;
 		
 	FERC1155Transaction(){}
 		
-	FERC1155Transaction(const FString& ToIn, const FString& DataIn, const FString& TokenIn, TArray<FERC1155TxnValue> ValsIn)
+	FERC1155Transaction(const FString& ToIn, const FString& DataIn, const FString& TokenAddressIn, TArray<FERC1155TxnValue> ValsIn)
 	{
 		to = ToIn;
 		data = DataIn;
-		token = TokenIn;
+		tokenAddress = TokenAddressIn;
 		vals.Reset(ValsIn.Num());
 		vals.Append(ValsIn);
 	}
@@ -224,7 +224,7 @@ public:
 	    FString Json = "{";
 	    Json += "\"data\":\"" + data + "\",";
 	    Json += "\"to\":\"" + to + "\",";
-	    Json += "\"token\":\"" + token + "\",";
+	    Json += "\"token\":\"" + tokenAddress + "\",";
 	    Json += "\"type\":\"" + type + "\",";
 	    Json += "\"vals\":";
 	    Json += "[";

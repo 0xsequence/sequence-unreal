@@ -15,6 +15,8 @@ class SEQUENCEPLUGIN_API AGeneralTesting : public AActor
 
 private:
 	TArray<FString> testingURLs = {"https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389","https://www.circle.com/hubfs/share-USDC.png#keepProtocol","https://assets.skyweaver.net/i7FuksL3/webapp/cards/full-cards/4x/0-silver.png","https://skyweaver.net/images/skyweavercover.jpg"};
+
+	UPROPERTY()
 	UObjectHandler* imgHandler;
 public:	
 	// Sets default values for this actor's properties
