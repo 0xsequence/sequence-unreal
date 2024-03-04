@@ -90,9 +90,6 @@ public:
 		FString GetLoginURL(const ESocialSigninType& Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		FString GetRedirectURL();
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void SocialLogin(const FString& IDTokenIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")

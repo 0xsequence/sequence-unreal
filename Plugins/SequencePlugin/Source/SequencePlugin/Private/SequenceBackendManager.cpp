@@ -95,19 +95,6 @@ FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 	}
 }
 
-FString ASequenceBackendManager::GetRedirectURL()
-{
-	if (this->authenticator)
-	{
-		return this->authenticator->GetRedirectURL();
-	}
-	else
-	{
-		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
-		return "invalid";
-	}
-}
-
 void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
 {
 	this->authenticator->SocialLogin(IDTokenIn);
