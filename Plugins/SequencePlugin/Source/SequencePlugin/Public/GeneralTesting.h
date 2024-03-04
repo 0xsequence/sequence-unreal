@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Errors.h"
-#include "Indexer/IndexerSupport.h"
 #include "SequenceDataTests.h"
 #include "GeneralTesting.generated.h"
 
@@ -34,9 +33,6 @@ protected:
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestListSessions() const;
-	
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
-	void TestSendTransaction() const;
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestCloseSessions() const;

@@ -73,21 +73,6 @@ void AGeneralTesting::TestListSessions() const
 	SequenceAPITest::ListSessions(OnSuccess, OnFailure);
 }
 
-void AGeneralTesting::TestSendTransaction() const
-{
-	const TFunction<void (FString)> OnSuccess = [this](FString State)
-	{
-		CallbackPassed(State);
-	};
-
-	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
-	{
-		CallbackFailed(Data, Err);
-	};
-	
-	SequenceAPITest::SendTransaction(OnSuccess, OnFailure);
-}
-
 void AGeneralTesting::TestSendRaw() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
