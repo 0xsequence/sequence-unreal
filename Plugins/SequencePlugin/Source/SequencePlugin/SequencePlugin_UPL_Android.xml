@@ -6,7 +6,12 @@
     </prebuildCopies>
 
     <buildGradleAdditions>
-        <insert>
+        <insert>  
+compileOptions {
+    sourceCompatibility 1.8
+    targetCompatibility 1.8
+}        
+
 dependencies {
     implementation "androidx.credentials:credentials:1.2.0"
     implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
@@ -35,7 +40,11 @@ import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
     public native void nativeSequenceHandleGoogleIdToken(String idToken);
 
     public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId) {
-        SequenceGoogleSignInHelper.signIn(this, clientId);
+        SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId);
+    }
+
+    public static GameActivity sequenceGetInstance() {
+        return _activity;
     }
         </insert>
     </gameActivityClassAdditions>

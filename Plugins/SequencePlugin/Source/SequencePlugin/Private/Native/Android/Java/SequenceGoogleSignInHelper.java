@@ -72,7 +72,7 @@ public class SequenceGoogleSignInHelper {
         ) {
             try {
                 GoogleIdTokenCredential idTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
-                GameActivity._activity.nativeSequenceHandleGoogleIdToken(idTokenCredential.getIdToken());
+                GameActivity.sequenceGetInstance().nativeSequenceHandleGoogleIdToken(idTokenCredential.getIdToken());
             } catch (Exception e) {
                 Log.e(TAG, "Failed to parse Google ID token response", e);
             }
