@@ -7,7 +7,7 @@ namespace NativeOAuth {
     void SignInWithGoogle(const FString& clientId)
     {
         #if PLATFORM_ANDROID
-        AndroidOAuth::AndroidThunkCpp_SignInWithGoogle(providerUrl, redirectScheme);
+        AndroidOAuth::AndroidThunkCpp_SignInWithGoogle(clientId);
         #endif // PLATFORM_ANDROID
     }
 }
