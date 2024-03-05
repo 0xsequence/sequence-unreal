@@ -14,7 +14,7 @@ import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.credentials.exceptions.NoCredentialException;
 
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
 import java.util.concurrent.Executors;
@@ -24,23 +24,18 @@ import com.epicgames.unreal.GameActivity;
 public class SequenceGoogleSignInHelper {
     private static final String TAG = "SequenceGoogleSignIn";
 
-    private static volatile boolean isFirstAttempt = true;
-
     public static void signIn(
         Context context,
         String clientId
     ) {
-        getCredentialAsync(context, clientId, isFirstAttempt);
+        getCredentialAsync(context, clientId);
     }
 
     private static void getCredentialAsync(
         Context context,
-        String clientId,
-        boolean filterByAuthorizedAccounts
+        String clientId
     ) {
-        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
-                .setServerClientId(clientId)
+        GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId)
                 // TODO: include a nonce value here
                 .build();
 
@@ -58,19 +53,11 @@ public class SequenceGoogleSignInHelper {
                     @Override
                     public void onResult(GetCredentialResponse getCredentialResponse) {
                         handleGetCredentialResponse(getCredentialResponse);
-                        isFirstAttempt = true;
                     }
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
-                        if (isFirstAttempt && (e instanceof NoCredentialException)) {
-                            // if no existing credentials on the first attempt, run google "sign up" flow
-                            isFirstAttempt = false;
-                            SequenceGoogleSignInHelper.getCredentialAsync(context, clientId, isFirstAttempt);
-                        } else {
-                            Log.e(TAG, "Error getting credential", e);
-                            isFirstAttempt = true;
-                        }
+                        Log.e(TAG, "Error getting credential", e);
                     }
                 }
         );
