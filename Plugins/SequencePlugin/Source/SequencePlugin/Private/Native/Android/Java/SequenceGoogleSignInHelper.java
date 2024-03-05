@@ -30,7 +30,7 @@ public class SequenceGoogleSignInHelper {
         getCredentialAsync(context, clientId, true);
     }
 
-    private static getCredentialAsync(
+    private static void getCredentialAsync(
         Context context,
         String clientId,
         boolean filterByAuthorizedAccounts
