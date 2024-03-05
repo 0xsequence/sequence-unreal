@@ -12,6 +12,7 @@ import androidx.credentials.CustomCredential;
 import androidx.credentials.GetCredentialRequest;
 import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
+import androidx.credentials.exceptions.NoCredentialException;
 
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
@@ -23,11 +24,13 @@ import com.epicgames.unreal.GameActivity;
 public class SequenceGoogleSignInHelper {
     private static final String TAG = "SequenceGoogleSignIn";
 
+    private static volatile boolean isFirstAttempt = true;
+
     public static void signIn(
         Context context,
         String clientId
     ) {
-        getCredentialAsync(context, clientId, true);
+        getCredentialAsync(context, clientId, isFirstAttempt);
     }
 
     private static void getCredentialAsync(
@@ -55,11 +58,19 @@ public class SequenceGoogleSignInHelper {
                     @Override
                     public void onResult(GetCredentialResponse getCredentialResponse) {
                         handleGetCredentialResponse(getCredentialResponse);
+                        isFirstAttempt = true;
                     }
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
-                        Log.e(TAG, "Error getting credential", e);
+                        if (isFirstAttempt && (e instanceof NoCredentialException)) {
+                            // if no existing credentials on the first attempt, run google "sign up" flow
+                            isFirstAttempt = false;
+                            SequenceGoogleSignInHelper.getCredentialAsync(context, clientId, isFirstAttempt);
+                        } else {
+                            Log.e(TAG, "Error getting credential", e);
+                            isFirstAttempt = true;
+                        }
                     }
                 }
         );
