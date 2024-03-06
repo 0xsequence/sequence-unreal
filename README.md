@@ -371,39 +371,196 @@ void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSucc
 
 //Provider Calls (Note to use this properly you need to specify a provider URL when making the USequenceWallet)
 
-//TODO need Jan to help me go through these calls and what they require//
-
+/*
+Returns information about a block by block number.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
+@param uint64 Number, the block we are querying for
+*/
 void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns information about a block by block number.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
+@param EBlockTag Tag, the block we are querying for
+*/
 void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns information about a block by block number.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
+*/
 void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
-void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+/*
+Returns information about a block by hash.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbyhash
+@param FHash256 Hash, DATA, 32 Bytes - Hash of a block.
+@return Boolean - If true it returns the full transaction objects, if false only the hashes of the transactions.
+*/
+void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 
+/*
+Returns the information about a transaction requested by transaction hash.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactionbyhash
+@param FHash256 Hash, DATA, 32 Bytes - hash of a transaction.
+@return Object - A transaction object, or null when no transaction was found
+*/
 void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the number of transactions sent from an address.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactioncount
+@param FAddress Addr, DATA, 20 Bytes - address.
+@param uint64 Number, QUANTITY|TAG - integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
+@return QUANTITY - integer of the number of transactions send from this address.
+*/
 void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the number of transactions sent from an address.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactioncount
+@param FAddress Addr, DATA, 20 Bytes - address.
+@param EBlockTag Tag, QUANTITY|TAG - integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
+@return QUANTITY - integer of the number of transactions send from this address.
+*/
 void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the receipt of a transaction by transaction hash.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactionreceipt
+@param FHash256 Hash, DATA, 32 Bytes - hash of a transaction
+@return Object - A transaction receipt object, or null when no receipt was found
+*/
 void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
 
-void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-
-void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
-void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-
-void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
-void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+/*
+Creates new message call transaction or a contract creation for signed transactions.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_sendrawtransaction
+@param FString Data, DATA, The signed transaction data.
+@return DATA, The signed transaction data.
+*/
 void SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
+/*
+Executes a new message call immediately without creating a transaction on the block chain. Often used for executing read-only smart contract functions, for example the balanceOf for an ERC-20 contract.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call
+@param FContractCall ContractCall, Object - The transaction call object
+@param uint64 Number,
+@return DATA - the return value of executed contract.
+*/
+void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Executes a new message call immediately without creating a transaction on the block chain. Often used for executing read-only smart contract functions, for example the balanceOf for an ERC-20 contract.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call
+@param FContractCall ContractCall, Object - The transaction call object
+@param EBlockTag Number,
+@return DATA - the return value of executed contract.
+*/
+void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Gets the ChainId of the set provider
+@return the ChainId of the provider
+*/
 void ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
-void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+/*
+Returns an estimate of the current price per gas in wei. 
+For example, the Besu client examines the last 100 blocks and returns the median gas unit price by default.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
+@return QUANTITY - integer of the current gas price in wei.
+*/
+void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns an estimate of the current price per gas in wei.
+For example, the Besu client examines the last 100 blocks and returns the median gas unit price by default.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
+@param FContractCall ContractCall, (used to estimate gas for the given contract call)
+@return QUANTITY - integer of the current gas price in wei.
+*/
+void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns an estimate of the current price per gas in wei.
+For example, the Besu client examines the last 100 blocks and returns the median gas unit price by default.
+https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
+@param FAddress From, (used to estimate gas for the given address & ByteCode)
+@param FString ByteCode, (used to estimate gas for the given address & ByteCode)
+@return QUANTITY - integer of the current gas price in wei.
+*/
+void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Used to deploy contracts
+@param FString ByteCode,
+@param FPrivateKey PrivKey
+@param ChainId
+@return FAddress of the deployed contract
+*/
+void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Used to deploy contracts
+@param FString ByteCode,
+@param FPrivateKey PrivKey
+@param ChainId
+@return FAddress of the deployed contract & the hash of the contract after deployment
+*/
+void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Used to extract a nonce value from a given block number
+@param uint64 Number, The block number to use
+@return FBlockNonce, the nonce value for that block
+*/
+void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Used to extract a nonce value from a given tag
+@param EBlockTag Tag, the tag to use
+@return FBlockNonce the nonce value for that block
+*/
+void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the header of the given block id
+@param uint64 Id, the id of the block we want to get the header for
+@return FHeader the header of the block
+*/
+void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the header of the given block Tag
+@param EBlockTag Tag, the Tag of the block we want to get the header for
+@return FHeader the header of the block
+*/
+void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Returns the header of the given block Hash
+@param FHash256 Hash, the Hash of the block we want to get the header for
+@return FHeader the header of the block
+*/
+void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+
+/*
+Contract call for a nonView function
+@param FEthTransaction transaction,
+@param FPrivateKey PrivateKey,
+@param int32 ChainID,
+@return FUnsizedData from the nonview call
+*/
 void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+
 ************** USequenceAPI **************
+
+************** ABI **************
+
+
+
+************** ABI **************
 
 ************** UAuthenticator **************
 UAuthenticator
