@@ -106,13 +106,11 @@ You can bind to these delegates like so:
    from EmailAuth. You are done Email Based Auth.
 
 [Social Signin based Authentication DESKTOP]
-1) To start SSO based authentication with desktop you'll want to ensure you have the Epic Games provided WebBrowser plugin
-   enabled. WIP
+1) To start SSO based authentication with desktop you can either use your own implementation to get the necessary
+   id_token or you can make use of Unreal's web browser plugin.
 
-2) With the web browser plugin enabled
-
-3) Once the id_token is parsed out from the redirect url. You can forward it to the UAuthenticator backend using 
-   [SocialLogin(const FString& IDTokenIn)], after which [AuthSuccess] will fire and You're done desktop based SSO!
+2) With whatever implementation you chose you can forward the colleted id_token to the UAuthenticator object with
+   [SocialLogin(const FString& IDTokenIn)], after which [AuthSuccess] will fire and you're done desktop based SSO!
 
 [Social Signin based Authentication MOBILE]
 WIP
