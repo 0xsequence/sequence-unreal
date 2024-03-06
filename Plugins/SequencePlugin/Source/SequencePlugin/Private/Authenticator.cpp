@@ -15,6 +15,7 @@
 #include "WebBrowserModule.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
+#include "Config/Config.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -32,7 +33,7 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	FBase64::Decode(this->VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
+	FBase64::Decode(FSequenceConfig::VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
 	
@@ -130,7 +131,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
+	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
 	this->StoreCredentials(Credentials);
 	this->CallAuthSuccess(Credentials);
 }
@@ -317,7 +318,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), this->ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,this->WaasVersion);
+			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
 			this->StoreCredentials(Credentials);
 			this->CallAuthSuccess(Credentials);
 		}
@@ -373,9 +374,9 @@ void UAuthenticator::PrintAll()
 	UE_LOG(LogTemp,Display,TEXT("ChallengeSession: %s"), *this->ChallengeSession);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthMaxRetries: %d"), this->EmailAuthMaxRetries);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
-	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *this->WaasVersion);
-	UE_LOG(LogTemp,Display,TEXT("ProjectAccessKey: %s"), *this->ProjectAccessKey);
-	UE_LOG(LogTemp,Display,TEXT("VITE_SEQUENCE_WAAS_CONFIG_KEY: %s"), *this->VITE_SEQUENCE_WAAS_CONFIG_KEY);
+	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *FSequenceConfig::WaasVersion);
+	UE_LOG(LogTemp,Display,TEXT("ProjectAccessKey: %s"), *FSequenceConfig::ProjectAccessKey);
+	UE_LOG(LogTemp,Display,TEXT("VITE_SEQUENCE_WAAS_CONFIG_KEY: %s"), *FSequenceConfig::VITE_SEQUENCE_WAAS_CONFIG_KEY);
 	UE_LOG(LogTemp,Display,TEXT("cached_email: %s"), *this->Cached_Email);
 	UE_LOG(LogTemp,Display,TEXT("cachedidtoken: %s"), *this->Cached_IDToken);
 	UE_LOG(LogTemp,Display,TEXT("appleclientid: %s"), *this->AppleClientID);
