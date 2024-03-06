@@ -322,7 +322,6 @@ private:
 
 	const FString UrlScheme = "powered-by-sequence";
 	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
-	const FString BRedirectURL = "some text to check with";
 
 	const FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
 	const FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
@@ -342,43 +341,21 @@ private:
 	FString Cached_Email;
 	UPROPERTY()
 	FString Cached_Issuer;
-	//AWS
-	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
 	UPROPERTY()
 	FWaasJWT WaasSettings;
+	
+	const FString VITE_SEQUENCE_WAAS_CONFIG_KEY = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
 	const FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";//Builder Key
 	const FString WaasVersion = "1.0.0";
-
-	//this provider map fails to init so I'm going to swap over to a runtime made map instead due to unreliability
+	
 	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
-
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
-	
 	const int32 EmailAuthMaxRetries = 2;
 	UPROPERTY()
 	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
-
-	//From GetCredentialsForIdentity
-	UPROPERTY()
-	FString AccessKeyId = "AKIAIOSFODNN7EXAMPLE";
-	UPROPERTY()
-	FString SecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-	UPROPERTY()
-	FString SessionToken = "";
-
-	//From KMSGenerateDataKey
-	UPROPERTY()
-	FString PlainText = "";
-	UPROPERTY()
-	TArray<uint8> PlainTextBytes;
-	UPROPERTY()
-	FString CipherTextBlob = "";
-
-	//From InitiateAuth
 	UPROPERTY()
 	FString ChallengeSession = "";
-
 	UPROPERTY()
 	UWallet * SessionWallet;
 	UPROPERTY()

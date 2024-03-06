@@ -371,12 +371,6 @@ void UAuthenticator::PrintAll()
 	FString PurgeCacheString = (this->PurgeCache) ? "true" : "false";
 	UE_LOG(LogTemp,Display,TEXT("PurgeCache: %s"), *PurgeCacheString);
 	UE_LOG(LogTemp,Display,TEXT("ChallengeSession: %s"), *this->ChallengeSession);
-	UE_LOG(LogTemp,Display,TEXT("CipherTextBlob: %s"), *this->CipherTextBlob);
-	UE_LOG(LogTemp,Display,TEXT("PlainText: %s"), *this->PlainText);
-	UE_LOG(LogTemp,Display,TEXT("SessionToken: %s"), *this->SessionToken);
-	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
-	UE_LOG(LogTemp,Display,TEXT("SecretKey: %s"), *this->SecretKey);
-	UE_LOG(LogTemp,Display,TEXT("AccessKeyId: %s"), *this->AccessKeyId);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthMaxRetries: %d"), this->EmailAuthMaxRetries);
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
 	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *this->WaasVersion);
@@ -392,7 +386,6 @@ void UAuthenticator::PrintAll()
 	UE_LOG(LogTemp,Display,TEXT("facebookurl: %s"), *this->FacebookAuthURL);
 	UE_LOG(LogTemp,Display,TEXT("googleclientid: %s"), *this->GoogleClientID);
 	UE_LOG(LogTemp,Display,TEXT("googleauthurl: %s"), *this->GoogleAuthURL);
-	UE_LOG(LogTemp,Display,TEXT("bredirecturl: %s"), *this->BRedirectURL);
 	UE_LOG(LogTemp,Display,TEXT("redirecturl: %s"), *this->RedirectURL);
 	UE_LOG(LogTemp,Display,TEXT("urlscheme: %s"), *this->UrlScheme);
 	UE_LOG(LogTemp,Display,TEXT("nonce: %s"), *this->Nonce);

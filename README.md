@@ -8,6 +8,8 @@ Note: all files and folders talked about in this readme will be found in the fol
 or
 /Plugins/SequencePlugin/Source/SequencePlugin/Public
 
+//Maybe add an excerpt about the use of the external ios plugin if we can't migrate in what we need for it
+
 =========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
@@ -20,7 +22,7 @@ do not use a securely stored key, can result in client information being stored 
 =========================================================================================================================
 Getting Started
 
-1) Once you have the the SequencePlugin folder & if you're on a fresh project, you'll need to go to your project directory
+1) Once you have the the SequencePlugin folder & You're on a fresh project, you'll need to go to your project directory
 and create a Plugins Folder in it, then copy over the Sequence Plugin folder into that Plugins folder, if a Plugins folder
 already exists just copy this SequencePlugin folder into it.
 
@@ -38,8 +40,7 @@ an example of this is with the [Custom_Spectator_Pawn] here this Pawn inherits f
 that class implements a blueprint Callable function [SetupCredentials(FCredentials_BE CredentialsIn)] which is callable
 within the child class [Custom_Spectator_Pawn]. Calling this function will forward the credentials to a C++ backend.
 
-6) before we get into using the Rest of the SequenceAPI we'll
-cover how to handle the Authentication side of things first.
+6) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
 
 [IF you are using your own UI you'll need to do the following]
 
@@ -125,18 +126,10 @@ WIP
 
 =========================================================================================================================
 
-The subset of the SequenceAPI can be found at
-
-SequenceAPI.h
-
-You can directly interact with the chain via Provider.h found in the ETH folder
-
-//To setup your game with the sequence plugin//
-Simply attach the sequence pawn component to an actor,
-
+Assuming you've setup your controlling Actor with the [Sequence_Pawn_Component_BP]
 The sequence pawn component has functions to do the following:
 
-Setup Sequence (sets up the sequence based systems)
+Setup Sequence (sets up the sequence based systems), Requires playerController input
 
 Show GUI Shows the UI
 
@@ -145,6 +138,7 @@ Hide GUI Hides the UI
 GUI Visible Simple Visibility test for the UI
 
 Switch Platform (Switches which mode the UI will be in and how it will be displayed)
+Note: this doesn't rotate the application into any one view it just make the UI responsive to that type of view.
 Modes:
 Desktop (default)
 Mobile Portrait (Custom built for portrait mode reducing the X width where ever possible)
@@ -165,86 +159,26 @@ following cases:
 3) On Successful Closing of a session
 **************************
 
-************** UAuthenticator **************
-UAuthenticator
-
-This UObject's purpose is to handle authenticating with Sequence Systems
-
-Key parts
-Delegates:
-
-/*
-This event is fired when the authenticator requires a
-code from the user in the UI, if you're using a custom UI
-collect it and send it to the UAuthenticator Object using EmailLoginCode(FString CodeIn)
-*/
-AuthRequiresCode
-
-/*
-This event fires out when an error occurs in the auth
-process, this can be for many reasons, timeout bad settings
-etc, in general you can bind to this to let you know when you
-should show an error prompt if using a custom UI
-*/
-AuthFailure
-
-/*
-This event fires when auth is successful the event will
-also include the authenticated FCredentials_BE struct
-*/
-AuthSuccess
-
-//When doing a custom UI the following functions are of interest
-
-/*
-Gets the Appropriate signin URL for SSO depending on the
-provider IE) Google or Apple
-*/
-GetSigninURL(ESocialSigninType Type)
-
-/*
-This is for dealing with Social based Login,
-(WIP)
-*/
-SocialLogin(FString IDTokenIn)
-
-/*
-Used to handle email based login
-*/
-EmailLogin(FString EmailIn)
-
-/*
-Used to respond to the event AuthRequiresCode
-include the needed Code in this function to
-continue email based auth
-*/
-EmailLoginCode(FString CodeIn)
-
-/*
-Used to get the credentials currently stored on disk
-the FStruct returned is a wrapper for FCredentials_BE,
-the bool value IsValid is also included so you can check
-if the credentials on disk were valid or not
-*/
-FStoredCredentials_BE GetStoredCredentials()
-
-/*
-Used to store the given credentials on disk
-*/
-StoreCredentials(FCredentials_BE CredentialsIn)
-
-************** UAuthenticator **************
-
 ************** USequenceWallet **************
 
 To get a USequenceWallet call either:
 
 USequenceWallet::Make(FCredentials_BE CredentialsIn) or
-USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL) where the providerURL is the url of the provider you wish to use
+USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL)
+
+Where the Credentials you give are the credentials you received from the UAuthenticator when [AuthSuccess] Fires,
+OR you can use the call Auth->[GetStoredCredentials](), where Auth is of the type [UAuthenticator] if you are using
+StoredCredentials please ensure they are valid by checking the wrapping Structs FStoredCredentials_BE.GetValid() flag
+returned from [GetStoredCredentials], 
+The providerURL is the url of the provider you wish to use.
+
+Once you have your [USequenceWallet] UObject please ensure that you've registered the session using [RegisterSession]
+before attempting to make other calls to the API.
 
 SequenceAPI calls:
 
 [Note]
+
 We make use of TFunctions with some callbacks here I'll list some example syntax for them
 
 TSuccessCallback
@@ -263,7 +197,7 @@ One thing to be aware of is keep an eye on capturables if you have lots of neste
 something and start over writing memory. If you require lots of nesting swapping to a more unreal esque approach using
 UFUNCTION callbacks helps to avoid these problems similar to how things are done in [UAuthenticator.h/cpp]
 
-[Note]
+[End Note]
 
 /*
 Used to sign the given string with sequence
@@ -471,6 +405,76 @@ void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsize
 void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 ************** USequenceAPI **************
 
+************** UAuthenticator **************
+UAuthenticator
+
+This UObject's purpose is to handle authenticating with Sequence Systems
+
+Key parts
+Delegates:
+
+/*
+This event is fired when the authenticator requires a
+code from the user in the UI, if you're using a custom UI
+collect it and send it to the UAuthenticator Object using EmailLoginCode(FString CodeIn)
+*/
+AuthRequiresCode
+
+/*
+This event fires out when an error occurs in the auth
+process, this can be for many reasons, timeout bad settings
+etc, in general you can bind to this to let you know when you
+should show an error prompt if using a custom UI
+*/
+AuthFailure
+
+/*
+This event fires when auth is successful the event will
+also include the authenticated FCredentials_BE struct
+*/
+AuthSuccess
+
+//When doing a custom UI the following functions are of interest
+
+/*
+Gets the Appropriate signin URL for SSO depending on the
+provider IE) Google or Apple
+*/
+GetSigninURL(ESocialSigninType Type)
+
+/*
+This is for dealing with Social based Login,
+(WIP)
+*/
+SocialLogin(FString IDTokenIn)
+
+/*
+Used to handle email based login
+*/
+EmailLogin(FString EmailIn)
+
+/*
+Used to respond to the event AuthRequiresCode
+include the needed Code in this function to
+continue email based auth
+*/
+EmailLoginCode(FString CodeIn)
+
+/*
+Used to get the credentials currently stored on disk
+the FStruct returned is a wrapper for FCredentials_BE,
+the bool value IsValid is also included so you can check
+if the credentials on disk were valid or not
+*/
+FStoredCredentials_BE GetStoredCredentials()
+
+/*
+Used to store the given credentials on disk
+*/
+StoreCredentials(FCredentials_BE CredentialsIn)
+
+************** UAuthenticator **************
+
 ************** Packaging **************
 To set your system up for Packaging please refer to the following links
 For Windows, Mac
@@ -483,4 +487,8 @@ https://docs.unrealengine.com/5.0/en-US/packaging-ios-projects-in-unreal-engine/
 For IOS you also need to setup provisioning refer to these docs to achieve that:
 
 https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/
+
+Unreal <-> Xcode Specifics:
+
+
 ************** Packaging **************
