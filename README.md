@@ -375,6 +375,7 @@ void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSucc
 Returns information about a block by block number.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
 @param uint64 Number, the block we are querying for
+@return the JsonResponse of the Block
 */
 void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 
@@ -382,12 +383,14 @@ void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSu
 Returns information about a block by block number.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
 @param EBlockTag Tag, the block we are querying for
+@return the JsonResponse of the Block
 */
 void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 
 /*
 Returns information about a block by block number.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
+@return the block number
 */
 void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
@@ -395,7 +398,7 @@ void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
 Returns information about a block by hash.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbyhash
 @param FHash256 Hash, DATA, 32 Bytes - Hash of a block.
-@return Boolean - If true it returns the full transaction objects, if false only the hashes of the transactions.
+@return JsonResponse of the Block, Boolean - If true it returns the full transaction objects, if false only the hashes of the transactions.
 */
 void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 
@@ -403,7 +406,7 @@ void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSucc
 Returns the information about a transaction requested by transaction hash.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactionbyhash
 @param FHash256 Hash, DATA, 32 Bytes - hash of a transaction.
-@return Object - A transaction object, or null when no transaction was found
+@return JsonResponse, Object - A transaction object, or null when no transaction was found
 */
 void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 
@@ -412,7 +415,7 @@ Returns the number of transactions sent from an address.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactioncount
 @param FAddress Addr, DATA, 20 Bytes - address.
 @param uint64 Number, QUANTITY|TAG - integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
-@return QUANTITY - integer of the number of transactions send from this address.
+@return uint64, QUANTITY - integer of the number of transactions send from this address.
 */
 void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
@@ -421,7 +424,7 @@ Returns the number of transactions sent from an address.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactioncount
 @param FAddress Addr, DATA, 20 Bytes - address.
 @param EBlockTag Tag, QUANTITY|TAG - integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
-@return QUANTITY - integer of the number of transactions send from this address.
+@return uint64, QUANTITY - integer of the number of transactions send from this address.
 */
 void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 
@@ -429,7 +432,7 @@ void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnS
 Returns the receipt of a transaction by transaction hash.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gettransactionreceipt
 @param FHash256 Hash, DATA, 32 Bytes - hash of a transaction
-@return Object - A transaction receipt object, or null when no receipt was found
+@return FTransactionReceipt, Object - A transaction receipt object, or null when no receipt was found
 */
 void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
 
@@ -437,7 +440,7 @@ void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnS
 Creates new message call transaction or a contract creation for signed transactions.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_sendrawtransaction
 @param FString Data, DATA, The signed transaction data.
-@return DATA, The signed transaction data.
+@return FUnsizedData, DATA, The signed transaction data.
 */
 void SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -446,7 +449,7 @@ Executes a new message call immediately without creating a transaction on the bl
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call
 @param FContractCall ContractCall, Object - The transaction call object
 @param uint64 Number,
-@return DATA - the return value of executed contract.
+@return FUnsizedData, DATA - the return value of executed contract.
 */
 void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -455,7 +458,7 @@ Executes a new message call immediately without creating a transaction on the bl
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call
 @param FContractCall ContractCall, Object - The transaction call object
 @param EBlockTag Number,
-@return DATA - the return value of executed contract.
+@return FUnsizedData, DATA - the return value of executed contract.
 */
 void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -469,7 +472,7 @@ void ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
 Returns an estimate of the current price per gas in wei. 
 For example, the Besu client examines the last 100 blocks and returns the median gas unit price by default.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
-@return QUANTITY - integer of the current gas price in wei.
+@return FUnsizedData, QUANTITY - integer of the current gas price in wei.
 */
 void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -478,7 +481,7 @@ Returns an estimate of the current price per gas in wei.
 For example, the Besu client examines the last 100 blocks and returns the median gas unit price by default.
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
 @param FContractCall ContractCall, (used to estimate gas for the given contract call)
-@return QUANTITY - integer of the current gas price in wei.
+@return FUnsizedData, QUANTITY - integer of the current gas price in wei.
 */
 void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -488,7 +491,7 @@ For example, the Besu client examines the last 100 blocks and returns the median
 https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_gasprice
 @param FAddress From, (used to estimate gas for the given address & ByteCode)
 @param FString ByteCode, (used to estimate gas for the given address & ByteCode)
-@return QUANTITY - integer of the current gas price in wei.
+@return FUnsizedData, QUANTITY - integer of the current gas price in wei.
 */
 void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 
@@ -591,8 +594,6 @@ also include the authenticated FCredentials_BE struct
 */
 AuthSuccess
 
-//When doing a custom UI the following functions are of interest
-
 /*
 Gets the Appropriate signin URL for SSO depending on the
 provider IE) Google or Apple
@@ -648,6 +649,7 @@ WaasVersion which gets set to whichever version of Waas you are using (default i
 ************** Waas Configuration **************
 
 ************** Packaging **************
+
 To set your system up for Packaging please refer to the following links
 For Windows, Mac
 https://docs.unrealengine.com/5.0/en-US/packaging-unreal-engine-projects/#:~:text=Clicking%20File%20%3E%20Package%20Project%20%3E%20Packaging,options%20for%20the%20packaging%20feature.&text=The%20build%20configuration%20to%20compile,a%20code%20project%2C%20select%20DebugGame.
