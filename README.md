@@ -475,6 +475,21 @@ StoreCredentials(FCredentials_BE CredentialsIn)
 
 ************** UAuthenticator **************
 
+************** Waas Configuration **************
+
+To configure Waas with your particular information please refer to the following file [Config.h] under
+SequencePlugin/Source/SequencePlugin/Private/Config/Config.h
+
+In this file you'll find [FSequenceConfig] which contains 3 values you'll need to update
+
+VITE_SEQUENCE_WAAS_CONFIG_KEY which you get from SequenceBuilder (need web link)
+
+ProjectAccessKey which you get from SequenceBuilder (need web link)
+
+WaasVersion which gets set to whichever version of Waas you are using (default is 1.0.0)
+
+************** Waas Configuration **************
+
 ************** Packaging **************
 To set your system up for Packaging please refer to the following links
 For Windows, Mac
@@ -489,6 +504,5 @@ For IOS you also need to setup provisioning refer to these docs to achieve that:
 https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/
 
 Unreal <-> Xcode Specifics:
-
 
 ************** Packaging **************
