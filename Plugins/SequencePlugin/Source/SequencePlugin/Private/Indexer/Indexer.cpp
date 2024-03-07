@@ -36,7 +36,7 @@ FString UIndexer::Url(const int64& chainID,const FString& endPoint)
 	
 
 	if (endPoint.Len() > 0)
-	{//strange error cropping up from this
+	{
 		out_url.Append(endPoint);
 	}
 	return out_url;
@@ -190,7 +190,6 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallb
 	}, OnFailure);
 }
 
-//args should be of type FGetTokenBalancesArgs we need to parse these things down to json strings!
 void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	const FString endpoint = "GetTokenBalances";
