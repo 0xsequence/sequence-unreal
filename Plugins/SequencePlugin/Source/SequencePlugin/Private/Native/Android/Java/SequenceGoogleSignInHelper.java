@@ -13,6 +13,7 @@ import androidx.credentials.GetCredentialRequest;
 import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.credentials.exceptions.NoCredentialException;
+import androidx.credentials.exceptions.GetCredentialCustomException;
 
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
@@ -58,6 +59,10 @@ public class SequenceGoogleSignInHelper {
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
                         Log.e(TAG, "Error getting credential", e);
+                        if (e instanceof GetCredentialCustomException) {
+                            GetCredentialCustomException customException = (GetCredentialCustomException) e;
+                            Log.e(TAG, "Custom Exception Type: " + customException.getType());
+                        }                        
                     }
                 }
         );
