@@ -5,78 +5,12 @@
 #include "Eth/EthTransaction.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
-#include "Indexer/Indexer_Enums.h"
-#include "Indexer/Structs/SortBy.h"
-#include "Indexer/Structs/Page.h"
 #include "Provider.h"
 #include "Session.h"
 #include "SignedMessage.h"
 #include "Containers/Union.h"
+#include "Provider.h"
 #include "SequenceAPI.generated.h"
-
-using FSignature = FUnsizedData;
-using TransactionID = FString;
-
-//Helper functions//
-FString SortOrderToString(ESortOrder SortOrder);
-ESortOrder StringToSortOrder(FString String);
-//helper functions//
-
-//Sequence Specific version of Page
-struct FPage_Sequence
-{
-	TOptional<uint64> PageSize;
-	TOptional<uint64> PageNum;
-	TOptional<uint64> TotalRecords;
-	TOptional<FString> Column;
-	TOptional<TArray<FSortBy>> Sort;
-
-	FString ToJson();
-	static FPage_Sequence From(TSharedPtr<FJsonObject> Json);
-	static FPage_Sequence Convert(FPage Page,int64 TotalRecords);
-};
-	
-//Sequence Specific Version of Transaction
-struct FTransaction_Sequence
-{
-	uint64 ChainId;
-	FAddress From;
-	FAddress To;
-	TOptional<FString> AutoGas;
-	TOptional<uint64> Nonce;
-	TOptional<FString> Value;
-	TOptional<FString> CallData;
-	TOptional<FString> TokenAddress;
-	TOptional<FString> TokenAmount;
-	TOptional<TArray<FString>> TokenIds;
-	TOptional<TArray<FString>> TokenAmounts;
-
-	static FTransaction_Sequence Convert(FTransaction_FE Transaction_Fe);
-	const FString ToJson();
-	const TransactionID ID();
-};
-
-struct FPartnerWallet
-{
-	uint64 Number;
-	uint64 PartnerId;
-	uint64 WalletIndex;
-	FString WalletAddress;
-
-	static FPartnerWallet From(TSharedPtr<FJsonObject> Json);
-};
-
-struct FDeployWalletReturn
-{
-	FString Address;
-	FString TransactionHash;
-};
-
-struct FWalletsReturn
-{
-	TArray<FPartnerWallet> Wallets;
-	FPage_Sequence Page;
-};
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
@@ -121,8 +55,6 @@ public:
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	
 private:
-	//NOP
-	void SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 	FString BuildSignMessageIntent(const FString& message);
