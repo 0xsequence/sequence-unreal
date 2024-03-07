@@ -247,7 +247,7 @@ CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback&
 //Indexer Calls//
 
 /*
-Used to get a ping back from the sequence app
+Used to get a ping back from the Chain
 @param ChainId, the chainId you wish to use
 
 OnSuccess returns a bool indicating ping state
@@ -256,7 +256,7 @@ OnFailure error in pinging indexer
 void Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Used to get version data back from the sequence app
+Used to get version data back from the Chain
 @param ChainId, the chainId you wish to use
 
 OnSuccess returns version data
@@ -265,7 +265,7 @@ OnFailure error getting version data from indexer
 void Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Used to get the runtime status of the sequence app
+Used to get the runtime status of the Chain
 @param ChainId, the chainId you wish to use
 
 OnSuccess returns runtime data
@@ -274,7 +274,7 @@ OnFailure error getting runtime status
 void RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Used to get the chainID from the sequence app
+Used to get the chainID from the Chain
 @param ChainId, the chainId you wish to use
 
 OnSuccess returns the chainId
@@ -283,7 +283,7 @@ OnFailure error getting chainId
 void GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Used to get the Ether balance from the sequence app
+Used to get the Ether balance from the Chain
 @param ChainId, the chainId you wish to use
 @param AccountAddr the accountAddress we want to get the balance for
 @return the Balance
@@ -294,7 +294,7 @@ OnFailure error getting ether balance
 void GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Gets the token balances from the sequence app
+Gets the token balances from the Chain
 @param ChainId, the chainId you wish to use
 @param FGetTokenBalancesArgs eg)
 FGetTokenBalancesArgs args;
@@ -307,7 +307,7 @@ OnFailure error getting tokenBalances
 void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
 
 /*
-gets the token supplies from the sequence app
+gets the token supplies from the Chain
 
 @param ChainId you wish to use
 @param FGetTokenSuppliesArgs eg)
@@ -321,7 +321,7 @@ OnFailure error getting token supplies
 void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
 
 /*
-gets the token supplies map from the sequence app
+gets the token supplies map from the Chain
 
 @param ChainId, the chainId you wish to use
 @param FGetTokenSuppliesMapArgs, eg)
@@ -338,7 +338,7 @@ OnFailure Error getting token supplies map
 void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
 
 /*
-Get the balance updates from the sequence app
+Get the balance updates from the Chain
 
 @param ChainId, the chainId you wish to use
 @param FGetBalanceUpdatesArgs the balance update arg struct sent to the indexer eg)
@@ -353,7 +353,7 @@ OnFailure error getting balance updates
 void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
 
 /*
-get transaction history from the sequence app
+get transaction history from the Chain
 
 @Param ChainId the chainId you want to use
 @Param FGetTransactionHistoryArgs, the transaction history argument struct required to send to the indexer
@@ -923,18 +923,165 @@ HexToBytes(FString& string, uint8 * Bytes);
 
 ************** Working with RawBytes in Unreal **************
 
+************** ABI Types **************
+
+************** ABIEncodable **************
+
+/*
+Abstract class for all things that can be encoded in the Abi,
+not meant to be used directly
+*/
+
+************** ABIEncodable **************
+
+************** TFixedABIArray **************
+
+/*
+Array Data used with the ABI of a fixed size
+Inherits from ABIEncodable
+*/
+
+/*
+Used to create a TFixedABIArray()
+@returns a setup TFixedABIArray
+*/
+TFixedABIArray();
+
+/*
+Used to create a TFixedABIArray initialized with the given TArray data
+@param TArray<ABIEncodable*> MyData, used to initialize the internal array
+@return TFixedABIArray initialized with the given Data
+*/
+TFixedABIArray(TArray<ABIEncodeable*> MyData);
+
+/*
+Used to add data to the internal Array
+@param ABIEncodable* Arg, the data we wish to push to the internal array
+*/
+void Push(ABIEncodeable* Arg);
+
+************** TFixedABIArray **************
+
+************** TDynamicABIArray **************
+
+/*
+Array Data used with the ABI that is of Dynamic Size
+Inherits from ABIEncodable
+*/
+
+/*
+Used to create a TDynamicABIArray()
+@returns a setup TDynamicABIArray
+*/
+TDynamicABIArray();
+
+/*
+Used to create a TDynamicABIArray initialized with the given TArray data
+@param TArray<ABIEncodable*> MyData, used to initialize the internal array
+@return TDynamicABIArray initialized with the given Data
+*/
+TDynamicABIArray(TArray<ABIEncodeable*> MyData);
+
+/*
+Used to add data to the internal Array
+@param ABIEncodable* Arg, the data we wish to push to the internal array
+*/
+void Push(ABIEncodeable* Arg);
+
+************** TDynamicABIArray **************
+
+************** TFixedABIData **************
+
+/*
+Data used with the ABI that is of Fixed Size
+Inherits from ABIEncodable
+*/
+
+/*
+Used to create a TFixedABIData object based off of the given data
+@param TArray<uint8> MyData, used to initialize the internal data
+@return the TFixedABIData initialized with the given byte data
+*/
+TFixedABIData(TArray<uint8> MyData);
+
+************** TFixedABIData **************
+
+************** TDynamicABIData **************
+
+/*
+Data used with the ABI that is of Dynamic Size
+Inherits from ABIEncodable
+*/
+
+/*
+Used to create a TDynamicABI object based off of the given data
+@param TArray<uint8> MyData, used to initialize the internal data
+@return the TDynamicABIData initialized with the given byte data
+*/
+TDynamicABIData(TArray<uint8> MyData);
+
+************** TDynamicABIData **************
+
+************** ABI Types **************
+
 ************** ABI **************
 
+/*
+ABI Spec: https://docs.soliditylang.org/en/latest/abi-spec.html
 
+Inherits from ABIEncodable
+*/
 
-	// CALL DATA
-	FString FunctionSignature = "balanceOf(address,uint256)";
-	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
-	TFixedABIData Id = ABI::UInt32(0x01);
-	TArray<ABIEncodeable*> Arr;
-	Arr.Add(&Account);
-	Arr.Add(&Id);
-	const FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);	
+/*
+Takes a fixed input uint32 and encodes it into a TFixedABIData
+@param uint32 Input, the number we wish to encode
+@return TFixedABIData, the resulting encoded uint32
+*/
+static TFixedABIData UInt32(uint32 Input);
+
+/*
+Takes a fixed input int32 and encodes it into a TFixedABIData
+@param int32 Input, the number we wish to encode
+@return TFixedABIData, the resulting encoded int32
+*/
+static TFixedABIData Int32(int32 Input);
+
+/*
+Takes a fixed input bool, and encodes it into a TFixedData
+@param bool Input, the bool we wish to encode
+@return TFixedABIData, the resulting encoded bool
+*/
+static TFixedABIData Bool(bool Input);
+
+/*
+Takes a fixed input FAddress and encodes it into a TFixedData
+@param FAddress Address, the FAddress we wish to encode
+@return TFixedABIData, the resulting encoded FAddress
+*/
+static TFixedABIData Address(FAddress Address);
+
+/*
+
+@param FString Input,
+@return TDynamicABIData,
+*/
+static TDynamicABIData String(FString Input);
+
+/*
+Takes the given TArray<ABIEncodables*> and encodes them and returns the byte data in FUnsizedData
+@param FString Signature, the funtion signature we are encoding
+@param TArray<ABIEncodable*> Arr, the Data we wish to encode
+@return FUnsizedData, the resulting encoded data
+*/
+static FUnsizedData Encode(FString Signature, TArray<ABIEncodeable*> Arr);
+
+/*
+Encodes the given function signature & data, then returns an FString we can display to console
+@param FString Signature, the function signature we are encoding
+@param TArray<ABIEncodable*> Arr, the data we wish to encode
+@return FString, the FString of the resulting encoded data
+*/
+static FString Display(FString Signature, TArray<ABIEncodeable*> Arr);
 
 ************** ABI **************
 

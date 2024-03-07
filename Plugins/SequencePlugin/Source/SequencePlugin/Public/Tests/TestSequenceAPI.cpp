@@ -103,7 +103,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Call Contract Test]========================"));
-
+	
 	// CALL DATA
 	FString FunctionSignature = "balanceOf(address,uint256)";
 	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
