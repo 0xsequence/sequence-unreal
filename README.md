@@ -563,6 +563,51 @@ void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainI
 
 There are alot of cases where you'll be interacting with raw ByteData, we commonly wrapped these datums up in
 
+************** FBinaryData **************
+
+/*
+Abstract class underlying BOTH sized & unsized data
+*/
+
+/*
+Returns the underlying TSharedPtr<TArray<uint8>>
+@param TSharedPtr<TArray<uint8>> Arr, the TArray pointed to by FBinaryData
+@return TSharedPtr<TArray<uint8>> the TArray pointed to by FBinaryData
+*/
+TSharedPtr<TArray<uint8>> Arr;
+
+/*
+Returns the byte length of the FBinaryData
+@return the Byte length of the FBinaryData
+*/
+virtual ByteLength GetLength() const = 0;
+
+/*
+Returns the hex FString of the Binary data
+@return the hex FString of the binary data
+*/
+FString ToHex() const;
+
+/*
+Used to clear out data contained within FBinaryData
+*/
+void Renew();
+
+/*
+Returns the underlying uint8* pointer for accessing byte data directly
+@return uint8* the underlying uint8* pointer
+*/
+uint8* Ptr() const;
+
+/*
+Returns the Underlying TArray<uint8> contained by FBinary Data
+@return TArray<uint8> the underlying TArray
+*/
+TArray<uint8> ToArray();
+};
+
+************** FBinaryData **************
+
 ************** FUnsizedData **************
 
 /*
@@ -619,39 +664,40 @@ TSharedPtr<TArray<uint8>> Arr();
 ************** TSizedData **************
 
 /*
-Templated Datatype for any data type of a fixed size for example an ethereum address is 20 bytes
+Templated Datatype for any data type of a fixed byte size for example an ethereum address is 20 bytes
 which is defined in FAddress which is a child of TSizedData
+
+Inherits from FBinaryData
 */
 
-template<ByteLength TSize>
-struct TSizedData : FBinaryData
-{
-const static ByteLength Size = TSize;
-virtual ByteLength GetLength() const override;
-FUnsizedData Copy() const; // This creates new data that must be freed
-explicit operator FUnsizedData() const { return Copy(); }
-static TSizedData Empty();
-}; // Data with set sizes
+/*
+Constructor used to create TSizedData of a set Byte Size
+@return the TSizedData of the template given byte size
+*/
+template<ByteLength Size>
+TSizedData<Size>()
 
+/*
+Used to get the Byte Length of the TSizedData
+@return the ByteLength of the TSizedData
+*/
 template <ByteLength Size>
-inline ByteLength TSizedData<Size>::GetLength() const
-{
-return Size;
-}
+inline ByteLength TSizedData<Size>::GetLength()
 
+/*
+Copies the data from this TSizedData object into an FUnsizedData
+object then returns it
+@return the FUnsizedData object created from this TSizedData Object
+*/
 template <ByteLength Size>
-FUnsizedData TSizedData<Size>::Copy() const
-{
-FUnsizedData data = FUnsizedData::Empty();
-data.Arr.Get()->Append(this->Arr);
-return data;
-}
+FUnsizedData TSizedData<Size>::Copy()
 
+/*
+Returns an empty block of TSized bytes
+@return the empty block of TSized bytes
+*/
 template <ByteLength TSize>
 TSizedData<TSize> TSizedData<TSize>::Empty()
-{
-return TSizedData{};
-}
 
 ************** TSizedData **************
 
@@ -659,6 +705,8 @@ return TSizedData{};
 
 /*
 Used to represent a 32 byte hash (256 bits)
+
+Inherits from TSizedData<32>
 */
 
 /*
@@ -698,6 +746,8 @@ static FHash256 From(FString Str);
 
 /*
 Used to store a 20 bytes Ethereum Address
+
+Inherits from TSizedData<20>
 */
 
 /*
@@ -728,6 +778,8 @@ static FAddress From(FString Str);
 
 /*
 Used to store a 64 byte Ethereum public Key
+
+Inherits from TSizedData<64>
 */
 
 /*
@@ -758,6 +810,8 @@ static FPublicKey From(FString Str);
 
 /*
 Used to store a 32 byte Ethereum private key
+
+Inherits from TSizedData<32>
 */
 
 /*
@@ -786,24 +840,64 @@ static FPrivateKey From(FString Str);
 
 ************** FBloom **************
 
-struct FBloom final : TSizedData<256>
-{
-static FBloom New(); // This creates new data that must be freed
+/*
+Bloom is an ethereum transaction field used for bloom filters one way or another
+Inherits from TSizedData<256>
+*/
+
+/*
+Used to create a new FBloom
+@return a new FBloom
+*/
+static FBloom::New();
+
+/*
+Creates an FBloom from a given TStaticArray<uint8, 256> Arr
+@param TStaticArray<uint8, 256> Arr, the Array we initialize FBloom with
+@return the Initialized FBloom
+*/
 static FBloom From(TStaticArray<uint8, 256> &Arr);
+
+/*
+Creates an FBloom from a given FString
+@param FString Str, the 256 hex byte FString,
+@return the FBloom initialized from the given FString
+*/
 static FBloom From(FString Str);
-};
 
 ************** FBloom **************
 
 ************** FBlockNonce **************
 
-struct FBlockNonce final : TSizedData<8>
-{
-static FBlockNonce New(); // This creates new data that must be freed
+/*
+Used to create an 8 byte Nonce (number used only once) value
+Inherits from TSizedData<8>
+*/
+
+/*
+Used to create a new FNonce
+@return The new FNonce
+*/
+static FBlockNonce::New();
+
+/*
+Used to create a new Nonce from a given TStaticArray<uint8, 8>
+@param TStaticArray<uint8, 8> Arr, the 8 byte static Array used to initialize the nonce
+@return the FNonce initialized with the given Array
+*/
 static FBlockNonce From(TStaticArray<uint8, 8> &Arr);
+
+/*
+Used to create a nonce Initialized from the given FString
+@param FString Str, the 8 hex byte FString used to initialize the FNonce
+@return the FNonce initialized from the given FString
+*/
 static FBlockNonce From(FString Str);
+
+/*
+Used to increment the FNonce internally
+*/
 void Increment() const;
-};
 
 ************** FBlockNonce **************
 
