@@ -11,6 +11,29 @@
 #include "Containers/Union.h"
 #include "SequenceAPI.generated.h"
 
+using FSignature = FUnsizedData;
+using TransactionID = FString;
+	
+//Sequence Specific Version of Transaction
+struct FTransaction_Sequence
+{
+	uint64 ChainId;
+	FAddress From;
+	FAddress To;
+	TOptional<FString> AutoGas;
+	TOptional<uint64> Nonce;
+	TOptional<FString> Value;
+	TOptional<FString> CallData;
+	TOptional<FString> TokenAddress;
+	TOptional<FString> TokenAmount;
+	TOptional<TArray<FString>> TokenIds;
+	TOptional<TArray<FString>> TokenAmounts;
+
+	static FTransaction_Sequence Convert(FTransaction_FE Transaction_Fe);
+	const FString ToJson();
+	const TransactionID ID();
+};
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
