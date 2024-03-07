@@ -4,10 +4,7 @@
 #include "CoreMinimal.h"
 #include "Util/Async.h"
 #include "Types/BinaryData.h"
-#include "Errors.h"
 #include "Types/Header.h"
-#include "Http.h"
-#include "Util/JsonBuilder.h"
 #include "Dom/JsonObject.h"
 #include "Types/TransactionReceipt.h"
 #include "Eth/EthTransaction.h"
@@ -30,10 +27,8 @@ FString TagToString(EBlockTag Tag);
 /**
  * 
  */
-UCLASS()
 class Provider : public RPCCaller
 {
-	GENERATED_BODY()
 	FString Url;
 	Provider Copy();
 
