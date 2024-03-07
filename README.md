@@ -559,13 +559,293 @@ void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainI
 
 ************** USequenceAPI **************
 
+************** Working with RawBytes in Unreal **************
+
+There are alot of cases where you'll be interacting with raw ByteData, we commonly wrapped these datums up in
+
+************** FUnsizedData **************
+
+/*
+FUnsizedData is used to hold byte data of an arbitary length,
+Inherits from FBinaryData
+*/
+
+/*
+Converts a hex string (no leading 0x) to a Number of
+arbitrary size
+@param FString Hex, The hex string you'd like to convert
+@return the FUnsizedData struct
+*/
+FUnsizedData HexStringToBinary(FString Hex); // Hex String to Number of arbitrary size
+
+/*
+Converts a string straight into FUnsizedData (raw bytes)
+@param FString string, the string you want to convert
+@return FUnsizedData, the FUnsizedData struct
+*/
+FUnsizedData StringToUTF8(FString String);
+
+/*
+Converts FUnsizedData into an FString
+@param FUnsizedData BinaryData the data you want to convert
+@return FString, the resulting FString
+*/
+FString UTF8ToString(FUnsizedData BinaryData);
+
+/*
+Converts the FUnsizedData object into a hex FString
+@param none,
+@return FString, the resulting hex FString.
+
+Called like FUnsizedData test;
+test.ToHex();
+*/
+FString ToHex();
+
+/*
+Accessing underlying uint8 * in FUnsizedData
+@return uint8 *, The underlying byte pointer
+*/
+uint8 * Ptr();
+
+/*
+Accessing the underlying TArray in FUnsizedData
+@return TSharedPtr<TArray<uint8>>, The underlying TSharedPtr<TArray<uint8>>
+*/
+TSharedPtr<TArray<uint8>> Arr();
+
+************** FUnsizedData **************
+
+************** TSizedData **************
+
+/*
+Templated Datatype for any data type of a fixed size for example an ethereum address is 20 bytes
+which is defined in FAddress which is a child of TSizedData
+*/
+
+template<ByteLength TSize>
+struct TSizedData : FBinaryData
+{
+const static ByteLength Size = TSize;
+virtual ByteLength GetLength() const override;
+FUnsizedData Copy() const; // This creates new data that must be freed
+explicit operator FUnsizedData() const { return Copy(); }
+static TSizedData Empty();
+}; // Data with set sizes
+
+template <ByteLength Size>
+inline ByteLength TSizedData<Size>::GetLength() const
+{
+return Size;
+}
+
+template <ByteLength Size>
+FUnsizedData TSizedData<Size>::Copy() const
+{
+FUnsizedData data = FUnsizedData::Empty();
+data.Arr.Get()->Append(this->Arr);
+return data;
+}
+
+template <ByteLength TSize>
+TSizedData<TSize> TSizedData<TSize>::Empty()
+{
+return TSizedData{};
+}
+
+************** TSizedData **************
+
+************** FHash256 **************
+
+/*
+Used to represent a 32 byte hash (256 bits)
+*/
+
+/*
+Used to create a new FHash256
+@return FHash256
+*/
+static FHash256::New();
+
+/*
+Provide a static 32 byte TArray to initialize an
+FAddress
+@param TStaticArray<uint8,32> Arr, the initializing array
+@return the FHash256 initialized with the given byte data
+*/
+static FHash256::From(TStaticArray<uint8, 32> &Arr);
+
+/*
+Provide a 32 byte TArray to initialize the FHash256
+with
+@param TArray<uint8> Arr, the initializing TArray of 32 bytes in length
+@return the FHash256 initialized with the given data
+*/
+static FHash256 From(TArray<uint8> &Arr);
+
+/*
+Provide a hex FString that works out to 32 bytes of data to
+initialize the FHash256 with
+@param FString Str, the 32 hex byte string
+@return the FHash256 initialized from the given hex string
+*/
+static FHash256 From(FString Str);
+
+
+************** FHash256 **************
+
+************** FAddress **************
+
+/*
+Used to store a 20 bytes Ethereum Address
+*/
+
+/*
+Creates a new FAddress
+@return a new FAddress
+*/
+FAddress::New();
+
+/*
+Provide a static 20 byte TArray to initialize an
+FAddress
+@param TStaticArray<uint8, 20> Arr, the initializing static TArray
+@return the FAddress initialized from the given TStaticArray
+*/
+static FAddress::From(TStaticArray<uint8, 20> &Arr);
+
+/*
+Provide a hex FString that works out to 20 bytes of data to
+initialize the FAddress with
+@param FString Str, the 20 hex byte FString
+@return the FAddress initialized from the given Hex byte FString
+*/
+static FAddress From(FString Str);
+
+************** FAddress **************
+
+************** FPublicKey **************
+
+/*
+Used to store a 64 byte Ethereum public Key
+*/
+
+/*
+Creates a new FPublicKey
+@return a new FPublicKey
+*/
+FPublicKey::New();
+
+/*
+Provide a static 64 byte TArray to initialize an
+FPublicKey
+@param TStaticArray<uint8, 64> Arr, the 64 Array used to initialize the FPublicKey
+@return the FPublicKey initialized with the given TStaticArray
+*/
+static FPublicKey::From(TStaticArray<uint8, 64> &Arr);
+
+/*
+Provide a hex FString that works out to 64 bytes of data to
+initialize the FPublicKey with
+@param FString str, the 64 hex byte FString,
+@return the FPublicKey Initialized from the given FString
+*/
+static FPublicKey From(FString Str);
+
+************** FPublicKey **************
+
+************** FPrivateKey **************
+
+/*
+Used to store a 32 byte Ethereum private key
+*/
+
+/*
+Creates a new FPrivateKey
+@return a new FPrivateKey
+*/
+FPrivateKey::New();
+
+/*
+Provide a static 32 byte TArray to initialize an
+FPrivateKey
+@param TStaticArray<uint8, 32> Arr, the 32 byte Array used to initialize the FPrivateKey
+@return the FPrivateKey initialized with the given TStaticArray
+*/
+static FPrivateKey::From(TStaticArray<uint8, 32> &Arr);
+
+/*
+Provide a hex FString that works out to 32 bytes of data to
+initialize the FPrivateKey with
+@param FString Str, the 32 hex byte FString
+@return the FPrivateKey initialized with the FString
+*/
+static FPrivateKey From(FString Str);
+
+************** FPrivateKey **************
+
+************** FBloom **************
+
+struct FBloom final : TSizedData<256>
+{
+static FBloom New(); // This creates new data that must be freed
+static FBloom From(TStaticArray<uint8, 256> &Arr);
+static FBloom From(FString Str);
+};
+
+************** FBloom **************
+
+************** FBlockNonce **************
+
+struct FBlockNonce final : TSizedData<8>
+{
+static FBlockNonce New(); // This creates new data that must be freed
+static FBlockNonce From(TStaticArray<uint8, 8> &Arr);
+static FBlockNonce From(FString Str);
+void Increment() const;
+};
+
+************** FBlockNonce **************
+
+************** Unreal Conversion Calls **************
+
+/*
+Converts the given byte data into a hex string
+@param uint8 * Data, the byte data pointer
+@param int32 Length, the number of byte the byte data pointer points to
+@return FString, the hex FString
+*/
+BytesToHex(uint8 * Data, int32 length);
+
+/*
+Takes a given set of Bytes and converts it to a Hex FString
+@param FString string, the hex string,
+@param uint8 * Bytes, the byte array where we will be storing our data
+@return in32, the number of bytes copied
+*/
+HexToBytes(FString& string, uint8 * Bytes);
+
+************** Unreal Conversion Calls **************
+
+************** Working with RawBytes in Unreal **************
+
 ************** ABI **************
 
 
+
+	// CALL DATA
+	FString FunctionSignature = "balanceOf(address,uint256)";
+	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
+	TFixedABIData Id = ABI::UInt32(0x01);
+	TArray<ABIEncodeable*> Arr;
+	Arr.Add(&Account);
+	Arr.Add(&Id);
+	const FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);	
 
 ************** ABI **************
 
 ************** UAuthenticator **************
+
 UAuthenticator
 
 This UObject's purpose is to handle authenticating with Sequence Systems

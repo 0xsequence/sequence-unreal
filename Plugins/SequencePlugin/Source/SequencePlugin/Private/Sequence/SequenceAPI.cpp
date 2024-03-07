@@ -1,156 +1,12 @@
 #include "Sequence/SequenceAPI.h"
-#include "Eth/Crypto.h"
 #include "RequestHandler.h"
 #include "Indexer/IndexerSupport.h"
-#include "Util/JsonBuilder.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
-#include "AES/aes.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "JsonUtils/JsonPointer.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
 #include "Sequence/Close.h"
-#include "Util/HexUtility.h"
-
-FString SortOrderToString(ESortOrder SortOrder)
-{
-	return UEnum::GetValueAsString(SortOrder);
-}
-
-ESortOrder StringToSortOrder(FString String)
-{
-	return String == "ASC" ? ESortOrder::ASC : ESortOrder::DESC;
-}
-
-FString FPage_Sequence::ToJson()
-{
-	FJsonBuilder Json = FJsonBuilder();
-
-	if(PageSize.IsSet())
-	{
-		Json.AddInt("pageSize", PageSize.GetValue());
-	}
-	if(PageNum.IsSet())
-	{
-		Json.AddInt("page", PageNum.GetValue());
-	}
-	if(TotalRecords.IsSet())
-	{
-		Json.AddInt("totalRecords", TotalRecords.GetValue());
-	}
-	if(Column.IsSet())
-	{
-		Json.AddString("column", Column.GetValue());
-	}
-	if(Sort.IsSet())
-	{
-		FJsonArray Array = Json.AddArray("sort");
-
-		for(FSortBy SortBy : Sort.GetValue())
-		{
-			Array.AddValue(SortBy.GetJsonString());
-		}
-	}
-	
-	return Json.ToString();
-}
-
-FPage_Sequence FPage_Sequence::Convert(FPage Page,int64 TotalRecords)
-{
-	FPage_Sequence Ret;
-	Ret.Column = Page.column;
-	Ret.PageNum = Page.page;
-	Ret.PageSize = Page.pageSize;
-	Ret.Sort = Page.sort;
-	Ret.TotalRecords = TotalRecords;
-	return Ret;
-}
-
-FPage_Sequence FPage_Sequence::From(TSharedPtr<FJsonObject> Json)
-{
-	FPage_Sequence page = FPage_Sequence{};
-
-	if(Json->HasField("pageSize"))
-	{
-		page.PageSize = static_cast<uint64>(Json->GetIntegerField("pageSize")); 
-	}
-	if(Json->HasField("page"))
-	{
-		page.PageNum =  static_cast<uint64>(Json->GetIntegerField("page")); 
-	}
-	if(Json->HasField("totalRecords"))
-	{
-		page.TotalRecords = static_cast<uint64>(Json->GetIntegerField("totalRecords")); 
-	}
-	if(Json->HasField("Column"))
-	{
-		page.Column = Json->GetStringField("Column");
-	}
-	if(Json->HasField("Sort"))
-	{
-		TArray<TSharedPtr<FJsonValue>> JsonArray = Json->GetArrayField("Sort");
-		TArray<FSortBy> Array;
-
-		for(TSharedPtr<FJsonValue> JsonVal : JsonArray)
-		{
-			FSortBy Result;
-			if (!FJsonObjectConverter::JsonObjectToUStruct<FSortBy>(JsonVal->AsObject().ToSharedRef(), &Result))
-				Array.Push(Result);
-		}
-		
-		page.Sort = Array;
-	}
-
-	return page;
-}
-
-//Hide for now
-FTransaction_Sequence FTransaction_Sequence::Convert(FTransaction_FE Transaction_Fe)
-{
-	return FTransaction_Sequence{
-		static_cast<uint64>(Transaction_Fe.chainId),
-		FAddress::From(Transaction_Fe.From),
-		FAddress::From(Transaction_Fe.To),
-		Transaction_Fe.AutoGas == "" ? TOptional<FString>() : TOptional(Transaction_Fe.AutoGas),
-		Transaction_Fe.Nonce < 0 ? TOptional<uint64>() : TOptional(static_cast<uint64>(Transaction_Fe.Nonce)),
-		Transaction_Fe.Value == "" ? TOptional<FString>() : TOptional(Transaction_Fe.Value),
-		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
-		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
-		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
-		Transaction_Fe.TokenIds.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
-		Transaction_Fe.TokenAmounts.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
-	};
-}
-
-const FString FTransaction_Sequence::ToJson()
-{
-	FJsonBuilder Json = FJsonBuilder();
-
-	Json.AddInt("chainId", ChainId);
-	Json.AddString("from", "0x" + From.ToHex());
-	Json.AddString("to", "0x" + To.ToHex());
-
-	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
-
-	return Json.ToString();
-}
-
-const TransactionID FTransaction_Sequence::ID()
-{
-	FUnsizedData Data = StringToUTF8(ToJson());
-	return GetKeccakHash(Data).ToHex();
-}
-
-FPartnerWallet FPartnerWallet::From(TSharedPtr<FJsonObject> Json)
-{
-	return FPartnerWallet{
-		static_cast<uint64>(Json->GetIntegerField("number")),
-		static_cast<uint64>(Json->GetIntegerField("partnerId")),
-		static_cast<uint64>(Json->GetIntegerField("walletIndex")),
-		Json->GetStringField("walletAddress")
-	};
-}
 
 FString USequenceWallet::Url(const FString Name) const
 {
@@ -342,11 +198,6 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
-void USequenceWallet::SessionValidation(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	OnSuccess("[RPC_NotActive]");
-}
-
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 {
 	//keccakhash of the packet first
@@ -460,9 +311,6 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& message)
 	return Intent;
 }
 
-//{"intent":{"data":{"identifier":"","network":"137","transactions":[{"to":"","type":"transaction","value":"1000000047497451"}],"wallet":"0x75700a9dC31ff38b93EafDC380c28e1B816f6799"},"expiresAt":1708466035,"issuedAt":1708466005,"name":"sendTransaction","signatures":[{"sessionId":"0x00bab99b6f4a25e44e9654515fc0b9232f6f87fa3b","signature":"0x56444d46815935d3e2420bc5aaa5060016efbf060c9f002f0dd6bd64c82162e06b4ebc46f6b6d991c6a1abe7de356f05b61f673c43fb0a50da0116a0b7d7ff4e1c"}],"version":"1.0.0"}}
-//{"intent":{"data":{"identifier":"","network":"137","transactions":[{"to":"","token":"0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174","type":"erc20send","value":"100000"}],"wallet":"0x5098a8d8fa7d27b14476E44677Ff8Ead10034032"},"expiresAt":1709325763,"issuedAt":1709239363,"name":"sendTransaction","signatures":[{"sessionId":"0x00a10a728fd74f8a7601e1dd12c8e405173ec620c6","signature":"0x751c8b3c9954ca4ca67383e3aef5baccf87aa278a2093f542c600e8924a1b3f449b08e3500daf8c186c3ea709f6d1a4a3e18b2b7d3d2f57945ee6347c3ef432100"}],"version":"1.0.0"}}
-
 FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
@@ -574,7 +422,6 @@ TArray<FContact_BE> USequenceWallet::buildFriendListFromJson(FString json)
 	return friendList;
 }
 
-//DEPRECATED
 /*
 * Gets the friend data from the given username!
 * This function appears to require some form of authentication (perhaps all of the sequence api does)
@@ -839,6 +686,7 @@ void USequenceWallet::DeployContract(FString Bytecode, FPrivateKey PrivKey, int6
 
 void USequenceWallet::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure)
 {
+	FUnsizedData test = StringToUTF8("converter");
 	Provider(this->ProviderUrl).DeployContractWithHash(Bytecode,PrivKey,ChainId,OnSuccess,OnFailure);
 }
 

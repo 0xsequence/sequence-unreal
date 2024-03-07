@@ -30,8 +30,10 @@ FString TagToString(EBlockTag Tag);
 /**
  * 
  */
+UCLASS()
 class Provider : public RPCCaller
 {
+	GENERATED_BODY()
 	FString Url;
 	Provider Copy();
 
