@@ -13,7 +13,7 @@ or
 =========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
-You must provide an encryption key implementation at [SequenceEncryptor.cpp] Function [GetStoredKey],
+You must provide an encryption key implementation at **SequenceEncryptor.cpp** Function **GetStoredKey**,
 This function must be implemented to provide a securely stored private key that will be used to encrypt &
 decrypt client information. Failure to do so will result in NO information being stored or in the event you
 do not use a securely stored key, can result in client information being stored insecurely on their systems.
@@ -31,21 +31,21 @@ already exists just copy this SequencePlugin folder into it.
 3) To find the SequencePlugin content folder in your content drawer enable view plugin content
 
 4) If you wish to use the in built sequence UI for login
-4a) Create an [Actor] you wish to be responsible for the SequenceUI then attach the [Sequence_Pawn_Component_BP] to it
-4b) Setup your [Actor] Blueprint similar to how it's setup in [Custom_Spectator_Pawn] being sure to bind to the delegate
-that gives you Credentials [Auth_Success_Forwarder]
+4a) Create an **Actor** you wish to be responsible for the SequenceUI then attach the **Sequence_Pawn_Component_BP** to it
+4b) Setup your **Actor** Blueprint similar to how it's setup in **Custom_Spectator_Pawn** being sure to bind to the delegate
+that gives you Credentials **Auth_Success_Forwarder**
 
 5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI,
-an example of this is with the [Custom_Spectator_Pawn] here this Pawn inherits from a C++ class [Sqnc_Spec_Pawn]
-that class implements a blueprint Callable function [SetupCredentials(FCredentials_BE CredentialsIn)] which is callable
-within the child class [Custom_Spectator_Pawn]. Calling this function will forward the credentials to a C++ backend.
+an example of this is with the **Custom_Spectator_Pawn** here this Pawn inherits from a C++ class **Sqnc_Spec_Pawn**
+that class implements a blueprint Callable function **SetupCredentials(FCredentials_BE CredentialsIn)** which is callable
+within the child class **Custom_Spectator_Pawn**. Calling this function will forward the credentials to a C++ backend.
 
 6) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
 
 [IF you are using your own UI you'll need to do the following]
 
-1) In a C++ backend with a series of pass through [UFUNCTIONS] setup similarly to [SequenceBackendManager.h/.cpp]
-Each of these calls are implemented in [UAuthenticator] you just need to pass through the data with YOUR UAuthenticator UObject
+1) In a C++ backend with a series of pass through **UFUNCTIONS** setup similarly to **SequenceBackendManager.h/.cpp**
+Each of these calls are implemented in **UAuthenticator** you just need to pass through the data with YOUR UAuthenticator UObject
 
 //This call is platform dependent on windows & mac this is required for SSO WIP
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")                      
@@ -59,7 +59,7 @@ Each of these calls are implemented in [UAuthenticator] you just need to pass th
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")
    void EmailLogin(const FString& EmailIn);
 
-//This is call is made after the Delegate [AuthRequiresCode] is fired
+//This is call is made after the Delegate **AuthRequiresCode** is fired
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")
    void EmailCode(const FString& CodeIn);
 
@@ -67,15 +67,15 @@ Each of these calls are implemented in [UAuthenticator] you just need to pass th
    UFUNCTION(BlueprintCallable, Category = "Login")
    bool StoredCredentialsValid();
 
-To start you'll want to create a [UAuthenticator] UObject like so [UAuthenticator * Auth = NewObject<UAuthenticator>()],
+To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator * Auth = NewObject<UAuthenticator>()]**,
 this UObject manages the authentication side of Sequence.
 
-2) Be sure to bind to the Delegates for [AuthSuccess], [AuthFailure], [AuthRequiresCode] prior to making any signin calls
+2) Be sure to bind to the Delegates for **[AuthSuccess]**, **[AuthFailure]**, **[AuthRequiresCode]** prior to making any signin calls
 You can bind to these delegates like so:
    this->authenticator->AuthRequiresCode.AddDynamic(this, &AYourClass::YourCallReadyToReceiveCode);
    this->authenticator->AuthFailure.AddDynamic(this, &AYourClass::YourCallShowAuthFailureScreen);
 
-   In the case of [AuthSuccess] since a parameter is also passed we bind to it like this
+   In the case of **[AuthSuccess]** since a parameter is also passed we bind to it like this
    FScriptDelegate del;
    del.BindUFunction(this, "CallShowAuthSuccessScreen");
    this->authenticator->AuthSuccess.Add(del);
@@ -1061,9 +1061,9 @@ Takes a fixed input FAddress and encodes it into a TFixedData
 static TFixedABIData Address(FAddress Address);
 
 /*
-
-@param FString Input,
-@return TDynamicABIData,
+Encodes the given FString into a TDynamicABIData
+@param FString Input, the FString we wish to encode
+@return TDynamicABIData, the resulting encoded FString
 */
 static TDynamicABIData String(FString Input);
 
@@ -1184,5 +1184,24 @@ For IOS you also need to setup provisioning refer to these docs to achieve that:
 https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/
 
 Unreal <-> Xcode Specifics:
+
+During the Unreal Package process there is a very high chance that it will fail due to a code signing error,
+in the event that this happens please take the following steps within XCode to get your packaged .app file
+
+1) After packaging the project in Unreal, open the Xcode project (Sequence-unreal folder -> Intermediate -> ProjectFilesIOS -> SequenceUnreal.xcodeproj)
+2) Click on the project name on the left hand side to open up project settings
+3) Click the Build Phase Tab
+4) Click on the ‘+’ icon at the top left
+5) Select Run Script
+6) Drag the new run script to one below from the last item in the phase list
+7) Expand the run script
+8) In the script box, add the following command: “xattr -cr /Users/Gill_Johnson/Desktop/sequence-unreal/Binaries/IOS/Payload/SequenceUnreal.app”
+9) Replace “/Users/Gill_Johnson/Desktop” with the location of the sequence-unreal project on your computer
+10) Click on the Build Settings tab
+11) Click on each item under the Architectures header that contains macOS and hit the delete key
+12) Click on the General tab
+13) Click on Mac and Applevision Pro under supported destinations and hit the delete key
+14) Now the project can be built (if the build fails at first, wait a few moments then try again. It can sometimes take a bit before the build registers the run script)
+15) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again
 
 ************** Packaging **************
