@@ -2,10 +2,11 @@
 
 
 #include "RequestHandler.h"
-
+#include "Modules/ModuleManager.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 #include "Util/Async.h"
 #include "Http.h"
-#include "HttpManager.h"
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
 
