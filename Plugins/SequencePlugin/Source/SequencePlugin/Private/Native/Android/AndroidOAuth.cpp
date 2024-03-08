@@ -2,7 +2,7 @@
 
 #if PLATFORM_ANDROID
 namespace AndroidOAuth {
-    void AndroidThunkCpp_RequestAuthCode(const FString& providerUrl, const FString& redirectScheme) 
+    void AndroidThunkCpp_SignInWithGoogle(const FString& clientId) 
     {
         if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
         {
@@ -10,16 +10,15 @@ namespace AndroidOAuth {
             jmethodID methodId{FJavaWrapper::FindStaticMethod(
                 jenv,
                 gameActivityClass, 
-                "AndroidThunkJava_RequestSequenceAuthCode", 
-                "(Ljava/lang/String;Ljava/lang/String;)V", 
+                "AndroidThunkJava_SequenceSignInWithGoogle", 
+                "(Ljava/lang/String;)V", 
                 false
             )};
 
             jenv->CallStaticVoidMethod(
                 gameActivityClass, 
                 methodId, 
-                AndroidOAuth::ConvertToJavaString(jenv, providerUrl),
-                AndroidOAuth::ConvertToJavaString(jenv, redirectScheme)
+                AndroidOAuth::ConvertToJavaString(jenv, clientId)
             );
 
             jenv->DeleteLocalRef(gameActivityClass);
@@ -37,15 +36,15 @@ namespace AndroidOAuth {
     }
 }
 
-JNI_METHOD void Java_com_epicgames_unreal_GameActivity_onSequenceAuthCodeResponse(JNIEnv* jenv, jobject thiz, jstring jResponseUrl)
+JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogleIdToken(JNIEnv* jenv, jobject thiz, jstring jIdToken)
 {
-    const char* responseUrlChars = jenv->GetStringUTFChars(jResponseUrl, 0);
+    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
 
-    FString responseUrl;
-    responseUrl = FString(UTF8_TO_TCHAR(responseUrlChars));
+    FString idToken;
+    idToken = FString(UTF8_TO_TCHAR(idTokenChars));
 
-    jenv->ReleaseStringUTFChars(jResponseUrl, responseUrlChars);
+    jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
 
-    UE_LOG(LogTemp, Warning, TEXT("NativeOAuth: redirect response url from java: %s"), *responseUrl);
+    UE_LOG(LogTemp, Warning, TEXT("NativeOAuth: received google id token from java: %s"), *idToken);
 }
 #endif // PLATFORM_ANDROID
