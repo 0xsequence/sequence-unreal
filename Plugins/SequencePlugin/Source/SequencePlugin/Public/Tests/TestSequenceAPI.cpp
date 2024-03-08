@@ -3,11 +3,31 @@
 #include "Authenticator.h"
 #include "ABI/ABI.h"
 
+/*
+ * testing stack based implementation for memory faults
+ */
+void SequenceAPITest::BasicProviderTests()
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
+	FContractCall testCall;
+	const TFunction<void(FUnsizedData)> testResponse = [](FUnsizedData response)
+	{
+		UE_LOG(LogTemp,Display,TEXT("Basic provider response"));
+	};
+
+	const TFunction<void(FSequenceError)> testError = [](FSequenceError error)
+	{
+		UE_LOG(LogTemp,Display,TEXT("Error"));
+	};
+	Api->Call(testCall,6,testResponse,testError);
+}
+
 void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
+	
 	const TFunction<void(FString)> OnResponse = [OnSuccess](FString Response)
 	{
 		OnSuccess("RegisterSession Test Passed");	
