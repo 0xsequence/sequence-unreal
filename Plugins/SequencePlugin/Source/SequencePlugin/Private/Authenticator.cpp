@@ -97,6 +97,14 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
+void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
+{
+	//For Signin with Google (temp)
+#if PLATFORM_ANDROID
+	NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
+#endif
+}
+
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 {
 	FString SigninURL = "";
@@ -123,7 +131,6 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 			}
 		}
 	}
-	NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
 	return SigninURL;
 }
 

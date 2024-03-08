@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "SequencePlugin",
 	"Description": "",
-	"Category": "Other",
+	"Category": "Sequence",
 	"CreatedBy": "",
 	"CreatedByURL": "",
 	"DocsURL": "",
@@ -16,13 +16,20 @@
 	"Installed": true,
 	"SupportedTargetPlatforms": [
 		"Win64",
-		"Android"
+		"Android",
+		"Mac"
 	],
 	"Modules": [
 		{
 			"Name": "SequencePlugin",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "WebBrowserWidget",
+			"Enabled": true
 		}
 	]
 }

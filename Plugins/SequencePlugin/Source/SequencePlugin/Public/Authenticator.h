@@ -363,6 +363,8 @@ private:
 public:
 	FString GetSigninURL(const ESocialSigninType& Type);
 
+	void InitiateMobileSSO(const ESocialSigninType& Type);
+	
 	void SocialLogin(const FString& IDTokenIn);
 
 	void EmailLogin(const FString& EmailIn);
