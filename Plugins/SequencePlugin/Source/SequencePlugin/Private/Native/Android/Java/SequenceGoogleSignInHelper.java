@@ -27,18 +27,20 @@ public class SequenceGoogleSignInHelper {
 
     public static void signIn(
         Context context,
-        String clientId
+        String clientId,
+        String nonce
     ) {
-        getCredentialAsync(context, clientId);
+        getCredentialAsync(context, clientId, nonce);
     }
 
     private static void getCredentialAsync(
         Context context,
-        String clientId
+        String clientId,
+        String nonce
     ) {
         Log.e(TAG, "clientId: " + clientId);
         GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId)
-                // TODO: include a nonce value here
+                .setNonce(nonce)
                 .build();
 
         GetCredentialRequest request = new GetCredentialRequest.Builder()

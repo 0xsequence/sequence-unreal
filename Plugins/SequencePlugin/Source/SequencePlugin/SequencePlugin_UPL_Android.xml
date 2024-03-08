@@ -39,8 +39,8 @@ import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
         <insert>
     public native void nativeSequenceHandleGoogleIdToken(String idToken);
 
-    public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId) {
-        SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId);
+    public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId, String nonce) {
+        SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId, nonce);
     }
 
     public static GameActivity sequenceGetInstance() {
