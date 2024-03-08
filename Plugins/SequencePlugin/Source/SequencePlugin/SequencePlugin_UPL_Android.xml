@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <prebuildCopies>
+        <copyDir src="$S(PluginDir)/Private/Native/Android/Java" dst="$S(BuildDir)/src/com/Plugins/SequencePlugin" />
+    </prebuildCopies>
+
+    <buildGradleAdditions>
+        <insert>
+dependencies {
+    implementation "androidx.credentials:credentials:1.2.0"
+    implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
+    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.0"
+}
+        </insert>
+    </buildGradleAdditions>
+
+    <proguardAdditions>
+        <insert>    
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** {
+  *;
+}        
+        </insert>    
+    </proguardAdditions>    
+        
+    <gameActivityImportAdditions>
+        <insert>
+import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
+        </insert>
+    </gameActivityImportAdditions>        
+
     <gameActivityClassAdditions>
         <insert>
-        public native void onSequenceAuthCodeResponse(String responseUrl);
+    public native void nativeSequenceHandleGoogleIdToken(String idToken);
 
-        public static void AndroidThunkJava_RequestSequenceAuthCode(String providerUrl, String redirectScheme) {
-            Log.debug("NativeOAuth: requesting auth code (providerUrl: " + providerUrl + ", redirectScheme: " + redirectScheme + ")");
-
-            // webview goes here
-
-            _activity.onSequenceAuthCodeResponse("pretend this is the redirect reponse url");
-        }
+    public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId) {
+        SequenceGoogleSignInHelper.signIn(this, clientId);
+    }
         </insert>
     </gameActivityClassAdditions>
 </root>

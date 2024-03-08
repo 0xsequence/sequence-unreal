@@ -5,7 +5,7 @@
 #include "Android/AndroidApplication.h"
 
 namespace AndroidOAuth {
-    void AndroidThunkCpp_RequestAuthCode(const FString& providerUrl, const FString& redirectScheme);
+    void AndroidThunkCpp_SignInWithGoogle(const FString& clientId);
     jstring ConvertToJavaString(JNIEnv* jenv, const FString& string);
 }
 #endif // PLATFORM_ANDROID

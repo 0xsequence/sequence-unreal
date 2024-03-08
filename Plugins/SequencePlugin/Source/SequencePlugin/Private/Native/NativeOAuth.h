@@ -1,5 +1,5 @@
 #pragma once
 
 namespace NativeOAuth {
-    void RequestAuthCode(const FString& providerUrl, const FString& redirectScheme);
+    void SignInWithGoogle(const FString& clientId);
 }
