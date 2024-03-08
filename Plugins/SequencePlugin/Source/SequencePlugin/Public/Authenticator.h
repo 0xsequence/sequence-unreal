@@ -360,7 +360,7 @@ private:
 private:
 	UAuthenticator();
 public:
-	FString GetSigninURL(const ESocialSigninType& Type) const;
+	FString GetSigninURL(const ESocialSigninType& Type);
 
 	void SocialLogin(const FString& IDTokenIn);
 
