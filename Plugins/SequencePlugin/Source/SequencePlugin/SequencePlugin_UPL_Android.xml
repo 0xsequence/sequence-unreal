@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+    <gameActivityClassAdditions>
+        <insert>
+        public native void onSequenceAuthCodeResponse(String responseUrl);
+
+        public static void AndroidThunkJava_RequestSequenceAuthCode(String providerUrl, String redirectScheme) {
+            Log.debug("NativeOAuth: requesting auth code (providerUrl: " + providerUrl + ", redirectScheme: " + redirectScheme + ")");
+
+            // webview goes here
+
+            _activity.onSequenceAuthCodeResponse("pretend this is the redirect reponse url");
+        }
+        </insert>
+    </gameActivityClassAdditions>
+</root>

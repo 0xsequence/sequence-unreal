@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class SequencePlugin : ModuleRules
@@ -20,6 +21,19 @@ public class SequencePlugin : ModuleRules
 				// ... add other private include paths required here ...
 			}
 			);
+
+
+        if (Target.Platform == UnrealTargetPlatform.Android)
+        {
+            PrivateDependencyModuleNames.AddRange(
+                new string[] 
+                {
+					"Engine",
+					"Launch"                    
+                }
+            );
+            AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(ModuleDirectory, "SequencePlugin_UPL_Android.xml"));
+        }
 			
 		
 		PublicDependencyModuleNames.AddRange(
