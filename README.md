@@ -244,6 +244,12 @@ OnFailure calls when something went wrong
 */
 CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
+/*
+Used to update the existing provider URL to a new one
+@param const FString& Url, the new provider URL we want to use
+*/
+UpdateProviderURL(const FString& Url)
+
 //Indexer Calls//
 
 /*
