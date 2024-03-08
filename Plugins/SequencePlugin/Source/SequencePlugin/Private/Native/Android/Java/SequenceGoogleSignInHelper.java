@@ -36,6 +36,7 @@ public class SequenceGoogleSignInHelper {
         Context context,
         String clientId
     ) {
+        Log.e(TAG, "clientId: " + clientId);
         GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId)
                 // TODO: include a nonce value here
                 .build();
@@ -75,6 +76,7 @@ public class SequenceGoogleSignInHelper {
         ) {
             try {
                 GoogleIdTokenCredential idTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
+                Log.e(TAG, "id token: " + idTokenCredential.getIdToken());
                 GameActivity.sequenceGetInstance().nativeSequenceHandleGoogleIdToken(idTokenCredential.getIdToken());
             } catch (Exception e) {
                 Log.e(TAG, "Failed to parse Google ID token response", e);
