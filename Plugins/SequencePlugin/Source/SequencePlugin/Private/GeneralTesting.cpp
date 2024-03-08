@@ -241,9 +241,10 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	ESortOrder TestOrder = ESortOrder::ASC;
-	FString TestResult = UEnum::GetValueAsString(TestOrder);
-	UE_LOG(LogTemp, Display, TEXT("Printed UEnum: %s"), *TestResult);
+	//ESortOrder TestOrder = ESortOrder::ASC;
+	//FString TestResult = UEnum::GetValueAsString(TestOrder);
+	SequenceAPITest::BasicProviderTests();
+	//UE_LOG(LogTemp, Display, TEXT("Printed UEnum: %s"), *TestResult);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()
