@@ -15,7 +15,6 @@
 #include "WebBrowserModule.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
-#include "Config/Config.h"
 #include "Native/NativeOAuth.h"
 
 UAuthenticator::UAuthenticator()
@@ -124,7 +123,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 			}
 		}
 	}
-	NativeOAuth::SignInWithGoogle(this->GoogleClientID,this);
+	NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
 	return SigninURL;
 }
 
@@ -146,7 +145,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 
 FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const
 {
-	return AuthURL +"?response_type=id_token&client_id="+ ClientID +"&redirect_uri="+ this->RedirectURL +"&scope=openid+profile+email&state="+ this->StateToken +"&nonce="+ this->Nonce;
+	return AuthURL +"?response_type=id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL +"&scope=openid+profile+email&state="+ this->StateToken +"&nonce="+ this->Nonce;
 }
 
 FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
@@ -380,16 +379,6 @@ void UAuthenticator::PrintAll()
 	UE_LOG(LogTemp,Display,TEXT("VITE_SEQUENCE_WAAS_CONFIG_KEY: %s"), *FSequenceConfig::VITE_SEQUENCE_WAAS_CONFIG_KEY);
 	UE_LOG(LogTemp,Display,TEXT("cached_email: %s"), *this->Cached_Email);
 	UE_LOG(LogTemp,Display,TEXT("cachedidtoken: %s"), *this->Cached_IDToken);
-	UE_LOG(LogTemp,Display,TEXT("appleclientid: %s"), *this->AppleClientID);
-	UE_LOG(LogTemp,Display,TEXT("appleauthurl: %s"), *this->AppleAuthURL);
-	UE_LOG(LogTemp,Display,TEXT("discordclientid: %s"), *this->DiscordClientID);
-	UE_LOG(LogTemp,Display,TEXT("discordurl: %s"), *this->DiscordAuthURL);
-	UE_LOG(LogTemp,Display,TEXT("facebookclientid: %s"), *this->FacebookClientID);
-	UE_LOG(LogTemp,Display,TEXT("facebookurl: %s"), *this->FacebookAuthURL);
-	UE_LOG(LogTemp,Display,TEXT("googleclientid: %s"), *this->GoogleClientID);
-	UE_LOG(LogTemp,Display,TEXT("googleauthurl: %s"), *this->GoogleAuthURL);
-	UE_LOG(LogTemp,Display,TEXT("redirecturl: %s"), *this->RedirectURL);
-	UE_LOG(LogTemp,Display,TEXT("urlscheme: %s"), *this->UrlScheme);
 	UE_LOG(LogTemp,Display,TEXT("nonce: %s"), *this->Nonce);
 	UE_LOG(LogTemp,Display,TEXT("statetoken: %s"), *this->StateToken);
 	UE_LOG(LogTemp,Display,TEXT("saveslot: %s"), *this->SaveSlot);

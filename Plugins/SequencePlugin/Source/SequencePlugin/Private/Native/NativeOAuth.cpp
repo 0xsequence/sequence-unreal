@@ -12,6 +12,7 @@ namespace NativeOAuth
     }
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
+    	const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
     		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
     		{
     			jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
@@ -26,7 +27,7 @@ namespace NativeOAuth
     			jenv->CallStaticVoidMethod(
 					gameActivityClass, 
 					methodId, 
-					ConvertToJavaString(jenv, message)
+					ConvertToJavaString(jenv, marked_message)
 				);
 
     			jenv->DeleteLocalRef(gameActivityClass);

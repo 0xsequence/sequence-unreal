@@ -7,8 +7,8 @@
 #include "Eth/Crypto.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
+#include "Native/NativeOAuth.h"
 #include "Sequence/Close.h"
-
 
 FTransaction_Sequence FTransaction_Sequence::Convert(FTransaction_FE Transaction_Fe)
 {
@@ -106,12 +106,14 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog(Response);
+#endif
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		const TSharedPtr<FJsonObject> * SessionObj = nullptr;
 		const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 		
 		UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
-
 		if (Json.Get()->TryGetObjectField("session",SessionObj) && Json.Get()->TryGetObjectField("response",ResponseObj))
 		{
 			//we can createdAt, issuedAt, refreshedAt, userId
@@ -177,6 +179,9 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog(Response);
+#endif
 		TArray<FSession> Sessions;
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FListSessionsResponseObj ResponseStruct;
@@ -205,6 +210,9 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog(Response);
+#endif
 		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FCloseResponseObj ResponseStruct;
@@ -256,7 +264,10 @@ void USequenceWallet::UpdateProviderURL(const FString& Url)
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
-	{		
+	{
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog(Response);
+#endif
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FSignedMessageResponseObj Msg;
 		if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessageResponseObj>(Json.ToSharedRef(), &Msg))
@@ -308,6 +319,9 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	TransactionsPayload += "]";
 	TSuccessCallback<FString> OnResponse = [=](FString Response)
 	{
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog(Response);
+#endif
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{

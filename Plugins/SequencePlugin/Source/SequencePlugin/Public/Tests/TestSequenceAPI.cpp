@@ -2,6 +2,7 @@
 #include "Sequence/SequenceAPI.h"
 #include "Authenticator.h"
 #include "ABI/ABI.h"
+#include "Native/NativeOAuth.h"
 
 /*
  * testing stack based implementation for memory faults
@@ -27,15 +28,23 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-	
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("RegisterSession");
+#endif
 	const TFunction<void(FString)> OnResponse = [OnSuccess](FString Response)
 	{
-		OnSuccess("RegisterSession Test Passed");	
+		OnSuccess("RegisterSession Test Passed");
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("RegisterSessionDone");
+#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("RegisterSessionFail");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
@@ -48,14 +57,24 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("SignMessage");
+#endif
+	
 	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage response)
 	{
 		OnSuccess("Sign Message Test Passed");
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("SignMessageDone");
+#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Sign Message Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("SignMessageFail");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignMessage Test]========================"));
@@ -67,15 +86,23 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("ListSessions");
+#endif
 	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> response)
 	{
 		OnSuccess("List Sessions Test Passed");
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("ListSessionsDone");
+#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("ListSessionsFail");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
@@ -87,10 +114,15 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("SendTransaction");
+#endif
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("SendTransactionFail");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Send[Raw]Transaction Test]========================"));
@@ -108,18 +140,27 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
+#if PLATFORM_ANDROID
+NativeOAuth::AndroidLog("SendTransactionDone");
+#endif
 	},GenericFailure);
 }
 
 void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("CallContract");
+#endif
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("CallContractFailed");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Call Contract Test]========================"));
@@ -148,6 +189,9 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
+#if PLATFORM_ANDROID
+NativeOAuth::AndroidLog("CallContractDone");
+#endif
 	},GenericFailure);
 }
 
@@ -242,17 +286,26 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 
 void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
+#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("CloseSession");
+#endif
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const TFunction<void(FString)> OnResponse = [OnSuccess](const FString& Response)
 	{
 		OnSuccess("CloseSession Test Passed");
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("CloseSessionDone");
+#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
+#if PLATFORM_ANDROID
+		NativeOAuth::AndroidLog("CloseSessionFailed");
+#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API CloseSession Test]========================"));

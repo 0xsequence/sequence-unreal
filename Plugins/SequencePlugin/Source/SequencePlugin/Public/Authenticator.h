@@ -6,6 +6,7 @@
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
+#include "Config/Config.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
@@ -320,7 +321,7 @@ private:
 	UPROPERTY()
 	FString Nonce = "";
 
-	const FString DeepLinkURLScheme = "sdk-powered-by-sequence";
+	/*const FString DeepLinkURLScheme = "sdk-powered-by-sequence";
 	const FString UrlScheme = "powered-by-sequence";
 	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
 
@@ -334,7 +335,7 @@ private:
 	const FString DiscordClientID = "";//TODO still need this
 
 	const FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	const FString AppleClientID = "com.horizon.sequence.waas";
+	const FString AppleClientID = "com.horizon.sequence.waas";*/
 
 	UPROPERTY()
 	FString Cached_IDToken;
@@ -345,7 +346,7 @@ private:
 	UPROPERTY()
 	FWaasJWT WaasSettings;
 	
-	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientID)}};
+	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 	const int32 EmailAuthMaxRetries = 2;

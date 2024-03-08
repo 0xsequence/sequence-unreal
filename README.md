@@ -13,7 +13,7 @@ or
 =========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
-You must provide an encryption key implementation at **SequenceEncryptor.cpp** Function **GetStoredKey**,
+You must provide an encryption key implementation at **[SequenceEncryptor.cpp]** Function **[GetStoredKey]**,
 This function must be implemented to provide a securely stored private key that will be used to encrypt &
 decrypt client information. Failure to do so will result in NO information being stored or in the event you
 do not use a securely stored key, can result in client information being stored insecurely on their systems.
@@ -31,21 +31,21 @@ already exists just copy this SequencePlugin folder into it.
 3) To find the SequencePlugin content folder in your content drawer enable view plugin content
 
 4) If you wish to use the in built sequence UI for login
-4a) Create an **Actor** you wish to be responsible for the SequenceUI then attach the **Sequence_Pawn_Component_BP** to it
-4b) Setup your **Actor** Blueprint similar to how it's setup in **Custom_Spectator_Pawn** being sure to bind to the delegate
-that gives you Credentials **Auth_Success_Forwarder**
+4a) Create an **[Actor]** you wish to be responsible for the SequenceUI then attach the **[Sequence_Pawn_Component_BP]** to it
+4b) Setup your **[Actor]** Blueprint similar to how it's setup in **[Custom_Spectator_Pawn]** being sure to bind to the delegate
+that gives you Credentials **[Auth_Success_Forwarder]**
 
 5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the SequenceAPI,
-an example of this is with the **Custom_Spectator_Pawn** here this Pawn inherits from a C++ class **Sqnc_Spec_Pawn**
-that class implements a blueprint Callable function **SetupCredentials(FCredentials_BE CredentialsIn)** which is callable
-within the child class **Custom_Spectator_Pawn**. Calling this function will forward the credentials to a C++ backend.
+an example of this is with the **[Custom_Spectator_Pawn]** here this Pawn inherits from a C++ class **[Sqnc_Spec_Pawn]**
+that class implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]** which is callable
+within the child class **[Custom_Spectator_Pawn]**. Calling this function will forward the credentials to a C++ backend.
 
 6) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
 
 [IF you are using your own UI you'll need to do the following]
 
-1) In a C++ backend with a series of pass through **UFUNCTIONS** setup similarly to **SequenceBackendManager.h/.cpp**
-Each of these calls are implemented in **UAuthenticator** you just need to pass through the data with YOUR UAuthenticator UObject
+1) In a C++ backend with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**
+Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 //This call is platform dependent on windows & mac this is required for SSO WIP
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")                      
@@ -59,7 +59,7 @@ Each of these calls are implemented in **UAuthenticator** you just need to pass 
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")
    void EmailLogin(const FString& EmailIn);
 
-//This is call is made after the Delegate **AuthRequiresCode** is fired
+//This is call is made after the Delegate **[AuthRequiresCode]** is fired
    UFUNCTION(BlueprintCallable, CATEGORY = "Login")
    void EmailCode(const FString& CodeIn);
 
@@ -80,7 +80,7 @@ You can bind to these delegates like so:
    del.BindUFunction(this, "CallShowAuthSuccessScreen");
    this->authenticator->AuthSuccess.Add(del);
    
-   Where [CallShowAuthSuccessScreen] is defined in SequenceBackendManager.h like so:
+   Where **[CallShowAuthSuccessScreen]** is defined in SequenceBackendManager.h like so:
 
    UFUNCTION()
    void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
@@ -93,40 +93,41 @@ You can bind to these delegates like so:
    if (this->ShowAuthSuccessDelegate.IsBound())
       this->ShowAuthSuccessDelegate.Broadcast(Credentials);
    else
-      UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
+      UE_LOG(LogTemp, Error, TEXT("**[Nothing bound to: ShowAuthSuccessDelegate]**"));
    }
 
-[Email based Authentication]
-1) To start email based authentication you'll start it with this call [EmailLogin(const FString& EmailIn)], supplying
+**[Email based Authentication]**
+1) To start email based authentication you'll start it with this call **[EmailLogin(const FString& EmailIn)]**, supplying
    an email you've collected from the User in your GUI.
 
-2) Next [AuthRequiresCode] will fire when the backend is ready to receive the Code from your UI. Collect this code from
-   your GUI and send it to the authenticator using [EmailCode(CodeIn)].
+2) Next **[AuthRequiresCode]** will fire when the backend is ready to receive the Code from your UI. Collect this code from
+   your GUI and send it to the authenticator using **[EmailCode(CodeIn)]**.
 
-3) Finally [AuthSuccess] will fire with a Credentials_BE struct as a parameter. This is your non registered credentials
+3) Finally **[AuthSuccess]** will fire with a Credentials_BE struct as a parameter. This is your non registered credentials
    from EmailAuth. You are done Email Based Auth.
 
-[Social Signin based Authentication DESKTOP]
+**[Social Signin based Authentication DESKTOP]**
 1) To start SSO based authentication with desktop you can either use your own implementation to get the necessary
    id_token or you can make use of Unreal's web browser plugin.
 
 2) With whatever implementation you chose you can forward the colleted id_token to the UAuthenticator object with
-   [SocialLogin(const FString& IDTokenIn)], after which [AuthSuccess] will fire and you're done desktop based SSO!
+   **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO!
 
-[Social Signin based Authentication MOBILE]
+**[Social Signin based Authentication MOBILE]**
 WIP
 
-[SequenceAPI]
-1) After you've completed initial authentication and have intercepted the credentials either through your UI or ours,
-   to use the Sequence API you'll need to create a [USequenceWallet] by using:
-   [USequenceWallet * Api = USequenceWallet(CredentialsIn)] or [USequenceWallet * Api = USequenceWallet::Make(CredentialsIn, ProviderURL)]
-   Once you have your [USequenceWallet] UObject call [Api->RegisterSession(OnSuccess,GenericFailure)] this will register
+**[SequenceAPI]**
+
+   After you've completed initial authentication and have intercepted the credentials either through your UI or ours,
+   to use the Sequence API you'll need to create a **[USequenceWallet]** by using:
+   **[USequenceWallet * Api = USequenceWallet(CredentialsIn)]** or **[USequenceWallet * Api = USequenceWallet::Make(CredentialsIn, ProviderURL)]**
+   Once you have your **[USequenceWallet]** UObject call **[Api->RegisterSession(OnSuccess,GenericFailure)]** this will register
    your credentials with the SequenceBackend. Note not calling Register prior to make any others calls will result in errors
    as a UserWallet hasn't been supplied until this point.
 
 =========================================================================================================================
 
-Assuming you've setup your controlling Actor with the [Sequence_Pawn_Component_BP]
+Assuming you've setup your controlling Actor with the **[Sequence_Pawn_Component_BP]**
 The sequence pawn component has functions to do the following:
 
 Setup Sequence (sets up the sequence based systems), Requires playerController input
@@ -166,13 +167,13 @@ To get a USequenceWallet call either:
 USequenceWallet::Make(FCredentials_BE CredentialsIn) or
 USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL)
 
-Where the Credentials you give are the credentials you received from the UAuthenticator when [AuthSuccess] Fires,
-OR you can use the call Auth->[GetStoredCredentials](), where Auth is of the type [UAuthenticator] if you are using
+Where the Credentials you give are the credentials you received from the UAuthenticator when **[AuthSuccess]** Fires,
+OR you can use the call Auth->**[GetStoredCredentials]**(), where Auth is of the type **[UAuthenticator]** if you are using
 StoredCredentials please ensure they are valid by checking the wrapping Structs FStoredCredentials_BE.GetValid() flag
-returned from [GetStoredCredentials], 
+returned from **[GetStoredCredentials]**, 
 The providerURL is the url of the provider you wish to use.
 
-Once you have your [USequenceWallet] UObject please ensure that you've registered the session using [RegisterSession]
+Once you have your **[USequenceWallet]** UObject please ensure that you've registered the session using **[RegisterSession]**
 before attempting to make other calls to the API.
 
 SequenceAPI calls:
@@ -182,22 +183,23 @@ SequenceAPI calls:
 We make use of TFunctions with some callbacks here I'll list some example syntax for them
 
 TSuccessCallback
-const TFunction<void(FString)> OnResponse = [Capturable variables](const FString& Response)
+const TFunction<void(FString)> OnResponse = **[Capturable variables]**(const FString& Response)
 {
 //callback body where we can process Response
 };
 
 FFailureCallback
-const TFunction<void(FSequenceError)> OnFailureTest = [Capturable variables](const FSequenceError& Error)
+const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**(const FSequenceError& Error)
 {
 //callback body where we can process Error
 };
 
 One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
 something and start over writing memory. If you require lots of nesting swapping to a more unreal esque approach using
-UFUNCTION callbacks helps to avoid these problems similar to how things are done in [UAuthenticator.h/cpp]
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
 
-[End Note]
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
+**[End Note]**
 
 /*
 Used to sign the given string with sequence
@@ -1162,10 +1164,10 @@ StoreCredentials(FCredentials_BE CredentialsIn)
 
 ************** Waas Configuration **************
 
-To configure Waas with your particular information please refer to the following file [Config.h] under
+To configure Waas with your particular information please refer to the following file **[Config.h]** under
 SequencePlugin/Source/SequencePlugin/Private/Config/Config.h
 
-In this file you'll find [FSequenceConfig] which contains 3 values you'll need to update
+In this file you'll find **[FSequenceConfig]** which contains 3 values you'll need to update
 
 VITE_SEQUENCE_WAAS_CONFIG_KEY which you get from SequenceBuilder (need web link)
 
@@ -1182,6 +1184,20 @@ For Windows, Mac
 https://docs.unrealengine.com/5.0/en-US/packaging-unreal-engine-projects/#:~:text=Clicking%20File%20%3E%20Package%20Project%20%3E%20Packaging,options%20for%20the%20packaging%20feature.&text=The%20build%20configuration%20to%20compile,a%20code%20project%2C%20select%20DebugGame.
 For Android
 https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Mobile/Android/PackagingAndroidProject/
+
+Android Google specific SSO setup
+Inorder to be able to properly use GoogleSignin you must do the following,
+Create & place the Keystore file by following these instructions:
+https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/
+
+You will also need to generate a ClientId and a WebId for your application,
+as well as place the **[WebId]** in the Config/Config.h FAuthenticatorConfig.GoogleClientID Field
+
+Please Refer to these docs to acheive the generation of ClientIds & WebIds:
+
+https://developers.google.com/identity/one-tap/android/get-started#api-console
+https://developers.google.com/android/guides/client-auth
+
 For IOS
 https://docs.unrealengine.com/5.0/en-US/packaging-ios-projects-in-unreal-engine/
 
