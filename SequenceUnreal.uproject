@@ -27,12 +27,20 @@
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Win64",
-				"Android"
+				"Android",
+				"Mac"
 			]
+		},
+		{
+			"Name": "WebBrowserWidget",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
 		"Win64",
-		"Android"
+		"Android",
+		"Mac",
+		"HoloLens",
+		"Windows"
 	]
 }

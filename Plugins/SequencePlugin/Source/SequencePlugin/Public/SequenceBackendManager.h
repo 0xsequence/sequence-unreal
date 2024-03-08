@@ -71,6 +71,7 @@ protected:
 
 public:
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+	
 	/*
 	* Used to send data to clipboard for ease of use!
 	*/
@@ -85,6 +86,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "FUNCTION")
 		FString GetTransactionHash(FTransaction_FE Transaction);
+
+	UFUNCTION(BlueprintCallable, Category="Login")
+	void InitiateMobileSSO(const ESocialSigninType& Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetLoginURL(const ESocialSigninType& Type);

@@ -82,6 +82,18 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 	return Transaction.ID();
 }
 
+void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
+{
+	if (this->authenticator)
+	{
+		this->authenticator->InitiateMobileSSO(Type);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
+	}
+}
+
 FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 {
 	if (this->authenticator)
