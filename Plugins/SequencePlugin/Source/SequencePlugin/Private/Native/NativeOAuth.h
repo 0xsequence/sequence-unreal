@@ -10,9 +10,9 @@
 namespace NativeOAuth
 {
 #if PLATFORM_ANDROID
-void AndroidThunkCpp_SignInWithGoogle(const FString& clientId);
+void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce);
 jstring ConvertToJavaString(JNIEnv* jenv, const FString& string);
 #endif // PLATFORM_ANDROID
 	inline UAuthenticator * Callback = nullptr;
-	void SignInWithGoogle(const FString& clientId,UAuthenticator * AuthCallback);
+	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback);
 }
