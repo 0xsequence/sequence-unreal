@@ -7,6 +7,7 @@
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
 #include "Config/Config.h"
+#include "Dom/JsonObject.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
