@@ -1130,6 +1130,11 @@ provider IE) Google or Apple
 GetSigninURL(ESocialSigninType Type)
 
 /*
+Used to initiate a mobile specific version of SSO (WIP)
+*/
+InitiateMobileSSO(const ESocialSigninType& Type)
+
+/*
 This is for dealing with Social based Login,
 (WIP)
 */
