@@ -70,6 +70,7 @@ public:
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn);
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
+	void UpdateProviderURL(const FString& Url);
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
 	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);

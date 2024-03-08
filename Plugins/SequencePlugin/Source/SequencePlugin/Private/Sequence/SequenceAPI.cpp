@@ -248,6 +248,11 @@ FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 	return Signature;
 }
 
+void USequenceWallet::UpdateProviderURL(const FString& Url)
+{
+	this->ProviderUrl = Url;
+}
+
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
