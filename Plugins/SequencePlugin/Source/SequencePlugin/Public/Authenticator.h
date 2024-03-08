@@ -382,7 +382,7 @@ private:
 
 	void ResetRetryEmailLogin();
 
-	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID, const FString& Method) const;
+	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const;
 
 	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
 
