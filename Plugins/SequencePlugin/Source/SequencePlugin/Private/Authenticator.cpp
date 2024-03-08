@@ -16,6 +16,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Config/Config.h"
+#include "Native/NativeOAuth.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -123,6 +124,8 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 			}
 		}
 	}
+
+	NativeOAuth::SignInWithGoogle(this->GoogleClientID);
 	
 	return SigninURL;
 }
