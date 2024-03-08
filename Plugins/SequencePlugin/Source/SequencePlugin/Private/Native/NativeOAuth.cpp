@@ -11,6 +11,28 @@ namespace NativeOAuth
         #endif // PLATFORM_ANDROID
     }
 #if PLATFORM_ANDROID
+        void AndroidLog(const FString& message) {
+    		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
+    		{
+    			jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+    			jmethodID methodId{FJavaWrapper::FindStaticMethod(
+					jenv,
+					gameActivityClass, 
+					"AndroidThunkJava_SequenceLog", 
+					"(Ljava/lang/String;)V", 
+					false
+				)};
+
+    			jenv->CallStaticVoidMethod(
+					gameActivityClass, 
+					methodId, 
+					ConvertToJavaString(jenv, message)
+				);
+
+    			jenv->DeleteLocalRef(gameActivityClass);
+    		}            
+        }
+
     	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce) 
     	{
     		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
