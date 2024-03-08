@@ -98,7 +98,7 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
+FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 {
 	FString SigninURL = "";
 	
@@ -124,14 +124,12 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 			}
 		}
 	}
-
-	NativeOAuth::SignInWithGoogle(this->GoogleClientID);
-	
+	NativeOAuth::SignInWithGoogle(this->GoogleClientID,this);
 	return SigninURL;
 }
 
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
-{
+{	
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
