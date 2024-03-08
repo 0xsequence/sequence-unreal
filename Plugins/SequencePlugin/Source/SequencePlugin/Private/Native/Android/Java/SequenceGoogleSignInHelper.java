@@ -86,5 +86,9 @@ public class SequenceGoogleSignInHelper {
         } else {
             Log.e(TAG, "Unexpected credential type");
         }
-    }    
+    } 
+
+    public static void log(String message) {
+        Log.e(TAG, message);
+    }   
 }
