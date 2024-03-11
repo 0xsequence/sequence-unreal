@@ -4,9 +4,8 @@
 #pragma warning(disable: 4104)
 #pragma warning(disable: 4101)
 #include "SequencePlugin.h"
-#include "Core.h"
 #include "Modules/ModuleManager.h"
-#include "Interfaces/IPluginManager.h"
+#include "Engine/Engine.h"
 
 
 #define LOCTEXT_NAMESPACE "FSequencePluginModule"

@@ -1,5 +1,6 @@
 #pragma once
 #include "Types.h"
+#include "Containers/StaticArray.h"
 
 TArray<uint8> BlankArray(ByteLength Size);
 

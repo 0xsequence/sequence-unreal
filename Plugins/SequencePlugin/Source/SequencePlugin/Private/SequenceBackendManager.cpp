@@ -4,6 +4,7 @@
 #include "Provider.h"
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
+#include "Engine/World.h"
 
 FUserDetails ASequenceBackendManager::getUserDetails()
 {
