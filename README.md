@@ -8,8 +8,6 @@ Note: all files and folders talked about in this readme will be found in the fol
 or
 /Plugins/SequencePlugin/Source/SequencePlugin/Public
 
-//Maybe add an excerpt about the use of the external ios plugin if we can't migrate in what we need for it
-
 =========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
