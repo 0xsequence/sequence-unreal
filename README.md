@@ -9,6 +9,24 @@ or
 /Plugins/SequencePlugin/Source/SequencePlugin/Public
 
 =========================================================================================================================
+   Be sure to get updated as the credentials provided in with this plugin may not work.
+
+	VITE_SEQUENCE_WAAS_CONFIG_KEY
+
+   &
+
+   ProjectAccessKey
+
+   If you start receiving errors from AWS in the logs due to invalid VITE_SEQUENCE_WAAS_CONFIG_KEY it's very likely you have credentials not set for email auth
+
+   If you start receiving errors from Sequence it could be due to an Invalid VITE_SEQUENCE_WAAS_CONFIG_KEY or an invalid ProjectAccessKey
+
+   Refer to the packaging section for instructions regarding google Signin for Android
+
+   Refer to the 
+=========================================================================================================================
+
+=========================================================================================================================
 
 !!!BEFORE YOU CAN SAFELY USE THIS!!!
 You must provide an encryption key implementation at **[SequenceEncryptor.cpp]** Function **[GetStoredKey]**,
@@ -1193,12 +1211,14 @@ Inorder to be able to properly use GoogleSignin you must do the following,
 Create & place the Keystore file by following these instructions:
 https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/
 
-You will also need to generate a ClientId and a WebId for your application,
-as well as place the **[WebId]** in the Config/Config.h FAuthenticatorConfig.GoogleClientID Field
+You will also need to generate a **[Android client ID]** and a **[Web Application client ID]** for your application,
+as well as place the **[Web Application client ID]** in the Config/Config.h FAuthenticatorConfig.GoogleClientID Field
 
-Please Refer to these docs to acheive the generation of ClientIds & WebIds:
+Please Refer to these docs to acheive the generation of **[Android client ID]** & **[Web Application client ID]**:
 
 https://developers.google.com/identity/one-tap/android/get-started#api-console
+
+This link helps explain how to collect Sha-1 key fingerprints for the **[Android client ID]**
 https://developers.google.com/android/guides/client-auth
 
 For IOS
