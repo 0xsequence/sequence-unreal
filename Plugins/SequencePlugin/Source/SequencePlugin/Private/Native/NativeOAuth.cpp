@@ -12,26 +12,26 @@ namespace NativeOAuth
     }
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
-    	const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
-    		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
-    		{
-    			jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
-    			jmethodID methodId{FJavaWrapper::FindStaticMethod(
-					jenv,
-					gameActivityClass, 
-					"AndroidThunkJava_SequenceLog", 
-					"(Ljava/lang/String;)V", 
-					false
-				)};
+    	// const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
+    	// 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
+    	// 	{
+    	// 		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+    	// 		jmethodID methodId{FJavaWrapper::FindStaticMethod(
+		// 			jenv,
+		// 			gameActivityClass, 
+		// 			"AndroidThunkJava_SequenceLog", 
+		// 			"(Ljava/lang/String;)V", 
+		// 			false
+		// 		)};
 
-    			jenv->CallStaticVoidMethod(
-					gameActivityClass, 
-					methodId, 
-					ConvertToJavaString(jenv, marked_message)
-				);
+    	// 		jenv->CallStaticVoidMethod(
+		// 			gameActivityClass, 
+		// 			methodId, 
+		// 			ConvertToJavaString(jenv, marked_message)
+		// 		);
 
-    			jenv->DeleteLocalRef(gameActivityClass);
-    		}            
+    	// 		jenv->DeleteLocalRef(gameActivityClass);
+    	// 	}            
         }
 
     	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce) 
@@ -76,7 +76,6 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogl
     	idToken = FString(UTF8_TO_TCHAR(idTokenChars));
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     	Callback->SocialLogin(idToken);
-    	UE_LOG(LogTemp, Warning, TEXT("NativeOAuth: received google id token from java: %s"), *idToken);
     }
 #endif // PLATFORM_ANDROID
 }

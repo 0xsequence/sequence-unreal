@@ -38,7 +38,6 @@ public class SequenceGoogleSignInHelper {
         String clientId,
         String nonce
     ) {
-        Log.e(TAG, "clientId: " + clientId);
         GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId)
                 .setNonce(nonce)
                 .build();
@@ -61,11 +60,11 @@ public class SequenceGoogleSignInHelper {
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
-                        Log.e(TAG, "Error getting credential", e);
-                        if (e instanceof GetCredentialCustomException) {
-                            GetCredentialCustomException customException = (GetCredentialCustomException) e;
-                            Log.e(TAG, "Custom Exception Type: " + customException.getType());
-                        }                        
+                        // Log.e(TAG, "Error getting credential", e);
+                        // if (e instanceof GetCredentialCustomException) {
+                        //     GetCredentialCustomException customException = (GetCredentialCustomException) e;
+                        //     Log.e(TAG, "Custom Exception Type: " + customException.getType());
+                        // }                        
                     }
                 }
         );
@@ -78,17 +77,16 @@ public class SequenceGoogleSignInHelper {
         ) {
             try {
                 GoogleIdTokenCredential idTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
-                Log.e(TAG, "id token: " + idTokenCredential.getIdToken());
                 GameActivity.sequenceGetInstance().nativeSequenceHandleGoogleIdToken(idTokenCredential.getIdToken());
             } catch (Exception e) {
-                Log.e(TAG, "Failed to parse Google ID token response", e);
+                // Log.e(TAG, "Failed to parse Google ID token response", e);
             }
         } else {
-            Log.e(TAG, "Unexpected credential type");
+            // Log.e(TAG, "Unexpected credential type");
         }
     } 
 
-    public static void log(String message) {
-        Log.e(TAG, message);
-    }   
+    // public static void log(String message) {
+    //     Log.e(TAG, message);
+    // }   
 }
