@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectHandler.h"
+#include "TextureResource.h"
 
 TMap<FString, UTexture2D*> UObjectHandler::getProcessedImages()
 {

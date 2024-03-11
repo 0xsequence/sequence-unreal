@@ -1,7 +1,5 @@
 #include "Types/Block.h"
 
-#include "Json.h"
-
 FBlock::~FBlock()
 {
 	delete Header;
