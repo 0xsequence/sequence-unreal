@@ -40,7 +40,6 @@
 		"Win64",
 		"Android",
 		"Mac",
-		"HoloLens",
 		"Windows"
 	]
 }
