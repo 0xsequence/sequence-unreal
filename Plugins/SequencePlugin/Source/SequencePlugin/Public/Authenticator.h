@@ -322,22 +322,6 @@ private:
 	UPROPERTY()
 	FString Nonce = "";
 
-	/*const FString DeepLinkURLScheme = "sdk-powered-by-sequence";
-	const FString UrlScheme = "powered-by-sequence";
-	const FString RedirectURL = "https://3d41-142-115-54-118.ngrok-free.app/";
-
-	const FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
-	const FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
-
-	const FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
-	const FString FacebookClientID = "";//TODO still need this
-
-	const FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
-	const FString DiscordClientID = "";//TODO still need this
-
-	const FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	const FString AppleClientID = "com.horizon.sequence.waas";*/
-
 	UPROPERTY()
 	FString Cached_IDToken;
 	UPROPERTY()
@@ -347,7 +331,7 @@ private:
 	UPROPERTY()
 	FWaasJWT WaasSettings;
 	
-	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
+	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Apple,FSSOCredentials(FAuthenticatorConfig::AppleAuthURL,FAuthenticatorConfig::AppleClientID)},{ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 	const int32 EmailAuthMaxRetries = 2;
@@ -386,7 +370,7 @@ private:
 
 	void ResetRetryEmailLogin();
 
-	FString GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const;
+	FString GenerateSigninURL(const ESocialSigninType& Type, const FString& AuthURL, const FString& ClientID) const;
 
 	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
 

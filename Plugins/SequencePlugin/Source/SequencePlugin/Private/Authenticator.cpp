@@ -111,7 +111,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 	
 	if (this->SSOProviderMap.Contains(Type))
 	{
-		SigninURL = this->GenerateSigninURL(this->SSOProviderMap[Type].URL, this->SSOProviderMap[Type].ClientID);
+		SigninURL = this->GenerateSigninURL(Type, this->SSOProviderMap[Type].URL, this->SSOProviderMap[Type].ClientID);
 	}
 	else
 	{
@@ -150,15 +150,27 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
-FString UAuthenticator::GenerateSigninURL(const FString& AuthURL, const FString& ClientID) const
+FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type, const FString& AuthURL, const FString& ClientID) const
 {
-	return AuthURL +"?response_type=id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL +"&scope=openid+profile+email&state="+ this->StateToken +"&nonce="+ this->Nonce;
+	FString SigninUrl = AuthURL +"?response_type=code+id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	switch (Type)
+	{
+	case ESocialSigninType::Google:
+		break;
+	case ESocialSigninType::Apple:
+		SigninUrl += "&response_mode=form_post";
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::AWS:
+		break;
+	}
+	
+	return SigninUrl;
 }
 
 FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
 {
-	UE_LOG(LogTemp,Display,TEXT("(In build AWS URL) Service: %s"), *Service);
-	UE_LOG(LogTemp,Display,TEXT("(In build AWS URL) Region: %s"), *AWSRegion);
 	FString Ret = "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
 	UE_LOG(LogTemp, Display, TEXT("AWSURL: %s"), *Ret);
 	return Ret;
