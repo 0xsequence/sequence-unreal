@@ -33,7 +33,7 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	FBase64::Decode(FSequenceConfig::VITE_SEQUENCE_WAAS_CONFIG_KEY,ParsedJWT);
+	FBase64::Decode(FSequenceConfig::WaaSTenantKey,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
 	
@@ -395,7 +395,7 @@ void UAuthenticator::PrintAll()
 	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
 	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *FSequenceConfig::WaasVersion);
 	UE_LOG(LogTemp,Display,TEXT("ProjectAccessKey: %s"), *FSequenceConfig::ProjectAccessKey);
-	UE_LOG(LogTemp,Display,TEXT("VITE_SEQUENCE_WAAS_CONFIG_KEY: %s"), *FSequenceConfig::VITE_SEQUENCE_WAAS_CONFIG_KEY);
+	UE_LOG(LogTemp,Display,TEXT("WaaSTenantKey: %s"), *FSequenceConfig::WaaSTenantKey);
 	UE_LOG(LogTemp,Display,TEXT("cached_email: %s"), *this->Cached_Email);
 	UE_LOG(LogTemp,Display,TEXT("cachedidtoken: %s"), *this->Cached_IDToken);
 	UE_LOG(LogTemp,Display,TEXT("nonce: %s"), *this->Nonce);
