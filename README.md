@@ -17,6 +17,14 @@ You can then add these credentials in the **[Config.h]** file under `SequencePlu
 
 You must provide an encryption key implementation at **[SequenceEncryptor.cpp]** function **[GetStoredKey]**. This function must be implemented to provide a securely stored private key that will be used to encrypt and decrypt client information. Failure to do so will result in NO information being stored or in the event you do not use a securely stored key, can result in client information being stored insecurely on their systems.
 
+Devs have 2 options here
+1) they can provide a cryptographically secure key of 32 characters in length & setup their packaged project to be encrypted
+   and un accessible so that no one can access the key in that function.
+
+2) Use platform specific key stores to securely store their keys.
+
+Failure to do so means user data stored locally can be tampered with and stolen.
+
 ***
 
 ## Getting Started
