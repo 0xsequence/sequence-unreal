@@ -152,8 +152,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 
 FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type, const FString& AuthURL, const FString& ClientID) const
 {
-	FString SigninUrl = AuthURL + "?response_type=id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL +"&scope=openid+profile+email&state="+ this->StateToken +"&nonce="+ this->Nonce;
-	//FString SigninUrl = AuthURL +"?response_type=code+id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthURL +"?response_type=code+id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
