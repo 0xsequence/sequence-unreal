@@ -666,7 +666,7 @@ FPage buildTestPage()
 	TArray<FSortBy> sortList;
 	FSortBy sortByEntry;
 	sortByEntry.column = "left";
-	sortByEntry.order = ESortOrder::DESC;
+	sortByEntry.order = ESortOrder_Sequence::DESC;
 	sortList.Add(sortByEntry);
 
 	ret.sort = sortList;

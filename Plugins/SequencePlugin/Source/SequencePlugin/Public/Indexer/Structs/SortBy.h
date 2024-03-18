@@ -13,7 +13,7 @@ public:
     UPROPERTY()
         FString column = "";
     UPROPERTY()
-        TEnumAsByte<ESortOrder> order = ESortOrder::ASC;
+        TEnumAsByte<ESortOrder_Sequence> order = ESortOrder_Sequence::ASC;
 
     /*
     * Used to get the jsonObjectString of this struct for args and testing
@@ -38,6 +38,6 @@ public:
             column = json_in.GetStringField("column");
 
         if (!json_in.TryGetField("order"))
-            order = ESortOrder(json_in.GetIntegerField("order"));
+            order = ESortOrder_Sequence(json_in.GetIntegerField("order"));
     }
 };
