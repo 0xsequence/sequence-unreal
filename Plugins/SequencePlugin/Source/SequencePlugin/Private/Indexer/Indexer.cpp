@@ -148,32 +148,32 @@ template<typename T> T UIndexer::BuildResponse(FString text)
 
 void UIndexer::Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "Ping", "", [=](FString Content) {
-		OnSuccess(BuildResponse<FPingReturn>(Content).status);
+	HTTPPost(chainID, "Ping", "", [this,OnSuccess](FString Content) {
+		OnSuccess(this->BuildResponse<FPingReturn>(Content).status);
 	}, OnFailure);
 }
 
 void UIndexer::Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "Version", "", [=](FString Content)
+	HTTPPost(chainID, "Version", "", [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FVersionReturn>(Content).version);
+		OnSuccess(this->BuildResponse<FVersionReturn>(Content).version);
 	}, OnFailure);
 }
 
 void UIndexer::RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "RuntimeStatus", "", [=](FString Content)
+	HTTPPost(chainID, "RuntimeStatus", "", [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FRuntimeStatusReturn>(Content).status);
+		OnSuccess(this->BuildResponse<FRuntimeStatusReturn>(Content).status);
 	}, OnFailure);
 }
 
 void UIndexer::GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetChainID", "", [=](FString Content)
+	HTTPPost(chainID, "GetChainID", "", [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetChainIDReturn>(Content).chainID);
+		OnSuccess(this->BuildResponse<FGetChainIDReturn>(Content).chainID);
 	}, OnFailure);
 }
 
@@ -183,9 +183,9 @@ void UIndexer::GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallb
 	json_arg.Append(accountAddr);
 	json_arg.Append("\"}");
 
-	HTTPPost(chainID, "GetEtherBalance", json_arg, [=](FString Content)
+	HTTPPost(chainID, "GetEtherBalance", json_arg, [this,OnSuccess](FString Content)
 	{
-		FGetEtherBalanceReturn Response = BuildResponse<FGetEtherBalanceReturn>(Content);
+		FGetEtherBalanceReturn Response = this->BuildResponse<FGetEtherBalanceReturn>(Content);
 		OnSuccess(Response.balance);
 	}, OnFailure);
 }
@@ -194,41 +194,41 @@ void UIndexer::GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSucc
 {
 	const FString endpoint = "GetTokenBalances";
 	UE_LOG(LogTemp, Display, TEXT("Endpoint: [%s]"), *endpoint);
-	HTTPPost(chainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(args), [=](FString Content)
+	HTTPPost(chainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(args), [this,OnSuccess](FString Content)
 	{
-		FGetTokenBalancesReturn response = BuildResponse<FGetTokenBalancesReturn>(Content);
+		FGetTokenBalancesReturn response = this->BuildResponse<FGetTokenBalancesReturn>(Content);
 		OnSuccess(response);
 	}, OnFailure);
 }
 
 void UIndexer::GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args), [=](FString Content)
+	HTTPPost(chainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(args), [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetTokenSuppliesReturn>(Content));
+		OnSuccess(this->BuildResponse<FGetTokenSuppliesReturn>(Content));
 	}, OnFailure);
 }
 
 void UIndexer::GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args), [=](FString Content)
+	HTTPPost(chainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(args), [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetTokenSuppliesMapReturn>(Content));
+		OnSuccess(this->BuildResponse<FGetTokenSuppliesMapReturn>(Content));
 	}, OnFailure);
 }
 
 void UIndexer::GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args), [=](FString Content)
+	HTTPPost(chainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(args), [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetBalanceUpdatesReturn>(Content));
+		OnSuccess(this->BuildResponse<FGetBalanceUpdatesReturn>(Content));
 	}, OnFailure);
 }
 
 void UIndexer::GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
 {
-	HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args), [=](FString Content)
+	HTTPPost(chainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(args), [this,OnSuccess](FString Content)
 	{
-		OnSuccess(BuildResponse<FGetTransactionHistoryReturn>(Content));
+		OnSuccess(this->BuildResponse<FGetTransactionHistoryReturn>(Content));
 	}, OnFailure);
 }

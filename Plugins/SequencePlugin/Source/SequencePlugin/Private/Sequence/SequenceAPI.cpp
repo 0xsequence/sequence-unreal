@@ -488,9 +488,9 @@ void USequenceWallet::getFriends(FString username, TSuccessCallback<TArray<FCont
 {
 	FString json_arg = "{}";
 	
-	SendRPC(getSequenceURL("friendList"), json_arg, [=](FString Content)
+	SendRPC(getSequenceURL("friendList"), json_arg, [this,OnSuccess](FString Content)
 		{
-			OnSuccess(buildFriendListFromJson(Content));
+			OnSuccess(this->buildFriendListFromJson(Content));
 		}, OnFailure);
 }
 
@@ -535,9 +535,9 @@ void USequenceWallet::getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSucces
 	args += UIndexerSupport::stringListToSimpleString(parsedItems);
 	args += "}";
 
-	SendRPC(getSequenceURL("getCoinPrices"), args, [=](FString Content)
+	SendRPC(getSequenceURL("getCoinPrices"), args, [this,OnSuccess](FString Content)
 		{
-			OnSuccess(buildItemUpdateListFromJson(Content));
+			OnSuccess(this->buildItemUpdateListFromJson(Content));
 		}, OnFailure);
 }
 
@@ -561,9 +561,9 @@ void USequenceWallet::getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, 
 	args += UIndexerSupport::stringListToSimpleString(parsedItems);
 	args += "}";
 
-	SendRPC(getSequenceURL("getCollectiblePrices"), args, [=](FString Content)
+	SendRPC(getSequenceURL("getCollectiblePrices"), args, [this,OnSuccess](FString Content)
 		{
-			OnSuccess(buildItemUpdateListFromJson(Content));
+			OnSuccess(this->buildItemUpdateListFromJson(Content));
 		}, OnFailure);
 }
 

@@ -42,7 +42,7 @@ enum ETxnTransferType
 };
 
 UENUM(BlueprintType)
-enum ESortOrder
+enum ESortOrder_Sequence
 {
 	DESC UMETA(DisplayName = "Descending"),
 	ASC UMETA(DisplayName = "Ascending")
