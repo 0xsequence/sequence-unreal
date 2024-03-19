@@ -17,4 +17,5 @@ void AndroidLog(const FString& message);
 #endif // PLATFORM_ANDROID
 	inline UAuthenticator * Callback = nullptr;
 	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback);
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback);
 }

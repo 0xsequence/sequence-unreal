@@ -46,7 +46,7 @@ public class SequenceWebViewAuth {
         Client client = new Client(
                 redirectUrl,
                 redirect -> {
-                    GameActivity.sequenceGetInstance().nativeSequenceHandleRedirectUrl(redirect)
+                    GameActivity.sequenceGetInstance().nativeSequenceHandleRedirectUrl(redirect);
                     dialog.dismiss();
                 }
         );
