@@ -99,8 +99,6 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-	//For Signin with Google (temp)
-
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
