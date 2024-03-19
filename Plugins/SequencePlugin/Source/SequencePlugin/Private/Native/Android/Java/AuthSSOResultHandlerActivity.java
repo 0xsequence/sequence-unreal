@@ -13,17 +13,19 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.TokenResponse;
 
 public class AuthSSOResultHandlerActivity extends AppCompatActivity {
     private static final String TAG = "SequenceGenericSSOSignIn";
     private static final int RC_AUTH = 100;
-        
+    private AuthorizationService authService;
         public void GenericSSO(Context context, String AuthEndpoint, String TokenEndpoint, String clientId, String redirectUri)
         {
             AuthorizationServiceConfiguration config = new AuthorizationServiceConfiguration(Uri.parse(AuthEndpoint), Uri.parse(TokenEndpoint));
+            //apple may require scope here
             AuthorizationRequest req = new AuthorizationRequest.Builder(config, clientId, ResponseTypeValues.CODE, Uri.parse(redirectUri)).build();
-            AuthorizationService service = new AuthorizationService(context);
-            Intent authIntent = service.getAuthorizationRequestIntent(req);
+            this.authService = new AuthorizationService(context);
+            Intent authIntent = this.authService.getAuthorizationRequestIntent(req);
             startActivityForResult(authIntent, RC_AUTH);
         }
         
@@ -35,11 +37,26 @@ public class AuthSSOResultHandlerActivity extends AppCompatActivity {
             
             if (resp != null) {
                 //process response
+                
+                //do token exchange
+                this.authService.performTokenRequest(
+                    resp.createTokenExchangeRequest(),
+                    new AuthorizationService.TokenResponseCallback() {
+                      @Override public void onTokenRequestCompleted(
+                            TokenResponse resp, AuthorizationException ex) {
+                          if (resp != null) {
+                            // exchange succeeded
+                            //GameActivity.sequenceGetInstance().nativeSequenceHandleSSOIdToken(idTokenCredential.getIdToken());
+                            Log.w(TAG, "Token Retrieved");
+                          } else {
+                          Log.w(TAG, "Failed to retrieve configuration: ", ex);
+                          }
+                        }
+                    });
             }
             else {
             Log.w(TAG, "Failed to retrieve configuration: ", ex);
             }
-            
           } else {
             Log.w(TAG, "Failed improper auth response received");
           }

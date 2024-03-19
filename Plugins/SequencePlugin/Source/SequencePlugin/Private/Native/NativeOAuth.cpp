@@ -68,6 +68,15 @@ namespace NativeOAuth
     		return globalString;
     	}
 
+	JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleSSOIdToken(JNIEnv * jenv, jobject thiz, jstring jIdToken)
+    {
+	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
+    	FString idToken;
+    	idToken = FString(UTF8_TO_CHAR(idTokenChars));
+    	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
+    	Callback->SocialLogin(idToken);
+    }
+	
 JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogleIdToken(JNIEnv* jenv, jobject thiz, jstring jIdToken)
     {
     	const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
