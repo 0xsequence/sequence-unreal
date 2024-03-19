@@ -3,6 +3,14 @@
 
 namespace NativeOAuth
 {
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;
+#if PLATFORM_ANDROID
+		AndroidThunkCpp_RequestAuthInWebView(requestUrl,redirectUrl);
+#endif
+	}
+	
     void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
     {
     	Callback = AuthCallback;
@@ -112,6 +120,8 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
     	jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
 
         // work with redirectUrl
+		//call out to cpp unreal from here
+		UE_LOG(LogTemp, Display, TEXT("Token received: %s"), *redirectUrl);
     }
 #endif // PLATFORM_ANDROID
 }

@@ -25,6 +25,6 @@ enum ESocialSigninType
 {
 	Google UMETA(DisplayName = "Google"),
 	FaceBook UMETA(DisplayName = "FaceBook"),
-	AWS UMETA(DisplayName = "AWS"),
+	Discord UMETA(DisplayName = "Discord"),
 	Apple UMETA(DisplayName = "Apple"),
 };

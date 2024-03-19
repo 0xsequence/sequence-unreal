@@ -331,7 +331,7 @@ private:
 	UPROPERTY()
 	FWaasJWT WaasSettings;
 	
-	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Apple,FSSOCredentials(FAuthenticatorConfig::AppleAuthURL,FAuthenticatorConfig::AppleClientID)},{ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
+	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Discord,FSSOCredentials(FAuthenticatorConfig::DiscordAuthURL,FAuthenticatorConfig::DiscordClientID)},{ESocialSigninType::FaceBook,FSSOCredentials(FAuthenticatorConfig::FacebookAuthURL,FAuthenticatorConfig::FacebookClientID)},{ESocialSigninType::Apple,FSSOCredentials(FAuthenticatorConfig::AppleAuthURL,FAuthenticatorConfig::AppleClientID)},{ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 	const int32 EmailAuthMaxRetries = 2;
@@ -370,7 +370,9 @@ private:
 
 	void ResetRetryEmailLogin();
 
-	FString GenerateSigninURL(const ESocialSigninType& Type, const FString& AuthURL, const FString& ClientID) const;
+	FString GenerateSigninURL(const ESocialSigninType& Type) const;
+
+	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
 
 	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
 
