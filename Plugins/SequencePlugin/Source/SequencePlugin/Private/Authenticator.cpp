@@ -39,6 +39,12 @@ UAuthenticator::UAuthenticator()
 	
 }
 
+void UAuthenticator::ClearStoredCredentials() const
+{
+	const FCredentials_BE BlankCredentials;
+	this->StoreCredentials(BlankCredentials);
+}
+
 void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
