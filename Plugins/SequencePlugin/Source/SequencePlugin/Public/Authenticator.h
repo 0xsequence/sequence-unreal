@@ -361,6 +361,8 @@ public:
 	FStoredCredentials_BE GetStoredCredentials() const;
 
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
+
+	void ClearStoredCredentials() const;
 private:
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 

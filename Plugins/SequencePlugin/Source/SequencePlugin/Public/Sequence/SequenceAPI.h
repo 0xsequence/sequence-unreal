@@ -76,7 +76,7 @@ public:
 	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	
+	void SignOut();
 private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
