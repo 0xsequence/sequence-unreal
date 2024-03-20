@@ -40,6 +40,7 @@
 		"Win64",
 		"Android",
 		"Mac",
-		"Windows"
+		"Windows",
+		"IOS"
 	]
 }

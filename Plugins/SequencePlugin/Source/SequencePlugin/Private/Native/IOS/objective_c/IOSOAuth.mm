@@ -1,10 +1,7 @@
 #import "IOSOAuth.h"
-
-#if PLATFORM_IOS
 #include "IOSAppDelegate.h"
 #import <Foundation/Foundation.h>
 #import <AuthenticationServices/AuthenticationServices.h>
-#endif
 
 static NSString *url = @"";
 static NSString *userId = @"";
@@ -53,6 +50,7 @@ typedef void(^Callback)(char *idToken);
         NSString *user = appleIDCredential.user;
         
         char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:appleIDCredential.user];
+        int idTokenLength = [[IOSOAuth GetDelegate] GetNSStringLength:appleIDCredential.user];
         completion(idToken);
     }
 }
@@ -86,6 +84,11 @@ typedef void(^Callback)(char *idToken);
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ASAuthorizationAppleIDProviderCredentialRevokedNotification object:nil];
     [super dealloc];
+}
+
+- (int)GetNSStringLength:(NSString *)str
+{
+    return str.length;
 }
 
 - (char *)ConvertNSStringToChars:(NSString *)str {
