@@ -15,9 +15,7 @@
 #include "WebBrowserModule.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
-#include "Native/IOSBridge.h"
 #include "Native/NativeOAuth.h"
-#include "Native/IOS/objective_c/IOSBridge.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -147,7 +145,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
-		InitiateIosSSO("",this);
+		NativeOAuth::SignInWithApple(FAuthenticatorConfig::AppleAuthURL + "&nonce=" + this->Nonce,this);
 		break;
 	case ESocialSigninType::Google:
 		break;

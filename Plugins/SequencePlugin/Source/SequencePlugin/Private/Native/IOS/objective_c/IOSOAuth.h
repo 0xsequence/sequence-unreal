@@ -14,6 +14,7 @@ typedef void(^Callback)(char *idToken);
 - (void)loadBrowserWithUrl: (NSString *)providerUrl callback:(void(^)(char *idToken))callback;
 - (void)loadBrowserURLInIOSThread;
 - (ASPresentationAnchor)presentationAnchorForAuthorizationController: (ASAuthorizationController *)controller;
+- (int)GetNSStringLength(NSString *)str;
 - (char *)ConvertNSStringToChars:(NSString *)str;
 @end
 #endif

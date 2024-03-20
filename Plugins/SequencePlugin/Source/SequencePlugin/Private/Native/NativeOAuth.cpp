@@ -1,5 +1,6 @@
 #include "NativeOAuth.h"
 #include "Authenticator.h"
+#include "IOSBridge.h"
 
 namespace NativeOAuth
 {
@@ -18,6 +19,19 @@ namespace NativeOAuth
         AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
         #endif // PLATFORM_ANDROID
     }
+
+	void SignInWithApple(const FString& providerUrl, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;
+		InitiateIosSSO(providerUrl,Callback);
+#if PLATFORM_IOS
+		UMobileNativeCodeBlueprint::GetIdToken(providerUrl,[](char *idToken){
+		   FString token = FString(UTF8_TO_TCHAR(idToken));
+		   Callback->SocialLogin(token);
+		});
+#endif
+	}
+	
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
     	 const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
