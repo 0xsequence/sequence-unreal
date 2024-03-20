@@ -12,7 +12,6 @@ struct FSequenceConfig
 
 struct FAuthenticatorConfig
 {
-	//inline static FString DeepLinkURLScheme = "sdk-powered-by-sequence";
 	inline static FString UrlScheme = "powered-by-sequence";
 	inline static FString RedirectURL = "https://0xsequence.github.io/demo-waas-auth/";
 
