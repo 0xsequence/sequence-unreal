@@ -24,12 +24,6 @@ namespace NativeOAuth
 	{
 		Callback = AuthCallback;
 		InitiateIosSSO(providerUrl,Callback);
-#if PLATFORM_IOS
-		UMobileNativeCodeBlueprint::GetIdToken(providerUrl,[](char *idToken){
-		   FString token = FString(UTF8_TO_TCHAR(idToken));
-		   Callback->SocialLogin(token);
-		});
-#endif
 	}
 	
 #if PLATFORM_ANDROID
