@@ -3,6 +3,14 @@
 
 namespace NativeOAuth
 {
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;
+#if PLATFORM_ANDROID
+		AndroidThunkCpp_RequestAuthInWebView(requestUrl,redirectUrl);
+#endif
+	}
+	
     void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
     {
     	Callback = AuthCallback;
@@ -58,6 +66,30 @@ namespace NativeOAuth
     		}
     	}
 
+        void AndroidThunkCpp_RequestAuthInWebView(const FString& requestUrl, const FString& redirectUrl)
+        {
+    		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
+    		{
+    			jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+    			jmethodID methodId{FJavaWrapper::FindStaticMethod(
+					jenv,
+					gameActivityClass, 
+					"AndroidThunkJava_SequenceRequestAuthInWebView", 
+					"(Ljava/lang/String;Ljava/lang/String;)V", 
+					false
+				)};
+
+    			jenv->CallStaticVoidMethod(
+					gameActivityClass, 
+					methodId, 
+					ConvertToJavaString(jenv, requestUrl),
+					ConvertToJavaString(jenv, redirectUrl)
+				);
+
+    			jenv->DeleteLocalRef(gameActivityClass);
+    		}            
+        }
+
     	jstring ConvertToJavaString(JNIEnv* jenv, const FString& string) 
     	{
     		const jstring localString = jenv->NewStringUTF(TCHAR_TO_UTF8(*string));
@@ -85,6 +117,20 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogl
     	idToken = FString(UTF8_TO_TCHAR(idTokenChars));
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     	Callback->SocialLogin(idToken);
+    }
+
+
+JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedirectUrl(JNIEnv* jenv, jobject thiz, jstring jRedirectUrl)
+    {
+    	const char* redirectUrlChars = jenv->GetStringUTFChars(jRedirectUrl, 0);
+
+    	FString redirectUrl;
+    	redirectUrl = FString(UTF8_TO_TCHAR(redirectUrlChars));
+    	jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
+
+        // work with redirectUrl
+		//call out to cpp unreal from here
+		UE_LOG(LogTemp, Display, TEXT("Token received: %s"), *redirectUrl);
     }
 #endif // PLATFORM_ANDROID
 }

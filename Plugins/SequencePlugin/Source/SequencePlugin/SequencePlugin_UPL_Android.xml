@@ -35,6 +35,7 @@
     <gameActivityImportAdditions>
         <insert>
 import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
+import com.Plugins.SequencePlugin.SequenceWebViewAuth;
         </insert>
     </gameActivityImportAdditions>        
 
@@ -42,8 +43,18 @@ import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
         <insert>
     public native void nativeSequenceHandleGoogleIdToken(String idToken);
 
+    public native void nativeSequenceHandleRedirectUrl(String redirectUrl);
+
     public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId, String nonce) {
         SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId, nonce);
+    }
+
+    public static void AndroidThunkJava_SequenceRequestAuthInWebView(String requestUrl, String redirectUrl) {
+        SequenceWebViewAuth.requestAuth(
+            GameActivity.sequenceGetInstance(),
+            requestUrl,
+            redirectUrl
+        );
     }
 
     // public static void AndroidThunkJava_SequenceLog(String message) {

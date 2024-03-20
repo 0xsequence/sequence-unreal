@@ -99,10 +99,21 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-	//For Signin with Google (temp)
-#if PLATFORM_ANDROID
-	NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
-#endif
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
+		break;
+	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
+		break;
+	case ESocialSigninType::FaceBook:
+		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
+		break;
+	case ESocialSigninType::Discord:
+		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
+		break;
+	}
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
@@ -111,7 +122,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
 	
 	if (this->SSOProviderMap.Contains(Type))
 	{
-		SigninURL = this->GenerateSigninURL(Type, this->SSOProviderMap[Type].URL, this->SSOProviderMap[Type].ClientID);
+		SigninURL = this->GenerateSigninURL(Type);
 	}
 	else
 	{
@@ -150,9 +161,29 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
-FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type, const FString& AuthURL, const FString& ClientID) const
+FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString SigninUrl = AuthURL +"?response_type=code+id_token&client_id="+ ClientID +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	switch (Type)
+	{
+	case ESocialSigninType::Google:
+		break;
+	case ESocialSigninType::Apple:
+		RedirectUrl += "&response_mode=form_post";
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+	return RedirectUrl;
+}
+
+FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
+{
+	const FString AuthClientId = SSOProviderMap[Type].ClientID;
+	const FString AuthUrl = SSOProviderMap[Type].URL;
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
@@ -162,7 +193,7 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type, const F
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
-	case ESocialSigninType::AWS:
+	case ESocialSigninType::Discord:
 		break;
 	}
 	
