@@ -14,7 +14,7 @@ struct FAuthenticatorConfig
 {
 	//inline static FString DeepLinkURLScheme = "sdk-powered-by-sequence";
 	inline static FString UrlScheme = "powered-by-sequence";
-	inline static FString RedirectURL = "https://dev2-api.sequence.app/oauth/callback";
+	inline static FString RedirectURL = "https://0xsequence.github.io/demo-waas-auth/";
 
 	inline static FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
 	inline static FString GoogleClientID = "970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com";
