@@ -15,7 +15,9 @@
 #include "WebBrowserModule.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
+#include "Native/IOSBridge.h"
 #include "Native/NativeOAuth.h"
+#include "Native/IOS/objective_c/IOSBridge.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -123,6 +125,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
+#if PLATFORM_ANDROID
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
@@ -138,6 +141,22 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
 		break;
 	}
+#endif
+	
+#if PLATFORM_IOS
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		InitiateIosSSO("",this);
+		break;
+	case ESocialSigninType::Google:
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
