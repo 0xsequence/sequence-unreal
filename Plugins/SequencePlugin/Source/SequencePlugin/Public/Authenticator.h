@@ -349,6 +349,8 @@ public:
 	FString GetSigninURL(const ESocialSigninType& Type);
 
 	void InitiateMobileSSO(const ESocialSigninType& Type);
+
+	void UpdateMobileLogin(const FString& TokenizedUrl);
 	
 	void SocialLogin(const FString& IDTokenIn);
 

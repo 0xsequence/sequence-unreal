@@ -20,26 +20,26 @@ namespace NativeOAuth
     }
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
-    	// const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
-    	// 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
-    	// 	{
-    	// 		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
-    	// 		jmethodID methodId{FJavaWrapper::FindStaticMethod(
-		// 			jenv,
-		// 			gameActivityClass, 
-		// 			"AndroidThunkJava_SequenceLog", 
-		// 			"(Ljava/lang/String;)V", 
-		// 			false
-		// 		)};
+    	 const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
+    	 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
+    	 	{
+    	 		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+    	 		jmethodID methodId{FJavaWrapper::FindStaticMethod(
+		 			jenv,
+		 			gameActivityClass, 
+		 			"AndroidThunkJava_SequenceLog", 
+		 			"(Ljava/lang/String;)V", 
+		 			false
+		 		)};
 
-    	// 		jenv->CallStaticVoidMethod(
-		// 			gameActivityClass, 
-		// 			methodId, 
-		// 			ConvertToJavaString(jenv, marked_message)
-		// 		);
+    	 		jenv->CallStaticVoidMethod(
+		 			gameActivityClass, 
+		 			methodId, 
+		 			ConvertToJavaString(jenv, marked_message)
+		 		);
 
-    	// 		jenv->DeleteLocalRef(gameActivityClass);
-    	// 	}            
+    	 		jenv->DeleteLocalRef(gameActivityClass);
+    	 	}            
         }
 
     	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce) 
@@ -104,7 +104,7 @@ namespace NativeOAuth
     {
 	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken;
-    	idToken = FString(UTF8_TO_CHAR(idTokenChars));
+    	idToken = FString(UTF8_TO_TCHAR(idTokenChars));
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     	Callback->SocialLogin(idToken);
     }
@@ -128,9 +128,9 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
     	redirectUrl = FString(UTF8_TO_TCHAR(redirectUrlChars));
     	jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
 
-        // work with redirectUrl
+        //work with redirectUrl
 		//call out to cpp unreal from here
-		UE_LOG(LogTemp, Display, TEXT("Token received: %s"), *redirectUrl);
+		Callback->UpdateMobileLogin(redirectUrl);
     }
 #endif // PLATFORM_ANDROID
 }

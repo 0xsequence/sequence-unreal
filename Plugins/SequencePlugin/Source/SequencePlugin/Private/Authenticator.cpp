@@ -97,6 +97,24 @@ void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
+void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
+{
+	//we need to parse out the id_token out of TokenizedUrl
+	TArray<FString> UrlParts;
+	TokenizedUrl.ParseIntoArray(UrlParts,TEXT("&"),true);
+
+	for (FString part : UrlParts)
+	{
+		if (part.Contains("id_token",ESearchCase::IgnoreCase))
+		{
+			const FString Token = part.RightChop(9);//we chop off: id_token=
+			UE_LOG(LogTemp,Display,TEXT("Token: %s"), *Token);
+			SocialLogin(Token);
+			return;
+		}
+	}
+}
+
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
 	switch (Type)
@@ -169,7 +187,8 @@ FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple:
-		RedirectUrl += "&response_mode=form_post";
+		RedirectUrl = RedirectUrl = FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		RedirectUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -188,8 +207,9 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	{
 	case ESocialSigninType::Google:
 		break;
-	case ESocialSigninType::Apple:
-		SigninUrl += "&response_mode=form_post";
+	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
