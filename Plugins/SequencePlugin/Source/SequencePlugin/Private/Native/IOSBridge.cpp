@@ -11,11 +11,11 @@ void InitiateIosSSO(const FString& providerUrl, UAuthenticator * Callback)
 {
     AuthBridgeCallback = Callback;
 #if PLATFORM_IOS
-    let url = providerUrl.GetNSString();
+    NSString * url = providerUrl.GetNSString();
     IOSOAuth *auth = [[IOSOAuth alloc] init];
     [auth loadBrowserWithUrl:url callback:^(char *idToken){
         FString parsedToken(idToken);
-        AuthBridgeCallback->SocialLogin(Test);
+        AuthBridgeCallback->SocialLogin(parsedToken);
     }];
 #endif
 }

@@ -67,5 +67,47 @@ public class SequencePlugin : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-	}
-}
+		
+		
+		//Add IOS Specific Dependencies
+		if (Target.Platform == UnrealTargetPlatform.IOS)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {"Launch"});
+			
+			/* A list of public frameworks from Apple that you need to use when building.
+			* You can view the entire list here: https://developer.apple.com/documentation/technologies
+			*/
+			PublicFrameworks.AddRange(
+				new string[]
+				{
+					"EventKit",
+					"GLKit",
+					"CoreTelephony",
+					"SystemConfiguration",
+					"UIKit",
+					"Foundation",
+					"CoreGraphics",
+					"MobileCoreServices",
+					"StoreKit",
+					"CFNetwork",
+					"CoreData",
+					"Security",
+					"CoreLocation",
+					"WatchConnectivity",
+					"MediaPlayer",
+					"CoreFoundation",
+					"AdSupport",
+					"MessageUI",
+					"AppTrackingTransparency",
+					"WebKit",
+					"AVFoundation",
+					"Accelerate",
+					"LocalAuthentication",
+					"SafariServices",
+					"AuthenticationServices",
+					"UserNotifications",
+				}
+			);//Public Frameworks
+		}//IOS Frameworks
+	}//SequencePlugin
+}//namespace
