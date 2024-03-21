@@ -10,11 +10,12 @@ using namespace std;
 void InitiateIosSSO(const FString& providerUrl, UAuthenticator * Callback)
 {
     AuthBridgeCallback = Callback;
+    
 #if PLATFORM_IOS
     NSString * url = providerUrl.GetNSString();
     IOSOAuth *auth = [[IOSOAuth alloc] init];
     [auth loadBrowserWithUrl:url callback:^(char *idToken){
-        FString parsedToken(idToken);
+        FString parsedToken(UTF8_TO_TCHAR(idToken));
         AuthBridgeCallback->SocialLogin(parsedToken);
     }];
 #endif
