@@ -50,6 +50,7 @@ typedef void(^Callback)(char *idToken);
         NSString *user = appleIDCredential.user;
         
         char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:appleIDCredential.user];
+        NSLog(@"Login Complete going to Callback");
         completion(idToken);
     }
 }
