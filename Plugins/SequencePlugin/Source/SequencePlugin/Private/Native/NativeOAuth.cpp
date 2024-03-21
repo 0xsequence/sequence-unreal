@@ -12,18 +12,25 @@ namespace NativeOAuth
 #endif
 	}
 	
-    void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
-    {
-    	Callback = AuthCallback;
-        #if PLATFORM_ANDROID
-        AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
-        #endif // PLATFORM_ANDROID
-    }
-
-	void SignInWithApple(const FString& providerUrl, UAuthenticator * AuthCallback)
+	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
-		InitiateIosSSO(providerUrl,Callback);
+#if PLATFORM_ANDROID
+		AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
+#endif // PLATFORM_ANDROID
+	}
+
+
+	void ProcessIosCallback(char * idToken)
+	{
+		const FString token = FString(UTF8_TO_TCHAR(idToken));
+		Callback->SocialLogin(token);
+	}
+	
+	void SignInWithApple(const FString& providerUrl, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;		
+		UIOSBridge::InitiateIosSSO(providerUrl,ProcessIosCallback);
 	}
 	
 #if PLATFORM_ANDROID
