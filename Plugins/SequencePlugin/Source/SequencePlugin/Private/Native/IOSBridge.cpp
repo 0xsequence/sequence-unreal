@@ -7,17 +7,19 @@
 
 using namespace std;
 
-void InitiateIosSSO(const FString& providerUrl, UAuthenticator * Callback)
+UIOSBridge::UIOSBridge()
 {
-    AuthBridgeCallback = Callback;
     
+}
+
+
+void UIOSBridge::InitiateIosSSO(const FString& providerUrl, void(*IOSCallback)(char *idToken))
+{
 #if PLATFORM_IOS
-    NSString * url = providerUrl.GetNSString();
-    IOSOAuth *auth = [[IOSOAuth alloc] init];
-    [auth loadBrowserWithUrl:url callback:^(char *idToken){
-        NSLog(@"In Initiate SSO callback, %s", idToken);
-        FString parsedToken = FString(UTF8_TO_TCHAR(idToken));
-        AuthBridgeCallback->SocialLogin(parsedToken);
-    }];
+	NSString * url = providerUrl.GetNSString();
+	IOSOAuth *auth = [[IOSOAuth alloc] init];
+	[auth loadBrowserWithUrl:url callback:^(char *idToken){
+		IOSCallback(idToken);
+	}];
 #endif
 }
