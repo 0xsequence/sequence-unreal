@@ -15,7 +15,7 @@ void InitiateIosSSO(const FString& providerUrl, UAuthenticator * Callback)
     NSString * url = providerUrl.GetNSString();
     IOSOAuth *auth = [[IOSOAuth alloc] init];
     [auth loadBrowserWithUrl:url callback:^(char *idToken){
-        FString parsedToken(UTF8_TO_TCHAR(idToken));
+        FString parsedToken = FString(UTF8_TO_TCHAR(idToken));
         AuthBridgeCallback->SocialLogin(parsedToken);
     }];
 #endif
