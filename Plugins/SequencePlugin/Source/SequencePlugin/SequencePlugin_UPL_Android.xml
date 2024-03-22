@@ -57,9 +57,9 @@ import com.Plugins.SequencePlugin.SequenceWebViewAuth;
         );
     }
 
-    // public static void AndroidThunkJava_SequenceLog(String message) {
-    //     SequenceGoogleSignInHelper.log(message);
-    // }
+     public static void AndroidThunkJava_SequenceLog(String message) {
+         SequenceGoogleSignInHelper.log(message);
+     }
 
     public static GameActivity sequenceGetInstance() {
         return _activity;
