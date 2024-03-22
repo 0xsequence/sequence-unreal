@@ -86,7 +86,7 @@ public class SequenceGoogleSignInHelper {
         }
     } 
 
-    // public static void log(String message) {
-    //     Log.e(TAG, message);
-    // }   
+     public static void log(String message) {
+         Log.e(TAG, message);
+     }   
 }
