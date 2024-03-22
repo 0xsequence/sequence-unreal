@@ -193,8 +193,7 @@ FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple:
-		RedirectUrl = RedirectUrl = FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
-		RedirectUrl += "&response_mode=fragment";
+		RedirectUrl = FAuthenticatorConfig::RedirectURL;
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
