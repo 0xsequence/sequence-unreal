@@ -21,7 +21,7 @@ namespace NativeOAuth
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
     	 const FString marked_message = "[ACTIVE_UE_LOGGING]: " + message;
-    	 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
+    	 	/*if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
     	 	{
     	 		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
     	 		jmethodID methodId{FJavaWrapper::FindStaticMethod(
@@ -39,7 +39,7 @@ namespace NativeOAuth
 		 		);
 
     	 		jenv->DeleteLocalRef(gameActivityClass);
-    	 	}            
+    	 	}     */       
         }
 
     	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce) 
@@ -121,7 +121,11 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
     {
     	const char* redirectUrlChars = jenv->GetStringUTFChars(jRedirectUrl, 0);
     	FString redirectUrl = FString(UTF8_TO_TCHAR(redirectUrlChars));
-		Callback->UpdateMobileLogin(redirectUrl);
+		UAuthenticator * CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,redirectUrl]() {
+			CallbackLcl->UpdateMobileLogin(redirectUrl);
+		});
+		
 		jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
     }
 #endif // PLATFORM_ANDROID
