@@ -132,10 +132,8 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
 		break;
 	case ESocialSigninType::FaceBook:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
 		break;
 	case ESocialSigninType::Discord:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
 		break;
 	}
 }

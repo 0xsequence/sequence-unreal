@@ -120,11 +120,24 @@ else
 
 1) To start SSO based authentication with desktop you can either use your own implementation to get the necessary id_token or you can make use of Unreal's web browser plugin.
 
-2) With whatever implementation you chose you can forward the colleted id_token to the UAuthenticator object with **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO.
+2) With whatever implementation you chose you can forward the collected id_token to the UAuthenticator object with **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO.
 
 ### Social Signin based Authentication on Mobile
 
-WIP
+1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
+   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported
+
+Android SSO Requirements
+
+Google: Please ensure your project is setup according to **[Google SSO Setup]** listed below
+
+Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
+
+IOS SSO
+
+Google: WIP
+
+Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 
 ### Sequence API
 
