@@ -24,13 +24,16 @@ namespace NativeOAuth
 	void ProcessIosCallback(char * idToken)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
-		Callback->SocialLogin(token);
+		UAuthenticator * CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
+			CallbackLcl->SocialLogin(token);
+		});
 	}
 	
-	void SignInWithApple(const FString& providerUrl, UAuthenticator * AuthCallback)
+	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;		
-		UIOSBridge::InitiateIosSSO(providerUrl,ProcessIosCallback);
+		UIOSBridge::InitiateIosSSO(clientID, nonce, ProcessIosCallback);
 	}
 	
 #if PLATFORM_ANDROID

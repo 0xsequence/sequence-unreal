@@ -24,17 +24,18 @@ typedef void(^Callback)(char *idToken);
     return UIApplication.sharedApplication.keyWindow;
 }
 
-- (void)loadBrowserWithUrl: (NSString *)providerUrl callback:(void(^)(char *))callback {
-    url = providerUrl;
+- (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {
     completion = [callback copy];
-    [[IOSOAuth GetDelegate] loadBrowserURLInIOSThread];
+    [[IOSOAuth GetDelegate] loadBrowserURLInIOSThread:cID nonce:nonce];
 }
 
-- (void)loadBrowserURLInIOSThread {
+- (void)loadBrowserURLInIOSThread: (NSString *)clientID nonce:(NSString *)nonce {
     NSURL *_url = [NSURL URLWithString:[IOSOAuth url]];
     
     ASAuthorizationAppleIDProvider *appleIDProvider = [ASAuthorizationAppleIDProvider new];
     ASAuthorizationAppleIDRequest *request = appleIDProvider.createRequest;
+    request.nonce = nonce;
+    request.state = clientID;
     request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
     ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
     
@@ -42,14 +43,26 @@ typedef void(^Callback)(char *idToken);
     controller.presentationContextProvider = self;
     
     [controller performRequests];
+    
+//     ASAuthorizationSingleSignOnProvider *authProvider = [ASAuthorizationSingleSignOnProvider authorizationProviderWithIdentityProviderURL:_url];    
+//         BOOL canPerformAuthorization = authProvider.canPerformAuthorization;
+//         if (canPerformAuthorization) {
+//             ASAuthorizationSingleSignOnRequest *request = [authProvider createRequest];
+//             ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+//             controller.delegate = self;
+//             controller.presentationContextProvider = self;
+//             [controller performRequests];
+//         } else {
+//             NSLog(@"Authorization not supported for this provider.");
+//         }
 }
 
 - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization {
     if ([authorization.credential isKindOfClass:[ASAuthorizationAppleIDCredential class]]) {
         ASAuthorizationAppleIDCredential *appleIDCredential = authorization.credential;
-        NSString *user = appleIDCredential.user;
         
-        char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:appleIDCredential.identityToken];
+        NSString *token = [[NSString alloc] initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
+        char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:token];
         completion(idToken);
     }
 }

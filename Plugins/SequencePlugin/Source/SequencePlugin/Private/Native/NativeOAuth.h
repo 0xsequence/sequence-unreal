@@ -18,6 +18,6 @@ namespace NativeOAuth
 	inline UAuthenticator * Callback = nullptr;
 	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback);
 	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback);
-	void SignInWithApple(const FString& providerUrl, UAuthenticator * AuthCallback);
+	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback);
 	void ProcessIosCallback(char * idToken);
 }

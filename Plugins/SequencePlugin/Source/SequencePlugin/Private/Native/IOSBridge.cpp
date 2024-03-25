@@ -13,12 +13,13 @@ UIOSBridge::UIOSBridge()
 }
 
 
-void UIOSBridge::InitiateIosSSO(const FString& providerUrl, void(*IOSCallback)(char *idToken))
+void UIOSBridge::InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken))
 {
 #if PLATFORM_IOS
-	NSString * url = providerUrl.GetNSString();
+	NSString * cID = clientID.GetNSString();
+	NSString * n = nonce.GetNSString();
 	IOSOAuth *auth = [[IOSOAuth alloc] init];
-	[auth loadBrowserWithUrl:url callback:^(char *idToken){
+	[auth loadBrowserWithUrl:cID nonce:n callback:^(char *idToken){
 		IOSCallback(idToken);
 	}];
 #endif
