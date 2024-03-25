@@ -3,9 +3,9 @@
 
 struct FSequenceConfig
 {	
-	inline static FString WaaSTenantKey = "eyJwcm9qZWN0SWQiOjIsImVtYWlsUmVnaW9uIjoidXMtZWFzdC0yIiwiZW1haWxDbGllbnRJZCI6IjVncDltaDJmYnFiajhsNnByamdvNzVwMGY2IiwicnBjU2VydmVyIjoiaHR0cHM6Ly9uZXh0LXdhYXMuc2VxdWVuY2UuYXBwIn0=";
+	inline static FString WaaSTenantKey = "eyJwcm9qZWN0SWQiOjU5LCJycGNTZXJ2ZXIiOiJodHRwczovL25leHQtd2Fhcy5zZXF1ZW5jZS5hcHAifQ==";
 
-	inline static FString ProjectAccessKey = "EeP6AmufRFfigcWaNverI6CAAAAAAAAAA";
+	inline static FString ProjectAccessKey = "AQAAAAAAAAA744iuRfvHtvhmxe3tfzontSw";
 
 	inline static FString WaasVersion = "1.0.0";
 };
