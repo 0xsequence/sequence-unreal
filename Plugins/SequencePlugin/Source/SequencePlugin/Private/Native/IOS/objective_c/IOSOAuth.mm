@@ -30,7 +30,8 @@ typedef void(^Callback)(char *idToken);
  NSURL * _url = [NSURL URLWithString:URL];
  NSURL * _redirect = [NSURL URLWithString:RedirectUri];
  
- ASAuthorizationSingleSignOnProvider *authProvider = [[ASAuthorizationSingleSignOnProvider alloc] initWithIdentityProvider:_url];
+ ASAuthorizationSingleSignOnProvider *authProvider = [ASAuthorizationSingleSignOnProvider authorizationProviderWithIdentityProviderURL:_url];
+ //[authProvider authorizationProviderWithIdentityProviderURL:_url];
  ASAuthorizationSingleSignOnRequest *request = authProvider.createRequest;
  //might need to do nonce assignments here
  request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
