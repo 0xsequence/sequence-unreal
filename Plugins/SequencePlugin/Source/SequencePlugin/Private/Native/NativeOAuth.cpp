@@ -23,7 +23,7 @@ namespace NativeOAuth
 	void SignInWithGoogle_IOS(const FString& Url, const FString& RedirectUri, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
-		
+		UIOSBridge::InitiateGoogleSSO(Url,RedirectUri,ProcessIosCallback);
 	}
 
 
