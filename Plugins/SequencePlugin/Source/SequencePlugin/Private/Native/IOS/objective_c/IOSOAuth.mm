@@ -31,14 +31,22 @@ typedef void(^Callback)(char *idToken);
  NSURL * _redirect = [NSURL URLWithString:RedirectUri];
  
  ASAuthorizationSingleSignOnProvider *authProvider = [ASAuthorizationSingleSignOnProvider authorizationProviderWithIdentityProviderURL:_url];
- //[authProvider authorizationProviderWithIdentityProviderURL:_url];
- ASAuthorizationSingleSignOnRequest *request = authProvider.createRequest;
- //might need to do nonce assignments here
- request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
- ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
- controller.delegate = self;
- controller.presentationContextProvider = self;    
- [controller performRequests];
+ 
+ BOOL canPerformAuthorization = authProvider.canPerformAuthorization;
+ if (canPerformAuthorization)
+ {
+    ASAuthorizationSingleSignOnRequest *request = authProvider.createRequest;
+    request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
+    //might need to do nonce assignments here 
+    ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+    controller.delegate = self;
+    controller.presentationContextProvider = self;    
+    [controller performRequests];
+ }
+ else
+ {
+    NSLog(@"Authorization not supported for this provider.");
+ }
 }
 
 - (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {
@@ -60,18 +68,6 @@ typedef void(^Callback)(char *idToken);
     controller.presentationContextProvider = self;
     
     [controller performRequests];
-    
-//     ASAuthorizationSingleSignOnProvider *authProvider = [ASAuthorizationSingleSignOnProvider authorizationProviderWithIdentityProviderURL:_url];    
-//         BOOL canPerformAuthorization = authProvider.canPerformAuthorization;
-//         if (canPerformAuthorization) {
-//             ASAuthorizationSingleSignOnRequest *request = [authProvider createRequest];
-//             ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
-//             controller.delegate = self;
-//             controller.presentationContextProvider = self;
-//             [controller performRequests];
-//         } else {
-//             NSLog(@"Authorization not supported for this provider.");
-//         }
 }
 
 
