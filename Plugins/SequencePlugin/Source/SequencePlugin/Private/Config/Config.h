@@ -25,5 +25,5 @@ struct FAuthenticatorConfig
 	inline static FString DiscordClientID = "";//TODO still need this
 
 	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	inline static FString AppleClientID = "com.horizon.sequence.waas";
+	inline static FString AppleClientID = "ca.zemind.sequence.waas";
 };
