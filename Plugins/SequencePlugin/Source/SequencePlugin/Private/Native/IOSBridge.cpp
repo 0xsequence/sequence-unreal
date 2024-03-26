@@ -14,6 +14,7 @@ UIOSBridge::UIOSBridge()
 
 void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& RedirectUri, void(*IOSCallback)(char *idToken))
 {
+	UE_LOG(LogTemp,Display,TEXT("Preparing to Signin with Google"));
 #if PLATFORM_IOS
 	NSString * _url = Url.GetNSString();
 	NSString * _redirect = RedirectUri.GetNSString();
