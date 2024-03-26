@@ -123,6 +123,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
+#if PLATFORM_ANDROID
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
@@ -136,6 +137,22 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 	case ESocialSigninType::Discord:
 		break;
 	}
+#endif
+#if PLATFORM_IOS
+	FString clientID = FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + FAuthenticatorConfig::AppleClientID;
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::SignInWithApple(clientID, this->Nonce, this);
+		break;
+	case ESocialSigninType::Google:
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)

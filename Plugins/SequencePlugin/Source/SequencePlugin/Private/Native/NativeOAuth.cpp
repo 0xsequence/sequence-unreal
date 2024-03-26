@@ -1,5 +1,6 @@
 #include "NativeOAuth.h"
 #include "Authenticator.h"
+#include "IOSBridge.h"
 
 namespace NativeOAuth
 {
@@ -11,14 +12,30 @@ namespace NativeOAuth
 #endif
 	}
 	
-    void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
-    {
-    	Callback = AuthCallback;
-        #if PLATFORM_ANDROID
-        AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
-        #endif
-    }
+	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;
+#if PLATFORM_ANDROID
+		AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
+#endif // PLATFORM_ANDROID
+	}
 
+
+	void ProcessIosCallback(char * idToken)
+	{
+		const FString token = FString(UTF8_TO_TCHAR(idToken));
+		UAuthenticator * CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
+			CallbackLcl->SocialLogin(token);
+		});
+	}
+	
+	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;		
+		UIOSBridge::InitiateIosSSO(clientID, nonce, ProcessIosCallback);
+	}
+	
 #if PLATFORM_ANDROID
         void AndroidLog(const FString& message) {
 //use dev flag here
