@@ -20,6 +20,12 @@ namespace NativeOAuth
 #endif // PLATFORM_ANDROID
 	}
 
+	void SignInWithGoogle_IOS(const FString& Url, const FString& RedirectUri, UAuthenticator * AuthCallback)
+	{
+		Callback = AuthCallback;
+		
+	}
+
 
 	void ProcessIosCallback(char * idToken)
 	{

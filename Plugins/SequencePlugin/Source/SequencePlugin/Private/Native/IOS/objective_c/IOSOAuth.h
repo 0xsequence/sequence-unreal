@@ -15,5 +15,10 @@ typedef void(^Callback)(char *idToken);
 - (void)loadBrowserURLInIOSThread: (NSString *)clientID nonce:(NSString *)nonce;
 - (ASPresentationAnchor)presentationAnchorForAuthorizationController: (ASAuthorizationController *)controller;
 - (char *)ConvertNSStringToChars:(NSString *)str;
+
+//Google Signin
+-(void)InitGoogleSignin:(NSString *)URL Redirect:(NSString *)RedirectUri callback:(void(^)(char *))callback;
+
+
 @end
 #endif

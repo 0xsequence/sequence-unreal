@@ -138,6 +138,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		break;
 	}
 #endif
+
 #if PLATFORM_IOS
 	FString clientID = FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + FAuthenticatorConfig::AppleClientID;
 	switch (Type)
@@ -146,6 +147,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		NativeOAuth::SignInWithApple(clientID, this->Nonce, this);
 		break;
 	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),this->GenerateRedirectURL(Type),this);
 		break;
 	case ESocialSigninType::FaceBook:
 		break;

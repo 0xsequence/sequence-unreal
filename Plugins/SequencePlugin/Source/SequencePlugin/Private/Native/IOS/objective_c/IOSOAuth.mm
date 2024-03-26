@@ -24,6 +24,22 @@ typedef void(^Callback)(char *idToken);
     return UIApplication.sharedApplication.keyWindow;
 }
 
+-(void)InitGoogleSignin:(NSString *)URL Redirect:(NSString *)RedirectUri callback:(void(^)(char *))callback {
+ completion = [callback copy];
+ 
+ NSURL * _url = [NSURL URLWithString:URL];
+ NSURL * _redirect = [NSURL URLWithString:RedirectUri];
+ 
+ ASAuthorizationSingleSignOnProvider *authProvider = [[ASAuthorizationSingleSignOnProvider alloc] initWithIdentityProvider:_url];
+ ASAuthorizationSingleSignOnRequest *request = authProvider.createRequest;
+ //might need to do nonce assignments here
+ request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
+ ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+ controller.delegate = self;
+ controller.presentationContextProvider = self;    
+ [controller performRequests];
+}
+
 - (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {
     completion = [callback copy];
     [[IOSOAuth GetDelegate] loadBrowserURLInIOSThread:cID nonce:nonce];
@@ -57,11 +73,21 @@ typedef void(^Callback)(char *idToken);
 //         }
 }
 
+
+
 - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization {
     if ([authorization.credential isKindOfClass:[ASAuthorizationAppleIDCredential class]]) {
         ASAuthorizationAppleIDCredential *appleIDCredential = authorization.credential;
         
         NSString *token = [[NSString alloc] initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
+        char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:token];
+        completion(idToken);
+    }
+    
+    if ([authorization.credential isKindOfClass:[ASAuthorizationSingleSignOnCredential class]]) {
+        ASAuthorizationSingleSignOnCredential * credential = authorization.credential;
+        
+        NSString * token = [[NSString alloc] initWithData:credential.identityToken encoding:NSUTF8StringEncoding];
         char *idToken = [[IOSOAuth GetDelegate] ConvertNSStringToChars:token];
         completion(idToken);
     }

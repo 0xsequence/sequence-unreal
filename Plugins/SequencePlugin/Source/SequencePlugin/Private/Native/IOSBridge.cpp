@@ -12,6 +12,17 @@ UIOSBridge::UIOSBridge()
     
 }
 
+void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& RedirectUri, void(*IOSCallback)(char *idToken))
+{
+#if PLATFORM_IOS
+	NSString * _url = Url.GetNSString();
+	NSString * _redirect = RedirectUri.GetNSString();
+	IOSOAuth * auth = [[IOSOAuth alloc] init];
+	[auth InitGoogleSignin:_url Redirect:_redirect callback:^(char * idToken){
+		IOSCallback(idToken);
+	}];
+#endif
+}
 
 void UIOSBridge::InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken))
 {

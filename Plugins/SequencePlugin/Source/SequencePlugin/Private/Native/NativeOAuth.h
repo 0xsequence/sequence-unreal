@@ -17,6 +17,7 @@ namespace NativeOAuth
 #endif // PLATFORM_ANDROID
 	inline UAuthenticator * Callback = nullptr;
 	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback);
+	void SignInWithGoogle_IOS(const FString& Url, const FString& RedirectUri, UAuthenticator * AuthCallback);
 	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback);
 	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback);
 	void ProcessIosCallback(char * idToken);
