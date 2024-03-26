@@ -1,19 +1,20 @@
 package com.Plugins.SequencePlugin;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.annotation.Nullable;
 
 import com.epicgames.unreal.GameActivity;
 
@@ -33,46 +34,114 @@ public class SequenceWebViewAuth {
     private static void _requestAuth(
         Activity activity,
         String requestUrl,
-        String redirectUrl        
+        String redirectUrl
     ) {
-        Dialog dialog = new Dialog(activity);
+        Bundle args = new Bundle();
+        args.putString(WebViewDialogFragment.ARG_REQUEST_URL, requestUrl);
+        args.putString(WebViewDialogFragment.ARG_REDIRECT_URL, redirectUrl);
 
-        WebView webView = new WebView(activity);
+        WebViewDialogFragment dialogFragment = new WebViewDialogFragment();
+        dialogFragment.setArguments(args);
 
-        webView.setVerticalScrollBarEnabled(false);
-        webView.setHorizontalScrollBarEnabled(false);
-        webView.getSettings().setJavaScriptEnabled(true);
-
-        Client client = new Client(
-                redirectUrl,
-                redirect -> {
-                    GameActivity.sequenceGetInstance().nativeSequenceHandleRedirectUrl(redirect);
-                    dialog.dismiss();
-                }
-        );
-        webView.setWebViewClient(client);
-
-        webView.loadUrl(requestUrl);
-
-        dialog.setContentView(webView);
-
-        dialog.show();
-        initDialogLayout(dialog, activity);
+        dialogFragment.show(activity.getFragmentManager(), TAG);
     }
 
-    private static void initDialogLayout(Dialog dialog, Activity activity) {
-        Rect displayRectangle = new Rect();
-        Window window = activity.getWindow();
-        window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
+    public static class WebViewDialogFragment extends DialogFragment {
+        public static final String ARG_REQUEST_URL = "ARG_REQUEST_URL";
+        public static final String ARG_REDIRECT_URL = "ARG_REDIRECT_URL";
 
-        Window dialogWindow = dialog.getWindow();
-        if (dialogWindow != null) {
-            dialogWindow.setLayout(
-                (int) (displayRectangle.width() * 0.9f),
-                (int) (displayRectangle.height() * 0.9f)
-            );
+        private WebView mWebView;
+
+        private String requestUrl = "";
+        private String redirectUrl = "";
+
+        private void initArguments() {
+            Bundle args = getArguments();
+
+            if (args == null) {
+                return;
+            }
+
+            requestUrl = args.getString(ARG_REQUEST_URL, "");
+            redirectUrl = args.getString(ARG_REDIRECT_URL, "");
         }
-    }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            initArguments();
+
+            setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(
+            LayoutInflater inflater, 
+            @Nullable ViewGroup container, 
+            Bundle savedInstanceState
+        ) {
+            mWebView = createWebView(
+                    getContext(),
+                    redirectUrl,
+                    redirect -> {
+                        GameActivity.sequenceGetInstance().nativeSequenceHandleRedirectUrl(redirect);
+                        dismiss();
+                    }
+            );
+
+            if (savedInstanceState != null) {
+                mWebView.restoreState(savedInstanceState);
+            } else {
+                mWebView.loadUrl(requestUrl);
+            }
+
+            return mWebView;
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            if (mWebView != null) {
+                mWebView.saveState(outState);
+            }
+            super.onSaveInstanceState(outState);
+        }
+
+        @Override
+        public void onStart()
+        {
+            super.onStart();
+            Dialog dialog = getDialog();
+            if (dialog != null)
+            {
+                dialog.getWindow().setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                );
+            }
+        }
+
+        private WebView createWebView(
+            Context context,
+            String redirectUrl,
+            OnRedirectListener onRedirectListener
+        ) {
+            WebView webView = new WebView(context);
+
+            webView.setVerticalScrollBarEnabled(false);
+            webView.setHorizontalScrollBarEnabled(false);
+            webView.getSettings().setJavaScriptEnabled(true);
+
+            Client client = new Client(
+                    redirectUrl,
+                    onRedirectListener
+            );
+            webView.setWebViewClient(client);
+
+            return webView;
+        }
+    }    
 
     private interface OnRedirectListener {
         void onRedirect(String redirect);
