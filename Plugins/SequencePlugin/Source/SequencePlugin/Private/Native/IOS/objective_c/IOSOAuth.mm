@@ -24,29 +24,54 @@ typedef void(^Callback)(char *idToken);
     return UIApplication.sharedApplication.keyWindow;
 }
 
--(void)InitGoogleSignin:(NSString *)URL Redirect:(NSString *)RedirectUri callback:(void(^)(char *))callback {
- completion = [callback copy];
- 
- NSURL * _url = [NSURL URLWithString:URL];
- NSURL * _redirect = [NSURL URLWithString:RedirectUri];
- 
- ASAuthorizationSingleSignOnProvider *authProvider = [ASAuthorizationSingleSignOnProvider authorizationProviderWithIdentityProviderURL:_url];
- 
- BOOL canPerformAuthorization = authProvider.canPerformAuthorization;
- if (canPerformAuthorization)
- {
-    ASAuthorizationSingleSignOnRequest *request = authProvider.createRequest;
-    request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
-    //might need to do nonce assignments here 
-    ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
-    controller.delegate = self;
-    controller.presentationContextProvider = self;    
-    [controller performRequests];
- }
- else
- {
-    NSLog(@"Authorization not supported for this provider.");
- }
+- (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session {
+    return UIApplication.sharedApplication.keyWindow;
+}
+
+-(void)InitGoogleSignin:(NSString *)URL Scheme:(NSString *)Scheme callback:(void(^)(char *))callback {
+    NSURL * authUrl = [NSURL URLWithString:URL];
+    NSString * scheme = Scheme;
+    
+    /*
+      host: https://0xsequence.github.io
+      path: /demo-waas-auth/
+    */
+    
+    NSString * host = @"0xsequence.github.io";
+    NSString * path = @"/demo-waas-auth/";
+    ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithHTTPSHost:host path:path];
+    
+    ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
+    initWithURL:authUrl
+    callback:sessionCallback
+    completionHandler:^(NSURL * _Nullable callbackUrl, NSError * _Nullable error){
+            if (error) {
+                // Handle authentication error
+                NSLog(@"Authentication failed with error: %@", error);
+            } else {
+                NSLog(@"Authentication successful need to parse token");
+                
+                NSString *urlString = callbackUrl.absoluteString;
+                NSLog(@"Tokenized url: %@",urlString);
+                
+/*                 NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
+                NSArray<NSURLQueryItem *> *queryItems = components.queryItems;
+                
+                for (NSURLQueryItem *queryItem in queryItems) {
+                    if ([queryItem.name isEqualToString:@"token"]) {
+                        NSString *idToken = queryItem.value;
+                        // Now you have your ID token!
+                        NSLog(@"ID Token: %@", idToken);
+                        break;
+                    }
+                } */
+              
+                //NSLog(@"Received authentication token: %@", token);
+            }
+    }];
+    
+    authSession.presentationContextProvider = self;
+    [authSession start];
 }
 
 - (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {

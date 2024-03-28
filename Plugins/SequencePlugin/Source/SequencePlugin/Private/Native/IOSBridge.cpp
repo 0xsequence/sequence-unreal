@@ -12,14 +12,14 @@ UIOSBridge::UIOSBridge()
     
 }
 
-void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& RedirectUri, void(*IOSCallback)(char *idToken))
+void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken))
 {
 	UE_LOG(LogTemp,Display,TEXT("Preparing to Signin with Google"));
 #if PLATFORM_IOS
 	NSString * _url = Url.GetNSString();
-	NSString * _redirect = RedirectUri.GetNSString();
+	NSString * _scheme = Scheme.GetNSString();
 	IOSOAuth * auth = [[IOSOAuth alloc] init];
-	[auth InitGoogleSignin:_url Redirect:_redirect callback:^(char * idToken){
+	[auth InitGoogleSignin:_url Scheme:_scheme callback:^(char * idToken){
 		IOSCallback(idToken);
 	}];
 #endif
