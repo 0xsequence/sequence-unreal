@@ -32,46 +32,57 @@ typedef void(^Callback)(char *idToken);
     NSURL * authUrl = [NSURL URLWithString:URL];
     NSString * scheme = Scheme;
     
-    /*
-      host: https://0xsequence.github.io
-      path: /demo-waas-auth/
-    */
-    
-    NSString * host = @"0xsequence.github.io";
-    NSString * path = @"/demo-waas-auth/";
-    ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithHTTPSHost:host path:path];
-    
-    ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
-    initWithURL:authUrl
-    callbackURLScheme:scheme
-    completionHandler:^(NSURL * callbackUrl, NSError * error){
-            if (error) {
-                // Handle authentication error
-                NSLog(@"Authentication failed with error: %@", error);
-            } else {
-                NSLog(@"Authentication successful need to parse token");
-                
-                NSString *urlString = callbackUrl.absoluteString;
-                NSLog(@"Tokenized url: %@",urlString);
-                
-/*                 NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
-                NSArray<NSURLQueryItem *> *queryItems = components.queryItems;
-                
-                for (NSURLQueryItem *queryItem in queryItems) {
-                    if ([queryItem.name isEqualToString:@"token"]) {
-                        NSString *idToken = queryItem.value;
-                        // Now you have your ID token!
-                        NSLog(@"ID Token: %@", idToken);
-                        break;
+    if (@available(iOS 17.4, *)) {//for support of IOS 17.4 and later
+        NSString * host = @"0xsequence.github.io";
+        NSString * path = @"/demo-waas-auth/";
+        //ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithHTTPSHost:host path:path];
+        ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithCustomScheme:scheme];
+            ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
+            initWithURL:authUrl
+            callback:sessionCallback
+            completionHandler:^(NSURL * callbackUrl, NSError * error){
+                if (error) {// Handle authentication error
+                    NSLog(@"Authentication failed with error: %@", error);
+                } else {
+                    NSLog(@"Authentication successful need to parse token");
+                    NSString *urlString = callbackUrl.absoluteString;
+                    NSLog(@"Tokenized url: %@",urlString);
+                }
+            }];
+            authSession.presentationContextProvider = self;
+            [authSession start];
+    } else {//for support of things prior of IOS 17.4
+         ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
+            initWithURL:authUrl
+            callbackURLScheme:scheme
+            completionHandler:^(NSURL * callbackUrl, NSError * error){
+                    if (error) {
+                        // Handle authentication error
+                        NSLog(@"Authentication failed with error: %@", error);
+                    } else {
+                        NSLog(@"Authentication successful need to parse token");
+                        
+                        NSString *urlString = callbackUrl.absoluteString;
+                        NSLog(@"Tokenized url: %@",urlString);
+                        
+        /*                 NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
+                        NSArray<NSURLQueryItem *> *queryItems = components.queryItems;
+                        
+                        for (NSURLQueryItem *queryItem in queryItems) {
+                            if ([queryItem.name isEqualToString:@"token"]) {
+                                NSString *idToken = queryItem.value;
+                                // Now you have your ID token!
+                                NSLog(@"ID Token: %@", idToken);
+                                break;
+                            }
+                        } */
+                      
+                        //NSLog(@"Received authentication token: %@", token);
                     }
-                } */
-              
-                //NSLog(@"Received authentication token: %@", token);
-            }
-    }];
-    
-    authSession.presentationContextProvider = self;
-    [authSession start];
+            }];
+            authSession.presentationContextProvider = self;
+            [authSession start];
+    }
 }
 
 - (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {
