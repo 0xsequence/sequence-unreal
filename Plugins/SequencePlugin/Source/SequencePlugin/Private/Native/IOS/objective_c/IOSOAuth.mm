@@ -43,7 +43,7 @@ typedef void(^Callback)(char *idToken);
     
     ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
     initWithURL:authUrl
-    callback:sessionCallback
+    callbackURLScheme:scheme
     completionHandler:^(NSURL * callbackUrl, NSError * error){
             if (error) {
                 // Handle authentication error
