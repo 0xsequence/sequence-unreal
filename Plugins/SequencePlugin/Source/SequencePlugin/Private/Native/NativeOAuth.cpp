@@ -23,10 +23,18 @@ namespace NativeOAuth
 	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
-		UIOSBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosCallback);
+		UIOSBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
 	}
 
-
+	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
+	{
+		const FString token = FString(UTF8_TO_TCHAR(tokenizedUrl));
+		UAuthenticator * CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
+			CallbackLcl->UpdateMobileLogin(token);
+		});
+	}
+	
 	void ProcessIosCallback(char * idToken)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
