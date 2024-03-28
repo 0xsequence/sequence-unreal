@@ -6,7 +6,7 @@
 
 typedef void(^Callback)(char *idToken);
 
-@interface IOSOAuth : UIViewController <ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding>
+@interface IOSOAuth : UIViewController <ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding, ASWebAuthenticationPresentationContextProviding>
 + (NSString *)url;
 + (NSString *)userId;
 + (Callback)completion;
@@ -14,10 +14,11 @@ typedef void(^Callback)(char *idToken);
 - (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback;
 - (void)loadBrowserURLInIOSThread: (NSString *)clientID nonce:(NSString *)nonce;
 - (ASPresentationAnchor)presentationAnchorForAuthorizationController: (ASAuthorizationController *)controller;
+- (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session;
 - (char *)ConvertNSStringToChars:(NSString *)str;
 
 //Google Signin
--(void)InitGoogleSignin:(NSString *)URL Redirect:(NSString *)RedirectUri callback:(void(^)(char *))callback;
+-(void)InitGoogleSignin:(NSString *)URL Scheme:(NSString *)Scheme callback:(void(^)(char *))callback;
 
 
 @end
