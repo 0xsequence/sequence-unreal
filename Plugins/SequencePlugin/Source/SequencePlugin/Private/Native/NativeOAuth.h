@@ -20,5 +20,6 @@ namespace NativeOAuth
 	void SignInWithGoogle_IOS(const FString& Url, const FString& RedirectUri, UAuthenticator * AuthCallback);
 	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback);
 	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback);
+	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl);
 	void ProcessIosCallback(char * idToken);
 }

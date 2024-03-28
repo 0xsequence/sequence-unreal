@@ -64,19 +64,8 @@ typedef void(^Callback)(char *idToken);
                         
                         NSString *urlString = callbackUrl.absoluteString;
                         NSLog(@"Tokenized url: %@",urlString);
-                        
-                        NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
-                        NSArray<NSURLQueryItem *> *queryItems = components.queryItems;
-                        
-                        for (NSURLQueryItem *queryItem in queryItems) {
-                            if ([queryItem.name isEqualToString:@"token"]) {
-                                NSString *idToken = queryItem.value;
-                                // Now you have your ID token!
-                                NSLog(@"ID Token: %@", idToken);
-                                
-                                break;
-                            }
-                        }
+                        char *tokenizedUrl = [[IOSOAuth GetDelegate] ConvertNSStringToChars:urlString];
+                        callback(tokenizedUrl);
                     }
             }];
             authSession.presentationContextProvider = self;
