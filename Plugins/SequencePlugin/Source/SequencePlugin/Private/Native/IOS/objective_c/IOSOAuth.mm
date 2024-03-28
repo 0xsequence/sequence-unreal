@@ -65,7 +65,7 @@ typedef void(^Callback)(char *idToken);
                         NSString *urlString = callbackUrl.absoluteString;
                         NSLog(@"Tokenized url: %@",urlString);
                         
-        /*                 NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
+                        NSURLComponents *components = [NSURLComponents componentsWithURL:callbackUrl resolvingAgainstBaseURL:NO];
                         NSArray<NSURLQueryItem *> *queryItems = components.queryItems;
                         
                         for (NSURLQueryItem *queryItem in queryItems) {
@@ -73,11 +73,10 @@ typedef void(^Callback)(char *idToken);
                                 NSString *idToken = queryItem.value;
                                 // Now you have your ID token!
                                 NSLog(@"ID Token: %@", idToken);
+                                
                                 break;
                             }
-                        } */
-                      
-                        //NSLog(@"Received authentication token: %@", token);
+                        }
                     }
             }];
             authSession.presentationContextProvider = self;
