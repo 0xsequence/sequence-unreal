@@ -107,18 +107,25 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
-	TokenizedUrl.ParseIntoArray(UrlParts,TEXT("&"),true);
-
-	for (FString part : UrlParts)
+	TokenizedUrl.ParseIntoArray(UrlParts,TEXT("?"),true);
+	for (FString part: UrlParts)
 	{
 		if (part.Contains("id_token",ESearchCase::IgnoreCase))
 		{
-			const FString Token = part.RightChop(9);//we chop off: id_token=
-			UE_LOG(LogTemp,Display,TEXT("Token: %s"), *Token);
-			SocialLogin(Token);
-			return;
-		}
-	}
+			TArray<FString> ParameterParts;
+			TokenizedUrl.ParseIntoArray(ParameterParts,TEXT("&"),true);
+			for (FString parameter : ParameterParts)
+			{
+				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
+				{
+					const FString Token = part.RightChop(9);//we chop off: id_token
+					UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
+					SocialLogin(Token);
+					return;
+				}//find id_token
+			}//parse out &
+		}//find id_token
+	}//parse out ?
 }
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
