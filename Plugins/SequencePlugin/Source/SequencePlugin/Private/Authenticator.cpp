@@ -113,12 +113,12 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 		if (part.Contains("id_token",ESearchCase::IgnoreCase))
 		{
 			TArray<FString> ParameterParts;
-			TokenizedUrl.ParseIntoArray(ParameterParts,TEXT("&"),true);
+			part.ParseIntoArray(ParameterParts,TEXT("&"),true);
 			for (FString parameter : ParameterParts)
 			{
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
-					const FString Token = part.RightChop(9);//we chop off: id_token
+					const FString Token = parameter.RightChop(9);//we chop off: id_token
 					UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
 					SocialLogin(Token);
 					return;
