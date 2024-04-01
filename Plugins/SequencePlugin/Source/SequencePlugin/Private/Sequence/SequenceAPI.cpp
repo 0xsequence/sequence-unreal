@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Sequence/SequenceAPI.h"
 #include "RequestHandler.h"
 #include "Indexer/IndexerSupport.h"

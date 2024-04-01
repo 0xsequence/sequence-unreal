@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 package com.Plugins.SequencePlugin;
 
 import android.util.Log;

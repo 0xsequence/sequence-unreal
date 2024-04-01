@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "SequencePlugin/Public/Authenticator.h"
 #include "CoreMinimal.h"

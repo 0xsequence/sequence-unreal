@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "SystemDataBuilder.h"
 #include "Indexer/Indexer.h"
 #include "Syncer.h"

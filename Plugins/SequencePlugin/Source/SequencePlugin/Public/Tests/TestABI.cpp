@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "ABI/ABI.h"
 #include "Misc/AutomationTest.h"
 #include "Types/BinaryData.h"

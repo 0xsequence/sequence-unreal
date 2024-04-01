@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Util/HexUtility.h"
 #include "Eth/RLP.h"
 #include "Misc/AutomationTest.h"
