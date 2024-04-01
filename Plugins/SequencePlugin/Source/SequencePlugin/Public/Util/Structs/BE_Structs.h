@@ -448,7 +448,7 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="BE")
         int64 chainID = -1;//used for getting updated price data!
 
-    bool operator ==(const FID_BE& a)
+    bool Compare(const FID_BE& a)
     {
         return (this->contractAddress.ToLower().Compare(a.contractAddress.ToLower()) == 0 && this->chainID == a.chainID);
     }
