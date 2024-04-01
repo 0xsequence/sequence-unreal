@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4146)
 #pragma warning(disable: 4104)

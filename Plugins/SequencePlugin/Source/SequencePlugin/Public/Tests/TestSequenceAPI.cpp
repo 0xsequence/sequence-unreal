@@ -1,3 +1,5 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #include "TestSequenceAPI.h"
 #include "Sequence/SequenceAPI.h"
 #include "Authenticator.h"

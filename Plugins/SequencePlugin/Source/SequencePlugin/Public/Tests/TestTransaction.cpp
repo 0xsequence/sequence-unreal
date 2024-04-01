@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Eth/Crypto.h"
 #include "Util/HexUtility.h"
 #include "Provider.h"
