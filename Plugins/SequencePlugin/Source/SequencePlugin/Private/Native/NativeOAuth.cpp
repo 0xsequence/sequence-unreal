@@ -1,6 +1,8 @@
 #include "NativeOAuth.h"
 #include "Authenticator.h"
 #include "IOSBridge.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "Async/Async.h"
 
 namespace NativeOAuth
 {

@@ -1,4 +1,5 @@
 {
+	"EngineVersion":"5.2",
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
@@ -8,7 +9,7 @@
 	"CreatedBy": "",
 	"CreatedByURL": "",
 	"DocsURL": "",
-	"MarketplaceURL": "",
+	"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3",
 	"SupportURL": "",
 	"CanContainContent": true,
 	"IsBetaVersion": true,
@@ -16,15 +17,21 @@
 	"Installed": true,
 	"SupportedTargetPlatforms": [
 		"Win64",
-		"Android",
 		"Mac",
-		"IOS"
+		"IOS",
+		"Android"
 	],
 	"Modules": [
 		{
 			"Name": "SequencePlugin",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Mac",
+				"IOS",
+				"Android"
+			]
 		}
 	],
 	"Plugins": [
