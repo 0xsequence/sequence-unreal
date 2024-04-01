@@ -48,7 +48,7 @@ TArray<FNFT_Master_BE> USystemDataBuilder::compressNFTData(TArray<FNFT_BE> nfts)
 		found = false;
 		for (FNFT_Master_BE i : ret)
 		{
-			if (i.NFT_Details.itemID == lcl_nfts[0].NFT_Details.itemID)
+			if (i.NFT_Details.itemID.Compare(lcl_nfts[0].NFT_Details.itemID))
 			{
 				found = true;
 				iNFT = i;
@@ -155,7 +155,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.coins.Num(); i++)
 			{
-				if (itemPrice.Token == this->systemData.user_data.coins[i].itemID)
+				if (itemPrice.Token.Compare(this->systemData.user_data.coins[i].itemID))
 				{//directly inject data into system data!
 					this->systemData.user_data.coins[i].Coin_Value = itemPrice.price.value;
 					break;
@@ -180,7 +180,7 @@ void USystemDataBuilder::initGetItemData(FUpdatableItemDataArgs itemsToUpdate)
 			this->systemDataGuard.Lock();
 			for (int32 i = 0; i < this->systemData.user_data.nfts.Num(); i++)
 			{//index directly into systemData rather than asigning it to some inbetween party
-				if (itemPrice.Token == this->systemData.user_data.nfts[i].NFT_Details.itemID)
+				if (itemPrice.Token.Compare(this->systemData.user_data.nfts[i].NFT_Details.itemID))
 				{
 					this->systemData.user_data.nfts[i].Value = itemPrice.price.value;
 				}
@@ -440,7 +440,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_coins.Num(); j++)
 				{//foreach coin in the txn
 					FCoin_BE* coin = &this->systemData.user_data.transaction_history[i].txn_history_coins[j].coin;
-					if (itemPrice.Token == coin->itemID)
+					if (itemPrice.Token.Compare((FID_BE)coin->itemID))
 					{//if id matched
 						coin->Coin_Value = itemPrice.price.value;//assign value
 					}
@@ -468,7 +468,7 @@ void USystemDataBuilder::initGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 				for (int32 j = 0; j < this->systemData.user_data.transaction_history[i].txn_history_nfts.Num(); j++)
 				{//foreach nft in the txn
 					FNFT_BE* nft = &this->systemData.user_data.transaction_history[i].txn_history_nfts[j].nft;
-					if (itemPrice.Token == nft->NFT_Details.itemID)
+					if (itemPrice.Token.Compare(nft->NFT_Details.itemID))
 					{//if id matched
 						nft->Value = itemPrice.price.value;//assign value
 					}
