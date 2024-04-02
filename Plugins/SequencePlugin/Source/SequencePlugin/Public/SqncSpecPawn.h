@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "Authenticator.h"
 #include "GameFramework/SpectatorPawn.h"
-#include "Sqnc_Spec_Pawn.generated.h"
+#include "SqncSpecPawn.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API ASqnc_Spec_Pawn : public ASpectatorPawn
+class SEQUENCEPLUGIN_API ASqncSpecPawn : public ASpectatorPawn
 {
 	GENERATED_BODY()
 

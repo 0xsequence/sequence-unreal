@@ -14,7 +14,6 @@ struct FSequenceConfig
 struct FAuthenticatorConfig
 {
 	inline static FString UrlScheme = "powered-by-sequence";
-	//https://dev2-api.sequence.app/oauth/callback
 	//inline static FString RedirectURL = "https://0xsequence.github.io/demo-waas-auth/";
 	inline static FString RedirectURL = "https://dev2-api.sequence.app/oauth/callback";
 

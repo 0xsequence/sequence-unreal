@@ -27,9 +27,6 @@ UAuthenticator::UAuthenticator()
 	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SessionHashBytes.Ptr());
 	this->SessionHash = "0x" + SessionHashBytes.ToHex().ToLower();
 	
-	UE_LOG(LogTemp, Display, TEXT("Generated SessionId: %s"),*this->SessionId);
-	UE_LOG(LogTemp, Display, TEXT("Generated Sessionhash: %s"),*this->SessionHash);
-	
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
@@ -119,7 +116,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
+					//UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
 					SocialLogin(Token);
 					return;
 				}//find id_token
@@ -362,7 +359,6 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
-	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 	
@@ -397,7 +393,6 @@ void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResp
 
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
-	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
@@ -436,7 +431,6 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
-	PrintAll();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
 	this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
@@ -462,26 +456,6 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	FCredentials_BE* Credentials = &CredData;
 	const bool IsValid = this->GetStoredCredentials(Credentials);
 	return FStoredCredentials_BE(IsValid, *Credentials);
-}
-
-void UAuthenticator::PrintAll()
-{
-	const FString creds = UIndexerSupport::structToString<FWaasJWT>(this->WaasSettings);
-	UE_LOG(LogTemp,Display,TEXT("FWaasSettings: %s"), *creds);
-	FString PurgeCacheString = (this->PurgeCache) ? "true" : "false";
-	UE_LOG(LogTemp,Display,TEXT("PurgeCache: %s"), *PurgeCacheString);
-	UE_LOG(LogTemp,Display,TEXT("ChallengeSession: %s"), *this->ChallengeSession);
-	UE_LOG(LogTemp,Display,TEXT("EmailAuthMaxRetries: %d"), this->EmailAuthMaxRetries);
-	UE_LOG(LogTemp,Display,TEXT("EmailAuthCurrRetries: %d"), this->EmailAuthCurrRetries);
-	UE_LOG(LogTemp,Display,TEXT("WaasVersion: %s"), *FSequenceConfig::WaasVersion);
-	UE_LOG(LogTemp,Display,TEXT("ProjectAccessKey: %s"), *FSequenceConfig::ProjectAccessKey);
-	UE_LOG(LogTemp,Display,TEXT("WaaSTenantKey: %s"), *FSequenceConfig::WaaSTenantKey);
-	UE_LOG(LogTemp,Display,TEXT("cached_email: %s"), *this->Cached_Email);
-	UE_LOG(LogTemp,Display,TEXT("cachedidtoken: %s"), *this->Cached_IDToken);
-	UE_LOG(LogTemp,Display,TEXT("nonce: %s"), *this->Nonce);
-	UE_LOG(LogTemp,Display,TEXT("statetoken: %s"), *this->StateToken);
-	UE_LOG(LogTemp,Display,TEXT("saveslot: %s"), *this->SaveSlot);
-	UE_LOG(LogTemp,Display,TEXT("UserIndex 0 : %d"), this->UserIndex);
 }
 
 void UAuthenticator::UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))

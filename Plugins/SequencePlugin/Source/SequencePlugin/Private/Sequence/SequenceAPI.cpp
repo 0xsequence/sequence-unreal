@@ -137,8 +137,10 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 					this->Credentials.RegisterCredentials(Wallet,Email,ISS,Type,Sub,UserId,UnixIssuedAt,UnixRefreshedAt,UnixExpiresAt);
 					const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
 					TUAuth->StoreCredentials(this->Credentials);
+					//TODO: remove prior to shipping
 					const FString Creds = UIndexerSupport::structToString(this->Credentials);
 					UE_LOG(LogTemp,Display,TEXT("Creds: %s"),*Creds);
+					//TODO: remove prior to shipping
 					OnSuccess("Session Registered");
 				}
 				else
