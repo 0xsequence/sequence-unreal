@@ -139,6 +139,9 @@ Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]
 
 Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 
+### Apple Specific SSO Requirements
+For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
+
 ### Sequence API
 
 After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet]** by using:
