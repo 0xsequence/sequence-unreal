@@ -362,6 +362,8 @@ public:
 
 	void ClearStoredCredentials() const;
 private:
+	bool CanHandleEmailLogin();
+	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 
 	static bool CredentialsValid(const FCredentials_BE& Credentials);

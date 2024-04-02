@@ -59,6 +59,14 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 	}
 }
 
+bool UAuthenticator::CanHandleEmailLogin()
+{
+	bool ret = true;
+	ret &= this->WaasSettings.GetEmailRegion().Len() > 0;
+	ret &= this->WaasSettings.GetEmailClientId().Len() > 0;
+	return ret;
+}
+
 bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
@@ -201,9 +209,17 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
-	this->ResetRetryEmailLogin();
-	this->Cached_Email = EmailIn;
-	CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
+	if (this->CanHandleEmailLogin())
+	{
+		this->ResetRetryEmailLogin();
+		this->Cached_Email = EmailIn;
+		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
+	}
+	else
+	{
+		UE_LOG(LogTemp,Display,TEXT("Email based Auth not setup properly please ensure your WaasTenant key is configured properly"));
+		this->CallAuthFailure();
+	}
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
@@ -249,7 +265,6 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
 {
 	FString Ret = "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
-	UE_LOG(LogTemp, Display, TEXT("AWSURL: %s"), *Ret);
 	return Ret;
 }
 
