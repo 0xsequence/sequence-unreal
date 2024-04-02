@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "..\Public\SqncSpecPawn.h"
+#include "SqncSpecPawn.h"
 #include "Indexer/IndexerSupport.h"
 
 void ASqncSpecPawn::SetupCredentials(FCredentials_BE CredentialsIn)
