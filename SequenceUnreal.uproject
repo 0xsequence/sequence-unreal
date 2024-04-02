@@ -27,10 +27,11 @@
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Win64",
-				"Android",
 				"Mac",
-				"IOS"
-			]
+				"IOS",
+				"Android"
+			],
+			"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3"
 		},
 		{
 			"Name": "WebBrowserWidget",
