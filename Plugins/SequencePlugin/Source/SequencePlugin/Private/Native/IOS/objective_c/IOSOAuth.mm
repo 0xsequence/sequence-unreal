@@ -34,9 +34,6 @@ typedef void(^Callback)(char *idToken);
     NSString * scheme = Scheme;
     
     if (@available(iOS 17.4, *)) {//for support of IOS 17.4 and later
-        NSString * host = @"0xsequence.github.io";
-        NSString * path = @"/demo-waas-auth/";
-        //ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithHTTPSHost:host path:path];
         ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithCustomScheme:scheme];
             ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
             initWithURL:authUrl
@@ -45,9 +42,10 @@ typedef void(^Callback)(char *idToken);
                 if (error) {// Handle authentication error
                     NSLog(@"Authentication failed with error: %@", error);
                 } else {
-                    NSLog(@"Authentication successful need to parse token");
+                    NSLog(@"Authentication successful");
                     NSString *urlString = callbackUrl.absoluteString;
-                    NSLog(@"Tokenized url: %@",urlString);
+                    char *tokenizedUrl = [[IOSOAuth GetDelegate] ConvertNSStringToChars:urlString];
+                    callback(tokenizedUrl);
                 }
             }];
             authSession.presentationContextProvider = self;
@@ -61,10 +59,8 @@ typedef void(^Callback)(char *idToken);
                         // Handle authentication error
                         NSLog(@"Authentication failed with error: %@", error);
                     } else {
-                        NSLog(@"Authentication successful need to parse token");
-                        
+                        NSLog(@"Authentication successful");
                         NSString *urlString = callbackUrl.absoluteString;
-                        NSLog(@"Tokenized url: %@",urlString);
                         char *tokenizedUrl = [[IOSOAuth GetDelegate] ConvertNSStringToChars:urlString];
                         callback(tokenizedUrl);
                     }
