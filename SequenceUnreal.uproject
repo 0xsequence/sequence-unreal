@@ -26,7 +26,8 @@
 			"Name": "SequencePlugin",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
-				"IOS"
+				"IOS",
+				"Mac"
 			],
 			"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3"
 		},
@@ -36,6 +37,7 @@
 		}
 	],
 	"TargetPlatforms": [
-		"IOS"
+		"IOS",
+		"Mac"
 	]
 }
