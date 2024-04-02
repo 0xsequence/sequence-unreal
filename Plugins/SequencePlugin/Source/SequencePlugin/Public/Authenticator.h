@@ -308,8 +308,6 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
-	void PrintAll();
-private:
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 
