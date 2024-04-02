@@ -1,4 +1,4 @@
-# 
+# Copyright 2024 Horizon Blockchain Games Inc. All rights reserved. 
 # This makefile builds and runs the test programs in this directory. They check
 # the functionality and correctness of the C++ cryptography implementations.
 # 
