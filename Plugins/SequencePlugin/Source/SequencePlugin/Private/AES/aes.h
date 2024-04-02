@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #ifndef _AES_H_
 #define _AES_H_
 

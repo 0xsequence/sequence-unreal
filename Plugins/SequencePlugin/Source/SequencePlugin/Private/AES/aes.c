@@ -1,3 +1,4 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 /*
 
 This is an implementation of the AES algorithm, specifically ECB, CTR and CBC mode.
