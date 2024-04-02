@@ -37,10 +37,10 @@ If this implementation is not done properly, user data stored locally can be tam
 3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
 
 4) If you wish to use the in built sequence UI for login
-    a) Create an **[Actor]** you wish to be responsible for the SequenceUI then attach the **[Sequence_Pawn_Component_BP]** to it
-    b) Setup your **[Actor]** Blueprint similar to how it's setup in **[Custom_Spectator_Pawn]** being sure to bind to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
+    a) Create an **[Actor]** you wish to be responsible for the SequenceUI then attach the **[AC_SequencePawn_Component]** to it
+    b) Setup your **[Actor]** Blueprint similar to how it's setup in **[BP_CustomSpectatorPawn]** being sure to bind to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
 
-5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the Sequence API, an example of this can be found in the **[Custom_Spectator_Pawn]**. This Pawn inherits from a C++ class **[Sqnc_Spec_Pawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[Custom_Spectator_Pawn]**. Calling this function will forward the credentials to a C++ backend.
+5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the Sequence API, an example of this can be found in the **[BP_CustomSpectatorPawn]**. This Pawn inherits from a C++ class **[SqncSpecPawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**. Calling this function will forward the credentials to a C++ backend.
 
 6) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
 
@@ -135,7 +135,7 @@ Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 
 IOS SSO
 
-Google: WIP
+Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
 
 Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 
@@ -151,7 +151,7 @@ Once you have your **[USequenceWallet]** UObject call **[Api>RegisterSession(OnS
 
 ***
 
-Assuming you've setup your controlling Actor with the **[Sequence_Pawn_Component_BP]**
+Assuming you've setup your controlling Actor with the **[AC_SequencePawn_Component]**
 The sequence pawn component has functions to do the following:
 
 Setup Sequence (sets up the sequence based systems), requires playerController input
