@@ -137,7 +137,8 @@ IOS SSO
 
 Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
 
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
+Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
+       be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
 For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
