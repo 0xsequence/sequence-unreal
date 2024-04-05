@@ -154,23 +154,15 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 			OnFailure(FSequenceError(RequestFail, "1st Level parsing: Request failed: " + Response));
 		}
 	};
-
-	if (this->Credentials.IsRegistered())
-	{
-		if (this->Credentials.Valid())
-		{
-			const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
-			this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
-		}
-	}
-	else
+	
+	if (this->Credentials.Valid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
 		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
 	}
 }
 
