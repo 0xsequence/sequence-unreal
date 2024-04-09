@@ -240,7 +240,10 @@ public:
 	bool Valid() const
 	{
 		bool IsValid = true;
-		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		if (Registered)
+			IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		IsValid &= IDToken.Len() > 0;
+		IsValid &= SessionPrivateKey.Len() > 0;
 		return IsValid;
 	}
 
@@ -361,7 +364,7 @@ public:
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
 	void ClearStoredCredentials() const;
-private:
+private:	
 	bool CanHandleEmailLogin();
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
@@ -397,6 +400,8 @@ private:
 
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void AutoRegister(const FCredentials_BE& Credentials);
 
 	//RPC Calls//
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);

@@ -47,8 +47,6 @@ private:
 	FCredentials_BE Credentials;
 	
 	FString ProviderUrl = "";
-	
-	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString sequenceURL_QR = "https://api.sequence.app/qr/";
 	const FString sequenceURL = "https://api.sequence.app/rpc/API/";
@@ -71,6 +69,7 @@ public:
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn);
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
+	FString GetWalletAddress();
 	void UpdateProviderURL(const FString& Url);
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
 	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
@@ -87,9 +86,7 @@ private:
 	FString BuildListSessionIntent();
 	FString BuildCloseSessionIntent();
 	FString BuildSessionValidationIntent();
-	
 	FString GeneratePacketSignature(const FString& Packet) const;
-	FString GetWalletAddress();
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
