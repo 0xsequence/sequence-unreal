@@ -10,18 +10,18 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCryptoTypes, "Public.Tests.TestCryptoTypes"
 
 bool TestCryptoTypes::RunTest(const FString& Parameters)
 {
-	TStaticArray<uint8, 32> arr;
-	for(auto i = 0; i < 32; i++) arr[i] = 0x00;
-	arr[31] = 0x01;
-	Uint256 test = Uint256(arr.GetData());
-	uint8* testPtr = reinterpret_cast<uint8*>(test.value);
+	TStaticArray<uint8, 32> Arr;
+	for(auto i = 0; i < 32; i++) Arr[i] = 0x00;
+	Arr[31] = 0x01;
+	Uint256 Test = Uint256(Arr.GetData());
+	uint8* TestPtr = reinterpret_cast<uint8*>(Test.value);
 
-	TStaticArray<uint8, 32> testArr;
-	for(int i = 0; i < 32; i++) testArr[i] = testPtr[i];
+	TStaticArray<uint8, 32> TestArr;
+	for(int i = 0; i < 32; i++) TestArr[i] = TestPtr[i];
 	
-	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(testArr).ToHex());
-	test.getBigEndianBytes(arr.GetData());
-	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(arr).ToHex());
+	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(TestArr).ToHex());
+	Test.getBigEndianBytes(Arr.GetData());
+	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(Arr).ToHex());
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

@@ -21,38 +21,38 @@ class UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:
-	static float getAmount(int64 amount,int32 decimals);
-	static float getAmount(int64 amount,float decimals);
+	static float GetAmount(int64 Amount,int32 Decimals);
+	static float GetAmount(int64 Amount,float Decimals);
 	
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings
 	*/
-	static TMap<FString, FString> jsonObjectParser(TSharedPtr<FJsonObject> jsonData);
+	static TMap<FString, FString> JSONObjectParser(TSharedPtr<FJsonObject> JSONData);
 
-	static TSharedPtr<FJsonObject> JsonStringToObject(const FString& json);
+	static TSharedPtr<FJsonObject> JsonStringToObject(const FString& JSON);
 	
 	/*
 	* Used to remove
 	* \n, \", \t, \r, spaces etc
 	*/
-	static FString simplifyString(FString string);
+	static FString SimplifyString(FString String);
 
-	static FString partialSimpleString(FString string);
+	static FString PartialSimpleString(FString String);
 
 	/*
 	* Similar to simplify string EXCEPT we keept he /" because we are trying
 	* to maintain json correctness for parsing!
 	*/
-	static FString simplifyStringParsable(FString string);
+	static FString SimplifyStringParsable(FString String);
 
 	/*
 	* Allows for the converting of a Struct straigt into a nicely formatted json string!
 	*/
-	template < typename T > static FString structToString(T structVar)
+	template < typename T > static FString StructToString(T StructVar)
 	{
-		FString ret;
-		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
-		return ret;
+		FString Ret;
+		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
+		return Ret;
 	}
 
 	/*
@@ -60,102 +60,102 @@ public:
 	* This also cleans up the string from json formatting in the event we just want an
 	* easily testable string!
 	*/
-	template < typename T > static FString structToSimpleString(T structVar)
+	template < typename T > static FString StructToSimpleString(T StructVar)
 	{
-		FString ret;
-		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
-		ret = simplifyString(ret);
-		return ret;
+		FString Ret;
+		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
+		Ret = SimplifyString(Ret);
+		return Ret;
 	}
 
-	template < typename T > static FString structToPartialSimpleString(T structVar)
+	template < typename T > static FString StructToPartialSimpleString(T StructVar)
 	{
-		FString ret;
-		FJsonObjectConverter::UStructToJsonObjectString<T>(structVar, ret, 0, 0);
-		ret = partialSimpleString(ret);
-		return ret;
+		FString Ret;
+		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
+		Ret = PartialSimpleString(Ret);
+		return Ret;
 	}
 
-	template < typename T > static T jsonStringToStruct(FString json)
+	template < typename T > static T JSONStringToStruct(FString JSON)
 	{
-		T ret;
+		T Ret;
 
 		TSharedPtr<FJsonObject> JsonObj = MakeShareable<FJsonObject>(new FJsonObject);
 
-		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), JsonObj))
+		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), JsonObj))
 		{
-			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &ret))
-				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *json);
+			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &Ret))
+				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
 		}
 		else
 		{//failed to convert the decrypted string into a jsonObject
-			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *json);
+			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
 		}
 
-		return ret;
+		return Ret;
 	}
 
-	template < typename T > static bool jsonStringToStruct(FString json, T * ptrRet)
+	template < typename T > static bool JSONStringToStruct(FString JSON, T * PtrRet)
 	{
 		T TStruct;
-		bool ret = false;
+		bool Ret = false;
 		TSharedPtr<FJsonObject> JsonObj = MakeShareable<FJsonObject>(new FJsonObject);
 
-		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), JsonObj))
+		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), JsonObj))
 		{
 			if (FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &TStruct))
 			{
-				*ptrRet = TStruct;
-				ret = true;
+				*PtrRet = TStruct;
+				Ret = true;
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *json);
+				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
 			}
 		}
 		else
 		{//failed to convert the decrypted string into a jsonObject
-			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *json);
+			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
 		}
 
-		return ret;
+		return Ret;
 	}
 
-	static FString stringListToSimpleString(TArray<FString> stringData);
+	static FString StringListToSimpleString(TArray<FString> StringData);
 
 	//for maintaining valid json for args in RPC calls
-	static FString stringListToParsableString(TArray<FString> stringData);
+	static FString StringListToParsableString(TArray<FString> StringData);
 
-	static FString int64ListToSimpleString(TArray<int64> intData);
+	static FString Int64ListToSimpleString(TArray<int64> IntData);
 
-	static FString jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData);
+	static FString JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData);
 	
-	static FString jsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> jsonData);
+	static FString JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData);
 
-	static FString jsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> jsonData);
+	static FString JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData);
 
-	static FString jsonToString(TSharedPtr<FJsonValue> jsonData);
+	static FString JsonToString(TSharedPtr<FJsonValue> JsonData);
 
-	static FString jsonToSimpleString(TSharedPtr<FJsonValue> jsonData);
+	static FString JsonToSimpleString(TSharedPtr<FJsonValue> JsonData);
 
-	static FString jsonToParsableString(TSharedPtr<FJsonValue> jsonData);
+	static FString JsonToParsableString(TSharedPtr<FJsonValue> JsonData);
 
-	static FString jsonToParsableString(TSharedPtr<FJsonObject> jsonData);
+	static FString JsonToParsableString(TSharedPtr<FJsonObject> JsonData);
 
-	static FString jsonToString(TSharedPtr<FJsonObject> jsonData);
+	static FString JsonToString(TSharedPtr<FJsonObject> JsonData);
 
-	static FString jsonToSimpleString(TSharedPtr<FJsonObject> jsonData);
+	static FString JsonToSimpleString(TSharedPtr<FJsonObject> JsonData);
 
 	//indexer reponse extraction functions used to parse response into a frontend usable form!
-	static FUpdatableHistoryArgs extractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
-	static FUpdatableItemDataArgs extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances);
+	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
+	static FUpdatableItemDataArgs ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances);
 
 private:
 	/*
 	* Similar to simplifyString EXCEPT we also cleanup 
 	* some special edge cases from json responses / parsing as well!
 	*/
-	static FString stringCleanup(FString string);
+	static FString StringCleanup(FString String);
 
 	static FMonthDayYear_BE TimestampToMonthDayYear_Be(FString Timestamp);
 };

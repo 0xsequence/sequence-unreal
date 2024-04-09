@@ -32,7 +32,7 @@ public:
         {
             balancesList.Add(tBalance.GetJson());
         }
-        ret.Get()->SetStringField("balances",UIndexerSupport::jsonObjListToSimpleString(balancesList));
+        ret.Get()->SetStringField("balances",UIndexerSupport::JsonObjListToSimpleString(balancesList));
         return ret;
     }
 

@@ -45,7 +45,7 @@ public:
             jList.Add(tItem.GetJson());
         }
 
-        ret.Get()->SetStringField("transfers", UIndexerSupport::jsonObjListToSimpleString(jList));
+        ret.Get()->SetStringField("transfers", UIndexerSupport::JsonObjListToSimpleString(jList));
 
         ret.Get()->SetStringField("timestamp", timestamp);
         return ret;

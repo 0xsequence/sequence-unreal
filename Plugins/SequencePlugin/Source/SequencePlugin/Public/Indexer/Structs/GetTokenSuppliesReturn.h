@@ -37,7 +37,7 @@ public:
         {
             jList.Add(tID.GetJson());
         }
-        ret.Get()->SetStringField("tokenIDs", UIndexerSupport::jsonObjListToSimpleString(jList));
+        ret.Get()->SetStringField("tokenIDs", UIndexerSupport::JsonObjListToSimpleString(jList));
         return ret;
     }
 

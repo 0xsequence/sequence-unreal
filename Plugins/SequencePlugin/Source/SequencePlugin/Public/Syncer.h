@@ -16,9 +16,9 @@ class SEQUENCEPLUGIN_API USyncer : public UObject
 {
 	GENERATED_BODY()
 private:
-	int32 requestCount = 0;
+	int32 RequestCount = 0;
 	mutable FCriticalSection Guard;
-	FString syncerName;//used for testing!
+	FString SyncerName;//used for testing!
 public:
 
 	FOnDoneSignature OnDoneDelegate;

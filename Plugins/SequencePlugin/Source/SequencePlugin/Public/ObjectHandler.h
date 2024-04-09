@@ -22,7 +22,7 @@ struct FRawData //used to store raw data in our runtime cache!
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	TArray<uint8> raw_data;
+	TArray<uint8> RawData;
 };
 
 /**
@@ -34,34 +34,34 @@ class UObjectHandler : public UObject
 	GENERATED_BODY()
 public:
 	FOnDoneImageProcessingSignature FOnDoneImageProcessingDelegate;
-	TMap<FString, UTexture2D*> getProcessedImages();
+	TMap<FString, UTexture2D*> GetProcessedImages();
 private:
 	//note 2GB is the limit because of int32 size limits!
-	const int32 max_cache_size = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
-	bool useCustomFormat = false;
-	EImageFormat customFormat = EImageFormat::GrayscaleJPEG;
-	int32 current_cache_size = 0;//in bytes we want this as accurate as possible!
-	TMap<FString, FRawData> cache;//a Map of URL's and rawData
+	const int32 MaxCacheSize = 256 * 1024 * 1024;//max size in bytes! 256 MB is what i have this set to for now!
+	bool bUseCustomFormat = false;
+	EImageFormat CustomFormat = EImageFormat::GrayscaleJPEG;
+	int32 CurrentCacheSize = 0;//in bytes we want this as accurate as possible!
+	TMap<FString, FRawData> Cache;//a Map of URL's and rawData
 	//need a list of maps!
-	TMap<FString, UTexture2D*> storedResponses;
+	TMap<FString, UTexture2D*> StoredResponses;
 
-	bool use_raw_cache = false; // enables / disables the use of raw data caching!
+	bool UseRawCache = false; // enables / disables the use of raw data caching!
 
 	//this is the number of requests that are actively processing
-	USyncer* syncer;
+	USyncer* Syncer;
 
 	/*
 	* Attempts to filter out bad urls to save on processing time
 	* Checks for http:// & https:// and length greater than 7
 	*/
-	TArray<FString> filterURLs(TArray<FString> urls);
+	TArray<FString> FilterURLs(TArray<FString> Urls);
 
 	/*
 	* Checks the cache to see if we already have the data needed in it
 	* if so fetch it from the cache.
 	* @return whether we had a cache hit or a cache miss
 	*/
-	bool check_raw_cache(FString URL,TArray<uint8>*raw_data);
+	bool CheckRawCache(FString URL,TArray<uint8>* RawData);
 
 	/*
 	* adds raw data to cache if the it can fit in the cache,
@@ -70,42 +70,42 @@ private:
 	* @param URL the url we got the data from
 	* @param raw_data the raw byte data from the given url
 	*/
-	void add_to_cache(FString URL, TArray<uint8> raw_data);
+	void AddToCache(FString URL, TArray<uint8> RawData);
 
 	/*
 	* Simple check to see if the cache can accomadate additional bytes
 	* @param byte_count_to_add the amount of byte data we would like to add to the cache
 	* @return true if we can add it else false
 	*/
-	bool can_add_to_cache(int32 byte_count_to_add);
+	bool CanAddToCache(int32 ByteCountToAdd);
 
 public:
 
 	/*
 	* Used to setup the Raw handler for web requests
 	*/
-	void setup(bool raw_cache_enabled);
+	void Setup(bool RawCacheEnabled);
 
-	void setupCustomFormat(bool raw_cache_enabled, EImageFormat format);
+	void SetupCustomFormat(bool RawCacheEnabled, EImageFormat Format);
 
 	//used to clear the contents of the raw cache!
-	void clear_raw_cache();
+	void ClearRawCache();
 
 private:
 	UFUNCTION()
 	void OnDone();
 
-	void storeImageData(UTexture2D * image, FString url);
+	void StoreImageData(UTexture2D *Image, FString URL);
 
 	//Here we process the data as uint8[] (For images)
-	void handle_request_raw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void HandleRequestRaw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	/*
 	* Base implementation of async raw request (IE getting raw uint8 bytes!) calls the associated
 	* raw handler set for this object handler
 	* @return true if the request started successfully else false
 	*/
-	bool request_raw_base(FString URL);
+	bool RequestRawBase(FString URL);
 
 public:
 
@@ -114,14 +114,14 @@ public:
 	* @upon request completetion a delegate OnDone will fire that will contain the needed data!
 	* in the event an error occurs OnDone will fire with nothing in it
 	*/
-	void requestImage(FString URL);//this is specifically there for getting raw data!
+	void RequestImage(FString URL);//this is specifically there for getting raw data!
 
 	/*
 	* Basic raw multi request
 	* @upon request completetion a delegate OnDone will fire that will contain the needed data!
 	* in the event an error occurs OnDone will fire with nothing in it
 	*/
-	void requestImages(TArray<FString> URLs);//this is specifically there for getting raw data!
+	void RequestImages(TArray<FString> URLs);//this is specifically there for getting raw data!
 
 private:
 	//helper functions for handling requests data! specifically image data!
@@ -130,12 +130,12 @@ private:
 	* for format identification purposes
 	* @return the generated texture2d
 	*/
-	UTexture2D* build_img_data(TArray<uint8> img_data,FString URL);
+	UTexture2D* BuildImgData(TArray<uint8> ImgData,FString URL);
 
-	UTexture2D* tryBuildImage(TArray<uint8> imgData, EImageFormat format);
+	UTexture2D* TryBuildImage(TArray<uint8> ImgData, EImageFormat Format);
 
 	/*
 	* Used to get the img format out of a url
 	*/
-	EImageFormat get_img_format(FString URL);
+	EImageFormat GetImgFormat(FString URL);
 };
