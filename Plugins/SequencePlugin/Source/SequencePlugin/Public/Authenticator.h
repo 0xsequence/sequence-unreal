@@ -6,7 +6,7 @@
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
-#include "Config/Config.h"
+#include "../PluginConfig/Config.h"
 #include "Dom/JsonObject.h"
 #include "Authenticator.generated.h"
 

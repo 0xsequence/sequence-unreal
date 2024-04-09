@@ -4,17 +4,11 @@
 #include "SequenceEncryptor.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
+#include "../PluginConfig/Config.h"
 
-/*
-* This function is meant to be rebuilt depending on how developers want to secure their key data
-* for the time being I include this key for testing but in release builds no key will be provided and
-* NO state will be written unless a valid key is provided!
-*/
 FString USequenceEncryptor::GetStoredKey()
-{//***Replace this implementation with your own proper implementation***
-	FString Ret;
-//this is for testing only a proper implementation needs to be provided for this function to work!
-	return "aaaabbbbccccddddaaaabbbbccccdddd";
+{
+	return FEncryptorConfig::Key;
 }
 
 
@@ -39,38 +33,12 @@ int32 BytesInFString(FString data)
 	return bytes;
 }
 
-//need to write a couple new functions for this based on AES-CBC-256, IV 16 bytes
-
-void USequenceEncryptor::EncryptAES(FString data)
-{
-	FString key = GetStoredKey();
-	if (key.Len() != 32)
-	{
-		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
-		return;// "[NOP]";
-	}
-	
-
-	//StringToBytes(data, PtrString, buffSize);
-
-	//AES_init_ctx_iv(PtrCtx, PtrKey, PtrIV);//init then use
-	//AES_CBC_encrypt_buffer(PtrCtx, PtrString, buffSize);
-
-	//FString DuringEncrypt = BytesToString(PtrString, buffSize);
-}
-
-void USequenceEncryptor::DecryptAES()
-{
-
-}
-
-
 FString USequenceEncryptor::Encrypt(FString Payload)
 {
 	FString key = GetStoredKey();
 	if (key.Len() < 32)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
+		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY that is at least 32 CHARACTERS in length!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"));
 		return "[NOP]";
 	}
 	//prepping the key for encryption
