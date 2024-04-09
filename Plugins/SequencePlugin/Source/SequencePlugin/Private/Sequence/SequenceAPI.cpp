@@ -314,7 +314,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 }
 
-void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FTransactionResponse> OnSuccess, FFailureCallback OnFailure)
 {
 	FString TransactionsPayload = "[";
 	
@@ -348,7 +348,37 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
-			OnSuccess(jsonObj);
+			//parse out what we want and wrap it nicely for ease of use
+			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField("response",ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				if (ResponseObj->Get()->TryGetObjectField("data",DataObj))
+				{
+					FString TxnHash = "";
+					if (DataObj->Get()->TryGetStringField("txHash",TxnHash))
+					{
+						FTransactionResponse TxnResponse(TxnHash,jsonObj);
+						OnSuccess(TxnResponse);
+					}
+					else
+					{
+						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
 		}
 		else
 		{

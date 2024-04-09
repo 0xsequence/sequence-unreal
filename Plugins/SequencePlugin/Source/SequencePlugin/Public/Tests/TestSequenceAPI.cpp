@@ -136,11 +136,11 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
 #if PLATFORM_ANDROID
 NativeOAuth::AndroidLog("SendTransactionDone");
@@ -185,11 +185,11 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
 #if PLATFORM_ANDROID
 NativeOAuth::AndroidLog("CallContractDone");
@@ -214,14 +214,15 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	FERC20Transaction T20;
 	T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-	T20.value = "100000";
+	T20.value = "1000";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -246,11 +247,12 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -277,11 +279,12 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	T1155.vals.Add(val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
