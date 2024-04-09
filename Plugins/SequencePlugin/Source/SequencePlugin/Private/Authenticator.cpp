@@ -34,7 +34,6 @@ UAuthenticator::UAuthenticator()
 	FBase64::Decode(FSequenceConfig::WaaSTenantKey,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
-	
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -75,14 +74,9 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 	{
 		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 		ret = UIndexerSupport::jsonStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
-		ret &= this->CredentialsValid(*Credentials);
+		ret &= Credentials->RegisteredValid();
 	}
 	return ret;
-}
-
-bool UAuthenticator::CredentialsValid(const FCredentials_BE& Credentials)
-{
-	return FDateTime::UtcNow().ToUnixTimestamp() < Credentials.GetExpires();
 }
 
 void UAuthenticator::CallAuthRequiresCode() const

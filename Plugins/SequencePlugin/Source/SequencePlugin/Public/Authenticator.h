@@ -237,11 +237,21 @@ public:
 		return Registered;
 	}
 
-	bool Valid() const
+	//Used to check cases where we are registered and in a good state
+	bool RegisteredValid() const
+	{
+		bool IsValidRegistered = true;
+		IsValidRegistered &= Registered;
+		IsValidRegistered &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		IsValidRegistered &= IDToken.Len() > 0;
+		IsValidRegistered &= SessionPrivateKey.Len() > 0;
+		return IsValidRegistered;
+	}
+
+	//Used to check in cases where we don't care if we are registered, just valid
+	bool UnRegisteredValid() const
 	{
 		bool IsValid = true;
-		if (Registered)
-			IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
 		IsValid &= IDToken.Len() > 0;
 		IsValid &= SessionPrivateKey.Len() > 0;
 		return IsValid;
@@ -368,10 +378,8 @@ private:
 	bool CanHandleEmailLogin();
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
-
-	static bool CredentialsValid(const FCredentials_BE& Credentials);
 	
-	FString GetISSClaim(const FString& JWT) const ;
+	FString GetISSClaim(const FString& JWT) const;
 
 	bool CanRetryEmailLogin();
 

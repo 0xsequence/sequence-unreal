@@ -164,7 +164,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 		}
 	};
 	
-	if (this->Credentials.Valid())
+	if (this->Credentials.UnRegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
 		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
@@ -197,7 +197,7 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 		}
 	};
 	
-	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
+	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildListSessionIntent(),OnResponse,OnFailure);
@@ -258,7 +258,7 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
 		}
 	};
-	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
+	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildCloseSessionIntent(),OnResponse,OnFailure);
@@ -305,7 +305,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 		}
 		
 	};
-	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
+	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildSignMessageIntent(Message),OnResponse,OnFailure);
@@ -356,7 +356,7 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		}
 	};
 	
-	if (this->Credentials.IsRegistered() && this->Credentials.Valid())
+	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
