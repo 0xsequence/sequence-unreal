@@ -58,7 +58,7 @@ void USequenceWallet::SendRPC(FString Url, FString Content, TSuccessCallback<FSt
 			->PrepareRequest()
 			->WithUrl(Url)
 			->WithHeader("Content-type", "application/json")
-			->WithHeader("Authorization", this->AuthToken)
+			->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
 			->WithVerb("POST")
 			->WithContentAsString(Content)
 			->ProcessAndThen(OnSuccess, OnFailure);
@@ -87,20 +87,29 @@ void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
-	this->AuthToken = "Bearer " + this->Credentials.GetIDToken();
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
-	this->AuthToken = "Bearer " + this->Credentials.GetIDToken();
 	this->ProviderUrl = ProviderURL;
 }
 
 FString USequenceWallet::GetWalletAddress()
 {
-	return this->Credentials.GetWalletAddress();
+	FString Addr;
+
+	if (this->Credentials.IsRegistered())
+	{
+		Addr = this->Credentials.GetWalletAddress();
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning,TEXT("[Please Login first before trying to use credentials]"));
+	}
+	
+	return Addr;
 }
 
 void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
