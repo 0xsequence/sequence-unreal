@@ -147,7 +147,7 @@ public:
 		return Network;
 	}
 	
-	FString GetWaasVersin() const
+	FString GetWaasVersion() const
 	{
 		return WaasVersion;
 	}
@@ -351,7 +351,7 @@ private:
 	UPROPERTY()
 	FString ChallengeSession = "";
 	UPROPERTY()
-	UWallet * SessionWallet;
+	UWallet* SessionWallet;
 	UPROPERTY()
 	bool PurgeCache = true;
 private:
@@ -412,6 +412,6 @@ private:
 	void AutoRegister(const FCredentials_BE& Credentials);
 
 	//RPC Calls//
-	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
-	void UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
+	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
+	void UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 };

@@ -16,7 +16,7 @@ struct FAttributeMap
 {
     GENERATED_USTRUCT_BODY()
 public:
-        TMap<FString, FString> attribute_map;
+        TMap<FString, FString> AttributeMap;
         
         /*
         * Gets the json object string formed by this struct
@@ -24,31 +24,31 @@ public:
         */
         FString GetJsonString()
         {
-            FString ret = "{";
+            FString Ret = "{";
             
-            TArray<FString> keys;
-            attribute_map.GetKeys(keys);
+            TArray<FString> Keys;
+            AttributeMap.GetKeys(Keys);
 
-            for (FString key : keys)
+            for (FString Key : Keys)
             {
-                ret.Append("\"");
-                ret.Append(key);
-                ret.Append("\"");
-                ret.Append(":");
-                ret.Append(*attribute_map.Find(key));
-                ret.Append(",");
+                Ret.Append("\"");
+                Ret.Append(Key);
+                Ret.Append("\"");
+                Ret.Append(":");
+                Ret.Append(*AttributeMap.Find(Key));
+                Ret.Append(",");
             }
-            if (keys.Num() > 0)
+            if (Keys.Num() > 0)
             {
-                ret.RemoveAt(ret.Len() - 1);//remove the last index as it'll be a wrongly placed ,
+                Ret.RemoveAt(Ret.Len() - 1);//remove the last index as it'll be a wrongly placed ,
             }
-            ret.Append("}");
-            return ret;
+            Ret.Append("}");
+            return Ret;
         }
 
-        void setup(TSharedPtr<FJsonObject> json_in)
+        void setup(TSharedPtr<FJsonObject> JsonIn)
         {//the json_in will be a mirror of what we have here!
             //we just need to convert the json object into an attributeMap now!
-            attribute_map = UIndexerSupport::jsonObjectParser(json_in);
+            AttributeMap = UIndexerSupport::JSONObjectParser(JsonIn);
         }
 };

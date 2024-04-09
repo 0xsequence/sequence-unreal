@@ -74,7 +74,7 @@ public:
                     stringList.Add(sItem.GetJsonString());
                 }
                 //Parse the string list into a JsonString
-                ret.Append(UIndexerSupport::stringListToSimpleString(stringList));
+                ret.Append(UIndexerSupport::StringListToSimpleString(stringList));
             }
 
             if (pageSize != -1)
@@ -105,7 +105,7 @@ public:
         FString sortString = "[";
         for (FSortBy s : sort)
         {
-            sortString.Append(UIndexerSupport::simplifyString(s.GetJsonString()));
+            sortString.Append(UIndexerSupport::SimplifyString(s.GetJsonString()));
             sortString.Append(",");
         }
         if (sort.Num() > 0)

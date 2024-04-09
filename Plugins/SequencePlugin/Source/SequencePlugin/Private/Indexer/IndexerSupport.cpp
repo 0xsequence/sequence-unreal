@@ -7,19 +7,19 @@
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
 
-float UIndexerSupport::getAmount(int64 amount, int32 decimals)
+float UIndexerSupport::GetAmount(int64 Amount, int32 Decimals)
 {
-	float ret = amount;
+	float ret = Amount;
 
-	ret /= FMath::Pow(10,float(decimals));
+	ret /= FMath::Pow(10,float(Decimals));
 
 	return ret;
 }
-float UIndexerSupport::getAmount(int64 amount, float decimals)
+float UIndexerSupport::GetAmount(int64 Amount, float Decimals)
 {
-	float ret = amount;
+	float ret = Amount;
 
-	ret /= FMath::Pow(10, decimals);
+	ret /= FMath::Pow(10, Decimals);
 
 	return ret;
 }
@@ -28,32 +28,32 @@ float UIndexerSupport::getAmount(int64 amount, float decimals)
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
 * object usable in the UI!
 */
-TMap<FString, FString> UIndexerSupport::jsonObjectParser(TSharedPtr<FJsonObject> jsonData)
+TMap<FString, FString> UIndexerSupport::JSONObjectParser(TSharedPtr<FJsonObject> JSONData)
 {
-	TArray<TPair<FString, TSharedPtr<FJsonValue>>> jsonList = jsonData.Get()->Values.Array();
+	TArray<TPair<FString, TSharedPtr<FJsonValue>>> jsonList = JSONData.Get()->Values.Array();
 	TMap<FString, FString> ret;
 	ret.Reserve(jsonList.Num());//put some slack in to speed this up!
 
 	for (TPair<FString,TSharedPtr<FJsonValue>> kvp : jsonList)
 	{
-		TPair<FString, FString> tPair(kvp.Key, stringCleanup(jsonToString(kvp.Value)));
+		TPair<FString, FString> tPair(kvp.Key, StringCleanup(JsonToString(kvp.Value)));
 		ret.Add(tPair);
 	}
 	return ret;
 }
 
-TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& json)
+TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& JSON)
 {
 	TSharedPtr<FJsonObject> Ret;
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(json), Ret))
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), Ret))
 		return Ret;
 	else
 		return nullptr;
 }
 
-FString UIndexerSupport::partialSimpleString(FString string)
+FString UIndexerSupport::PartialSimpleString(FString String)
 {
-	FString* ret = &string;
+	FString* ret = &String;
 
 	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
 	FString srch_r = TEXT("\r");
@@ -73,9 +73,9 @@ FString UIndexerSupport::partialSimpleString(FString string)
 	return (*ret);
 }
 
-FString UIndexerSupport::simplifyString(FString string)
+FString UIndexerSupport::SimplifyString(FString String)
 {
-	FString* ret = &string;
+	FString* ret = &String;
 
 	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
 	FString srch_r = TEXT("\r");
@@ -98,9 +98,9 @@ FString UIndexerSupport::simplifyString(FString string)
 	return (*ret);
 }
 
-FString UIndexerSupport::simplifyStringParsable(FString string)
+FString UIndexerSupport::SimplifyStringParsable(FString String)
 {
-	FString* ret = &string;
+	FString* ret = &String;
 
 	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
 	FString srch_r = TEXT("\r");
@@ -120,17 +120,17 @@ FString UIndexerSupport::simplifyStringParsable(FString string)
 	return (*ret);
 }
 
-FString UIndexerSupport::stringListToSimpleString(TArray<FString> stringData)
+FString UIndexerSupport::StringListToSimpleString(TArray<FString> StringData)
 {
 	FString ret = "[";
 
-	for (FString string : stringData)
+	for (FString string : StringData)
 	{
 		ret += string;
 		ret += ",";
 	}
 
-	if (stringData.Num() > 0)
+	if (StringData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
@@ -138,16 +138,16 @@ FString UIndexerSupport::stringListToSimpleString(TArray<FString> stringData)
 	return ret;
 }
 
-FString UIndexerSupport::stringListToParsableString(TArray<FString> stringData)
+FString UIndexerSupport::StringListToParsableString(TArray<FString> StringData)
 {
 	FString ret = "[";
-	for (FString string : stringData)
+	for (FString string : StringData)
 	{
 		ret += "\""+string+"\"";
 		ret += ",";
 	}
 
-	if (stringData.Num() > 0)
+	if (StringData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
@@ -155,17 +155,17 @@ FString UIndexerSupport::stringListToParsableString(TArray<FString> stringData)
 	return ret;
 }
 
-FString UIndexerSupport::int64ListToSimpleString(TArray<int64> intData)
+FString UIndexerSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {
 	FString ret = "[";
 
-	for (int64 iData : intData)
+	for (int64 iData : IntData)
 	{
 		FString iDataString = FString::Printf(TEXT("%lld"), iData);
 		ret += iDataString + ",";
 	}
 
-	if (intData.Num() > 0)
+	if (IntData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
@@ -174,16 +174,16 @@ FString UIndexerSupport::int64ListToSimpleString(TArray<int64> intData)
 	return ret;
 }
 
-FString UIndexerSupport::jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jsonData)
+FString UIndexerSupport::JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
-	for (TSharedPtr<FJsonObject> jObj : jsonData)
+	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::jsonToString(jObj));
+		ret.Append(UIndexerSupport::JsonToString(jObj));
 		ret.Append(",");
 	}
 
-	if (jsonData.Num() > 0)
+	if (JsonData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);
 	}
@@ -191,16 +191,16 @@ FString UIndexerSupport::jsonObjListToString(TArray<TSharedPtr<FJsonObject>> jso
 	return ret;
 }
 
-FString UIndexerSupport::jsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> jsonData)
+FString UIndexerSupport::JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
-	for (TSharedPtr<FJsonObject> jObj : jsonData)
+	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::jsonToSimpleString(jObj));
+		ret.Append(UIndexerSupport::JsonToSimpleString(jObj));
 		ret.Append(",");
 	}
 
-	if (jsonData.Num() > 0)
+	if (JsonData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);
 	}
@@ -208,16 +208,16 @@ FString UIndexerSupport::jsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject
 	return ret;
 }
 
-FString UIndexerSupport::jsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> jsonData)
+FString UIndexerSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
-	for (TSharedPtr<FJsonObject> jObj : jsonData)
+	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::jsonToParsableString(jObj));
+		ret.Append(UIndexerSupport::JsonToParsableString(jObj));
 		ret.Append(",");
 	}
 
-	if (jsonData.Num() > 0)
+	if (JsonData.Num() > 0)
 	{
 		ret.RemoveAt(ret.Len() - 1);
 	}
@@ -225,25 +225,25 @@ FString UIndexerSupport::jsonObjListToParsableString(TArray<TSharedPtr<FJsonObje
 	return ret;
 }
 
-FString UIndexerSupport::jsonToString(TSharedPtr<FJsonObject> jsonData)
+FString UIndexerSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)
 {
 	FString ret;
 	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
-	FJsonSerializer::Serialize(jsonData.ToSharedRef(), Writer);
+	FJsonSerializer::Serialize(JsonData.ToSharedRef(), Writer);
 	return ret;
 }
 
-FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonValue> jsonData)
+FString UIndexerSupport::JsonToSimpleString(TSharedPtr<FJsonValue> JsonData)
 {
-	return simplifyString(jsonToString(jsonData));
+	return SimplifyString(JsonToString(JsonData));
 }
 
-FString UIndexerSupport::jsonToSimpleString(TSharedPtr<FJsonObject> jsonData)
+FString UIndexerSupport::JsonToSimpleString(TSharedPtr<FJsonObject> JsonData)
 {
-	return simplifyString(jsonToString(jsonData));
+	return SimplifyString(JsonToString(JsonData));
 }
 
-FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
+FUpdatableHistoryArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
 {
 	FUpdatableHistoryArgs UpdateItems;
 
@@ -285,7 +285,7 @@ FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyA
 				if (hasMetaData)
 				{
 					TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
-					NftTxn.amount = UIndexerSupport::getAmount(amount, TokenMetaData->decimals);
+					NftTxn.amount = UIndexerSupport::GetAmount(amount, TokenMetaData->decimals);
 					NftTxn.nft.NFT_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Short_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Icon_URL = TokenMetaData->image;
@@ -318,7 +318,7 @@ FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyA
 			else if (Transfer.contractType == EContractType::ERC721 || Transfer.contractType == EContractType::ERC721_BRIDGE || Transfer.contractType == EContractType::ERC20 || Transfer.contractType == EContractType::ERC20_BRIDGE)
 			{//coin
 				FCoinTxn_BE CoinTxn;
-				CoinTxn.amount = UIndexerSupport::getAmount(amount,Transfer.contractInfo.decimals);
+				CoinTxn.amount = UIndexerSupport::GetAmount(amount,Transfer.contractInfo.decimals);
 				CoinTxn.coin.Coin_Symbol_URL = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.symbol;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
@@ -374,35 +374,35 @@ FUpdatableHistoryArgs UIndexerSupport::extractFromTransactionHistory(FString MyA
 	return UpdateItems;
 }
 
-FString UIndexerSupport::jsonToParsableString(TSharedPtr<FJsonValue> jsonData)
+FString UIndexerSupport::JsonToParsableString(TSharedPtr<FJsonValue> JsonData)
 {
-	return simplifyStringParsable(jsonToString(jsonData));
+	return SimplifyStringParsable(JsonToString(JsonData));
 }
 
-FString UIndexerSupport::jsonToParsableString(TSharedPtr<FJsonObject> jsonData)
+FString UIndexerSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
 {
-	return simplifyStringParsable(jsonToString(jsonData));
+	return SimplifyStringParsable(JsonToString(JsonData));
 }
 
 /*
 * This will convert a json value to an FString!
 */
-FString UIndexerSupport::jsonToString(TSharedPtr<FJsonValue> jsonData)
+FString UIndexerSupport::JsonToString(TSharedPtr<FJsonValue> JsonData)
 {
 	FString ret;
 	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
-	FJsonSerializer::Serialize(jsonData.ToSharedRef(),"", Writer);
+	FJsonSerializer::Serialize(JsonData.ToSharedRef(),"", Writer);
 	return ret;
 }
 
-FString UIndexerSupport::stringCleanup(FString string)
+FString UIndexerSupport::StringCleanup(FString String)
 {
-	FString *ret = &string;
+	FString *ret = &String;
 
 	//For some reason FJsonValues when they get parsed will have leading commas!
-	if (string[0] == ',')
+	if (String[0] == ',')
 	{
-		string.RemoveAt(0);//remove the initial character if it's a treasonous comma!
+		String.RemoveAt(0);//remove the initial character if it's a treasonous comma!
 	}
 
 	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
@@ -445,11 +445,11 @@ FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 
 //indexer response extractors
 
-FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalancesReturn tokenBalances)
+FUpdatableItemDataArgs UIndexerSupport::ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances)
 {
 	FUpdatableItemDataArgs ret;
 	
-	for (FTokenBalance token : tokenBalances.balances)
+	for (FTokenBalance token : TokenBalances.balances)
 	{
 		if (token.contractType == EContractType::ERC1155 || token.contractType == EContractType::ERC1155_BRIDGE)
 		{//NFT
@@ -460,7 +460,7 @@ FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalanc
 			nft.Collection_Short_Name = token.contractInfo.symbol;
 			nft.Description = token.tokenMetaData.description;
 			nft.Properties = token.tokenMetaData.properties;
-			nft.Amount = UIndexerSupport::getAmount(token.balance,token.tokenMetaData.decimals);
+			nft.Amount = UIndexerSupport::GetAmount(token.balance,token.tokenMetaData.decimals);
 			nft.Value = -1;
 			nft.NFT_Icon_URL = token.tokenMetaData.image;
 			nft.Collection_Icon_URL = token.contractInfo.extensions.ogImage;
@@ -488,7 +488,7 @@ FUpdatableItemDataArgs UIndexerSupport::extractFromTokenBalances(FGetTokenBalanc
 			coin.Coin_Standard = token.contractType;
 			coin.itemID.chainID = token.chainId;
 			coin.itemID.contractAddress = token.contractAddress;
-			coin.Coin_Amount = UIndexerSupport::getAmount(token.balance,token.contractInfo.decimals);
+			coin.Coin_Amount = UIndexerSupport::GetAmount(token.balance,token.contractInfo.decimals);
 			coin.Coin_Value = -1;
 			coin.Coin_Symbol_URL = token.contractInfo.logoURI;
 			ret.semiParsedBalances.coins.Add(coin);//add the semi parsed coin data

@@ -60,11 +60,11 @@ TStaticArray<uint8, TSize> HexToBytesInline(FString in)
 FString TrimHex(FString Hex);
 
 //Makes
-TArray<uint8> MakeArray(uint8* ptr, int len);
+TArray<uint8> MakeArray(uint8* Ptr, int Len);
 template<ByteLength TSize>
-TStaticArray<uint8, TSize> MakeArray(uint8* ptr)
+TStaticArray<uint8, TSize> MakeArray(uint8* Ptr)
 {
-	TStaticArray<uint8, TSize> arr;
-	for(int i = 0; i < TSize; i++) arr[i] = ptr[i];
-	return arr;
+	TStaticArray<uint8, TSize> Arr;
+	for(int i = 0; i < TSize; i++) Arr[i] = Ptr[i];
+	return Arr;
 }

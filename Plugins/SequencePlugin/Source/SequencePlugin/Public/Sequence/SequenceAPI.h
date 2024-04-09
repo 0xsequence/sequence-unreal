@@ -49,8 +49,8 @@ private:
 	
 	FString ProviderUrl = "";
 	const FString Hostname = "https://next-api.sequence.app";
-	const FString sequenceURL_QR = "https://api.sequence.app/qr/";
-	const FString sequenceURL = "https://api.sequence.app/rpc/API/";
+	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
+	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
 	const FString Path = "/rpc/Wallet/";
 	
 	//URL fetchers for sequence services
@@ -62,8 +62,8 @@ private:
 	void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	//Response helper functions
-	TArray<FContact_BE> buildFriendListFromJson(FString json);
-	TArray<FItemPrice_BE> buildItemUpdateListFromJson(FString json);
+	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
+	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
 public:
 	USequenceWallet();
 	
@@ -81,7 +81,7 @@ public:
 private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
-	FString BuildSignMessageIntent(const FString& message);
+	FString BuildSignMessageIntent(const FString& Message);
 	FString BuildSendTransactionIntent(const FString& Txns);
 	FString BuildRegisterSessionIntent();
 	FString BuildListSessionIntent();
@@ -91,12 +91,12 @@ private:
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
-	void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	FString buildQR_Request_URL(FString data, int32 size);
+	void GetFriends(FString PublicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCoinPrice(FID_BE ItemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCollectiblePrice(FID_BE ItemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	FString BuildQr_Request_URL(FString Data, int32 Size);
 private:
 	template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
 public:
@@ -105,22 +105,22 @@ public:
 	/*
 	Used to get a ping back from the Chain
 	*/
-	void Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
+	void Ping(int64 ChainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
+	void Version(int64 ChainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
+	void RunTimeStatus(int64 ChainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the chainID from the Chain
 	*/
-	void GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
+	void GetChainID(int64 ChainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the Ether balance from the Chain
@@ -128,32 +128,32 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
+	void GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSupplies(int64 ChainID, FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSuppliesMap(int64 ChainID, FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetBalanceUpdates(int64 ChainID, FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTransactionHistory(int64 ChainID, FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
 	
 	//Provider calls
 
@@ -186,5 +186,5 @@ public:
 
 	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void NonViewCall(FEthTransaction Transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 };

@@ -6,7 +6,7 @@
 #include "SystemDataBuilder.h"
 #include "Engine/World.h"
 
-FUserDetails ASequenceBackendManager::getUserDetails()
+FUserDetails ASequenceBackendManager::GetUserDetails()
 {
 	FUserDetails ret;
 	return ret;
@@ -43,21 +43,21 @@ ASequenceBackendManager::ASequenceBackendManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	this->authenticator = nullptr;
+	this->Authenticator = nullptr;
 }
 
 // Called when the game starts or when spawned
 void ASequenceBackendManager::BeginPlay()
 {
 	Super::BeginPlay();
-	this->authenticator = NewObject<UAuthenticator>();
+	this->Authenticator = NewObject<UAuthenticator>();
 
 	//setup up delegate bindings
 	FScriptDelegate del;
 	del.BindUFunction(this, "CallShowAuthSuccessScreen");
-	this->authenticator->AuthSuccess.Add(del);
-	this->authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
-	this->authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
+	this->Authenticator->AuthSuccess.Add(del);
+	this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
+	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -65,7 +65,7 @@ void ASequenceBackendManager::BeginPlay()
 /*
 	Used to copy data to the systems clipboard!
 */
-void ASequenceBackendManager::CopyToClipboard(FString data)
+void ASequenceBackendManager::CopyToClipboard(FString Data)
 {
 	//FGenericPlatformMisc::ClipboardCopy(*data);
 }
@@ -85,9 +85,9 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 
 void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-	if (this->authenticator)
+	if (this->Authenticator)
 	{
-		this->authenticator->InitiateMobileSSO(Type);
+		this->Authenticator->InitiateMobileSSO(Type);
 	}
 	else
 	{
@@ -97,9 +97,9 @@ void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
 
 FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 {
-	if (this->authenticator)
+	if (this->Authenticator)
 	{
-		return this->authenticator->GetSigninURL(Type);
+		return this->Authenticator->GetSigninURL(Type);
 	}
 	else
 	{
@@ -110,23 +110,23 @@ FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 
 void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
 {
-	this->authenticator->SocialLogin(IDTokenIn);
+	this->Authenticator->SocialLogin(IDTokenIn);
 }
 
 void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
 {
-	this->authenticator->EmailLogin(EmailIn);
+	this->Authenticator->EmailLogin(EmailIn);
 }
 
 void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 {
-	this->authenticator->EmailLoginCode(CodeIn);
+	this->Authenticator->EmailLoginCode(CodeIn);
 }
 
 bool ASequenceBackendManager::StoredCredentialsValid()
 {
 	bool valid = false;
-	FStoredCredentials_BE PCred = this->authenticator->GetStoredCredentials();
+	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
 	valid = PCred.GetValid();
 	if (valid)
 	{
@@ -142,8 +142,8 @@ bool ASequenceBackendManager::StoredCredentialsValid()
 
 void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& systemData)
 {
-	this->testCoins = systemData.user_data.coins;
-	this->testNFTs = systemData.user_data.nfts;
+	this->TestCoins = systemData.user_data.coins;
+	this->TestNfTs = systemData.user_data.nfts;
 
 	//need to setup a special timer function delegate!
 

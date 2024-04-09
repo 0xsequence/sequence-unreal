@@ -44,24 +44,24 @@ public:
         if (!accountAddresses.IsEmpty())
         {
             ret.Append(",\"accountAddresses\":");
-            ret.Append(UIndexerSupport::stringListToParsableString(accountAddresses));
+            ret.Append(UIndexerSupport::StringListToParsableString(accountAddresses));
         }
 
         if (!contractAddresses.IsEmpty())
         {
-            ret.Append(",\"contractAddresses\":" + UIndexerSupport::stringListToParsableString(contractAddresses));
+            ret.Append(",\"contractAddresses\":" + UIndexerSupport::StringListToParsableString(contractAddresses));
         }
 
         if (!transactionHashes.IsEmpty())
         {
             ret.Append(",\"transactionHashes\":");
-            ret.Append(UIndexerSupport::stringListToParsableString(transactionHashes));
+            ret.Append(UIndexerSupport::StringListToParsableString(transactionHashes));
         }
 
         if (!metaTransactionIDs.IsEmpty())
         {
             ret.Append(",\"metaTransactionIDs\":");
-            ret.Append(UIndexerSupport::stringListToParsableString(metaTransactionIDs));
+            ret.Append(UIndexerSupport::StringListToParsableString(metaTransactionIDs));
         }
         
         if (fromBlock != -1)
