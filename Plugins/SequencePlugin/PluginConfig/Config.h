@@ -2,6 +2,11 @@
 #pragma once
 #include "CoreMinimal.h"
 
+struct FEncryptorConfig
+{
+	inline static FString Key = "aaaabbbbccccddddaaaabbbbccccdddd";
+};
+
 struct FSequenceConfig
 {	
 	inline static FString WaaSTenantKey = "eyJwcm9qZWN0SWQiOjU5LCJycGNTZXJ2ZXIiOiJodHRwczovL25leHQtd2Fhcy5zZXF1ZW5jZS5hcHAifQ==";

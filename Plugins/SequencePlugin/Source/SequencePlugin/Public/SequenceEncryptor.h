@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #pragma once
-
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "SequenceEncryptor.generated.h"
@@ -49,12 +48,6 @@ public:
 	* @Return the decrypted data
 	*/
 	static FString Decrypt(FString Payload,int32 PayloadLength);
-
-	static void EncryptAES(FString data);
-
-	static void DecryptAES();
-
-	static int32 BytesInFString(FString data);
 
 	static void PKC7Padding(int32 blockSize);
 };
