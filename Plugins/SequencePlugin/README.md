@@ -159,13 +159,15 @@ else
 
 2) Next **[AuthRequiresCode]** will fire when the **[UAuthenticator]** is ready to receive the Code from your UI. Collect this code from your GUI and send it to the authenticator using **[EmailCode(CodeIn)]**.
 
-3) Finally **[AuthSuccess]** will fire with a Credentials_BE struct as a parameter. This is your non registered credentials from EmailAuth. You are done Email Based Auth.
+3) Finally **[AuthSuccess]** will fire with a Credentials_BE struct as a parameter. You are done Email Based Auth.
 
 ### Social Signin based Authentication on Desktop With CustomUI
 
 1) To start SSO based authentication with desktop you can either use your own implementation to get the necessary id_token or you can make use of Unreal's web browser plugin.
 
-2) With whatever implementation you chose you can forward the collected id_token to the UAuthenticator object with **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO.
+2) To get the URL to navigate to you can use the UAuthenticator supplied call **[FString GetSigninURL(const ESocialSigninType& Type)]** where Type is the social login type you wish to use
+
+3) With whatever implementation you chose you can forward the collected id_token to the UAuthenticator object with **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO.
 
 ### Social Signin based Authentication on Mobile With CustomUI
 
@@ -433,8 +435,7 @@ USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL)
 ```
 
 Where the Credentials you give are the credentials you received from the UAuthenticator when **[AuthSuccess]** fires, or you can use the call Auth->**[GetStoredCredentials]**(), where Auth is of the type **[UAuthenticator]**. If you are using StoredCredentials please ensure they are valid by checking the wrapping Structs FStoredCredentials_BE.GetValid() flag returned from **[GetStoredCredentials]**, the providerURL is the url of the provider you wish to use.
-
-Once you have your **[USequenceWallet]** UObject please ensure that you've registered the session using **[RegisterSession]** before attempting to make other calls to the API.
+Once you have logged in and have the supplied credentials to the Sequence Wallet you'll be good to go, We now automatically register credentials in the UAuthenticator
 
 #### Sequence API Methods
 
