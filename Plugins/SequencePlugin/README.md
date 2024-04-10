@@ -3,6 +3,24 @@ Sequence Unreal SDK
 
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
+## Manually Upgrading from previous versions
+
+IF you are using release Beta_1_0_2 or older please backup the values you stored in `Config/Config.h`
+when the new Config.h exists in your project simply update the values in that file with the ones you had existing prior
+
+IF you are using a newer release you can leave the folder `SequencePlugin/PluginConfig` alone
+
+To Manually Update the Sequence plugin delete the following folders contained within `SequencePlugin`:
+`Binaries`,`Content`,`Intermediate`,`Resource`,`Source`
+
+Then Copy the following Folders / Files from the NEW SequencePlugin Folder:
+`Content`, `Resources`, `Source`, `README`, `SequencePlugin`
+
+Then paste these folders / files into the SequencePlugin folder in your project, allowing the files to be replaced with new ones
+in the case of `README.md` & `SequencePlugin.uplugin`
+
+Once done Rebuild the project from source and you'll be good to go!
+
 ## Credentials
 
 Before you can use this plugin, you need to acquire the following credentials from Sequence:
@@ -10,43 +28,50 @@ Before you can use this plugin, you need to acquire the following credentials fr
 - `WaaSTenantKey`
 - `ProjectAccessKey`
 
-You can then add these credentials in the **[Config.h]** file under `SequencePlugin/Source/SequencePlugin/Private/Config/Config.h`.
-
+You can then add these credentials in the **[Config.h]** file under `SequencePlugin/PluginConfig/Config.h`.
 
 ## Security
 
-You must provide an encryption key implementation at **[SequenceEncryptor.cpp]** function **[GetStoredKey]**. This function must be implemented to provide a securely stored private key that will be used to encrypt and decrypt client information. Failure to do so will result in NO information being stored or in the event you do not use a securely stored key, can result in client information being stored insecurely on their systems.
+You must provide an Encryption key of 32 Characters in length, in `SequencePlugin/PluginConfig/Config.h` contained within
+the following struct value **[FEncryptorConfig::Key]**
 
-You have two options for a secure key implementation:
-
-1) You can provide a cryptographically secure key of 32 characters in length and configure your packaged project to be encrypted
-   so that the key provided in the function cannot be retrieved from your package.
-
-2) You can use platform specific key stores to securely store your keys. This is the preferred method.
-
-If this implementation is not done properly, user data stored locally can be tampered with and stolen.
+In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
+You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.2)
 
 ***
 
-## Getting Started
+## Getting Started With the Builtin GUI
 
-1) Once you have the the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it, then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
+1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it, then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
 
 2) Launch your project, then allow it to update the UProject Settings.
 
 3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
 
-4) If you wish to use the in built sequence UI for login
+4) If you wish to use the in built sequence UI for login you have to:
     a) Create an **[Actor]** you wish to be responsible for the SequenceUI then attach the **[AC_SequencePawn_Component]** to it
     b) Setup your **[Actor]** Blueprint similar to how it's setup in **[BP_CustomSpectatorPawn]** being sure to bind to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
 
-5) Once you have those credentials you'll need to forward them to your own C++ backend in order to use the Sequence API, an example of this can be found in the **[BP_CustomSpectatorPawn]**. This Pawn inherits from a C++ class **[SqncSpecPawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**. Calling this function will forward the credentials to a C++ backend.
+Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
+during updates all code could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
+it's recommended you duplicate the BP_CustomSpectatorPawn out of the plugin folder, then update it's parent class to a C++ class of your own making that also
+resides outside the plugin.
 
-6) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
+5) Once you have those credentials you'll need to forward them to your own C++ code in order to use the Sequence API, an example of this can be found in the **[BP_CustomSpectatorPawn]**. This Pawn inherits from a C++ class **[SqncSpecPawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**. Calling this function will forward the credentials to the C++ ParentClass function.
+
+6) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
+Gamemode stored within Ready_To_Use in the content folder. Duplicate this Gamemode and move it outside the plugin folder.
+Then open up the blueprint and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** if you just want to see things running OR
+your own Pawn (think of this Pawn as the character you play as / control).
+Lastly in Project Settings you'll need to set this gamemode as the default gamemode. Specifically in ProjectSettings -> Maps & Modes
+
+To learn more about Gamemodes and gamemode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
+
+7) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
 
 ### Custom UI Integration
 
-In a C++ backend with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
+In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
 //This call is platform dependent on windows & mac this is required for SSO WIP
@@ -112,7 +137,7 @@ else
 
 1) To start email based authentication you'll start it with this call **[EmailLogin(const FString& EmailIn)]**, supplying an email you've collected from the User in your GUI.
 
-2) Next **[AuthRequiresCode]** will fire when the backend is ready to receive the Code from your UI. Collect this code from your GUI and send it to the authenticator using **[EmailCode(CodeIn)]**.
+2) Next **[AuthRequiresCode]** will fire when the **[UAuthenticator]** is ready to receive the Code from your UI. Collect this code from your GUI and send it to the authenticator using **[EmailCode(CodeIn)]**.
 
 3) Finally **[AuthSuccess]** will fire with a Credentials_BE struct as a parameter. This is your non registered credentials from EmailAuth. You are done Email Based Auth.
 
@@ -233,7 +258,7 @@ To set your system up for Packaging please refer to the following links:
 #### Google SSO Setup
 In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
 
-You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application, as well as place the **[Web Application client ID]** in the `Config/Config.h` `FAuthenticatorConfig.GoogleClientID` field.
+You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application, as well as place the **[Web Application client ID]** in the `PluginConfig/Config.h` `FAuthenticatorConfig.GoogleClientID` field.
 
 Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
 
