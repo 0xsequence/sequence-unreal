@@ -44,7 +44,7 @@ public:
     /*
     * Used to Handle Edge Cases with Unreal's Json parsing
     */
-    void setup(FJsonObject json_in)
+    void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;
         if (json_in.TryGetArrayField("tokenIDs",lst))
