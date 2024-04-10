@@ -12,7 +12,7 @@ FString USequenceEncryptor::GetStoredKey()
 }
 
 
-void USequenceEncryptor::PKC7Padding(int32 blockSize)
+void USequenceEncryptor::PKC7Padding(int32 BlockSize)
 {
 	FString testString = "abc";
 	int32 buffSize = sizeof(testString);
@@ -31,6 +31,27 @@ int32 BytesInFString(FString data)
 		bytes += sizeof(c);
 	}
 	return bytes;
+}
+
+
+//need to write a couple new functions for this based on AES-CBC-256, IV 16 bytes
+
+void USequenceEncryptor::EncryptAES(FString Data)
+{
+	FString key = GetStoredKey();
+	if (key.Len() != 32)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
+		return;// "[NOP]";
+	}
+	
+
+	//StringToBytes(data, PtrString, buffSize);
+
+	//AES_init_ctx_iv(PtrCtx, PtrKey, PtrIV);//init then use
+	//AES_CBC_encrypt_buffer(PtrCtx, PtrString, buffSize);
+
+	//FString DuringEncrypt = BytesToString(PtrString, buffSize);
 }
 
 FString USequenceEncryptor::Encrypt(FString Payload)

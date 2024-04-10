@@ -296,9 +296,9 @@ FString TrimHex(FString Hex)
 	return HexCopy;
 }
 
-TArray<uint8> MakeArray(uint8* ptr, int len)
+TArray<uint8> MakeArray(uint8* Ptr, int Len)
 {
 	TArray<uint8> arr;
-	for(int i = 0; i < len; i++) arr.Push(ptr[i]);
+	for(int i = 0; i < Len; i++) arr.Push(Ptr[i]);
 	return arr;
 }

@@ -13,17 +13,17 @@ void SequenceAPITest::BasicProviderTests()
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
-	FContractCall testCall;
-	const TFunction<void(FUnsizedData)> testResponse = [](FUnsizedData response)
+	FContractCall TestCall;
+	const TFunction<void(FUnsizedData)> TestResponse = [](FUnsizedData Response)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Basic provider response"));
 	};
 
-	const TFunction<void(FSequenceError)> testError = [](FSequenceError error)
+	const TFunction<void(FSequenceError)> TestError = [](FSequenceError Error)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error"));
 	};
-	Api->Call(testCall,6,testResponse,testError);
+	Api->Call(TestCall,6,TestResponse,TestError);
 }
 
 void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
@@ -63,7 +63,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	NativeOAuth::AndroidLog("SignMessage");
 #endif
 	
-	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage response)
+	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage Response)
 	{
 		OnSuccess("Sign Message Test Passed");
 #if PLATFORM_ANDROID
@@ -91,7 +91,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("ListSessions");
 #endif
-	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> response)
+	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
 	{
 		OnSuccess("List Sessions Test Passed");
 #if PLATFORM_ANDROID
@@ -273,10 +273,10 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
 	
-	FERC1155TxnValue val;
-	val.amount = "1";
-	val.id = "66635";
-	T1155.vals.Add(val);
+	FERC1155TxnValue Val;
+	Val.amount = "1";
+	Val.id = "66635";
+	T1155.vals.Add(Val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
 	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)

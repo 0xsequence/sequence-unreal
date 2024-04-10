@@ -185,7 +185,7 @@ void AGeneralTesting::TestTokenBalances() const
 	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
 	{
-		FString ret = UIndexerSupport::structToString<FGetTokenBalancesReturn>(tokenBalances);
+		FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -206,9 +206,9 @@ void AGeneralTesting::TestHistory() const
 	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
 	{
-		if (printAll)
+		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::structToString<FGetTransactionHistoryReturn>(transactionHistory);
+			FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -249,7 +249,7 @@ void AGeneralTesting::TestMisc()
 
 void AGeneralTesting::OnDoneImageProcessing()
 {//forward this to the front as we will be able to view all the images from there!
-	this->testMiscForwarder(this->imgHandler->getProcessedImages());
+	this->testMiscForwarder(this->imgHandler->GetProcessedImages());
 }
 
 // Called every frame

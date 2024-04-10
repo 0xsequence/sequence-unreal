@@ -33,7 +33,8 @@ UAuthenticator::UAuthenticator()
 	FString ParsedJWT;
 	FBase64::Decode(FSequenceConfig::WaaSTenantKey,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
-	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
+
+	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -46,7 +47,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		const FString CTS_Json = UIndexerSupport::structToString<FCredentials_BE>(Credentials);
+		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
 		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
@@ -73,7 +74,7 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
 	{
 		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
-		ret = UIndexerSupport::jsonStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= Credentials->RegisteredValid();
 	}
 	return ret;
@@ -374,7 +375,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 	
 	if (this->CanRetryEmailLogin())
 	{
-		this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
+		this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
 	}
 	else
 	{
@@ -406,7 +407,7 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
-	this->UE_AWS_RPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
+	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
 }
 
 void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -443,7 +444,7 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
-	this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
+	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
 void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
@@ -475,10 +476,10 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 	Wallet->RegisterSession(OnSuccess,OnFailure);
 }
 
-TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
+TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
 {
 	TSharedPtr<FJsonObject> responseObj;
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(response), responseObj))
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), responseObj))
 		return responseObj;
 	else
 		return nullptr;
@@ -497,7 +498,7 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	return FStoredCredentials_BE(IsValid, *Credentials);
 }
 
-void UAuthenticator::UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
+void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
 {
 	UE_LOG(LogTemp,Display,TEXT("RequestBody: %s"),*RequestBody);
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();

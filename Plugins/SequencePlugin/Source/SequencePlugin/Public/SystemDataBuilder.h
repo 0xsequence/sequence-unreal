@@ -18,37 +18,37 @@ class SEQUENCEPLUGIN_API USystemDataBuilder : public UObject
 	GENERATED_BODY()
 private:
 	//Shared Variables//
-	ASequenceBackendManager* sqncMngr;//this is used to let the backend know when we are done
+	ASequenceBackendManager* SqncMngr;//this is used to let the backend know when we are done
 
-	mutable FCriticalSection masterGuard;//lock for masterSyncer
-	USyncer* masterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
+	mutable FCriticalSection MasterGuard;//lock for masterSyncer
+	USyncer* MasterSyncer;//keeps track of all active requests when this counts down to 0 we are done!
 	
 	// these vars are read only
-	mutable FCriticalSection walletGuard;
+	mutable FCriticalSection WalletGuard;
 	USequenceWallet* GWallet;
 	int64 GChainId;
 	FString GPublicAddress;
 
-	mutable FCriticalSection systemDataGuard;//lock for system data
-	FSystemData_BE systemData;
+	mutable FCriticalSection SystemDataGuard;//lock for system data
+	FSystemData_BE SystemData;
 	//Shared Variables//
 
 	//GO Get Token Data Variables//
-	UIndexer* tIndexer;
-	UObjectHandler* tokenImageHandler;
-	mutable FCriticalSection itemGuard;
-	USyncer* getItemDataSyncer;
+	UIndexer* TIndexer;
+	UObjectHandler* TokenImageHandler;
+	mutable FCriticalSection ItemGuard;
+	USyncer* GetItemDataSyncer;
 	//GO Get Token Data Variables//
 
 	//GO Get Txn history Data Variables//
-	UIndexer* hIndexer;
-	mutable FCriticalSection historyGuard;
-	USyncer* getTxnHistorySyncer;
+	UIndexer* HIndexer;
+	mutable FCriticalSection HistoryGuard;
+	USyncer* GetTxnHistorySyncer;
 	UObjectHandler* HistoryImageHandler;
 	//GO Get Txn history Data Variables//
 
 	//GO Get QR Data Variables//
-	FString qr_url;
+	FString QrURL;
 	UObjectHandler* QRImageHandler;
 	//GO Get QR Data Variables//
 
@@ -56,23 +56,23 @@ private:
 	* Used to take and Array of FNFT_BE's and convert them into a compressed form
 	* FNFT_Master_BE list that the front actually uses
 	*/
-	TArray<FNFT_Master_BE> compressNFTData(TArray<FNFT_BE> nfts);
+	TArray<FNFT_Master_BE> CompressNftData(TArray<FNFT_BE> Nfts);
 
 	/*
 	* Wrapper function for master syncer dec call,
 	* this function applies locking on the syncer in a clean and easily modifiable way
 	*/
-	void decMasterSyncer();
+	void DecMasterSyncer();
 
 
 	//manager function for getting value and image data for tokens
-	void initGetTokenData();
+	void InitGetTokenData();
 
 	/*
 	* Master function for controlling fetching of token data aux data such
 	* as values and images and updating the needed system data values
 	*/
-	void initGetItemData(FUpdatableItemDataArgs itemsToUpdate);
+	void InitGetItemData(FUpdatableItemDataArgs ItemsToUpdate);
 
 	/*
 	* Fires off when all token related tasks are done
@@ -84,24 +84,24 @@ private:
 	* Used for managing and setting the QR code data
 	* ASYNC
 	*/
-	void initGetQRCode();
+	void InitGetQrCode();
 
 	/*
 	* Master controller for everything history data related
 	*/
-	void initGetTxnHistory();
+	void InitGetTxnHistory();
 
 	/*
 	* Updates the received history data with images and values
 	*/
-	void initGetHistoryAuxData(FUpdatableHistoryArgs history_data);
+	void InitGetHistoryAuxData(FUpdatableHistoryArgs history_data);
 
 	//Fires off when history async processing is done
 	UFUNCTION()
 		void OnGetTxnHistoryDone();
 
 	//used for getting contact data! Async
-	void initGetContactData();
+	void InitGetContactData();
 
 	//master OnDone//
 	/*
@@ -121,8 +121,8 @@ public:
 	USystemDataBuilder();
 	~USystemDataBuilder();
 
-	void initBuildSystemData(USequenceWallet * wallet,int64 chainId,FString publicAddress, ASequenceBackendManager* manager);
+	void InitBuildSystemData(USequenceWallet *Wallet, int64 ChainId,FString PublicAddress, ASequenceBackendManager* Manager);
 
-	void testGOTokenData(USequenceWallet* wallet, int64 chainId, FString publicAddress);
+	void TestGoTokenData(USequenceWallet* Wallet, int64 ChainId, FString PublicAddress);
 
 };
