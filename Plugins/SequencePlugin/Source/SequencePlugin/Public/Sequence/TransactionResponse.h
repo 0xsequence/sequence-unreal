@@ -11,16 +11,38 @@ USTRUCT()
 struct FTransactionResponse
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY()
-	FString TransactionHash = "";
+	FString IdentifyingCode = "";
+	UPROPERTY()
+	FString TxHash = "";
+	UPROPERTY()
+	FString MetaTxHash = "";
+
+	TSharedPtr<FJsonObject> Request;
+	TSharedPtr<FJsonObject> NativeReceipt;
+	TSharedPtr<FJsonObject> Receipt;
+	TArray<TSharedPtr<FJsonValue>> Simulations;
+
+	//Raw Json Response for ease of use with older code
 	TSharedPtr<FJsonObject> Json;
 
 	FTransactionResponse(){}
 	
-	FTransactionResponse(const FString& TxnHashIn, const TSharedPtr<FJsonObject>& JsonIn)
+	FTransactionResponse(
+		const FString& IdentifyingCodeIn, const FString& TxHashIn, const FString& MetaTxHashIn,
+		const TSharedPtr<FJsonObject>& RequestIn,
+		const TSharedPtr<FJsonObject>& NativeReceiptIn,
+		const TSharedPtr<FJsonObject>& ReceiptIn,
+		const TArray<TSharedPtr<FJsonValue>>& SimulationsIn,
+		const TSharedPtr<FJsonObject>& JsonIn)
 	{
-		TransactionHash = TxnHashIn;
+		IdentifyingCode = IdentifyingCodeIn;
+		TxHash = TxHashIn;
+		MetaTxHash = MetaTxHashIn;
+		Request = RequestIn;
+		NativeReceipt = NativeReceiptIn;
+		Simulations = SimulationsIn;
 		Json = JsonIn;
 	}
 };

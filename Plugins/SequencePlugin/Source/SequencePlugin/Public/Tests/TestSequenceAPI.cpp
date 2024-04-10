@@ -226,7 +226,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -256,7 +256,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -288,7 +288,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
