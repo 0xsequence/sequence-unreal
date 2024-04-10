@@ -16,9 +16,6 @@ Example API usage steps:
 2) Create a USequenceWallet object within it
 3) Call the various api calls through the USequenceWallet
 
-
-
-
 Sequence Unreal SDK
 ===================
 
@@ -69,14 +66,30 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 
 3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
 
-4) If you wish to use the in built sequence UI for login you have to:
-    a) Create an **[Actor]** you wish to be responsible for the SequenceUI then attach the **[AC_SequencePawn_Component]** to it
-    b) Setup your **[Actor]** Blueprint similar to how it's setup in **[BP_CustomSpectatorPawn]** being sure to bind to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
+4) If you wish to use the in built sequence UI for login you have to do the following:
+    
+    a) Create a C++ Class that Inherits from **[Actor]** If you don't know how to do this refer to the [Creating C++ Classes in Unreal]
+    
+    b) In that C++ Classes .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+    
+    c) Create a BlueprintCallable function that accepts **[FCredentials_BE]** as a Parameter.
+    
+    d) Create a Blueprint that inherits from your C++ Class, Then Attach the **[AC_SequencePawn_Component]** to it. For in depth specifics on how to setup this blueprint
+       please refer to the demonstration BP **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
+       received from the inbuilt UI to your code base by binding to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
+
+    If you don't know what an some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
+    [Actors](https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine?application_version=5.2)
+    [Components](https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine?application_version=5.2)
+    [PlayerController](https://dev.epicgames.com/documentation/en-us/unreal-engine/player-controllers-in-unreal-engine?application_version=5.2)
+    [UI in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-widgets-in-unreal-engine?application_version=5.2)
+    [C++ & Blueprints](https://dev.epicgames.com/documentation/en-us/unreal-engine/cpp-and-blueprints-example?application_version=5.2)
+    [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2)    
 
 Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
-during updates all code could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
+during updates all code you place there could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
 it's recommended you duplicate the BP_CustomSpectatorPawn out of the plugin folder, then update it's parent class to a C++ class of your own making that also
-resides outside the plugin.
+resides outside the plugins content folder.
 
 5) Once you have those credentials you'll need to forward them to your own C++ code in order to use the Sequence API, an example of this can be found in the **[BP_CustomSpectatorPawn]**. This Pawn inherits from a C++ class **[SqncSpecPawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**. Calling this function will forward the credentials to the C++ ParentClass function.
 
@@ -458,7 +471,7 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 For iOS apps you also need to setup provisioning, [following these docs](https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/).
 
 #### Unreal and Xcode Specifics
-During the Unreal Package process there is a very high chance that it will fail due to a code signing error, in the event that this happens please take the following steps within XCode to get your packaged .app file
+During the Unreal Package process in the event a code signing error occurs you can take the following steps within XCode to get your packaged .app file
 
 1) After packaging the project in Unreal, open the Xcode project (Sequence-unreal folder -> Intermediate -> ProjectFilesIOS -> SequenceUnreal.xcodeproj)
 2) Click on the project name on the left hand side to open up project settings
