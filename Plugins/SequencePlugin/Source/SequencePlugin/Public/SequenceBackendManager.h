@@ -101,8 +101,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
+	
 	UFUNCTION(BlueprintCallable, Category = "Login")
 		bool StoredCredentialsValid();
+	
+	UFUNCTION(BlueprintCallable, Category = "Login")
+		FCredentials_BE GetStoredCredentials();
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 

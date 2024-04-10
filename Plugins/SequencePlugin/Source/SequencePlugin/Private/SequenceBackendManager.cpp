@@ -123,6 +123,19 @@ void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 	this->Authenticator->EmailLoginCode(CodeIn);
 }
 
+FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
+{
+	bool valid = false;
+	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
+	valid = PCred.GetValid();
+	if (valid)
+	{
+		this->Credentials = PCred.GetCredentials();
+		return this->Credentials;
+	}
+	return FCredentials_BE();
+}
+
 bool ASequenceBackendManager::StoredCredentialsValid()
 {
 	bool valid = false;
