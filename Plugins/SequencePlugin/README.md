@@ -1,9 +1,3 @@
-Example API usage steps:
-
-1) Import SequenceAPI.h into the C++ Parent class you are using
-2) Create a USequenceWallet object within it
-3) Call the various api calls through the USequenceWallet
-
 Sequence Unreal SDK
 ===================
 
@@ -122,7 +116,7 @@ bool StoredCredentialsValid();
 ```
 
 
-To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator + Auth = NewObject<UAuthenticator>()]**, this UObject manages the authentication side of Sequence.
+To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator * Auth = NewObject<UAuthenticator>()]**, this UObject manages the authentication side of Sequence.
 
 Be sure to bind to the Delegates for **[AuthSuccess]**, **[AuthFailure]**, **[AuthRequiresCode]** prior to making any signin calls You can bind to these delegates like so:
 
@@ -159,7 +153,7 @@ else
 }
 ```
 
-### Email based Authentication
+### Email based Authentication With CustomUI
 
 1) To start email based authentication you'll start it with this call **[EmailLogin(const FString& EmailIn)]**, supplying an email you've collected from the User in your GUI.
 
@@ -167,24 +161,24 @@ else
 
 3) Finally **[AuthSuccess]** will fire with a Credentials_BE struct as a parameter. This is your non registered credentials from EmailAuth. You are done Email Based Auth.
 
-### Social Signin based Authentication on Desktop
+### Social Signin based Authentication on Desktop With CustomUI
 
 1) To start SSO based authentication with desktop you can either use your own implementation to get the necessary id_token or you can make use of Unreal's web browser plugin.
 
 2) With whatever implementation you chose you can forward the collected id_token to the UAuthenticator object with **[SocialLogin(const FString& IDTokenIn)]**, after which **[AuthSuccess]** will fire and you're done desktop based SSO.
 
-### Social Signin based Authentication on Mobile
+### Social Signin based Authentication on Mobile With CustomUI
 
 1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
    where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported
 
-Android SSO Requirements
+### Android SSO Requirements
 
 Google: Please ensure your project is setup according to **[Google SSO Setup]** listed below
 
 Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 
-IOS SSO
+### IOS SSO Requirements
 
 Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
 
@@ -197,6 +191,7 @@ For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Con
 ### Sequence API
 
 After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet]** by using:
+In order to gain access to the SequenceAPI be sure to #include "Sequence/SequenceAPI.h"
 
 ```clike
 **[USequenceWallet * Api = USequenceWallet(CredentialsIn)]**
@@ -231,7 +226,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
     /*
         Used to register a session (done automatically for you by UAuthenticator now)
     */
-    void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+    void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
     /*
         Lists the active sessions
@@ -344,7 +339,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
     
-    const TSuccessCallback<TArray<FSession>> OnResponse = [=](TArray<FSession> Response)
+    const TSuccessCallback<TArray<FSession>> OnSuccess = [=](TArray<FSession> Response)
     {
        //Response is a list of Sessions
     };
@@ -354,24 +349,46 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-	Api->ListSessions(OnResponse,OnFailure);
+	Api->ListSessions(OnSuccess,OnFailure);
 
-### Example CloseSession & SignOut
+### Example CloseSession
 
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
     USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
-	const TFunction<void(FString)> OnResponse = [=](const FString& Response)
+	const TFunction<void(FString)> OnSuccess = [=](const FString& Response)
 	{
 		//Response is just a confirmation string
     };
 
 	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
 	{
-		OnFailure("Test Failed", Error);
+		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-	Api->CloseSession(OnResponse,OnFailure);
+	Api->CloseSession(OnSuccess,OnFailure);
+
+### Example SignOut
+
+    const UAuthenticator * Auth = NewObject<UAuthenticator>();
+    USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
+    Api->SignOut();
+
+### Example RegisterSession
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
+    const TFunction<void(FCredentials_BE)> OnSuccess = [=](FCredentials_BE Response)
+    {
+        //Successful registration
+    };
+
+	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
+    };
+
+	Api->RegisterSession(OnSuccess,OnFailure);
 
 ***
 
@@ -406,7 +423,6 @@ The SDK automatically stores credentials on disk in the following cases:
 2) On Successful Registering of a session
 3) On Successful Closing of a session
 
-
 #### USequenceWallet
 
 To get a `USequenceWallet` call either:
@@ -419,7 +435,6 @@ USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL)
 Where the Credentials you give are the credentials you received from the UAuthenticator when **[AuthSuccess]** fires, or you can use the call Auth->**[GetStoredCredentials]**(), where Auth is of the type **[UAuthenticator]**. If you are using StoredCredentials please ensure they are valid by checking the wrapping Structs FStoredCredentials_BE.GetValid() flag returned from **[GetStoredCredentials]**, the providerURL is the url of the provider you wish to use.
 
 Once you have your **[USequenceWallet]** UObject please ensure that you've registered the session using **[RegisterSession]** before attempting to make other calls to the API.
-
 
 #### Sequence API Methods
 
