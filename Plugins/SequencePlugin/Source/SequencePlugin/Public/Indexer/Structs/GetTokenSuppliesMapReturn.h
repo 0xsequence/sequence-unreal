@@ -39,7 +39,7 @@ public:
 	/*
 	* Used to Handle Edge Cases with Unreal's Json parsing
 	*/
-	void setup(FJsonObject json_in)
+	void Setup(FJsonObject json_in)
 	{
 
 		const TSharedPtr<FJsonObject>* itemObj;

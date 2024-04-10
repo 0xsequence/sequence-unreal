@@ -18,5 +18,5 @@ public:
     /*
     * Used to Handle Edge Cases with Unreal's Json parsing
     */
-    void setup(FJsonObject json_in) {};//dummy method to allow for templating in build response!
+    void Setup(FJsonObject json_in) {};//dummy method to allow for templating in build response!
 };
