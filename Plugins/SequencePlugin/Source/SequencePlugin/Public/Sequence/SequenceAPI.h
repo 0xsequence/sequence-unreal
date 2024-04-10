@@ -157,34 +157,50 @@ public:
 	
 	//Provider calls
 
-	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void BlockByNumber(uint64 Number, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                   TFunction<void(FSequenceError)> OnFailure);
+	void BlockByNumber(EBlockTag Tag, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                   TFunction<void(FSequenceError)> OnFailure);
+	void BlockByHash(FHash256 Hash, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                 TFunction<void(FSequenceError)> OnFailure);
+	void BlockNumber(TFunction<void(uint64)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-	void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-	void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+	void HeaderByNumber(uint64 Id, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void HeaderByNumber(EBlockTag Tag, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void HeaderByHash(FHash256 Hash, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
-	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
+	void TransactionByHash(FHash256 Hash, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                       TFunction<void(FSequenceError)> OnFailure);
+	void TransactionCount(FAddress Addr, uint64 Number, TFunction<void(uint64)> OnSuccess,
+	                      TFunction<void(FSequenceError)> OnFailure);
+	void TransactionCount(FAddress Addr, EBlockTag Tag, TFunction<void(uint64)> OnSuccess,
+	                      TFunction<void(FSequenceError)> OnFailure);
+	void TransactionReceipt(FHash256 Hash, TFunction<void(FTransactionReceipt)> OnSuccess,
+	                        TFunction<void(FSequenceError)> OnFailure);
 
-	void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void GetGasPrice(TFunction<void(FUnsizedData)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void EstimateContractCallGas(FContractCall ContractCall, TFunction<void(FUnsizedData)> OnSuccess,
+	                             TFunction<void(FSequenceError)> OnFailure);
+	void EstimateDeploymentGas(FAddress From, FString Bytecode, TFunction<void(FUnsizedData)> OnSuccess,
+	                           TFunction<void(FSequenceError)> OnFailure);
 
-	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
-	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TFunction<void(FAddress)> OnSuccess,
+	                    TFunction<void(FSequenceError)> OnFailure);
+	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId,
+	                            TFunction<void(FAddress, FUnsizedData)> OnSuccess,
+	                            TFunction<void(FSequenceError)> OnFailure);
 
-	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
-	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
-	void SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void NonceAt(uint64 Number, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void NonceAt(EBlockTag Tag, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void SendRawTransaction(FString Data, TFunction<void(FUnsizedData)> OnSuccess,
+	                        TFunction<void(FSequenceError)> OnFailure);
 
-	void ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void ChainId(TFunction<void(uint64)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void NonViewCall(FEthTransaction Transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void Call(FContractCall ContractCall, uint64 Number, TFunction<void(FUnsizedData)> OnSuccess,
+	          TFunction<void(FSequenceError)> OnFailure);
+	void Call(FContractCall ContractCall, EBlockTag Number, TFunction<void(FUnsizedData)> OnSuccess,
+	          TFunction<void(FSequenceError)> OnFailure);
+	void NonViewCall(FEthTransaction Transaction, FPrivateKey PrivateKey, int ChainID,
+	                 TFunction<void(FUnsizedData)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 };
