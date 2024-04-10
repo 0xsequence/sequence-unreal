@@ -354,12 +354,26 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 			if (jsonObj->TryGetObjectField("response",ResponseObj))
 			{
 				const TSharedPtr<FJsonObject> * DataObj = nullptr;
-				if (ResponseObj->Get()->TryGetObjectField("data",DataObj))
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField("data",DataObj) && ResponseObj->Get()->TryGetStringField("code",Code))
 				{
-					FString TxnHash = "";
-					if (DataObj->Get()->TryGetStringField("txHash",TxnHash))
-					{
-						FTransactionResponse TxnResponse(TxnHash,jsonObj);
+					FString TxHash = "";
+					FString MetaTxHash = "";
+
+					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
+					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
+					
+					
+					if (DataObj->Get()->TryGetStringField("txHash",TxHash) &&
+						DataObj->Get()->TryGetStringField("metaTxHash",MetaTxHash) &&
+						DataObj->Get()->TryGetObjectField("nativeReceipt",NativeReceiptObj) &&
+						DataObj->Get()->TryGetObjectField("receipt",ReceiptObj) &&
+						DataObj->Get()->TryGetObjectField("request",RequestObj) &&
+						DataObj->Get()->TryGetArrayField("simulations", SimulationsObj))
+					{						
+						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
 						OnSuccess(TxnResponse);
 					}
 					else
