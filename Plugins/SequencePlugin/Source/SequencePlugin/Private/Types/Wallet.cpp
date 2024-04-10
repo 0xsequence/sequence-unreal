@@ -45,7 +45,7 @@ UWallet* UWallet::Make(const FString& PrivateKey)
 	return Wallet;
 }
 
-TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
+TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* MessageHash, int32 Size)
 {
 	TArray<uint8_t> nonce;
 	FString v_0_str = "010101010101010101010101010101010101010101010101010101010101010100";
@@ -58,7 +58,7 @@ TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	TArray<uint8_t> mesgBuff;
 	mesgBuff.Append(v_0, 33);//append v_0 + 00
 	mesgBuff.Append(this->PrivateKey.Arr.Get()->GetData(),this->PrivateKey.GetLength());//append private key
-	mesgBuff.Append(messageHash, size);
+	mesgBuff.Append(MessageHash, Size);
 
 	const Sha256Hash k_1 = Sha256::getHmac(k_0, 32,mesgBuff.GetData(),mesgBuff.Num());
 	const Sha256Hash v_1 = Sha256::getHmac(k_1.value,32,v_0,32);
@@ -70,7 +70,7 @@ TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	HexToBytes(k_2_constant,k_2_c_ptr);
 	k_2_msg.Append(k_2_c_ptr,1);
 	k_2_msg.Append(this->PrivateKey.Arr.Get()->GetData(), this->PrivateKey.GetLength());
-	k_2_msg.Append(messageHash, size);
+	k_2_msg.Append(MessageHash, Size);
 
 	const Sha256Hash k_2 = Sha256::getHmac(k_1.value, 32, k_2_msg.GetData(), k_2_msg.Num());
 	const Sha256Hash v_2 = Sha256::getHmac(k_2.value,32,v_1.value,32);
@@ -84,18 +84,18 @@ TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* messageHash, int32 size)
 	return nonce;
 }
 
-TArray<uint8> UWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLength)
+TArray<uint8> UWallet::SignMessage(TArray<uint8> MessageBytes, int32 MessageLength)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
 	uint16 RecoveryParameter;	
 	FString LeadingByte = "\x19";//leading byte
 	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
-	Payload.AppendInt(messageLength);
+	Payload.AppendInt(MessageLength);
 
 	FHash256 SigningHash = FHash256::New();
 	FUnsizedData EncodedSigningData = StringToUTF8(Payload);
-	EncodedSigningData.Arr->Append(messageBytes);
+	EncodedSigningData.Arr->Append(MessageBytes);
 	Keccak256::getHash(EncodedSigningData.Ptr(), EncodedSigningData.GetLength(), SigningHash.Ptr());
 	
 	FString rawHash = SigningHash.ToHex();
@@ -128,7 +128,7 @@ TArray<uint8> UWallet::SignMessage(TArray<uint8> messageBytes, int32 messageLeng
 	return sig;
 }
 
-TArray<uint8> UWallet::SignMessage(FString message)
+TArray<uint8> UWallet::SignMessage(FString Message)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
@@ -136,8 +136,8 @@ TArray<uint8> UWallet::SignMessage(FString message)
 
 	FString LeadingByte = "\x19";//leading byte
 	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
-	Payload.AppendInt(message.Len());
-	Payload += message;
+	Payload.AppendInt(Message.Len());
+	Payload += Message;
 
 	FHash256 SigningHash = FHash256::New();
 	FUnsizedData EncodedSigningData = StringToUTF8(Payload);

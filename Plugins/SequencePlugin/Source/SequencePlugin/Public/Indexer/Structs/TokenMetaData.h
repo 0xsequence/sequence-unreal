@@ -77,7 +77,7 @@ public:
         FString attributeString = "[";
         for (FAttributeMap aMap : attributes)
         {
-            attributeString.Append(UIndexerSupport::simplifyString(aMap.GetJsonString()));
+            attributeString.Append(UIndexerSupport::SimplifyString(aMap.GetJsonString()));
             attributeString.Append(",");
         }
         if (attributes.Num() > 0)
@@ -98,7 +98,7 @@ public:
         const TSharedPtr<FJsonObject>* refPtr;
         if (json_in.TryGetObjectField("properties", refPtr))
         {
-            properties = UIndexerSupport::jsonObjectParser(*refPtr);
+            properties = UIndexerSupport::JSONObjectParser(*refPtr);
         }
 
         //now we create the attribute map!
