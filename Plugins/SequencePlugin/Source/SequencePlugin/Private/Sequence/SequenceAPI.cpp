@@ -112,7 +112,7 @@ FString USequenceWallet::GetWalletAddress()
 	return Addr;
 }
 
-void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
@@ -146,7 +146,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FString>& OnSuccess
 					this->Credentials.RegisterCredentials(Wallet,Email,ISS,Type,Sub,UserId,UnixIssuedAt,UnixRefreshedAt,UnixExpiresAt);
 					const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
 					TUAuth->StoreCredentials(this->Credentials);
-					OnSuccess("Session Registered");
+					OnSuccess(this->Credentials);
 				}
 				else
 				{

@@ -33,7 +33,7 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("RegisterSession");
 #endif
-	const TFunction<void(FString)> OnResponse = [OnSuccess](FString Response)
+	const TFunction<void(FCredentials_BE)> OnResponse = [OnSuccess](FCredentials_BE Response)
 	{
 		OnSuccess("RegisterSession Test Passed");
 #if PLATFORM_ANDROID
@@ -51,7 +51,7 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
 
-	Api->RegisterSession(OnSuccess,GenericFailure);
+	Api->RegisterSession(OnResponse,GenericFailure);
 }
 
 void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
