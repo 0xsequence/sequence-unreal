@@ -451,18 +451,16 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 {
 	USequenceWallet * Wallet = USequenceWallet::Make(Credentials);
 	
-	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	const TFunction<void (FCredentials_BE)> OnSuccess = [this](FCredentials_BE Credentials)
 	{
-		FCredentials_BE CredData;
-		FCredentials_BE * Cred = &CredData;
-		if (GetStoredCredentials(Cred))
+		if (Credentials.IsRegistered())
 		{
-			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials: %s"),*State);
-			this->CallAuthSuccess(*Cred);
+			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials"));
+			this->CallAuthSuccess(Credentials);
 		}
 		else
 		{
-			UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*State);
+			UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register, Credentials weren't registered"));
 			this->CallAuthFailure();
 		}
 	};

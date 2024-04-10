@@ -1,15 +1,3 @@
-example setup steps
-
-1) download plugin
-2) Create plugins folder if it doesn't exist
-3) Copy SequencePlugin to plugins folder
-4) build source & refresh project files
-5) open project
-6) enable the plugin / update UProject file
-7) Either create your own pawn from scratch or use existing for testing
-8) Either create your own gamemode and set the default pawn to the one of your choosing or use the prebuilt one for testing
-9) Set the gamemode to whichever you chose before
-
 Example API usage steps:
 
 1) Import SequenceAPI.h into the C++ Parent class you are using
@@ -68,17 +56,18 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 
 4) If you wish to use the in built sequence UI for login you have to do the following:
     
-    a) Create a C++ Class that Inherits from **[Actor]** If you don't know how to do this refer to the [Creating C++ Classes in Unreal]
+    a) Create a C++ Class that Inherits from **[Actor]** If you don't know how to do this refer to the [Creating C++ Classes in Unreal],
+       for the purpose of these docs I'll refer to the Actor created here as the **[C++ Parent]**
     
     b) In that C++ Classes .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
     
-    c) Create a BlueprintCallable function that accepts **[FCredentials_BE]** as a Parameter.
+    c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
     
-    d) Create a Blueprint that inherits from your C++ Class, Then Attach the **[AC_SequencePawn_Component]** to it. For in depth specifics on how to setup this blueprint
+    d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the **[AC_SequencePawn_Component]** to it. For in depth specifics on how to setup this blueprint
        please refer to the demonstration BP **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
        received from the inbuilt UI to your code base by binding to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
 
-    If you don't know what an some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
+    If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
     [Actors](https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine?application_version=5.2)
     [Components](https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine?application_version=5.2)
     [PlayerController](https://dev.epicgames.com/documentation/en-us/unreal-engine/player-controllers-in-unreal-engine?application_version=5.2)
@@ -91,17 +80,20 @@ during updates all code you place there could potentially be lost. These are her
 it's recommended you duplicate the BP_CustomSpectatorPawn out of the plugin folder, then update it's parent class to a C++ class of your own making that also
 resides outside the plugins content folder.
 
-5) Once you have those credentials you'll need to forward them to your own C++ code in order to use the Sequence API, an example of this can be found in the **[BP_CustomSpectatorPawn]**. This Pawn inherits from a C++ class **[SqncSpecPawn]**, which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**. Calling this function will forward the credentials to the C++ ParentClass function.
+5) Once you have those credentials you'll need to forward them to your own C++ code contained in **[C++ Parent]** in order to use the Sequence API,
+   an example of this can be found in the **[BP_CustomSpectatorPawn]**. This class inherits from a C++ class **[SqncSpecPawn]**,
+   which implements a blueprint Callable function **[SetupCredentials(FCredentials_BE CredentialsIn)]**. This is callable within the child class **[BP_CustomSpectatorPawn]**.
+   Calling this function will forward the credentials to the C++ ParentClass function.
 
 6) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
-Gamemode stored within Ready_To_Use in the content folder. Duplicate this Gamemode and move it outside the plugin folder.
-Then open up the blueprint and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** if you just want to see things running OR
-your own Pawn (think of this Pawn as the character you play as / control).
-Lastly in Project Settings you'll need to set this gamemode as the default gamemode. Specifically in ProjectSettings -> Maps & Modes
+   GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
+   Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** if you just want to see things running OR
+   your own Pawn.
 
-To learn more about Gamemodes and gamemode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
+7) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
 
-7) before we get into using the rest of the SequenceAPI we'll cover how to handle the Authentication side of things first.
+To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
+To learn more about Pawns refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/pawn-in-unreal-engine?application_version=5.2)
 
 ### Custom UI Integration
 
