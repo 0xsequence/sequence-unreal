@@ -5,6 +5,7 @@
 
 TArray<uint8> BlankArray(ByteLength Size);
 
+// Struct encapsulating an array of binary data
 struct FBinaryData
 {
 	virtual ~FBinaryData() = default; // Does NOT free Data pointer. Must do so manually!
@@ -16,7 +17,7 @@ struct FBinaryData
 	TArray<uint8> ToArray();
 };
 
-// Number of arbitrary length
+// Binary data of arbitrary length
 struct FUnsizedData final : FBinaryData
 {
 	static FUnsizedData Empty();
@@ -35,7 +36,6 @@ FUnsizedData StringToUTF8(FString String);
 FString UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
-
 template<ByteLength TSize>
 struct TSizedData : FBinaryData
 {
