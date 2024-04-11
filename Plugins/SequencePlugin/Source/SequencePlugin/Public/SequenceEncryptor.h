@@ -48,13 +48,4 @@ public:
 	* @Return the decrypted data
 	*/
 	static FString Decrypt(FString Payload,int32 PayloadLength);
-
-
-	static void EncryptAES(FString Data);
-
-	static void DecryptAES();
-
-	static int32 BytesInFString(FString Data);
-
-	static void PKC7Padding(int32 BlockSize);
 };
