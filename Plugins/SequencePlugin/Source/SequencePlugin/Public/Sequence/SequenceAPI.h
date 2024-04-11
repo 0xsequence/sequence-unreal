@@ -72,6 +72,8 @@ public:
 
 	FString GetWalletAddress();
 	void UpdateProviderURL(const FString& Url);
+	void UpdateNetworkId(int64 NewNetwork);
+	int64 GetNetworkId();
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
 	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FTransactionResponse> OnSuccess, FFailureCallback OnFailure);
 	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
@@ -105,22 +107,22 @@ public:
 	/*
 	Used to get a ping back from the Chain
 	*/
-	void Ping(int64 ChainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
+	void Ping(TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(int64 ChainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
+	void Version(TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(int64 ChainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
+	void RunTimeStatus(TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the chainID from the Chain
 	*/
-	void GetChainID(int64 ChainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
+	void GetChainID(TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the Ether balance from the Chain
@@ -128,32 +130,32 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
+	void GetEtherBalance(FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenBalances(FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(int64 ChainID, FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSupplies(FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(int64 ChainID, FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSuppliesMap(FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(int64 ChainID, FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetBalanceUpdates(FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(int64 ChainID, FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTransactionHistory(FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
 	
 	//Provider calls
 

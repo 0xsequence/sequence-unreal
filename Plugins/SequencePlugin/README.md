@@ -50,10 +50,10 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 
 4) If you wish to use the in built sequence UI for login you have to do the following:
     
-    a) Create a C++ Class that Inherits from **[Actor]** If you don't know how to do this refer to the [Creating C++ Classes in Unreal],
+    a) Create a C++ Class that Inherits from **[Actor]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
        for the purpose of these docs I'll refer to the Actor created here as the **[C++ Parent]**
     
-    b) In that C++ Classes .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+    b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
     
     c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
     
@@ -372,8 +372,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 
 ### Example SignOut
 
-    const UAuthenticator * Auth = NewObject<UAuthenticator>();
-    USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
     Api->SignOut();
 
 ### Example RegisterSession
@@ -391,6 +390,135 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
     };
 
 	Api->RegisterSession(OnSuccess,OnFailure);
+
+### Example GetWalletAddress
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+    Api->GetWalletAddress();
+
+### Example GetNetworkId
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+    Api->GetNetworkId();
+
+### Example UpdateNetworkId
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+    Api->UpdateNetworkId();
+
+### Indexer & the Wallet
+
+The indexer is tied nicely with the wallet to allow for ease of use
+
+## Ping
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+    
+	const TSuccessCallback<bool> GenericSuccess = [=](const bool bSuccess)
+	{
+        //Ping response is in bSuccess
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//Ping failure
+	};
+
+	Api->Ping(GenericSuccess, GenericFailure);
+
+## Version
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FVersion> GenericSuccess = [=](const FVersion version)
+    {
+        //Response contained in FVersion
+    };
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//Version Failure
+	};
+    
+	Api->Version(GenericSuccess, GenericFailure);
+
+## RunTimeStatus
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FRuntimeStatus> GenericSuccess = [=](const FRuntimeStatus runTimeStatus)
+    {
+        //Response is in FRunTimeStatus
+    };
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//RunTimeStatus Failure
+	};
+
+    Api->RunTimeStatus(GenericSuccess, GenericFailure);
+
+## GetChainID
+
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+    
+    const TSuccessCallback<int64> GenericSuccess = [=](const int64 chainID)
+	{
+        //Response in int64
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetChainID Failure
+	};
+
+	Api->GetChainID(GenericSuccess, GenericFailure);
+
+## GetEtherBalance
+
+	/*
+		Used to get the Ether balance from the Chain
+		@param 1st the ChainID
+		@param 2nd the accountAddr we want to get the balance for
+		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
+	*/
+	void GetEtherBalance(FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
+
+## GetTokenBalances
+
+	/*
+		Gets the token balances from the Chain
+	*/
+	void GetTokenBalances(FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
+
+## GetTokenSupplies
+
+	/*
+		gets the token supplies from the Chain
+	*/
+	void GetTokenSupplies(FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
+
+## GetTokenSuppliesMap
+
+	/*
+		gets the token supplies map from the Chain
+	*/
+	void GetTokenSuppliesMap(FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
+
+## GetBalanceUpdates
+
+	/*
+		Get the balance updates from the Chain
+	*/
+	void GetBalanceUpdates(FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
+
+## GetTransactionHistory
+
+	/*
+		get transaction history from the Chain
+	*/
+	void GetTransactionHistory(FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
+
 
 ***
 
@@ -477,6 +605,10 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/).
+
+### Hardware Requirements
+
+For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.2)
 
 #### Unreal and Xcode Specifics
 During the Unreal Package process in the event a code signing error occurs you can take the following steps within XCode to get your packaged .app file
