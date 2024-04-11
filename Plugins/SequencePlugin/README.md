@@ -621,28 +621,7 @@ Modes:
 
 ***
 
-### Sequence Unreal API
-
-The Sequence Unreal plugin is broken up into a few different parts in order to manage all of the differing functionality. Here we'll go through each parts purpose then summarize how to use them all together below
-
-The SDK automatically stores credentials on disk in the following cases:
-1) On Successful Auth
-2) On Successful Registering of a session
-3) On Successful Closing of a session
-
-#### USequenceWallet
-
-To get a `USequenceWallet` call either:
-
-```
-USequenceWallet::Make(FCredentials_BE CredentialsIn)
-USequenceWallet::Make(FCredentials_BE CredentialsIn, FString ProviderURL)
-```
-
-Where the Credentials you give are the credentials you received from the UAuthenticator when **[AuthSuccess]** fires, or you can use the call Auth->**[GetStoredCredentials]**(), where Auth is of the type **[UAuthenticator]**. If you are using StoredCredentials please ensure they are valid by checking the wrapping Structs FStoredCredentials_BE.GetValid() flag returned from **[GetStoredCredentials]**, the providerURL is the url of the provider you wish to use.
-Once you have logged in and have the supplied credentials to the Sequence Wallet you'll be good to go, We now automatically register credentials in the UAuthenticator
-
-#### Sequence API Methods
+#### Unreal TFunctions & Async Best Practices
 
 We make use of TFunctions with some callbacks:
 
@@ -660,8 +639,9 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 };
 ```
 
-One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something and start over writing memory. If you require lots of nesting swapping to a better approach using UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
-
+One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something
+and start over writing memory. If you require lots of nesting swapping to using UFUNCTION callbacks helps to avoid these,
+problems similar to how things are done in **[UAuthenticator.h/cpp]** as a reference.
 
 ### Packaging
 
