@@ -225,6 +225,8 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
+Note: if you want call contracts with the Raw type you'll want include the header
+`#include "ABI/ABI.h"` in order to use the ABI to encode the data for a contract call.
 
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
     USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
