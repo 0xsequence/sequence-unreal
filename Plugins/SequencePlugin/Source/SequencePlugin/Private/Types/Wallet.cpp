@@ -42,6 +42,10 @@ UWallet* UWallet::Make(const FString& PrivateKey)
 		Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
 		Wallet->Address = GetAddress(Wallet->PublicKey);
 	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("PrivateKey: %s is %d Characters in length, This key needs to be 64 Hex Characters in length"),*PrivateKey, PrivateKey.Len());
+	}
 	return Wallet;
 }
 

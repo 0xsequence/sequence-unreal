@@ -8,9 +8,9 @@ class SEQUENCEPLUGIN_API UWallet : public UObject
 {
 	GENERATED_BODY()
 private:
-	FPrivateKey PrivateKey;
-	FPublicKey PublicKey;
-	FAddress Address;
+	FPrivateKey PrivateKey = FPrivateKey::New();
+	FPublicKey PublicKey = FPublicKey::New();
+	FAddress Address = FAddress::New();
 public:
 	/*
 	* Generates a random wallet
