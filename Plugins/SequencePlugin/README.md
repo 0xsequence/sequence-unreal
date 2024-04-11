@@ -205,47 +205,8 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 
 ### USequenceWallet Functions
 
-    /*
-        Gets the Users Wallet
-    */
-	FString GetWalletAddress();
-
-    /*
-        Allows you to update the Provider Url
-    */
-	void UpdateProviderURL(const FString& Url);
-
-    /*
-        Used to Sign a message
-    */
-	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
-	
-    /*
-        Used to send a transaction
-    */
-    void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FTransactionResponse> OnSuccess, FFailureCallback OnFailure);
-	
-    /*
-        Used to register a session (done automatically for you by UAuthenticator now)
-    */
-    void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-	
-    /*
-        Lists the active sessions
-    */
-    void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
-	
-    /*
-        Closes the Session
-    */
-    void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-    /*
-        Closes the Session & Clears out cached credentials with blank ones
-    */
-    void SignOut();
-
 ### Example SignMessage
+##### Used to Sign a message
     
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());    
@@ -263,6 +224,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	Api->SignMessage(Message,OnResponse,GenericFailure);
 
 ### Example SendTransaction
+##### Used to send a transaction / perform contract calls
 
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
     USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
@@ -337,6 +299,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	},OnFailure);
 
 ### Example ListSessions
+##### Lists the active sessions
 
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
@@ -354,6 +317,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	Api->ListSessions(OnSuccess,OnFailure);
 
 ### Example CloseSession
+##### Closes the session
 
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
     USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
@@ -371,11 +335,13 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	Api->CloseSession(OnSuccess,OnFailure);
 
 ### Example SignOut
+##### Closes the session & clears out cached credentials with blank ones
 
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
     Api->SignOut();
 
 ### Example RegisterSession
+##### Used to register a session (done automatically for you by UAuthenticator)
 
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
@@ -392,23 +358,34 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 	Api->RegisterSession(OnSuccess,OnFailure);
 
 ### Example GetWalletAddress
+#### Gets the wallet address currently being used
 
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
     Api->GetWalletAddress();
 
 ### Example GetNetworkId
+#### Gets the network id being used
 
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
     Api->GetNetworkId();
 
 ### Example UpdateNetworkId
+#### Used to update the stored network id
 
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    Api->UpdateNetworkId();
+    Api->UpdateNetworkId(137);
+
+### Example UpdateProviderUrl
+#### Used to update the provider url of the wallet
+    
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+	Api->UpdateProviderURL(NewProviderUrl);
 
 ### Indexer & the Wallet
 
-The indexer is tied nicely with the wallet to allow for ease of use
+The indexer is tied nicely with the wallet to allow for ease of use.
+One thing to note is the NetworkId you set with your wallet is the one that will be used with
+the indexer. The default network we set is `137`
 
 ## Ping
 
