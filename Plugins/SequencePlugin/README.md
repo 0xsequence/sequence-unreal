@@ -476,49 +476,126 @@ The indexer is tied nicely with the wallet to allow for ease of use
 
 ## GetEtherBalance
 
-	/*
-		Used to get the Ether balance from the Chain
-		@param 1st the ChainID
-		@param 2nd the accountAddr we want to get the balance for
-		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
-	*/
-	void GetEtherBalance(FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FEtherBalance> GenericSuccess = [=](const FEtherBalance etherBalance)
+	{
+        //Response in FEtherBalance
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetEtherBalance Failure
+	};
+
+	Api->GetEtherBalance(Api->GetWalletAddress(), GenericSuccess, GenericFailure);
 
 ## GetTokenBalances
 
-	/*
-		Gets the token balances from the Chain
-	*/
-	void GetTokenBalances(FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [=](const FGetTokenBalancesReturn tokenBalances)
+	{
+        //Response in FGetTokenBalancesReturn
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetTokenBalances Failure
+	};
+
+	FGetTokenBalancesArgs args;
+	args.accountAddress = Api->GetWalletAddress();
+	args.includeMetaData = true;
+
+	Api->GetTokenBalances(args, GenericSuccess, GenericFailure);
 
 ## GetTokenSupplies
 
-	/*
-		gets the token supplies from the Chain
-	*/
-	void GetTokenSupplies(FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [=](const FGetTokenSuppliesReturn tokenSupplies)
+	{
+        //Response is in FGetTokenSuppliesReturn
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetTokenSupplies Failure
+	};
+
+	FGetTokenSuppliesArgs args;
+	args.contractAddress = "0x01";//Testing Contract Address in hex with leading 0x
+	args.includeMetaData = true;
+
+	Api->GetTokenSupplies(args, GenericSuccess, GenericFailure);
 
 ## GetTokenSuppliesMap
 
-	/*
-		gets the token supplies map from the Chain
-	*/
-	void GetTokenSuppliesMap(FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [=](const FGetTokenSuppliesMapReturn tokenSuppliesMap)
+	{
+        //Response is in FGetTokenSuppliesMapReturn
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+        //GetTokenSuppliesMap Failure
+	};
+    
+	TMap<FString, FTokenList> tokenMap;
+	TPair<FString,FTokenList> item;
+	tokenMap.Add(item);
+
+    FGetTokenSuppliesMapArgs args;
+	args.includeMetaData = true;
+	args.tokenMap = tokenMap;
+
+	Api->GetTokenSuppliesMap(args, GenericSuccess, GenericFailure);
 
 ## GetBalanceUpdates
 
-	/*
-		Get the balance updates from the Chain
-	*/
-	void GetBalanceUpdates(FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
+
+    const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [=](const FGetBalanceUpdatesReturn balanceUpdates)
+	{
+        //Response in FGetBalanceUpdatesReturn
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetBalanceUpdates Failure
+	};
+
+	FGetBalanceUpdatesArgs args;
+	args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	args.page.page = 10;
+	args.page.more = true;
+
+	Api->GetBalanceUpdates(args, GenericSuccess, GenericFailure);
 
 ## GetTransactionHistory
 
-	/*
-		get transaction history from the Chain
-	*/
-	void GetTransactionHistory(FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
+    USequenceWallet * Api = USequenceWallet::Make(Credentials);
 
+    const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [=](const FGetTransactionHistoryReturn transactionHistory)
+	{
+        //Response is in FGetTransactionHistoryReturn
+	};
+
+	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	{
+		//GetTransactionHistory Failure
+	};
+
+	FGetTransactionHistoryArgs args;
+	args.filter.accountAddress = Api->GetWalletAddress();
+	args.includeMetaData = true;
+	args.page.page = 0;
+	args.page.more = true;    
+
+	Api->GetTransactionHistory(args, GenericSuccess, GenericFailure);
 
 ***
 
