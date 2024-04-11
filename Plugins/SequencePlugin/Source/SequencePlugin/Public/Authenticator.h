@@ -113,6 +113,11 @@ public:
 		RPCServer = RPCServerIn;
 	}
 
+	void UpdateNetwork(int64 NewNetwork)
+	{
+		Network = NewNetwork;
+	}
+	
 	void RegisterCredentials(const FString& WalletIn, const FString& EmailIn, const FString& IssuerIn, const FString& TypeIn, const FString& SubIn, const FString& UserIdIn, const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
 	{
 		WalletAddress = WalletIn;

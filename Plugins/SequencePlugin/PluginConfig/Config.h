@@ -4,7 +4,7 @@
 
 struct FEncryptorConfig
 {
-	inline static FString Key = "";
+	inline static FString Key = "aaaabbbbccccddddaaaabbbbccccdddd";
 };
 
 struct FSequenceConfig

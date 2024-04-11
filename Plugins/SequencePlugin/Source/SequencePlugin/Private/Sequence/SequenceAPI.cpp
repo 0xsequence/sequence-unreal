@@ -197,13 +197,15 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 		}
 	};
 	
-	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
+	if (this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildListSessionIntent(),OnResponse,OnFailure);
 	}
 	else
+	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
 }
 
 void USequenceWallet::SignOut()
@@ -251,20 +253,24 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 				OnSuccess(ResponseStruct.response.code);
 			}
 			else
+			{
 				OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
+			}
 		}
 		else
 		{
 			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
 		}
 	};
-	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
+	if (this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildCloseSessionIntent(),OnResponse,OnFailure);
 	}
 	else
+	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
 }
 
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
@@ -277,6 +283,18 @@ FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 	SigningBytes.Append(SigningHash.Ptr(),SigningHash.GetLength());
 	const FString Signature = "0x" + this->Credentials.SignMessageWithSessionWallet(SigningBytes,32);
 	return Signature;
+}
+
+int64 USequenceWallet::GetNetworkId()
+{
+	return this->Credentials.GetNetwork();
+}
+
+void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
+{
+	this->Credentials.UpdateNetwork(NewNetwork);
+	const UAuthenticator * auth = NewObject<UAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
 }
 
 void USequenceWallet::UpdateProviderURL(const FString& Url)
@@ -305,13 +323,15 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 		}
 		
 	};
-	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
+	if (this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL,this->BuildSignMessageIntent(Message),OnResponse,OnFailure);
 	}
 	else
+	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
 }
 
 void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FTransactionResponse> OnSuccess, FFailureCallback OnFailure)
@@ -400,13 +420,15 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		}
 	};
 	
-	if (this->Credentials.IsRegistered() && this->Credentials.RegisteredValid())
+	if (this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
 		this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
 	}
 	else
+	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& Message)
@@ -673,64 +695,64 @@ FString USequenceWallet::encodeB64_URL(FString data)
 
 //Indexer Calls
 
-void USequenceWallet::Ping(int64 ChainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Ping(TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->Ping(ChainID, OnSuccess, OnFailure);
+		this->Indexer->Ping(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
 }
 
-void USequenceWallet::Version(int64 ChainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::Version(TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->Version(ChainID,OnSuccess,OnFailure);
+		this->Indexer->Version(this->Credentials.GetNetwork(),OnSuccess,OnFailure);
 }
 
-void USequenceWallet::RunTimeStatus(int64 ChainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::RunTimeStatus(TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->RunTimeStatus(ChainID, OnSuccess, OnFailure);
+		this->Indexer->RunTimeStatus(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetChainID(int64 ChainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetChainID(TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetChainID(ChainID, OnSuccess, OnFailure);
+		this->Indexer->GetChainID(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetEtherBalance(FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetEtherBalance(ChainID, AccountAddr, OnSuccess, OnFailure);
+		this->Indexer->GetEtherBalance(this->Credentials.GetNetwork(), AccountAddr, OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenBalances(FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetTokenBalances(ChainID, Args, OnSuccess, OnFailure);
+		this->Indexer->GetTokenBalances(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetTokenSupplies(int64 ChainID, FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenSupplies(FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetTokenSupplies(ChainID, Args, OnSuccess, OnFailure);
+		this->Indexer->GetTokenSupplies(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetTokenSuppliesMap(int64 ChainID, FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTokenSuppliesMap(FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetTokenSuppliesMap(ChainID, Args, OnSuccess, OnFailure);
+		this->Indexer->GetTokenSuppliesMap(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetBalanceUpdates(int64 ChainID, FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetBalanceUpdates(FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetBalanceUpdates(ChainID, Args, OnSuccess, OnFailure);
+		this->Indexer->GetBalanceUpdates(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
-void USequenceWallet::GetTransactionHistory(int64 ChainID, FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
+void USequenceWallet::GetTransactionHistory(FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	if (this->Indexer)
-		this->Indexer->GetTransactionHistory(ChainID, Args, OnSuccess, OnFailure);
+		this->Indexer->GetTransactionHistory(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
