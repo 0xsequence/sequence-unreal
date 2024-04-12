@@ -10,21 +10,21 @@ when the new Config.h exists in your project simply update the values in that fi
 
 IF you are using a newer release you can leave the folder `SequencePlugin/PluginConfig` alone
 
-To Manually Update the Sequence plugin delete the following folders contained within `SequencePlugin`:
+To manually update the Sequence plugin delete the following folders contained within `SequencePlugin`:
 `Binaries`,`Content`,`Intermediate`,`Resource`,`Source`
 
-Then Copy the following Folders / Files from the NEW SequencePlugin Folder:
+Then copy the following folders / files from the NEW SequencePlugin folder:
 `Content`, `Resources`, `Source`, `README`, `SequencePlugin`
 
 Then paste these folders / files into the SequencePlugin folder in your project, allowing the files to be replaced with new ones
 in the case of `README.md` & `SequencePlugin.uplugin`
 
-Once done Rebuild the project from source and you'll be good to go!
+Once done rebuild the project from source and you'll be good to go!
 
 ### YourProject.Build.cs
 
 In some instances your build.cs may not update properly for your project when this happens you'll be unable to import plugin,
-if this occurs in your Projects Build.cs file please check the private Dependency module such that it looks like this:
+if this occurs in your Projects Build.cs file please check the private Dependency module such that it includes "SequencePlugin":
 
     public SequenceTest(ReadOnlyTargetRules Target) : base(Target)
     {
@@ -52,7 +52,7 @@ You can then add these credentials in the **[Config.h]** file under `SequencePlu
 
 ## Security
 
-You must provide an Encryption key of 32 Characters in length, in `SequencePlugin/PluginConfig/Config.h` contained within
+You must provide a 32 character encryption key in `SequencePlugin/PluginConfig/Config.h` contained within
 the following struct value **[FEncryptorConfig::Key]**
 
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
