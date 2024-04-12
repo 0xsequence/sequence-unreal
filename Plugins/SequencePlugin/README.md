@@ -71,7 +71,7 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 4) If you wish to use the in built sequence UI for login you have to do the following:
  
     a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
-       for the purpose of these docs I'll refer to the Actor created here as the **[C++ Parent]**
+       for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
     b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
