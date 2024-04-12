@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Authenticator.h"
-#include "GameFramework/SpectatorPawn.h"
 #include "SqncSpecPawn.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API ASqncSpecPawn : public ASpectatorPawn
+class SEQUENCEPLUGIN_API ASqncSpecPawn : public APawn
 {
 	GENERATED_BODY()
 
@@ -19,8 +18,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 	
-	
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
 	void SetupCredentials(FCredentials_BE CredentialsIn);
-	
 };
