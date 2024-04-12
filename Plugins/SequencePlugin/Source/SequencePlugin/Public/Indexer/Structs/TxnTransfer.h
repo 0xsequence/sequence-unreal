@@ -47,8 +47,8 @@ public:
         ret.Get()->SetStringField("contractType", UEnum::GetValueAsString(contractType.GetValue()));
         ret.Get()->SetStringField("from",from);
         ret.Get()->SetStringField("to", to);
-        ret.Get()->SetStringField("tokenIds",UIndexerSupport::int64ListToSimpleString(tokenIds));
-        ret.Get()->SetStringField("amounts", UIndexerSupport::int64ListToSimpleString(amounts));
+        ret.Get()->SetStringField("tokenIds",UIndexerSupport::Int64ListToSimpleString(tokenIds));
+        ret.Get()->SetStringField("amounts", UIndexerSupport::Int64ListToSimpleString(amounts));
         ret.Get()->SetNumberField("logIndex", logIndex);
         ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
         TSharedPtr<FJsonObject> nRet = MakeShareable<FJsonObject>(new FJsonObject);

@@ -13,17 +13,17 @@ void SequenceAPITest::BasicProviderTests()
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
-	FContractCall testCall;
-	const TFunction<void(FUnsizedData)> testResponse = [](FUnsizedData response)
+	FContractCall TestCall;
+	const TFunction<void(FUnsizedData)> TestResponse = [](FUnsizedData Response)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Basic provider response"));
 	};
 
-	const TFunction<void(FSequenceError)> testError = [](FSequenceError error)
+	const TFunction<void(FSequenceError)> TestError = [](FSequenceError Error)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error"));
 	};
-	Api->Call(testCall,6,testResponse,testError);
+	Api->Call(TestCall,6,TestResponse,TestError);
 }
 
 void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
@@ -33,7 +33,7 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("RegisterSession");
 #endif
-	const TFunction<void(FString)> OnResponse = [OnSuccess](FString Response)
+	const TFunction<void(FCredentials_BE)> OnResponse = [OnSuccess](FCredentials_BE Response)
 	{
 		OnSuccess("RegisterSession Test Passed");
 #if PLATFORM_ANDROID
@@ -51,7 +51,7 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
 
-	Api->RegisterSession(OnSuccess,GenericFailure);
+	Api->RegisterSession(OnResponse,GenericFailure);
 }
 
 void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
@@ -63,7 +63,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	NativeOAuth::AndroidLog("SignMessage");
 #endif
 	
-	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage response)
+	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage Response)
 	{
 		OnSuccess("Sign Message Test Passed");
 #if PLATFORM_ANDROID
@@ -91,7 +91,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("ListSessions");
 #endif
-	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> response)
+	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
 	{
 		OnSuccess("List Sessions Test Passed");
 #if PLATFORM_ANDROID
@@ -136,11 +136,11 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
 #if PLATFORM_ANDROID
 NativeOAuth::AndroidLog("SendTransactionDone");
@@ -185,11 +185,11 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
 		OnSuccess(OutputString);
 #if PLATFORM_ANDROID
 NativeOAuth::AndroidLog("CallContractDone");
@@ -214,14 +214,19 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	FERC20Transaction T20;
 	T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-	T20.value = "100000";
+	T20.value = "1000";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -246,11 +251,12 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }
@@ -271,17 +277,18 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
 	
-	FERC1155TxnValue val;
-	val.amount = "1";
-	val.id = "66635";
-	T1155.vals.Add(val);
+	FERC1155TxnValue Val;
+	Val.amount = "1";
+	Val.id = "66635";
+	T1155.vals.Add(Val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
-	Api->SendTransaction(Txn,[=](TSharedPtr<FJsonObject> json)
+	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
 	{
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(json.ToSharedRef(), Writer);
+		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 		OnSuccess(OutputString);
 	},GenericFailure);
 }

@@ -10,6 +10,7 @@
 #include "Session.h"
 #include "SignedMessage.h"
 #include "Containers/Union.h"
+#include "TransactionResponse.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -47,11 +48,9 @@ private:
 	FCredentials_BE Credentials;
 	
 	FString ProviderUrl = "";
-	
-	FString AuthToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVyX2lkIjoyLCJ3YWxsZXQiOiIweDY2MDI1MDczNGYzMTY0NDY4MWFlMzJkMDViZDdlOGUyOWZlYTI5ZTEifQ.FC8WmaC_hW4svdrs4rxyKcvoekfVYFkFFvGwUOXzcHA";
 	const FString Hostname = "https://next-api.sequence.app";
-	const FString sequenceURL_QR = "https://api.sequence.app/qr/";
-	const FString sequenceURL = "https://api.sequence.app/rpc/API/";
+	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
+	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
 	const FString Path = "/rpc/Wallet/";
 	
 	//URL fetchers for sequence services
@@ -63,42 +62,43 @@ private:
 	void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	//Response helper functions
-	TArray<FContact_BE> buildFriendListFromJson(FString json);
-	TArray<FItemPrice_BE> buildItemUpdateListFromJson(FString json);
+	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
+	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
 public:
 	USequenceWallet();
 	
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn);
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 
+	FString GetWalletAddress();
 	void UpdateProviderURL(const FString& Url);
+	void UpdateNetworkId(int64 NewNetwork);
+	int64 GetNetworkId();
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
-	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void RegisterSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, TSuccessCallback<FTransactionResponse> OnSuccess, FFailureCallback OnFailure);
+	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignOut();
 private:
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
-	FString BuildSignMessageIntent(const FString& message);
+	FString BuildSignMessageIntent(const FString& Message);
 	FString BuildSendTransactionIntent(const FString& Txns);
 	FString BuildRegisterSessionIntent();
 	FString BuildListSessionIntent();
 	FString BuildCloseSessionIntent();
 	FString BuildSessionValidationIntent();
-	
 	FString GeneratePacketSignature(const FString& Packet) const;
-	FString GetWalletAddress();
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
-	void getFriends(FString publicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCoinPrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCoinPrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCollectiblePrice(FID_BE itemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	void getUpdatedCollectiblePrices(TArray<FID_BE> itemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
-	FString buildQR_Request_URL(FString data, int32 size);
+	void GetFriends(FString PublicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCoinPrice(FID_BE ItemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCollectiblePrice(FID_BE ItemToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, FFailureCallback OnFailure);
+	FString BuildQr_Request_URL(FString Data, int32 Size);
 private:
 	template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
 public:
@@ -107,22 +107,22 @@ public:
 	/*
 	Used to get a ping back from the Chain
 	*/
-	void Ping(int64 chainID, TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
+	void Ping(TSuccessCallback<bool> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(int64 chainID, TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
+	void Version(TSuccessCallback<FVersion> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(int64 chainID, TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
+	void RunTimeStatus(TSuccessCallback<FRuntimeStatus> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the chainID from the Chain
 	*/
-	void GetChainID(int64 chainID, TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
+	void GetChainID(TSuccessCallback<int64> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Used to get the Ether balance from the Chain
@@ -130,63 +130,79 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(int64 chainID, FString accountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
+	void GetEtherBalance(FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(int64 chainID, FGetTokenBalancesArgs args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenBalances(FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(int64 chainID, FGetTokenSuppliesArgs args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSupplies(FGetTokenSuppliesArgs Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(int64 chainID, FGetTokenSuppliesMapArgs args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTokenSuppliesMap(FGetTokenSuppliesMapArgs Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(int64 chainID, FGetBalanceUpdatesArgs args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetBalanceUpdates(FGetBalanceUpdatesArgs Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, FFailureCallback OnFailure);
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(int64 chainID, FGetTransactionHistoryArgs args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
+	void GetTransactionHistory(FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
 	
 	//Provider calls
 
-	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void BlockByNumber(uint64 Number, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                   TFunction<void(FSequenceError)> OnFailure);
+	void BlockByNumber(EBlockTag Tag, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                   TFunction<void(FSequenceError)> OnFailure);
+	void BlockByHash(FHash256 Hash, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                 TFunction<void(FSequenceError)> OnFailure);
+	void BlockNumber(TFunction<void(uint64)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void HeaderByNumber(uint64 Id, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-	void HeaderByNumber(EBlockTag Tag, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
-	void HeaderByHash(FHash256 Hash, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
+	void HeaderByNumber(uint64 Id, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void HeaderByNumber(EBlockTag Tag, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void HeaderByHash(FHash256 Hash, TFunction<void(FHeader)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void TransactionByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, uint64 Number, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
-	void TransactionCount(FAddress Addr, EBlockTag Tag, TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
-	void TransactionReceipt(FHash256 Hash, TSuccessCallback<FTransactionReceipt> OnSuccess, FFailureCallback OnFailure);
+	void TransactionByHash(FHash256 Hash, TFunction<void(TSharedPtr<FJsonObject>)> OnSuccess,
+	                       TFunction<void(FSequenceError)> OnFailure);
+	void TransactionCount(FAddress Addr, uint64 Number, TFunction<void(uint64)> OnSuccess,
+	                      TFunction<void(FSequenceError)> OnFailure);
+	void TransactionCount(FAddress Addr, EBlockTag Tag, TFunction<void(uint64)> OnSuccess,
+	                      TFunction<void(FSequenceError)> OnFailure);
+	void TransactionReceipt(FHash256 Hash, TFunction<void(FTransactionReceipt)> OnSuccess,
+	                        TFunction<void(FSequenceError)> OnFailure);
 
-	void GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void GetGasPrice(TFunction<void(FUnsizedData)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void EstimateContractCallGas(FContractCall ContractCall, TFunction<void(FUnsizedData)> OnSuccess,
+	                             TFunction<void(FSequenceError)> OnFailure);
+	void EstimateDeploymentGas(FAddress From, FString Bytecode, TFunction<void(FUnsizedData)> OnSuccess,
+	                           TFunction<void(FSequenceError)> OnFailure);
 
-	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure);
-	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TFunction<void(FAddress)> OnSuccess,
+	                    TFunction<void(FSequenceError)> OnFailure);
+	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId,
+	                            TFunction<void(FAddress, FUnsizedData)> OnSuccess,
+	                            TFunction<void(FSequenceError)> OnFailure);
 
-	void NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
-	void NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
-	void SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void NonceAt(uint64 Number, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void NonceAt(EBlockTag Tag, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
+	void SendRawTransaction(FString Data, TFunction<void(FUnsizedData)> OnSuccess,
+	                        TFunction<void(FSequenceError)> OnFailure);
 
-	void ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure);
+	void ChainId(TFunction<void(uint64)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 
-	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
+	void Call(FContractCall ContractCall, uint64 Number, TFunction<void(FUnsizedData)> OnSuccess,
+	          TFunction<void(FSequenceError)> OnFailure);
+	void Call(FContractCall ContractCall, EBlockTag Number, TFunction<void(FUnsizedData)> OnSuccess,
+	          TFunction<void(FSequenceError)> OnFailure);
+	void NonViewCall(FEthTransaction Transaction, FPrivateKey PrivateKey, int ChainID,
+	                 TFunction<void(FUnsizedData)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 };

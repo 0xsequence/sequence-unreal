@@ -16,10 +16,10 @@ struct FUserDetails
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	FString username = "";
-	FString email = "";
-	FString emailService = "";
-	int32 accountID = -1;
+	FString Username = "";
+	FString Email = "";
+	FString EmailService = "";
+	int32 AccountID = -1;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
@@ -52,16 +52,16 @@ private:
 	FCredentials_BE Credentials;
 	
 	UPROPERTY()
-	UAuthenticator* authenticator;
+	UAuthenticator* Authenticator;
 
 	//testing variables//
-	bool enableTesting = true;
-	TArray<FCoin_BE> testCoins;
-	TArray<FNFT_Master_BE> testNFTs;
+	bool bEnableTesting = true;
+	TArray<FCoin_BE> TestCoins;
+	TArray<FNFT_Master_BE> TestNfTs;
 	//testing variables//
 
 public:
-	FUserDetails getUserDetails();
+	FUserDetails GetUserDetails();
 	
 	ASequenceBackendManager();
 
@@ -76,7 +76,7 @@ public:
 	* Used to send data to clipboard for ease of use!
 	*/
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
-		void CopyToClipboard(FString data);
+		void CopyToClipboard(FString Data);
 
 	/*
 	* Used to get data from clipboard for ease of use
@@ -101,8 +101,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
+	
 	UFUNCTION(BlueprintCallable, Category = "Login")
 		bool StoredCredentialsValid();
+	
+	UFUNCTION(BlueprintCallable, Category = "Login")
+		FCredentials_BE GetStoredCredentials();
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
@@ -137,7 +141,7 @@ public:
 	* Used to let the frontend know if a txn went through or not!
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, CATEGORY = "Send_Txn")
-		void UpdateTxn(FTxnCallback_BE txnCallback);
+		void UpdateTxn(FTxnCallback_BE TxnCallback);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Get_Updated_Data")
 		void InitGetUpdatedCoinData(TArray<FID_BE> CoinsToUpdate);

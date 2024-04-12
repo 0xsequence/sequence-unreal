@@ -3,9 +3,9 @@
 #include "ObjectHandler.h"
 #include "TextureResource.h"
 
-TMap<FString, UTexture2D*> UObjectHandler::getProcessedImages()
+TMap<FString, UTexture2D*> UObjectHandler::GetProcessedImages()
 {
-	return this->storedResponses;
+	return this->StoredResponses;
 }
 
 void UObjectHandler::OnDone()
@@ -21,38 +21,38 @@ void UObjectHandler::OnDone()
 	}
 }
 
-void UObjectHandler::setup(bool raw_cache_enabled)
+void UObjectHandler::Setup(bool RawCacheEnabled)
 {
-	this->syncer = NewObject<USyncer>();
-	this->syncer->SetupForTesting("ImageHandler_"+this->GetName());
+	this->Syncer = NewObject<USyncer>();
+	this->Syncer->SetupForTesting("ImageHandler_"+this->GetName());
 	//binding will occur here
 	//need to bind to OnDone
-	this->syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
-	this->use_raw_cache = raw_cache_enabled;
+	this->Syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
+	this->UseRawCache = RawCacheEnabled;
 }
 
 /*
 * Used for using a hardset custom image format for all image requests
 * made through this object, if you want to use the computable format use the other setup call
 */
-void UObjectHandler::setupCustomFormat(bool raw_cache_enabled, EImageFormat format)
+void UObjectHandler::SetupCustomFormat(bool RawCacheEnabled, EImageFormat Format)
 {
-	this->syncer = NewObject<USyncer>();
-	this->customFormat = format;
-	this->useCustomFormat = true;
-	this->syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
-	this->use_raw_cache = raw_cache_enabled;
+	this->Syncer = NewObject<USyncer>();
+	this->CustomFormat = Format;
+	this->bUseCustomFormat = true;
+	this->Syncer->OnDoneDelegate.BindUFunction(this, "OnDone");
+	this->UseRawCache = RawCacheEnabled;
 }
 
-void UObjectHandler::storeImageData(UTexture2D* image, FString url)
+void UObjectHandler::StoreImageData(UTexture2D* Image, FString URL)
 {
-	this->storedResponses.Add(TPair<FString,UTexture2D*>(url,image));
+	this->StoredResponses.Add(TPair<FString,UTexture2D*>(URL,Image));
 	UE_LOG(LogTemp, Display, TEXT("[Image stored]"));
-	this->syncer->Decrement();
+	this->Syncer->Decrement();
 	//this is when we would consider a response satisfied
 }
 
-void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void UObjectHandler::HandleRequestRaw(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString rep_content = "[error]";
 	if (bWasSuccessful)
@@ -61,11 +61,11 @@ void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePt
 		//cache our response first!
 		TArray<uint8> response_data = Response.Get()->GetContent();
 		FString response_url = Request.Get()->GetURL();
-		if (this->use_raw_cache)
-			this->add_to_cache(response_url, response_data);//cache it if we need it!
+		if (this->UseRawCache)
+			this->AddToCache(response_url, response_data);//cache it if we need it!
 
 		//build the image data and store it! also decrements our active request count!
-		this->storeImageData(build_img_data(response_data, response_url), response_url);
+		this->StoreImageData(BuildImgData(response_data, response_url), response_url);
 	}
 	else//error
 	{
@@ -76,15 +76,15 @@ void UObjectHandler::handle_request_raw(FHttpRequestPtr Request, FHttpResponsePt
 			UE_LOG(LogTemp, Error, TEXT("Request failed."));
 		}
 		//in the event we failed or errored out we should decrement
-		this->syncer->Decrement();
+		this->Syncer->Decrement();
 	}
 }
 
-TArray<FString> UObjectHandler::filterURLs(TArray<FString> urls)
+TArray<FString> UObjectHandler::FilterURLs(TArray<FString> Urls)
 {
 	TArray<FString> filteredUrls;
 
-	for (FString url : urls)
+	for (FString url : Urls)
 	{//note we don't support .svg or .gif, and we should filter out empty / invalid urls
 		bool valid = true;
 		valid &= !url.Contains(".gif");
@@ -98,14 +98,14 @@ TArray<FString> UObjectHandler::filterURLs(TArray<FString> urls)
 	return filteredUrls;
 }
 
-bool UObjectHandler::check_raw_cache(FString URL, TArray<uint8>* raw_data)
+bool UObjectHandler::CheckRawCache(FString URL, TArray<uint8>* RawData)
 {
-	bool cache_hit = this->cache.Contains(URL);
+	bool cache_hit = this->Cache.Contains(URL);
 
 	if (cache_hit)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Raw Cache hit"));
-		*raw_data = this->cache.Find(URL)->raw_data;//get the data in the cache!
+		*RawData = this->Cache.Find(URL)->RawData;//get the data in the cache!
 	}
 	else
 	{
@@ -114,16 +114,16 @@ bool UObjectHandler::check_raw_cache(FString URL, TArray<uint8>* raw_data)
 	return cache_hit;
 }
 
-void UObjectHandler::add_to_cache(FString URL, TArray<uint8> raw_data)
+void UObjectHandler::AddToCache(FString URL, TArray<uint8> RawData)
 {
-	if (!this->cache.Contains(URL) || this->cache.Num() == 0)
+	if (!this->Cache.Contains(URL) || this->Cache.Num() == 0)
 	{
-		if (this->can_add_to_cache(raw_data.Num()))//do we have room in the cache?
+		if (this->CanAddToCache(RawData.Num()))//do we have room in the cache?
 		{//we have room in the cache for more!
 			FRawData new_cache_entry;
-			new_cache_entry.raw_data = raw_data;
-			this->cache.Add(TTuple<FString, FRawData>(URL, new_cache_entry));//add the new cache entry if we don't already have it!
-			this->current_cache_size += raw_data.Num();//add the bytes in to keep track!
+			new_cache_entry.RawData = RawData;
+			this->Cache.Add(TTuple<FString, FRawData>(URL, new_cache_entry));//add the new cache entry if we don't already have it!
+			this->CurrentCacheSize += RawData.Num();//add the bytes in to keep track!
 		}
 		else
 		{//we now will clear data out at random until we can fit it
@@ -132,49 +132,49 @@ void UObjectHandler::add_to_cache(FString URL, TArray<uint8> raw_data)
 			FRawData cached_data;
 
 			//I include a check here incase we download an image that is just massive so we don't spin forever!
-			while (this->cache.Num() > 0 && (this->current_cache_size + raw_data.Num()) > this->max_cache_size)
+			while (this->Cache.Num() > 0 && (this->CurrentCacheSize + RawData.Num()) > this->MaxCacheSize)
 			{
-				this->cache.GetKeys(cache_keys);//get the keys!
+				this->Cache.GetKeys(cache_keys);//get the keys!
 				r_key = cache_keys[FMath::RandRange(0, cache_keys.Num() - 1)];//get a random key!
-				cached_data = *this->cache.Find(r_key);
-				this->current_cache_size -= cached_data.raw_data.Num();//remove the count!
-				this->cache.Remove(r_key);//remove it from the cache!
+				cached_data = *this->Cache.Find(r_key);
+				this->CurrentCacheSize -= cached_data.RawData.Num();//remove the count!
+				this->Cache.Remove(r_key);//remove it from the cache!
 			}
 			
 			//now that we have room for a new entry add it in!
 			FRawData new_cache_entry;
-			new_cache_entry.raw_data = raw_data;
-			this->cache.Add(TTuple<FString, FRawData>(URL, new_cache_entry));//add the new cache entry if we don't already have it!
-			this->current_cache_size += raw_data.Num();//add the bytes in to keep track!
+			new_cache_entry.RawData = RawData;
+			this->Cache.Add(TTuple<FString, FRawData>(URL, new_cache_entry));//add the new cache entry if we don't already have it!
+			this->CurrentCacheSize += RawData.Num();//add the bytes in to keep track!
 		}
 	}
 }
 
 //used to clear the contents of the raw cache!
-void UObjectHandler::clear_raw_cache()
+void UObjectHandler::ClearRawCache()
 {
-	this->current_cache_size = 0;//nothing in here!
-	this->cache.Empty();//clear the cache!
-	this->cache.Shrink();//remove all slack as well
+	this->CurrentCacheSize = 0;//nothing in here!
+	this->Cache.Empty();//clear the cache!
+	this->Cache.Shrink();//remove all slack as well
 }
 
-bool UObjectHandler::can_add_to_cache(int32 byte_count_to_add)
+bool UObjectHandler::CanAddToCache(int32 ByteCountToAdd)
 {
-	return (this->current_cache_size + byte_count_to_add) <= (this->max_cache_size);
+	return (this->CurrentCacheSize + ByteCountToAdd) <= (this->MaxCacheSize);
 }
 
-bool UObjectHandler::request_raw_base(FString URL)
+bool UObjectHandler::RequestRawBase(FString URL)
 {
 	UE_LOG(LogTemp, Display, TEXT("Fetching Raw From: %s"), *URL);
 
-	if (this->use_raw_cache)//are we using the cache?
+	if (this->UseRawCache)//are we using the cache?
 	{
 		TArray<uint8> cached_data, * cached_data_ptr;
 		cached_data_ptr = &cached_data;
-		bool cache_hit = this->check_raw_cache(URL, cached_data_ptr);
+		bool cache_hit = this->CheckRawCache(URL, cached_data_ptr);
 		if (cache_hit)
 		{
-			this->storeImageData(build_img_data(cached_data, URL), URL);
+			this->StoreImageData(BuildImgData(cached_data, URL), URL);
 			return true; //we are done here!
 		}
 	}
@@ -182,29 +182,29 @@ bool UObjectHandler::request_raw_base(FString URL)
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
 	http_post_req->SetTimeout(15);
-	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::handle_request_raw);
+	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::HandleRequestRaw);
 	http_post_req->ProcessRequest();
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;
 }
 
-void UObjectHandler::requestImage(FString URL)
+void UObjectHandler::RequestImage(FString URL)
 {
-	this->syncer->Increment();
-	this->request_raw_base(URL);
+	this->Syncer->Increment();
+	this->RequestRawBase(URL);
 }
 
-void UObjectHandler::requestImages(TArray<FString> URLs)
+void UObjectHandler::RequestImages(TArray<FString> URLs)
 {
 	//this will filter out bad urls saving on compute
-	TArray<FString> filteredUrls = this->filterURLs(URLs);
-	this->syncer->Increase(filteredUrls.Num());//inc for all requests
+	TArray<FString> filteredUrls = this->FilterURLs(URLs);
+	this->Syncer->Increase(filteredUrls.Num());//inc for all requests
 	for (FString url : filteredUrls)
 	{
-		this->request_raw_base(url);
+		this->RequestRawBase(url);
 	}
 }
 
-EImageFormat UObjectHandler::get_img_format(FString URL)
+EImageFormat UObjectHandler::GetImgFormat(FString URL)
 {
 	EImageFormat fmt = EImageFormat::PNG;//default!
 
@@ -223,17 +223,17 @@ EImageFormat UObjectHandler::get_img_format(FString URL)
 	return fmt;
 }
 
-UTexture2D* UObjectHandler::tryBuildImage(TArray<uint8> imgData, EImageFormat format)
+UTexture2D* UObjectHandler::TryBuildImage(TArray<uint8> ImgData, EImageFormat Format)
 {
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(format);
+	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(Format);
 	UTexture2D* img = nullptr;
 	EPixelFormat pxl_format = PF_B8G8R8A8;
 	int32 width = 0, height = 0;
 
 	if (ImageWrapper)
 	{
-		if (ImageWrapper.Get()->SetCompressed(imgData.GetData(), imgData.Num()))
+		if (ImageWrapper.Get()->SetCompressed(ImgData.GetData(), ImgData.Num()))
 		{
 			TArray64<uint8>  Uncompressed;
 			if (ImageWrapper.Get()->GetRaw(Uncompressed))
@@ -256,29 +256,29 @@ UTexture2D* UObjectHandler::tryBuildImage(TArray<uint8> imgData, EImageFormat fo
 	return img;
 }
 
-UTexture2D* UObjectHandler::build_img_data(TArray<uint8> img_data,FString URL)
+UTexture2D* UObjectHandler::BuildImgData(TArray<uint8> ImgData,FString URL)
 {
-	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), img_data.Num());
+	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), ImgData.Num());
 
 	int32 width = 0, height = 0;
 	UTexture2D* img = nullptr;
 	EPixelFormat pxl_format = PF_B8G8R8A8;
 	EImageFormat img_format;
 
-	if (this->useCustomFormat)
+	if (this->bUseCustomFormat)
 	{
-		img_format = this->customFormat;
+		img_format = this->CustomFormat;
 	}
 	else
 	{
-		img_format = get_img_format(URL);//get the image format nicely
+		img_format = GetImgFormat(URL);//get the image format nicely
 	}
 
-	img = this->tryBuildImage(img_data,img_format);
+	img = this->TryBuildImage(ImgData,img_format);
 
 	if (!img)
 	{//try again with forced Jpeg our default choice in the event of no .type specified is .png
-		img = this->tryBuildImage(img_data, EImageFormat::JPEG);
+		img = this->TryBuildImage(ImgData, EImageFormat::JPEG);
 	}
 
 	if (!img)

@@ -2,10 +2,11 @@
 
 #include "SqncSpecPawn.h"
 #include "Indexer/IndexerSupport.h"
+#include "Sequence/SequenceAPI.h"
 
 void ASqncSpecPawn::SetupCredentials(FCredentials_BE CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
-	const FString CredentialsParsed = UIndexerSupport::structToString(CredentialsIn);
+	const FString CredentialsParsed = UIndexerSupport::StructToString(CredentialsIn);
 	UE_LOG(LogTemp,Display,TEXT("Passed Credentials: %s"), *CredentialsParsed);
 }

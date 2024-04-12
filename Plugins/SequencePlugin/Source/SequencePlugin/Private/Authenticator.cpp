@@ -16,6 +16,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
+#include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -32,8 +33,8 @@ UAuthenticator::UAuthenticator()
 	FString ParsedJWT;
 	FBase64::Decode(FSequenceConfig::WaaSTenantKey,ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
-	this->WaasSettings = UIndexerSupport::jsonStringToStruct<FWaasJWT>(ParsedJWT);
-	
+
+	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -46,7 +47,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		const FString CTS_Json = UIndexerSupport::structToString<FCredentials_BE>(Credentials);
+		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
 		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
@@ -73,15 +74,10 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
 	{
 		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
-		ret = UIndexerSupport::jsonStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
-		ret &= this->CredentialsValid(*Credentials);
+		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+		ret &= Credentials->RegisteredValid();
 	}
 	return ret;
-}
-
-bool UAuthenticator::CredentialsValid(const FCredentials_BE& Credentials)
-{
-	return FDateTime::UtcNow().ToUnixTimestamp() < Credentials.GetExpires();
 }
 
 void UAuthenticator::CallAuthRequiresCode() const
@@ -204,7 +200,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
 	this->StoreCredentials(Credentials);
-	this->CallAuthSuccess(Credentials);
+	this->AutoRegister(Credentials);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
@@ -379,7 +375,7 @@ void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FSt
 	
 	if (this->CanRetryEmailLogin())
 	{
-		this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
+		this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
 	}
 	else
 	{
@@ -411,7 +407,7 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 
-	this->UE_AWS_RPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
+	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
 }
 
 void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -429,7 +425,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
 			this->StoreCredentials(Credentials);
-			this->CallAuthSuccess(Credentials);
+			this->AutoRegister(Credentials);
 		}
 		else
 		{//error state
@@ -448,13 +444,40 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
-	this->UE_AWS_RPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
+	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
-TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& response)
+void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
+{
+	USequenceWallet * Wallet = USequenceWallet::Make(Credentials);
+	
+	const TFunction<void (FCredentials_BE)> OnSuccess = [this](FCredentials_BE Credentials)
+	{
+		if (Credentials.IsRegistered())
+		{
+			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials"));
+			this->CallAuthSuccess(Credentials);
+		}
+		else
+		{
+			UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register, Credentials weren't registered"));
+			this->CallAuthFailure();
+		}
+	};
+	
+	const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err)
+	{
+		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
+		this->CallAuthFailure();
+	};
+	
+	Wallet->RegisterSession(OnSuccess,OnFailure);
+}
+
+TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
 {
 	TSharedPtr<FJsonObject> responseObj;
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(response), responseObj))
+	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), responseObj))
 		return responseObj;
 	else
 		return nullptr;
@@ -473,7 +496,7 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	return FStoredCredentials_BE(IsValid, *Credentials);
 }
 
-void UAuthenticator::UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
+void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
 {
 	UE_LOG(LogTemp,Display,TEXT("RequestBody: %s"),*RequestBody);
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
