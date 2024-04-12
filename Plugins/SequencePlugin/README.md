@@ -624,9 +624,50 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 };
 ```
 
-One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something
-and start over writing memory. If you require lots of nesting swapping to using UFUNCTION callbacks helps to avoid these,
-problems similar to how things are done in **[UAuthenticator.h/cpp]** as a reference.
+One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something and start over writing memory. If you require lots of nesting swapping to a better approach using UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
+
+### Blockchain Functionality
+
+Most users of the Sequence SDK will not need to interact with cryptographic functions directly. 
+
+#### Binary Data
+
+We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`. 
+Binary data is further subtyped into `FUnsizedData`, which represents data of any variable size, and `TSizedData<TSize>`, which represents data of a required byte length `TSize`.
+
+Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`. 
+These can also be loaded from hex strings using ``From(FString Str)``, such as ``FPrivateKey::From("0x0...0");``. Ensure that the input string is the correct size.
+
+#### The ABI
+
+To call contracts on the blockchain, you will need to encode any data you wish to pass as arguments using the ABI. To read more about the ABI and its specification, check out the [solidity docs](https://docs.soliditylang.org/en/latest/abi-spec.html).
+
+Our ABI implementation centers around the ``ABI`` class in `ABI/ABI.h`, which provides functions to convert the following types: `UInt32`, `Int32`, `Bool`, `FAddress`, and `FString`. Any other data may be transformed directly into `TFixedABIArray` or `TDynamicABIArray` for fixed-length and dynamic length arrays respectively, or to `TFixedABIData` and `TDynamicABIData` for fixed-length and dynamic length binary data.
+
+Once you have your data stored in `ABIEncodeable` types, you can provide the ABI an array of the type `TArray<ABIEncodeable*>` to `ABI::Encode` to receive the binary encoding of the arguments.
+See `TestABI.cpp` for an example.
+
+#### Cryptographic Functions
+
+`Eth/Crypto.h` provides some important ethereum functions for interacting directly with the blockchain:
+
+```
+// Derives a public key from a private key
+FPublicKey GetPublicKey(FPrivateKey PrivateKey);
+
+// Derives an address from the public key
+FAddress GetAddress(FPublicKey PublicKey);
+
+// Finds a keccak hash for some binary data
+FHash256 GetKeccakHash(FBinaryData &Data);
+
+// Derives contract address from a given sending address and nonce
+FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce);
+```
+
+#### Raw Ethereum Transactions
+
+`EthTransaction.h` contains a struct designed for managing raw ethereum transactions, including functions to sign and hash them. Note that transactions should usually be handled via the Sequence wallet interface, which sends the transactions via the Sequence WAAS.
 
 ### Packaging
 
