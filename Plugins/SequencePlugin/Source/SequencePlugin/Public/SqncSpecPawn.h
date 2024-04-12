@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Authenticator.h"
+#include "GameFramework/Pawn.h"
 #include "SqncSpecPawn.generated.h"
 
 /**
