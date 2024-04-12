@@ -8,12 +8,24 @@ TArray<uint8> BlankArray(ByteLength Size);
 // Struct encapsulating an array of binary data
 struct FBinaryData
 {
-	virtual ~FBinaryData() = default; // Does NOT free Data pointer. Must do so manually!
+	virtual ~FBinaryData() = default;
+
+	// Raw data- direct modification is usually inadvisable
 	TSharedPtr<TArray<uint8>> Arr;
+
+	// Byte length
 	virtual ByteLength GetLength() const = 0;
-	FString ToHex() const;
-	void Renew(); // Makes new blank array. Clean up the old one!
+	
+	// String hex representation of the binary data
+	FString ToHex() const; 
+
+	// Clear data, replacing it with a new blank array
+	void Renew();
+
+	// Direct byte access
 	uint8* Ptr() const;
+
+	// Get byte array
 	TArray<uint8> ToArray();
 };
 
@@ -22,17 +34,22 @@ struct FUnsizedData final : FBinaryData
 {
 	static FUnsizedData Empty();
 	FUnsizedData(const TArray<uint8> &Array);
-	FUnsizedData Copy() const; // This creates new data that must be freed
+	FUnsizedData Copy() const;
 	virtual ByteLength GetLength() const override;
-	FUnsizedData Trim(); // Destroys itself
+	FUnsizedData Trim();
 	static FUnsizedData From(FString Hex);
 };
 
 // Returns returns data with leading 0x00 bytes trimmed
 FUnsizedData Trimmed(const FBinaryData &Data);
 
-FUnsizedData HexStringToBinary(FString Hex); // Hex String to Number of arbitrary size
+// Hex String to Number of arbitrary size
+FUnsizedData HexStringToBinary(FString Hex);
+
+// Gets UTF8 byte encoding of string
 FUnsizedData StringToUTF8(FString String);
+
+// Converts a UTF8 encoded byte array ot a string
 FString UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
@@ -41,7 +58,7 @@ struct TSizedData : FBinaryData
 {
 	const static ByteLength Size = TSize;
 	virtual ByteLength GetLength() const override;
-	FUnsizedData Copy() const; // This creates new data that must be freed
+	FUnsizedData Copy() const; 
 	explicit operator FUnsizedData() const { return Copy(); }
 	static TSizedData Empty();
 }; // Data with set sizes
@@ -69,7 +86,7 @@ TSizedData<TSize> TSizedData<TSize>::Empty()
 // Basic Binary Types
 struct FHash256 final : TSizedData<32>
 {
-	static FHash256 New(); // This creates new data that must be freed
+	static FHash256 New();
 	static FHash256 From(TStaticArray<uint8, 32> &Arr);
 	static FHash256 From(TArray<uint8> &Arr);
 	static FHash256 From(FString Str);
@@ -77,35 +94,35 @@ struct FHash256 final : TSizedData<32>
 
 struct FAddress final : TSizedData<20>
 {
-	static FAddress New(); // This creates new data that must be freed
+	static FAddress New();
 	static FAddress From(TStaticArray<uint8, 20> &Arr);
 	static FAddress From(FString Str);
 };
 
 struct FPublicKey final : TSizedData<64>
 {
-	static FPublicKey New(); // This creates new data that must be freed
+	static FPublicKey New();
 	static FPublicKey From(TStaticArray<uint8, 64> &Arr);
 	static FPublicKey From(FString Str);
 };
 
 struct FPrivateKey final : TSizedData<32>
 {
-	static FPrivateKey New(); // This creates new data that must be freed
+	static FPrivateKey New();
 	static FPrivateKey From(TStaticArray<uint8, 32> &Arr);
 	static FPrivateKey From(FString Str);
 };
 
 struct FBloom final : TSizedData<256>
 {
-	static FBloom New(); // This creates new data that must be freed
+	static FBloom New();
 	static FBloom From(TStaticArray<uint8, 256> &Arr);
 	static FBloom From(FString Str);
 };
 
 struct FBlockNonce final : TSizedData<8>
 {
-	static FBlockNonce New(); // This creates new data that must be freed
+	static FBlockNonce New();
 	static FBlockNonce From(TStaticArray<uint8, 8> &Arr);
 	static FBlockNonce From(FString Str);
 	void Increment() const;
