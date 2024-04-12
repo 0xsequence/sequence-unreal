@@ -89,6 +89,12 @@ resides outside the plugins content folder.
 To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
 To learn more about Pawns refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/pawn-in-unreal-engine?application_version=5.2)
 
+### Customizing the builtin GUI
+
+In the folder located at All/Plugins/SequencePlugin Content/Core/Style you'll find a struct F_SequenceUIStyle,
+In the default values section of this struct you'll be able to update the colours and images displayed throughout the UI.
+For beta we currently only read from Sequence_Style_Dark_Mode
+
 ### Custom UI Integration
 
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
