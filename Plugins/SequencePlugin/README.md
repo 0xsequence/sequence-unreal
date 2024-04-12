@@ -21,6 +21,26 @@ in the case of `README.md` & `SequencePlugin.uplugin`
 
 Once done Rebuild the project from source and you'll be good to go!
 
+### YourProject.Build.cs
+
+In some instances your build.cs may not update properly for your project when this happens you'll be unable to import plugin,
+if this occurs in your Projects Build.cs file please check the private Dependency module such that it looks like this:
+
+    public SequenceTest(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+        //The line below is what you want
+		PrivateDependencyModuleNames.AddRange(new string[] { "SequencePlugin" });
+
+		// Uncomment if you are using Slate UI
+		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
+
 ## Credentials
 
 Before you can use this plugin, you need to acquire the following credentials from Sequence:
@@ -56,7 +76,12 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
     b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
     
     c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
-    
+
+        To create a Blueprint right click in the Content drawer then click blueprint Class, then when in the blueprint class selector
+        Select the All Classes drop down and search for the C++ class you just made and select it as the parent
+
+        From the AC_SequencePawn_Component you'll be able to find the Event Auth_Success_Forwarder bind to it to listen for credentials
+
     d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the **[AC_SequencePawn_Component]** to it. For in depth specifics on how to setup this blueprint
        please refer to the demonstration BP **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
        received from the inbuilt UI to your code base by binding to the delegate that gives you Credentials **[Auth_Success_Forwarder]**
