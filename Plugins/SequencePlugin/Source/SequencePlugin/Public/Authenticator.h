@@ -6,7 +6,7 @@
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
-#include "Config/Config.h"
+#include "../PluginConfig/Config.h"
 #include "Dom/JsonObject.h"
 #include "Authenticator.generated.h"
 
@@ -113,6 +113,11 @@ public:
 		RPCServer = RPCServerIn;
 	}
 
+	void UpdateNetwork(int64 NewNetwork)
+	{
+		Network = NewNetwork;
+	}
+	
 	void RegisterCredentials(const FString& WalletIn, const FString& EmailIn, const FString& IssuerIn, const FString& TypeIn, const FString& SubIn, const FString& UserIdIn, const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
 	{
 		WalletAddress = WalletIn;
@@ -147,7 +152,7 @@ public:
 		return Network;
 	}
 	
-	FString GetWaasVersin() const
+	FString GetWaasVersion() const
 	{
 		return WaasVersion;
 	}
@@ -237,10 +242,23 @@ public:
 		return Registered;
 	}
 
-	bool Valid() const
+	//Used to check cases where we are registered and in a good state
+	bool RegisteredValid() const
+	{
+		bool IsValidRegistered = true;
+		IsValidRegistered &= Registered;
+		IsValidRegistered &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		IsValidRegistered &= IDToken.Len() > 0;
+		IsValidRegistered &= SessionPrivateKey.Len() > 0;
+		return IsValidRegistered;
+	}
+
+	//Used to check in cases where we don't care if we are registered, just valid
+	bool UnRegisteredValid() const
 	{
 		bool IsValid = true;
-		IsValid &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
+		IsValid &= IDToken.Len() > 0;
+		IsValid &= SessionPrivateKey.Len() > 0;
 		return IsValid;
 	}
 
@@ -338,7 +356,7 @@ private:
 	UPROPERTY()
 	FString ChallengeSession = "";
 	UPROPERTY()
-	UWallet * SessionWallet;
+	UWallet* SessionWallet;
 	UPROPERTY()
 	bool PurgeCache = true;
 private:
@@ -361,14 +379,12 @@ public:
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
 	void ClearStoredCredentials() const;
-private:
+private:	
 	bool CanHandleEmailLogin();
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
-
-	static bool CredentialsValid(const FCredentials_BE& Credentials);
 	
-	FString GetISSClaim(const FString& JWT) const ;
+	FString GetISSClaim(const FString& JWT) const;
 
 	bool CanRetryEmailLogin();
 
@@ -398,7 +414,9 @@ private:
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
+	void AutoRegister(const FCredentials_BE& Credentials);
+
 	//RPC Calls//
-	static TSharedPtr<FJsonObject> ResponseToJson(const FString& response);
-	void UE_AWS_RPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
+	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
+	void UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 };

@@ -180,12 +180,13 @@ void AGeneralTesting::TestIndexer()
 
 void AGeneralTesting::TestTokenBalances() const
 {
-	UIndexer * indexer = NewObject<UIndexer>();
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	USequenceWallet * Api = USequenceWallet::Make(Credentials);
+	
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
 	{
-		FString ret = UIndexerSupport::structToString<FGetTokenBalancesReturn>(tokenBalances);
+		FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -193,22 +194,25 @@ void AGeneralTesting::TestTokenBalances() const
 	{
 		UE_LOG(LogTemp, Display, TEXT("Error with getting balances"));
 	};
+	
 	FGetTokenBalancesArgs args;
-	args.accountAddress = Credentials.GetWalletAddress();
+	args.accountAddress = Api->GetWalletAddress();
 	args.includeMetaData = true;
-	indexer->GetTokenBalances(Credentials.GetNetwork(), args,GenericSuccess,GenericFailure);
+
+	Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
 }
 
 void AGeneralTesting::TestHistory() const
 {
-	UIndexer * indexer = NewObject<UIndexer>();
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+	USequenceWallet * Api = USequenceWallet::Make(Credentials);
+	
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
 	{
-		if (printAll)
+		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::structToString<FGetTransactionHistoryReturn>(transactionHistory);
+			FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -219,11 +223,11 @@ void AGeneralTesting::TestHistory() const
 	};
 
 	FGetTransactionHistoryArgs args;
-	args.filter.accountAddress =  Credentials.GetWalletAddress();
+	args.filter.accountAddress = Api->GetWalletAddress();
 	args.includeMetaData = true;
 	args.page.page = 0;
 	args.page.more = true;
-	indexer->GetTransactionHistory(Credentials.GetNetwork(), args, GenericSuccess, GenericFailure);
+	Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
 }
 
 void AGeneralTesting::TestEncryption() const
@@ -249,7 +253,7 @@ void AGeneralTesting::TestMisc()
 
 void AGeneralTesting::OnDoneImageProcessing()
 {//forward this to the front as we will be able to view all the images from there!
-	this->testMiscForwarder(this->imgHandler->getProcessedImages());
+	this->testMiscForwarder(this->imgHandler->GetProcessedImages());
 }
 
 // Called every frame

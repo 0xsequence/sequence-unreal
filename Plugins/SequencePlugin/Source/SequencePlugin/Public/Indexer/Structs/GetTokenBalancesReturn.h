@@ -32,14 +32,14 @@ public:
         {
             balancesList.Add(tBalance.GetJson());
         }
-        ret.Get()->SetStringField("balances",UIndexerSupport::jsonObjListToSimpleString(balancesList));
+        ret.Get()->SetStringField("balances",UIndexerSupport::JsonObjListToSimpleString(balancesList));
         return ret;
     }
 
     /*
     * Used to Handle Edge Cases with Unreal's Json parsing
     */
-    void setup(FJsonObject json_in)
+    void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;
         if (json_in.TryGetArrayField("balances", lst))

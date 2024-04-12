@@ -8,9 +8,9 @@ class SEQUENCEPLUGIN_API UWallet : public UObject
 {
 	GENERATED_BODY()
 private:
-	FPrivateKey PrivateKey;
-	FPublicKey PublicKey;
-	FAddress Address;
+	FPrivateKey PrivateKey = FPrivateKey::New();
+	FPublicKey PublicKey = FPublicKey::New();
+	FAddress Address = FAddress::New();
 public:
 	/*
 	* Generates a random wallet
@@ -21,12 +21,12 @@ public:
 	static UWallet* Make(FPrivateKey PrivateKey);
 	static UWallet* Make(const FString& PrivateKey);
 
-	TArray<uint8> SignMessage(TArray<uint8> messageBytes,int32 messageLength);
+	TArray<uint8> SignMessage(TArray<uint8> MessageBytes,int32 MessageLength);
 	
 	/*
 	* Signs the given message
 	*/
-	TArray<uint8> SignMessage(FString message);
+	TArray<uint8> SignMessage(FString Message);
 
 	//Accessors//
 	FPrivateKey GetWalletPrivateKey();
@@ -35,5 +35,5 @@ public:
 	//Accessors//
 
 	//Used to build out the nonce used during the signing process
-private: TArray<uint8_t> BuildSigningNonce(uint8_t* messageHash, int32 size);
+private: TArray<uint8_t> BuildSigningNonce(uint8_t* MessageHash, int32 Size);
 };

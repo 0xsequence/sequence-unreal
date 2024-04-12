@@ -32,7 +32,7 @@ public:
         {
             jsonList.Add(tItem.GetJson());
         }
-        ret.Get()->SetStringField("balances", UIndexerSupport::jsonObjListToSimpleString(jsonList));
+        ret.Get()->SetStringField("balances", UIndexerSupport::JsonObjListToSimpleString(jsonList));
 
         return ret;
     }
@@ -40,7 +40,7 @@ public:
     /*
     * Used to handle edge cases with Unreal's json parsing
     */
-    void setup(FJsonObject json_in)
+    void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>> *lst;
         if (json_in.TryGetArrayField("balances", lst))//verify it's an arrayfield and valid!
