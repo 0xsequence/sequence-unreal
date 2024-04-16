@@ -8,8 +8,7 @@
 
 FString USequenceEncryptor::GetStoredKey()
 {
-	UConfigFetcher * ConfigFetcher = NewObject<UConfigFetcher>();
-	return ConfigFetcher->GetConfigVar(UConfigFetcher::FallBackEncryptionKey);
+	return UConfigFetcher::GetConfigVar(UConfigFetcher::FallBackEncryptionKey);
 }
 
 FString USequenceEncryptor::Encrypt(FString Payload)

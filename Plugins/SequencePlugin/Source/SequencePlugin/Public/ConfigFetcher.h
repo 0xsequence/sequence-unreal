@@ -23,8 +23,6 @@ public:
 	static inline FString FacebookClientID = "FacebookClientID";
 	static inline FString DiscordClientID = "DiscordClientID";
 	//Config Keys
-
-	bool CriticalConfigVarsValidated();
 	
-	FString GetConfigVar(const FString& ConfigKey);
+	static FString GetConfigVar(const FString& ConfigKey);
 };

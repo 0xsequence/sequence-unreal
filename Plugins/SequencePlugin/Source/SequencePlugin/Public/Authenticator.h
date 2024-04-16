@@ -7,6 +7,7 @@
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
 #include "Dom/JsonObject.h"
+#include "ConfigFetcher.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
@@ -347,7 +348,12 @@ private:
 	UPROPERTY()
 	FWaasJWT WaasSettings;
 	
-	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap;
+	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
+		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
+		{ESocialSigninType::Apple,FSSOCredentials(AppleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID))},
+		{ESocialSigninType::Discord,FSSOCredentials(DiscordAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::DiscordClientID))},
+		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
+	
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 	const int32 EmailAuthMaxRetries = 2;
