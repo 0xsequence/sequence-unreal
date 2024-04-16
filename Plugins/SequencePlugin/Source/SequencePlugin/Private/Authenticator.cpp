@@ -17,7 +17,6 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
 #include "Sequence/SequenceAPI.h"
-#include "ConfigFetcher.h"
 
 UAuthenticator::UAuthenticator()
 {
@@ -32,20 +31,9 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	UConfigFetcher * ConfigFetcher = NewObject<UConfigFetcher>();
-	FBase64::Decode(ConfigFetcher->GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
+	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
-
-	const FString GoogleClientId = ConfigFetcher->GetConfigVar(UConfigFetcher::GoogleClientID);
-	const FString AppleClientId = ConfigFetcher->GetConfigVar(UConfigFetcher::AppleClientID);
-	const FString DiscordClientId = ConfigFetcher->GetConfigVar(UConfigFetcher::DiscordClientID);
-	const FString FacebookClientId = ConfigFetcher->GetConfigVar(UConfigFetcher::FacebookClientID);
-
-	SSOProviderMap.Add({ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,GoogleClientId)});
-	SSOProviderMap.Add({ESocialSigninType::Apple,FSSOCredentials(AppleAuthURL,AppleClientId)});
-	SSOProviderMap.Add({ESocialSigninType::Discord,FSSOCredentials(DiscordAuthURL,DiscordClientId)});
-	SSOProviderMap.Add({ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,FacebookClientId)});
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -209,8 +197,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {	
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	UConfigFetcher * ConfigFetcher = NewObject<UConfigFetcher>();
-	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), ConfigFetcher->GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
+	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 	this->StoreCredentials(Credentials);
 	this->AutoRegister(Credentials);
 }
@@ -434,8 +421,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			UConfigFetcher * ConfigFetcher = NewObject<UConfigFetcher>();
-			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), ConfigFetcher->GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
+			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 			this->StoreCredentials(Credentials);
 			this->AutoRegister(Credentials);
 		}

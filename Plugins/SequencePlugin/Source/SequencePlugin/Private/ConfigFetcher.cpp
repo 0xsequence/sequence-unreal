@@ -1,13 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "ConfigFetcher.h"
-
-bool UConfigFetcher::CriticalConfigVarsValidated()
-{
-	
-	return false;
-}
+#include "CoreGlobals.h"
 	
 FString UConfigFetcher::GetConfigVar(const FString& ConfigKey)
 {
@@ -20,6 +14,7 @@ FString UConfigFetcher::GetConfigVar(const FString& ConfigKey)
 	FString value;
 	const FString Section = "/Script/Sequence.Config";
 	const FString Filename = FConfigCacheIni::NormalizeConfigIniPath(FPaths::ProjectConfigDir() + TEXT("/SequenceConfig.ini"));
+	GConfig->Flush(true,Filename);
 	if (GConfig->GetString(GetData(Section), GetData(ConfigKey),value,GetData(Filename)))
 	{
 		UE_LOG(LogTemp, Log, TEXT("%s"),*value);
