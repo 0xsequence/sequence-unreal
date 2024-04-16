@@ -4,11 +4,12 @@
 #include "SequenceEncryptor.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "../PluginConfig/Config.h"
+#include "ConfigFetcher.h"
 
 FString USequenceEncryptor::GetStoredKey()
 {
-	return FEncryptorConfig::Key;
+	UConfigFetcher * ConfigFetcher = NewObject<UConfigFetcher>();
+	return ConfigFetcher->GetConfigVar(UConfigFetcher::FallBackEncryptionKey);
 }
 
 FString USequenceEncryptor::Encrypt(FString Payload)
