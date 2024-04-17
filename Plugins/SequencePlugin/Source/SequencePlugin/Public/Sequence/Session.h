@@ -6,9 +6,6 @@
 #include "UObject/Object.h"
 #include "Session.generated.h"
 
-/**
-* {"id":"","projectId":2,"userId":"","identity":{"type":"","iss":"","sub":""},"friendlyName":"5B05F9AA4EA089C227ABFD880F1DB2CB","createdAt":"2024-02-29T16:16:16.884986934Z","refreshedAt":"2024-02-29T16:16:16.910342395Z","expiresAt":"2124-02-05T16:16:16.884987064Z"}
- */
 USTRUCT()
 struct FIdentity
 {

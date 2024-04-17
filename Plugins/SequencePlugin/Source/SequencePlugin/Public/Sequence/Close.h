@@ -5,8 +5,6 @@
 #include "UObject/Object.h"
 #include "Close.generated.h"
 
-//// {"response":{"code":"sessionClosed","data":{}}}
-
 USTRUCT()
 struct FCloseResponse
 {

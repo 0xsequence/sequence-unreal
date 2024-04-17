@@ -1,6 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "ABI.h"
-
 #include "ABIEncodeable.h"
 #include "Eth/Crypto.h"
 #include "Types/BinaryData.h"
