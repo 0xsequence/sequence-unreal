@@ -65,7 +65,7 @@ private:
 	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
 	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
 
-	static USequenceWallet* Ptr; 
+	inline static USequenceWallet* Ptr = nullptr; 
 public:
 	USequenceWallet();
 	
