@@ -659,11 +659,11 @@ One thing to be aware of is keep an eye on capturables if you have lots of neste
 
 ### Blockchain Functionality
 
-Most users of the Sequence SDK will not need to interact with cryptographic functions directly.
+Most users of the Sequence SDK will not need to interact with cryptographic functions directly. 
 
 #### Binary Data
 
-We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`.
+We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`. 
 Binary data is further subtyped into `FUnsizedData`, which represents data of any variable size, and `TSizedData<TSize>`, which represents data of a required byte length `TSize`.
 
 Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`.

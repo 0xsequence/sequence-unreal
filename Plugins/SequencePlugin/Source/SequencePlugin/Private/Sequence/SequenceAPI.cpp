@@ -71,16 +71,22 @@ USequenceWallet::USequenceWallet()
 
 USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn)
 {
-	USequenceWallet * Wallet = NewObject<USequenceWallet>();
-	Wallet->Init(CredentialsIn);
-	return Wallet;
+	Ptr = NewObject<USequenceWallet>();
+	Ptr->Init(CredentialsIn);
+	return Ptr;
 }
 
 USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn, const FString& ProviderURL)
 {
-	USequenceWallet * Wallet = NewObject<USequenceWallet>();
-	Wallet->Init(CredentialsIn,ProviderURL);
-	return Wallet;
+	Ptr = NewObject<USequenceWallet>();
+	Ptr->Init(CredentialsIn,ProviderURL);
+	return Ptr;
+}
+
+TOptional<USequenceWallet*> USequenceWallet::Get()
+{
+	if(Ptr != nullptr) return Ptr;
+	return TOptional<USequenceWallet*>();
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
