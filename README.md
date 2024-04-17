@@ -253,7 +253,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
     FString Message = "Hi";
-	Api->SignMessage(Message,OnResponse,GenericFailure);
+	Api->SignMessage(Message,OnResponse,OnFailure);
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
@@ -307,10 +307,8 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	Arr.Add(&Account);
 	Arr.Add(&Id);
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-	
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+
 	FRawTransaction T;
-	
 	T.data = "0x" + EncodedData.ToHex();
 	T.to = "0x64d9f9d527abe2a1c1ce3fada98601c4ac5bfdd2";
 	T.value = "0";
@@ -328,8 +326,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
-		OnSuccess(OutputString);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 	},OnFailure);
 
 ### Example ListSessions
