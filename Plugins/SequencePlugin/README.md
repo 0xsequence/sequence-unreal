@@ -4,22 +4,27 @@ Sequence Unreal SDK
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Manually Upgrading from previous versions
+IF you are using release Beta_1_0_3 or older please backup the values you stored in `PluginConfig/Config.h` or `Config/Config.h`
+After you've backed up your configuration data, Delete the entirety of the SequencePlugin directory. And drop
+in the new updated version.
 
-IF you are using release Beta_1_0_2 or older please backup the values you stored in `Config/Config.h`
-when the new Config.h exists in your project simply update the values in that file with the ones you had existing prior
+We now are opting to use .ini files to store configurations for the plugin rather than storing them in the plugin itself.
 
-IF you are using a newer release you can leave the folder `SequencePlugin/PluginConfig` alone
+To do this please go to [YourProjectDirectory]/Config And create a file named **[SequenceConfig.ini]**
 
-To manually update the Sequence plugin delete the following folders contained within `SequencePlugin`:
-`Binaries`,`Content`,`Intermediate`,`Resource`,`Source`
+Within **[SequenceConfig.ini]** add the following lines:
 
-Then copy the following folders / files from the NEW SequencePlugin folder:
-`Content`, `Resources`, `Source`, `README`, `SequencePlugin`
+      [/Script/Sequence.Config]
+      FallbackEncryptionKey = ""
+      WaaSTenantKey = ""
+      ProjectAccessKey = ""
+      GoogleClientID = ""
+      AppleClientID = ""
+      FacebookClientID = ""
+      DiscordClientID = ""
 
-Then paste these folders / files into the SequencePlugin folder in your project, allowing the files to be replaced with new ones
-in the case of `README.md` & `SequencePlugin.uplugin`
-
-Once done rebuild the project from source and you'll be good to go!
+Here is where you'll fill in the various configuration values for the plugin, for the time being we don't support
+Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
 ### YourProject.Build.cs
 
