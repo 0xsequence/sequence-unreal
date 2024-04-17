@@ -67,28 +67,28 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 2) Launch your project, then allow it to update the UProject Settings.
 
 3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
-  
+
 4) If you wish to use the in built sequence UI for login you have to do the following:
- 
-    a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
-       for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-    b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+   a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
+   for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-    c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
+   b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
-    d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-       please refer to the demonstration BP [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
-       received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]** that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
-       You can do this by swapping the SetupCredentials node for your own setup node.
+   c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
 
-    d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
-         drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
-         for your **[C++ Parent]** class you just made.
- 
-    d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
-          to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
-          then click add custom event.
+   d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
+   please refer to the demonstration BP [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
+   received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]** that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
+   You can do this by swapping the SetupCredentials node for your own setup node.
+
+   d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
+   drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
+   for your **[C++ Parent]** class you just made.
+
+   d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
+   to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
+   then click add custom event.
 
 Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
 during updates all code you place there could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
@@ -100,7 +100,7 @@ resides outside the plugins content folder.
    Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** to the Pawn Blueprint that you just made.
 
 6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
- 
+
 If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
 To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
 To learn more about Pawns refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/pawn-in-unreal-engine?application_version=5.2)
@@ -217,7 +217,7 @@ Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
 
 Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
-       be sure you register and set your bundle identifier properly for your app
+be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
 For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
@@ -239,7 +239,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 
 ### Example SignMessage
 ##### Used to Sign a message
-    
+
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());    
 
@@ -253,7 +253,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
     FString Message = "Hi";
-	Api->SignMessage(Message,OnResponse,GenericFailure);
+	Api->SignMessage(Message,OnResponse,OnFailure);
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
@@ -307,10 +307,8 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	Arr.Add(&Account);
 	Arr.Add(&Id);
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-	
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+
 	FRawTransaction T;
-	
 	T.data = "0x" + EncodedData.ToHex();
 	T.to = "0x64d9f9d527abe2a1c1ce3fada98601c4ac5bfdd2";
 	T.value = "0";
@@ -328,8 +326,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
-		OnSuccess(OutputString);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 	},OnFailure);
 
 ### Example ListSessions
@@ -411,7 +408,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
-    
+
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
 	Api->UpdateProviderURL(NewProviderUrl);
 
@@ -654,14 +651,14 @@ One thing to be aware of is keep an eye on capturables if you have lots of neste
 
 ### Blockchain Functionality
 
-Most users of the Sequence SDK will not need to interact with cryptographic functions directly. 
+Most users of the Sequence SDK will not need to interact with cryptographic functions directly.
 
 #### Binary Data
 
-We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`. 
+We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`.
 Binary data is further subtyped into `FUnsizedData`, which represents data of any variable size, and `TSizedData<TSize>`, which represents data of a required byte length `TSize`.
 
-Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`. 
+Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`.
 These can also be loaded from hex strings using ``From(FString Str)``, such as ``FPrivateKey::From("0x0...0");``. Ensure that the input string is the correct size.
 
 #### The ABI
