@@ -58,6 +58,11 @@ the following struct value **[FEncryptorConfig::Key]**
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
 You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
 
+Note: For generating secure keys feel free to use tools such as:
+Lastpass Password generator or equivalent,
+Encryption Key Generators,
+etc
+
 ***
 
 ## Getting Started With the Builtin GUI
