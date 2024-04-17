@@ -716,6 +716,12 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
 New to 5.3 the ability to use Modernized XCode has been added. However we've experienced many issues with this setting enabled and recommend turning it off.
 
+### Android
+When setting up your project to build for Android you'll need to update the following settings:
+In ProjectSettings/Android SDK
+Set SDK API Level to Android-34
+Set NDK API Level to anything in the range [26,33] (We personally used android-32)
+
 ### Hardware Requirements
 
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
