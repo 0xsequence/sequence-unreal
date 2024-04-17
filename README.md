@@ -1,4 +1,4 @@
-Sequence Unreal SDK
+_Sequence Unreal SDK
 ===================
 
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
@@ -249,6 +249,25 @@ or
 Once you have your **[USequenceWallet]** you can feel free to call any of the functions Supplied by the object, as the register call is now automatically done for you.
 
 ### USequenceWallet Functions
+
+### Example Static Access
+Example of how to statically Access the USequenceWallet so you don't have to pass around pointers throughout your code
+
+   	USequenceWallet::Make(CredentialsIn);//You'll need to call Make at least once somewhere in your code
+
+	TOptional<USequenceWallet*> TApi = USequenceWallet::Get();
+	USequenceWallet * Api = nullptr;
+
+	if (TApi.IsSet())
+	{//Valid state
+		Api = TApi.GetValue();
+	}
+	else
+	{//Undefined state
+		return;
+	}
+
+    //From this point onward you'll be able to use Api as you would normally
 
 ### Example SignMessage
 ##### Used to Sign a message
@@ -752,4 +771,4 @@ During the Unreal Package process in the event a code signing error occurs you c
 11) Click on the General tab
 12) Click on Mac and Applevision Pro under supported destinations and hit the delete key
 13) Now the project can be built (if the build fails at first, wait a few moments then try again. It can sometimes take a bit before the build registers the run script)
-14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again.
+14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again._
