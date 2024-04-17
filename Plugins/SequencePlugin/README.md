@@ -78,9 +78,12 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
    c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
 
    d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-   please refer to the demonstration BP [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
-   received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]** that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
-   You can do this by swapping the SetupCredentials node for your own setup node.
+   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
+   own Blueprint graph.
+   
+   The important part here is forwarding the Credentials received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]**,
+   that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
+   You can do this by swapping the SetupCredentials BlueprintCallable Function for your own Blueprint Callable Function from **[C++ Parent]**.
 
    d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
    drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
