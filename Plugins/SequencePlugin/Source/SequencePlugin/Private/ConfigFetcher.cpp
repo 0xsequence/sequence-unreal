@@ -18,7 +18,6 @@ FString UConfigFetcher::GetConfigVar(const FString& ConfigKey)
 	GConfig->Flush(true,Filename);
 	if (GConfig->GetString(GetData(Section), GetData(ConfigKey),value,GetData(Filename)))
 	{
-		UE_LOG(LogTemp, Log, TEXT("%s"),*value);
 		return value;
 	}
 	
