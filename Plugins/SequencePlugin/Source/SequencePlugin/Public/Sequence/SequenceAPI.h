@@ -64,11 +64,14 @@ private:
 	//Response helper functions
 	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
 	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
+
+	static USequenceWallet* Ptr; 
 public:
 	USequenceWallet();
 	
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn);
 	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
+	static TOptional<USequenceWallet*> Get();
 
 	FString GetWalletAddress();
 	void UpdateProviderURL(const FString& Url);
