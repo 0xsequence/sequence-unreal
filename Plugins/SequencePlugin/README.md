@@ -80,7 +80,7 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
    d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
    please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
    own Blueprint graph.
-   
+
    The important part here is forwarding the Credentials received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]**,
    that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
    You can do this by swapping the SetupCredentials BlueprintCallable Function for your own Blueprint Callable Function from **[C++ Parent]**.
@@ -715,6 +715,12 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
 New to 5.3 the ability to use Modernized XCode has been added. However we've experienced many issues with this setting enabled and recommend turning it off.
+
+### Android
+When setting up your project to build for Android you'll need to update the following settings:
+In ProjectSettings/Android SDK
+Set SDK API Level to Android-34
+Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
 ### Hardware Requirements
 
