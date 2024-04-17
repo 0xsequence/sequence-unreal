@@ -726,7 +726,7 @@ During the Unreal Package process in the event a code signing error occurs you c
 5) Select Run Script
 6) Drag the new run script to one below from the last item in the phase list
 7) Expand the run script
-8) In the script box, add the following command: `xattr -cr /path-to-your-project/sequence-unreal/Binaries/IOS/Payload/SequenceUnreal.app`
+8) In the script box, add the following command: `xattr -cr /[path-to-your-project]/[your-project-name]/Binaries/IOS/Payload/[your-project-name.app]`
 9) Click on the Build Settings tab
 10) Click on each item under the Architectures header that contains macOS and hit the delete key
 11) Click on the General tab
