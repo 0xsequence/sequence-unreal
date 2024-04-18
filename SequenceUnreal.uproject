@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.2",
+	"EngineAssociation": "5.3",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -26,8 +26,8 @@
 			"Name": "SequencePlugin",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
-				"Android",
 				"Mac",
+				"Android",
 				"Win64",
 				"IOS"
 			],
@@ -39,9 +39,10 @@
 		}
 	],
 	"TargetPlatforms": [
-		"Android",
 		"Mac",
 		"Win64",
+		"Windows",
+		"Android",
 		"IOS"
 	]
 }

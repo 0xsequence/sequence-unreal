@@ -31,9 +31,8 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	FBase64::Decode(FSequenceConfig::WaaSTenantKey,ParsedJWT);
+	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
-
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 }
 
@@ -138,7 +137,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
 		break;
 	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(FAuthenticatorConfig::GoogleClientID,this->Nonce,this);
+		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID),this->Nonce,this);
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -148,14 +147,14 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 #endif
 	
 #if PLATFORM_IOS
-	FString clientID = FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + FAuthenticatorConfig::AppleClientID;
+	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
 		NativeOAuth::SignInWithApple(clientID, this->Nonce, this);
 		break;
 	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),FAuthenticatorConfig::UrlScheme,this);
+		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -198,7 +197,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {	
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
+	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 	this->StoreCredentials(Credentials);
 	this->AutoRegister(Credentials);
 }
@@ -220,13 +219,13 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString RedirectUrl = FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple:
-		RedirectUrl = FAuthenticatorConfig::RedirectURL;
+		RedirectUrl = RedirectURL;
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -240,13 +239,13 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
-	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
-		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ FAuthenticatorConfig::RedirectURL + "&nonce=" + this->Nonce + "&state=" + FAuthenticatorConfig::UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:
@@ -254,7 +253,6 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	case ESocialSigninType::Discord:
 		break;
 	}
-	
 	return SigninUrl;
 }
 
@@ -423,7 +421,7 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), FSequenceConfig::ProjectAccessKey,SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,FSequenceConfig::WaasVersion);
+			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 			this->StoreCredentials(Credentials);
 			this->AutoRegister(Credentials);
 		}
