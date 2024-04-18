@@ -1,5 +1,5 @@
 {
-	"EngineVersion":"5.2",
+	"EngineVersion":"5.3",
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
@@ -16,8 +16,8 @@
 	"IsExperimentalVersion": false,
 	"Installed": true,
 	"SupportedTargetPlatforms": [
-		"Android",
 		"Mac",
+		"Android",
 		"Win64",
 		"IOS"
 	],
@@ -27,8 +27,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
-				"Android",
 				"Mac",
+				"Android",
 				"Win64",
 				"IOS"
 			]

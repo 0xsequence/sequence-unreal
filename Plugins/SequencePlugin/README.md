@@ -4,22 +4,37 @@ Sequence Unreal SDK
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Manually Upgrading from previous versions
+IF you are using release Beta_1_0_3 or older please backup the values you stored in `PluginConfig/Config.h` or `Config/Config.h`
+After you've backed up your configuration data, Delete the entirety of the SequencePlugin directory. And drop
+in the new updated version.
 
-IF you are using release Beta_1_0_2 or older please backup the values you stored in `Config/Config.h`
-when the new Config.h exists in your project simply update the values in that file with the ones you had existing prior
+We now are opting to use .ini files to store configurations for the plugin rather than storing them in the plugin itself.
+This will make integrating updates to the plugin much simpler.
 
-IF you are using a newer release you can leave the folder `SequencePlugin/PluginConfig` alone
+To do this please go to [YourProjectDirectory]/Config And create a file named **[SequenceConfig.ini]**
 
-To manually update the Sequence plugin delete the following folders contained within `SequencePlugin`:
-`Binaries`,`Content`,`Intermediate`,`Resource`,`Source`
+Within **[SequenceConfig.ini]** add the following lines:
 
-Then copy the following folders / files from the NEW SequencePlugin folder:
-`Content`, `Resources`, `Source`, `README`, `SequencePlugin`
+      [/Script/Sequence.Config]
+      FallbackEncryptionKey = ""
+      WaaSTenantKey = ""
+      ProjectAccessKey = ""
+      GoogleClientID = ""
+      AppleClientID = ""
+      FacebookClientID = ""
+      DiscordClientID = ""
 
-Then paste these folders / files into the SequencePlugin folder in your project, allowing the files to be replaced with new ones
-in the case of `README.md` & `SequencePlugin.uplugin`
+Here is where you'll fill in the various configuration values for the plugin.
+For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
-Once done rebuild the project from source and you'll be good to go!
+### Upgrading to Unreal 5.3
+If your project is currently on 5.2, then for this version you'll want to upgrade to 5.3.
+To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
+file. Then select Switch Unreal Engine Version, Choose 5.3 and click okay. Once done. Open your
+code editor and rebuild your source code.
+
+As way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
+as Unreal 5.4 and onward will be dropping support for visual studio 2019.
 
 ### YourProject.Build.cs
 
@@ -56,7 +71,12 @@ You must provide a 32 character encryption key in `SequencePlugin/PluginConfig/C
 the following struct value **[FEncryptorConfig::Key]**
 
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
-You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.2)
+You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
+
+Note: For generating secure keys feel free to use tools such as:
+Lastpass Password generator or equivalent,
+Encryption Key Generators,
+etc
 
 ***
 
@@ -67,28 +87,31 @@ You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unre
 2) Launch your project, then allow it to update the UProject Settings.
 
 3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
-  
+
 4) If you wish to use the in built sequence UI for login you have to do the following:
- 
-    a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
-       for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-    b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+   a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
+   for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-    c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
+   b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
-    d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-       please refer to the demonstration BP [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder. The important part here is forwarding the Credentials
-       received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]** that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
-       You can do this by swapping the SetupCredentials node for your own setup node.
+   c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
 
-    d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
-         drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
-         for your **[C++ Parent]** class you just made.
- 
-    d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
-          to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
-          then click add custom event.
+   d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
+   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
+   own Blueprint graph.
+
+   The important part here is forwarding the Credentials received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]**,
+   that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
+   You can do this by swapping the SetupCredentials BlueprintCallable Function for your own Blueprint Callable Function from **[C++ Parent]**.
+
+   d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
+   drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
+   for your **[C++ Parent]** class you just made.
+
+   d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
+   to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
+   then click add custom event.
 
 Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
 during updates all code you place there could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
@@ -100,7 +123,7 @@ resides outside the plugins content folder.
    Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** to the Pawn Blueprint that you just made.
 
 6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
- 
+
 If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
 To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
 To learn more about Pawns refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/pawn-in-unreal-engine?application_version=5.2)
@@ -146,7 +169,6 @@ void EmailCode(const FString& CodeIn);
 UFUNCTION(BlueprintCallable, Category = "Login")
 bool StoredCredentialsValid();
 ```
-
 
 To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator * Auth = NewObject<UAuthenticator>()]**, this UObject manages the authentication side of Sequence.
 
@@ -217,7 +239,7 @@ Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
 Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
 
 Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
-       be sure you register and set your bundle identifier properly for your app
+be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
 For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
@@ -237,9 +259,28 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 
 ### USequenceWallet Functions
 
+### Example Static Access
+Example of how to statically Access the USequenceWallet so you don't have to pass around pointers throughout your code
+
+   	USequenceWallet::Make(CredentialsIn);//You'll need to call Make at least once somewhere in your code
+
+	TOptional<USequenceWallet*> TApi = USequenceWallet::Get();
+	USequenceWallet * Api = nullptr;
+
+	if (TApi.IsSet())
+	{//Valid state
+		Api = TApi.GetValue();
+	}
+	else
+	{//Undefined state
+		return;
+	}
+
+    //From this point onward you'll be able to use Api as you would normally
+
 ### Example SignMessage
 ##### Used to Sign a message
-    
+
     const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());    
 
@@ -253,7 +294,7 @@ Once you have your **[USequenceWallet]** you can feel free to call any of the fu
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
     FString Message = "Hi";
-	Api->SignMessage(Message,OnResponse,GenericFailure);
+	Api->SignMessage(Message,OnResponse,OnFailure);
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
@@ -307,10 +348,8 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	Arr.Add(&Account);
 	Arr.Add(&Id);
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-	
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+
 	FRawTransaction T;
-	
 	T.data = "0x" + EncodedData.ToHex();
 	T.to = "0x64d9f9d527abe2a1c1ce3fada98601c4ac5bfdd2";
 	T.value = "0";
@@ -328,8 +367,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		FString OutputString;
 		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TransactionHash);
-		OnSuccess(OutputString);
+		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 	},OnFailure);
 
 ### Example ListSessions
@@ -411,7 +449,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
-    
+
     USequenceWallet * Api = USequenceWallet::Make(Credentials);
 	Api->UpdateProviderURL(NewProviderUrl);
 
@@ -654,14 +692,14 @@ One thing to be aware of is keep an eye on capturables if you have lots of neste
 
 ### Blockchain Functionality
 
-Most users of the Sequence SDK will not need to interact with cryptographic functions directly. 
+Most users of the Sequence SDK will not need to interact with cryptographic functions directly.
 
 #### Binary Data
 
-We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`. 
+We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`.
 Binary data is further subtyped into `FUnsizedData`, which represents data of any variable size, and `TSizedData<TSize>`, which represents data of a required byte length `TSize`.
 
-Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`. 
+Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`.
 These can also be loaded from hex strings using ``From(FString Str)``, such as ``FPrivateKey::From("0x0...0");``. Ensure that the input string is the correct size.
 
 #### The ABI
@@ -699,9 +737,11 @@ FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce);
 
 To set your system up for Packaging please refer to the following links:
 
-- [Windows and macOS](https://docs.unrealengine.com/5.0/en-US/packaging-unreal-engine-projects/)
-- [Android](https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Mobile/Android/PackagingAndroidProject/)
-- [iOS](https://docs.unrealengine.com/5.0/en-US/packaging-ios-projects-in-unreal-engine/)
+- [Windows and macOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
+- [Setting up Visual Studio for Unreal on Windows](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
+- [Android](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-android-projects-in-unreal-engine?application_version=5.3)
+- [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
+- [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
 
 #### Google SSO Setup
 In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
@@ -713,11 +753,18 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 [This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
 
 #### iOS
-For iOS apps you also need to setup provisioning, [following these docs](https://docs.unrealengine.com/5.1/en-US/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects/).
+For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
+New to 5.3 the ability to use Modernized XCode has been added. However we've experienced many issues with this setting enabled and recommend turning it off.
+
+### Android
+When setting up your project to build for Android you'll need to update the following settings:
+In ProjectSettings/Android SDK
+Set SDK API Level to Android-34
+Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
 ### Hardware Requirements
 
-For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.2)
+For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
 
 #### Unreal and Xcode Specifics
 During the Unreal Package process in the event a code signing error occurs you can take the following steps within XCode to get your packaged .app file
@@ -729,10 +776,10 @@ During the Unreal Package process in the event a code signing error occurs you c
 5) Select Run Script
 6) Drag the new run script to one below from the last item in the phase list
 7) Expand the run script
-8) In the script box, add the following command: `xattr -cr /path-to-your-project/sequence-unreal/Binaries/IOS/Payload/SequenceUnreal.app`
+8) In the script box, add the following command: `xattr -cr /[path-to-your-project]/[your-project-name]/Binaries/IOS/Payload/[your-project-name.app]`
 9) Click on the Build Settings tab
 10) Click on each item under the Architectures header that contains macOS and hit the delete key
 11) Click on the General tab
 12) Click on Mac and Applevision Pro under supported destinations and hit the delete key
 13) Now the project can be built (if the build fails at first, wait a few moments then try again. It can sometimes take a bit before the build registers the run script)
-14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again.
+14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again._

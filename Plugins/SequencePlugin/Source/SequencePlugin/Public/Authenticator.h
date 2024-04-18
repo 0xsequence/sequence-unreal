@@ -6,8 +6,8 @@
 #include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
-#include "../PluginConfig/Config.h"
 #include "Dom/JsonObject.h"
+#include "ConfigFetcher.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
@@ -326,6 +326,7 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
+	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 
@@ -347,7 +348,12 @@ private:
 	UPROPERTY()
 	FWaasJWT WaasSettings;
 	
-	const TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap = { {ESocialSigninType::Discord,FSSOCredentials(FAuthenticatorConfig::DiscordAuthURL,FAuthenticatorConfig::DiscordClientID)},{ESocialSigninType::FaceBook,FSSOCredentials(FAuthenticatorConfig::FacebookAuthURL,FAuthenticatorConfig::FacebookClientID)},{ESocialSigninType::Apple,FSSOCredentials(FAuthenticatorConfig::AppleAuthURL,FAuthenticatorConfig::AppleClientID)},{ESocialSigninType::Google,FSSOCredentials(FAuthenticatorConfig::GoogleAuthURL,FAuthenticatorConfig::GoogleClientID)}};
+	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
+		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
+		{ESocialSigninType::Apple,FSSOCredentials(AppleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID))},
+		{ESocialSigninType::Discord,FSSOCredentials(DiscordAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::DiscordClientID))},
+		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
+	
 	UPROPERTY()
 	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
 	const int32 EmailAuthMaxRetries = 2;
@@ -359,6 +365,15 @@ private:
 	UWallet* SessionWallet;
 	UPROPERTY()
 	bool PurgeCache = true;
+
+	//Static Config variables
+	inline static FString WaasVersion = "1.0.0";
+	inline static FString UrlScheme = "powered-by-sequence";
+	inline static FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
+	inline static FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
+	inline static FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
+	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
+	inline static FString RedirectURL = "https://dev2-api.sequence.app/oauth/callback";
 private:
 	UAuthenticator();
 public:
