@@ -751,12 +751,6 @@ In ProjectSettings/Android SDK
 Set SDK API Level to Android-34
 Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
-#### Packaging For Android Notes
-On occasion Unreal may appear stuck at the very start of an android package operation. In particular on a Unreal Header Tool
-(UAT) Command. If this is the case stop the package operation, Close the editor go to your .uproject file, right click &
-select **[generate visual studio project files]**. Once that operation is done you can re open the editor and restart your
-android package operation.
-
 ### Hardware Requirements
 
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
