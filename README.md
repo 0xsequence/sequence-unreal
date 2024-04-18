@@ -1,4 +1,4 @@
-_Sequence Unreal SDK
+Sequence Unreal SDK
 ===================
 
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
@@ -159,7 +159,6 @@ void EmailCode(const FString& CodeIn);
 UFUNCTION(BlueprintCallable, Category = "Login")
 bool StoredCredentialsValid();
 ```
-
 
 To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator * Auth = NewObject<UAuthenticator>()]**, this UObject manages the authentication side of Sequence.
 
@@ -731,6 +730,7 @@ To set your system up for Packaging please refer to the following links:
 - [Windows and macOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
 - [Android](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-android-projects-in-unreal-engine?application_version=5.3)
 - [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
+- [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
 
 #### Google SSO Setup
 In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
@@ -750,6 +750,12 @@ When setting up your project to build for Android you'll need to update the foll
 In ProjectSettings/Android SDK
 Set SDK API Level to Android-34
 Set NDK API Level to anything in the range [26,33] (We personally used android-32)
+
+#### Packaging For Android Notes
+On occasion Unreal may appear stuck at the very start of an android package operation. In particular on a Unreal Header Tool
+(UAT) Command. If this is the case stop the package operation, Close the editor go to your .uproject file, right click &
+select **[generate visual studio project files]**. Once that operation is done you can re open the editor and restart your
+android package operation.
 
 ### Hardware Requirements
 
