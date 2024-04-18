@@ -26,6 +26,15 @@ Within **[SequenceConfig.ini]** add the following lines:
 Here is where you'll fill in the various configuration values for the plugin, for the time being we don't support
 Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
+### Upgrading to Unreal 5.3
+If your project is currently on 5.2, then for this version you'll want to upgrade to 5.3.
+To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
+file. Then select Switch Unreal Engine Version, Choose 5.3 and click okay. Once done. Open your
+code editor and rebuild your source code.
+
+As way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
+as Unreal 5.4 and onward will be dropping support for visual studio 2019.
+
 ### YourProject.Build.cs
 
 In some instances your build.cs may not update properly for your project when this happens you'll be unable to import plugin,
@@ -728,6 +737,7 @@ FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce);
 To set your system up for Packaging please refer to the following links:
 
 - [Windows and macOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
+- [Setting up Visual Studio for Unreal on Windows](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
 - [Android](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-android-projects-in-unreal-engine?application_version=5.3)
 - [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
 - [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
