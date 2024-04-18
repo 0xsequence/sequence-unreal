@@ -9,6 +9,7 @@ After you've backed up your configuration data, Delete the entirety of the Seque
 in the new updated version.
 
 We now are opting to use .ini files to store configurations for the plugin rather than storing them in the plugin itself.
+This will make integrating updates to the plugin much simpler.
 
 To do this please go to [YourProjectDirectory]/Config And create a file named **[SequenceConfig.ini]**
 
@@ -23,13 +24,13 @@ Within **[SequenceConfig.ini]** add the following lines:
       FacebookClientID = ""
       DiscordClientID = ""
 
-Here is where you'll fill in the various configuration values for the plugin, for the time being we don't support
-Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
+Here is where you'll fill in the various configuration values for the plugin.
+For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
 ### Upgrading to Unreal 5.3
 If your project is currently on 5.2, then for this version you'll want to upgrade to 5.3.
 To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
-file. Then select Switch Unreal Engine Version, Choose 5.3 and click okay. Once done. Open your 
+file. Then select Switch Unreal Engine Version, Choose 5.3 and click okay. Once done. Open your
 code editor and rebuild your source code.
 
 As way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
@@ -691,11 +692,11 @@ One thing to be aware of is keep an eye on capturables if you have lots of neste
 
 ### Blockchain Functionality
 
-Most users of the Sequence SDK will not need to interact with cryptographic functions directly. 
+Most users of the Sequence SDK will not need to interact with cryptographic functions directly.
 
 #### Binary Data
 
-We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`. 
+We encapsulate binary data using the ``FBinaryData`` structs, which is a wrapper around a pointer to a shared byte array `TSharedPtr<TArray<uint8>>`.
 Binary data is further subtyped into `FUnsizedData`, which represents data of any variable size, and `TSizedData<TSize>`, which represents data of a required byte length `TSize`.
 
 Important cryptographic types of set size, such as 32-byte private keys, are defined as subtypes of ``TSizedData``- for example, we define `FPrivateKey : TSizedData<32>`.

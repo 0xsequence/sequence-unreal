@@ -9,6 +9,7 @@ After you've backed up your configuration data, Delete the entirety of the Seque
 in the new updated version.
 
 We now are opting to use .ini files to store configurations for the plugin rather than storing them in the plugin itself.
+This will make integrating updates to the plugin much simpler.
 
 To do this please go to [YourProjectDirectory]/Config And create a file named **[SequenceConfig.ini]**
 
@@ -23,8 +24,8 @@ Within **[SequenceConfig.ini]** add the following lines:
       FacebookClientID = ""
       DiscordClientID = ""
 
-Here is where you'll fill in the various configuration values for the plugin, for the time being we don't support
-Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
+Here is where you'll fill in the various configuration values for the plugin.
+For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
 ### Upgrading to Unreal 5.3
 If your project is currently on 5.2, then for this version you'll want to upgrade to 5.3.
