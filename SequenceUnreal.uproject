@@ -26,18 +26,25 @@
 			"Name": "SequencePlugin",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
-				"Mac",
-				"IOS"
+				"Win64",
+				"Android",
+				"Mac"
 			],
 			"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3"
 		},
 		{
 			"Name": "WebBrowserWidget",
 			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemGoogle",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
-		"Mac",
-		"IOS"
+		"Win64",
+		"Android",
+		"Windows",
+		"Mac"
 	]
 }

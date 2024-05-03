@@ -16,8 +16,9 @@
 	"IsExperimentalVersion": false,
 	"Installed": true,
 	"SupportedTargetPlatforms": [
-		"Mac",
-		"IOS"
+		"Win64",
+		"Android",
+		"Mac"
 	],
 	"Modules": [
 		{
@@ -25,8 +26,9 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
-				"Mac",
-				"IOS"
+				"Win64",
+				"Android",
+				"Mac"
 			]
 		}
 	],
