@@ -3,6 +3,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Misc/AES.h"
+#include "Containers/UnrealString.h"
 #include "SequenceEncryptor.generated.h"
 
 /**
