@@ -93,7 +93,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 		{
 			HeadPtr[0] = 0x80 + this->Length;
 			
-			for(auto i = 0; i < this->Length; i++)
+			for(uint32 i = 0; i < this->Length; i++)
 			{
 				HeadPtr[1 + i] = RawData[i];
 			}
@@ -104,12 +104,12 @@ void RLPItem::Encode(uint8* HeadPtr)
 
 		HeadPtr[0] = 0xb7 + LengthByteLength;
 
-		for(auto i = 0; i < LengthByteLength; i++)
+		for(uint32 i = 0; i < LengthByteLength; i++)
 		{
 			HeadPtr[1 + i] = 0xFF & (this->Length >> 8 * (LengthByteLength - 1 - i));
 		}
 
-		for(auto i = 0; i < this->Length; i++)
+		for(uint32 i = 0; i < this->Length; i++)
 		{
 			HeadPtr[1 + LengthByteLength + i] = RawData[i];
 		}
@@ -133,7 +133,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 			const ByteLength LengthByteLength = GetByteLength(LengthSum);
 			HeadPtr[0] = 0xf7 + LengthByteLength;
 			
-			for(auto i = 0; i < LengthByteLength; i++)
+			for(uint32 i = 0; i < LengthByteLength; i++)
 			{
 				HeadPtr[1 + i] = 0xFF & (LengthSum >> 8 * (LengthByteLength - 1 - i));
 			}
@@ -141,7 +141,7 @@ void RLPItem::Encode(uint8* HeadPtr)
 			DataOffset += LengthByteLength;
 		}
 
-		for(auto i = 0; i < this->Length; i++)
+		for(uint32 i = 0; i < this->Length; i++)
 		{
 			auto Arg = Args[i];
 			Arg.Encode(&HeadPtr[DataOffset]);

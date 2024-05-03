@@ -1,9 +1,13 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
+#include "CoreMinimal.h"
 #include "Util/Async.h"
 #include "Errors.h"
 #include "Dom/JsonObject.h"
 #include "Util/JsonBuilder.h"
+#include "Templates/SharedPointer.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 class RPCCaller
 {

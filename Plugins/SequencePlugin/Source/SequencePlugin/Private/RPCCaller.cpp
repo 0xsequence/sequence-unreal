@@ -2,6 +2,8 @@
 #include "RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"
+#include "Templates/SharedPointer.h"
+#include "Serialization/JsonReader.h"
 
 TSharedPtr<FJsonObject> RPCCaller::Parse(FString JsonRaw)
 {
