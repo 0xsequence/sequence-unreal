@@ -280,7 +280,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	{
 		const TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
 		FString iss;
-		if (json.Get()->TryGetStringField("iss", iss))
+		if (json.Get()->TryGetStringField(TEXT("iss"), iss))
 		{
 			if (iss.Contains("https://",ESearchCase::IgnoreCase))
 				ISSClaim = iss.RightChop(8);
@@ -346,7 +346,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString SessionPtr;
-	if (responseObj->TryGetStringField("Session", SessionPtr))
+	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
 	{//good state
 		this->ChallengeSession = SessionPtr;
 		this->CallAuthRequiresCode();
@@ -415,9 +415,9 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString IDTokenPtr;
 	const TSharedPtr<FJsonObject> *AuthObject;
-	if (responseObj->TryGetObjectField("AuthenticationResult", AuthObject))
+	if (responseObj->TryGetObjectField(TEXT("AuthenticationResult"), AuthObject))
 	{
-		if (AuthObject->Get()->TryGetStringField("IdToken", IDTokenPtr))
+		if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();

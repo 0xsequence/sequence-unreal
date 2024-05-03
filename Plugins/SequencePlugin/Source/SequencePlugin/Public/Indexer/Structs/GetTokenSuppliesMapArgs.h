@@ -23,7 +23,7 @@ public:
 
     FGetTokenSuppliesMapArgs(FJsonObject json_in)
     {//need to manually parse this so we get a proper json result!
-		TSharedPtr<FJsonObject> data = json_in.GetObjectField("tokenMap");//Get the object we need
+		TSharedPtr<FJsonObject> data = json_in.GetObjectField(TEXT("tokenMap"));//Get the object we need
 		TMap<FString, TSharedPtr<FJsonValue>> data_map = data.Get()->Values;//get it's map!
 		TArray<FString> map_keys;
 		data_map.GetKeys(map_keys);//get the keys of the map

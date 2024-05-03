@@ -26,7 +26,7 @@ TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString Json
 		return MakeError(FSequenceError(EmptyResponse, "Could not extract response"));
 	}
 
-	return MakeValue(Json->GetObjectField("result"));
+	return MakeValue(Json->GetObjectField(TEXT("result")));
 }
 
 TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
@@ -38,7 +38,7 @@ TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
 		return MakeError(FSequenceError(EmptyResponse, "Could not extract response"));
 	}
 
-	return MakeValue(Json->GetStringField("result"));
+	return MakeValue(Json->GetStringField(TEXT("result")));
 }
 
 TResult<uint64> RPCCaller::ExtractUIntResult(FString JsonRaw)

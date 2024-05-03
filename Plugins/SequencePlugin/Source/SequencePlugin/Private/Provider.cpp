@@ -140,7 +140,7 @@ void Provider::NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuc
 
 	TSuccessCallback<TSharedPtr<FJsonObject>> BlockCallback = [OnSuccess](TSharedPtr<FJsonObject> Json)
 	{
-		FString Hex = Json->GetStringField("nonce");
+		FString Hex = Json->GetStringField(TEXT("nonce"));
 		FBlockNonce Nonce{};
 		*Nonce.Arr.Get() = HexToBytesInline(Hex);
 		OnSuccess(Nonce);

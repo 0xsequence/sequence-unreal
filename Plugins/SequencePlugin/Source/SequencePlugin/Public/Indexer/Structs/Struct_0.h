@@ -67,7 +67,7 @@ public:
 	//This is a test of <TArray<TMap<FString,data>>
 	FStruct_0(FJsonObject json_in)
 	{//need to manually parse this so we get a proper json result!
-		TArray<TSharedPtr<FJsonValue>> data = json_in.GetArrayField("list");
+		TArray<TSharedPtr<FJsonValue>> data = json_in.GetArrayField(TEXT("list"));
 		TSharedPtr<FJsonObject> json_step;
 		FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create("{ \"int_data\": {} }"), json_step);
 		FStruct_1 w_in;

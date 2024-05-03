@@ -130,17 +130,17 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& O
 		const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 		
 		UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
-		if (Json.Get()->TryGetObjectField("session",SessionObj) && Json.Get()->TryGetObjectField("response",ResponseObj))
+		if (Json.Get()->TryGetObjectField(TEXT("session"),SessionObj) && Json.Get()->TryGetObjectField(TEXT("response"),ResponseObj))
 		{
 			//we can createdAt, issuedAt, refreshedAt, userId
 			const TSharedPtr<FJsonObject> * DataObj = nullptr;
 			const TSharedPtr<FJsonObject> * IdentityObj = nullptr;
 
 			FString CreatedAt = "", RefreshedAt = "", ExpiresAt = "", UserId = "";
-			if (ResponseObj->Get()->TryGetObjectField("data", DataObj) && SessionObj->Get()->TryGetObjectField("identity", IdentityObj) && SessionObj->Get()->TryGetStringField("userId",UserId) && SessionObj->Get()->TryGetStringField("createdAt",CreatedAt) && SessionObj->Get()->TryGetStringField("refreshedAt", RefreshedAt) && SessionObj->Get()->TryGetStringField("expiresAt", ExpiresAt))
+			if (ResponseObj->Get()->TryGetObjectField(TEXT("data"), DataObj) && SessionObj->Get()->TryGetObjectField(TEXT("identity"), IdentityObj) && SessionObj->Get()->TryGetStringField(TEXT("userId"),UserId) && SessionObj->Get()->TryGetStringField(TEXT("createdAt"),CreatedAt) && SessionObj->Get()->TryGetStringField(TEXT("refreshedAt"), RefreshedAt) && SessionObj->Get()->TryGetStringField(TEXT("expiresAt"), ExpiresAt))
 			{
 				FString Wallet = "", Type = "", ISS = "", Sub = "", Email = "";
-				if (IdentityObj->Get()->TryGetStringField("email", Email) && IdentityObj->Get()->TryGetStringField("sub", Sub) && IdentityObj->Get()->TryGetStringField("iss",ISS) && IdentityObj->Get()->TryGetStringField("type",Type) && DataObj->Get()->TryGetStringField("wallet",Wallet))
+				if (IdentityObj->Get()->TryGetStringField(TEXT("email"), Email) && IdentityObj->Get()->TryGetStringField(TEXT("sub"), Sub) && IdentityObj->Get()->TryGetStringField(TEXT("iss"),ISS) && IdentityObj->Get()->TryGetStringField(TEXT("type"),Type) && DataObj->Get()->TryGetStringField(TEXT("wallet"),Wallet))
 				{
 					FDateTime ParsedCreatedAt, ParsedRefreshedAt, ParsedExpiresAt;
 					FDateTime::ParseIso8601(*CreatedAt,ParsedCreatedAt);
@@ -377,11 +377,11 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 			//parse out what we want and wrap it nicely for ease of use
 			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
-			if (jsonObj->TryGetObjectField("response",ResponseObj))
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
 			{
 				const TSharedPtr<FJsonObject> * DataObj = nullptr;
 				FString Code = "";
-				if (ResponseObj->Get()->TryGetObjectField("data",DataObj) && ResponseObj->Get()->TryGetStringField("code",Code))
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
 					FString TxHash = "";
 					FString MetaTxHash = "";
@@ -392,12 +392,12 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
 					
 					
-					if (DataObj->Get()->TryGetStringField("txHash",TxHash) &&
-						DataObj->Get()->TryGetStringField("metaTxHash",MetaTxHash) &&
-						DataObj->Get()->TryGetObjectField("nativeReceipt",NativeReceiptObj) &&
-						DataObj->Get()->TryGetObjectField("receipt",ReceiptObj) &&
-						DataObj->Get()->TryGetObjectField("request",RequestObj) &&
-						DataObj->Get()->TryGetArrayField("simulations", SimulationsObj))
+					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
+						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
+						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
+						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
 					{						
 						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
 						OnSuccess(TxnResponse);
@@ -552,7 +552,7 @@ TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(FString JSON)
 	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
 	{
 		const TArray<TSharedPtr<FJsonValue>>* storedFriends;
-		if (jsonObj.Get()->TryGetArrayField("friends", storedFriends))
+		if (jsonObj.Get()->TryGetArrayField(TEXT("friends"), storedFriends))
 		{
 			for (TSharedPtr<FJsonValue> friendData : *storedFriends)
 			{
@@ -560,8 +560,8 @@ TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(FString JSON)
 				if (friendData.Get()->TryGetObject(fJsonObj))//need it as an object
 				{
 					FContact_BE newFriend;
-					newFriend.Public_Address = fJsonObj->Get()->GetStringField("userAddress");
-					newFriend.Nickname = fJsonObj->Get()->GetStringField("nickname");
+					newFriend.Public_Address = fJsonObj->Get()->GetStringField(TEXT("userAddress"));
+					newFriend.Nickname = fJsonObj->Get()->GetStringField(TEXT("nickname"));
 					friendList.Add(newFriend);
 				}
 			}

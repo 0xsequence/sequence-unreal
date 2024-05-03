@@ -47,7 +47,7 @@ public:
     void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;
-        if (json_in.TryGetArrayField("tokenIDs",lst))
+        if (json_in.TryGetArrayField(TEXT("tokenIDs"),lst))
         {
             for (int32 i = 0; i < tokenIDs.Num(); i++)
             {
