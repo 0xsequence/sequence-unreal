@@ -8,7 +8,8 @@
 #include "Types/Wallet.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
-#include "NativeEncryptors/GenericNativeEncryptor.h"
+#include "NativeEncryptors/Android/NativeAndroidEncryptor.h"
+//#include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials

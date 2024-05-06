@@ -11,9 +11,9 @@
 UCLASS()
 class SEQUENCEPLUGIN_API UGenericNativeEncryptor : public UObject
 {
-	GENERATED_UCLASS_BODY()
-
+	GENERATED_BODY()
 public:
+	UGenericNativeEncryptor();
 
 	virtual FString Encrypt(const FString& StringIn);
 

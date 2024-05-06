@@ -16,7 +16,6 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
-#include "NativeEncryptors/Android/AndroidNativeEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
@@ -38,7 +37,7 @@ UAuthenticator::UAuthenticator()
 
 	if constexpr (PLATFORM_ANDROID)
 	{
-		this->Encryptor = NewObject<UAndroidNativeEncryptor>();
+		//this->Encryptor = NewObject<UNativeAndroidEncryptor>();
 	}
 	else if constexpr (PLATFORM_MAC)
 	{
