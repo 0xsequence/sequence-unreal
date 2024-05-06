@@ -3,16 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "GenericNativeEncryptor.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class abstract UGenericNativeEncryptor : public UObject
+class SEQUENCEPLUGIN_API UGenericNativeEncryptor : public UObject
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 public:
 

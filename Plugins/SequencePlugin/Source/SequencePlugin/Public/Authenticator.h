@@ -8,6 +8,7 @@
 #include "Types/Wallet.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
+#include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
@@ -326,6 +327,8 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
+	UPROPERTY()
+	UGenericNativeEncryptor * Encryptor = nullptr;
 	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
@@ -377,6 +380,8 @@ private:
 private:
 	UAuthenticator();
 public:
+	static UAuthenticator * Make(UGenericNativeEncryptor * EncryptorIn);
+	
 	FString GetSigninURL(const ESocialSigninType& Type);
 
 	void InitiateMobileSSO(const ESocialSigninType& Type);
@@ -394,7 +399,9 @@ public:
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
 	void ClearStoredCredentials() const;
-private:	
+private:
+	void Init(UGenericNativeEncryptor * EncryptorIn);
+	
 	bool CanHandleEmailLogin();
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;

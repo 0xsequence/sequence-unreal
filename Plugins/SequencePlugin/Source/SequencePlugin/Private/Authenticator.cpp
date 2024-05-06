@@ -16,6 +16,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
+#include "NativeEncryptors/Android/AndroidNativeEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
@@ -34,6 +35,35 @@ UAuthenticator::UAuthenticator()
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
+
+	if constexpr (PLATFORM_ANDROID)
+	{
+		this->Encryptor = NewObject<UAndroidNativeEncryptor>();
+	}
+	else if constexpr (PLATFORM_MAC)
+	{
+		
+	}
+	else if constexpr (PLATFORM_WINDOWS)
+	{
+		
+	}
+	else if constexpr (PLATFORM_IOS)
+	{
+		
+	}
+}
+
+UAuthenticator * UAuthenticator::Make(UGenericNativeEncryptor * EncryptorIn)
+{
+	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	Authenticator->Init(EncryptorIn);
+	return Authenticator;
+}
+
+void UAuthenticator::Init(UGenericNativeEncryptor * EncryptorIn)
+{
+	this->Encryptor = EncryptorIn;
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -49,8 +79,16 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
-		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
-		StorableCredentials->KL = CTS_Json_Length;
+		if (Encryptor)
+		{//Use set encryptor
+			StorableCredentials->EK = this->Encryptor->Encrypt(CTS_Json);
+			StorableCredentials->KL = CTS_Json_Length;
+		}
+		else
+		{//Use the fallback
+			StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
+			StorableCredentials->KL = CTS_Json_Length;
+		}
 
 		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
 		{

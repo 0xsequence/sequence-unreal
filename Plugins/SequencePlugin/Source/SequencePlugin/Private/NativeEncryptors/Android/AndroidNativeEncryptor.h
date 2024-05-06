@@ -1,16 +1,19 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "AndroidNativeEncryptor.generated.h"
 
 UCLASS()
-class UAndroidNativeEncryptor : public UGenericNativeEncryptor
+class SEQUENCEPLUGIN_API UAndroidNativeEncryptor : public UGenericNativeEncryptor
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
-	public:
+private:
+
+	UAndroidNativeEncryptor();
+	
+public:
 
 	virtual FString Encrypt(const FString& StringIn) override;
 
