@@ -4,6 +4,7 @@
 #include "IOSBridge.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Async/Async.h"
+#include "Android/Support/AndroidSupport.h"
 
 namespace NativeOAuth
 {
@@ -127,16 +128,6 @@ namespace NativeOAuth
     		}            
         }
 
-    	jstring ConvertToJavaString(JNIEnv* jenv, const FString& string) 
-    	{
-    		const jstring localString = jenv->NewStringUTF(TCHAR_TO_UTF8(*string));
-    		const jstring globalString{
-    			static_cast<jstring>(jenv->NewGlobalRef(localString))
-			};
-    		jenv->DeleteLocalRef(localString);
-    		return globalString;
-    	}
-
 	JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleSSOIdToken(JNIEnv * jenv, jobject thiz, jstring jIdToken)
     {
 	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
@@ -165,5 +156,6 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
 		
 		jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
     }
+	
 #endif
 }
