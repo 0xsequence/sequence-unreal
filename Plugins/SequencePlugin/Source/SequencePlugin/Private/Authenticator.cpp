@@ -37,7 +37,7 @@ UAuthenticator::UAuthenticator()
 
 	if constexpr (PLATFORM_ANDROID)
 	{
-		this->Encryptor = new UNativeAndroidEncryptor();
+		this->Encryptor = NewObject<UAndroidEncryptor>();
 	}
 	else if constexpr (PLATFORM_MAC)
 	{
