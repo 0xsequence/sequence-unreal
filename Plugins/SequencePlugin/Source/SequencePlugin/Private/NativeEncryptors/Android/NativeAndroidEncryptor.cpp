@@ -18,12 +18,13 @@ FString UNativeAndroidEncryptor::Encrypt(const FString& StringIn)
 #if PLATFORM_ANDROID	
 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})
 	{
-		//jclass JavaClass = jenv->FindClass("AndroidEncryptor");
 		jclass JavaClass = FAndroidApplication::FindJavaClass("com/Plugins/SequencePlugin/AndroidEncryptor");
-		//jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"encrypt","(Ljava/lang/String;)Ljava/lang/String;");
-		//jstring EncryptedString = (jstring)jenv->CallObjectMethod(JavaClass,JavaMethod,ConvertToJavaString(jenv, StringIn));
-		//const char* JResultChars = jenv->GetStringUTFChars(EncryptedString, 0);
-		//Result = FString(UTF8_TO_TCHAR(JResultChars));
+		jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"encrypt","(Ljava/lang/String;)Ljava/lang/String;");
+		//We know the class we know the method, we need the object?
+		
+		jstring EncryptedString = (jstring)jenv->CallObjectMethod(JavaClass,JavaMethod,ConvertToJavaString(jenv, StringIn));
+		const char* JResultChars = jenv->GetStringUTFChars(EncryptedString, 0);
+		Result = FString(UTF8_TO_TCHAR(JResultChars));
 	}          
 #endif
 	UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
@@ -37,11 +38,11 @@ FString UNativeAndroidEncryptor::Decrypt(const FString& StringIn)
 #if PLATFORM_ANDROID
 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})
 	{
-		//jclass JavaClass = jenv->FindClass("AndroidEncryptor");
-		/*jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"decrypt","(Ljava/lang/String;)Ljava/lang/String;");
+		jclass JavaClass = FAndroidApplication::FindJavaClass("com/Plugins/SequencePlugin/AndroidEncryptor");
+		jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"decrypt","(Ljava/lang/String;)Ljava/lang/String;");
 		jstring EncryptedString = (jstring)jenv->CallObjectMethod(JavaClass,JavaMethod,ConvertToJavaString(jenv, StringIn));
 		const char* JResultChars = jenv->GetStringUTFChars(EncryptedString, 0);
-		Result = FString(UTF8_TO_TCHAR(JResultChars));*/
+		Result = FString(UTF8_TO_TCHAR(JResultChars));
 	}
 #endif
 	return Result;
