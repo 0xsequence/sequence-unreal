@@ -3,6 +3,8 @@
 
 UGenericNativeEncryptor::UGenericNativeEncryptor(){ }
 
+UGenericNativeEncryptor::~UGenericNativeEncryptor(){ }
+
 FString UGenericNativeEncryptor::Encrypt(const FString& StringIn)
 {
 	UE_LOG(LogTemp,Warning,TEXT("Please Override this function with an actual implementation in child classes"));

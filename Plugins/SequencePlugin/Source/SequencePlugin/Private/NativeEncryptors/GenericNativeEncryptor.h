@@ -3,17 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GenericNativeEncryptor.generated.h"
+//#include "GenericNativeEncryptor.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class SEQUENCEPLUGIN_API UGenericNativeEncryptor : public UObject
+//UCLASS()
+class UGenericNativeEncryptor
 {
-	GENERATED_BODY()
+	//GENERATED_BODY()
 public:
 	UGenericNativeEncryptor();
+
+	virtual ~UGenericNativeEncryptor();
 
 	virtual FString Encrypt(const FString& StringIn);
 

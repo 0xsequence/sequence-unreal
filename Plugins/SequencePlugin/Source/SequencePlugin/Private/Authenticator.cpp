@@ -37,7 +37,7 @@ UAuthenticator::UAuthenticator()
 
 	if constexpr (PLATFORM_ANDROID)
 	{
-		//this->Encryptor = NewObject<UNativeAndroidEncryptor>();
+		this->Encryptor = new UNativeAndroidEncryptor();
 	}
 	else if constexpr (PLATFORM_MAC)
 	{
@@ -109,7 +109,16 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 	bool ret = false;
 	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
 	{
-		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		FString CTR_Json = "";
+		if (Encryptor)
+		{//Use set encryptor
+			CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
+		}
+		else
+		{//Use the fallback
+			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		}
+
 		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= Credentials->RegisteredValid();
 	}

@@ -328,7 +328,7 @@ private://Broadcast handlers
 	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
 //vars
 private:
-	UPROPERTY()
+	//UPROPERTY()
 	UGenericNativeEncryptor * Encryptor = nullptr;
 	
 	const FString SaveSlot = "Cr";

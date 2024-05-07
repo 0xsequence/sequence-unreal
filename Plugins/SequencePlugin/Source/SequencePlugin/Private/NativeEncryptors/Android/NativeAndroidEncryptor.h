@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "NativeAndroidEncryptor.generated.h"
+//#include "NativeAndroidEncryptor.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class SEQUENCEPLUGIN_API UNativeAndroidEncryptor : public UGenericNativeEncryptor
+//UCLASS()
+class UNativeAndroidEncryptor : public UGenericNativeEncryptor
 {
-	GENERATED_BODY()
+	//GENERATED_BODY()
 
 public:
 	UNativeAndroidEncryptor();

@@ -35,6 +35,7 @@
         
     <gameActivityImportAdditions>
         <insert>
+import com.Plugins.SequencePlugin.AndroidEncryptor;            
 import com.Plugins.SequencePlugin.SequenceGoogleSignInHelper;
 import com.Plugins.SequencePlugin.SequenceWebViewAuth;
         </insert>
@@ -45,16 +46,6 @@ import com.Plugins.SequencePlugin.SequenceWebViewAuth;
     public native void nativeSequenceHandleGoogleIdToken(String idToken);
 
     public native void nativeSequenceHandleRedirectUrl(String redirectUrl);
-            
-    public static void AndroidThunkJava_AndroidNativeEncrypt(String stringIn){ 
-            AndroidEncryptor Encryptor = New AndroidEncryptor("Main");
-            Encryptor.encrypt(stringIn);
-    }
-            
-    public static void AndroidThunkJava_AndroidNativeDecrypt(String stringIn){
-        AndroidEncryptor Encryptor = New AndroidEncryptor("Main");
-        Encryptor.decrypt(stringIn);    
-    }        
             
     public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId, String nonce) {
         SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId, nonce);
