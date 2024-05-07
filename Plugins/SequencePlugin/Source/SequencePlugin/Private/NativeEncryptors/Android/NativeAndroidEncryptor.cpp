@@ -18,13 +18,19 @@ FString UNativeAndroidEncryptor::Encrypt(const FString& StringIn)
 #if PLATFORM_ANDROID	
 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})
 	{
-		jclass JavaClass = FAndroidApplication::FindJavaClass("com/Plugins/SequencePlugin/AndroidEncryptor");
-		jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"encrypt","(Ljava/lang/String;)Ljava/lang/String;");
-		//We know the class we know the method, we need the object?
-		
-		jstring EncryptedString = (jstring)jenv->CallObjectMethod(JavaClass,JavaMethod,ConvertToJavaString(jenv, StringIn));
+		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+		jmethodID methodId{FJavaWrapper::FindStaticMethod(
+			jenv,
+			gameActivityClass, 
+			"AndroidThunkJava_AndroidEncrypt", 
+			"(Ljava/lang/String;)Ljava/lang/String;", 
+			false
+		)};
+
+		jstring EncryptedString = (jstring)jenv->CallStaticObjectMethod(gameActivityClass, methodId, ConvertToJavaString(jenv, StringIn));
 		const char* JResultChars = jenv->GetStringUTFChars(EncryptedString, 0);
 		Result = FString(UTF8_TO_TCHAR(JResultChars));
+		jenv->DeleteLocalRef(gameActivityClass);		
 	}          
 #endif
 	UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
@@ -38,11 +44,19 @@ FString UNativeAndroidEncryptor::Decrypt(const FString& StringIn)
 #if PLATFORM_ANDROID
 	if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})
 	{
-		jclass JavaClass = FAndroidApplication::FindJavaClass("com/Plugins/SequencePlugin/AndroidEncryptor");
-		jmethodID JavaMethod = jenv->GetMethodID(JavaClass,"decrypt","(Ljava/lang/String;)Ljava/lang/String;");
-		jstring EncryptedString = (jstring)jenv->CallObjectMethod(JavaClass,JavaMethod,ConvertToJavaString(jenv, StringIn));
+		jclass gameActivityClass{FAndroidApplication::FindJavaClass("com/epicgames/unreal/GameActivity")};
+		jmethodID methodId{FJavaWrapper::FindStaticMethod(
+			jenv,
+			gameActivityClass, 
+			"AndroidThunkJava_AndroidDecrypt",
+			"(Ljava/lang/String;)Ljava/lang/String;", 
+			false
+		)};
+
+		jstring EncryptedString = (jstring)jenv->CallStaticObjectMethod(gameActivityClass, methodId, ConvertToJavaString(jenv, StringIn));
 		const char* JResultChars = jenv->GetStringUTFChars(EncryptedString, 0);
 		Result = FString(UTF8_TO_TCHAR(JResultChars));
+		jenv->DeleteLocalRef(gameActivityClass);
 	}
 #endif
 	return Result;

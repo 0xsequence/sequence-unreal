@@ -48,6 +48,26 @@ import com.Plugins.SequencePlugin.SequenceWebViewAuth;
 
     public native void nativeSequenceHandleRedirectUrl(String redirectUrl);
             
+    public static String AndroidThunkJava_AndroidEncrypt(String stringIn) {
+        try {
+            AndroidEncryptor Encryptor = new AndroidEncryptor();
+            return Encryptor.encrypt(stringIn);
+        } catch (Exception e) {
+        
+        }
+        return "";
+    }
+            
+    public static String AndroidThunkJava_AndroidDecrypt(String stringIn) {
+        try {
+            AndroidEncryptor Encryptor = new AndroidEncryptor();
+            return Encryptor.decrypt(stringIn);
+        } catch (Exception e) {
+        
+        }
+        return "";    
+    }
+            
     public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId, String nonce) {
         SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId, nonce);
     }
