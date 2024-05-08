@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "NativeEncryptors/AndroidEncryptor.h"
 #include "Native/Android/Support/AndroidSupport.h"
