@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "GenericPlatform/GenericPlatform.h"
 
-class ABIEncodeable
+class SEQUENCEPLUGIN_API ABIEncodeable
 {
 public:
 	virtual ~ABIEncodeable() = default;
@@ -19,7 +19,7 @@ public:
 	static void CopyInInt32(TArray<uint8> &Data, int32 Value, int BlockPosition);
 };
 
-class TFixedABIArray : public ABIEncodeable
+class SEQUENCEPLUGIN_API TFixedABIArray : public ABIEncodeable
 {
 	TArray<ABIEncodeable*> MyData;
 public:
@@ -31,7 +31,7 @@ public:
 	void Push(ABIEncodeable* Arg);
 };
 
-class TDynamicABIArray : public ABIEncodeable
+class SEQUENCEPLUGIN_API TDynamicABIArray : public ABIEncodeable
 {
 	TArray<ABIEncodeable*> MyData;
 public:
@@ -42,7 +42,7 @@ public:
 	void Push(ABIEncodeable* Arg);
 };
 
-class TFixedABIData : public ABIEncodeable
+class SEQUENCEPLUGIN_API TFixedABIData : public ABIEncodeable
 {
 	TArray<uint8> MyData;
 public:
@@ -51,7 +51,7 @@ public:
 	virtual void EncodeTail(TArray<uint8> &Data, int HeadPosition, int Offset) override;
 };
 
-class TDynamicABIData : public ABIEncodeable
+class SEQUENCEPLUGIN_API TDynamicABIData : public ABIEncodeable
 {
 	TArray<uint8> MyData;
 public:

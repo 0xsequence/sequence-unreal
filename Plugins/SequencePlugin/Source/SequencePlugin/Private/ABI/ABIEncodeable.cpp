@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "ABIEncodeable.h"
-#include "ABI.h"
+#include "ABI/ABIEncodeable.h"
+#include "ABI/ABI.h"
 
 void ABIEncodeable::PushEmptyBlock(TArray<uint8>& Data)
 {
