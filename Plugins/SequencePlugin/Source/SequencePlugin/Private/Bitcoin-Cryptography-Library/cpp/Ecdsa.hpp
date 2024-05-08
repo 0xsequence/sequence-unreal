@@ -8,7 +8,8 @@
  */
 
 #pragma once
-
+#include "CoreMinimal.h"
+#include "GenericPlatform/GenericPlatform.h"
 #include "CurvePoint.hpp"
 #include "Sha256Hash.hpp"
 #include "Uint256.hpp"

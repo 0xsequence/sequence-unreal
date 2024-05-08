@@ -43,7 +43,7 @@ public:
 	{
 
 		const TSharedPtr<FJsonObject>* itemObj;
-		if (json_in.TryGetObjectField("supplies", itemObj))
+		if (json_in.TryGetObjectField(TEXT("supplies"), itemObj))
 		{
 			TArray<FString> des_keys;
 			supplies.GetKeys(des_keys);
@@ -70,7 +70,7 @@ public:
 	void construct(FJsonObject json_in)
 	{//need to manually parse this so we get a proper json result!
 		const TSharedPtr<FJsonObject>* data;
-		if (json_in.TryGetObjectField("supplies", data))//safely get
+		if (json_in.TryGetObjectField(TEXT("supplies"), data))//safely get
 		{
 			TMap<FString, TSharedPtr<FJsonValue>> data_map = data->Get()->Values;//get it's map!
 			TArray<FString> map_keys;

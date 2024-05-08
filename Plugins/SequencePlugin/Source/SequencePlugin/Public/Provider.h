@@ -15,11 +15,11 @@ struct FContractCall;
 
 enum EBlockTag
 {
-	Latest,
-	Earliest,
-	Pending,
-	Safe,
-	Finalized
+	ELatest,
+	EEarliest,
+	EPending,
+	ESafe,
+	EFinalized
 };
 
 FString TagToString(EBlockTag Tag);

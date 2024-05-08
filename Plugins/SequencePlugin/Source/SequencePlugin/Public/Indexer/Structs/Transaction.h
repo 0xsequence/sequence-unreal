@@ -57,7 +57,7 @@ public:
     void setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* trnsfrs;
-        if (json_in.TryGetArrayField("transfers", trnsfrs))
+        if (json_in.TryGetArrayField(TEXT("transfers"), trnsfrs))
         {
             //here we know the array's are gonna be parallel as we setup up the UStruct with the exact same data!
             for (int i = 0; i < transfers.Num(); i++)

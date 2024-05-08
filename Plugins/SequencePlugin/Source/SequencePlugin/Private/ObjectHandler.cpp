@@ -69,12 +69,7 @@ void UObjectHandler::HandleRequestRaw(FHttpRequestPtr Request, FHttpResponsePtr 
 	}
 	else//error
 	{
-		switch (Request->GetStatus()) {
-		case EHttpRequestStatus::Failed_ConnectionError:
-			UE_LOG(LogTemp, Error, TEXT("Connection failed."));
-		default:
-			UE_LOG(LogTemp, Error, TEXT("Request failed."));
-		}
+		UE_LOG(LogTemp, Error, TEXT("Connection Error."));
 		//in the event we failed or errored out we should decrement
 		this->Syncer->Decrement();
 	}

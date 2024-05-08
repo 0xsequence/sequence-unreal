@@ -42,7 +42,7 @@ public:
     void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;
-        if (json_in.TryGetArrayField("balances", lst))
+        if (json_in.TryGetArrayField(TEXT("balances"), lst))
         {
             for (int32 i = 0; i < balances.Num(); i++)
             {

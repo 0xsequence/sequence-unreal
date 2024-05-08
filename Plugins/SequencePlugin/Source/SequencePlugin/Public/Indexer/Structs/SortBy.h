@@ -35,10 +35,10 @@ public:
     */
     void setup(FJsonObject json_in)
     {
-        if (!json_in.TryGetField("column"))
-            column = json_in.GetStringField("column");
+        if (!json_in.TryGetField(TEXT("column")))
+            column = json_in.GetStringField(TEXT("column"));
 
-        if (!json_in.TryGetField("order"))
-            order = ESortOrder_Sequence(json_in.GetIntegerField("order"));
+        if (!json_in.TryGetField(TEXT("order")))
+            order = ESortOrder_Sequence(json_in.GetIntegerField(TEXT("order")));
     }
 };

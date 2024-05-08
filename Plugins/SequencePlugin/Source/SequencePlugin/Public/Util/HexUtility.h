@@ -1,5 +1,8 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
+#include "CoreMinimal.h"
+#include "Containers/StaticArray.h"
+#include "GenericPlatform/GenericPlatform.h"
 #include "Types/Types.h"
 
 static const int32 HexLUTSize = 16;

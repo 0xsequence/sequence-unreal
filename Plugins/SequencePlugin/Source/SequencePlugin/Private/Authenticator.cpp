@@ -34,6 +34,35 @@ UAuthenticator::UAuthenticator()
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
 	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
+
+	if constexpr (PLATFORM_ANDROID)
+	{
+		this->Encryptor = NewObject<UAndroidEncryptor>();
+	}
+	else if constexpr (PLATFORM_MAC)
+	{
+		
+	}
+	else if constexpr (PLATFORM_WINDOWS)
+	{
+		
+	}
+	else if constexpr (PLATFORM_IOS)
+	{
+		
+	}
+}
+
+UAuthenticator * UAuthenticator::Make(UGenericNativeEncryptor * EncryptorIn)
+{
+	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	Authenticator->Init(EncryptorIn);
+	return Authenticator;
+}
+
+void UAuthenticator::Init(UGenericNativeEncryptor * EncryptorIn)
+{
+	this->Encryptor = EncryptorIn;
 }
 
 void UAuthenticator::ClearStoredCredentials() const
@@ -49,8 +78,16 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
-		StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
-		StorableCredentials->KL = CTS_Json_Length;
+		if (Encryptor)
+		{//Use set encryptor
+			StorableCredentials->EK = this->Encryptor->Encrypt(CTS_Json);
+			StorableCredentials->KL = CTS_Json_Length;
+		}
+		else
+		{//Use the fallback
+			StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
+			StorableCredentials->KL = CTS_Json_Length;
+		}
 
 		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
 		{
@@ -72,7 +109,16 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 	bool ret = false;
 	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
 	{
-		const FString CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		FString CTR_Json = "";
+		if (Encryptor)
+		{//Use set encryptor
+			CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
+		}
+		else
+		{//Use the fallback
+			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+		}
+
 		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= Credentials->RegisteredValid();
 	}
@@ -280,7 +326,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	{
 		const TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
 		FString iss;
-		if (json.Get()->TryGetStringField("iss", iss))
+		if (json.Get()->TryGetStringField(TEXT("iss"), iss))
 		{
 			if (iss.Contains("https://",ESearchCase::IgnoreCase))
 				ISSClaim = iss.RightChop(8);
@@ -346,7 +392,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString SessionPtr;
-	if (responseObj->TryGetStringField("Session", SessionPtr))
+	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
 	{//good state
 		this->ChallengeSession = SessionPtr;
 		this->CallAuthRequiresCode();
@@ -415,9 +461,9 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString IDTokenPtr;
 	const TSharedPtr<FJsonObject> *AuthObject;
-	if (responseObj->TryGetObjectField("AuthenticationResult", AuthObject))
+	if (responseObj->TryGetObjectField(TEXT("AuthenticationResult"), AuthObject))
 	{
-		if (AuthObject->Get()->TryGetStringField("IdToken", IDTokenPtr))
+		if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
 		{//good state
 			this->Cached_IDToken = IDTokenPtr;
 			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();

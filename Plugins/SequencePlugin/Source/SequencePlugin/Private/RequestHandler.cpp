@@ -9,6 +9,7 @@
 #include "Http.h"
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
+#include "TextureResource.h"
 
 URequestHandler* URequestHandler::PrepareRequest()
 {

@@ -43,7 +43,7 @@ public:
     void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>> *lst;
-        if (json_in.TryGetArrayField("balances", lst))//verify it's an arrayfield and valid!
+        if (json_in.TryGetArrayField(TEXT("balances"), lst))//verify it's an arrayfield and valid!
         {
             for (int32 i = 0; i < balances.Num(); i++)
             {

@@ -71,7 +71,7 @@ public:
     void setup(FJsonObject json_in)
     {//the json object we get will be a mirror to this!        
         const TSharedPtr<FJsonObject>* ptrJson;
-        if (json_in.TryGetObjectField("tokenMetaData",ptrJson))
+        if (json_in.TryGetObjectField(TEXT("tokenMetaData"),ptrJson))
         {
             TArray<FString> srcKeys;
             ptrJson->Get()->Values.GetKeys(srcKeys);

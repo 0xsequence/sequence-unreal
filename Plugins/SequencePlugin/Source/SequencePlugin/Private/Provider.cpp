@@ -17,15 +17,15 @@ FString TagToString(EBlockTag Tag)
 {
 	switch (Tag)
 	{
-	case Latest:
+	case ELatest:
 		return "latest";
-	case Earliest:
+	case EEarliest:
 		return "earliest";
-	case Pending:
+	case EPending:
 		return "pending";
-	case Safe:
+	case ESafe:
 		return "safe";
-	case Finalized:
+	case EFinalized:
 		return "finalized";
 	}
 
@@ -140,7 +140,7 @@ void Provider::NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuc
 
 	TSuccessCallback<TSharedPtr<FJsonObject>> BlockCallback = [OnSuccess](TSharedPtr<FJsonObject> Json)
 	{
-		FString Hex = Json->GetStringField("nonce");
+		FString Hex = Json->GetStringField(TEXT("nonce"));
 		FBlockNonce Nonce{};
 		*Nonce.Arr.Get() = HexToBytesInline(Hex);
 		OnSuccess(Nonce);
@@ -298,7 +298,7 @@ void Provider::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int
 	const FAddress From = GetAddress(GetPublicKey(PrivKey));
 	const FString MyUrl = this->Url;
 	
-	TransactionCount(From, EBlockTag::Latest, [=](uint64 Count)
+	TransactionCount(From, EBlockTag::ELatest, [=](uint64 Count)
 	{
 		const FBlockNonce Nonce = FBlockNonce::From(IntToHexString(Count));
 

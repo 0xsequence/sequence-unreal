@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.3",
+	"EngineAssociation": "5.4",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -27,22 +27,26 @@
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Mac",
+				"IOS",
 				"Android",
-				"Win64",
-				"IOS"
+				"Win64"
 			],
 			"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3"
 		},
 		{
 			"Name": "WebBrowserWidget",
 			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemGoogle",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
 		"Mac",
-		"Win64",
-		"Windows",
+		"IOS",
 		"Android",
-		"IOS"
+		"Win64",
+		"Windows"
 	]
 }

@@ -43,7 +43,7 @@ public:
     void setup(FJsonObject json_in)
     {
         const TSharedPtr<FJsonObject>* itemObj;
-        if (json_in.TryGetObjectField("tokenMetaData", itemObj))
+        if (json_in.TryGetObjectField(TEXT("tokenMetaData"), itemObj))
         {
             tokenMetaData.setup(*itemObj->Get());
         }
