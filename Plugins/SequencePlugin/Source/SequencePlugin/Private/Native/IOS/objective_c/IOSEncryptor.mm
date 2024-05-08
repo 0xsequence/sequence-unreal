@@ -50,7 +50,7 @@ static SecKeyRef publicKey;
     else if (status == errSecItemNotFound)
     {
         NSLog(@"Private key not found. Add it if needed.");
-        return [this: GenerateKeys];
+        return [self GenerateKeys];
     }
     else
     {
@@ -67,7 +67,7 @@ static SecKeyRef publicKey;
 
 - (char *)Encrypt:(NSString *)str
 {
-    if ([this: LoadKeys])
+    if ([self LoadKeys])
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef *error;
@@ -78,6 +78,7 @@ static SecKeyRef publicKey;
         plainText,
         &error);
         
+        [self Clean];
         //now we need to convert the CFDataRef to NSString NSString to char * and return that!
     }
     else
@@ -89,7 +90,7 @@ static SecKeyRef publicKey;
 
 - (char *)Decrypt:(NSString *)str
 {
-    if ([this: LoadKeys])
+    if ([self LoadKeys])
     {
             CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
             CFErrorRef *error;
@@ -99,6 +100,7 @@ static SecKeyRef publicKey;
             kSecKeyAlgorithmRSAEncryptionPKCS1,
             plainText,
             &error);
+            [self Clean];
     }
     else
     {

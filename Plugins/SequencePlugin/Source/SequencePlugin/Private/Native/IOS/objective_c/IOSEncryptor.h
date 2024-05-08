@@ -7,7 +7,7 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-@interface IOSEncryptor
+@interface IOSEncryptor : NSObject
 
 - (BOOL) GenerateKeys:();
 - (BOOL) LoadKeys:();
