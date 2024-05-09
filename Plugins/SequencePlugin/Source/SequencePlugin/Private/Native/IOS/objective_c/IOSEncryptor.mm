@@ -9,7 +9,7 @@ static SecKeyRef publicKey;
 
 @implementation IOSEncryptor
 
-- (BOOL) GenerateKeys:()
+- (BOOL) GenerateKeys 
 {
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -23,15 +23,17 @@ static SecKeyRef publicKey;
          };
     CFErrorRef error = NULL;
     privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes,&error);
+    
+    
     if (!privateKey) {
         NSError *err = CFBridgingRelease(error);  // ARC takes ownership
-        return @NO;
+        return false;
     }
     publicKey = SecKeyCopyPublicKey(privateKey);
-    return @YES;
+    return true;
 }
 
-- (BOOL) LoadKeys:()
+- (BOOL) LoadKeys 
 {
     NSDictionary *query = @ {
         (__bridge id)kSecClass: (__bridge id)kSecClassKey,
@@ -45,7 +47,7 @@ static SecKeyRef publicKey;
     {
         NSLog(@"Private key retrieved successfully.");
         publicKey = SecKeyCopyPublicKey(privateKey);
-        return @YES;
+        return true;
     }
     else if (status == errSecItemNotFound)
     {
@@ -55,11 +57,11 @@ static SecKeyRef publicKey;
     else
     {
         NSLog(@"Keychain error: %ld", (long)status);
-        return @NO;
+        return false;
     }
 }
 
-- (void) Clean()
+- (void) Clean
 {
     if (publicKey)  { CFRelease(publicKey);  }
     if (privateKey) { CFRelease(privateKey); }
@@ -67,10 +69,11 @@ static SecKeyRef publicKey;
 
 - (char *)Encrypt:(NSString *)str
 {
+    char *EncryptedChars = nullptr;
     if ([self LoadKeys])
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
-        CFErrorRef *error;
+        CFErrorRef error = NULL;
         
         CFDataRef EncryptedData = SecKeyCreateEncryptedData(
         publicKey,
@@ -78,35 +81,49 @@ static SecKeyRef publicKey;
         plainText,
         &error);
         
-        [self Clean];
-        //now we need to convert the CFDataRef to NSString NSString to char * and return that!
+        NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
+        NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
+        EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
     }
     else
     {
         //In the event we get here it means no keys could be loaded / generated something is very wrong
         //print an error log and return an empty string
     }
+    [self Clean];
+    return EncryptedChars;
 }
 
 - (char *)Decrypt:(NSString *)str
 {
+    char *DecryptedChars = nullptr;
     if ([self LoadKeys])
     {
             CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
-            CFErrorRef *error;
+            CFErrorRef error = NULL;
             
-            CFDataRef EncryptedData = SecKeyCreateDecryptedData(
+            CFDataRef DecryptedData = SecKeyCreateDecryptedData(
             privateKey,
             kSecKeyAlgorithmRSAEncryptionPKCS1,
             plainText,
             &error);
-            [self Clean];
+            
+            NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
+            NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
+            DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
     }
     else
     {
         //In the event we get here it means no keys could be loaded / generated something is very wrong
         //print an error log and return an empty string
     }
+    [self Clean];
+    return DecryptedChars;
+}
+
+- (char *)ConvertNSStringToChars:(NSString *)str {
+    const char *strChars = [str UTF8String];
+    return (char*)strChars;
 }
 
 @end

@@ -9,9 +9,10 @@
 
 @interface IOSEncryptor : NSObject
 
-- (BOOL) GenerateKeys:();
-- (BOOL) LoadKeys:();
-- (void) Clean();
+- (BOOL) GenerateKeys;
+- (BOOL) LoadKeys;
+- (void) Clean;
+- (char *)ConvertNSStringToChars:(NSString *)str;
 
 - (char *)Encrypt:(NSString *)str;
 - (char *)Decrypt:(NSString *)str;
