@@ -83,12 +83,14 @@ static SecKeyRef publicKey;
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
+        NSLog(@"EncryptedData Data: %@",EncryptedDataString);
         EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
     }
     else
-    {
-        //In the event we get here it means no keys could be loaded / generated something is very wrong
-        //print an error log and return an empty string
+    {//Failure state
+        NSLog(@"Failed to load encryption key");
+        NSString * FailureString = @"";
+        EncryptedChars = [self ConvertNSStringToChars:FailureString];
     }
     [self Clean];
     return EncryptedChars;
@@ -110,12 +112,14 @@ static SecKeyRef publicKey;
             
             NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
             NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
+            NSLog(@"Decrypted Data: %@",DecryptedDataString);
             DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
     }
     else
-    {
-        //In the event we get here it means no keys could be loaded / generated something is very wrong
-        //print an error log and return an empty string
+    {//Failure state
+        NSLog(@"Failed to load decryption key");
+        NSString * FailureString = @"";
+        DecryptedChars = [self ConvertNSStringToChars:FailureString];
     }
     [self Clean];
     return DecryptedChars;
@@ -125,5 +129,4 @@ static SecKeyRef publicKey;
     const char *strChars = [str UTF8String];
     return (char*)strChars;
 }
-
 @end
