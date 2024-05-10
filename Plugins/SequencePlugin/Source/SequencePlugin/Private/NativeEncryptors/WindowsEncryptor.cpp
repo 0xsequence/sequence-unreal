@@ -1,6 +1,7 @@
 //Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "NativeEncryptors/WindowsEncryptor.h"
+#include "Misc/Base64.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
