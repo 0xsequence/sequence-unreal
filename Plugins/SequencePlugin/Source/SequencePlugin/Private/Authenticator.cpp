@@ -16,6 +16,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
+#include "NativeEncryptors/WindowsEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
@@ -45,7 +46,7 @@ UAuthenticator::UAuthenticator()
 	}
 	else if constexpr (PLATFORM_WINDOWS)
 	{
-		
+		this->Encryptor = NewObject<UWindowsEncryptor>();
 	}
 	else if constexpr (PLATFORM_IOS)
 	{
