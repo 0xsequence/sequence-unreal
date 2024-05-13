@@ -2,6 +2,7 @@
 
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "Misc/Base64.h"
+#include "Internationalization/Regex.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
