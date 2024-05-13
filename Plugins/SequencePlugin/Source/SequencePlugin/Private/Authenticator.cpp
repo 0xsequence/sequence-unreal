@@ -57,6 +57,15 @@ UAuthenticator::UAuthenticator()
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
+	if (this->Encryptor)
+	{
+		const FString EncryptorName = this->Encryptor->GetClass()->GetName();
+		UE_LOG(LogTemp,Display,TEXT("Setting custom encryptor to: %s"),*EncryptorName);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Received null instead of a pointer to an Encryptor Object using fallback encryptor"));	
+	}
 }
 
 void UAuthenticator::ClearStoredCredentials() const
