@@ -54,14 +54,7 @@ UAuthenticator::UAuthenticator()
 	}
 }
 
-UAuthenticator * UAuthenticator::Make(UGenericNativeEncryptor * EncryptorIn)
-{
-	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
-	Authenticator->Init(EncryptorIn);
-	return Authenticator;
-}
-
-void UAuthenticator::Init(UGenericNativeEncryptor * EncryptorIn)
+void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
 }

@@ -71,6 +71,9 @@ protected:
 
 public:
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
+
+	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
+		void SetupCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
 	/*
 	* Used to send data to clipboard for ease of use!

@@ -381,7 +381,7 @@ private:
 private:
 	UAuthenticator();
 public:
-	static UAuthenticator * Make(UGenericNativeEncryptor * EncryptorIn);
+	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
 	FString GetSigninURL(const ESocialSigninType& Type);
 
@@ -401,8 +401,6 @@ public:
 
 	void ClearStoredCredentials() const;
 private:
-	void Init(UGenericNativeEncryptor * EncryptorIn);
-	
 	bool CanHandleEmailLogin();
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;

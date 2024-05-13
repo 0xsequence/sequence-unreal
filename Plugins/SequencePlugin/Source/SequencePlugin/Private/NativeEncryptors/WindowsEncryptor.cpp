@@ -45,7 +45,7 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Encryption Failed on windows"));
 	}
-	//delete[] CharsIn;
+	delete[] CharsIn;
 #endif
 	UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
 	return Result;
@@ -61,7 +61,20 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 
 	const int32 InSize = StringIn.Len() / 2;
 	uint8 * CharsIn = new uint8[InSize];
-	HexToBytes(StringIn,CharsIn);
+
+	const FRegexPattern HexPattern(TEXT("^[a-fA-F0-9]+$"));
+	FRegexMatcher HexChecker(HexPattern,StringIn);
+	
+	if (HexChecker.FindNext())
+	{
+		HexToBytes(StringIn,CharsIn);
+	}
+	else
+	{
+		delete[] CharsIn;
+		UE_LOG(LogTemp,Error,TEXT("Provided String is InValid and cannot be decoded!"));
+		return "";
+	}
 	
 	BYTE *pbDataInput = CharsIn;
 	const DWORD cbDataInput = InSize;	
@@ -99,6 +112,7 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 		const int32 ErrorCode = GetLastError();
 		UE_LOG(LogTemp,Display,TEXT("Decryption Failed on windows, Error code: %d"),ErrorCode);
 	}
+	delete[] CharsIn;
 #endif
 	UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
 	return Result;

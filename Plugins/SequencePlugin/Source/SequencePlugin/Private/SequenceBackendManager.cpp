@@ -62,6 +62,14 @@ void ASequenceBackendManager::BeginPlay()
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
 
+void ASequenceBackendManager::SetupCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->SetCustomEncryptor(EncryptorIn);
+	}
+}
+
 /*
 	Used to copy data to the systems clipboard!
 */
