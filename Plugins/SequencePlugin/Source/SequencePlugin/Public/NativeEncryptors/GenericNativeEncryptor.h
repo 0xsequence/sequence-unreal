@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API UGenericNativeEncryptor : public UObject
 {
 	GENERATED_BODY()

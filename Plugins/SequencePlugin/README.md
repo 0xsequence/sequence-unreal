@@ -1,6 +1,11 @@
 Sequence Unreal SDK
 ===================
 
+This plugin requires the modern xcode setting to be enabled to build on MacOS.
+See [the following link](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-modern-xcode-in-unreal-engine-5.3-and-newer) for more details.
+
+===================
+
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Manually Upgrading from previous versions
@@ -754,7 +759,6 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
-New to 5.3 the ability to use Modernized XCode has been added. However we've experienced many issues with this setting enabled and recommend turning it off.
 
 ### Android
 When setting up your project to build for Android you'll need to update the following settings:

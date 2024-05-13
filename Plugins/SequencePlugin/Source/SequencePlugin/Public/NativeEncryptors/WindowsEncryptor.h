@@ -1,16 +1,16 @@
-﻿//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "AndroidEncryptor.generated.h"
+#include "WindowsEncryptor.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API UAndroidEncryptor : public UGenericNativeEncryptor
+class SEQUENCEPLUGIN_API UWindowsEncryptor : public UGenericNativeEncryptor
 {
 	GENERATED_BODY()
 

@@ -30,7 +30,7 @@ FString UAndroidEncryptor::Encrypt(const FString& StringIn)
 		jenv->DeleteLocalRef(gameActivityClass);		
 	}          
 #endif
-	UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
+	//UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
 	return Result;
 }
 
@@ -56,6 +56,6 @@ FString UAndroidEncryptor::Decrypt(const FString& StringIn)
 		jenv->DeleteLocalRef(gameActivityClass);
 	}
 #endif
-	UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
+	//UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
 	return Result;
 }

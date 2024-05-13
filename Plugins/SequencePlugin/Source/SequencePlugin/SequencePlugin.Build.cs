@@ -68,7 +68,16 @@ public class SequencePlugin : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-		
+
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+		{
+			PublicSystemLibraries.AddRange(
+				new string[]
+				{
+					"Crypt32.lib"
+				}
+				);
+		}
 		
 		//Add IOS Specific Dependencies
 		if (Target.Platform == UnrealTargetPlatform.IOS)
