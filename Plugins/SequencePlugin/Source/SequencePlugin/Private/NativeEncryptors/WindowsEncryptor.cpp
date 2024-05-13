@@ -48,7 +48,7 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 	}
 	delete[] CharsIn;
 #endif
-	UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
+	//UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
 	return Result;
 }
 
@@ -115,6 +115,6 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 	}
 	delete[] CharsIn;
 #endif
-	UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
+	//UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
 	return Result;
 }
