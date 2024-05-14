@@ -180,13 +180,9 @@ void AGeneralTesting::TestIndexer()
 
 void AGeneralTesting::TestTokenBalances() const
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
-	USequenceWallet * Api = USequenceWallet::Get(Credentials).GetValue();
-	
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
 	{
-		FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
+		const FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -195,25 +191,23 @@ void AGeneralTesting::TestTokenBalances() const
 		UE_LOG(LogTemp, Display, TEXT("Error with getting balances"));
 	};
 	
-	FGetTokenBalancesArgs args;
-	args.accountAddress = Api->GetWalletAddress();
-	args.includeMetaData = true;
-
-	if (Api)
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	if (USequenceWallet * Api = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials()).GetValue())
+	{
+		FGetTokenBalancesArgs args;
+		args.accountAddress = Api->GetWalletAddress();
+		args.includeMetaData = true;
 		Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
+	}
 }
 
 void AGeneralTesting::TestHistory() const
-{
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
-	USequenceWallet * Api = USequenceWallet::Get(Credentials).GetValue();
-	
+{	
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
 	{
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
+			const FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -222,14 +216,17 @@ void AGeneralTesting::TestHistory() const
 	{
 		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
 	};
-
-	FGetTransactionHistoryArgs args;
-	args.filter.accountAddress = Api->GetWalletAddress();
-	args.includeMetaData = true;
-	args.page.page = 0;
-	args.page.more = true;
-	if (Api)
+	
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	if (USequenceWallet * Api = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials()).GetValue())
+	{
+		FGetTransactionHistoryArgs args;
+		args.filter.accountAddress = Api->GetWalletAddress();
+		args.includeMetaData = true;
+		args.page.page = 0;
+		args.page.more = true;
 		Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
+	}
 }
 
 void AGeneralTesting::TestEncryption() const

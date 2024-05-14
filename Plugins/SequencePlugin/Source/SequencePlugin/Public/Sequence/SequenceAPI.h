@@ -37,8 +37,6 @@ struct FTransaction_Sequence
 };
 
 UCLASS()
-//Make this a subsystem of GameInstance this way it's life time will be managed better!
-//Need to assess how this will behave statically though? (not sure what will happen with respect to that!)
 class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
@@ -70,8 +68,6 @@ private:
 	//Response helper functions
 	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
 	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
-
-	inline static USequenceWallet* Ptr = nullptr;
 public:
 	USequenceWallet();
 	

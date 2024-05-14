@@ -63,7 +63,9 @@ void ASequenceBackendManager::BeginPlay()
 	//do fetch to get credentials from here as it'll fire off once each level start!
 
 	if (USequenceWallet * Wallet = USequenceWallet::Get().GetValue())
+	{
 		UE_LOG(LogTemp,Display,TEXT("Stored Wallet Address: %s"),*Wallet->GetWalletAddress());
+	}
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

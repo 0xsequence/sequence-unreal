@@ -12,7 +12,7 @@
 FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 {
 	FString Result = "";
-	UE_LOG(LogTemp,Display,TEXT("Preparing to encrypt on windows: %s"),*StringIn);
+	//UE_LOG(LogTemp,Display,TEXT("Preparing to encrypt on windows: %s"),*StringIn);
 #if PLATFORM_WINDOWS
 	DATA_BLOB DataIn;
 	DATA_BLOB DataOut;
@@ -55,7 +55,7 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 {
 	FString Result = "";
-	UE_LOG(LogTemp,Display,TEXT("Preparing to decrypt on windows: %s"),*StringIn);
+	//UE_LOG(LogTemp,Display,TEXT("Preparing to decrypt on windows: %s"),*StringIn);
 #if PLATFORM_WINDOWS
 	DATA_BLOB DataIn;
 	DATA_BLOB DataOut;
