@@ -13,6 +13,7 @@
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
 #include "WebBrowserModule.h"
+#include "AI/NavigationSystemBase.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
@@ -495,9 +496,7 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 }
 
 void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
-{
-	USequenceWallet * Wallet = USequenceWallet::Make(Credentials);
-	
+{	
 	const TFunction<void (FCredentials_BE)> OnSuccess = [this](FCredentials_BE Credentials)
 	{
 		if (Credentials.IsRegistered())
@@ -517,8 +516,15 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
 		this->CallAuthFailure();
 	};
-	
-	Wallet->RegisterSession(OnSuccess,OnFailure);
+
+	if (USequenceWallet * Wallet = USequenceWallet::Get(Credentials).GetValue())
+	{
+		Wallet->RegisterSession(OnSuccess,OnFailure);
+	}
+	else
+	{
+		this->CallAuthFailure();
+	}
 }
 
 TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)

@@ -6,6 +6,7 @@
 #include "JsonObjectConverter.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Eth/Crypto.h"
+#include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
 #include "Native/NativeOAuth.h"
@@ -69,24 +70,85 @@ USequenceWallet::USequenceWallet()
 	this->Indexer = NewObject<UIndexer>();
 }
 
-USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn)
+void USequenceWallet::Initialize(FSubsystemCollectionBase& Collection)
 {
-	Ptr = NewObject<USequenceWallet>();
-	Ptr->Init(CredentialsIn);
-	return Ptr;
+	UE_LOG(LogTemp,Display,TEXT("Initilizing wallet subsystem"));
 }
 
-USequenceWallet* USequenceWallet::Make(const FCredentials_BE& CredentialsIn, const FString& ProviderURL)
+void USequenceWallet::Deinitialize()
 {
-	Ptr = NewObject<USequenceWallet>();
-	Ptr->Init(CredentialsIn,ProviderURL);
-	return Ptr;
+	UE_LOG(LogTemp,Display,TEXT("Deinitializing wallet subsystem"));
 }
 
 TOptional<USequenceWallet*> USequenceWallet::Get()
 {
-	if(Ptr != nullptr) return Ptr;
-	return TOptional<USequenceWallet*>();
+	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	{
+		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
+		{
+			if (const UAuthenticator * Auth = NewObject<UAuthenticator>())
+			{
+				const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
+				Wallet->Init(Credentials);
+				return Wallet;
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error creating UAuthenticator during GameInstanceSubsystem Get"));
+			}			
+		}
+		else
+		{
+			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+	}
+	return nullptr;
+}
+
+TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials)
+{
+	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	{
+		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
+		{
+			Wallet->Init(Credentials);
+			return Wallet;
+		}
+		else
+		{
+			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+	}
+	return nullptr;
+}
+
+TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials, const FString& ProviderUrl)
+{
+	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	{
+		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
+		{
+			Wallet->Init(Credentials, ProviderUrl);
+			return Wallet;
+		}
+		else
+		{
+			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+	}
+	return nullptr;
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)

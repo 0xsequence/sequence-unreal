@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 FUserDetails ASequenceBackendManager::GetUserDetails()
 {
@@ -58,6 +59,11 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthSuccess.Add(del);
 	this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
+
+	//do fetch to get credentials from here as it'll fire off once each level start!
+
+	if (USequenceWallet * Wallet = USequenceWallet::Get().GetValue())
+		UE_LOG(LogTemp,Display,TEXT("Stored Wallet Address: %s"),*Wallet->GetWalletAddress());
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

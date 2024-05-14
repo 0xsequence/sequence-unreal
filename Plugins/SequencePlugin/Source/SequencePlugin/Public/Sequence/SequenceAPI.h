@@ -37,9 +37,15 @@ struct FTransaction_Sequence
 };
 
 UCLASS()
-class SEQUENCEPLUGIN_API USequenceWallet : public UObject
+//Make this a subsystem of GameInstance this way it's life time will be managed better!
+//Need to assess how this will behave statically though? (not sure what will happen with respect to that!)
+class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	virtual void Deinitialize() override;
 private:
 	UPROPERTY()
 	UIndexer* Indexer;
@@ -65,13 +71,13 @@ private:
 	TArray<FContact_BE> BuildFriendListFromJson(FString JSON);
 	TArray<FItemPrice_BE> BuildItemUpdateListFromJson(FString JSON);
 
-	inline static USequenceWallet* Ptr = nullptr; 
+	inline static USequenceWallet* Ptr = nullptr;
 public:
 	USequenceWallet();
 	
-	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn);
-	static USequenceWallet* Make(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 	static TOptional<USequenceWallet*> Get();
+	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials);
+	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials, const FString& ProviderUrl);
 
 	FString GetWalletAddress();
 	void UpdateProviderURL(const FString& Url);
@@ -186,6 +192,8 @@ public:
 	void GetGasPrice(TFunction<void(FUnsizedData)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 	void EstimateContractCallGas(FContractCall ContractCall, TFunction<void(FUnsizedData)> OnSuccess,
 	                             TFunction<void(FSequenceError)> OnFailure);
+
+	//deprecated//
 	void EstimateDeploymentGas(FAddress From, FString Bytecode, TFunction<void(FUnsizedData)> OnSuccess,
 	                           TFunction<void(FSequenceError)> OnFailure);
 
@@ -194,7 +202,8 @@ public:
 	void DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId,
 	                            TFunction<void(FAddress, FUnsizedData)> OnSuccess,
 	                            TFunction<void(FSequenceError)> OnFailure);
-
+	//deprecated//
+	
 	void NonceAt(uint64 Number, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 	void NonceAt(EBlockTag Tag, TFunction<void(FBlockNonce)> OnSuccess, TFunction<void(FSequenceError)> OnFailure);
 	void SendRawTransaction(FString Data, TFunction<void(FUnsizedData)> OnSuccess,

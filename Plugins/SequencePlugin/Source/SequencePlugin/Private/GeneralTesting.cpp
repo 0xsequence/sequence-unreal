@@ -182,7 +182,7 @@ void AGeneralTesting::TestTokenBalances() const
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
-	USequenceWallet * Api = USequenceWallet::Make(Credentials);
+	USequenceWallet * Api = USequenceWallet::Get(Credentials).GetValue();
 	
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
 	{
@@ -199,14 +199,15 @@ void AGeneralTesting::TestTokenBalances() const
 	args.accountAddress = Api->GetWalletAddress();
 	args.includeMetaData = true;
 
-	Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
+	if (Api)
+		Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
 }
 
 void AGeneralTesting::TestHistory() const
 {
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
-	USequenceWallet * Api = USequenceWallet::Make(Credentials);
+	USequenceWallet * Api = USequenceWallet::Get(Credentials).GetValue();
 	
 	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
 	{
@@ -227,7 +228,8 @@ void AGeneralTesting::TestHistory() const
 	args.includeMetaData = true;
 	args.page.page = 0;
 	args.page.more = true;
-	Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
+	if (Api)
+		Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
 }
 
 void AGeneralTesting::TestEncryption() const

@@ -321,7 +321,7 @@ public:
 	FOnAuthFailure AuthFailure;
 	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
-
+	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure() const;
