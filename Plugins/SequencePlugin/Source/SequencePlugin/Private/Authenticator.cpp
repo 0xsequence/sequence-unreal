@@ -13,7 +13,6 @@
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
 #include "WebBrowserModule.h"
-#include "AI/NavigationSystemBase.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"

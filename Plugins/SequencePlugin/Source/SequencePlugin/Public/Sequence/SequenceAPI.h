@@ -11,6 +11,7 @@
 #include "SignedMessage.h"
 #include "Containers/Union.h"
 #include "TransactionResponse.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;

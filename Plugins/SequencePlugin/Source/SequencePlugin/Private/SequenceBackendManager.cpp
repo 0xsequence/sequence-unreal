@@ -5,7 +5,6 @@
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
 #include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 
 FUserDetails ASequenceBackendManager::GetUserDetails()
 {
