@@ -10,6 +10,8 @@
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
 #include "Native/NativeOAuth.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Sequence/Close.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(FTransaction_FE Transaction_Fe)
