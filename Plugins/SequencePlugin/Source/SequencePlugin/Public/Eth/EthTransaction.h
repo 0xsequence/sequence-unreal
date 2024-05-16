@@ -2,7 +2,7 @@
 #pragma once
 #include "Types/BinaryData.h"
 
-class FEthTransaction
+class SEQUENCEPLUGIN_API FEthTransaction
 {
 	FBlockNonce Nonce;
 	FUnsizedData GasPrice;

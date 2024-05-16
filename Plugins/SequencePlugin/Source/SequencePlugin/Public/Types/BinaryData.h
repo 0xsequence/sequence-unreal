@@ -41,16 +41,16 @@ struct SEQUENCEPLUGIN_API FUnsizedData final : FBinaryData
 };
 
 // Returns returns data with leading 0x00 bytes trimmed
-FUnsizedData Trimmed(const FBinaryData &Data);
+FUnsizedData SEQUENCEPLUGIN_API Trimmed(const FBinaryData &Data);
 
 // Hex String to Number of arbitrary size
-FUnsizedData HexStringToBinary(FString Hex);
+FUnsizedData SEQUENCEPLUGIN_API HexStringToBinary(FString Hex);
 
 // Gets UTF8 byte encoding of string
-FUnsizedData StringToUTF8(FString String);
+FUnsizedData SEQUENCEPLUGIN_API StringToUTF8(FString String);
 
 // Converts a UTF8 encoded byte array ot a string
-FString UTF8ToString(FUnsizedData BinaryData);
+FString SEQUENCEPLUGIN_API UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
 template<ByteLength TSize>

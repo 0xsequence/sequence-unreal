@@ -16,7 +16,7 @@
 
 using FSignature = FUnsizedData;
 using TransactionID = FString;
-	
+
 //Sequence Specific Version of Transaction
 struct FTransaction_Sequence
 {
