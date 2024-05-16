@@ -151,14 +151,15 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 
 ### Custom UI Integration
 
-In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
+In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**.
+Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-//This call is platform dependent on windows & mac this is required for SSO WIP
+//This call is platform dependent on windows & mac this is required for SSO
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 FString GetLoginURL(const ESocialSigninType& Type); 
 
-//This Call is made after you've collected the ID_Token (Mac & Windows only) WIP
+//This Call is made after you've collected the ID_Token (Mac & Windows only)
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void SocialLogin(const FString& IDTokenIn);
 
