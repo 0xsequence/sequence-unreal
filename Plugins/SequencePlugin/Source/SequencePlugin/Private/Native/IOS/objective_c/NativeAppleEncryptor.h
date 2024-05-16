@@ -2,7 +2,7 @@
 
 #pragma once
 
-#if PLATFORM_IOS || PLATFORM_MAC
+#if PLATFORM_IOS
 
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>

@@ -14,7 +14,7 @@ UAppleBridge::UAppleBridge() { }
 FString UAppleBridge::AppleEncrypt(const FString& StringIn)
 {
 	FString Result = "";
-#if PLATFORM_IOS || PLATFORM_MAC
+#if PLATFORM_IOS
 	NSString * _ToEncrypt = StringIn.GetNSString();
 	NativeAppleEncryptor * Encryptor = [[NativeAppleEncryptor alloc] init];
 	char * CharResult = [Encryptor Encrypt:_ToEncrypt];
@@ -26,7 +26,7 @@ FString UAppleBridge::AppleEncrypt(const FString& StringIn)
 FString UAppleBridge::AppleDecrypt(const FString& StringIn)
 {
 	FString Result = "";
-#if PLATFORM_IOS || PLATFORM_MAC
+#if PLATFORM_IOS
 	NSString * _ToDecrypt = StringIn.GetNSString();
 	NativeAppleEncryptor * Encryptor = [[NativeAppleEncryptor alloc] init];
 	char * CharResult = [Encryptor Decrypt:_ToDecrypt];
