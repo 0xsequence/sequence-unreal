@@ -6,7 +6,7 @@
 TArray<uint8> BlankArray(ByteLength Size);
 
 // Struct encapsulating an array of binary data
-struct FBinaryData
+struct SEQUENCEPLUGIN_API FBinaryData
 {
 	virtual ~FBinaryData() = default;
 
@@ -30,7 +30,7 @@ struct FBinaryData
 };
 
 // Binary data of arbitrary length
-struct FUnsizedData final : FBinaryData
+struct SEQUENCEPLUGIN_API FUnsizedData final : FBinaryData
 {
 	static FUnsizedData Empty();
 	FUnsizedData(const TArray<uint8> &Array);
@@ -73,7 +73,7 @@ template <ByteLength Size>
 FUnsizedData TSizedData<Size>::Copy() const
 {
 	FUnsizedData data = FUnsizedData::Empty();
-	data.Arr.Get()->Append(this->Arr);
+	data.Arr.Get()->Append(*this->Arr.Get());
 	return data;
 }
 
@@ -84,7 +84,7 @@ TSizedData<TSize> TSizedData<TSize>::Empty()
 }
 
 // Basic Binary Types
-struct FHash256 final : TSizedData<32>
+struct SEQUENCEPLUGIN_API FHash256 final : TSizedData<32>
 {
 	static FHash256 New();
 	static FHash256 From(TStaticArray<uint8, 32> &Arr);
@@ -92,35 +92,35 @@ struct FHash256 final : TSizedData<32>
 	static FHash256 From(FString Str);
 };
 
-struct FAddress final : TSizedData<20>
+struct SEQUENCEPLUGIN_API FAddress final : TSizedData<20>
 {
 	static FAddress New();
 	static FAddress From(TStaticArray<uint8, 20> &Arr);
 	static FAddress From(FString Str);
 };
 
-struct FPublicKey final : TSizedData<64>
+struct SEQUENCEPLUGIN_API FPublicKey final : TSizedData<64>
 {
 	static FPublicKey New();
 	static FPublicKey From(TStaticArray<uint8, 64> &Arr);
 	static FPublicKey From(FString Str);
 };
 
-struct FPrivateKey final : TSizedData<32>
+struct SEQUENCEPLUGIN_API FPrivateKey final : TSizedData<32>
 {
 	static FPrivateKey New();
 	static FPrivateKey From(TStaticArray<uint8, 32> &Arr);
 	static FPrivateKey From(FString Str);
 };
 
-struct FBloom final : TSizedData<256>
+struct SEQUENCEPLUGIN_API FBloom final : TSizedData<256>
 {
 	static FBloom New();
 	static FBloom From(TStaticArray<uint8, 256> &Arr);
 	static FBloom From(FString Str);
 };
 
-struct FBlockNonce final : TSizedData<8>
+struct SEQUENCEPLUGIN_API FBlockNonce final : TSizedData<8>
 {
 	static FBlockNonce New();
 	static FBlockNonce From(TStaticArray<uint8, 8> &Arr);

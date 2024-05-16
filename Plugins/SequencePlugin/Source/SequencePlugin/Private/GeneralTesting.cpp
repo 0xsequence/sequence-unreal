@@ -192,8 +192,10 @@ void AGeneralTesting::TestTokenBalances() const
 	};
 	
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	if (USequenceWallet * Api = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials()).GetValue())
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet())
 	{
+		USequenceWallet * Api = WalletOptional.GetValue();
 		FGetTokenBalancesArgs args;
 		args.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
@@ -218,8 +220,10 @@ void AGeneralTesting::TestHistory() const
 	};
 	
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	if (USequenceWallet * Api = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials()).GetValue())
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet())
 	{
+		USequenceWallet * Api = WalletOptional.GetValue();
 		FGetTransactionHistoryArgs args;
 		args.filter.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;

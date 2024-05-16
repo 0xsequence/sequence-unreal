@@ -516,8 +516,10 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 		this->CallAuthFailure();
 	};
 
-	if (USequenceWallet * Wallet = USequenceWallet::Get(Credentials).GetValue())
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	if (WalletOptional.IsSet())
 	{
+		USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->RegisterSession(OnSuccess,OnFailure);
 	}
 	else
@@ -541,7 +543,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
-{
+{	
 	FCredentials_BE CredData;
 	FCredentials_BE* Credentials = &CredData;
 	const bool IsValid = this->GetStoredCredentials(Credentials);

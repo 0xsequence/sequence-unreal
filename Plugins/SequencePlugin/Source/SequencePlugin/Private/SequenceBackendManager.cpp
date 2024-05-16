@@ -60,9 +60,10 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 
 	//do fetch to get credentials from here as it'll fire off once each level start!
-
-	if (USequenceWallet * Wallet = USequenceWallet::Get().GetValue())
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet())
 	{
+		USequenceWallet * Wallet = WalletOptional.GetValue();
 		UE_LOG(LogTemp,Display,TEXT("Stored Wallet Address: %s"),*Wallet->GetWalletAddress());
 	}
 }
