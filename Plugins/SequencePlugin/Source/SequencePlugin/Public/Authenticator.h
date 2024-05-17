@@ -3,13 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
+#include "Interfaces/IHttpRequest.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "NativeEncryptors/AndroidEncryptor.h"
 #include "Authenticator.generated.h"
 
 struct FSSOCredentials
