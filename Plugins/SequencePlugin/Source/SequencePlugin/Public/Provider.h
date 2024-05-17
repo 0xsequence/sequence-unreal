@@ -22,12 +22,12 @@ enum EBlockTag
 	EFinalized
 };
 
-FString TagToString(EBlockTag Tag);
+FString SEQUENCEPLUGIN_API TagToString(EBlockTag Tag);
 
 /**
  * 
  */
-class Provider : public RPCCaller
+class SEQUENCEPLUGIN_API Provider : public RPCCaller
 {
 	FString Url;
 	Provider Copy();
@@ -70,5 +70,4 @@ public:
 	void Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	void Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
 	void NonViewCall(FEthTransaction transaction, FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-
 };
