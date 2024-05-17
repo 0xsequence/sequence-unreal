@@ -2,8 +2,8 @@
 #pragma once
 
 #if PLATFORM_IOS
-#import <Foundation/Foundation.h>
-#import <AuthenticationServices/AuthenticationServices.h>
+@import Foundation;
+@import AuthenticationServices;
 
 typedef void(^Callback)(char *idToken);
 
