@@ -86,6 +86,11 @@ public class SequencePlugin : ModuleRules
 			{
 				"Foundation",
 				"Security",
+				"CoreFoundation",
+				"SystemConfiguration",
+				"AVFoundation",
+				"LocalAuthentication",
+				"AuthenticationServices",
 			});
 		}
 		
