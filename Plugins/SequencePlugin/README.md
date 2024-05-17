@@ -87,7 +87,8 @@ etc
 
 ## Getting Started With the Builtin GUI
 
-1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it, then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
+1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it,
+   then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
 
 2) Launch your project, then allow it to update the UProject Settings.
 
@@ -151,8 +152,7 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 
 ### Custom UI Integration
 
-In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**.
-Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
+In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
 //This call is platform dependent on windows & mac this is required for SSO
@@ -321,7 +321,6 @@ no data is reset when a level is changed in your games!
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
     
-    
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
     if (WalletOptional.IsSet())
@@ -353,7 +352,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T20.value = "1000";
 
     //ERC721
-
 	FERC721Transaction T721;
 	T721.safe = true;
 	T721.id = "54530968763798660137294927684252503703134533114052628080002308208148824588621";
@@ -361,7 +359,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 
     //ERC1155
-
 	FERC1155Transaction T1155;
 	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
@@ -372,7 +369,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T1155.vals.Add(Val);
 
     //Raw (Example contract call)
-
     FString FunctionSignature = "balanceOf(address,uint256)";
 	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
 	TFixedABIData Id = ABI::UInt32(0x01);
@@ -399,12 +395,16 @@ Note: if you want call contracts with the Raw type you'll want include the heade
     if (WalletOptional.IsSet())
     {
       USequenceWallet * Api = WalletOptional.GetValue();
-       Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+       Api->SendTransaction(Txn,[=](const FTransactionResponse& Transaction)
        {
-		  FString OutputString;
-		  TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-          FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		  UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+          TSharedPtr<FJsonObject> Json = Transaction.Json;
+       	  TSharedPtr<FJsonObject> Receipt = Transaction.Receipt;
+       	  TSharedPtr<FJsonObject> NativeReceipt = Transaction.NativeReceipt;
+       	  TSharedPtr<FJsonObject> Request = Transaction.Request;
+       	  TArray<TSharedPtr<FJsonValue>> Simulations = Transaction.Simulations;
+       	  FString TxHash = Transaction.TxHash;
+       	  FString IdentifyingCode = Transaction.IdentifyingCode;
+       	  FString MetaTxHash = Transaction.MetaTxHash;
 	   },OnFailure);
     }
 
@@ -761,7 +761,7 @@ the indexer. The default network we set is `137`
 
 ***
 
-Assuming you've setup your controlling Actor with the **[AC_SequencePawn_Component]**
+Assuming you've setup your controlling Pawn with the **[AC_SequencePawn_Component]**
 The sequence pawn component has functions to do the following:
 
 Setup Sequence (sets up the sequence based systems), requires playerController input
@@ -801,7 +801,9 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 };
 ```
 
-One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something and start over writing memory. If you require lots of nesting swapping to a better approach using UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
+One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
+something and start over writing memory. If you require lots of nesting swapping to a better approach using
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
 
 ### Blockchain Functionality
 
