@@ -24,4 +24,4 @@ struct FHeader
 	FUnsizedData BaseFee;
 };
 
-FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);
+FHeader SEQUENCEPLUGIN_API JsonToHeader(TSharedPtr<FJsonObject> Json);

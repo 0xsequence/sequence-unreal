@@ -10,4 +10,4 @@ struct FBlock
 	~FBlock();
 };
 
-FBlock MakeBlock(FJsonObject Json);
+FBlock SEQUENCEPLUGIN_API MakeBlock(FJsonObject Json);

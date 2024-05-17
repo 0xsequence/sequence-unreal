@@ -18,4 +18,4 @@ struct FTransactionReceipt
 	FString Status;
 };
 
-FTransactionReceipt JsonToTransactionReceipt(TSharedPtr<FJsonObject> Json);
+FTransactionReceipt SEQUENCEPLUGIN_API JsonToTransactionReceipt(TSharedPtr<FJsonObject> Json);
