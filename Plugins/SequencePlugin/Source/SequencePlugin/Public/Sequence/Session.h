@@ -42,10 +42,6 @@ struct FSession
 	FString expiresAt = "";
 };
 
-/*
-*  {"response":{"code":"sessionsListed","data":[]}}
-*/
-
 USTRUCT()
 struct FListSessionResponse
 {
