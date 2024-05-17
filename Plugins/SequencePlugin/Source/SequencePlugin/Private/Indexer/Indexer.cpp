@@ -2,6 +2,9 @@
 
 #include "Indexer/Indexer.h"
 #include "Util/Async.h"
+#include "JsonObjectConverter.h"
+#include "Http.h"
+#include "HttpManager.h"
 
 const TMap<int64, FString> UIndexer::IndexerNames = {{1,"mainnet"},{137,"polygon"},{1101,"polygon-zkevm"},{42161,"arbitrum"},{42170,"arbitrum-nova"},{10,"optimism"},{56,"bsc"},{43114,"avalanche"},{8453,"base"},{100,"gnosis"},{1337,"testchain"},{5,"goerli"},{11155111,"sepolia"},{421613,"arbitrum-goerli"},{80001,"mumbai"},{84531,"base-goerli"},{97,"bsc-testnet"},{43113,"testnetavalanchefuji"} };
 

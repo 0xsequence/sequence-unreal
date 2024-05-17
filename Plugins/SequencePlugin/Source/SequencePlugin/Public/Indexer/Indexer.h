@@ -3,17 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "Util/Async.h"
-#include "UObject/NoExportTypes.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Dom/JsonObject.h"
-#include "JsonObjectConverter.h"
-#include "Http.h"
-#include "HttpManager.h"
 #include "Engine/Texture2D.h"
-#include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
-#include "SequenceBackendManager.h"
-#include "ObjectHandler.h"
 #include "Indexer.generated.h"
 
 /**
