@@ -1,11 +1,11 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "RPCCaller.h"
+#include "..\Public\RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 
-TSharedPtr<FJsonObject> RPCCaller::Parse(FString JsonRaw)
+TSharedPtr<FJsonObject> URPCCaller::Parse(FString JsonRaw)
 {
 	TSharedPtr<FJsonObject> JsonParsed;
 
@@ -18,8 +18,7 @@ TSharedPtr<FJsonObject> RPCCaller::Parse(FString JsonRaw)
 	return nullptr;
 }
 
-
-TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString JsonRaw)
+TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(FString JsonRaw)
 {
 	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
@@ -31,7 +30,7 @@ TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString Json
 	return MakeValue(Json->GetObjectField(TEXT("result")));
 }
 
-TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
+TResult<FString> URPCCaller::ExtractStringResult(FString JsonRaw)
 {
 	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
@@ -43,7 +42,7 @@ TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
 	return MakeValue(Json->GetStringField(TEXT("result")));
 }
 
-TResult<uint64> RPCCaller::ExtractUIntResult(FString JsonRaw)
+TResult<uint64> URPCCaller::ExtractUIntResult(FString JsonRaw)
 {
 	TResult<FString> Result = ExtractStringResult(JsonRaw);
 	if(!Result.HasValue())
@@ -59,7 +58,7 @@ TResult<uint64> RPCCaller::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-void RPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnError)
+void URPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnError)
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -71,7 +70,7 @@ void RPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> 
 		->ProcessAndThen(OnSuccess, OnError);
 }
 
-FJsonBuilder RPCCaller::RPCBuilder(const FString MethodName)
+FJsonBuilder URPCCaller::RPCBuilder(const FString MethodName)
 {
 	return *FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")

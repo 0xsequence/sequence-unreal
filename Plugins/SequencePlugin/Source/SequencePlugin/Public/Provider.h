@@ -10,36 +10,39 @@
 #include "Eth/EthTransaction.h"
 #include "RPCCaller.h"
 #include "Types/ContractCall.h"
+#include "Provider.generated.h"
 
 struct FContractCall;
 
+UENUM()
 enum EBlockTag
 {
-	ELatest,
-	EEarliest,
-	EPending,
-	ESafe,
-	EFinalized
+	ELatest UMETA(DisplayName = "latest"),
+	EEarliest UMETA(DisplayName = "earliest"),
+	EPending UMETA(DisplayName = "pending"),
+	ESafe UMETA(DisplayName = "safe"),
+	EFinalized UMETA(DisplayName = "finalized"),
 };
-
-FString SEQUENCEPLUGIN_API TagToString(EBlockTag Tag);
 
 /**
  * 
  */
-class SEQUENCEPLUGIN_API Provider : public RPCCaller
+UCLASS()
+class SEQUENCEPLUGIN_API UProvider : public URPCCaller
 {
+	GENERATED_BODY()
+private:
 	FString Url;
-	Provider Copy();
 
 //helpers
 	void BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 	void HeaderByNumberHelper(FString Number, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure);
 	void NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure);
 	void CallHelper(FContractCall ContractCall, FString Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure);
-
+	void Init(const FString& UrlIn);
 public:
-	Provider(FString Url);
+	static UProvider* Make(const FString& UrlIn);
+	void UpdateUrl(const FString& UrlIn);
 	void BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 	void BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);
 	void BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure);

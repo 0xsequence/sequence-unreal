@@ -8,11 +8,15 @@
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "RPCCaller.generated.h"
 
-class RPCCaller
+template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
+
+UCLASS()
+class SEQUENCEPLUGIN_API URPCCaller : public UObject
 {
+	GENERATED_BODY()
 public:
-	virtual ~RPCCaller() = default;
 	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
 	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
 	TResult<FString> ExtractStringResult(FString JsonRaw);
@@ -20,26 +24,18 @@ public:
 	virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 	template<typename T>
-	void SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure);
+	void SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure)
+	{
+		SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
+		{
+			TResult<T> Value = Extractor(Result);
+
+			if(Value.HasValue())
+			{
+				OnSuccess(Value.GetValue());
+			}
+		}, OnFailure);
+	}
 	
 	static FJsonBuilder RPCBuilder(FString MethodName);
 };
-
-
-template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
-
-template <typename T>
-void RPCCaller::SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, Extractor<T> Extractor, FFailureCallback OnFailure)
-{
-	SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
-	{
-		TResult<T> Value = Extractor(Result);
-
-		if(Value.HasValue())
-		{
-			OnSuccess(Value.GetValue());
-		}
-	}, OnFailure);
-}
-
-
