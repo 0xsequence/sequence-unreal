@@ -1,4 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+#if PLATFORM_IOS
 #import "IOSOAuth.h"
 #include "IOSAppDelegate.h"
 #import <Foundation/Foundation.h>
@@ -147,3 +148,4 @@ typedef void(^Callback)(char *idToken);
     return (char*)strChars;
 }
 @end
+#endif
