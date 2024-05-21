@@ -11,7 +11,7 @@
 
 void UProvider::Init(const FString& UrlIn)
 {
-	this->Url = Url;
+	this->Url = UrlIn;
 }
 
 UProvider* UProvider::Make(const FString& UrlIn)
