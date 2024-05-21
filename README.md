@@ -263,7 +263,7 @@ After you've completed initial authentication and have intercepted the credentia
 USequenceWallet::Get()
 
 const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-if (WalletOptional.IsSet())
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
 {
    USequenceWallet * Wallet = WalletOptional.GetValue();
    //Use here
@@ -278,7 +278,7 @@ or
 USequenceWallet::Get(const FCredentials_BE& Credentials)
 
 const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-if (WalletOptional.IsSet())
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
 {
    USequenceWallet * Wallet = WalletOptional.GetValue();
    //Use here
@@ -292,7 +292,7 @@ or
 USequenceWallet::Get(const FCredentials_BE& Credentials,const FString& ProviderUrl);
 
 const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials,"ProviderUrl");
-if (WalletOptional.IsSet())
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
 {
    USequenceWallet * Wallet = WalletOptional.GetValue();
    //Use here
@@ -323,7 +323,7 @@ no data is reset when a level is changed in your games!
     
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
        const FString Message = "Hi";
@@ -392,7 +392,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
     //Now send the transaction
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
       USequenceWallet * Api = WalletOptional.GetValue();
        Api->SendTransaction(Txn,[=](const FTransactionResponse& Transaction)
@@ -423,7 +423,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them  
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
        Api->ListSessions(OnSuccess,OnFailure);
@@ -444,7 +444,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->CloseSession(OnSuccess,OnFailure);
@@ -455,7 +455,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
        Api->SignOut();
@@ -476,7 +476,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->RegisterSession(OnSuccess,OnFailure);
@@ -487,7 +487,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
        Api->GetWalletAddress();
@@ -498,7 +498,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
        Api->GetNetworkId();
@@ -509,7 +509,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
        Api->UpdateNetworkId(137);
@@ -520,7 +520,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->UpdateProviderURL("NewProviderUrl");
@@ -546,7 +546,7 @@ the indexer. The default network we set is `137`
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->Ping(GenericSuccess, GenericFailure);
@@ -566,7 +566,7 @@ the indexer. The default network we set is `137`
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->Version(GenericSuccess, GenericFailure);
@@ -586,7 +586,7 @@ the indexer. The default network we set is `137`
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
        Api->RunTimeStatus(GenericSuccess, GenericFailure);
@@ -606,7 +606,7 @@ the indexer. The default network we set is `137`
    
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->GetChainID(GenericSuccess, GenericFailure);
@@ -626,7 +626,7 @@ the indexer. The default network we set is `137`
     
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->GetEtherBalance(Api->GetWalletAddress(), GenericSuccess, GenericFailure);
@@ -646,7 +646,7 @@ the indexer. The default network we set is `137`
    
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   FGetTokenBalancesArgs args;
@@ -669,7 +669,7 @@ the indexer. The default network we set is `137`
     
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   FGetTokenSuppliesArgs args;
@@ -692,7 +692,7 @@ the indexer. The default network we set is `137`
 
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();    
 
@@ -721,7 +721,7 @@ the indexer. The default network we set is `137`
    
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   FGetBalanceUpdatesArgs args;
@@ -746,7 +746,7 @@ the indexer. The default network we set is `137`
    
     const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 
