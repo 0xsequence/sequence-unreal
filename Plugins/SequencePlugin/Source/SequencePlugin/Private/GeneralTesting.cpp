@@ -193,7 +193,7 @@ void AGeneralTesting::TestTokenBalances() const
 	
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet())
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
 		FGetTokenBalancesArgs args;
@@ -221,7 +221,7 @@ void AGeneralTesting::TestHistory() const
 	
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet())
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
 		FGetTransactionHistoryArgs args;

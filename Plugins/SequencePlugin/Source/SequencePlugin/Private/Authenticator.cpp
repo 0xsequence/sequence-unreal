@@ -518,7 +518,7 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 	};
 
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-	if (WalletOptional.IsSet())
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->RegisterSession(OnSuccess,OnFailure);

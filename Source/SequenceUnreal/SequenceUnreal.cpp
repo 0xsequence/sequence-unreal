@@ -67,7 +67,7 @@ void Test()
     //Now send the transaction
     const UAuthenticator * Auth = NewObject<UAuthenticator>();   
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-    if (WalletOptional.IsSet())
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
       USequenceWallet * Api = WalletOptional.GetValue();
        Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
