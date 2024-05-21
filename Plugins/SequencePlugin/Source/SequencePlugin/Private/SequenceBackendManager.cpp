@@ -133,10 +133,8 @@ void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 
 FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
 {
-	bool valid = false;
 	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
-	valid = PCred.GetValid();
-	if (valid)
+	if (PCred.GetValid())
 	{
 		this->Credentials = PCred.GetCredentials();
 		return this->Credentials;
@@ -146,9 +144,8 @@ FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
 
 bool ASequenceBackendManager::StoredCredentialsValid()
 {
-	bool valid = false;
 	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
-	valid = PCred.GetValid();
+	const bool valid = PCred.GetValid();
 	if (valid)
 	{
 		this->Credentials = PCred.GetCredentials();
@@ -179,7 +176,7 @@ void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& sys
 void ASequenceBackendManager::InitSystemData()
 {
 	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
-	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
+	//USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
 	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
 	//builder->initBuildSystemData(this->sequenceWallet, this->chainID, this->publicAddress, this);
 }
