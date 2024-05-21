@@ -100,6 +100,15 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 	}
 }
 
+FString UAuthenticator::BuildRedirectPrefix() const
+{
+	const FString Redirect = UConfigFetcher::GetConfigVar(UConfigFetcher::RedirectUrl);
+	if (Redirect.EndsWith(TEXT("/"),ESearchCase::IgnoreCase))
+		return Redirect + this->RedirectPrefixTrailer;
+	else
+		return Redirect + "/" + this->RedirectPrefixTrailer;
+}
+
 bool UAuthenticator::CanHandleEmailLogin() const
 {
 	bool ret = true;
@@ -269,13 +278,13 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString RedirectUrl = RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple:
-		RedirectUrl = RedirectURL;
+		RedirectUrl = this->BuildRedirectPrefix();
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -289,13 +298,13 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
-	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
-		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:

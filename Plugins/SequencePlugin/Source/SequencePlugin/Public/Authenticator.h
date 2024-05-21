@@ -376,7 +376,7 @@ private:
 	inline static FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
 	inline static FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
 	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	inline static FString RedirectURL = "https://dev2-api.sequence.app/oauth/callback";
+	inline static FString RedirectPrefixTrailer = "oauth/callback";
 private:
 	UAuthenticator();
 public:
@@ -400,6 +400,8 @@ public:
 
 	void ClearStoredCredentials() const;
 private:
+	FString BuildRedirectPrefix() const;
+	
 	bool CanHandleEmailLogin() const;
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
