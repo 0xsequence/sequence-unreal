@@ -28,6 +28,7 @@ Within **[SequenceConfig.ini]** add the following lines:
       AppleClientID = ""
       FacebookClientID = ""
       DiscordClientID = ""
+      RedirectUrl = "https://api.sequence.app"
 
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
