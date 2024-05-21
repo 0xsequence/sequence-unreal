@@ -34,7 +34,7 @@ UAuthenticator::UAuthenticator()
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
-	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
+	//UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	if constexpr (PLATFORM_ANDROID)
@@ -100,7 +100,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 	}
 }
 
-bool UAuthenticator::CanHandleEmailLogin()
+bool UAuthenticator::CanHandleEmailLogin() const
 {
 	bool ret = true;
 	ret &= this->WaasSettings.GetEmailRegion().Len() > 0;
@@ -214,7 +214,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 #endif
 }
 
-FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
+FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 {
 	FString SigninURL = "";
 	
@@ -349,7 +349,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	return ISSClaim;
 }
 
-FString UAuthenticator::ParseResponse(FHttpResponsePtr Response,bool WasSuccessful)
+FString UAuthenticator::ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful)
 {
 	FString Ret = "";
 
@@ -393,7 +393,7 @@ void UAuthenticator::ResetRetryEmailLogin()
 void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response, bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
+	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString SessionPtr;
 	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
@@ -446,7 +446,7 @@ FString UAuthenticator::GenerateSignUpPassword()
 void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
+	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
@@ -454,14 +454,13 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
-
 	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
 }
 
 void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
+	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString IDTokenPtr;
 	const TSharedPtr<FJsonObject> *AuthObject;
@@ -495,9 +494,9 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
-void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
+void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
 {	
-	const TFunction<void (FCredentials_BE)> OnSuccess = [this](FCredentials_BE Credentials)
+	const TFunction<void (FCredentials_BE)> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		if (Credentials.IsRegistered())
 		{
@@ -511,7 +510,7 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 		}
 	};
 	
-	const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err)
+	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
 		this->CallAuthFailure();
@@ -553,7 +552,6 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 
 void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
 {
-	UE_LOG(LogTemp,Display,TEXT("RequestBody: %s"),*RequestBody);
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("POST");
 	http_post_req->SetURL(Url);

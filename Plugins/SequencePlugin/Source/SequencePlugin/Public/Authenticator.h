@@ -382,7 +382,7 @@ private:
 public:
 	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
-	FString GetSigninURL(const ESocialSigninType& Type);
+	FString GetSigninURL(const ESocialSigninType& Type) const;
 
 	void InitiateMobileSSO(const ESocialSigninType& Type);
 
@@ -400,7 +400,7 @@ public:
 
 	void ClearStoredCredentials() const;
 private:
-	bool CanHandleEmailLogin();
+	bool CanHandleEmailLogin() const;
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 	
@@ -423,7 +423,7 @@ private:
 	static FString BuildFullDateTime(const FDateTime& Date);
 
 	//RPC Calls//
-	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
+	static FString ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful);
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -434,7 +434,7 @@ private:
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
-	void AutoRegister(const FCredentials_BE& Credentials);
+	void AutoRegister(const FCredentials_BE& Credentials) const;
 
 	//RPC Calls//
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);

@@ -26,7 +26,7 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 	StringToBytes(ProcString,CharsIn,InSize);
 	BYTE *pbDataInput = CharsIn;
 	const DWORD cbDataInput = InSize;
-	UE_LOG(LogTemp,Display,TEXT("InByteCount: %d"),cbDataInput);
+	//UE_LOG(LogTemp,Display,TEXT("InByteCount: %d"),cbDataInput);
 	
 	DataIn.pbData = pbDataInput;
 	DataIn.cbData = cbDataInput;
@@ -98,11 +98,11 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 		
 		if (FBase64::Decode(PreResult,Result))
 		{
-			UE_LOG(LogTemp,Display,TEXT("Successful B64 Decode"));
+			UE_LOG(LogTemp,Display,TEXT("Successful B64 Decode in Windows Encryptor"));
 		}
 		else
 		{
-			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode"));
+			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode in Windows Encryptor"));
 		}
 		
 		LocalFree(DataOut.pbData);
