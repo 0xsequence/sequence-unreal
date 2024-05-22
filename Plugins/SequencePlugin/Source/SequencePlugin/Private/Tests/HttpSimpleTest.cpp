@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Misc/AutomationTest.h"
-#include "..\..\Public\Provider.h"
+#include "Provider.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpSimpleTest, "Public.HttpSimpleTest",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)

@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceBackendManager.h"
-#include "..\Public\Provider.h"
+#include "Provider.h"
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
 #include "Engine/World.h"
