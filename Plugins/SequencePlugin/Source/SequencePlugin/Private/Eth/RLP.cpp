@@ -182,13 +182,8 @@ RLPItem Itemize(RLPItem* Items, uint32 Length)
 FUnsizedData RLP::Encode(RLPItem Item)
 {
 	const auto Length = Item.CalculateLength();
-
-	// Bugfix?
-	//if(Length > 56) {
-	//	Length += 1;
-	//}
 	
-	uint8* Data = new uint8[Length];
+	uint8* Data = new uint8[Length];//memory leaks here
 	Item.Encode(Data);
 	return FUnsizedData
 	{

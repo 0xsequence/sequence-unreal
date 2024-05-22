@@ -14,13 +14,7 @@ FString IntToHexString(uint64 Num);
 //only used internally by IntToHexString
 FString IntToHexLetter(uint8 Num);
 
-//TOptional<uint8> HexLetterToInt(FString Hex); never used
 TOptional<uint64> HexStringToUint64(FString Hex); //used only a handful of times not sure if TOpt is needed though
-
-/*
-* Used to take a HexString and convert it into a list of hex chars
-*/
-//TArray<uint8_t> HexToHexCharList(FString in);
 
 int32 GetBytesInString(FString in);
 
@@ -43,14 +37,11 @@ FString RandomHexByte();
 */
 uint8 RandomByte();
 
-//these functions are to take BytesToHex (and should be replaced by unreal versions under the hood)
-//FString HashToHexString(ByteLength Size, Hash Hash);
-//Hash HexStringToBytes(ByteLength Size, FString Hex);
-
 /*
 * Inline wrapper function for HexToBytes allowing for cleaner usage
 */
 TArray<uint8> HexToBytesInline(FString in);
+
 template<ByteLength TSize>
 TStaticArray<uint8, TSize> HexToBytesInline(FString in)
 {

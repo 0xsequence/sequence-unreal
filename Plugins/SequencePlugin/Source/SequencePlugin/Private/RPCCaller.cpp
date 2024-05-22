@@ -4,6 +4,7 @@
 #include "RequestHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
+#include "Util/JsonBuilder.h"
 
 TSharedPtr<FJsonObject> URPCCaller::Parse(const FString& JsonRaw)
 {

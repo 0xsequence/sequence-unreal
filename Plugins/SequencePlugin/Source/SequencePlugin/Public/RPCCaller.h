@@ -4,13 +4,14 @@
 #include "Util/Async.h"
 #include "Errors.h"
 #include "Dom/JsonObject.h"
-#include "Util/JsonBuilder.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "RPCCaller.generated.h"
 
 template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
+
+class FJsonBuilder;
 
 UCLASS()
 class SEQUENCEPLUGIN_API URPCCaller : public UObject
