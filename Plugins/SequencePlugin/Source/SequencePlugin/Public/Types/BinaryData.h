@@ -143,4 +143,3 @@ struct SEQUENCEPLUGIN_API FBlockNonce final : TSizedData<8>
 	static FBlockNonce From(FString Str);
 	void Increment() const;
 };
-

@@ -6,18 +6,23 @@
 #include "Eth/EthTransaction.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
-#include "Provider.h"
 #include "Session.h"
 #include "SignedMessage.h"
 #include "Containers/Union.h"
 #include "TransactionResponse.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Types/Header.h"
+#include "Dom/JsonObject.h"
+#include "Types/TransactionReceipt.h"
+#include "Types/ContractCall.h"
+#include "ProviderEnum.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
 using TransactionID = FString;
 
 class UIndexer;
+class UProvider;
 
 //Sequence Specific Version of Transaction
 struct FTransaction_Sequence

@@ -9,19 +9,10 @@
 #include "Eth/EthTransaction.h"
 #include "RPCCaller.h"
 #include "Types/ContractCall.h"
+#include "ProviderEnum.h"
 #include "Provider.generated.h"
 
 struct FContractCall;
-
-UENUM()
-enum EBlockTag
-{
-	ELatest UMETA(DisplayName = "latest"),
-	EEarliest UMETA(DisplayName = "earliest"),
-	EPending UMETA(DisplayName = "pending"),
-	ESafe UMETA(DisplayName = "safe"),
-	EFinalized UMETA(DisplayName = "finalized"),
-};
 
 /**
  * 
