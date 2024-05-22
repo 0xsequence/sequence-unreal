@@ -17,14 +17,14 @@ class SEQUENCEPLUGIN_API URPCCaller : public UObject
 {
 	GENERATED_BODY()
 public:
-	TSharedPtr<FJsonObject> Parse(FString JsonRaw);
-	TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(FString JsonRaw);
-	TResult<FString> ExtractStringResult(FString JsonRaw);
-	TResult<uint64> ExtractUIntResult(FString JsonRaw);
-	virtual void SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	static TSharedPtr<FJsonObject> Parse(const FString& JsonRaw);
+	static TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(const FString& JsonRaw);
+	static TResult<FString> ExtractStringResult(const FString& JsonRaw);
+	static TResult<uint64> ExtractUIntResult(const FString& JsonRaw);
+	virtual void SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	template<typename T>
-	void SendRPCAndExtract(FString Url, FString Content, TSuccessCallback<T> OnSuccess, TFunction<TResult<T> (FString)> Extractor, FFailureCallback OnFailure)
+	void SendRPCAndExtract(const FString& Url, const FString& Content, const TSuccessCallback<T>& OnSuccess, const TFunction<TResult<T> (FString)>& Extractor, const FFailureCallback& OnFailure)
 	{
 		SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
 		{
@@ -37,5 +37,5 @@ public:
 		}, OnFailure);
 	}
 	
-	static FJsonBuilder RPCBuilder(FString MethodName);
+	static FJsonBuilder RPCBuilder(const FString& MethodName);
 };

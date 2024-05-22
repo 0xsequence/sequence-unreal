@@ -1,26 +1,24 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "..\Public\RPCCaller.h"
+#include "RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 
-TSharedPtr<FJsonObject> URPCCaller::Parse(FString JsonRaw)
+TSharedPtr<FJsonObject> URPCCaller::Parse(const FString& JsonRaw)
 {
 	TSharedPtr<FJsonObject> JsonParsed;
-
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonRaw);
+	const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonRaw);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
 		return JsonParsed;
 	}
-
 	return nullptr;
 }
 
-TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(FString JsonRaw)
+TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(const FString& JsonRaw)
 {
-	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
+	const TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
 	{
@@ -30,9 +28,9 @@ TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(FString Jso
 	return MakeValue(Json->GetObjectField(TEXT("result")));
 }
 
-TResult<FString> URPCCaller::ExtractStringResult(FString JsonRaw)
+TResult<FString> URPCCaller::ExtractStringResult(const FString& JsonRaw)
 {
-	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
+	const TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
 	{
@@ -42,7 +40,7 @@ TResult<FString> URPCCaller::ExtractStringResult(FString JsonRaw)
 	return MakeValue(Json->GetStringField(TEXT("result")));
 }
 
-TResult<uint64> URPCCaller::ExtractUIntResult(FString JsonRaw)
+TResult<uint64> URPCCaller::ExtractUIntResult(const FString& JsonRaw)
 {
 	TResult<FString> Result = ExtractStringResult(JsonRaw);
 	if(!Result.HasValue())
@@ -58,7 +56,7 @@ TResult<uint64> URPCCaller::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-void URPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnError)
+void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError)
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -70,7 +68,7 @@ void URPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString>
 		->ProcessAndThen(OnSuccess, OnError);
 }
 
-FJsonBuilder URPCCaller::RPCBuilder(const FString MethodName)
+FJsonBuilder URPCCaller::RPCBuilder(const FString& MethodName)
 {
 	return *FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")
