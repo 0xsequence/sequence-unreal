@@ -13,6 +13,8 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Sequence/Close.h"
+#include "Indexer/Indexer.h"
+#include "Util/JsonBuilder.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {

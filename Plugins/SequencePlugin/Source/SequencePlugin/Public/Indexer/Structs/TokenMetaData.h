@@ -2,8 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer/AttributeMap.h"
-#include "JsonObjectConverter.h"
+#include "Indexer/Structs/AttributeMap.h"
 #include "Indexer/IndexerSupport.h"
 #include "TokenMetaData.generated.h"
 

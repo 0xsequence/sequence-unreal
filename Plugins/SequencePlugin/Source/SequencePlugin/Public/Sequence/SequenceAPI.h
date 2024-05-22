@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
-#include "Indexer/Indexer.h"
+#include "Indexer/Structs/Struct_Data.h"
 #include "Authenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
@@ -16,6 +16,8 @@
 
 using FSignature = FUnsizedData;
 using TransactionID = FString;
+
+class UIndexer;
 
 //Sequence Specific Version of Transaction
 struct FTransaction_Sequence
