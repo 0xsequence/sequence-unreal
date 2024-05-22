@@ -54,34 +54,50 @@ FString SEQUENCEPLUGIN_API UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
 template<ByteLength TSize>
-struct TSizedData : FBinaryData
+struct SEQUENCEPLUGIN_API TSizedData : FBinaryData
 {
 	const static ByteLength Size = TSize;
-	virtual ByteLength GetLength() const override;
-	FUnsizedData Copy() const; 
+	
+	virtual ByteLength GetLength() const override
+	{
+		return Size;
+	}
+	
+	FUnsizedData Copy() const
+	{
+		FUnsizedData Data = FUnsizedData::Empty();
+		Data.Arr.Get()->Append(*this->Arr.Get());
+		return Data;
+	}
+	
 	explicit operator FUnsizedData() const { return Copy(); }
-	static TSizedData Empty();
+	
+	template <ByteLength Size>
+	static TSizedData<Size> Empty()
+	{
+		return TSizedData{};
+	}
 }; // Data with set sizes
 
-template <ByteLength Size>
+/*template <ByteLength Size>
 inline ByteLength TSizedData<Size>::GetLength() const 
 {
 	return Size;
-}
+}*/
 
-template <ByteLength Size>
+/*template <ByteLength Size>
 FUnsizedData TSizedData<Size>::Copy() const
 {
 	FUnsizedData data = FUnsizedData::Empty();
 	data.Arr.Get()->Append(*this->Arr.Get());
 	return data;
-}
+}*/
 
-template <ByteLength TSize>
+/*template <ByteLength TSize>
 TSizedData<TSize> TSizedData<TSize>::Empty()
 {
 	return TSizedData{};
-}
+}*/
 
 // Basic Binary Types
 struct SEQUENCEPLUGIN_API FHash256 final : TSizedData<32>

@@ -104,18 +104,6 @@ uint8_t GetPaddingByte(int32 StringLength)
 	return Byte;
 }
 
-int32 GetBytesInString(FString in)
-{
-	int32 Bytes = 0;
-
-	for (auto c : in.GetCharArray())
-	{
-		Bytes += sizeof(c);
-	}
-
-	return Bytes;
-}
-
 FString IntToHexString(uint64 Num)
 {
 	if (Num == 0)
