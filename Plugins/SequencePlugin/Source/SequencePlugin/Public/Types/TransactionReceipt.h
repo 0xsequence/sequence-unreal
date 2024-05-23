@@ -3,7 +3,7 @@
 #include "Dom/JsonObject.h"
 #include "BinaryData.h"
 
-struct FTransactionReceipt
+struct SEQUENCEPLUGIN_API FTransactionReceipt
 {
 	FHash256 BlockHash;
 	uint64 BlockNumber;
@@ -14,7 +14,6 @@ struct FTransactionReceipt
 	uint64 CumulativeGasUsed;
 	uint64 GasUsed;
 	FAddress ContractAddress;
-	// logs?
 	FString Status;
 };
 

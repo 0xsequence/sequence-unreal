@@ -2,7 +2,7 @@
 #pragma once
 #include "Header.h"
 
-struct FBlock
+struct SEQUENCEPLUGIN_API FBlock
 {
 	FHeader* Header;
 	FHeader* Uncles;
