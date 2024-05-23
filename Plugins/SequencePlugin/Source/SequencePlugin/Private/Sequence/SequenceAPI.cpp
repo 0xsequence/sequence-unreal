@@ -86,75 +86,84 @@ void USequenceWallet::Deinitialize()
 	UE_LOG(LogTemp,Display,TEXT("Deinitializing wallet subsystem"));
 }
 
-TOptional<USequenceWallet*> USequenceWallet::Get()
+USequenceWallet * USequenceWallet::GetSubSystem()
 {
-	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	if (CachedWallet)
 	{
-		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
-		{
-			if (const UAuthenticator * Auth = NewObject<UAuthenticator>())
-			{
-				const FCredentials_BE Credentials =  Auth->GetStoredCredentials().GetCredentials();
-				Wallet->Init(Credentials);
-				return Wallet;
-			}
-			else
-			{
-				UE_LOG(LogTemp,Error,TEXT("Error creating UAuthenticator during GameInstanceSubsystem Get"));
-			}			
-		}
-		else
-		{
-			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
-		}
+		return CachedWallet;
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+		if (GEngine)
+		{
+			const TIndirectArray<FWorldContext> Contexts = GEngine->GetWorldContexts();
+			for (FWorldContext Context : Contexts)
+			{
+				if (const UWorld * World = Context.World())
+				{
+					if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(World))
+					{
+						if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
+						{
+							CachedWallet = Wallet;
+							return Wallet;
+						}//GameInstance Subsystem Check
+					}//GameInstance Check
+				}//World Context Check
+			}//Context Search
+		}//GEngine Check
+		else
+		{
+			UE_LOG(LogTemp,Error,TEXT("Error Accessing GEngine"));
+		}
+	}
+	UE_LOG(LogTemp,Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
+	return nullptr;
+}
+
+TOptional<USequenceWallet*> USequenceWallet::Get()
+{
+	if (USequenceWallet * Wallet = GetSubSystem())
+	{
+		const UAuthenticator * Auth = NewObject<UAuthenticator>();
+		FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
+		if (StoredCredentials.GetValid())
+		{
+			Wallet->Init(StoredCredentials.GetCredentials());
+			return Wallet;
+		}
+		else
+		{
+			UE_LOG(LogTemp,Warning,TEXT("The Credentials found on disk were invalid please login"));
+		}
 	}
 	return nullptr;
 }
 
 TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials)
 {
-	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	if (USequenceWallet * Wallet = GetSubSystem())
 	{
-		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
-		{
-			Wallet->Init(Credentials);
-			return Wallet;
-		}
-		else
-		{
-			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
-		}
+		Wallet->Init(Credentials);
+		return Wallet;
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+		return nullptr;
 	}
-	return nullptr;
 }
 
 TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials, const FString& ProviderUrl)
 {
-	if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(GEngine->GetCurrentPlayWorld(nullptr)))
+	if (USequenceWallet * Wallet = GetSubSystem())
 	{
-		if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
-		{
-			Wallet->Init(Credentials, ProviderUrl);
-			return Wallet;
-		}
-		else
-		{
-			UE_LOG(LogTemp,Error,TEXT("Error accessing the USequenceWallet GameInstanceSubsystem"));
-		}
+		Wallet->Init(Credentials,ProviderUrl);
+		return Wallet;
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT("Error accessing the GameInstance"));
+		return nullptr;
 	}
-	return nullptr;
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)

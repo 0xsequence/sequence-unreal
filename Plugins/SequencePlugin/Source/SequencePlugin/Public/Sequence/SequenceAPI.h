@@ -62,6 +62,8 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 	
+	static inline USequenceWallet * CachedWallet = nullptr;
+	
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
 	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
@@ -96,6 +98,7 @@ public:
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignOut();
 private:
+	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
 	FString BuildSignMessageIntent(const FString& Message) const;
