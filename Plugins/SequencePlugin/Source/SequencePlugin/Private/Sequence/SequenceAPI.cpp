@@ -125,18 +125,28 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 {
 	if (USequenceWallet * Wallet = GetSubSystem())
 	{
-		const UAuthenticator * Auth = NewObject<UAuthenticator>();
-		FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
-		if (StoredCredentials.GetValid())
+		if (Wallet->Credentials.RegisteredValid())
 		{
-			Wallet->Init(StoredCredentials.GetCredentials());
 			return Wallet;
 		}
 		else
 		{
-			UE_LOG(LogTemp,Warning,TEXT("The Credentials found on disk were invalid please login"));
-		}
-	}
+			UE_LOG(LogTemp,Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
+			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
+
+			if (StoredCredentials.GetValid())
+			{
+				UE_LOG(LogTemp,Display,TEXT("Successfully loaded on disk credentials"));
+				Wallet->Init(StoredCredentials.GetCredentials());
+				return Wallet;
+			}
+			else
+			{
+				UE_LOG(LogTemp,Warning,TEXT("The Credentials on disk were invalid please login"));
+			}//Stored Valid Check
+		}//Registered Valid Check
+	}//SubSystem Check
 	return nullptr;
 }
 

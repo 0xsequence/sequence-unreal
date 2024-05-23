@@ -58,6 +58,13 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthSuccess.Add(del);
 	this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
+
+	TOptional<USequenceWallet*> OptionalWallet = USequenceWallet::Get();
+	if (OptionalWallet.IsSet() && OptionalWallet.GetValue())
+	{
+		const USequenceWallet * Wallet = OptionalWallet.GetValue();
+		UE_LOG(LogTemp,Display,TEXT("Address: %s"),*Wallet->GetWalletAddress());
+	}
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

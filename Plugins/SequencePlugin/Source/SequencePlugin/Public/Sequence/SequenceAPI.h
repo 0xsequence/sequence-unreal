@@ -25,7 +25,7 @@ class UIndexer;
 class UProvider;
 
 //Sequence Specific Version of Transaction
-struct FTransaction_Sequence
+struct SEQUENCEPLUGIN_API FTransaction_Sequence
 {
 	uint64 ChainId;
 	FAddress From;

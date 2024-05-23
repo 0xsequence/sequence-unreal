@@ -8,7 +8,7 @@
 #include "TransactionResponse.generated.h"
 
 USTRUCT()
-struct FTransactionResponse
+struct SEQUENCEPLUGIN_API FTransactionResponse
 {
 	GENERATED_BODY()
 	

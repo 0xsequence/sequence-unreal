@@ -11,10 +11,13 @@
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Authenticator.generated.h"
 
-struct FSSOCredentials
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSSOCredentials
 {
+	GENERATED_USTRUCT_BODY()
 	FString URL = "";
 	FString ClientID = "";
+	FSSOCredentials(){}
 	FSSOCredentials(const FString& URLIn, const FString& ClientIDIn)
 	{
 		URL = URLIn;
@@ -23,7 +26,7 @@ struct FSSOCredentials
 };
 
 USTRUCT()
-struct FWaasJWT
+struct SEQUENCEPLUGIN_API FWaasJWT
 {
 	GENERATED_USTRUCT_BODY()
 private:
@@ -60,7 +63,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FCredentials_BE
+struct SEQUENCEPLUGIN_API FCredentials_BE
 {
     GENERATED_USTRUCT_BODY()
 private:
@@ -273,7 +276,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FStoredCredentials_BE
+struct SEQUENCEPLUGIN_API FStoredCredentials_BE
 {
 	GENERATED_USTRUCT_BODY()
 private:

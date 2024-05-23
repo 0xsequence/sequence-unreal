@@ -7,7 +7,7 @@
 #include "SignedMessage.generated.h"
 
 USTRUCT()
-struct FSignedMessageSignature
+struct SEQUENCEPLUGIN_API FSignedMessageSignature
 {
 	GENERATED_BODY()
 	UPROPERTY()
@@ -17,7 +17,7 @@ struct FSignedMessageSignature
 };
 
 USTRUCT()
-struct FSignedMessage
+struct SEQUENCEPLUGIN_API FSignedMessage
 {
 	GENERATED_BODY()
 
@@ -26,7 +26,7 @@ struct FSignedMessage
 };
 
 USTRUCT()
-struct FSignedMessageResponseObj
+struct SEQUENCEPLUGIN_API FSignedMessageResponseObj
 {
 	GENERATED_BODY()
 

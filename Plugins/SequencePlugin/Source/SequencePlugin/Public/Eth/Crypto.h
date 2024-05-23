@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "Types/BinaryData.h"
-#include "Types/Types.h"
 
 // Derives a public key from a private key 
 FPublicKey SEQUENCEPLUGIN_API GetPublicKey(FPrivateKey PrivateKey);
