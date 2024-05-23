@@ -17,9 +17,7 @@
 	"Installed": true,
 	"SupportedTargetPlatforms": [
 		"Mac",
-		"IOS",
-		"Android",
-		"Win64"
+		"IOS"
 	],
 	"Modules": [
 		{
@@ -28,9 +26,7 @@
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Mac",
-				"IOS",
-				"Android",
-				"Win64"
+				"IOS"
 			]
 		}
 	],
