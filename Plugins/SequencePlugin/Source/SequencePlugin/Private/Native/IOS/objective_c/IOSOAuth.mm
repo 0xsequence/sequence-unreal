@@ -34,6 +34,8 @@ typedef void(^Callback)(char *idToken);
     NSString * scheme = Scheme;
     
     if (@available(iOS 17.4, *)) {//for support of IOS 17.4 and later
+    #ifdef PLATFORM_IOS
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 170400
         ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithCustomScheme:scheme];
             ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
             initWithURL:authUrl
@@ -50,6 +52,8 @@ typedef void(^Callback)(char *idToken);
             }];
             authSession.presentationContextProvider = self;
             [authSession start];
+        #endif//Version guard for when we are compiling with versions lower than what we need
+        #endif//platform_IOS
     } else {//for support of things prior of IOS 17.4
          ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
             initWithURL:authUrl
