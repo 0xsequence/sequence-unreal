@@ -79,26 +79,6 @@ struct SEQUENCEPLUGIN_API TSizedData : FBinaryData
 	}
 }; // Data with set sizes
 
-/*template <ByteLength Size>
-inline ByteLength TSizedData<Size>::GetLength() const 
-{
-	return Size;
-}*/
-
-/*template <ByteLength Size>
-FUnsizedData TSizedData<Size>::Copy() const
-{
-	FUnsizedData data = FUnsizedData::Empty();
-	data.Arr.Get()->Append(*this->Arr.Get());
-	return data;
-}*/
-
-/*template <ByteLength TSize>
-TSizedData<TSize> TSizedData<TSize>::Empty()
-{
-	return TSizedData{};
-}*/
-
 // Basic Binary Types
 struct SEQUENCEPLUGIN_API FHash256 final : TSizedData<32>
 {
