@@ -35,7 +35,7 @@ typedef void(^Callback)(char *idToken);
     
     if (@available(iOS 17.4, *)) {//for support of IOS 17.4 and later
     #ifdef PLATFORM_IOS
-    #if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_17_4
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 170400
         ASWebAuthenticationSessionCallback * sessionCallback = [ASWebAuthenticationSessionCallback callbackWithCustomScheme:scheme];
             ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
             initWithURL:authUrl
