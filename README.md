@@ -156,10 +156,9 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-
 /*
    Used to initiate mobile Social Signin
-   (Note no other calls need to be made to complete mobile SSO)
+   (No other calls need to be made to complete mobile SSO)
 */
 void InitiateMobileSSO(const ESocialSigninType& Type)
 
@@ -173,13 +172,11 @@ void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
    This call is for generating a login URL for Desktop based Social Signin
    the received URL is fed into a WebBrowser to begin the login process
 */
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 FString GetLoginURL(const ESocialSigninType& Type); 
 
 /*
    This is call is for undergoing social login once an ID_Token has been collected.
 */
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void SocialLogin(const FString& IDTokenIn);
 
 /*
@@ -187,14 +184,12 @@ void SocialLogin(const FString& IDTokenIn);
    The Delegate **[AuthRequiresCode]** will fire when a code is ready to be received
    by the UAuthenticator
 */
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void EmailLogin(const FString& EmailIn);
 
 /*
    This is call is made after the Delegate **[AuthRequiresCode]** is fired
    The Code collected from the User in the GUI is sent in via this call
 */
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void EmailCode(const FString& CodeIn);
 
 /*
@@ -205,7 +200,6 @@ FStoredCredentials_BE GetStoredCredentials() const;
 /*
    Optional call used to check if the credentials on disk are valid or not
 */
-UFUNCTION(BlueprintCallable, Category = "Login")
 bool StoredCredentialsValid();
 ```
 
@@ -271,19 +265,27 @@ else
 
 ### Android SSO Requirements
 
-Google: Please ensure your project is setup according to **[Google SSO Setup]** listed below
+Google:
 
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
+In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
+
+You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application. And place the **[Web Application client ID]** in the [YourProject/Config/SequenceConfig.ini], [GoogleClientID] field.
+
+Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
+
+[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
+
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
 ### IOS SSO Requirements
 
-Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
+Google: Please ensure you have a proper **[GoogleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**,
 be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
-For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
+For Apple SSO to work please be sure to register the **[RedirectUrl]** in **[YourProject/Config/SequenceConfig.ini]** appropriately for your app.
 
 ### Sequence API
 
@@ -893,15 +895,6 @@ To set your system up for Packaging please refer to the following links:
 - [Android](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-android-projects-in-unreal-engine?application_version=5.3)
 - [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
 - [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
-
-#### Google SSO Setup
-In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
-
-You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application, as well as place the **[Web Application client ID]** in the `PluginConfig/Config.h` `FAuthenticatorConfig.GoogleClientID` field.
-
-Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
-
-[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
 
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
