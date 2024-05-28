@@ -64,17 +64,17 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 
 ## Credentials
 
-Before you can use this plugin, you need to acquire the following credentials from Sequence:
+Before you can use this plugin, you need to acquire the following credentials from [Sequence](https://sequence.xyz/builder)
 
 - `WaaSTenantKey`
 - `ProjectAccessKey`
 
-You can then add these credentials in the **[Config.h]** file under `SequencePlugin/PluginConfig/Config.h`.
+You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
 
 ## Security
 
-You must provide a 32 character encryption key in `SequencePlugin/PluginConfig/Config.h` contained within
-the following struct value **[FEncryptorConfig::Key]**
+You must provide a 32 character encryption key in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
+under the config variable `FallbackEncryptionKey`
 
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
 You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
@@ -127,7 +127,7 @@ resides outside the plugins content folder.
 
 5) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
    GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
-   Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** to the Pawn Blueprint that you just made.
+   Then open up **[GM_Sequence]** and set the DefaultPawn to the Pawn Blueprint you've just made.
 
 6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
 
@@ -156,24 +156,50 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-//This call is platform dependent on windows & mac this is required for SSO
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   Used to initiate mobile Social Signin
+   (No other calls need to be made to complete mobile SSO)
+*/
+void InitiateMobileSSO(const ESocialSigninType& Type)
+
+/*
+   Optional Call,
+   Used to set a custom encryptor implementation for the Authentication Process
+*/
+void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+
+/*
+   This call is for generating a login URL for Desktop based Social Signin
+   the received URL is fed into a WebBrowser to begin the login process
+*/
 FString GetLoginURL(const ESocialSigninType& Type); 
 
-//This Call is made after you've collected the ID_Token (Mac & Windows only)
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This is call is for undergoing social login once an ID_Token has been collected.
+*/
 void SocialLogin(const FString& IDTokenIn);
 
-//This Call is made after you've collected the email address from the Users in the UI
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This Call is made after you've collected the email address from the Users in the UI
+   The Delegate **[AuthRequiresCode]** will fire when a code is ready to be received
+   by the UAuthenticator
+*/
 void EmailLogin(const FString& EmailIn);
 
-//This is call is made after the Delegate **[AuthRequiresCode]** is fired
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This is call is made after the Delegate **[AuthRequiresCode]** is fired
+   The Code collected from the User in the GUI is sent in via this call
+*/
 void EmailCode(const FString& CodeIn);
 
-//Optional call used to check if the credentials on disk are valid or not//
-UFUNCTION(BlueprintCallable, Category = "Login")
+/*
+   Optional call used to retrieve stored credentials on disk
+*/
+FStoredCredentials_BE GetStoredCredentials() const;
+
+/*
+   Optional call used to check if the credentials on disk are valid or not
+*/
 bool StoredCredentialsValid();
 ```
 
@@ -194,7 +220,9 @@ del.BindUFunction(this, "CallShowAuthSuccessScreen");
 this->authenticator->AuthSuccess.Add(del);
 ```
 
-Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` like so:
+Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
+it is only used here as a reference in the event more context is needed with these instructions.
+Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` as an example like so:
 
 ```clike
 UFUNCTION()
@@ -233,23 +261,31 @@ else
 ### Social Signin based Authentication on Mobile With CustomUI
 
 1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
-   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported
+   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported.
+   This function call is all that's required for Mobile SSO.
 
 ### Android SSO Requirements
 
-Google: Please ensure your project is setup according to **[Google SSO Setup]** listed below
+Google:
 
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
+In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
+
+You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application. And place the **[Web Application client ID]** in the [YourProject/Config/SequenceConfig.ini], [GoogleClientID] field.
+
+Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
+
+[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
+
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
 ### IOS SSO Requirements
+Google: Please ensure you have a proper **[GoogleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
-Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
-
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**,
 be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
-For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
+For Apple SSO to work please be sure to register the **[RedirectUrl]** in **[YourProject/Config/SequenceConfig.ini]** appropriately for your app.
 
 ### Sequence API
 
@@ -284,6 +320,7 @@ if (WalletOptional.IsSet() && WalletOptional.GetValue())
    USequenceWallet * Wallet = WalletOptional.GetValue();
    //Use here
 }
+
 or
 
 /*
@@ -775,7 +812,7 @@ GUI Visible Simple Visibility test for the UI
 
 Switch Platform (Switches which mode the UI will be in and how it will be displayed)
 
-Note: this doesn't rotate the application into any one view it just make the UI responsive to that type of view.
+Note: this doesn't rotate the application into any one view it just makes the UI responsive to that type of view.
 
 Modes:
 - Desktop (default)
@@ -859,15 +896,6 @@ To set your system up for Packaging please refer to the following links:
 - [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
 - [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
 
-#### Google SSO Setup
-In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
-
-You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application, as well as place the **[Web Application client ID]** in the `PluginConfig/Config.h` `FAuthenticatorConfig.GoogleClientID` field.
-
-Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
-
-[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
-
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
 
@@ -878,7 +906,6 @@ Set SDK API Level to Android-34
 Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
 ### Hardware Requirements
-
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
 
 #### Unreal and Xcode Specifics

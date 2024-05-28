@@ -261,7 +261,8 @@ else
 ### Social Signin based Authentication on Mobile With CustomUI
 
 1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
-   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported
+   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported.
+   This function call is all that's required for Mobile SSO.
 
 ### Android SSO Requirements
 
@@ -278,7 +279,6 @@ Refer to [these docs](https://developers.google.com/identity/one-tap/android/get
 Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
 ### IOS SSO Requirements
-
 Google: Please ensure you have a proper **[GoogleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
 Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**,
@@ -812,7 +812,7 @@ GUI Visible Simple Visibility test for the UI
 
 Switch Platform (Switches which mode the UI will be in and how it will be displayed)
 
-Note: this doesn't rotate the application into any one view it just make the UI responsive to that type of view.
+Note: this doesn't rotate the application into any one view it just makes the UI responsive to that type of view.
 
 Modes:
 - Desktop (default)
@@ -906,7 +906,6 @@ Set SDK API Level to Android-34
 Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
 ### Hardware Requirements
-
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
 
 #### Unreal and Xcode Specifics
