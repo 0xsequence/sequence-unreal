@@ -64,17 +64,17 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 
 ## Credentials
 
-Before you can use this plugin, you need to acquire the following credentials from Sequence:
+Before you can use this plugin, you need to acquire the following credentials from [Sequence](https://sequence.xyz/builder)
 
 - `WaaSTenantKey`
 - `ProjectAccessKey`
 
-You can then add these credentials in the **[Config.h]** file under `SequencePlugin/PluginConfig/Config.h`.
+You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
 
 ## Security
 
-You must provide a 32 character encryption key in `SequencePlugin/PluginConfig/Config.h` contained within
-the following struct value **[FEncryptorConfig::Key]**
+You must provide a 32 character encryption key in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
+under the config variable `FallbackEncryptionKey`
 
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
 You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
@@ -127,7 +127,7 @@ resides outside the plugins content folder.
 
 5) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
    GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
-   Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** to the Pawn Blueprint that you just made.
+   Then open up **[GM_Sequence]** and set the DefaultPawn to the Pawn Blueprint you've just made.
 
 6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
 
@@ -156,23 +156,55 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-//This call is platform dependent on windows & mac this is required for SSO
+
+/*
+   Used to initiate mobile Social Signin
+   (Note no other calls need to be made to complete mobile SSO)
+*/
+void InitiateMobileSSO(const ESocialSigninType& Type)
+
+/*
+   Optional Call,
+   Used to set a custom encryptor implementation for the Authentication Process
+*/
+void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+
+/*
+   This call is for generating a login URL for Desktop based Social Signin
+   the received URL is fed into a WebBrowser to begin the login process
+*/
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 FString GetLoginURL(const ESocialSigninType& Type); 
 
-//This Call is made after you've collected the ID_Token (Mac & Windows only)
+/*
+   This is call is for undergoing social login once an ID_Token has been collected.
+*/
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void SocialLogin(const FString& IDTokenIn);
 
-//This Call is made after you've collected the email address from the Users in the UI
+/*
+   This Call is made after you've collected the email address from the Users in the UI
+   The Delegate **[AuthRequiresCode]** will fire when a code is ready to be received
+   by the UAuthenticator
+*/
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void EmailLogin(const FString& EmailIn);
 
-//This is call is made after the Delegate **[AuthRequiresCode]** is fired
+/*
+   This is call is made after the Delegate **[AuthRequiresCode]** is fired
+   The Code collected from the User in the GUI is sent in via this call
+*/
 UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 void EmailCode(const FString& CodeIn);
 
-//Optional call used to check if the credentials on disk are valid or not//
+/*
+   Optional call used to retrieve stored credentials on disk
+*/
+FStoredCredentials_BE GetStoredCredentials() const;
+
+/*
+   Optional call used to check if the credentials on disk are valid or not
+*/
 UFUNCTION(BlueprintCallable, Category = "Login")
 bool StoredCredentialsValid();
 ```
@@ -194,7 +226,9 @@ del.BindUFunction(this, "CallShowAuthSuccessScreen");
 this->authenticator->AuthSuccess.Add(del);
 ```
 
-Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` like so:
+Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
+it is only used here as a reference in the event more context is needed with these instructions.
+Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` as an example like so:
 
 ```clike
 UFUNCTION()
@@ -284,6 +318,7 @@ if (WalletOptional.IsSet() && WalletOptional.GetValue())
    USequenceWallet * Wallet = WalletOptional.GetValue();
    //Use here
 }
+
 or
 
 /*
