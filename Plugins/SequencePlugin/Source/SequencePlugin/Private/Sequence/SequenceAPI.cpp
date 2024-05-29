@@ -88,12 +88,6 @@ void USequenceWallet::Deinitialize()
 
 USequenceWallet * USequenceWallet::GetSubSystem()
 {
-	if (CachedWallet)
-	{
-		return CachedWallet;
-	}
-	else
-	{
 		if (GEngine)
 		{
 			const TIndirectArray<FWorldContext> Contexts = GEngine->GetWorldContexts();
@@ -105,7 +99,6 @@ USequenceWallet * USequenceWallet::GetSubSystem()
 					{
 						if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
 						{
-							CachedWallet = Wallet;
 							return Wallet;
 						}//GameInstance Subsystem Check
 					}//GameInstance Check
@@ -116,7 +109,6 @@ USequenceWallet * USequenceWallet::GetSubSystem()
 		{
 			UE_LOG(LogTemp,Error,TEXT("Error Accessing GEngine"));
 		}
-	}
 	UE_LOG(LogTemp,Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
 	return nullptr;
 }

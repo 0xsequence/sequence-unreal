@@ -62,8 +62,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 	
-	static inline USequenceWallet * CachedWallet = nullptr;
-	
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
 	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
