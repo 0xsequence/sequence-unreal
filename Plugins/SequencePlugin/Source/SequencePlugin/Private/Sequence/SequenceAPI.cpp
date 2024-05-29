@@ -127,7 +127,8 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 	{
 		if (Wallet->Credentials.RegisteredValid())
 		{
-			return Wallet;
+			TOptional OptionalWallet(Wallet);
+			return OptionalWallet;
 		}
 		else
 		{
@@ -139,7 +140,8 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 			{
 				UE_LOG(LogTemp,Display,TEXT("Successfully loaded on disk credentials"));
 				Wallet->Init(StoredCredentials.GetCredentials());
-				return Wallet;
+				TOptional OptionalWallet(Wallet);
+				return OptionalWallet;
 			}
 			else
 			{
@@ -155,12 +157,10 @@ TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credenti
 	if (USequenceWallet * Wallet = GetSubSystem())
 	{
 		Wallet->Init(Credentials);
-		return Wallet;
+		TOptional OptionalWallet(Wallet);
+		return OptionalWallet;
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
 TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials, const FString& ProviderUrl)
@@ -168,12 +168,10 @@ TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credenti
 	if (USequenceWallet * Wallet = GetSubSystem())
 	{
 		Wallet->Init(Credentials,ProviderUrl);
-		return Wallet;
+		TOptional OptionalWallet(Wallet);
+		return OptionalWallet;
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
