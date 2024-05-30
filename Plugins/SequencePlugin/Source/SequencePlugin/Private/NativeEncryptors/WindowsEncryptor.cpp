@@ -12,21 +12,16 @@
 FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 {
 	FString Result = "";
-	UE_LOG(LogTemp,Display,TEXT("Preparing to encrypt on windows: %s"),*StringIn);
 #if PLATFORM_WINDOWS
 	DATA_BLOB DataIn;
 	DATA_BLOB DataOut;
 	const FString ProcString = FBase64::Encode(StringIn);
-
-	//UE_LOG(LogTemp,Display,TEXT("Decrypted PreResult: %s"),*ProcString);
-	//UE_LOG(LogTemp,Display,TEXT("PreResult Length: %d"),ProcString.Len());
 	
 	const int32 InSize = ProcString.Len();
 	uint8 * CharsIn =  new uint8[InSize];
 	StringToBytes(ProcString,CharsIn,InSize);
 	BYTE *pbDataInput = CharsIn;
 	const DWORD cbDataInput = InSize;
-	UE_LOG(LogTemp,Display,TEXT("InByteCount: %d"),cbDataInput);
 	
 	DataIn.pbData = pbDataInput;
 	DataIn.cbData = cbDataInput;
@@ -48,14 +43,12 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 	}
 	delete[] CharsIn;
 #endif
-	//UE_LOG(LogTemp,Display,TEXT("Encrypted Result: %s"),*Result);
 	return Result;
 }
 
 FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 {
 	FString Result = "";
-	UE_LOG(LogTemp,Display,TEXT("Preparing to decrypt on windows: %s"),*StringIn);
 #if PLATFORM_WINDOWS
 	DATA_BLOB DataIn;
 	DATA_BLOB DataOut;
@@ -92,17 +85,14 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 		&DataOut))
 	{
 		const FString PreResult = BytesToString(DataOut.pbData,DataOut.cbData);
-
-		//UE_LOG(LogTemp,Display,TEXT("Decrypted PreResult: %s"),*PreResult);
-		//UE_LOG(LogTemp,Display,TEXT("PreResult Length: %d"),PreResult.Len());
 		
 		if (FBase64::Decode(PreResult,Result))
 		{
-			UE_LOG(LogTemp,Display,TEXT("Successful B64 Decode"));
+			UE_LOG(LogTemp,Display,TEXT("Successful B64 Decode in Windows Encryptor"));
 		}
 		else
 		{
-			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode"));
+			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode in Windows Encryptor"));
 		}
 		
 		LocalFree(DataOut.pbData);
@@ -115,6 +105,5 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 	}
 	delete[] CharsIn;
 #endif
-	//UE_LOG(LogTemp,Display,TEXT("Decrypted Result: %s"),*Result);
 	return Result;
 }

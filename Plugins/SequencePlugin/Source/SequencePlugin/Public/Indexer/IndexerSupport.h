@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "JsonObjectConverter.h"
 #include "Util/Structs/BE_Structs.h"
 #include "IndexerSupport.generated.h"
@@ -17,7 +16,7 @@ struct FUpdatableItemDataArgs;
  * Support class for the indexer
  */
 UCLASS()
-class UIndexerSupport : public UObject
+class SEQUENCEPLUGIN_API UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:

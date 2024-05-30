@@ -28,14 +28,15 @@ Within **[SequenceConfig.ini]** add the following lines:
       AppleClientID = ""
       FacebookClientID = ""
       DiscordClientID = ""
+      RedirectUrl = "https://api.sequence.app"
 
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
-### Upgrading to Unreal 5.3
-If your project is currently on 5.2, then for this version you'll want to upgrade to 5.3.
+### Upgrading to Unreal 5.4
+If your project is currently on 5.2 or 5.3, then for this version you'll want to upgrade to 5.4.
 To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
-file. Then select Switch Unreal Engine Version, Choose 5.3 and click okay. Once done. Open your
+file. Then select Switch Unreal Engine Version, Choose 5.4 and click okay. Once done. Open your
 code editor and rebuild your source code.
 
 As way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
@@ -63,17 +64,17 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 
 ## Credentials
 
-Before you can use this plugin, you need to acquire the following credentials from Sequence:
+Before you can use this plugin, you need to acquire the following credentials from [Sequence](https://sequence.xyz/builder)
 
 - `WaaSTenantKey`
 - `ProjectAccessKey`
 
-You can then add these credentials in the **[Config.h]** file under `SequencePlugin/PluginConfig/Config.h`.
+You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
 
 ## Security
 
-You must provide a 32 character encryption key in `SequencePlugin/PluginConfig/Config.h` contained within
-the following struct value **[FEncryptorConfig::Key]**
+You must provide a 32 character encryption key in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
+under the config variable `FallbackEncryptionKey`
 
 In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings
 You can refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects?application_version=5.3)
@@ -87,7 +88,8 @@ etc
 
 ## Getting Started With the Builtin GUI
 
-1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it, then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
+1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it,
+   then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
 
 2) Launch your project, then allow it to update the UProject Settings.
 
@@ -125,7 +127,7 @@ resides outside the plugins content folder.
 
 5) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
    GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
-   Then open up **[GM_Sequence]** and set the DefaultPawn to either the **[BP_CustomSpectatorPawn]** to the Pawn Blueprint that you just made.
+   Then open up **[GM_Sequence]** and set the DefaultPawn to the Pawn Blueprint you've just made.
 
 6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
 
@@ -154,24 +156,50 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-//This call is platform dependent on windows & mac this is required for SSO WIP
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   Used to initiate mobile Social Signin
+   (No other calls need to be made to complete mobile SSO)
+*/
+void InitiateMobileSSO(const ESocialSigninType& Type)
+
+/*
+   Optional Call,
+   Used to set a custom encryptor implementation for the Authentication Process
+*/
+void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+
+/*
+   This call is for generating a login URL for Desktop based Social Signin
+   the received URL is fed into a WebBrowser to begin the login process
+*/
 FString GetLoginURL(const ESocialSigninType& Type); 
 
-//This Call is made after you've collected the ID_Token (Mac & Windows only) WIP
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This is call is for undergoing social login once an ID_Token has been collected.
+*/
 void SocialLogin(const FString& IDTokenIn);
 
-//This Call is made after you've collected the email address from the Users in the UI
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This Call is made after you've collected the email address from the Users in the UI
+   The Delegate **[AuthRequiresCode]** will fire when a code is ready to be received
+   by the UAuthenticator
+*/
 void EmailLogin(const FString& EmailIn);
 
-//This is call is made after the Delegate **[AuthRequiresCode]** is fired
-UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+/*
+   This is call is made after the Delegate **[AuthRequiresCode]** is fired
+   The Code collected from the User in the GUI is sent in via this call
+*/
 void EmailCode(const FString& CodeIn);
 
-//Optional call used to check if the credentials on disk are valid or not//
-UFUNCTION(BlueprintCallable, Category = "Login")
+/*
+   Optional call used to retrieve stored credentials on disk
+*/
+FStoredCredentials_BE GetStoredCredentials() const;
+
+/*
+   Optional call used to check if the credentials on disk are valid or not
+*/
 bool StoredCredentialsValid();
 ```
 
@@ -192,7 +220,9 @@ del.BindUFunction(this, "CallShowAuthSuccessScreen");
 this->authenticator->AuthSuccess.Add(del);
 ```
 
-Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` like so:
+Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
+it is only used here as a reference in the event more context is needed with these instructions.
+Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` as an example like so:
 
 ```clike
 UFUNCTION()
@@ -231,65 +261,95 @@ else
 ### Social Signin based Authentication on Mobile With CustomUI
 
 1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
-   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported
+   where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported.
+   This function call is all that's required for Mobile SSO.
 
 ### Android SSO Requirements
 
-Google: Please ensure your project is setup according to **[Google SSO Setup]** listed below
+Google:
 
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**
+In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
+
+You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application. And place the **[Web Application client ID]** in the [YourProject/Config/SequenceConfig.ini], [GoogleClientID] field.
+
+Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
+
+[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
+
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
 ### IOS SSO Requirements
+Google: Please ensure you have a proper **[GoogleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**
 
-Google: Please ensure you have a proper **[GoogleClientId]** set in **[Config.h]** , you can optional change the **[UrlScheme]** in **[Config.h]** but this isn't required
-
-Apple: Please ensure you have a proper **[AppleClientId]** set in **[Config.h]**,
+Apple: Please ensure you have a proper **[AppleClientID]** set in **[YourProject/Config/SequenceConfig.ini]**,
 be sure you register and set your bundle identifier properly for your app
 
 ### Apple Specific SSO Requirements
-For Apple SSO to work please be sure to register the **[RedirectURL]** in **[Config/Config.h]** appropriately for your app.
+For Apple SSO to work please be sure to register the **[RedirectUrl]** in **[YourProject/Config/SequenceConfig.ini]** appropriately for your app.
 
 ### Sequence API
 
-After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet]** by using:
 In order to gain access to the SequenceAPI be sure to #include "Sequence/SequenceAPI.h"
+After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet*]** by using:
 
 ```clike
-**[USequenceWallet * Api = USequenceWallet(CredentialsIn)]**
+/*
+   Automatically tries to read stored credentials on disk and initialize with them
+   if none are found returns a TOptional<USequenceWallet*> Pointer without any set Credentials
+*/
+USequenceWallet::Get()
+
+const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
+{
+   USequenceWallet * Wallet = WalletOptional.GetValue();
+   //Use here
+}
+
 or
-**[USequenceWallet * Api = USequenceWallet::Make(CredentialsIn, ProviderURL)]**
+
+/*
+   returns a TOptional<USequenceWallet*> Pointer set with the 
+   given Credentials
+*/
+USequenceWallet::Get(const FCredentials_BE& Credentials)
+
+const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
+{
+   USequenceWallet * Wallet = WalletOptional.GetValue();
+   //Use here
+}
+
+or
+
+/*
+   returns a TOptional<USequenceWallet*> Pointer set with the 
+   given Credentials & ProviderUrl
+*/
+USequenceWallet::Get(const FCredentials_BE& Credentials,const FString& ProviderUrl);
+
+const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials,"ProviderUrl");
+if (WalletOptional.IsSet() && WalletOptional.GetValue())
+{
+   USequenceWallet * Wallet = WalletOptional.GetValue();
+   //Use here
+}
 ```
 
 Once you have your **[USequenceWallet]** you can feel free to call any of the functions Supplied by the object, as the register call is now automatically done for you.
 
+### USequenceWallet, Static Access & Persistence
+USequenceWallet is now a Subsystem of GameInstance, what this means is not only can you access it from anywhere
+as if it was a static variable in your C++ code. But it also persists for the lifetime of your game. That is
+no data is reset when a level is changed in your games!
+
 ### USequenceWallet Functions
-
-### Example Static Access
-Example of how to statically Access the USequenceWallet so you don't have to pass around pointers throughout your code
-
-   	USequenceWallet::Make(CredentialsIn);//You'll need to call Make at least once somewhere in your code
-
-	TOptional<USequenceWallet*> TApi = USequenceWallet::Get();
-	USequenceWallet * Api = nullptr;
-
-	if (TApi.IsSet())
-	{//Valid state
-		Api = TApi.GetValue();
-	}
-	else
-	{//Undefined state
-		return;
-	}
-
-    //From this point onward you'll be able to use Api as you would normally
 
 ### Example SignMessage
 ##### Used to Sign a message
 
-    const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());    
-
-	const TSuccessCallback<FSignedMessage> OnResponse = [=] (FSignedMessage Response)
+	const TSuccessCallback<FSignedMessage> OnResponse = [=] (const FSignedMessage& Response)
 	{
 		//Response is the signed message
     };
@@ -298,16 +358,20 @@ Example of how to statically Access the USequenceWallet so you don't have to pas
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
-    FString Message = "Hi";
-	Api->SignMessage(Message,OnResponse,OnFailure);
+    
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+       const FString Message = "Hi";
+       Api->SignMessage(Message,OnResponse,OnFailure);
+    }
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
 Note: if you want call contracts with the Raw type you'll want include the header
 `#include "ABI/ABI.h"` in order to use the ABI to encode the data for a contract call.
-
-    const UAuthenticator * Auth = NewObject<UAuthenticator>();
-    USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
 	{
@@ -326,7 +390,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T20.value = "1000";
 
     //ERC721
-
 	FERC721Transaction T721;
 	T721.safe = true;
 	T721.id = "54530968763798660137294927684252503703134533114052628080002308208148824588621";
@@ -334,7 +397,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 
     //ERC1155
-
 	FERC1155Transaction T1155;
 	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
@@ -345,7 +407,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	T1155.vals.Add(Val);
 
     //Raw (Example contract call)
-
     FString FunctionSignature = "balanceOf(address,uint256)";
 	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
 	TFixedABIData Id = ABI::UInt32(0x01);
@@ -367,20 +428,27 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));//ContractCall
 
     //Now send the transaction
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
-	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
-	},OnFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+      USequenceWallet * Api = WalletOptional.GetValue();
+       Api->SendTransaction(Txn,[=](const FTransactionResponse& Transaction)
+       {
+          TSharedPtr<FJsonObject> Json = Transaction.Json;
+       	  TSharedPtr<FJsonObject> Receipt = Transaction.Receipt;
+       	  TSharedPtr<FJsonObject> NativeReceipt = Transaction.NativeReceipt;
+       	  TSharedPtr<FJsonObject> Request = Transaction.Request;
+       	  TArray<TSharedPtr<FJsonValue>> Simulations = Transaction.Simulations;
+       	  FString TxHash = Transaction.TxHash;
+       	  FString IdentifyingCode = Transaction.IdentifyingCode;
+       	  FString MetaTxHash = Transaction.MetaTxHash;
+	   },OnFailure);
+    }
 
 ### Example ListSessions
 ##### Lists the active sessions
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-    
     const TSuccessCallback<TArray<FSession>> OnSuccess = [=](TArray<FSession> Response)
     {
        //Response is a list of Sessions
@@ -391,13 +459,16 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-	Api->ListSessions(OnSuccess,OnFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them  
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+	   USequenceWallet * Api = WalletOptional.GetValue();
+       Api->ListSessions(OnSuccess,OnFailure);
+    }
 
 ### Example CloseSession
 ##### Closes the session
-
-    const UAuthenticator * Auth = NewObject<UAuthenticator>();
-    USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const TFunction<void(FString)> OnSuccess = [=](const FString& Response)
 	{
@@ -409,19 +480,28 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-	Api->CloseSession(OnSuccess,OnFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+	   USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->CloseSession(OnSuccess,OnFailure);
+    }
 
 ### Example SignOut
 ##### Closes the session & clears out cached credentials with blank ones
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    Api->SignOut();
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+	   USequenceWallet * Api = WalletOptional.GetValue();
+       Api->SignOut();
+    }
 
 ### Example RegisterSession
 ##### Used to register a session (done automatically for you by UAuthenticator)
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
     const TFunction<void(FCredentials_BE)> OnSuccess = [=](FCredentials_BE Response)
     {
         //Successful registration
@@ -432,31 +512,57 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-	Api->RegisterSession(OnSuccess,OnFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+	   USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->RegisterSession(OnSuccess,OnFailure);
+    }
 
 ### Example GetWalletAddress
 #### Gets the wallet address currently being used
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    Api->GetWalletAddress();
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+	   USequenceWallet * Api = WalletOptional.GetValue();
+       Api->GetWalletAddress();
+    }
 
 ### Example GetNetworkId
 #### Gets the network id being used
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    Api->GetNetworkId();
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+       Api->GetNetworkId();
+    }
 
 ### Example UpdateNetworkId
 #### Used to update the stored network id
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    Api->UpdateNetworkId(137);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+       Api->UpdateNetworkId(137);
+    }
 
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-	Api->UpdateProviderURL(NewProviderUrl);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->UpdateProviderURL("NewProviderUrl");
+    }
 
 ### Indexer & the Wallet
 
@@ -466,194 +572,234 @@ the indexer. The default network we set is `137`
 
 ## Ping
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    
 	const TSuccessCallback<bool> GenericSuccess = [=](const bool bSuccess)
 	{
         //Ping response is in bSuccess
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//Ping failure
 	};
 
-	Api->Ping(GenericSuccess, GenericFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->Ping(GenericSuccess, GenericFailure);
+    }
 
 ## Version
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FVersion> GenericSuccess = [=](const FVersion version)
+    const TSuccessCallback<FVersion> GenericSuccess = [=](const FVersion& version)
     {
         //Response contained in FVersion
     };
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//Version Failure
 	};
-    
-	Api->Version(GenericSuccess, GenericFailure);
+
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->Version(GenericSuccess, GenericFailure);
+    }
 
 ## RunTimeStatus
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FRuntimeStatus> GenericSuccess = [=](const FRuntimeStatus runTimeStatus)
+    const TSuccessCallback<FRuntimeStatus> GenericSuccess = [=](const FRuntimeStatus& runTimeStatus)
     {
         //Response is in FRunTimeStatus
     };
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//RunTimeStatus Failure
 	};
 
-    Api->RunTimeStatus(GenericSuccess, GenericFailure);
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+       Api->RunTimeStatus(GenericSuccess, GenericFailure);
+    }
 
 ## GetChainID
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-    
     const TSuccessCallback<int64> GenericSuccess = [=](const int64 chainID)
 	{
         //Response in int64
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetChainID Failure
 	};
-
-	Api->GetChainID(GenericSuccess, GenericFailure);
+   
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->GetChainID(GenericSuccess, GenericFailure);
+    }
 
 ## GetEtherBalance
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FEtherBalance> GenericSuccess = [=](const FEtherBalance etherBalance)
+    const TSuccessCallback<FEtherBalance> GenericSuccess = [=](const FEtherBalance& etherBalance)
 	{
         //Response in FEtherBalance
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetEtherBalance Failure
 	};
-
-	Api->GetEtherBalance(Api->GetWalletAddress(), GenericSuccess, GenericFailure);
+    
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   Api->GetEtherBalance(Api->GetWalletAddress(), GenericSuccess, GenericFailure);
+    }
 
 ## GetTokenBalances
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [=](const FGetTokenBalancesReturn tokenBalances)
+    const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [=](const FGetTokenBalancesReturn& tokenBalances)
 	{
         //Response in FGetTokenBalancesReturn
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetTokenBalances Failure
 	};
-
-	FGetTokenBalancesArgs args;
-	args.accountAddress = Api->GetWalletAddress();
-	args.includeMetaData = true;
-
-	Api->GetTokenBalances(args, GenericSuccess, GenericFailure);
+   
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   FGetTokenBalancesArgs args;
+	   args.accountAddress = Api->GetWalletAddress();
+	   args.includeMetaData = true;
+	   Api->GetTokenBalances(args, GenericSuccess, GenericFailure);
+    }
 
 ## GetTokenSupplies
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [=](const FGetTokenSuppliesReturn tokenSupplies)
+    const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [=](const FGetTokenSuppliesReturn& tokenSupplies)
 	{
         //Response is in FGetTokenSuppliesReturn
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetTokenSupplies Failure
 	};
-
-	FGetTokenSuppliesArgs args;
-	args.contractAddress = "0x01";//Testing Contract Address in hex with leading 0x
-	args.includeMetaData = true;
-
-	Api->GetTokenSupplies(args, GenericSuccess, GenericFailure);
+    
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   FGetTokenSuppliesArgs args;
+	   args.contractAddress = "0x01";//Testing Contract Address in hex with leading 0x
+	   args.includeMetaData = true;
+	   Api->GetTokenSupplies(args, GenericSuccess, GenericFailure);
+    }
 
 ## GetTokenSuppliesMap
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [=](const FGetTokenSuppliesMapReturn tokenSuppliesMap)
+    const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [=](const FGetTokenSuppliesMapReturn& tokenSuppliesMap)
 	{
         //Response is in FGetTokenSuppliesMapReturn
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
         //GetTokenSuppliesMap Failure
 	};
-    
-	TMap<FString, FTokenList> tokenMap;
-	TPair<FString,FTokenList> item;
-	tokenMap.Add(item);
 
-    FGetTokenSuppliesMapArgs args;
-	args.includeMetaData = true;
-	args.tokenMap = tokenMap;
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();    
 
-	Api->GetTokenSuppliesMap(args, GenericSuccess, GenericFailure);
+	   TMap<FString, FTokenList> tokenMap;
+	   const TPair<FString,FTokenList> item;
+	   tokenMap.Add(item);
+
+       FGetTokenSuppliesMapArgs args;
+	   args.includeMetaData = true;
+	   args.tokenMap = tokenMap;
+
+	   Api->GetTokenSuppliesMap(args, GenericSuccess, GenericFailure);
+    }
 
 ## GetBalanceUpdates
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [=](const FGetBalanceUpdatesReturn balanceUpdates)
+    const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [=](const FGetBalanceUpdatesReturn& balanceUpdates)
 	{
         //Response in FGetBalanceUpdatesReturn
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetBalanceUpdates Failure
 	};
+   
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
+	   FGetBalanceUpdatesArgs args;
+	   args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	   args.page.page = 10;
+	   args.page.more = true;
 
-	FGetBalanceUpdatesArgs args;
-	args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	args.page.page = 10;
-	args.page.more = true;
-
-	Api->GetBalanceUpdates(args, GenericSuccess, GenericFailure);
+	   Api->GetBalanceUpdates(args, GenericSuccess, GenericFailure);
+    }
 
 ## GetTransactionHistory
 
-    USequenceWallet * Api = USequenceWallet::Make(Credentials);
-
-    const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [=](const FGetTransactionHistoryReturn transactionHistory)
+    const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [=](const FGetTransactionHistoryReturn& transactionHistory)
 	{
         //Response is in FGetTransactionHistoryReturn
 	};
 
-	const FFailureCallback GenericFailure = [=](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
 	{
 		//GetTransactionHistory Failure
 	};
+   
+    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    if (WalletOptional.IsSet() && WalletOptional.GetValue())
+    {
+       USequenceWallet * Api = WalletOptional.GetValue();
 
-	FGetTransactionHistoryArgs args;
-	args.filter.accountAddress = Api->GetWalletAddress();
-	args.includeMetaData = true;
-	args.page.page = 0;
-	args.page.more = true;    
+	   FGetTransactionHistoryArgs args;
+	   args.filter.accountAddress = Api->GetWalletAddress();
+	   args.includeMetaData = true;
+	   args.page.page = 0;
+	   args.page.more = true;    
 
-	Api->GetTransactionHistory(args, GenericSuccess, GenericFailure);
+	   Api->GetTransactionHistory(args, GenericSuccess, GenericFailure);
+    }
 
 ***
 
-Assuming you've setup your controlling Actor with the **[AC_SequencePawn_Component]**
+Assuming you've setup your controlling Pawn with the **[AC_SequencePawn_Component]**
 The sequence pawn component has functions to do the following:
 
 Setup Sequence (sets up the sequence based systems), requires playerController input
@@ -666,7 +812,7 @@ GUI Visible Simple Visibility test for the UI
 
 Switch Platform (Switches which mode the UI will be in and how it will be displayed)
 
-Note: this doesn't rotate the application into any one view it just make the UI responsive to that type of view.
+Note: this doesn't rotate the application into any one view it just makes the UI responsive to that type of view.
 
 Modes:
 - Desktop (default)
@@ -693,7 +839,9 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 };
 ```
 
-One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss something and start over writing memory. If you require lots of nesting swapping to a better approach using UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
+One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
+something and start over writing memory. If you require lots of nesting swapping to a better approach using
+UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
 
 ### Blockchain Functionality
 
@@ -748,15 +896,6 @@ To set your system up for Packaging please refer to the following links:
 - [iOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-ios-projects-in-unreal-engine?application_version=5.3)
 - [Mac Specific Software Requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine)
 
-#### Google SSO Setup
-In order to be able to properly use Google Auth, create and place the Keystore file by following [these instructions](https://docs.unrealengine.com/5.1/en-US/signing-android-projects-for-release-on-the-google-play-store-with-unreal-engine/).
-
-You will also need to generate an **[Android client ID]** and a **[Web Application client ID]** for your application, as well as place the **[Web Application client ID]** in the `PluginConfig/Config.h` `FAuthenticatorConfig.GoogleClientID` field.
-
-Refer to [these docs](https://developers.google.com/identity/one-tap/android/get-started#api-console) to generate **[Android client ID]** and **[Web Application client ID]**.
-
-[This guide](https://developers.google.com/android/guides/client-auth) helps explain how to collect SHA-1 key fingerprints for the **[Android client ID]**.
-
 #### iOS
 For iOS apps you also need to setup provisioning, [following these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects?application_version=5.3)
 
@@ -767,7 +906,6 @@ Set SDK API Level to Android-34
 Set NDK API Level to anything in the range [26,33] (We personally used android-32)
 
 ### Hardware Requirements
-
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
 
 #### Unreal and Xcode Specifics

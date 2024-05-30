@@ -2,9 +2,8 @@
 #pragma once
 #include "BinaryData.h"
 #include "Dom/JsonObject.h"
-#include "Types.h"
 
-struct FHeader
+struct SEQUENCEPLUGIN_API FHeader
 {
 	FHash256 ParentHash;
 	FHash256 UncleHash;
@@ -24,4 +23,4 @@ struct FHeader
 	FUnsizedData BaseFee;
 };
 
-FHeader JsonToHeader(TSharedPtr<FJsonObject> Json);
+FHeader SEQUENCEPLUGIN_API JsonToHeader(TSharedPtr<FJsonObject> Json);

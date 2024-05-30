@@ -4,24 +4,22 @@
 #include "RequestHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
+#include "Util/JsonBuilder.h"
 
-TSharedPtr<FJsonObject> RPCCaller::Parse(FString JsonRaw)
+TSharedPtr<FJsonObject> URPCCaller::Parse(const FString& JsonRaw)
 {
 	TSharedPtr<FJsonObject> JsonParsed;
-
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonRaw);
+	const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonRaw);
 	if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
 		return JsonParsed;
 	}
-
 	return nullptr;
 }
 
-
-TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString JsonRaw)
+TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(const FString& JsonRaw)
 {
-	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
+	const TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
 	{
@@ -31,9 +29,9 @@ TResult<TSharedPtr<FJsonObject>> RPCCaller::ExtractJsonObjectResult(FString Json
 	return MakeValue(Json->GetObjectField(TEXT("result")));
 }
 
-TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
+TResult<FString> URPCCaller::ExtractStringResult(const FString& JsonRaw)
 {
-	TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
+	const TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
 	{
@@ -43,7 +41,7 @@ TResult<FString> RPCCaller::ExtractStringResult(FString JsonRaw)
 	return MakeValue(Json->GetStringField(TEXT("result")));
 }
 
-TResult<uint64> RPCCaller::ExtractUIntResult(FString JsonRaw)
+TResult<uint64> URPCCaller::ExtractUIntResult(const FString& JsonRaw)
 {
 	TResult<FString> Result = ExtractStringResult(JsonRaw);
 	if(!Result.HasValue())
@@ -59,7 +57,7 @@ TResult<uint64> RPCCaller::ExtractUIntResult(FString JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-void RPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnError)
+void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError)
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -71,7 +69,7 @@ void RPCCaller::SendRPC(FString Url, FString Content, TSuccessCallback<FString> 
 		->ProcessAndThen(OnSuccess, OnError);
 }
 
-FJsonBuilder RPCCaller::RPCBuilder(const FString MethodName)
+FJsonBuilder URPCCaller::RPCBuilder(const FString& MethodName)
 {
 	return *FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")

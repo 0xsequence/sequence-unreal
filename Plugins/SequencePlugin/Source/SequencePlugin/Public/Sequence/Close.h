@@ -6,7 +6,7 @@
 #include "Close.generated.h"
 
 USTRUCT()
-struct FCloseResponse
+struct SEQUENCEPLUGIN_API FCloseResponse
 {
 	GENERATED_BODY()
 
@@ -15,7 +15,7 @@ struct FCloseResponse
 };
 
 USTRUCT()
-struct FCloseResponseObj
+struct SEQUENCEPLUGIN_API FCloseResponseObj
 {
 	GENERATED_BODY()
 	UPROPERTY()

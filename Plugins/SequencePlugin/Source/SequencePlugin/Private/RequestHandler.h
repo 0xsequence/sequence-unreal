@@ -6,9 +6,6 @@
 #include "Util/Async.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Engine/Texture2D.h"
-#include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
-#include "UObject/NoExportTypes.h"
 #include "UObject/Object.h"
 #include "RequestHandler.generated.h"
 

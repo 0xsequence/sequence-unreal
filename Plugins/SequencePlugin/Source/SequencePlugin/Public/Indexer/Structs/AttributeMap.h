@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "IndexerSupport.h"
+#include "Indexer/IndexerSupport.h"
 #include "AttributeMap.generated.h"
 
 /*

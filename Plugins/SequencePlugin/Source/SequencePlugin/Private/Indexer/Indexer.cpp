@@ -2,6 +2,9 @@
 
 #include "Indexer/Indexer.h"
 #include "Util/Async.h"
+#include "JsonObjectConverter.h"
+#include "Http.h"
+#include "HttpManager.h"
 
 const TMap<int64, FString> UIndexer::IndexerNames = {{1,"mainnet"},{137,"polygon"},{1101,"polygon-zkevm"},{42161,"arbitrum"},{42170,"arbitrum-nova"},{10,"optimism"},{56,"bsc"},{43114,"avalanche"},{8453,"base"},{100,"gnosis"},{1337,"testchain"},{5,"goerli"},{11155111,"sepolia"},{421613,"arbitrum-goerli"},{80001,"mumbai"},{84531,"base-goerli"},{97,"bsc-testnet"},{43113,"testnetavalanchefuji"} };
 
@@ -110,14 +113,12 @@ template < typename T> FString UIndexer::BuildArgs(T StructIn)
 			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
-	UE_LOG(LogTemp, Display, TEXT("Args: %s"),*result);
 	return result;
 }
 
 //generic
 template<typename T> T UIndexer::BuildResponse(FString Text)
 {
-	UE_LOG(LogTemp, Display, TEXT("Rep:\n%s"), *Text);
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> json_step;
 	//Then take the json object we make and convert it to a USTRUCT of type T then we return that!
@@ -193,7 +194,6 @@ void UIndexer::GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallb
 void UIndexer::GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	const FString endpoint = "GetTokenBalances";
-	UE_LOG(LogTemp, Display, TEXT("Endpoint: [%s]"), *endpoint);
 	HTTPPost(ChainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(Args), [this,OnSuccess](FString Content)
 	{
 		FGetTokenBalancesReturn response = this->BuildResponse<FGetTokenBalancesReturn>(Content);

@@ -2,7 +2,7 @@
 #pragma once
 #include "BinaryData.h"
 
-struct FContractCall
+struct SEQUENCEPLUGIN_API FContractCall
 {
 	TOptional<FAddress> From;
 	FAddress To;

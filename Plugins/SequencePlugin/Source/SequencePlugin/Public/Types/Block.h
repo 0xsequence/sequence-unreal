@@ -2,7 +2,7 @@
 #pragma once
 #include "Header.h"
 
-struct FBlock
+struct SEQUENCEPLUGIN_API FBlock
 {
 	FHeader* Header;
 	FHeader* Uncles;
@@ -10,4 +10,4 @@ struct FBlock
 	~FBlock();
 };
 
-FBlock MakeBlock(FJsonObject Json);
+FBlock SEQUENCEPLUGIN_API MakeBlock(FJsonObject Json);

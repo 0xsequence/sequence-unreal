@@ -7,7 +7,7 @@
 #include "Session.generated.h"
 
 USTRUCT()
-struct FIdentity
+struct SEQUENCEPLUGIN_API FIdentity
 {
 	GENERATED_BODY()
 
@@ -20,7 +20,7 @@ struct FIdentity
 };
 
 USTRUCT()
-struct FSession
+struct SEQUENCEPLUGIN_API FSession
 {
 	GENERATED_BODY()
 
@@ -42,12 +42,8 @@ struct FSession
 	FString expiresAt = "";
 };
 
-/*
-*  {"response":{"code":"sessionsListed","data":[]}}
-*/
-
 USTRUCT()
-struct FListSessionResponse
+struct SEQUENCEPLUGIN_API FListSessionResponse
 {
 	GENERATED_BODY()
 	UPROPERTY()
@@ -55,7 +51,7 @@ struct FListSessionResponse
 };
 
 USTRUCT()
-struct FListSessionsResponseObj
+struct SEQUENCEPLUGIN_API FListSessionsResponseObj
 {
 	GENERATED_BODY()
 

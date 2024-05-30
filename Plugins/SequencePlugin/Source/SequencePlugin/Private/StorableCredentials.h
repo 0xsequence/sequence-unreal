@@ -16,11 +16,11 @@ class SEQUENCEPLUGIN_API UStorableCredentials : public USaveGame
 public:
 		//Encrypted Key
 		UPROPERTY(VisibleAnywhere, Category = Basic)
-			FString EK;
+			FString EK = "";
 
 		//Key Length
 		UPROPERTY(VisibleAnywhere, Category = Basic)
-			int32 KL;
+			int32 KL = 0;
 
 		UStorableCredentials();
 };

@@ -11,9 +11,6 @@
  */
 void SequenceAPITest::BasicProviderTests()
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
-	FContractCall TestCall;
 	const TFunction<void(FUnsizedData)> TestResponse = [](FUnsizedData Response)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Basic provider response"));
@@ -23,13 +20,19 @@ void SequenceAPITest::BasicProviderTests()
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error"));
 	};
-	Api->Call(TestCall,6,TestResponse,TestError);
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		const FContractCall TestCall;
+		Api->Call(TestCall,6,TestResponse,TestError);
+	}
 }
 
 void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("RegisterSession");
 #endif
@@ -51,14 +54,17 @@ void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunct
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
 
-	Api->RegisterSession(OnResponse,GenericFailure);
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->RegisterSession(OnResponse,GenericFailure);
+	}
 }
 
 void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("SignMessage");
 #endif
@@ -80,14 +86,17 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignMessage Test]========================"));
-
-	Api->SignMessage("hi",OnResponse,GenericFailure);
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SignMessage("hi",OnResponse,GenericFailure);
+	}
 }
 
 void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("ListSessions");
 #endif
@@ -108,14 +117,17 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
-
-	Api->ListSessions(OnResponse,GenericFailure);
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->ListSessions(OnResponse,GenericFailure);
+	}
 }
 
 void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("SendTransaction");
 #endif
@@ -136,16 +148,23 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		OnSuccess(OutputString);
-#if PLATFORM_ANDROID
-NativeOAuth::AndroidLog("SendTransactionDone");
-#endif
-	},GenericFailure);
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			FString OutputString;
+			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+			OnSuccess(OutputString);
+	#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("SendTransactionDone");
+	#endif
+		},GenericFailure);
+	}
 }
 
 void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
@@ -154,8 +173,6 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("CallContract");
 #endif
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
@@ -185,23 +202,27 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	T.value = "0";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		OnSuccess(OutputString);
-#if PLATFORM_ANDROID
-NativeOAuth::AndroidLog("CallContractDone");
-#endif
-	},GenericFailure);
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			FString OutputString;
+			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+			OnSuccess(OutputString);
+	#if PLATFORM_ANDROID
+	NativeOAuth::AndroidLog("CallContractDone");
+	#endif
+		},GenericFailure);
+	}
 }
 
 void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
@@ -220,20 +241,24 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
-	
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
-		OnSuccess(OutputString);
-	},GenericFailure);
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			FString OutputString;
+			const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			OnSuccess(OutputString);
+		},GenericFailure);
+	}
 }
 void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
@@ -251,20 +276,24 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
-		OnSuccess(OutputString);
-	},GenericFailure);
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			FString OutputString;
+			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			OnSuccess(OutputString);
+		},GenericFailure);
+	}
 }
 void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
-
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
@@ -283,14 +312,21 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	T1155.vals.Add(Val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
-	Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString OutputString;
-		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-		UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
-		OnSuccess(OutputString);
-	},GenericFailure);
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			FString OutputString;
+			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			OnSuccess(OutputString);
+		},GenericFailure);
+	}
 }
 
 void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
@@ -298,8 +334,6 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("CloseSession");
 #endif
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	USequenceWallet * Api = USequenceWallet::Make(Auth->GetStoredCredentials().GetCredentials());
 
 	const TFunction<void(FString)> OnResponse = [OnSuccess](const FString& Response)
 	{
@@ -319,5 +353,11 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API CloseSession Test]========================"));
 
-	Api->CloseSession(OnResponse,GenericFailure);
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->CloseSession(OnResponse,GenericFailure);
+	}
 }

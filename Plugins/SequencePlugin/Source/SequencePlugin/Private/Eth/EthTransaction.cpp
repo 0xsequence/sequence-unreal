@@ -18,11 +18,8 @@ FEthTransaction::FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsi
 void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 {
 	FString NonceString = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 
 	FUnsizedData TrimmedNonce = Trimmed(Nonce);
-
-	UE_LOG(LogTemp, Display, TEXT("My trimmed nonce is %s"), *TrimmedNonce.ToHex());
 	
 	FUnsizedData EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
 	{
@@ -52,13 +49,6 @@ void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 	BigS.getBigEndianBytes(MyS.Ptr());
 	
 	const uint16 BigV = ChainID * 2 + 35 + RecoveryParameter;
-	UE_LOG(LogTemp, Display, TEXT("Recovery Bit: %d"), RecoveryParameter);
-	UE_LOG(LogTemp, Display, TEXT("ENCODED SIGNING DATA: %s"), *EncodedSigningData.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("SIGNING HASH: %s"), *SigningHash.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("R: %s"), *MyR.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("S: %s"), *MyS.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("V: %s"), *IntToHexString(35));
-	UE_LOG(LogTemp, Display, TEXT("PRIVATE KEY: %s"), *PrivateKey.ToHex());
 
 	this->V = HexStringToBinary(IntToHexString(BigV));
 	this->R = MyR;
@@ -76,7 +66,6 @@ FHash256 FEthTransaction::GetSignedTransactionHash(FPrivateKey Key, int ChainID)
 FHash256 FEthTransaction::GetUnsignedTransactionHash(int ChainID)
 {
 	FString NonceString = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 
 	FUnsizedData TrimmedNonce = Trimmed(Nonce);
 	
@@ -104,7 +93,6 @@ FUnsizedData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int C
 	this->Sign(PrivateKey, ChainID);
 
 	const FString NonceString = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 	
 	return RLP::Encode(Itemize(new RLPItem[]
 	{

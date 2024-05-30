@@ -1,38 +1,31 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
-
 #include "Provider.h"
-
 #include "Eth/Crypto.h"
 #include "Eth/EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
-#include "HttpManager.h"
 #include "Util/JsonBuilder.h"
-#include "JsonObjectConverter.h"
 #include "RequestHandler.h"
 #include "Types/Header.h"
 
-FString TagToString(EBlockTag Tag)
+void UProvider::Init(const FString& UrlIn)
 {
-	switch (Tag)
-	{
-	case ELatest:
-		return "latest";
-	case EEarliest:
-		return "earliest";
-	case EPending:
-		return "pending";
-	case ESafe:
-		return "safe";
-	case EFinalized:
-		return "finalized";
-	}
-
-	return "";
+	this->Url = UrlIn;
 }
 
-void Provider::BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+UProvider* UProvider::Make(const FString& UrlIn)
+{
+	UProvider * ProviderObj = NewObject<UProvider>();
+	ProviderObj->Init(UrlIn);
+	return ProviderObj;
+}
+
+void UProvider::UpdateUrl(const FString& UrlIn)
+{
+	this->Url = UrlIn;
+}
+
+void UProvider::BlockByNumberHelper(const FString& Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = FJsonBuilder().ToPtr()
 		->AddString("jsonrpc", "2.0")
@@ -49,11 +42,9 @@ void Provider::BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<F
 		Url,
 		Content,
 		OnSuccess,
-		[MyUrl](FString Json)
+		[MyUrl](const FString& Json)
 		{
-			TResult<TSharedPtr<FJsonObject>> Obj = Provider(MyUrl).ExtractJsonObjectResult(Json);
-
-			
+			TResult<TSharedPtr<FJsonObject>> Obj = Make(MyUrl)->ExtractJsonObjectResult(Json);
 
 			if(Obj.HasValue() && Obj.GetValue() != nullptr)
 			{
@@ -72,29 +63,17 @@ void Provider::BlockByNumberHelper(FString Number, TSuccessCallback<TSharedPtr<F
 	);
 }
 
-Provider Provider::Copy()
-{
-	return Provider(Url);
-}
-
-
-
-
-Provider::Provider(FString Url) : Url(Url)
-{
-}
-
-void  Provider::BlockByNumber(uint64 Number, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void  UProvider::BlockByNumber(const uint64 Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	BlockByNumberHelper(ConvertString(IntToHexString(Number)), OnSuccess, OnFailure);
 }
 
-void Provider::BlockByNumber(EBlockTag Tag, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void UProvider::BlockByNumber(const EBlockTag Tag, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	BlockByNumberHelper(ConvertString(TagToString(Tag)), OnSuccess, OnFailure);
+	BlockByNumberHelper(ConvertString(UEnum::GetValueAsString(Tag)), OnSuccess, OnFailure);
 }
 
-void Provider::BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObject>> OnSuccess, FFailureCallback OnFailure)
+void UProvider::BlockByHash(const FHash256& Hash, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_getBlockByHash").ToPtr()
         ->AddArray("params").ToPtr()
@@ -107,41 +86,40 @@ void Provider::BlockByHash(FHash256 Hash, TSuccessCallback<TSharedPtr<FJsonObjec
 
 	SendRPCAndExtract<TSharedPtr<FJsonObject>>(Url, Content,
 		OnSuccess,
-		[MyUrl](FString Result)
+		[MyUrl](const FString& Result)
 		{
-			return Provider(MyUrl).ExtractJsonObjectResult(Result);
+			return Make(MyUrl)->ExtractJsonObjectResult(Result);
 		},
 		OnFailure);
 }
 
-void Provider::BlockNumber(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void UProvider::BlockNumber(const TSuccessCallback<uint64>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_blockNumber").ToString();
 	const FString MyUrl = this->Url;
 	SendRPCAndExtract<uint64>(Url, Content,
 		OnSuccess,
-		[MyUrl](FString Result)
+		[MyUrl](const FString& Result)
 		{
-			return Provider(MyUrl).ExtractUIntResult(Result);
+			return Make(MyUrl)->ExtractUIntResult(Result);
 		},
 		OnFailure);
 }
 
-void Provider::HeaderByNumberHelper(FString Number, TSuccessCallback<FHeader> OnSuccess, FFailureCallback OnFailure)
+void UProvider::HeaderByNumberHelper(const FString& Number, TSuccessCallback<FHeader> OnSuccess, const FFailureCallback& OnFailure)
 {
-	BlockByNumberHelper(Number, [OnSuccess](TSharedPtr<FJsonObject> Json)
+	BlockByNumberHelper(Number, [OnSuccess](const TSharedPtr<FJsonObject>& Json)
 	{
 		OnSuccess(JsonToHeader(Json));
 	}, OnFailure);
 }
 
-void Provider::NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
+void UProvider::NonceAtHelper(const FString& Number, TSuccessCallback<FBlockNonce> OnSuccess, const FFailureCallback& OnFailure)
 {
-
-	TSuccessCallback<TSharedPtr<FJsonObject>> BlockCallback = [OnSuccess](TSharedPtr<FJsonObject> Json)
+	const TSuccessCallback<TSharedPtr<FJsonObject>> BlockCallback = [OnSuccess](const TSharedPtr<FJsonObject>& Json)
 	{
-		FString Hex = Json->GetStringField(TEXT("nonce"));
-		FBlockNonce Nonce{};
+		const FString Hex = Json->GetStringField(TEXT("nonce"));
+		const FBlockNonce Nonce{};
 		*Nonce.Arr.Get() = HexToBytesInline(Hex);
 		OnSuccess(Nonce);
 	};
@@ -149,26 +127,26 @@ void Provider::NonceAtHelper(FString Number, TSuccessCallback<FBlockNonce> OnSuc
 	this->BlockByNumberHelper(Number, BlockCallback, OnFailure);
 }
 
-void Provider::HeaderByNumber(uint64 Id, TFunction<void (FHeader)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::HeaderByNumber(const uint64 Id, const TFunction<void (FHeader)>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	HeaderByNumberHelper(ConvertString(IntToHexString(Id)), OnSuccess, OnFailure);
 }
 
-void Provider::HeaderByNumber(EBlockTag Tag, TFunction<void (FHeader)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::HeaderByNumber(const EBlockTag Tag, const TFunction<void (FHeader)>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	HeaderByNumberHelper(ConvertString(TagToString(Tag)), OnSuccess, OnFailure);
+	HeaderByNumberHelper(ConvertString(UEnum::GetValueAsString(Tag)), OnSuccess, OnFailure);
 }
 
-void Provider::HeaderByHash(FHash256 Hash, TFunction<void (FHeader)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::HeaderByHash(const FHash256& Hash, TFunction<void (FHeader)> OnSuccess, const FFailureCallback& OnFailure)
 {
-	BlockByHash(Hash, [OnSuccess](TSharedPtr<FJsonObject> Json)
+	BlockByHash(Hash, [OnSuccess](const TSharedPtr<FJsonObject>& Json)
 	{
 		const FHeader Header = JsonToHeader(Json);
 		OnSuccess(Header);
 	}, OnFailure); 
 }
 
-void Provider::TransactionByHash(FHash256 Hash, TFunction<void (TSharedPtr<FJsonObject>)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::TransactionByHash(const FHash256& Hash, const TFunction<void (TSharedPtr<FJsonObject>)>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_getTransactionByHash").ToPtr()
 		->AddArray("params").ToPtr()
@@ -179,14 +157,14 @@ void Provider::TransactionByHash(FHash256 Hash, TFunction<void (TSharedPtr<FJson
 	const FString MyUrl = this->Url;
 	SendRPCAndExtract<TSharedPtr<FJsonObject>>(Url, Content,
 		OnSuccess,
-		[MyUrl](FString Result)
+		[MyUrl](const FString& Result)
 		{
-			return Provider(MyUrl).ExtractJsonObjectResult(Result);
+			return Make(MyUrl)->ExtractJsonObjectResult(Result);
 		},
 		OnFailure);
 }
 
-void Provider::TransactionCount(FAddress Addr, uint64 Number, TFunction<void (uint64)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::TransactionCount(const FAddress& Addr, const uint64 Number, const TFunction<void (uint64)>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
@@ -198,33 +176,33 @@ void Provider::TransactionCount(FAddress Addr, uint64 Number, TFunction<void (ui
 	const FString MyUrl = this->Url;
 	SendRPCAndExtract<uint64>(Url, Content,
 		OnSuccess,
-		[MyUrl](FString Result)
+		[MyUrl](const FString& Result)
 		{
-			return Provider(MyUrl).ExtractUIntResult(Result);
+			return Make(MyUrl)->ExtractUIntResult(Result);
 		},
 		OnFailure);
 }
 
-void Provider::TransactionCount(FAddress Addr, EBlockTag Tag, TFunction<void (uint64)> OnSuccess, FFailureCallback OnFailure)
+void UProvider::TransactionCount(const FAddress& Addr, const EBlockTag Tag, const TFunction<void (uint64)>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_getTransactionCount").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString("0x" + Addr.ToHex())
-			->AddValue(ConvertString(TagToString(Tag)))
+			->AddValue(ConvertString(UEnum::GetValueAsString(Tag)))
 			->EndArray()
 		->ToString();
 
 	const FString MyUrl = this->Url;
 	SendRPCAndExtract<uint64>(Url, Content,
 		OnSuccess,
-		[MyUrl](FString Result)
+		[MyUrl](const FString& Result)
 		{
-			return Provider(MyUrl).ExtractUIntResult(Result);
+			return Make(MyUrl)->ExtractUIntResult(Result);
 		},
 		OnFailure);
 }
 
-void Provider::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::GetGasPrice(const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_gasPrice").ToPtr()
 		->AddArray("params").ToPtr()
@@ -232,9 +210,9 @@ void Provider::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCal
 		->ToString();
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](FString Response)
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
-		TResult<FString> String = Provider(MyUrl).ExtractStringResult(Response);
+		TResult<FString> String = Make(MyUrl)->ExtractStringResult(Response);
 
 		if(!String.HasError())
 		{
@@ -245,19 +223,18 @@ void Provider::GetGasPrice(TSuccessCallback<FUnsizedData> OnSuccess, FFailureCal
 	}, OnFailure);
 }
 
-void Provider::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::EstimateContractCallGas(FContractCall ContractCall, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_estimateGas").ToPtr()
 			->AddArray("params").ToPtr()
 				->AddValue(ContractCall.GetJson())
 				->EndArray()
 			->ToString();
-	UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](FString Response)
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
-		TResult<FString> String = Provider(MyUrl).ExtractStringResult(Response);
+		TResult<FString> String = Make(MyUrl)->ExtractStringResult(Response);
 
 		if(!String.HasError())
 		{
@@ -268,7 +245,7 @@ void Provider::EstimateContractCallGas(FContractCall ContractCall, TSuccessCallb
 	}, OnFailure);
 }
 
-void Provider::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure) //byte has ox prefix
+void UProvider::EstimateDeploymentGas(const FAddress& From, const FString& Bytecode, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) //byte has ox prefix
 {
 	FJsonBuilder JSON = FJsonBuilder();
 	JSON.AddString("from", "0x" + From.ToHex());
@@ -280,9 +257,9 @@ void Provider::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCa
 	    ->ToString();
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](FString Response)
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
-		TResult<FString> StringResult = Provider(MyUrl).ExtractStringResult(Response);
+		TResult<FString> StringResult = Make(MyUrl)->ExtractStringResult(Response);
 
 		if(!StringResult.HasError())
 		{
@@ -293,7 +270,7 @@ void Provider::EstimateDeploymentGas(FAddress From, FString Bytecode, TSuccessCa
 	}, OnFailure);
 }
 
-void Provider::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallbackTuple<FAddress, FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKey& PrivKey, const int64 ChainId, const TSuccessCallbackTuple<FAddress, FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FAddress From = GetAddress(GetPublicKey(PrivKey));
 	const FString MyUrl = this->Url;
@@ -302,9 +279,9 @@ void Provider::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int
 	{
 		const FBlockNonce Nonce = FBlockNonce::From(IntToHexString(Count));
 
-		Provider(MyUrl).GetGasPrice([=](FUnsizedData GasPrice)
+		Make(MyUrl)->GetGasPrice([=](const FUnsizedData& GasPrice)
 		{
-			Provider(MyUrl).EstimateDeploymentGas(From, Bytecode, [=](FUnsizedData GasLimit)
+			Make(MyUrl)->EstimateDeploymentGas(From, Bytecode, [=](const FUnsizedData& GasLimit)
 			{
 				const FAddress To = FAddress::From("");
 				const FUnsizedData Value = HexStringToBinary("");
@@ -314,7 +291,7 @@ void Provider::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int
 				const FAddress DeployedAddress = GetContractAddress(From, Nonce);
 				const FUnsizedData SignedTransaction = Transaction.GetSignedTransaction(PrivKey, ChainId);
 
-				Provider(MyUrl).SendRawTransaction("0x" + SignedTransaction.ToHex(), [=](FUnsizedData Hash)
+				Make(MyUrl)->SendRawTransaction("0x" + SignedTransaction.ToHex(), [=](const FUnsizedData& Hash)
 				{
 					OnSuccess(DeployedAddress, Hash);
 				}, OnFailure);
@@ -323,19 +300,17 @@ void Provider::DeployContractWithHash(FString Bytecode, FPrivateKey PrivKey, int
 	}, OnFailure);
 }
 
-void Provider::DeployContract(FString Bytecode, FPrivateKey PrivKey, int64 ChainId, TSuccessCallback<FAddress> OnSuccess, FFailureCallback OnFailure)
+void UProvider::DeployContract(const FString& Bytecode, const FPrivateKey& PrivKey, const int64 ChainId, const TSuccessCallback<FAddress>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	DeployContractWithHash(Bytecode, PrivKey, ChainId, [=](FAddress Address, FUnsizedData Hash)
+	DeployContractWithHash(Bytecode, PrivKey, ChainId, [=](const FAddress& Address, FUnsizedData Hash)
 	{
 		OnSuccess(Address);
 	}, OnFailure);
 }
 
 //call method
-void Provider::TransactionReceipt(FHash256 Hash, TFunction<void (FTransactionReceipt)> OnSuccess, FFailureCallback OnFailure)
-{
-	UE_LOG(LogTemp, Display, TEXT("My Hash is %s"), *Hash.ToHex());
-	
+void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (FTransactionReceipt)>& OnSuccess, const FFailureCallback& OnFailure)
+{	
 	const FString Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString("0x" + Hash.ToHex())
@@ -343,11 +318,9 @@ void Provider::TransactionReceipt(FHash256 Hash, TFunction<void (FTransactionRec
 		->ToString();
 
 	const FString MyUrl = this->Url;
-	SendRPCAndExtract<FTransactionReceipt>(Url, Content,
-		OnSuccess,
-		[MyUrl](FString Result)
+	SendRPCAndExtract<FTransactionReceipt>(Url, Content,OnSuccess,[MyUrl](const FString& Result)
 		{
-			TResult<TSharedPtr<FJsonObject>> JSON = Provider(MyUrl).ExtractJsonObjectResult(Result);
+			TResult<TSharedPtr<FJsonObject>> JSON = Make(MyUrl)->ExtractJsonObjectResult(Result);
 			
 			if(!JSON.HasError())
 			{
@@ -361,17 +334,17 @@ void Provider::TransactionReceipt(FHash256 Hash, TFunction<void (FTransactionRec
 		OnFailure);
 }
 
-void Provider::NonceAt(uint64 Number, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
+void UProvider::NonceAt(const uint64 Number, const TSuccessCallback<FBlockNonce>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	return NonceAtHelper(ConvertString(ConvertInt(Number)), OnSuccess, OnFailure);
 }
 
-void Provider::NonceAt(EBlockTag Tag, TSuccessCallback<FBlockNonce> OnSuccess, FFailureCallback OnFailure)
+void UProvider::NonceAt(const EBlockTag Tag, const TSuccessCallback<FBlockNonce>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	return NonceAtHelper(ConvertString(TagToString(Tag)), OnSuccess, OnFailure);
+	return NonceAtHelper(ConvertString(UEnum::GetValueAsString(Tag)), OnSuccess, OnFailure);
 }
 
-void Provider::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::SendRawTransaction(const FString& Data, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_sendRawTransaction").ToPtr()
         ->AddArray("params").ToPtr()
@@ -380,9 +353,9 @@ void Provider::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> O
         ->ToString();
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](FString Response)
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
-		TResult<FString> StringResult = Provider(MyUrl).ExtractStringResult(Response);
+		TResult<FString> StringResult = Make(MyUrl)->ExtractStringResult(Response);
 
 		if(!StringResult.HasError())
 		{
@@ -393,33 +366,33 @@ void Provider::SendRawTransaction(FString Data, TSuccessCallback<FUnsizedData> O
 	}, OnFailure);
 }
 
-void Provider::ChainId(TSuccessCallback<uint64> OnSuccess, FFailureCallback OnFailure)
+void UProvider::ChainId(const TSuccessCallback<uint64>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_chainId").ToString();
 	FString MyUrl = this->Url;
-	SendRPCAndExtract<uint64>(Url, Content, OnSuccess, [MyUrl](FString Result)
+	SendRPCAndExtract<uint64>(Url, Content, OnSuccess, [MyUrl](const FString& Result)
 	{
-		return Provider(MyUrl).ExtractUIntResult(Result);
+		return Make(MyUrl)->ExtractUIntResult(Result);
 	}, OnFailure);
 }
 
-void Provider::Call(FContractCall ContractCall, uint64 Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure) //check if eth_call
+void UProvider::Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) //check if eth_call
 {
 	return CallHelper(ContractCall, ConvertInt(Number), OnSuccess, OnFailure);
 }
 
-void Provider::Call(FContractCall ContractCall, EBlockTag Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	return CallHelper(ContractCall, ConvertString(TagToString(Number)), OnSuccess, OnFailure);
+	return CallHelper(ContractCall, ConvertString(UEnum::GetValueAsString(Number)), OnSuccess, OnFailure);
 }
 
-void Provider::NonViewCall(FEthTransaction transaction,FPrivateKey PrivateKey, int ChainID, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::NonViewCall(FEthTransaction Transaction, const FPrivateKey& PrivateKey, const int ChainID, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FUnsizedData SignedTransaction = transaction.GetSignedTransaction(PrivateKey, ChainID);
+	const FUnsizedData SignedTransaction = Transaction.GetSignedTransaction(PrivateKey, ChainID);
 	return SendRawTransaction("0x" + SignedTransaction.ToHex(), OnSuccess, OnFailure);
 }
 
-void Provider::CallHelper(FContractCall ContractCall, FString Number, TSuccessCallback<FUnsizedData> OnSuccess, FFailureCallback OnFailure)
+void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
@@ -429,9 +402,9 @@ void Provider::CallHelper(FContractCall ContractCall, FString Number, TSuccessCa
 		->ToString();
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](FString Response)
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
-		TResult<FString> StringResult = Provider(MyUrl).ExtractStringResult(Response);
+		TResult<FString> StringResult = Make(MyUrl)->ExtractStringResult(Response);
 
 		if(!StringResult.HasError())
 		{

@@ -6,3 +6,5 @@
 #pragma warning(disable: 4104)
 #include "CoreMinimal.h"
 
+void Test();
+

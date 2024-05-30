@@ -16,6 +16,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
+#include "NativeEncryptors/AndroidEncryptor.h"
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 
@@ -33,7 +34,6 @@ UAuthenticator::UAuthenticator()
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
-	UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	if constexpr (PLATFORM_ANDROID)
@@ -99,7 +99,16 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 	}
 }
 
-bool UAuthenticator::CanHandleEmailLogin()
+FString UAuthenticator::BuildRedirectPrefix() const
+{
+	const FString Redirect = UConfigFetcher::GetConfigVar(UConfigFetcher::RedirectUrl);
+	if (Redirect.EndsWith(TEXT("/"),ESearchCase::IgnoreCase))
+		return Redirect + this->RedirectPrefixTrailer;
+	else
+		return Redirect + "/" + this->RedirectPrefixTrailer;
+}
+
+bool UAuthenticator::CanHandleEmailLogin() const
 {
 	bool ret = true;
 	ret &= this->WaasSettings.GetEmailRegion().Len() > 0;
@@ -168,7 +177,6 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					//UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
 					SocialLogin(Token);
 					return;
 				}//find id_token
@@ -213,7 +221,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 #endif
 }
 
-FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type)
+FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 {
 	FString SigninURL = "";
 	
@@ -268,13 +276,13 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString RedirectUrl = RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple:
-		RedirectUrl = RedirectURL;
+		RedirectUrl = this->BuildRedirectPrefix();
 		break;
 	case ESocialSigninType::FaceBook:
 		break;
@@ -288,13 +296,13 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
-	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
-		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ RedirectURL + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:
@@ -348,7 +356,7 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	return ISSClaim;
 }
 
-FString UAuthenticator::ParseResponse(FHttpResponsePtr Response,bool WasSuccessful)
+FString UAuthenticator::ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful)
 {
 	FString Ret = "";
 
@@ -392,7 +400,6 @@ void UAuthenticator::ResetRetryEmailLogin()
 void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response, bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString SessionPtr;
 	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
@@ -445,7 +452,6 @@ FString UAuthenticator::GenerateSignUpPassword()
 void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
@@ -453,14 +459,12 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
-
 	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
 }
 
 void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString IDTokenPtr;
 	const TSharedPtr<FJsonObject> *AuthObject;
@@ -494,11 +498,9 @@ void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FSt
 	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
-void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
-{
-	USequenceWallet * Wallet = USequenceWallet::Make(Credentials);
-	
-	const TFunction<void (FCredentials_BE)> OnSuccess = [this](FCredentials_BE Credentials)
+void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
+{	
+	const TFunction<void (FCredentials_BE)> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		if (Credentials.IsRegistered())
 		{
@@ -512,13 +514,22 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials)
 		}
 	};
 	
-	const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err)
+	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
 		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
 		this->CallAuthFailure();
 	};
-	
-	Wallet->RegisterSession(OnSuccess,OnFailure);
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Wallet = WalletOptional.GetValue();
+		Wallet->RegisterSession(OnSuccess,OnFailure);
+	}
+	else
+	{
+		this->CallAuthFailure();
+	}
 }
 
 TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
@@ -536,7 +547,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
-{
+{	
 	FCredentials_BE CredData;
 	FCredentials_BE* Credentials = &CredData;
 	const bool IsValid = this->GetStoredCredentials(Credentials);
@@ -545,7 +556,6 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 
 void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
 {
-	UE_LOG(LogTemp,Display,TEXT("RequestBody: %s"),*RequestBody);
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("POST");
 	http_post_req->SetURL(Url);

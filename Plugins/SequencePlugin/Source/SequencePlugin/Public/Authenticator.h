@@ -3,19 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RequestHandler.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
+#include "Interfaces/IHttpRequest.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "NativeEncryptors/AndroidEncryptor.h"
 #include "Authenticator.generated.h"
 
-struct FSSOCredentials
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSSOCredentials
 {
+	GENERATED_USTRUCT_BODY()
 	FString URL = "";
 	FString ClientID = "";
+	FSSOCredentials(){}
 	FSSOCredentials(const FString& URLIn, const FString& ClientIDIn)
 	{
 		URL = URLIn;
@@ -24,7 +26,7 @@ struct FSSOCredentials
 };
 
 USTRUCT()
-struct FWaasJWT
+struct SEQUENCEPLUGIN_API FWaasJWT
 {
 	GENERATED_USTRUCT_BODY()
 private:
@@ -61,7 +63,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FCredentials_BE
+struct SEQUENCEPLUGIN_API FCredentials_BE
 {
     GENERATED_USTRUCT_BODY()
 private:
@@ -274,7 +276,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FStoredCredentials_BE
+struct SEQUENCEPLUGIN_API FStoredCredentials_BE
 {
 	GENERATED_USTRUCT_BODY()
 private:
@@ -321,7 +323,7 @@ public:
 	FOnAuthFailure AuthFailure;
 	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
-
+	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure() const;
@@ -377,13 +379,13 @@ private:
 	inline static FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
 	inline static FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
 	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
-	inline static FString RedirectURL = "https://dev2-api.sequence.app/oauth/callback";
+	inline static FString RedirectPrefixTrailer = "oauth/callback";
 private:
 	UAuthenticator();
 public:
 	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
-	FString GetSigninURL(const ESocialSigninType& Type);
+	FString GetSigninURL(const ESocialSigninType& Type) const;
 
 	void InitiateMobileSSO(const ESocialSigninType& Type);
 
@@ -401,7 +403,9 @@ public:
 
 	void ClearStoredCredentials() const;
 private:
-	bool CanHandleEmailLogin();
+	FString BuildRedirectPrefix() const;
+	
+	bool CanHandleEmailLogin() const;
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 	
@@ -424,7 +428,7 @@ private:
 	static FString BuildFullDateTime(const FDateTime& Date);
 
 	//RPC Calls//
-	FString ParseResponse(FHttpResponsePtr Response,bool WasSuccessful);
+	static FString ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful);
 
 	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
 	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -435,7 +439,7 @@ private:
 	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
 	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
 
-	void AutoRegister(const FCredentials_BE& Credentials);
+	void AutoRegister(const FCredentials_BE& Credentials) const;
 
 	//RPC Calls//
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);

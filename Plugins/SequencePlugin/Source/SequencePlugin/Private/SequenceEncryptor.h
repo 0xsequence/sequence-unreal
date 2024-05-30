@@ -2,7 +2,6 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 #include "SequenceEncryptor.generated.h"
@@ -15,13 +14,7 @@ class SEQUENCEPLUGIN_API USequenceEncryptor : public UObject
 {
 	GENERATED_BODY()
 private:
-
-	/*
-	* This function is meant to be rebuilt depending on how developers want to secure their key data
-	* for the time being I include this key for testing but in release builds no key will be provided and
-	* NO state will be written unless a valid key is provided!
-	*/
-	//***Replace this implementation with your own proper implementation***
+	
 	static FString GetStoredKey();
 
 public:

@@ -21,6 +21,7 @@ public:
 	static inline FString AppleClientID = "AppleClientID";
 	static inline FString FacebookClientID = "FacebookClientID";
 	static inline FString DiscordClientID = "DiscordClientID";
+	static inline FString RedirectUrl = "RedirectUrl";
 	//Config Keys
 	
 	static FString GetConfigVar(const FString& ConfigKey);

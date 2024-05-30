@@ -6,7 +6,7 @@
 static constexpr int GBlockByteLength = 32;
 static constexpr int GSignatureLength = 4;
 
-class ABI : public ABIEncodeable
+class SEQUENCEPLUGIN_API ABI : public ABIEncodeable
 {
 public:
 	static TFixedABIData UInt32(uint32 Input);

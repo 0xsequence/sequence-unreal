@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "ObjectHandler.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Sequence/SequenceAPI.h"
 #include "SequenceBackendManager.h"

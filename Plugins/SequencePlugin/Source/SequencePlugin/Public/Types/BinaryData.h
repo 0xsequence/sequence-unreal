@@ -6,7 +6,7 @@
 TArray<uint8> BlankArray(ByteLength Size);
 
 // Struct encapsulating an array of binary data
-struct FBinaryData
+struct SEQUENCEPLUGIN_API FBinaryData
 {
 	virtual ~FBinaryData() = default;
 
@@ -30,7 +30,7 @@ struct FBinaryData
 };
 
 // Binary data of arbitrary length
-struct FUnsizedData final : FBinaryData
+struct SEQUENCEPLUGIN_API FUnsizedData final : FBinaryData
 {
 	static FUnsizedData Empty();
 	FUnsizedData(const TArray<uint8> &Array);
@@ -41,50 +41,46 @@ struct FUnsizedData final : FBinaryData
 };
 
 // Returns returns data with leading 0x00 bytes trimmed
-FUnsizedData Trimmed(const FBinaryData &Data);
+FUnsizedData SEQUENCEPLUGIN_API Trimmed(const FBinaryData &Data);
 
 // Hex String to Number of arbitrary size
-FUnsizedData HexStringToBinary(FString Hex);
+FUnsizedData SEQUENCEPLUGIN_API HexStringToBinary(FString Hex);
 
 // Gets UTF8 byte encoding of string
-FUnsizedData StringToUTF8(FString String);
+FUnsizedData SEQUENCEPLUGIN_API StringToUTF8(FString String);
 
 // Converts a UTF8 encoded byte array ot a string
-FString UTF8ToString(FUnsizedData BinaryData);
+FString SEQUENCEPLUGIN_API UTF8ToString(FUnsizedData BinaryData);
 
 // UNIFORM DATA TYPES
 template<ByteLength TSize>
-struct TSizedData : FBinaryData
+struct SEQUENCEPLUGIN_API TSizedData : FBinaryData
 {
 	const static ByteLength Size = TSize;
-	virtual ByteLength GetLength() const override;
-	FUnsizedData Copy() const; 
+	
+	virtual ByteLength GetLength() const override
+	{
+		return Size;
+	}
+	
+	FUnsizedData Copy() const
+	{
+		FUnsizedData Data = FUnsizedData::Empty();
+		Data.Arr.Get()->Append(*this->Arr.Get());
+		return Data;
+	}
+	
 	explicit operator FUnsizedData() const { return Copy(); }
-	static TSizedData Empty();
+	
+	template <ByteLength Size>
+	static TSizedData<Size> Empty()
+	{
+		return TSizedData{};
+	}
 }; // Data with set sizes
 
-template <ByteLength Size>
-inline ByteLength TSizedData<Size>::GetLength() const 
-{
-	return Size;
-}
-
-template <ByteLength Size>
-FUnsizedData TSizedData<Size>::Copy() const
-{
-	FUnsizedData data = FUnsizedData::Empty();
-	data.Arr.Get()->Append(this->Arr);
-	return data;
-}
-
-template <ByteLength TSize>
-TSizedData<TSize> TSizedData<TSize>::Empty()
-{
-	return TSizedData{};
-}
-
 // Basic Binary Types
-struct FHash256 final : TSizedData<32>
+struct SEQUENCEPLUGIN_API FHash256 final : TSizedData<32>
 {
 	static FHash256 New();
 	static FHash256 From(TStaticArray<uint8, 32> &Arr);
@@ -92,39 +88,38 @@ struct FHash256 final : TSizedData<32>
 	static FHash256 From(FString Str);
 };
 
-struct FAddress final : TSizedData<20>
+struct SEQUENCEPLUGIN_API FAddress final : TSizedData<20>
 {
 	static FAddress New();
 	static FAddress From(TStaticArray<uint8, 20> &Arr);
 	static FAddress From(FString Str);
 };
 
-struct FPublicKey final : TSizedData<64>
+struct SEQUENCEPLUGIN_API FPublicKey final : TSizedData<64>
 {
 	static FPublicKey New();
 	static FPublicKey From(TStaticArray<uint8, 64> &Arr);
 	static FPublicKey From(FString Str);
 };
 
-struct FPrivateKey final : TSizedData<32>
+struct SEQUENCEPLUGIN_API FPrivateKey final : TSizedData<32>
 {
 	static FPrivateKey New();
 	static FPrivateKey From(TStaticArray<uint8, 32> &Arr);
 	static FPrivateKey From(FString Str);
 };
 
-struct FBloom final : TSizedData<256>
+struct SEQUENCEPLUGIN_API FBloom final : TSizedData<256>
 {
 	static FBloom New();
 	static FBloom From(TStaticArray<uint8, 256> &Arr);
 	static FBloom From(FString Str);
 };
 
-struct FBlockNonce final : TSizedData<8>
+struct SEQUENCEPLUGIN_API FBlockNonce final : TSizedData<8>
 {
 	static FBlockNonce New();
 	static FBlockNonce From(TStaticArray<uint8, 8> &Arr);
 	static FBlockNonce From(FString Str);
 	void Increment() const;
 };
-

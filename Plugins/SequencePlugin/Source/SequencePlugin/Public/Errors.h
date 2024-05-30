@@ -14,7 +14,7 @@ enum EErrorType
 	TestFail,
 };
 
-class FSequenceError
+class SEQUENCEPLUGIN_API FSequenceError
 {
 public:
 	FSequenceError(EErrorType Type, FString Message);
