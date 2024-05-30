@@ -34,7 +34,6 @@ UAuthenticator::UAuthenticator()
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
-	//UE_LOG(LogTemp, Display, TEXT("Decoded Data: %s"),*ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	if constexpr (PLATFORM_ANDROID)
@@ -178,7 +177,6 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					//UE_LOG(LogTemp,Display,TEXT("Token: %s"),*Token);
 					SocialLogin(Token);
 					return;
 				}//find id_token
@@ -402,7 +400,6 @@ void UAuthenticator::ResetRetryEmailLogin()
 void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response, bWasSuccessful);
-	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString SessionPtr;
 	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
@@ -455,7 +452,6 @@ FString UAuthenticator::GenerateSignUpPassword()
 void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 }
 
@@ -469,7 +465,6 @@ void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& 
 void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	//UE_LOG(LogTemp, Display, TEXT("Response %s"), *response);
 	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
 	FString IDTokenPtr;
 	const TSharedPtr<FJsonObject> *AuthObject;

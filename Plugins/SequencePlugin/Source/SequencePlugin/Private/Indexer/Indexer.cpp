@@ -196,7 +196,6 @@ void UIndexer::GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallb
 void UIndexer::GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, FFailureCallback OnFailure)
 {
 	const FString endpoint = "GetTokenBalances";
-	UE_LOG(LogTemp, Display, TEXT("Endpoint: [%s]"), *endpoint);
 	HTTPPost(ChainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(Args), [this,OnSuccess](FString Content)
 	{
 		FGetTokenBalancesReturn response = this->BuildResponse<FGetTokenBalancesReturn>(Content);

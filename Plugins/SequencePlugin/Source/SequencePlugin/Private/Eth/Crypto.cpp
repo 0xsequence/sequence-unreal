@@ -43,7 +43,6 @@ FAddress GetContractAddress(FAddress Sender, FBlockNonce Nonce)
 	RLPItem* RLPArray = new RLPItem[]{Itemize(Sender), Itemize(HexStringToBinary(NonceStr))};
 	RLPItem Items = Itemize(RLPArray, 2);
 	FUnsizedData Data = RLP::Encode(Items);
-	UE_LOG(LogTemp, Display, TEXT("Nonce %s RLP is %s"), *Nonce.ToHex(), *Data.ToHex());
 	FHash256 Hash = GetKeccakHash(Data);
 
 	const FAddress Address = FAddress::New();
