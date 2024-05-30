@@ -230,7 +230,6 @@ void UProvider::EstimateContractCallGas(FContractCall ContractCall, const TSucce
 				->AddValue(ContractCall.GetJson())
 				->EndArray()
 			->ToString();
-	UE_LOG(LogTemp, Display, TEXT("My rpc call %s"), *Content);
 
 	const FString MyUrl = this->Url;
 	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
@@ -311,9 +310,7 @@ void UProvider::DeployContract(const FString& Bytecode, const FPrivateKey& PrivK
 
 //call method
 void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (FTransactionReceipt)>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	UE_LOG(LogTemp, Display, TEXT("My Hash is %s"), *Hash.ToHex());
-	
+{	
 	const FString Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString("0x" + Hash.ToHex())

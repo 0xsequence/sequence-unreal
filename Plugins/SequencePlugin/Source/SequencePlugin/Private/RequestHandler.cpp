@@ -72,26 +72,20 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
-		UE_LOG(LogTemp, Display, TEXT("QR URL: %s"), *Req->GetURL());
-
 		auto content = Req->GetContent();
 		FString str = "";
 		for (auto i : content)
 		{
 			str += UTF8ToString(FUnsizedData{ MakeArray(&i, 1) });
 		}
-		UE_LOG(LogTemp, Display, TEXT("QR Content: %s"), *str);
-
 		auto headers = Req->GetAllHeaders();
 		FString headers_str = "";
 		for (auto header : headers) { headers_str += "\n" + header; }
-		UE_LOG(LogTemp, Display, TEXT("QR Headers: %s"), *headers_str);
 
 		if (bWasSuccessful)
 		{
 			TArray<uint8> img_data = Response->GetContent();
 			//now we must process the image
-			UE_LOG(LogTemp, Display, TEXT("Received Image Size: %d"), img_data.Num());
 			int32 width = 0, height = 0;
 			UTexture2D* img = nullptr;
 			EPixelFormat pxl_format = PF_B8G8R8A8;

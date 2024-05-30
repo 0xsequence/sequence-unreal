@@ -18,11 +18,8 @@ FEthTransaction::FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsi
 void FEthTransaction::Sign(FPrivateKey PrivateKey, int ChainID)
 {
 	FString NonceString = TrimHex(Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *NonceString);
 
 	FUnsizedData TrimmedNonce = Trimmed(Nonce);
-
-	UE_LOG(LogTemp, Display, TEXT("My trimmed nonce is %s"), *TrimmedNonce.ToHex());
 	
 	FUnsizedData EncodedSigningData = RLP::Encode(Itemize(new RLPItem[]
 	{

@@ -337,7 +337,7 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 		if (FJsonObjectConverter::JsonObjectToUStruct<FCloseResponseObj>(Json.ToSharedRef(), &ResponseStruct))
 		{
 			const FString ParsedResponse = UIndexerSupport::StructToString(ResponseStruct);
-			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
+			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
 			if (ResponseStruct.response.code.Compare("sessionClosed")==0)
 			{
 				this->Credentials.UnRegisterCredentials();
@@ -465,7 +465,7 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
 			//parse out what we want and wrap it nicely for ease of use
-			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
+			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
 			{
@@ -616,7 +616,6 @@ FString USequenceWallet::BuildSessionValidationIntent() const
 
 template <typename T> void USequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
 {
-	UE_LOG(LogTemp,Display,TEXT("Dest: %s"),*Url);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -680,7 +679,7 @@ void USequenceWallet::GetFriends(FString username, TSuccessCallback<TArray<FCont
 
 TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
 {
-	UE_LOG(LogTemp, Error, TEXT("Received json: %s"), *JSON);
+	//UE_LOG(LogTemp, Error, TEXT("Received json: %s"), *JSON);
 	TSharedPtr<FJsonObject> jsonObj;
 	FUpdatedPriceReturn updatedPrices;
 
