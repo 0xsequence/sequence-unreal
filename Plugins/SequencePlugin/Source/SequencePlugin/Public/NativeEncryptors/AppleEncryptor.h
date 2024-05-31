@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "IOSEncryptor.generated.h"
+#include "AppleEncryptor.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API UIOSEncryptor : public UGenericNativeEncryptor
+class SEQUENCEPLUGIN_API UAppleEncryptor : public UGenericNativeEncryptor
 {
 	GENERATED_BODY()
 

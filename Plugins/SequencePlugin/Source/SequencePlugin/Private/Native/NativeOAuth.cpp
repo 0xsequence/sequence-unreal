@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "NativeOAuth.h"
 #include "Authenticator.h"
-#include "IOSBridge.h"
+#include "AppleBridge.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Async/Async.h"
 #include "Android/Support/AndroidSupport.h"
@@ -27,7 +27,7 @@ namespace NativeOAuth
 	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
-		UIOSBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
+		UAppleBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
 	}
 
 	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
@@ -51,7 +51,7 @@ namespace NativeOAuth
 	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;		
-		UIOSBridge::InitiateIosSSO(clientID, nonce, ProcessIosCallback);
+		UAppleBridge::InitiateIosSSO(clientID, nonce, ProcessIosCallback);
 	}
 	
 #if PLATFORM_ANDROID

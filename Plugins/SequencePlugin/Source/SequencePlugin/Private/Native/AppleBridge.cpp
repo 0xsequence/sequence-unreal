@@ -1,41 +1,41 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "IOSBridge.h"
+#include "AppleBridge.h"
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <functional>
 #include "Native/IOS/objective_c/IOSOAuth.h"
-#include "Native/IOS/objective_c/IOSEncryptor.h"
+#include "Native/IOS/objective_c/NativeAppleEncryptor.h"
 
 using namespace std;
 
-UIOSBridge::UIOSBridge() { }
+UAppleBridge::UAppleBridge() { }
 
-FString UIOSBridge::IOSEncrypt(const FString& StringIn)
+FString UAppleBridge::AppleEncrypt(const FString& StringIn)
 {
 	FString Result = "";
-#if PLATFORM_IOS
+#if PLATFORM_IOS || PLATFORM_MAC
 	NSString * _ToEncrypt = StringIn.GetNSString();
-	IOSEncryptor * Encryptor = [[IOSEncryptor alloc] init];
+	NativeAppleEncryptor * Encryptor = [[NativeAppleEncryptor alloc] init];
 	char * CharResult = [Encryptor Encrypt:_ToEncrypt];
 	Result = FString(UTF8_TO_TCHAR(CharResult));
 #endif
 	return Result;
 }
 
-FString UIOSBridge::IOSDecrypt(const FString& StringIn)
+FString UAppleBridge::AppleDecrypt(const FString& StringIn)
 {
 	FString Result = "";
-#if PLATFORM_IOS
+#if PLATFORM_IOS || PLATFORM_MAC
 	NSString * _ToDecrypt = StringIn.GetNSString();
-	IOSEncryptor * Encryptor = [[IOSEncryptor alloc] init];
+	NativeAppleEncryptor * Encryptor = [[NativeAppleEncryptor alloc] init];
 	char * CharResult = [Encryptor Decrypt:_ToDecrypt];
 	Result = FString(UTF8_TO_TCHAR(CharResult));
 #endif
 	return Result;
 }
 
-void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken))
+void UAppleBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken))
 {
 	UE_LOG(LogTemp,Display,TEXT("Preparing to Signin with Google"));
 #if PLATFORM_IOS
@@ -48,7 +48,7 @@ void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, vo
 #endif
 }
 
-void UIOSBridge::InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken))
+void UAppleBridge::InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken))
 {
 #if PLATFORM_IOS
 	NSString * cID = clientID.GetNSString();

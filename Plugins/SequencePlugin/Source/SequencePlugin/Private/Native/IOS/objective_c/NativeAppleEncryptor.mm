@@ -1,13 +1,13 @@
 ﻿// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#import "IOSEncryptor.h"
+#import "NativeAppleEncryptor.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
 static SecKeyRef privateKey;
 static SecKeyRef publicKey;
 
-@implementation IOSEncryptor
+@implementation NativeAppleEncryptor
 
 - (BOOL) GenerateKeys 
 {

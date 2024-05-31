@@ -2,12 +2,12 @@
 
 #pragma once
 
-#if PLATFORM_IOS
+#if PLATFORM_IOS || PLATFORM_MAC
 
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-@interface IOSEncryptor : NSObject
+@interface NativeAppleEncryptor : NSObject
 
 - (BOOL) GenerateKeys;
 - (BOOL) LoadKeys;
