@@ -17,6 +17,8 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
 #include "NativeEncryptors/AppleEncryptor.h"
+#include "NativeEncryptors/AndroidEncryptor.h"
+#include "NativeEncryptors/WindowsEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
