@@ -9,16 +9,16 @@
 
 using namespace std;
 
-UIOSBridge::UIOSBridge()
-{
-    
-}
+UIOSBridge::UIOSBridge() { }
 
 FString UIOSBridge::IOSEncrypt(const FString& StringIn)
 {
 	FString Result = "";
 #if PLATFORM_IOS
-	NSString * _url = StringIn.GetNSString();
+	NSString * _ToEncrypt = StringIn.GetNSString();
+	IOSEncryptor * Encryptor = [[IOSEncryptor alloc] init];
+	char * CharResult = [Encryptor Encrypt:_ToEncrypt];
+	Result = FString(UTF8_TO_TCHAR(CharResult));
 #endif
 	return Result;
 }
@@ -27,7 +27,10 @@ FString UIOSBridge::IOSDecrypt(const FString& StringIn)
 {
 	FString Result = "";
 #if PLATFORM_IOS
-	NSString * _url = StringIn.GetNSString();
+	NSString * _ToDecrypt = StringIn.GetNSString();
+	IOSEncryptor * Encryptor = [[IOSEncryptor alloc] init];
+	char * CharResult = [Encryptor Decrypt:_ToDecrypt];
+	Result = FString(UTF8_TO_TCHAR(CharResult));
 #endif
 	return Result;
 }
