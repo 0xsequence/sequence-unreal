@@ -89,7 +89,7 @@ static SecKeyRef publicKey;
     else
     {//Failure state
         NSLog(@"Failed to load encryption key");
-        NSString * FailureString = @"";
+        NSString * FailureString = @"Failure_To_Load_Keys";
         EncryptedChars = [self ConvertNSStringToChars:FailureString];
     }
     [self Clean];
