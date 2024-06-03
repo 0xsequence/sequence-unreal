@@ -6,6 +6,7 @@
 
 static SecKeyRef privateKey;
 static SecKeyRef publicKey;
+static NSString * ErrorCapture = @"";
 
 @implementation NativeAppleEncryptor
 
@@ -46,17 +47,20 @@ static SecKeyRef publicKey;
     if (status == errSecSuccess) 
     {
         NSLog(@"Private key retrieved successfully.");
+        ErrorCapture = @"Private key retrieved successfully";
         publicKey = SecKeyCopyPublicKey(privateKey);
         return true;
     }
     else if (status == errSecItemNotFound)
     {
         NSLog(@"Private key not found. Add it if needed.");
+        ErrorCapture = @"Private key not found. Add it if needed.";
         return [self GenerateKeys];
     }
     else
     {
         NSLog(@"Keychain error: %ld", (long)status);
+        ErrorCapture = @"Keychain error";
         return false;
     }
 }
@@ -89,8 +93,7 @@ static SecKeyRef publicKey;
     else
     {//Failure state
         NSLog(@"Failed to load encryption key");
-        NSString * FailureString = @"Failure_To_Load_Keys";
-        EncryptedChars = [self ConvertNSStringToChars:FailureString];
+        EncryptedChars = [self ConvertNSStringToChars:ErrorCapture];
     }
     [self Clean];
     return EncryptedChars;
