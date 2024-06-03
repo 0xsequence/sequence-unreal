@@ -5,6 +5,7 @@
 #include <sstream>
 #include <functional>
 #include "Native/IOS/objective_c/IOSOAuth.h"
+#include "Native/IOS/objective_c/NativeAppleEncryptor.mm"
 #include "Native/IOS/objective_c/NativeAppleEncryptor.h"
 
 using namespace std;
