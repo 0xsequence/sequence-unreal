@@ -116,12 +116,12 @@ static NSString * ErrorCapture = @"";
             
             NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
             NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
-            NSLog(@"Decrypted Data: %@",DecryptedDataString);
+            printf("DecryptedData: %s", [DecryptedDataString UTF8String]);
             DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
     }
     else
     {//Failure state
-        NSLog(@"Failed to load decryption key");
+        printf("Failed to load decryption key");
         NSString * FailureString = @"Failed to load decryption key";
         DecryptedChars = [self ConvertNSStringToChars:FailureString];
     }
