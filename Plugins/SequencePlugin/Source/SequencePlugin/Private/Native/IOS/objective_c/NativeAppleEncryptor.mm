@@ -46,21 +46,22 @@ static NSString * ErrorCapture = @"";
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&privateKey);
     if (status == errSecSuccess) 
     {
-        NSLog(@"Private key retrieved successfully.");
         ErrorCapture = @"Private key retrieved successfully";
+        printf("%s", [ErrorCapture UTF8String]);
         publicKey = SecKeyCopyPublicKey(privateKey);
         return true;
     }
     else if (status == errSecItemNotFound)
     {
-        NSLog(@"Private key not found. Add it if needed.");
         ErrorCapture = @"Private key not found. Add it if needed.";
+        printf("%s", [ErrorCapture UTF8String]);
         return [self GenerateKeys];
     }
     else
     {
-        NSLog(@"Keychain error: %ld", (long)status);
+        //NSLog(@"Keychain error: %ld", (long)status);
         ErrorCapture = @"Keychain error";
+        printf("%s", [ErrorCapture UTF8String]);
         return false;
     }
 }
@@ -87,12 +88,12 @@ static NSString * ErrorCapture = @"";
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
-        NSLog(@"EncryptedData Data: %@",EncryptedDataString);
+        printf("%s", [EncryptedDataString UTF8String]);
         EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
     }
     else
     {//Failure state
-        NSLog(@"Failed to load encryption key");
+        printf("Failed to load encryption key");
         EncryptedChars = [self ConvertNSStringToChars:ErrorCapture];
     }
     [self Clean];
