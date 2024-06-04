@@ -121,7 +121,7 @@ static NSString * ErrorCapture = @"";
     else
     {//Failure state
         NSLog(@"Failed to load decryption key");
-        NSString * FailureString = @"";
+        NSString * FailureString = @"Failed to load decryption key";
         DecryptedChars = [self ConvertNSStringToChars:FailureString];
     }
     [self Clean];
