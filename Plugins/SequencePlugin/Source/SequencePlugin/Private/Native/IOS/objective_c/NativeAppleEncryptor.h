@@ -9,7 +9,6 @@
 
 @interface NativeAppleEncryptor : NSObject
 
-+ (NativeAppleEncryptor*)GetDelegate;
 - (BOOL) GenerateKeys;
 - (BOOL) LoadKeys;
 - (void) Clean;

@@ -10,11 +10,6 @@ static NSString * ErrorCapture = @"";
 
 @implementation NativeAppleEncryptor
 
-+ (NativeAppleEncryptor*)GetDelegate {
-    static NativeAppleEncryptor *Singleton = [[NativeAppleEncryptor alloc] init];
-    return Singleton;
-}
-
 - (BOOL) GenerateKeys 
 {
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
@@ -92,12 +87,13 @@ static NSString * ErrorCapture = @"";
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
-        EncryptedChars = [[NativeAppleEncryptor GetDelegate] ConvertNSStringToChars:EncryptedDataString];
+        NSLog(@"EncryptedData Data: %@",EncryptedDataString);
+        EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
     }
     else
     {//Failure state
         NSLog(@"Failed to load encryption key");
-        EncryptedChars = [[NativeAppleEncryptor GetDelegate] ConvertNSStringToChars:ErrorCapture];
+        EncryptedChars = [self ConvertNSStringToChars:ErrorCapture];
     }
     [self Clean];
     return EncryptedChars;
@@ -119,13 +115,14 @@ static NSString * ErrorCapture = @"";
             
             NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
             NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
-            DecryptedChars = [[NativeAppleEncryptor GetDelegate] ConvertNSStringToChars:DecryptedDataString];
+            NSLog(@"Decrypted Data: %@",DecryptedDataString);
+            DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
     }
     else
     {//Failure state
         NSLog(@"Failed to load decryption key");
         NSString * FailureString = @"Failed to load decryption key";
-        DecryptedChars = [[NativeAppleEncryptor GetDelegate] ConvertNSStringToChars:FailureString];
+        DecryptedChars = [self ConvertNSStringToChars:FailureString];
     }
     [self Clean];
     return DecryptedChars;
