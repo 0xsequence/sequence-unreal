@@ -232,3 +232,15 @@ void UIndexer::GetTransactionHistory(int64 ChainID, FGetTransactionHistoryArgs A
 		OnSuccess(this->BuildResponse<FGetTransactionHistoryReturn>(Content));
 	}, OnFailure);
 }
+
+TMap<int64, FTokenBalance> UIndexer::GetTokenBalancesAsMap(TArray<FTokenBalance> Balances)
+{
+	TMap<int64, FTokenBalance> BalanceMap;
+
+	for (FTokenBalance Balance : Balances)
+	{
+		BalanceMap.Add(TPair<int64,FTokenBalance>(Balance.tokenID,Balance));
+	}
+	
+	return BalanceMap;
+}

@@ -116,6 +116,12 @@ public:
 		get transaction history from the Chain
 	*/
 	void GetTransactionHistory(int64 ChainID, FGetTransactionHistoryArgs Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, FFailureCallback OnFailure);
-
+	
+	/*
+	 *	Converts a TArray<FTokenBalance> Into a TMap<int64, FTokenBalance>
+	 *	where the key is the TokenID
+	 */
+	static TMap<int64, FTokenBalance> GetTokenBalancesAsMap(TArray<FTokenBalance> Balances);
+	
 //end of public functions
 };

@@ -5,7 +5,7 @@
 #include "FeeOption.generated.h"
 
 UENUM(BlueprintType)
-enum FeeType
+enum EFeeType
 {
 	Unknown UMETA(DisplayName = "unknown"),
 	Erc20Token UMETA(DisplayName = "erc20token"),
@@ -13,7 +13,7 @@ enum FeeType
 };
 
 USTRUCT()
-struct FeeToken
+struct FFeeToken
 {
 	GENERATED_USTRUCT_BODY()
 public:
@@ -32,13 +32,13 @@ public:
 	UPROPERTY()
 	FString TokenID = "";
 	UPROPERTY()
-	TEnumAsByte<FeeType> Type = Unknown;
+	TEnumAsByte<EFeeType> Type = Unknown;
 
-	FeeToken(){}
+	FFeeToken(){}
 	
-	FeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, uint32 DecimalsIn,
+	FFeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, uint32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
-		const FString& TokenIDIn, FeeType TypeIn)
+		const FString& TokenIDIn, EFeeType TypeIn)
 	{
 		ChainID = ChainIDIn;
 		ContractAddress = ContractAddressIn;
@@ -52,7 +52,7 @@ public:
 };
 
 USTRUCT()
-struct FeeOption
+struct FFeeOption
 {
 	GENERATED_USTRUCT_BODY()
 public:
@@ -61,13 +61,13 @@ public:
 	UPROPERTY()
 	FString To = "";
 	UPROPERTY()
-	FeeToken Token;
+	FFeeToken Token;
 	UPROPERTY()
 	FString Value = "";
 
-	FeeOption(){}
+	FFeeOption(){}
 	
-	FeeOption(uint32 GasLimitIn, const FString& ToIn, const FeeToken& TokenIn, const FString& ValueIn)
+	FFeeOption(uint32 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
 	{
 		GasLimit = GasLimitIn;
 		To = ToIn;
@@ -77,20 +77,31 @@ public:
 };
 
 USTRUCT()
-struct FeeOptionReturn
+struct FFeeOptionReturn
 {
 	GENERATED_USTRUCT_BODY()
 public:
 	UPROPERTY()
-	TArray<FeeOption> FeeOptions;
+	TArray<FFeeOption> FeeOptions;
 	UPROPERTY()
 	bool InWallet = false;
 
-	FeeOptionReturn() {}
+	FFeeOptionReturn() {}
 	
-	FeeOptionReturn(const TArray<FeeOption>& FeeOptionsIn, bool InWalletIn)
+	FFeeOptionReturn(const TArray<FFeeOption>& FeeOptionsIn, bool InWalletIn)
 	{
 		FeeOptions = FeeOptionsIn;
 		InWallet = InWalletIn;
 	}
+};
+
+USTRUCT()
+struct FIntentDataFeeOptions
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	FString Identifier = "";
+	FString Network = "";
+	FString TransactionsString = "";//maybe look at changing this out for what gets handed in
+	FString Wallet = "";
 };
