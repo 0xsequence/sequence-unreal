@@ -18,8 +18,8 @@
 	"SupportedTargetPlatforms": [
 		"Mac",
 		"IOS",
-		"Win64",
-		"Android"
+		"Android",
+		"Win64"
 	],
 	"Modules": [
 		{
@@ -29,8 +29,8 @@
 			"WhitelistPlatforms": [
 				"Mac",
 				"IOS",
-				"Win64",
-				"Android"
+				"Android",
+				"Win64"
 			]
 		}
 	],
