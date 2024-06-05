@@ -98,7 +98,7 @@ static NSString * ErrorCapture = @"";
         printf("Failed to load encryption key");
         EncryptedChars = [self ConvertNSStringToChars:ErrorCapture];
     }
-    [self Clean];
+    //[self Clean];
     return EncryptedChars;
 }
 
@@ -127,7 +127,7 @@ static NSString * ErrorCapture = @"";
         NSString * FailureString = @"Failed to load decryption key";
         DecryptedChars = [self ConvertNSStringToChars:FailureString];
     }
-    [self Clean];
+    //[self Clean];
     return DecryptedChars;
 }
 
