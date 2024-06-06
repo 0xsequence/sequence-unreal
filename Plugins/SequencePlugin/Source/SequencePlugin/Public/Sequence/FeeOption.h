@@ -72,6 +72,27 @@ public:
 	FString Value = "";
 
 	FFeeOption(){}
+
+	FFeeOption(const TSharedPtr<FJsonValue>& FeeOption)
+	{
+		//OR convert it to a FJsonObject and convert using UE calls instead!
+		const TSharedPtr<FJsonObject> * FeeOptionObject;
+		if (FeeOption->TryGetObject(FeeOptionObject))
+		{
+			FFeeOption FeeOptionStruct;
+			if (FJsonObjectConverter::JsonObjectToUStruct<FFeeOption>(FeeOptionObject->ToSharedRef(), &FeeOptionStruct))
+			{
+				GasLimit = FeeOptionStruct.GasLimit;
+				To = FeeOptionStruct.To;
+				Token = FeeOptionStruct.Token;
+				Value = FeeOptionStruct.Value;
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error Parsing Fee Option"));
+			}
+		}
+	}
 	
 	FFeeOption(uint32 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
 	{
