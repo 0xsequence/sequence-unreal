@@ -51,6 +51,12 @@ public:
 	}
 };
 
+/*
+gasLimit
+to
+value
+"token":{"chainId":137,"contractAddress":null,"decimals":18,"logoURL":"","name":"Matic","symbol":"MATIC","tokenID":null,"type":"unknown"},"value":"1526191875889204"}
+*/
 USTRUCT()
 struct FFeeOption
 {

@@ -435,14 +435,70 @@ void USequenceWallet::SendTransactionWithFeeOption()
 	
 }
 
+/*
+{"response":{"code":"feeOptions","data":{"feeOptions":[
+{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":null,"decimals":18,"logoURL":"","name":"Matic","symbol":"MATIC","tokenID":null,"type":"unknown"},"value":"1526191875889204"},
+{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359","decimals":6,"logoURL":"","name":"USDC","symbol":"USDC","tokenID":null,"type":"erc20Token"},"value":"1925"},
+{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174","decimals":6,"logoURL":"","name":"USDC.e","symbol":"USDC.e","tokenID":null,"type":"erc20Token"},"value":"1831"},
+{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619","decimals":18,"logoURL":"","name":"Wrapped Ether","symbol":"WETH","tokenID":null,"type":"erc20Token"},"value":"453638203296"}
+],
+"feeQuote":"/7N/AwEBCEZlZVF1b3RlAf+AAAEKARFUcmFuc2FjdGlvbkRpZ2VzdAH/ggABDUlzV2hpdGVsaXN0ZWQBAgABCkdhc1Nwb25zb3IBBgABB0dhc1RhbmsBBgABCEdhc1VzYWdlAQYAAQhHYXNQcmljZQH/hAABC05hdGl2ZVByaWNlAf+EAAELVG9rZW5QcmljZXMB/4YAAQlFeHBpcmVzQXQB/4gAAQlTaWduYXR1cmUBCgAAABT/gQEBAQRIYXNoAf+CAAEGAUAAAAr/gwUBAv+KAAAAJP+FBAEBE21hcFtzdHJpbmddKmJpZy5JbnQB/4YAAQwB/4QAAAr
+/hwUBAv+MAAAA/87/gAEg/7hw//pZ/+//hv/E/55o//H////+Rv/3L/+0/+8l/8//mf/pDzoU/93/7/+vbEz/rv+QFQT+h78BBgIG/9IHGAEHAq7cBQEoAAEDBHVzZGMHAu1L195MAAV1c2RjZQcC7WV0YRgABHdldGgJAg3gtrOnZAAAAQ8BAAAADt3z7MEy57Tc//8BQa7Sa8rpjdU9D2zr2VNTXp3UrE5s6RorrRUP/u55/n1zIFvxAwvD/UCR76+84Dr5RqnpwIoz1jWizZJfxJN3V5McAA=="}}}
+ */
+
+void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
+	{
+		TSharedPtr<FJsonObject> jsonObj;
+		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		{
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
+				{
+					const TSharedPtr<FJsonArray> * FeeList = nullptr;
+					/*if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList))
+					{
+						
+					}*/
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	
+	if (this->Credentials.RegisteredValid())
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,BuildGetFeeOptionsIntent(Transactions),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
 void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString TransactionsPayload = USequenceWallet::TransactionListToJsonString(Transactions);
 	const TSuccessCallback<FString> OnResponse = [=](FString Response)
 	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
@@ -501,7 +557,8 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 	{
 		//we need to gather fee data here first
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
-		this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
+		//this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
+		this->SequenceRPC(URL,BuildGetFeeOptionsIntent(Transactions),OnResponse,OnFailure);
 	}
 	else
 	{
@@ -538,15 +595,16 @@ FString USequenceWallet::TransactionListToJsonString(const TArray<TUnion<FRawTra
 	return TransactionsPayload;
 }
 
-FString USequenceWallet::BuildGetFeeOptionsIntent(const FString& Txns)
+FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString SigIntent = "{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString TxnsString = USequenceWallet::TransactionListToJsonString(Txns);
+	const FString SigIntent = "{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	FString Intent = "{\"intent\":{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
+	FString Intent = "{\"intent\":{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
 	return Intent;
 }
 
