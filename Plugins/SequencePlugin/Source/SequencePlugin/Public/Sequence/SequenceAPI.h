@@ -90,7 +90,8 @@ public:
 	void UpdateNetworkId(int64 NewNetwork);
 	int64 GetNetworkId() const;
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
-	void SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void SendTransactionWithFeeOption();
 	
@@ -99,12 +100,13 @@ public:
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignOut();
 private:
-
-	
-	
 	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
 	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
+
+	static FString TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions);
+	
+	FString BuildGetFeeOptionsIntent(const FString& Txns);
 	FString BuildSignMessageIntent(const FString& Message) const;
 	FString BuildSendTransactionIntent(const FString& Txns) const;
 	FString BuildRegisterSessionIntent() const;

@@ -435,32 +435,9 @@ void USequenceWallet::SendTransactionWithFeeOption()
 	
 }
 
-void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FString TransactionsPayload = "[";
-	
-	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
-	{
-		switch(Transaction.GetCurrentSubtypeIndex())
-		{
-		case 0: //RawTransaction
-			TransactionsPayload += Transaction.GetSubtype<FRawTransaction>().GetJsonString() + ",";
-			break;
-		case 1: //ERC20
-			TransactionsPayload += Transaction.GetSubtype<FERC20Transaction>().GetJsonString() + ",";
-			break;
-		case 2: //ERC721
-			TransactionsPayload += Transaction.GetSubtype<FERC721Transaction>().GetJsonString() + ",";
-			break;
-		case 3: //ERC1155
-			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
-			break;
-		default: //Doesn't match
-			break;
-		}
-	}
-	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
-	TransactionsPayload += "]";
+	const FString TransactionsPayload = USequenceWallet::TransactionListToJsonString(Transactions);
 	const TSuccessCallback<FString> OnResponse = [=](FString Response)
 	{
 #if PLATFORM_ANDROID
@@ -532,14 +509,55 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	}
 }
 
+FString USequenceWallet::TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions)
+{
+	FString TransactionsPayload = "[";
+	
+	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
+	{
+		switch(Transaction.GetCurrentSubtypeIndex())
+		{
+		case 0: //RawTransaction
+			TransactionsPayload += Transaction.GetSubtype<FRawTransaction>().GetJsonString() + ",";
+			break;
+		case 1: //ERC20
+			TransactionsPayload += Transaction.GetSubtype<FERC20Transaction>().GetJsonString() + ",";
+			break;
+		case 2: //ERC721
+			TransactionsPayload += Transaction.GetSubtype<FERC721Transaction>().GetJsonString() + ",";
+			break;
+		case 3: //ERC1155
+			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
+			break;
+		default: //Doesn't match
+			break;
+		}
+	}
+	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	TransactionsPayload += "]";
+	return TransactionsPayload;
+}
+
+FString USequenceWallet::BuildGetFeeOptionsIntent(const FString& Txns)
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString SigIntent = "{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(SigIntent);
+	FString Intent = "{\"intent\":{\"data\":{\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
+	return Intent;
+}
+
 FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	
 	const FString Wallet = this->Credentials.GetWalletAddress();
+	
 	//eip-191 and keccak hashing the message
 	const FString LeadingByte = "\x19";//leading byte
 	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
@@ -547,7 +565,6 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 	Payload += Message;
 	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
 	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
-	//UE_LOG(LogTemp,Display,TEXT("EIP_191: %s"),*EIP_Message);
 	
 	//EIP-191
 	const FString Data = "{\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
@@ -568,7 +585,6 @@ FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns) const
 	const FString SigIntent = "{\"data\":{\"identifier\":\""+identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	FString Intent = "{\"intent\":{\"data\":{\"identifier\":\""+identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
 	return Intent;
 }
 
