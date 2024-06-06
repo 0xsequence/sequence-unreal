@@ -50,8 +50,25 @@ typedef void(^Callback)(char *idToken);
             }];
             authSession.presentationContextProvider = self;
             [authSession start];
-        #endif//Version guard for when we are compiling with versions lower than what we need
-        #endif//platform_IOS
+    #else//Fall back to deprecated approach for now
+            ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
+            initWithURL:authUrl
+            callbackURLScheme:scheme
+            completionHandler:^(NSURL * callbackUrl, NSError * error){
+                if (error) {
+                    // Handle authentication error
+                    NSLog(@"Authentication failed with error: %@", error);
+                } else {
+                    NSLog(@"Authentication successful");
+                    NSString *urlString = callbackUrl.absoluteString;
+                    char *tokenizedUrl = [[IOSOAuth GetDelegate] ConvertNSStringToChars:urlString];
+                    callback(tokenizedUrl);
+                }
+            }];
+            authSession.presentationContextProvider = self;
+            [authSession start];
+    #endif//Version guard for when we are compiling with versions lower than what we need
+    #endif//platform_IOS
     } else {//for support of things prior of IOS 17.4
          ASWebAuthenticationSession * authSession = [[ASWebAuthenticationSession alloc]
             initWithURL:authUrl
