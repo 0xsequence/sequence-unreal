@@ -87,6 +87,14 @@ static NSString * ErrorCapture = @"";
         plainText,
         &error);
         
+        //we never check the error state here!
+        if (error)
+        {
+            //read and log the error
+            NSError *err = CFBridgingRelease(error);
+            NSLog(@"Captured Error: %@", err);
+        }
+        
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
         NSLog(@"Encrypted Data: %@", EncryptedDataString);
