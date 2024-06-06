@@ -27,11 +27,11 @@ static NSString * ErrorCapture = @"";
     
     if (!privateKey) {
         NSError *err = CFBridgingRelease(error);  // ARC takes ownership
-        printf("Failed to generate private key");
+        printf("Failed to generate private key\n");
         return false;
     }
     publicKey = SecKeyCopyPublicKey(privateKey);
-    printf("successfully generated private key");
+    printf("successfully generated private key\n");
     return true;
 }
 
@@ -48,21 +48,21 @@ static NSString * ErrorCapture = @"";
     if (status == errSecSuccess) 
     {
         ErrorCapture = @"Private key retrieved successfully";
-        printf("SecSuccess");
+        printf("SecSuccess\n");
         publicKey = SecKeyCopyPublicKey(privateKey);
         return true;
     }
     else if (status == errSecItemNotFound)
     {
         ErrorCapture = @"Private key not found. Add it if needed.";
-        printf("ErrSecItemNotFound");
+        printf("ErrSecItemNotFound\n");
         return [self GenerateKeys];
     }
     else
     {
         //NSLog(@"Keychain error: %ld", (long)status);
         ErrorCapture = @"Keychain error";
-        printf("KeyChain Error");
+        printf("KeyChain Error\n");
         return false;
     }
 }
@@ -75,6 +75,7 @@ static NSString * ErrorCapture = @"";
 
 - (char *)Encrypt:(NSString *)str
 {
+    NSLog(@"Input to encrypt: %@", str);
     if ([self LoadKeys])
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
@@ -88,13 +89,14 @@ static NSString * ErrorCapture = @"";
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
+        NSLog(@"Encrypted Data: %@", EncryptedDataString);
         char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
         [self Clean];
         return EncryptedChars;
     }
     else
     {//Failure state
-        printf("Failed to load encryption key");
+        printf("Failed to load encryption key\n");
         char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
         [self Clean];
         return ErrorChars;
@@ -103,6 +105,7 @@ static NSString * ErrorCapture = @"";
 
 - (char *)Decrypt:(NSString *)str
 {
+    NSLog(@"Input to decrypt: %@", str);
     if ([self LoadKeys])
     {
             CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
@@ -116,13 +119,14 @@ static NSString * ErrorCapture = @"";
             
             NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
             NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
+            NSLog(@"Decrypted Data: %@", DecryptedDataString);
             char * DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
             [self Clean];
             return DecryptedChars;
     }
     else
     {//Failure state
-        printf("Failed to load decryption key");
+        printf("Failed to load decryption key\n");
         NSString * FailureString = @"Failed to load decryption key";
         char * ErrorChars = [self ConvertNSStringToChars:FailureString];
         [self Clean];
