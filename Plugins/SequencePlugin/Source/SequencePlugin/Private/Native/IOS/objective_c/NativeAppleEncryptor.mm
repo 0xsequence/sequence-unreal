@@ -83,7 +83,7 @@ static NSString * ErrorCapture = @"";
         
         CFDataRef EncryptedData = SecKeyCreateEncryptedData(
         publicKey,
-        kSecKeyAlgorithmRSAEncryptionPKCS1,
+        kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
         plainText,
         &error);
         
@@ -121,7 +121,7 @@ static NSString * ErrorCapture = @"";
             
             CFDataRef DecryptedData = SecKeyCreateDecryptedData(
             privateKey,
-            kSecKeyAlgorithmRSAEncryptionPKCS1,
+            kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
             plainText,
             &error);
             
