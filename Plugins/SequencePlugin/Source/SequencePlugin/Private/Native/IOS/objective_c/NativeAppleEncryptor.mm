@@ -87,10 +87,8 @@ static NSString * ErrorCapture = @"";
         plainText,
         &error);
         
-        //we never check the error state here!
         if (error)
         {
-            //read and log the error
             NSError *err = CFBridgingRelease(error);
             NSLog(@"Captured Error: %@", err);
         }
@@ -124,6 +122,12 @@ static NSString * ErrorCapture = @"";
             kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
             plainText,
             &error);
+            
+            if (error)
+            {
+                NSError *err = CFBridgingRelease(error);
+                NSLog(@"Captured Error: %@", err);
+            }
             
             NSData * PreProcDecryptedData = (__bridge NSData *)DecryptedData;
             NSString * DecryptedDataString = [[NSString alloc] initWithData:PreProcDecryptedData encoding:NSUTF8StringEncoding];
