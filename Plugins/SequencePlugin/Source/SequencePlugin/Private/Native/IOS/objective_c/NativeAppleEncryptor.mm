@@ -13,7 +13,7 @@ static NSString * ErrorCapture = @"";
 - (BOOL) GenerateKeys 
 {
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
-    
+    [self Clean];
     NSDictionary* attributes =
         @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
            (id)kSecAttrKeySizeInBits:         @2048,
@@ -102,8 +102,6 @@ static NSString * ErrorCapture = @"";
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
-        
-        
         
         CFDataRef EncryptedData = SecKeyCreateEncryptedData(
         publicKey,
