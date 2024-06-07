@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectConverter.h"
 #include "FeeOption.generated.h"
 
 UENUM(BlueprintType)
