@@ -4,8 +4,8 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-static SecKeyRef privateKey;
-static SecKeyRef publicKey;
+static SecKeyRef privateKey = NULL;
+static SecKeyRef publicKey = NULL;
 static NSString * ErrorCapture = @"";
 
 @implementation NativeAppleEncryptor
@@ -43,8 +43,8 @@ static NSString * ErrorCapture = @"";
         (__bridge id)kSecReturnRef: @YES,
     };
     
-    SecKeyRef privateKeyRef = NULL;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&privateKey);
+    
     if (status == errSecSuccess) 
     {
         ErrorCapture = @"Private key retrieved successfully";
@@ -54,7 +54,7 @@ static NSString * ErrorCapture = @"";
     }
     else if (status == errSecItemNotFound)
     {
-        ErrorCapture = @"Private key not found. Add it if needed.";
+        ErrorCapture = @"Keys not found generating fresh keys.";
         printf("ErrSecItemNotFound\n");
         return [self GenerateKeys];
     }
@@ -94,6 +94,7 @@ static NSString * ErrorCapture = @"";
         }
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
+        NSLog(@"Pre converted encrypted data: %@", PreProcEncryptedData);
         NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
         NSLog(@"Encrypted Data: %@", EncryptedDataString);
         char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
