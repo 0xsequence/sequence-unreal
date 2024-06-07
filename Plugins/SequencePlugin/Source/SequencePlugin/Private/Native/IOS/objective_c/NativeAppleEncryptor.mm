@@ -15,7 +15,7 @@ static NSString * ErrorCapture = @"";
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
     
     NSDictionary* attributes =
-        @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
+        @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
            (id)kSecAttrKeySizeInBits:         @2048,
            (id)kSecPrivateKeyAttrs:
                @{ (id)kSecAttrIsPermanent:    @YES,
@@ -49,8 +49,31 @@ static NSString * ErrorCapture = @"";
     {
         ErrorCapture = @"Private key retrieved successfully";
         printf("SecSuccess\n");
-        publicKey = SecKeyCopyPublicKey(privateKey);
-        return true;
+        
+        SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
+        if (SecKeyIsAlgorithmSupported(privateKey, kSecKeyOperationTypeSign, algorithm))
+        {//Check if the fetched key is valid for the type operation we need to do
+            publicKey = SecKeyCopyPublicKey(privateKey);
+            return true;
+        }
+        else
+        {//delete the existing key and generate a new one!
+            NSDictionary * query = @{
+                (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+                (__bridge id)kSecValueRef: (__bridge id)privateKey;
+                OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
+                if (status == errSecSuccess)
+                {
+                    NSLog(@"Removed invalid key, Generating fresh key\n");
+                    return [self GenerateKeys];
+                }
+                else
+                {
+                    NSLog(@"Error deleting key\n");
+                    return false;
+                }
+            };
+        }
     }
     else if (status == errSecItemNotFound)
     {
@@ -60,7 +83,6 @@ static NSString * ErrorCapture = @"";
     }
     else
     {
-        //NSLog(@"Keychain error: %ld", (long)status);
         ErrorCapture = @"Keychain error";
         printf("KeyChain Error\n");
         return false;
@@ -80,6 +102,8 @@ static NSString * ErrorCapture = @"";
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
+        
+        
         
         CFDataRef EncryptedData = SecKeyCreateEncryptedData(
         publicKey,
