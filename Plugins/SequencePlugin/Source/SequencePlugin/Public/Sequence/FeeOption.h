@@ -3,6 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
+#include "Indexer/Structs/TokenBalance.h"
+#include "Containers/Union.h"
+#include "Util/Structs/BE_Structs.h"
 #include "FeeOption.generated.h"
 
 UENUM(BlueprintType)
@@ -52,12 +55,6 @@ public:
 	}
 };
 
-/*
-gasLimit
-to
-value
-"token":{"chainId":137,"contractAddress":null,"decimals":18,"logoURL":"","name":"Matic","symbol":"MATIC","tokenID":null,"type":"unknown"},"value":"1526191875889204"}
-*/
 USTRUCT()
 struct FFeeOption
 {
@@ -71,12 +68,37 @@ public:
 	FFeeToken Token;
 	UPROPERTY()
 	FString Value = "";
-
+	int64 ValueNumber = 0;//Used for making easy comparisons
 	FFeeOption(){}
 
+	FFeeOption(const FTokenBalance& BalanceOption)
+	{
+		Value = "";
+		Value.AppendInt(BalanceOption.balance);
+		Token.Decimals = BalanceOption.contractInfo.decimals;
+		Token.Name = BalanceOption.contractInfo.name;
+		Token.Symbol = BalanceOption.contractInfo.symbol;
+		Token.ContractAddress = BalanceOption.contractAddress;
+		Token.ChainID = BalanceOption.chainId;
+		Token.LogoURL = BalanceOption.contractInfo.logoURI;
+		ValueNumber = BalanceOption.balance;
+		
+		switch(BalanceOption.contractType)
+		{
+		case EContractType::ERC20:
+			Token.Type = EFeeType::Erc20Token;
+			break;
+		case EContractType::ERC1155:
+			Token.Type = EFeeType::Erc1155Token;
+			break;		
+		default:
+			Token.Type = EFeeType::Unknown;
+			break;
+		}
+	}
+	
 	FFeeOption(const TSharedPtr<FJsonValue>& FeeOption)
 	{
-		//OR convert it to a FJsonObject and convert using UE calls instead!
 		const TSharedPtr<FJsonObject> * FeeOptionObject;
 		if (FeeOption->TryGetObject(FeeOptionObject))
 		{
@@ -87,6 +109,7 @@ public:
 				To = FeeOptionStruct.To;
 				Token = FeeOptionStruct.Token;
 				Value = FeeOptionStruct.Value;
+				ValueNumber = FCString::Atoi64(*Value);
 			}
 			else
 			{
@@ -130,6 +153,6 @@ struct FIntentDataFeeOptions
 public:
 	FString Identifier = "";
 	FString Network = "";
-	FString TransactionsString = "";//maybe look at changing this out for what gets handed in
+	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
 	FString Wallet = "";
 };
