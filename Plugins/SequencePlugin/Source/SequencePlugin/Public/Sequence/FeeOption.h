@@ -140,6 +140,12 @@ public:
 	int64 ValueNumber = 0;//Used for making easy comparisons
 	FFeeOption(){}
 
+	FFeeOption(const FEtherBalance& EtherBalance)
+	{
+		ValueNumber = EtherBalance.balanceWei;
+		Token.Type = EFeeType::Unknown;
+	}
+	
 	FFeeOption(const FTokenBalance& BalanceOption)
 	{
 		Value = "";
@@ -201,19 +207,24 @@ public:
 	 * Our numerical values are greater than or equal to the fee
 	 * we can afford said fee
 	 */
-	bool CanAfford(const FFeeOption& Fee)
+	bool CanAfford(const FFeeOption& Fee) const
 	{
-		const float OurValue = UIndexerSupport::GetAmount(ValueNumber,Token.Decimals);
-		const float FeeValue = UIndexerSupport::GetAmount(Fee.ValueNumber,Fee.Token.Decimals);
+		bool Affordable = true;
 
-		if (Token.Type != EFeeType::Unknown &&
-			Fee.Token.Type == Token.Type &&
-			)
+		if (Token.Type == Fee.Token.Type && Token.Type != EFeeType::Unknown)
 		{
-			
+			Affordable &= Token.ChainID == Fee.Token.ChainID;
+			Affordable &= Token.ContractAddress.Compare(Fee.Token.ContractAddress) == 0;
+			Affordable &= Token.Name.Compare(Fee.Token.Name) == 0;
+			Affordable &= Token.Symbol.Compare(Fee.Token.Symbol) == 0;
+			Affordable &= ValueNumber >= Fee.ValueNumber;
+		}
+		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
+		{//Edge case where we are looking for EtherBalance against an Unknown type of fee option
+			Affordable &= ValueNumber >= Fee.ValueNumber;
 		}
 		
-		return false;
+		return Affordable;
 	}
 };
 

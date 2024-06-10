@@ -16,7 +16,6 @@
 #include "Indexer/Indexer.h"
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
-#include "Sequence/FeeOption.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {
@@ -447,11 +446,14 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 {
 	TArray<FFeeOption> ValidFeeOptions;
 
-	for (auto FeeOption : FeeOptions)
+	for (auto BalanceOption : BalanceOptions)
 	{
-		for (auto BalanceOption : BalanceOptions)
+		for (auto FeeOption : FeeOptions)
 		{
-			
+			if (BalanceOption.CanAfford(FeeOption))
+			{
+				ValidFeeOptions.Add(FeeOption);
+			}
 		}
 	}
 	
@@ -468,9 +470,9 @@ TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArra
 	return ParsedFeeOptionList;
 }
 
-void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [=,this](const FString& Response)
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{		
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
@@ -486,20 +488,30 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList))
 					{	
 						TArray<FFeeOption> Fees = JsonFeeOptionListToFeeOptionList(*FeeList);
-
-						//new set of calls out to the indexer
 						FGetTokenBalancesArgs args;
 						args.accountAddress = this->GetWalletAddress();
 
-						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [=,this,Fees] (const FGetTokenBalancesReturn& BalanceResponse)
+						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [this, Fees, OnSuccess, OnFailure] (const FGetTokenBalancesReturn& BalanceResponse)
 						{
-							TArray<FFeeOption> Balances = BalancesListToFeeOptionList(BalanceResponse.balances);
-							
+							TArray<FTokenBalance> PreProcBalances = BalanceResponse.balances;
+							const TSuccessCallback<FEtherBalance> EtherSuccess = [this, PreProcBalances, Fees, OnSuccess] (const FEtherBalance& EtherBalance)
+							{
+								TArray<FFeeOption> Balances = this->BalancesListToFeeOptionList(PreProcBalances);
+								Balances.Add(FFeeOption(EtherBalance));
+								OnSuccess(this->FindValidFeeOptions(Fees,Balances));
+							};
+
+							const FFailureCallback EtherFailure = [this,OnFailure] (const FSequenceError& Err)
+							{
+								OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
+							};
+
+							this->GetEtherBalance(this->GetWalletAddress(),EtherSuccess,EtherFailure);
 						};
 
-						const FFailureCallback BalanceFailure = [this,=](FSequenceError Err)
+						const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
 						{
-							
+							OnFailure(FSequenceError(RequestFail, "Failed to Get Balances from Indexer"));
 						};
 						
 						this->GetTokenBalances(args,BalanceSuccess,BalanceFailure);
