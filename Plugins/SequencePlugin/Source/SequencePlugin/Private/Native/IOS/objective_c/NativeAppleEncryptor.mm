@@ -15,7 +15,7 @@ static NSString * ErrorCapture = @"";
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
     [self Clean];
     NSDictionary* attributes =
-        @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
+        @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionPKCS1,
            (id)kSecAttrKeySizeInBits:         @2048,
            (id)kSecPrivateKeyAttrs:
                @{ (id)kSecAttrIsPermanent:    @YES,
