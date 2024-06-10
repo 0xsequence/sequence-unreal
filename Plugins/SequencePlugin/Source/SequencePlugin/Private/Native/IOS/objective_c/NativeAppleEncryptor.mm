@@ -58,11 +58,11 @@ static NSString * ErrorCapture = @"";
         }
         else
         {//delete the existing key and generate a new one!
-            NSDictionary * query = @{
+            NSDictionary * deletionQuery = @{
                 (__bridge id)kSecClass: (__bridge id)kSecClassKey,
                 (__bridge id)kSecValueRef: (__bridge id)privateKey;
-                OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
-                if (status == errSecSuccess)
+                OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
+                if (deletionStatus == errSecSuccess)
                 {
                     NSLog(@"Removed invalid key, Generating fresh key\n");
                     return [self GenerateKeys];
