@@ -63,18 +63,17 @@ static NSString * ErrorCapture = @"";
                 (__bridge id)kSecValueRef: (__bridge id)privateKey,
                 };
                 
-                OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
-                if (deletionStatus == errSecSuccess)
-                {
-                    NSLog(@"Removed invalid key, Generating fresh key\n");
-                    return [self GenerateKeys];
-                }
-                else
-                {
-                    NSLog(@"Error deleting key\n");
-                    return false;
-                }
-            };
+            OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
+            if (deletionStatus == errSecSuccess)
+            {
+                NSLog(@"Removed invalid key, Generating fresh key\n");
+                return [self GenerateKeys];
+            }
+            else
+            {
+                NSLog(@"Error deleting key\n");
+                return false;
+            }
         }
     }
     else if (status == errSecItemNotFound)
