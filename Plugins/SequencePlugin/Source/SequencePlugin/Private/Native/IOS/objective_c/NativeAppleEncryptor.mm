@@ -51,34 +51,8 @@ static NSString * ErrorCapture = @"";
     {
         ErrorCapture = @"Private key retrieved successfully";
         printf("SecSuccess\n");
-        
-        SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
-        if (SecKeyIsAlgorithmSupported(privateKey, kSecKeyOperationTypeSign, algorithm))
-        {//Check if the fetched key is valid for the type operation we need to do
-            publicKey = SecKeyCopyPublicKey(privateKey);
-            return true;
-        }
-        else
-        {//delete the existing key and generate a new one!
-            NSDictionary * deletionQuery = @{
-                (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-                (__bridge id)kSecValueRef: (__bridge id)privateKey,
-                };
-                
-            OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
-            if (deletionStatus == errSecSuccess)
-            {
-                ErrorCapture = @"Removed invalid key, generating fresh key";
-                NSLog(@"Removed invalid key, Generating fresh key\n");
-                return [self GenerateKeys];
-            }
-            else
-            {
-                ErrorCapture = @"Error Deleting key";
-                NSLog(@"Error deleting key\n");
-                return false;
-            }
-        }
+        publicKey = SecKeyCopyPublicKey(privateKey);
+        return true;
     }
     else if (status == errSecItemNotFound)
     {
