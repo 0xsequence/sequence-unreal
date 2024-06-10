@@ -361,3 +361,40 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 		Api->CloseSession(OnResponse,GenericFailure);
 	}
 }
+
+void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
+	{
+		for (const auto Fee : Response)
+		{
+			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);
+		}
+		OnSuccess("Get FeeOptions Test Passed");
+	};
+
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Test Failed", Error);
+	};
+
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+
+		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+
+		FERC20Transaction T20;
+		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+		T20.value = "1000";
+		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		
+		Api->GetFeeOptions(Transactions,OnResponse,GenericFailure);
+	}
+}
