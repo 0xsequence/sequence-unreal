@@ -60,7 +60,9 @@ static NSString * ErrorCapture = @"";
         {//delete the existing key and generate a new one!
             NSDictionary * deletionQuery = @{
                 (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-                (__bridge id)kSecValueRef: (__bridge id)privateKey;
+                (__bridge id)kSecValueRef: (__bridge id)privateKey,
+                };
+                
                 OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
                 if (deletionStatus == errSecSuccess)
                 {
