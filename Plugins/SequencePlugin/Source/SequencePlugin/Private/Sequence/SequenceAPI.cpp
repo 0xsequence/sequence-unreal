@@ -431,18 +431,46 @@ void USequenceWallet::SendTransactionWithFeeOption()
 /hwUBAv+MAAAA/87/gAEg/7hw//pZ/+//hv/E/55o//H////+Rv/3L/+0/+8l/8//mf/pDzoU/93/7/+vbEz/rv+QFQT+h78BBgIG/9IHGAEHAq7cBQEoAAEDBHVzZGMHAu1L195MAAV1c2RjZQcC7WV0YRgABHdldGgJAg3gtrOnZAAAAQ8BAAAADt3z7MEy57Tc//8BQa7Sa8rpjdU9D2zr2VNTXp3UrE5s6RorrRUP/u55/n1zIFvxAwvD/UCR76+84Dr5RqnpwIoz1jWizZJfxJN3V5McAA=="}}}
  */
 
-void USequenceWallet::JsonFeeOptionListToTArray(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList)
+TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList)
+{
+	TArray<FFeeOption> ParsedBalances;
+
+	for (auto Balance : BalanceList)
+	{
+		ParsedBalances.Add(FFeeOption(Balance));
+	}
+	
+	return ParsedBalances;
+}
+
+TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions)
+{
+	TArray<FFeeOption> ValidFeeOptions;
+
+	for (auto FeeOption : FeeOptions)
+	{
+		for (auto BalanceOption : BalanceOptions)
+		{
+			
+		}
+	}
+	
+	return ValidFeeOptions;
+}
+
+TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList)
 {
 	TArray<FFeeOption> ParsedFeeOptionList;
 	for (auto FeeOption : FeeOptionList)
 	{
 		ParsedFeeOptionList.Add(FFeeOption(FeeOption));
 	}
+	return ParsedFeeOptionList;
 }
 
 void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
+	const TSuccessCallback<FString> OnResponse = [=,this](const FString& Response)
 	{		
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
@@ -456,8 +484,25 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 				{
 					const TArray<TSharedPtr<FJsonValue>> * FeeList = nullptr;
 					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList))
-					{
+					{	
+						TArray<FFeeOption> Fees = JsonFeeOptionListToFeeOptionList(*FeeList);
+
+						//new set of calls out to the indexer
+						FGetTokenBalancesArgs args;
+						args.accountAddress = this->GetWalletAddress();
+
+						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [=,this,Fees] (const FGetTokenBalancesReturn& BalanceResponse)
+						{
+							TArray<FFeeOption> Balances = BalancesListToFeeOptionList(BalanceResponse.balances);
+							
+						};
+
+						const FFailureCallback BalanceFailure = [this,=](FSequenceError Err)
+						{
+							
+						};
 						
+						this->GetTokenBalances(args,BalanceSuccess,BalanceFailure);
 					}
 				}
 				else

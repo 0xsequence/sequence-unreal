@@ -6,6 +6,7 @@
 #include "Indexer/Structs/TokenBalance.h"
 #include "Containers/Union.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Indexer/IndexerSupport.h"
 #include "FeeOption.generated.h"
 
 UENUM(BlueprintType)
@@ -26,7 +27,7 @@ public:
 	UPROPERTY()
 	FString ContractAddress = "";
 	UPROPERTY()
-	uint32 Decimals = 0;
+	int32 Decimals = 0;
 	UPROPERTY()
 	FString LogoURL = "";
 	UPROPERTY()
@@ -40,7 +41,7 @@ public:
 
 	FFeeToken(){}
 	
-	FFeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, uint32 DecimalsIn,
+	FFeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
 		const FString& TokenIDIn, EFeeType TypeIn)
 	{
@@ -54,6 +55,74 @@ public:
 		Type = TypeIn;
 	}
 };
+
+/*
+ *	Reference code for how to determine which fee options to provide the user
+ *         private async Task<FeeOptionsResponse> DetermineWhichFeeOptionsUserHasInWallet(IntentResponseFeeOptions feeOptions, Chain network)
+        {
+            try
+            {
+                IIndexer indexer = new ChainIndexer(network);
+                int feeOptionsLength = feeOptions.feeOptions.Length;
+                FeeOptionReturn[] decoratedFeeOptions = new FeeOptionReturn[feeOptionsLength];
+                for (int i = 0; i < feeOptionsLength; i++)
+                {
+                    FeeToken token = feeOptions.feeOptions[i].token;
+                    BigInteger requiredBalance = BigInteger.Parse(feeOptions.feeOptions[i].value);
+                    switch (token.type)
+                    {
+                        case FeeTokenType.unknown:
+                            EtherBalance etherBalance = await indexer.GetEtherBalance(_address);
+                            decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
+                                requiredBalance <= etherBalance.balanceWei);
+                            break;
+                        case FeeTokenType.erc20Token:
+                            GetTokenBalancesReturn tokenBalances = await indexer.GetTokenBalances(new GetTokenBalancesArgs(
+                                _address, token.contractAddress));
+                            if (tokenBalances.balances.Length > 0)
+                            {
+                                if (tokenBalances.balances[0].contractAddress != token.contractAddress)
+                                {
+                                    throw new Exception(
+                                        $"Expected contract address from indexer response ({tokenBalances.balances[0].contractAddress}) to match contract address we queried ({token.contractAddress})");
+                                }
+
+                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
+                                    requiredBalance <= tokenBalances.balances[0].balance);
+                            }
+                            else
+                            {
+                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i], false);
+                            }
+
+                            break;
+                        case FeeTokenType.erc1155Token:
+                            Dictionary<BigInteger, TokenBalance> sftBalances =
+                                await indexer.GetTokenBalancesOrganizedInDictionary(_address, token.contractAddress,
+                                    false);
+                            if (sftBalances.TryGetValue(BigInteger.Parse(token.tokenID), out TokenBalance balance))
+                            {
+                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
+                                    requiredBalance <= balance.balance);
+                            }
+                            else
+                            {
+                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i], false);
+                            }
+
+                            break;
+                    }
+                }
+
+                return new FeeOptionsResponse(decoratedFeeOptions, feeOptions.feeQuote);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to determine which fee option tokens the user has in their wallet: " +
+                                    e.Message);
+            }
+        }
+ */
 
 USTRUCT()
 struct FFeeOption
@@ -124,6 +193,27 @@ public:
 		To = ToIn;
 		Token = TokenIn;
 		Value = ValueIn;
+	}
+
+	/*
+	 * Compare our values against the fee provided
+	 * if our values are valid & the Fee's values are valid &
+	 * Our numerical values are greater than or equal to the fee
+	 * we can afford said fee
+	 */
+	bool CanAfford(const FFeeOption& Fee)
+	{
+		const float OurValue = UIndexerSupport::GetAmount(ValueNumber,Token.Decimals);
+		const float FeeValue = UIndexerSupport::GetAmount(Fee.ValueNumber,Fee.Token.Decimals);
+
+		if (Token.Type != EFeeType::Unknown &&
+			Fee.Token.Type == Token.Type &&
+			)
+		{
+			
+		}
+		
+		return false;
 	}
 };
 
