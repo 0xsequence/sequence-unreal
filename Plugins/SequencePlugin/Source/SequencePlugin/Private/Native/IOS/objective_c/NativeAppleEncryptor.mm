@@ -15,7 +15,7 @@ static NSString * ErrorCapture = @"";
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
     [self Clean];
     NSDictionary* attributes =
-        @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionPKCS1,
+        @{ (id)kSecAttrKeyType:               (id)kSecKeyAlgorithmRSAEncryptionOAEPSHA512,
            (id)kSecAttrKeySizeInBits:         @2048,
            (id)kSecPrivateKeyAttrs:
                @{ (id)kSecAttrIsPermanent:    @YES,
@@ -27,7 +27,7 @@ static NSString * ErrorCapture = @"";
     
     if (!privateKey) {
         NSError *err = CFBridgingRelease(error);  // ARC takes ownership
-        ErrorCapture = @"Failed to generate key: ";
+        ErrorCapture = @"Failed to generate key";
         printf("Failed to generate private key\n");
         return false;
     }
