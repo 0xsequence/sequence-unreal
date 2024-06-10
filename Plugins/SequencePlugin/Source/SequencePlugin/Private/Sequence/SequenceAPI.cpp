@@ -413,22 +413,10 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption()
+void USequenceWallet::SendTransactionWithFeeOption(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	
 }
-
-/*
-{"response":{"code":"feeOptions","data":{"feeOptions":
-[
-{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":null,"decimals":18,"logoURL":"","name":"Matic","symbol":"MATIC","tokenID":null,"type":"unknown"},"value":"1526191875889204"},
-{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359","decimals":6,"logoURL":"","name":"USDC","symbol":"USDC","tokenID":null,"type":"erc20Token"},"value":"1925"},
-{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174","decimals":6,"logoURL":"","name":"USDC.e","symbol":"USDC.e","tokenID":null,"type":"erc20Token"},"value":"1831"},
-{"gasLimit":100000,"to":"0x7e08701cC9194eF4fFD82421dd0d986d1B43D521","token":{"chainId":137,"contractAddress":"0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619","decimals":18,"logoURL":"","name":"Wrapped Ether","symbol":"WETH","tokenID":null,"type":"erc20Token"},"value":"453638203296"}
-],
-"feeQuote":"/7N/AwEBCEZlZVF1b3RlAf+AAAEKARFUcmFuc2FjdGlvbkRpZ2VzdAH/ggABDUlzV2hpdGVsaXN0ZWQBAgABCkdhc1Nwb25zb3IBBgABB0dhc1RhbmsBBgABCEdhc1VzYWdlAQYAAQhHYXNQcmljZQH/hAABC05hdGl2ZVByaWNlAf+EAAELVG9rZW5QcmljZXMB/4YAAQlFeHBpcmVzQXQB/4gAAQlTaWduYXR1cmUBCgAAABT/gQEBAQRIYXNoAf+CAAEGAUAAAAr/gwUBAv+KAAAAJP+FBAEBE21hcFtzdHJpbmddKmJpZy5JbnQB/4YAAQwB/4QAAAr
-/hwUBAv+MAAAA/87/gAEg/7hw//pZ/+//hv/E/55o//H////+Rv/3L/+0/+8l/8//mf/pDzoU/93/7/+vbEz/rv+QFQT+h78BBgIG/9IHGAEHAq7cBQEoAAEDBHVzZGMHAu1L195MAAV1c2RjZQcC7WV0YRgABHdldGgJAg3gtrOnZAAAAQ8BAAAADt3z7MEy57Tc//8BQa7Sa8rpjdU9D2zr2VNTXp3UrE5s6RorrRUP/u55/n1zIFvxAwvD/UCR76+84Dr5RqnpwIoz1jWizZJfxJN3V5McAA=="}}}
- */
 
 TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList)
 {
