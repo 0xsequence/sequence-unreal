@@ -27,10 +27,12 @@ static NSString * ErrorCapture = @"";
     
     if (!privateKey) {
         NSError *err = CFBridgingRelease(error);  // ARC takes ownership
+        ErrorCapture = @"Failed to generate key: ";
         printf("Failed to generate private key\n");
         return false;
     }
     publicKey = SecKeyCopyPublicKey(privateKey);
+    ErrorCapture = @"Successfully generated key";
     printf("successfully generated private key\n");
     return true;
 }
@@ -66,11 +68,13 @@ static NSString * ErrorCapture = @"";
             OSStatus deletionStatus = SecItemDelete((__bridge CFDictionaryRef)deletionQuery);
             if (deletionStatus == errSecSuccess)
             {
+                ErrorCapture = @"Removed invalid key, generating fresh key";
                 NSLog(@"Removed invalid key, Generating fresh key\n");
                 return [self GenerateKeys];
             }
             else
             {
+                ErrorCapture = @"Error Deleting key";
                 NSLog(@"Error deleting key\n");
                 return false;
             }
