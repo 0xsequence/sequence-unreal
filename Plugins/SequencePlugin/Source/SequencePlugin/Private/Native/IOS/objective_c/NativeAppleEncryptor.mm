@@ -90,13 +90,17 @@ static NSString * ErrorCapture = @"";
             return ErrorChars;
         }
         
-        CFDataRef EncryptedData = SecKeyCreateEncryptedData(
-        publicKey,
-        algorithm,
-        plainText,
-        &error);
+        NSData * EncryptedData = (NSData*)CFBridgingRelease(SecKeyCreateEncryptedData(publicKey,algorithm,plainText,&error));
         
-        if (error)
+        if (EncryptedData)
+        {
+            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
+            NSLog(@"Encrypted Data: %@", EncryptedDataString);
+            char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
+            [self Clean];
+            return EncryptedChars;
+        }
+        else
         {
             NSError *err = CFBridgingRelease(error);
             ErrorCapture = err.localizedDescription;
@@ -105,14 +109,6 @@ static NSString * ErrorCapture = @"";
             [self Clean];
             return ErrorChars;
         }
-        
-        NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
-        NSLog(@"Pre converted encrypted data: %@", PreProcEncryptedData);
-        NSString * EncryptedDataString = [[NSString alloc] initWithData:PreProcEncryptedData encoding:NSUTF8StringEncoding];
-        NSLog(@"Encrypted Data: %@", EncryptedDataString);
-        char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
-        [self Clean];
-        return EncryptedChars;
     }
     else
     {//Failure state
