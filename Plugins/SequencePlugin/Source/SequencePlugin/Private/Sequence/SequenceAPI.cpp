@@ -413,9 +413,75 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
-{//need fee qoute
+void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	Transactions.Insert(FeeOption.CreateTransaction(),0);
+	this->CachedFeeQuote;
+
+	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
+	{
+		TSharedPtr<FJsonObject> jsonObj;
+		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		{
+			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
+				{
+					FString TxHash = "";
+					FString MetaTxHash = "";
+
+					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
+					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
+					
+					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
+						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
+						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
+						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
+					{						
+						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
+						OnSuccess(TxnResponse);
+					}
+					else
+					{
+						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
 	
+	if (this->Credentials.RegisteredValid())
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,BuildSendTransactionWithFeeIntent(Transactions,this->CachedFeeQuote),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
 }
 
 TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList)
@@ -461,7 +527,8 @@ TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArra
 void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
-	{		
+	{
+		UE_LOG(LogTemp,Display,TEXT("%s"),*Response);
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
@@ -473,7 +540,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
 					const TArray<TSharedPtr<FJsonValue>> * FeeList = nullptr;
-					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList))
+					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList) && DataObj->Get()->TryGetStringField(TEXT("feeQuote"),this->CachedFeeQuote))
 					{	
 						TArray<FFeeOption> Fees = JsonFeeOptionListToFeeOptionList(*FeeList);
 						FGetTokenBalancesArgs args;
@@ -594,9 +661,7 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 	
 	if (this->Credentials.RegisteredValid())
 	{
-		//we need to gather fee data here first
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
-		//this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
 		this->SequenceRPC(URL,BuildGetFeeOptionsIntent(Transactions),OnResponse,OnFailure);
 	}
 	else
@@ -632,6 +697,19 @@ FString USequenceWallet::TransactionListToJsonString(const TArray<TUnion<FRawTra
 	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
 	TransactionsPayload += "]";
 	return TransactionsPayload;
+}
+
+FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote)
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString TxnsString = USequenceWallet::TransactionListToJsonString(Txns);
+	const FString SigIntent = "{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(SigIntent);
+	FString Intent = "{\"intent\":{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
+	return Intent;
 }
 
 FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns)
