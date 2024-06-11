@@ -27,7 +27,7 @@ static NSString * ErrorCapture = @"";
     
     if (!privateKey) {
         NSError *err = CFBridgingRelease(error);  // ARC takes ownership
-        ErrorCapture = @"Failed to generate key";
+        ErrorCapture = err.localizedDescription;
         printf("Failed to generate private key\n");
         return false;
     }
