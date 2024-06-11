@@ -414,7 +414,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 }
 
 void USequenceWallet::SendTransactionWithFeeOption(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
-{
+{//need fee qoute
 	
 }
 

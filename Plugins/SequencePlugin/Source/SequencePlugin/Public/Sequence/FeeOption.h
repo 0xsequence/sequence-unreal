@@ -6,7 +6,6 @@
 #include "Indexer/Structs/TokenBalance.h"
 #include "Containers/Union.h"
 #include "Util/Structs/BE_Structs.h"
-#include "Indexer/IndexerSupport.h"
 #include "FeeOption.generated.h"
 
 UENUM(BlueprintType)
@@ -225,6 +224,31 @@ public:
 		}
 		
 		return Affordable;
+	}
+
+	TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> CreateTransaction()
+	{
+		TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction;
+		switch(Token.Type)
+		{
+		case EFeeType::Unknown:
+			Transaction.SetSubtype<FRawTransaction>(FRawTransaction(To,"",Value));
+			break;
+		case EFeeType::Erc20Token:
+			Transaction.SetSubtype<FERC20Transaction>(FERC20Transaction(To,Value,Token.ContractAddress));
+			break;
+		case EFeeType::Erc1155Token:
+			Transaction.SetSubtype<FERC1155Transaction>(FERC1155Transaction(To,"",Token.ContractAddress,{ FERC1155TxnValue(Value,Token.TokenID) }));
+			break;
+		default:
+			FRawTransaction FailedOption;
+			FailedOption.to = To;
+			FailedOption.value = Value;
+			FailedOption.data = "";
+			Transaction.SetSubtype<FRawTransaction>(FailedOption);
+			break;
+		}
+		return Transaction;
 	}
 };
 
