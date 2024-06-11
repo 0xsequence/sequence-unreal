@@ -81,9 +81,18 @@ static NSString * ErrorCapture = @"";
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
         
+        SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
+        if (!SecKeyIsAlgorithmSupported(publicKey, kSecKeyOperationTypeEncrypt, algorithm))
+        {
+            ErrorCapture = @"Key generated doesn't support set algorithm / operation";
+            char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
+            [self Clean];
+            return ErrorChars;
+        }
+        
         CFDataRef EncryptedData = SecKeyCreateEncryptedData(
         publicKey,
-        kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM,
+        algorithm,
         plainText,
         &error);
         
