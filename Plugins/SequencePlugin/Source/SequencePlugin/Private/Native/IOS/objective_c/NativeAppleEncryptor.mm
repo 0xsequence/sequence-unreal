@@ -90,7 +90,11 @@ static NSString * ErrorCapture = @"";
         if (error)
         {
             NSError *err = CFBridgingRelease(error);
+            ErrorCapture = err.localizedDescription;
             NSLog(@"Captured Error: %@", err);
+            char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
+            [self Clean];
+            return ErrorChars;
         }
         
         NSData * PreProcEncryptedData = (__bridge NSData *)EncryptedData;
