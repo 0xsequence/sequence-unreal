@@ -13,10 +13,9 @@ static NSString * ErrorCapture = @"";
 - (BOOL) GenerateKeys 
 {
     NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
-    [self Clean];
     NSDictionary* attributes =
         @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
-           (id)kSecAttrKeySizeInBits:         @4096,
+           (id)kSecAttrKeySizeInBits:         @2048,
            (id)kSecPrivateKeyAttrs:
                @{ (id)kSecAttrIsPermanent:    @YES,
                   (id)kSecAttrApplicationTag: tag,
