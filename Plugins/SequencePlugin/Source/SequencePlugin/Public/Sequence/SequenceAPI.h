@@ -113,7 +113,6 @@ private:
 	static FString TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions);
 	
 	FString BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns);
-	
 	FString BuildSignMessageIntent(const FString& Message) const;
 	FString BuildSendTransactionIntent(const FString& Txns) const;
 	FString BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote);
@@ -122,6 +121,7 @@ private:
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
 	FString GeneratePacketSignature(const FString& Packet) const;
+	FString GenerateIntent(const FString& Data, const FString& Operation) const;
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version

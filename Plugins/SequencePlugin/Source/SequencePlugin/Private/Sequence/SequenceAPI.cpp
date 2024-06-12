@@ -717,6 +717,19 @@ FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<F
 	return Intent;
 }
 
+FString USequenceWallet::GenerateIntent(const FString& Data, const FString& Operation) const
+{
+	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 expires = issued + 86400;
+	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
+	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
+	const FString SigIntent = "{\"data\":" + Data + ",\"expiresAt\":" + expiresString + ",\"issuedAt\":" + issuedString + ",\"name\":\""+Operation+"\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString Signature = this->GeneratePacketSignature(SigIntent);
+	//
+	const FString Intent = "{}";
+	return Intent;
+}
+
 FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns)
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
@@ -779,7 +792,6 @@ FString USequenceWallet::BuildRegisterSessionIntent() const
 	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"},\"friendlyName\":\""+GUID+"\"}";
-	//UE_LOG(LogTemp,Display,TEXT("RegisterSession Intent: %s"),*Intent);
 	return Intent;
 }
 
@@ -792,7 +804,6 @@ FString USequenceWallet::BuildListSessionIntent() const
 	const FString SigIntent = "{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
 	const FString Intent = "{\"intent\":{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
 	return Intent;
 }
 
