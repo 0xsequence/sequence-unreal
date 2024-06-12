@@ -502,10 +502,13 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 
 	for (auto BalanceOption : BalanceOptions)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Checking which Fee option matches the following Balance Option: %s"), *UIndexerSupport::StructToString(BalanceOption));
 		for (auto FeeOption : FeeOptions)
 		{
+			UE_LOG(LogTemp, Display, TEXT("Observing Fee option: %s"), *UIndexerSupport::StructToString(FeeOption));
 			if (BalanceOption.CanAfford(FeeOption))
 			{
+				UE_LOG(LogTemp, Display, TEXT("Valid Fee Option"));
 				ValidFeeOptions.Add(FeeOption);
 			}
 		}
@@ -545,6 +548,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 						TArray<FFeeOption> Fees = JsonFeeOptionListToFeeOptionList(*FeeList);
 						FGetTokenBalancesArgs args;
 						args.accountAddress = this->GetWalletAddress();
+						args.includeMetaData = true;
 
 						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [this, Fees, OnSuccess, OnFailure] (const FGetTokenBalancesReturn& BalanceResponse)
 						{
@@ -706,9 +710,10 @@ FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<F
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString TxnsString = USequenceWallet::TransactionListToJsonString(Txns);
-	const FString SigIntent = "{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
+	const FString SigIntent = "{\"data\":{\"identifier\":\""+Identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"transactionsFeeQuote\":\""+FeeQuote+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	FString Intent = "{\"intent\":{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
+	FString Intent = "{\"intent\":{\"data\":{\"identifier\":\""+Identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"transactionsFeeQuote\":\""+FeeQuote+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
 	return Intent;
 }
 

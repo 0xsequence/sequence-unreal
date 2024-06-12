@@ -213,14 +213,20 @@ public:
 		if (Token.Type == Fee.Token.Type && Token.Type != EFeeType::Unknown)
 		{
 			Affordable &= Token.ChainID == Fee.Token.ChainID;
-			Affordable &= Token.ContractAddress.Compare(Fee.Token.ContractAddress) == 0;
-			Affordable &= Token.Name.Compare(Fee.Token.Name) == 0;
-			Affordable &= Token.Symbol.Compare(Fee.Token.Symbol) == 0;
+			Affordable &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
+			Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+			Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
 			Affordable &= ValueNumber >= Fee.ValueNumber;
 		}
 		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
 		{//Edge case where we are looking for EtherBalance against an Unknown type of fee option
+			Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+			Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
 			Affordable &= ValueNumber >= Fee.ValueNumber;
+		}
+		else
+		{
+			Affordable = false;
 		}
 		
 		return Affordable;
