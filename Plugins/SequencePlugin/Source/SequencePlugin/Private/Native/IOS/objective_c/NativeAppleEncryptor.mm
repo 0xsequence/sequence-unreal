@@ -76,10 +76,11 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 
 - (char *)Encrypt:(NSString *)str
 {
+    NSString * TestString = @"Some epic easy string";
     NSLog(@"Input to encrypt: %@", str);
     if ([self LoadKeys])
     {
-        CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataRef plainText = (__bridge CFDataRef)[TestString dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
         
         if (!SecKeyIsAlgorithmSupported(publicKey, kSecKeyOperationTypeEncrypt, algorithm))
