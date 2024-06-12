@@ -398,3 +398,58 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 		Api->GetFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 }
+
+void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess, TFunction<void(FString,FSequenceError)> OnFailure)
+{
+	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+	FERC20Transaction T20;
+	T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+	T20.value = "10";
+	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	
+	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
+	{
+		if (Response.Num() > 0)
+		{
+			const FFeeOption SelectedFeeOption = Response[0];
+			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *UIndexerSupport::StructToString(SelectedFeeOption));
+			
+			const FFailureCallback OnTransactionFailure = [OnFailure](const FSequenceError& Error)
+			{
+				OnFailure("Transaction failure", Error);
+			};
+
+			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+			if (WalletOptional.IsSet() && WalletOptional.GetValue())
+			{
+				USequenceWallet * Api = WalletOptional.GetValue();
+				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FTransactionResponse& Transaction)
+				{
+					FString OutputString;
+					const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+					FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+					OnSuccess(OutputString);
+				}, OnTransactionFailure);
+			}
+		}
+		else
+		{
+			OnFailure("Test failed no fee options in response",FSequenceError(EErrorType::EmptyResponse,"Empty fee option response"));
+		}
+	};
+
+	const FFailureCallback OnFeeFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Get Fee Option Response failure", Error);
+	};
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->GetFeeOptions(Transactions,OnFeeResponse,OnFeeFailure);
+	}
+}

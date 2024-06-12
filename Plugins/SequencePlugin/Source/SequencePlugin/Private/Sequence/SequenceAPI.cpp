@@ -700,15 +700,15 @@ FString USequenceWallet::TransactionListToJsonString(const TArray<TUnion<FRawTra
 }
 
 FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote)
-{
+{	
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString TxnsString = USequenceWallet::TransactionListToJsonString(Txns);
-	const FString SigIntent = "{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
+	const FString SigIntent = "{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
 	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	FString Intent = "{\"intent\":{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"feeOptions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
+	FString Intent = "{\"intent\":{\"data\":{\"feeQuote\":\""+FeeQuote+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+TxnsString+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
 	return Intent;
 }
 

@@ -62,6 +62,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestGetFeeOptions() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendTransactionWithFee() const;
 	
 	/*
 	* Called by frontend to test the indexer

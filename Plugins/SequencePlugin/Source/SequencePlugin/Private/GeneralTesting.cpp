@@ -148,6 +148,21 @@ void AGeneralTesting::TestSendERC1155() const
 	SequenceAPITest::SendERC1155(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestSendTransactionWithFee() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](const FString& State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](const FString& Data, const FSequenceError& Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendTransactionWithFee(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestGetFeeOptions() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
