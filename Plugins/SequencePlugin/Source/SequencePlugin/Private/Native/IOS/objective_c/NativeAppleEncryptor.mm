@@ -92,15 +92,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
         
         NSData * EncryptedData = (NSData*)CFBridgingRelease(SecKeyCreateEncryptedData(publicKey,algorithm,plainText,&error));
         
-        if (EncryptedData)
-        {
-            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
-            NSLog(@"Encrypted Data: %@", EncryptedDataString);
-            char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
-            [self Clean];
-            return EncryptedChars;
-        }
-        else
+        if (error)
         {
             NSError *err = CFBridgingRelease(error);
             ErrorCapture = err.localizedDescription;
@@ -109,6 +101,12 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
             [self Clean];
             return ErrorChars;
         }
+        
+        NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
+        NSLog(@"Encrypted Data: %@", EncryptedDataString);
+        char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
+        [self Clean];
+        return EncryptedChars;
     }
     else
     {//Failure state
@@ -137,15 +135,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
             
             NSData * DecryptedData = (NSData*)CFBridgingRelease(SecKeyCreateDecryptedData(privateKey,algorithm,plainText,&error));
             
-            if (DecryptedData)
-            {
-                NSString * DecryptedDataString = [[NSString alloc] initWithData:DecryptedData encoding:NSUTF8StringEncoding];
-                NSLog(@"Decrypted Data: %@", DecryptedDataString);
-                char * DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
-                [self Clean];
-                return DecryptedChars;
-            }
-            else
+            if (error)
             {
                 NSError *err = CFBridgingRelease(error);
                 ErrorCapture = err.localizedDescription;
@@ -154,6 +144,12 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
                 [self Clean];
                 return ErrorChars;
             }
+            
+            NSString * DecryptedDataString = [[NSString alloc] initWithData:DecryptedData encoding:NSUTF8StringEncoding];
+            NSLog(@"Decrypted Data: %@", DecryptedDataString);
+            char * DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
+            [self Clean];
+            return DecryptedChars;
     }
     else
     {//Failure state
