@@ -8,6 +8,11 @@
 #include "BE_Structs.generated.h"
 
 //Sequence API Structs
+USTRUCT(BlueprintType)
+struct FGenericTransaction
+{
+    GENERATED_USTRUCT_BODY()
+};
 
 USTRUCT(BlueprintType)
 struct FRawTransaction

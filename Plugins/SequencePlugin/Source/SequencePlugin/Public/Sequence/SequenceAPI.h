@@ -17,6 +17,7 @@
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
 #include "Sequence/FeeOption.h"
+#include "SequenceIntent.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -114,14 +115,16 @@ private:
 	
 	FString BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns);
 	FString BuildSignMessageIntent(const FString& Message) const;
-	FString BuildSendTransactionIntent(const FString& Txns) const;
+	FString BuildSendTransactionIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const;
 	FString BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote);
 	FString BuildRegisterSessionIntent() const;
 	FString BuildListSessionIntent() const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
 	FString GeneratePacketSignature(const FString& Packet) const;
-	FString GenerateIntent(const FString& Data, const FString& Operation) const;
+	//FString GenerateIntent(const FString& Data, const FString& Operation) const;
+
+	template<typename T> FString GenerateIntent(T Data) const;
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version

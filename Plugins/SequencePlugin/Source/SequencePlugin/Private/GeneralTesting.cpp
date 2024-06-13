@@ -278,10 +278,12 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	//ESortOrder_Sequence TestOrder = ESortOrder_Sequence::ASC;
-	//FString TestResult = UEnum::GetValueAsString(TestOrder);
-	SequenceAPITest::BasicProviderTests();
-	//UE_LOG(LogTemp, Display, TEXT("Printed UEnum: %s"), *TestResult);
+	FRegisterSessionData GenericData = FRegisterSessionData();
+	FGenericData * GPointer = &GenericData;
+	
+	FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
+	const FString GenericString = UIndexerSupport::StructToPartialSimpleString(*GPointer);
+	UE_LOG(LogTemp, Display, TEXT("Parsed response: %s"), *GenericString);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()
