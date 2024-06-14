@@ -281,8 +281,12 @@ void AGeneralTesting::TestMisc()
 	FRegisterSessionData GenericData = FRegisterSessionData();
 	FGenericData * GPointer = &GenericData;
 	
-	FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
+	//FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
 	const FString GenericString = UIndexerSupport::StructToPartialSimpleString(*GPointer);
+	
+	FString Ret;
+	FJsonObjectConverter::UStructToJsonObjectString<FRegisterSessionData>(*static_cast<FRegisterSessionData*>(GPointer), Ret, 0, 0);
+	
 	UE_LOG(LogTemp, Display, TEXT("Parsed response: %s"), *GenericString);
 }
 

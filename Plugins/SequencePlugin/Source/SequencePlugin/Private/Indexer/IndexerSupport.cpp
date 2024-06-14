@@ -24,6 +24,35 @@ float UIndexerSupport::GetAmount(int64 Amount, float Decimals)
 	return ret;
 }
 
+FString UIndexerSupport::TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions)
+{
+	FString TransactionsPayload = "[";
+	
+	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
+	{
+		switch(Transaction.GetCurrentSubtypeIndex())
+		{
+		case 0: //RawTransaction
+			TransactionsPayload += Transaction.GetSubtype<FRawTransaction>().GetJsonString() + ",";
+			break;
+		case 1: //ERC20
+			TransactionsPayload += Transaction.GetSubtype<FERC20Transaction>().GetJsonString() + ",";
+			break;
+		case 2: //ERC721
+			TransactionsPayload += Transaction.GetSubtype<FERC721Transaction>().GetJsonString() + ",";
+			break;
+		case 3: //ERC1155
+			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
+			break;
+		default: //Doesn't match
+			break;
+		}
+	}
+	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	TransactionsPayload += "]";
+	return TransactionsPayload;
+}
+
 /*
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
 * object usable in the UI!

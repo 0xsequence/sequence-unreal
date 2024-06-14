@@ -39,11 +39,20 @@ closeSession cleanup checks (passed)
 Old: {"intent":{"data":{"sessionId":"0x00dd64dc6917182b8f3a259907cfcb1156519cce84"},"expiresAt":1718394688,"issuedAt":1718308288,"name":"closeSession","signatures":[{"sessionId":"0x00dd64dc6917182b8f3a259907cfcb1156519cce84","signature":"0x5acd6adc9905372d6db32c9ceeed764563151ada74b438c069b60da7b00d417a5a51d72c4c1c3d0e9530451bea7201084dd3db39fe21a9b3eefa6a00d1424c9100"}],"version":"1.0.0"}}
 New: {"intent":{"data":{"sessionId":"0x00dd64dc6917182b8f3a259907cfcb1156519cce84"},"expiresAt":1718394688,"issuedAt":1718308288,"name":"closeSession","signatures":[{"sessionId":"0x00dd64dc6917182b8f3a259907cfcb1156519cce84","signature":"0x5acd6adc9905372d6db32c9ceeed764563151ada74b438c069b60da7b00d417a5a51d72c4c1c3d0e9530451bea7201084dd3db39fe21a9b3eefa6a00d1424c9100"}],"version":"1.0.0"}}
 
-sendTransaction cleanup checks ()
+sendTransaction cleanup checks (passed)
 
-getTransactionFeeOptions cleanup checks ()
+Old: {"intent":{"data":{"identifier":"unreal-sdk-2024.06.14-17.51.24-0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5","network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"}],"wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718473854,"issuedAt":1718387454,"name":"sendTransaction","signatures":[{"sessionId":"0x008755da90a23a385bed05f921fcc5d369a3d49abd","signature":"0xbfb8a994fd057458e3bfea0a6351e20fe068ba8dc4fc51e24f091b23cafb9e3d3142c5d5954615018404d213fa27c3f5327e1cd524a107bcbbabcfabec11231500"}],"version":"1.0.0"}}
+New: {"intent":{"data":{"identifier":"unreal-sdk-2024.06.14-17.51.24-0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5","network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"}],"wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718473854,"issuedAt":1718387454,"name":"sendTransaction","signatures":[{"sessionId":"0x008755da90a23a385bed05f921fcc5d369a3d49abd","signature":"0xbfb8a994fd057458e3bfea0a6351e20fe068ba8dc4fc51e24f091b23cafb9e3d3142c5d5954615018404d213fa27c3f5327e1cd524a107bcbbabcfabec11231500"}],"version":"1.0.0"}}
 
-sendTransactionWithFeeOption cleanup checks ()
+getTransactionFeeOptions cleanup checks (passed)
+
+Old: {"intent":{"data":{"network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"}],"wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718473377,"issuedAt":1718386977,"name":"feeOptions","signatures":[{"sessionId":"0x008755da90a23a385bed05f921fcc5d369a3d49abd","signature":"0x4dab9093c1b7043a0b79207394b7ef46d1383aa620ccc71177889b3b1b906e85100b94426188e430e2d962368e076e026390f02075b47f4aaf74e136744f721100"}],"version":"1.0.0"}}
+New: {"intent":{"data":{"network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"},{"to":"","tokenAddress":"","type":"erc20send","value":"1000"}],"wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718473377,"issuedAt":1718386977,"name":"feeOptions","signatures":[{"sessionId":"0x008755da90a23a385bed05f921fcc5d369a3d49abd","signature":"0x4dab9093c1b7043a0b79207394b7ef46d1383aa620ccc71177889b3b1b906e85100b94426188e430e2d962368e076e026390f02075b47f4aaf74e136744f721100"}],"version":"1.0.0"}}
+
+sendTransactionWithFeeOption cleanup checks (passed)
+
+Old: {"intent":{"data":{"identifier":"","network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"3497"},{"to":"","tokenAddress":"","type":"erc20send","value":"10"}],"transactionsFeeQuote":"","wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718475935,"issuedAt":1718389535,"name":"sendTransaction","signatures":[{"sessionId":"0x00efe9a3edf48da21f115a4bc04b8751ffaa6b903f","signature":"0xac81f24114da27fba7d219ce14725e8493a32ac4e08090047948b8b71d9cc0fa18a2811a70bd3c089d80417c96018aabae8f11ac957af23f2cf70136d881dc1a01"}],"version":"1.0.0"}}
+New: {"intent":{"data":{"identifier":"","network":"137","transactions":[{"to":"","tokenAddress":"","type":"erc20send","value":"3497"},{"to":"","tokenAddress":"","type":"erc20send","value":"10"}],"transactionsFeeQuote":"","wallet":"0x5Fb06bF3549F4823A983Cf60bab3d3120A7152a5"},"expiresAt":1718475935,"issuedAt":1718389535,"name":"sendTransaction","signatures":[{"sessionId":"0x00efe9a3edf48da21f115a4bc04b8751ffaa6b903f","signature":"0xac81f24114da27fba7d219ce14725e8493a32ac4e08090047948b8b71d9cc0fa18a2811a70bd3c089d80417c96018aabae8f11ac957af23f2cf70136d881dc1a01"}],"version":"1.0.0"}}
 
 */
 
@@ -51,9 +60,14 @@ USTRUCT()
 struct FGenericData
 {
  FString Operation = "";
- 
+ bool UseCustomParser = false;
  GENERATED_USTRUCT_BODY()
  FGenericData(){}
+ virtual FString GetJson() const
+ {
+  return "";
+ }
+ virtual ~FGenericData(){}
 };
 
 USTRUCT()
@@ -73,6 +87,11 @@ struct FCloseSessionData : public FGenericData
   Operation = CloseSessionOP;
   sessionId = SessionIdIn;
  }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
 };
 
 USTRUCT()
@@ -88,15 +107,23 @@ struct FGetFeeOptionsData : public FGenericData
 
  FGetFeeOptionsData()
  {
+  UseCustomParser = true;
   Operation = FeeOptionsOP;
  }
  
  FGetFeeOptionsData(const FString& NetworkIn, const TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>>& TransactionsIn, const FString& WalletIn)
  {
+  UseCustomParser = true;
   Operation = FeeOptionsOP;
   network = NetworkIn;
   transactions = TransactionsIn;
   wallet = WalletIn;
+ }
+
+ virtual FString GetJson() const override
+ {
+  const FString Json = "{\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
+  return Json;
  }
 };
 
@@ -115,16 +142,24 @@ struct FSendTransactionData : public FGenericData
 
  FSendTransactionData()
  {
+  UseCustomParser = true;
   Operation = SendTransactionOP;
  }
  
  FSendTransactionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& TransactionsIn, const FString& WalletIn)
  {
+  UseCustomParser = true;
   Operation = SendTransactionOP;
   identifier = IdentifierIn;
   network = NetworkIn;
   transactions = TransactionsIn;
   wallet = WalletIn;
+ }
+
+ virtual FString GetJson() const override
+ {
+  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
+  return Json;
  }
 };
 
@@ -145,17 +180,25 @@ struct FSendTransactionWithFeeOptionData : public FGenericData
 
  FSendTransactionWithFeeOptionData()
  {
+  UseCustomParser = true;
   Operation = SendTransactionOP;
  }
  
  FSendTransactionWithFeeOptionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& TransactionsIn,const FString& TransactionsFeeQuoteIn, const FString& WalletIn)
  {
+  UseCustomParser = true;
   Operation = SendTransactionOP;
   identifier = IdentifierIn;
   network = NetworkIn;
   transactions = TransactionsIn;
   transactionsFeeQuote = TransactionsFeeQuoteIn;
   wallet = WalletIn;
+ }
+
+ virtual FString GetJson() const override
+ {
+  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"transactionsFeeQuote\":\""+transactionsFeeQuote+"\",\"wallet\":\""+wallet+"\"}";
+  return Json;
  }
 };
 
@@ -179,6 +222,11 @@ struct FRegisterSessionData : public FGenericData
   idToken = IdTokenIn;
   sessionId = SessionIdIn;
  }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
 };
 
 USTRUCT()
@@ -197,6 +245,11 @@ struct FListSessionsData : public FGenericData
  {
   Operation = ListSessionsOP;
   wallet = WalletIn;
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
  }
 };
 
@@ -223,6 +276,11 @@ struct FSignMessageData : public FGenericData
   network = NetworkIn;
   wallet = WalletIn;
  }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
 };
 
 struct FSignatureIntent
@@ -247,7 +305,7 @@ struct FSignatureIntent
  template<typename T> FString GetJson() const
  {
   T CData = *static_cast<T*>(data);
-  const FString DataJson = UIndexerSupport::StructToPartialSimpleString<T>(CData);
+  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : UIndexerSupport::StructToPartialSimpleString<T>(CData);
   const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
   const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
   const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\""+name+"\",\"version\":\""+version+"\"}";
@@ -298,7 +356,7 @@ struct FSignedIntent
  template <typename T> FString GetJson() const
  {
   T CData = *static_cast<T*>(data);
-  const FString DataJson = UIndexerSupport::StructToPartialSimpleString<T>(CData);
+  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : UIndexerSupport::StructToPartialSimpleString<T>(CData);
   const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
   const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
   FString SigListJson = "[";
