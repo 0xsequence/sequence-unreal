@@ -423,7 +423,6 @@ void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
-			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
 			{
@@ -502,13 +501,13 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 
 	for (auto BalanceOption : BalanceOptions)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Checking which Fee option matches the following Balance Option: %s"), *UIndexerSupport::StructToString(BalanceOption));
+		//UE_LOG(LogTemp, Display, TEXT("Checking which Fee option matches the following Balance Option: %s"), *UIndexerSupport::StructToString(BalanceOption));
 		for (auto FeeOption : FeeOptions)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Observing Fee option: %s"), *UIndexerSupport::StructToString(FeeOption));
+			//UE_LOG(LogTemp, Display, TEXT("Observing Fee option: %s"), *UIndexerSupport::StructToString(FeeOption));
 			if (BalanceOption.CanAfford(FeeOption))
 			{
-				UE_LOG(LogTemp, Display, TEXT("Valid Fee Option"));
+				//UE_LOG(LogTemp, Display, TEXT("Valid Fee Option"));
 				ValidFeeOptions.Add(FeeOption);
 			}
 		}
@@ -531,7 +530,6 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp,Display,TEXT("%s"),*Response);
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
@@ -612,8 +610,6 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
-			//parse out what we want and wrap it nicely for ease of use
-			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
 			{
