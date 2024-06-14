@@ -366,7 +366,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 {
 	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
 	{
-		for (const auto Fee : Response)
+		for (const FFeeOption& Fee : Response)
 		{
 			FString FeeOption = UIndexerSupport::StructToString(Fee);
 			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);

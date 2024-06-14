@@ -416,8 +416,6 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
-	this->CachedFeeQuote;
-
 	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
 	{
 		TSharedPtr<FJsonObject> jsonObj;
