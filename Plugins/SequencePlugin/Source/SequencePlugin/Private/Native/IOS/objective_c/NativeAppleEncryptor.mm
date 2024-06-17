@@ -14,30 +14,31 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 
 @implementation NativeAppleEncryptor
 
-- (BOOL) GenerateKeys 
+- (BOOL) GenerateKeys
 {
     keyRef = (NSData*)[NSMutableData dataWithLength:kCCKeySizeAES256];
     int result = SecRandomCopyBytes(kSecRandomDefault, kCCKeySizeAES256, keyRef);
     if (result == errSecSuccess) {
-        
-    NSDictionary *query = @{
-        (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-        (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
-        (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
-        (__bridge id)kSecAttrApplicationTag: IdentifierTag,
-        (__bridge id)kSecValueData: keyRef
+        NSDictionary *query = @{
+            (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+            (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
+            (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
+            (__bridge id)kSecAttrApplicationTag: IdentifierTag,
+            (__bridge id)kSecValueData: keyRef
         };
         
-    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
-    if (status != errSecSuccess) {
-        ErrorCapture = @"Error storing symmetric key.";
-        NSLog(@"Error storing symmetric key: %d", (int)status);
+        OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
+        if (status != errSecSuccess) {
+            ErrorCapture = @"Error storing symmetric key.";
+            NSLog(@"Error storing symmetric key: %d", (int)status);
+            return false;
+        }
         return true;
-    } else {
-        ErrorCapture = @"Error generating symmetric key.";
-        NSLog(@"Error generating symmetric key: %d", result);
-        return false;
     }
+    
+    ErrorCapture = @"Error generating symmetric key.";
+    NSLog(@"Error generating symmetric key.");
+    return false;
 }
 
 - (BOOL) LoadKeys 
