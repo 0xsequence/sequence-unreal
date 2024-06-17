@@ -3,69 +3,64 @@
 #import "NativeAppleEncryptor.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
+#import <CommonCrypto/CommonCrypto.h>
 
 static SecKeyRef privateKey = NULL;
 static SecKeyRef publicKey = NULL;
+static NSData * keyRef = NULL:
 static NSString * ErrorCapture = @"";
+static NSString * IdentifierTag = @"com.Sequence.keys.SymMain";
 static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
 
 @implementation NativeAppleEncryptor
 
 - (BOOL) GenerateKeys 
 {
-    NSData* tag = [@"com.Sequence.keys.Main" dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary* attributes =
-        @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
-           (id)kSecAttrKeySizeInBits:         @2048,
-           (id)kSecPrivateKeyAttrs:
-               @{ (id)kSecAttrIsPermanent:    @YES,
-                  (id)kSecAttrApplicationTag: tag,
-                  },   
-         };
-    CFErrorRef error = NULL;
-    privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes,&error);
-    
-    if (!privateKey) {
-        NSError *err = CFBridgingRelease(error);  // ARC takes ownership
-        ErrorCapture = err.localizedDescription;
-        printf("Failed to generate private key\n");
-        return false;
-    }
-    publicKey = SecKeyCopyPublicKey(privateKey);
-    ErrorCapture = @"Successfully generated key";
-    printf("successfully generated private key\n");
-    return true;
+        keyRef = (NSData*)[NSMutableData dataWithLength:kCCKeySizeAES256];
+        int result = SecRandomCopyBytes(kSecRandomDefault, keySize, keyData.mutableBytes);
+        if (result == errSecSuccess) {
+            
+            NSDictionary *query = @{
+                (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+                (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
+                (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
+                (__bridge id)kSecAttrApplicationTag: IdentifierTag,
+                (__bridge id)kSecValueData: keyRef
+            };
+        
+            OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
+            if (status != errSecSuccess) {
+                ErrorCapture = @"Error storing symmetric key.";
+                NSLog(@"Error storing symmetric key: %d", (int)status);
+            }
+            return true;
+        } else {
+            ErrorCapture = @"Error generating symmetric key.";
+            NSLog(@"Error generating symmetric key: %d", result);
+            return false
+        }
 }
 
 - (BOOL) LoadKeys 
 {
-    NSDictionary *query = @ {
-        (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-        (__bridge id)kSecAttrApplicationTag: @"com.Sequence.keys.Main",
-        (__bridge id)kSecReturnRef: @YES,
-    };
-    
-    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&privateKey);
-    
-    if (status == errSecSuccess) 
-    {
-        ErrorCapture = @"Private key retrieved successfully";
-        printf("SecSuccess\n");
-        publicKey = SecKeyCopyPublicKey(privateKey);
+  NSDictionary *query = @{
+         (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+         (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
+         (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
+         (__bridge id)kSecAttrApplicationTag: IdentifierTag,
+         (__bridge id)kSecReturnData: @YES
+     };
+ 
+     CFTypeRef result = NULL;
+     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+     if (status == errSecSuccess) {
+        keyRef = (__bridge_transfer NSData*)result;
         return true;
-    }
-    else if (status == errSecItemNotFound)
-    {
-        ErrorCapture = @"Keys not found generating fresh keys.";
-        printf("ErrSecItemNotFound\n");
+     } else {
+        ErrorCapture = @"Error retrieving symmetric key.";
+        NSLog(@"Error retrieving symmetric key: %d", (int)status);
         return [self GenerateKeys];
-    }
-    else
-    {
-        ErrorCapture = @"Keychain error";
-        printf("KeyChain Error\n");
-        return false;
-    }
+     }
 }
 
 - (void) Clean
@@ -77,36 +72,26 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 - (char *)Encrypt:(NSString *)str
 {
     NSString * TestString = @"Some epic easy string";
-    NSLog(@"Input to encrypt: %@", str);
+    NSLog(@"Input to encrypt: %@", TestString);
     if ([self LoadKeys])
     {
-        CFDataRef plainText = (__bridge CFDataRef)[TestString dataUsingEncoding:NSUTF8StringEncoding];
-        CFErrorRef error = NULL;
         
-        if (!SecKeyIsAlgorithmSupported(publicKey, kSecKeyOperationTypeEncrypt, algorithm))
+/*         if (!SecKeyIsAlgorithmSupported(publicKey, kSecKeyOperationTypeEncrypt, algorithm))
         {
             ErrorCapture = @"Key generated doesn't support set algorithm / operation";
             char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
             [self Clean];
             return ErrorChars;
-        }
+        } */
         
-        NSData * EncryptedData = (NSData*)CFBridgingRelease(SecKeyCreateEncryptedData(publicKey,algorithm,plainText,&error));
-        
-        if (error)
-        {
-            NSError *err = CFBridgingRelease(error);
-            ErrorCapture = err.localizedDescription;
-            NSLog(@"Captured Error: %@", err);
-            char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
-            [self Clean];
-            return ErrorChars;
-        }
+        NSData *dataToEncrypt = [TestString dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *symmetricKey = keyRef;
+        NSData *EncryptedData = [self encryptData:dataToEncrypt withSymmetricKey:symmetricKey];
         
         NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
         NSLog(@"Encrypted Data: %@", EncryptedDataString);
         char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
-        [self Clean];
+        //[self Clean];
         return EncryptedChars;
     }
     else
