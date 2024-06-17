@@ -54,7 +54,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
      CFTypeRef result = NULL;
      OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
      if (status == errSecSuccess) {
-        keyRef = (__bridge_transfer NSData*)result;
+        keyRef = result;
         return true;
      } else {
         ErrorCapture = @"Error retrieving symmetric key.";
@@ -75,30 +75,44 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
     NSLog(@"Input to encrypt: %@", TestString);
     if ([self LoadKeys])
     {
-        
-/*         if (!SecKeyIsAlgorithmSupported(publicKey, kSecKeyOperationTypeEncrypt, algorithm))
-        {
-            ErrorCapture = @"Key generated doesn't support set algorithm / operation";
-            char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
-            [self Clean];
-            return ErrorChars;
-        } */
-        
         NSData *dataToEncrypt = [TestString dataUsingEncoding:NSUTF8StringEncoding];
         NSData *symmetricKey = keyRef;
-        NSData *EncryptedData = [self encryptData:dataToEncrypt withSymmetricKey:symmetricKey];
-        
-        NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
-        NSLog(@"Encrypted Data: %@", EncryptedDataString);
-        char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
-        //[self Clean];
-        return EncryptedChars;
+       
+        NSUInteger dataLength = [dataToEncrypt length];
+        uint8_t inputRawData[dataLength];
+        [dataToEncrypt getBytes:&inputRawData length:dataLength];
+       
+        size_t bufferSize = dataLength + kCCBlockSizeAES128;
+        void *buffer = malloc(bufferSize);
+        size_t numBytesEncrypted = 0;
+        CCCryptorStatus cryptStatus = CCCrypt(kCCEncrypt,
+                                                 kCCAlgorithmAES,
+                                                 kCCOptionPKCS7Padding,
+                                                 [symmetricKey bytes],
+                                                 kCCKeySizeAES128,
+                                                 NULL,
+                                                 inputRawData,
+                                                 dataLength,
+                                                 buffer,
+                                                 bufferSize,
+                                                 &numBytesEncrypted);
+                                                 
+        if (cryptStatus == kCCSuccess) {
+            NSData * EncryptedBytes = [NSData dataWithBytesNoCopy:buffer length:numBytesEncrypted];
+            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
+            NSLog(@"Encrypted Data: %@", EncryptedDataString);
+            char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
+            return EncryptedChars;
+        } else {
+            free(buffer);
+            NSLog(@"Encryption failed with status: %d", cryptStatus);
+            return ErrorChars;
+        }
     }
     else
     {//Failure state
         printf("Failed to load encryption key\n");
         char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
-        [self Clean];
         return ErrorChars;
     }
 }
