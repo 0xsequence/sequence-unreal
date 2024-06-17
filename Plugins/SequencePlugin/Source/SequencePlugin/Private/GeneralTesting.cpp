@@ -5,21 +5,19 @@
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "Util/HexUtility.h"
 #include "Indexer/IndexerSupport.h"
 #include "SequenceEncryptor.h"
-#include "SystemDataBuilder.h"
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
-#include "Types/Wallet.h"
-#include "Indexer/Indexer_Enums.h"
+#include "Sequence/SequenceIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	imgHandler = nullptr;
 }
 
 // Called when the game starts or when spawned

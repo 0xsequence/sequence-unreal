@@ -16,6 +16,7 @@
 #include "Indexer/Indexer.h"
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
+#include "SequenceIntent.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {

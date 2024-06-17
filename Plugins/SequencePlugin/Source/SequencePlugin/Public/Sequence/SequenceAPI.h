@@ -17,7 +17,6 @@
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
 #include "Sequence/FeeOption.h"
-#include "SequenceIntent.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
