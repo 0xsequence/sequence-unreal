@@ -84,7 +84,6 @@ public class SequencePlugin : ModuleRules
 		{
 			PublicFrameworks.AddRange(new string[]
 			{
-				"CommonCrypto",
 				"Foundation",
 				"Security",
 				"CoreFoundation",
@@ -106,7 +105,6 @@ public class SequencePlugin : ModuleRules
 			PublicFrameworks.AddRange(
 				new string[]
 				{
-					"CommonCrypto",
 					"EventKit",
 					"GLKit",
 					"CoreTelephony",

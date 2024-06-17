@@ -121,7 +121,8 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 - (char *)Decrypt:(NSString *)str
 {
     NSLog(@"Input to decrypt: %@", str);
-    if ([self LoadKeys])
+    return NULL;
+/*     if ([self LoadKeys])
     {
             CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
             CFErrorRef error = NULL;
@@ -159,7 +160,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
         char * ErrorChars = [self ConvertNSStringToChars:FailureString];
         [self Clean];
         return ErrorChars;
-    }
+    } */
 }
 
 - (char *)ConvertNSStringToChars:(NSString *)str {
