@@ -7,7 +7,7 @@
 
 static SecKeyRef privateKey = NULL;
 static SecKeyRef publicKey = NULL;
-static NSData * keyRef = NULL:
+static NSData * keyRef = NULL;
 static NSString * ErrorCapture = @"";
 static NSString * IdentifierTag = @"com.Sequence.keys.SymMain";
 static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
@@ -17,7 +17,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 - (BOOL) GenerateKeys 
 {
         keyRef = (NSData*)[NSMutableData dataWithLength:kCCKeySizeAES256];
-        int result = SecRandomCopyBytes(kSecRandomDefault, keySize, keyData.mutableBytes);
+        int result = SecRandomCopyBytes(kSecRandomDefault, kCCKeySizeAES256, keyRef);
         if (result == errSecSuccess) {
             
             NSDictionary *query = @{
@@ -37,7 +37,7 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
         } else {
             ErrorCapture = @"Error generating symmetric key.";
             NSLog(@"Error generating symmetric key: %d", result);
-            return false
+            return false;
         }
 }
 
