@@ -16,51 +16,49 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
 
 - (BOOL) GenerateKeys 
 {
-        keyRef = (NSData*)[NSMutableData dataWithLength:kCCKeySizeAES256];
-        int result = SecRandomCopyBytes(kSecRandomDefault, kCCKeySizeAES256, keyRef);
-        if (result == errSecSuccess) {
-            
-            NSDictionary *query = @{
-                (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-                (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
-                (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
-                (__bridge id)kSecAttrApplicationTag: IdentifierTag,
-                (__bridge id)kSecValueData: keyRef
-            };
+    keyRef = (NSData*)[NSMutableData dataWithLength:kCCKeySizeAES256];
+    int result = SecRandomCopyBytes(kSecRandomDefault, kCCKeySizeAES256, keyRef);
+    if (result == errSecSuccess) {
         
-            OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
-            if (status != errSecSuccess) {
-                ErrorCapture = @"Error storing symmetric key.";
-                NSLog(@"Error storing symmetric key: %d", (int)status);
-            }
-            return true;
-        } else {
-            ErrorCapture = @"Error generating symmetric key.";
-            NSLog(@"Error generating symmetric key: %d", result);
-            return false;
-        }
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+        (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
+        (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
+        (__bridge id)kSecAttrApplicationTag: IdentifierTag,
+        (__bridge id)kSecValueData: keyRef
+        };
+        
+    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
+    if (status != errSecSuccess) {
+        ErrorCapture = @"Error storing symmetric key.";
+        NSLog(@"Error storing symmetric key: %d", (int)status);
+        return true;
+    } else {
+        ErrorCapture = @"Error generating symmetric key.";
+        NSLog(@"Error generating symmetric key: %d", result);
+        return false;
+    }
 }
 
 - (BOOL) LoadKeys 
 {
-  NSDictionary *query = @{
-         (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-         (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
-         (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
-         (__bridge id)kSecAttrApplicationTag: IdentifierTag,
-         (__bridge id)kSecReturnData: @YES
-     };
- 
-     CFTypeRef result = NULL;
-     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
-     if (status == errSecSuccess) {
-        keyRef = result;
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassKey,
+        (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeAES,
+        (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassSymmetric,
+        (__bridge id)kSecAttrApplicationTag: IdentifierTag,
+        (__bridge id)kSecReturnData: @YES
+    };
+    CFTypeRef result = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+    if (status == errSecSuccess) {
+        keyRef = (__bridge NSData *)result;
         return true;
-     } else {
+    } else {
         ErrorCapture = @"Error retrieving symmetric key.";
         NSLog(@"Error retrieving symmetric key: %d", (int)status);
         return [self GenerateKeys];
-     }
+    }
 }
 
 - (void) Clean
@@ -99,13 +97,15 @@ static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM
                                                  
         if (cryptStatus == kCCSuccess) {
             NSData * EncryptedBytes = [NSData dataWithBytesNoCopy:buffer length:numBytesEncrypted];
-            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
+            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedBytes encoding:NSUTF8StringEncoding];
             NSLog(@"Encrypted Data: %@", EncryptedDataString);
             char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
+            free(buffer);
             return EncryptedChars;
         } else {
             free(buffer);
             NSLog(@"Encryption failed with status: %d", cryptStatus);
+            char * ErrorChars = [self ConvertNSStringToChars:ErrorCapture];
             return ErrorChars;
         }
     }
