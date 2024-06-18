@@ -5,7 +5,8 @@
 #import <Security/Security.h>
 
 static NSString * ErrorCapture = @"";
-static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
+                                    //kSecKeyAlgorithmRSAEncryptionOAEPSHA1AESGCM
+static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA1AESGCM;
 static NSString * Tag = @"com.Sequence.keys.Main";
 static SecKeyRef PrivateKey = NULL;
 static SecKeyRef PublicKey = NULL;
@@ -16,13 +17,13 @@ static SecKeyRef PublicKey = NULL;
 {
     NSData* idTag = [Tag dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary* attributes =
-        @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
-           (id)kSecAttrKeySizeInBits:         @2048,
-           (id)kSecPrivateKeyAttrs:
-               @{ (id)kSecAttrIsPermanent:    @YES,
-                  (id)kSecAttrApplicationTag: idTag,
-                  },
-        };
+    @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
+       (id)kSecAttrKeySizeInBits:         @2048,
+       (id)kSecPrivateKeyAttrs:
+       @{ (id)kSecAttrIsPermanent:    @YES,
+          (id)kSecAttrApplicationTag: idTag,
+       },
+    };
     
     CFErrorRef error = NULL;
     PrivateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
