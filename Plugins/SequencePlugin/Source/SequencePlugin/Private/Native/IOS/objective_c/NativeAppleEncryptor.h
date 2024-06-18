@@ -9,9 +9,9 @@
 
 @interface NativeAppleEncryptor : NSObject
 
-- (BOOL) GenerateKeys;
-- (BOOL) LoadKeys;
-- (void) Clean;
+- (SecKeyRef) GenerateKeys;
+- (SecKeyRef) LoadKeys;
+- (void) Clean:(SecKeyRef)Key;
 - (char *)ConvertNSStringToChars:(NSString *)str;
 
 - (char *)Encrypt:(NSString *)str;
