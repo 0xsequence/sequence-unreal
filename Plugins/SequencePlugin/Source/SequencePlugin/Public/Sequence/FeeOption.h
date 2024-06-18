@@ -55,74 +55,6 @@ public:
 	}
 };
 
-/*
- *	Reference code for how to determine which fee options to provide the user
- *         private async Task<FeeOptionsResponse> DetermineWhichFeeOptionsUserHasInWallet(IntentResponseFeeOptions feeOptions, Chain network)
-        {
-            try
-            {
-                IIndexer indexer = new ChainIndexer(network);
-                int feeOptionsLength = feeOptions.feeOptions.Length;
-                FeeOptionReturn[] decoratedFeeOptions = new FeeOptionReturn[feeOptionsLength];
-                for (int i = 0; i < feeOptionsLength; i++)
-                {
-                    FeeToken token = feeOptions.feeOptions[i].token;
-                    BigInteger requiredBalance = BigInteger.Parse(feeOptions.feeOptions[i].value);
-                    switch (token.type)
-                    {
-                        case FeeTokenType.unknown:
-                            EtherBalance etherBalance = await indexer.GetEtherBalance(_address);
-                            decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
-                                requiredBalance <= etherBalance.balanceWei);
-                            break;
-                        case FeeTokenType.erc20Token:
-                            GetTokenBalancesReturn tokenBalances = await indexer.GetTokenBalances(new GetTokenBalancesArgs(
-                                _address, token.contractAddress));
-                            if (tokenBalances.balances.Length > 0)
-                            {
-                                if (tokenBalances.balances[0].contractAddress != token.contractAddress)
-                                {
-                                    throw new Exception(
-                                        $"Expected contract address from indexer response ({tokenBalances.balances[0].contractAddress}) to match contract address we queried ({token.contractAddress})");
-                                }
-
-                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
-                                    requiredBalance <= tokenBalances.balances[0].balance);
-                            }
-                            else
-                            {
-                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i], false);
-                            }
-
-                            break;
-                        case FeeTokenType.erc1155Token:
-                            Dictionary<BigInteger, TokenBalance> sftBalances =
-                                await indexer.GetTokenBalancesOrganizedInDictionary(_address, token.contractAddress,
-                                    false);
-                            if (sftBalances.TryGetValue(BigInteger.Parse(token.tokenID), out TokenBalance balance))
-                            {
-                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i],
-                                    requiredBalance <= balance.balance);
-                            }
-                            else
-                            {
-                                decoratedFeeOptions[i] = new FeeOptionReturn(feeOptions.feeOptions[i], false);
-                            }
-
-                            break;
-                    }
-                }
-
-                return new FeeOptionsResponse(decoratedFeeOptions, feeOptions.feeQuote);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to determine which fee option tokens the user has in their wallet: " +
-                                    e.Message);
-            }
-        }
- */
-
 USTRUCT()
 struct FFeeOption
 {
@@ -137,6 +69,7 @@ public:
 	UPROPERTY()
 	FString Value = "";
 	int64 ValueNumber = 0;//Used for making easy comparisons
+	bool bCanAfford = false;
 	FFeeOption(){}
 
 	FFeeOption(const FEtherBalance& EtherBalance)
@@ -206,7 +139,7 @@ public:
 	 * Our numerical values are greater than or equal to the fee
 	 * we can afford said fee
 	 */
-	bool CanAfford(const FFeeOption& Fee) const
+	bool CanAfford(const FFeeOption& Fee)
 	{
 		bool Affordable = true;
 
@@ -228,7 +161,7 @@ public:
 		{
 			Affordable = false;
 		}
-		
+		bCanAfford = Affordable;
 		return Affordable;
 	}
 
