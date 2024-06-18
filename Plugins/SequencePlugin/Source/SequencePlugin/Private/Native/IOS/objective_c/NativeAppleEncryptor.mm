@@ -71,7 +71,7 @@ static SecKeyRef PublicKey = NULL;
 - (void) Clean
 {
     if (PrivateKey) { CFRelease(PrivateKey);}
-    if (PublicKey { CFRelease(PublicKey);}
+    if (PublicKey) { CFRelease(PublicKey);}
 }
 
 - (char *)Encrypt:(NSString *)str
