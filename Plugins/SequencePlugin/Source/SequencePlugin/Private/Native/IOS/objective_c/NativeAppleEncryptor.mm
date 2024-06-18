@@ -14,30 +14,29 @@ static SecKeyRef PublicKey = NULL;
 
 - (bool) GenerateKeys
 {
-    NSDictionary *keyAttributes = @{
-        (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeRSA,
-        (__bridge id)kSecAttrKeySizeInBits: @2048
-    };
-    
-    OSStatus status = SecKeyGeneratePair((__bridge CFDictionaryRef)keyAttributes, &PublicKey, &PrivateKey);
-
-    if (status == errSecSuccess) 
-    {            
-        NSDictionary *privateKeyAttributes = @{
-            (__bridge id)kSecValueRef: (__bridge id)PrivateKey,
-            (__bridge id)kSecAttrLabel: Tag,
-            (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassPrivate,
+    NSData* idTag = [Tag dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary* attributes =
+        @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
+           (id)kSecAttrKeySizeInBits:         @2048,
+           (id)kSecPrivateKeyAttrs:
+               @{ (id)kSecAttrIsPermanent:    @YES,
+                  (id)kSecAttrApplicationTag: idTag,
+                  },
         };
-            
-        status = SecItemAdd((__bridge CFDictionaryRef)privateKeyAttributes, NULL);
-        if (status != errSecSuccess)
-        {
-            NSLog(@"Error storing private key in keychain");
-        }
-        return (status == errSecSuccess);
+    
+    CFErrorRef error = NULL;
+    PrivateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
+    
+    if (PrivateKey)
+    {
+        PublicKey = SecKeyCopyPublicKey(PrivateKey);
+        return true;
     }
-    NSLog(@"Error generating RSA key pair");
-    return false;
+    else
+    {
+        NSLog(@"Error generating RSA key pair");
+        return false;
+    }
 }
 
 - (bool) LoadKeys 
