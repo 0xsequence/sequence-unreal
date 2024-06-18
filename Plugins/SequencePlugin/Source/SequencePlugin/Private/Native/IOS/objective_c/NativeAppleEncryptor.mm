@@ -96,7 +96,7 @@ static SecKeyRef PublicKey = NULL;
         
         if (cfEncryptedData)
         {
-            NSData * EncryptedData = (__bridge_transfer NSData *)cfEncryptedData;
+            NSData * EncryptedData = (NSData *)CFBridgingRelease(cfEncryptedData);
             NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
             NSLog(@"Encrypted Data: %@", EncryptedDataString);
             char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
@@ -143,6 +143,7 @@ static SecKeyRef PublicKey = NULL;
         
         if (cfDecryptedData)
         {
+            NSData * DecryptedData = (NSData *)CFBridgingRelease(cfDecryptedData);
             NSString * DecryptedDataString = [[NSString alloc] initWithData:DecryptedData encoding:NSUTF8StringEncoding];
             NSLog(@"Decrypted Data: %@", DecryptedDataString);
             char * DecryptedChars = [self ConvertNSStringToChars:DecryptedDataString];
