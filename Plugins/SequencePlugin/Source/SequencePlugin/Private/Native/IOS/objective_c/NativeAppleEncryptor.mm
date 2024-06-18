@@ -68,7 +68,7 @@ static SecKeyRef PublicKey = NULL;
     }
 }
 
-- (void) Clean:
+- (void) Clean
 {
     if (PrivateKey) { CFRelease(PrivateKey);}
     if (PublicKey { CFRelease(PublicKey);}
