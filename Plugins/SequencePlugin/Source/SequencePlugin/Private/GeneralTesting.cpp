@@ -276,6 +276,17 @@ void AGeneralTesting::TestHistory() const
 	}
 }
 
+void AGeneralTesting::TestGetWalletAddress() const
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet * Api = WalletOptional.GetValue();
+		UE_LOG(LogTemp, Display, TEXT("Wallet Address: %s"), *Api->GetWalletAddress());
+	}
+}
+
 void AGeneralTesting::TestEncryption() const
 {
 	const FString PreEncrypt = "testing text";

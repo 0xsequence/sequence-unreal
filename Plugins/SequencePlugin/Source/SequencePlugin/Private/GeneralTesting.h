@@ -68,6 +68,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestGetUnFilteredFeeOptions() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetWalletAddress() const;
 	
 	/*
 	* Called by frontend to test the indexer

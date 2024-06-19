@@ -267,9 +267,9 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 
 	FERC721Transaction T721;
 	T721.safe = true;
-	T721.id = "54530968763798660137294927684252503703134533114052628080002308208148824588621";
-	T721.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
+	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
+	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
 
@@ -288,6 +288,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 		},GenericFailure);
 	}
 }
+
 void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
@@ -299,12 +300,12 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	
 	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
 	FERC1155Transaction T1155;
-	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
+	T1155.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T1155.tokenAddress = "0x44b3f42e2bf34f62868ff9e9dab7c2f807ba97cb";
 	
 	FERC1155TxnValue Val;
 	Val.amount = "1";
-	Val.id = "66635";
+	Val.id = "130";
 	T1155.vals.Add(Val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
@@ -397,12 +398,17 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 
 void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess, TFunction<void(FString,FSequenceError)> OnFailure)
 {
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
-	FERC20Transaction T20;
-	T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-	T20.value = "10";
-	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Transactions;
+	FERC1155Transaction T1155;
+	T1155.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T1155.tokenAddress = "0x44b3f42e2bf34f62868ff9e9dab7c2f807ba97cb";
+	
+	FERC1155TxnValue Val;
+	Val.amount = "1";
+	Val.id = "0";
+	T1155.vals.Add(Val);
+
+	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
 	
 	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
 	{
