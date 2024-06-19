@@ -97,23 +97,19 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 
 void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-#if PLATFORM_ANDROID
-	NativeOAuth::AndroidLog("ListSessions");
-#endif
 	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
 	{
+		for (auto Session : Response)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *UIndexerSupport::StructToString(Session));	
+		}
+		
 		OnSuccess("List Sessions Test Passed");
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("ListSessionsDone");
-#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("ListSessionsFail");
-#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
@@ -451,5 +447,44 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
 		Api->GetFeeOptions(Transactions,OnFeeResponse,OnFeeFailure);
+	}
+}
+
+void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
+	{
+		for (const FFeeOption& Fee : Response)
+		{
+			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString CanAfford = (Fee.bCanAfford) ? "Yes" : "No";
+			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
+			
+		}
+		OnSuccess("Get FeeOptions Test Passed");
+	};
+
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Test Failed", Error);
+	};
+
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetUnfilteredFeeOptions Test]========================"));
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+
+		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+
+		FERC20Transaction T20;
+		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+		T20.value = "1000";
+		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		
+		Api->GetUnfilteredFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 }

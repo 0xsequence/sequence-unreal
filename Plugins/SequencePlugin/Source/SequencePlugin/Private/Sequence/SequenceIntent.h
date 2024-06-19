@@ -252,7 +252,6 @@ struct FSignatureIntent
   const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
   const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
   const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\""+name+"\",\"version\":\""+version+"\"}";
-  UE_LOG(LogTemp, Display, TEXT("Parsed Json: %s"),*Json);
   return Json;
  }
 };

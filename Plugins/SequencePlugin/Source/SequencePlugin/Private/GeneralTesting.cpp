@@ -161,6 +161,21 @@ void AGeneralTesting::TestSendTransactionWithFee() const
 	SequenceAPITest::SendTransactionWithFee(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestGetUnFilteredFeeOptions() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetUnfilteredFeeOptions(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestGetFeeOptions() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
@@ -242,7 +257,7 @@ void AGeneralTesting::TestHistory() const
 		}
 	};
 
-	const FFailureCallback GenericFailure = [](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
 	};

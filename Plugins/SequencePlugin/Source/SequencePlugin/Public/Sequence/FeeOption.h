@@ -133,38 +133,6 @@ public:
 		Value = ValueIn;
 	}
 
-	/*
-	 * Compare our values against the fee provided
-	 * if our values are valid & the Fee's values are valid &
-	 * Our numerical values are greater than or equal to the fee
-	 * we can afford said fee
-	 */
-	bool CanAfford(const FFeeOption& Fee)
-	{
-		bool Affordable = true;
-
-		if (Token.Type == Fee.Token.Type && Token.Type != EFeeType::Unknown)
-		{
-			Affordable &= Token.ChainID == Fee.Token.ChainID;
-			Affordable &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
-			Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
-			Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
-			Affordable &= ValueNumber >= Fee.ValueNumber;
-		}
-		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
-		{//Edge case where we are looking for EtherBalance against an Unknown type of fee option
-			Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
-			Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
-			Affordable &= ValueNumber >= Fee.ValueNumber;
-		}
-		else
-		{
-			Affordable = false;
-		}
-		bCanAfford = Affordable;
-		return Affordable;
-	}
-
 	TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> CreateTransaction()
 	{
 		TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction;
@@ -188,6 +156,67 @@ public:
 			break;
 		}
 		return Transaction;
+	}
+
+private:
+bool AffordableTest(const FFeeOption& Fee)
+{
+	bool Affordable = true;
+
+	if (Token.Type == Fee.Token.Type && Token.Type != EFeeType::Unknown)
+	{
+		Affordable &= Token.ChainID == Fee.Token.ChainID;
+		Affordable &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
+		Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+		Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
+		Affordable &= ValueNumber >= Fee.ValueNumber;
+	}
+	else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
+	{//Edge case where we are looking for EtherBalance against an Unknown type of fee option
+		Affordable &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+		Affordable &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
+		Affordable &= ValueNumber >= Fee.ValueNumber;
+	}
+	else
+	{
+		Affordable = false;
+	}
+	return Affordable;
+}
+	
+public:
+	/*
+	* Compare our values against the fee provided
+	* if our values are valid & the Fee's values are valid &
+	* Our numerical values are greater than or equal to the fee
+	* we can afford said fee
+	*/
+	bool CanAfford(const FFeeOption& Fee)
+	{
+		bCanAfford = AffordableTest(Fee);
+		return bCanAfford;
+	}
+
+	bool Equals(const FFeeOption& Fee) const
+	{
+		bool IsMatch = true;
+		if (Token.Type == Fee.Token.Type && Token.Type != EFeeType::Unknown)
+		{
+			IsMatch &= Token.ChainID == Fee.Token.ChainID;
+			IsMatch &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
+			IsMatch &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+			IsMatch &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
+		}
+		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
+		{//Edge case where we are looking for EtherBalance against an Unknown type of fee option
+			IsMatch &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+			IsMatch &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
+		}
+		else
+		{
+			IsMatch = false;
+		}
+		return IsMatch;
 	}
 };
 
