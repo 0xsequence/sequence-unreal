@@ -76,12 +76,12 @@ static SecKeyRef PublicKey = NULL;
 
 - (char *)Encrypt:(NSString *)str
 {
-    NSString * TestString = @"Some epic easy string";
-    NSLog(@"Input to encrypt: %@", TestString);
+    //NSString * TestString = @"Some epic easy string";
+    NSLog(@"Input to encrypt: %@", str);
     
     if ([self LoadKeys])
     {
-        CFDataRef plainText = (__bridge CFDataRef)[TestString dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
         
         if (!SecKeyIsAlgorithmSupported(PublicKey, kSecKeyOperationTypeEncrypt, algorithm))
@@ -98,6 +98,10 @@ static SecKeyRef PublicKey = NULL;
         if (cfEncryptedData)
         {
             NSData * EncryptedData = (__bridge NSData *)cfEncryptedData;
+            if (!EncryptedData)
+            {
+                NSLog(@"Error Converted data has become null");
+            }
             NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
             NSLog(@"Encrypted Data: %@", EncryptedDataString);
             char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
