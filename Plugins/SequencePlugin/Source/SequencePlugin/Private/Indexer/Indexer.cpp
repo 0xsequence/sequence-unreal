@@ -61,16 +61,18 @@ FString UIndexer::HostName(int64 ChainID)
 */
 void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FString& Args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	//Now we create the post request
-	TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 
+	UE_LOG(LogTemp, Display, TEXT("URL: %s"), *this->Url(ChainID,Endpoint));
+	UE_LOG(LogTemp, Display, TEXT("Body: %s"), *Args);
+	
 	http_post_req->SetVerb("POST");
 	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	http_post_req->SetHeader("Accept", "application/json");
 	http_post_req->SetTimeout(30);
 	http_post_req->SetURL(this->Url(ChainID, Endpoint));
 	http_post_req->SetContentAsString(Args);//args will need to be a json object converted to a string
-
+	
 	http_post_req->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{ 
 		if(bWasSuccessful )

@@ -498,8 +498,10 @@ TArray<FFeeOption> USequenceWallet::MarkValidFeeOptions(const TArray<FFeeOption>
 {	
 	for (auto FeeOption : FeeOptions)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Checking Fee: %s"), *UIndexerSupport::StructToString(FeeOption));
 		for (auto BalanceOption : BalanceOptions)
 		{
+			UE_LOG(LogTemp, Display, TEXT("Checking balance for Fee: %s"), *UIndexerSupport::StructToString(BalanceOption));
 			if (FeeOption.Equals(BalanceOption))
 			{
 				FeeOption.bCanAfford |= BalanceOption.CanAfford(FeeOption);
