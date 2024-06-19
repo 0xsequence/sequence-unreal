@@ -494,21 +494,18 @@ TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTo
 	return ParsedBalances;
 }
 
-TArray<FFeeOption> USequenceWallet::MarkValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions)
-{	
-	for (auto FeeOption : FeeOptions)
+TArray<FFeeOption> USequenceWallet::MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions)
+{
+	for (int i = 0; i < FeeOptions.Num(); i++)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Checking Fee: %s"), *UIndexerSupport::StructToString(FeeOption));
-		for (auto BalanceOption : BalanceOptions)
+		for (int j = 0; j < BalanceOptions.Num(); j++)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Checking balance for Fee: %s"), *UIndexerSupport::StructToString(BalanceOption));
-			if (FeeOption.Equals(BalanceOption))
-			{
-				FeeOption.bCanAfford |= BalanceOption.CanAfford(FeeOption);
-			}
+			//if (FeeOptions[i].Equals(BalanceOptions[j]))
+			//{
+				FeeOptions[i].bCanAfford |= BalanceOptions[j].CanAfford(FeeOptions[i]);
+			//}			
 		}
 	}
-	
 	return FeeOptions;
 }
 

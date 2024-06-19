@@ -182,6 +182,8 @@ public:
 		{
 			IsMatch = false;
 		}
+		const FString IsMatchingString = (IsMatch) ? "True" : "False";
+		UE_LOG(LogTemp, Display, TEXT("Fee & Balance Matched: %s"), *IsMatchingString);
 		return IsMatch;
 	}
 	
