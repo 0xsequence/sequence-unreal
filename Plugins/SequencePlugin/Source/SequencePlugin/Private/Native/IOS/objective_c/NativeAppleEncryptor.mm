@@ -93,7 +93,8 @@ static SecKeyRef PublicKey = NULL;
         }
         
         CFDataRef cfEncryptedData = SecKeyCreateEncryptedData(PublicKey,algorithm,plainText,&error);
-        
+        CFIndex ByteLength = CFDataGetLength(cfEncryptedData);
+        NSLog(@"Byte Length: %lu",ByteLength);
         if (cfEncryptedData)
         {
             NSData * EncryptedData = (__bridge NSData *)cfEncryptedData;
