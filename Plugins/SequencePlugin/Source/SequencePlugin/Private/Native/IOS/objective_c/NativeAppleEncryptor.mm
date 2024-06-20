@@ -103,7 +103,6 @@ static SecKeyRef PublicKey = NULL;
             {
                 NSLog(@"Error Converted data has become null");
             }
-            //NSString *base64String = [EncryptedData base64EncodedStringWithOptions:0];
             NSString * EncryptedDataString = [EncryptedData base64EncodedStringWithOptions:0];
             NSLog(@"Encrypted Data: %@", EncryptedDataString);
             char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
@@ -135,7 +134,8 @@ static SecKeyRef PublicKey = NULL;
     
     if ([self LoadKeys])
     {
-        CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *DecodedData = [[NSData alloc] initWithBase64EncodedString:base64EncodedString options:0];
+        CFDataRef plainText = (__bridge CFDataRef)DecodedData;
         CFErrorRef error = NULL;
             
         if (!SecKeyIsAlgorithmSupported(PrivateKey, kSecKeyOperationTypeDecrypt, algorithm))
