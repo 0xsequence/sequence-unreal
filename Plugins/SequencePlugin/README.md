@@ -84,6 +84,10 @@ Lastpass Password generator or equivalent,
 Encryption Key Generators,
 etc
 
+##### Important for values you place in FallbackEncryptionKey
+Be sure what ever key data you place in **[FallbackEncryptionKey]** is of hex form & does NOT contain any extraneous symbols, eg) *,/\ etc.
+In the event unrecognized symbols are seen the engine will not load the .ini file.
+
 ***
 
 ## Getting Started With the Builtin GUI
