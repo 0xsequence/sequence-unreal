@@ -134,7 +134,7 @@ static SecKeyRef PublicKey = NULL;
     
     if ([self LoadKeys])
     {
-        NSData *DecodedData = [[NSData alloc] initWithBase64EncodedString:base64EncodedString options:0];
+        NSData *DecodedData = [[NSData alloc] initWithBase64EncodedString:str options:0];
         CFDataRef plainText = (__bridge CFDataRef)DecodedData;
         CFErrorRef error = NULL;
             
