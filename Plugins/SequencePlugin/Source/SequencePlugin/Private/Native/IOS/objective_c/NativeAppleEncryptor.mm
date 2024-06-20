@@ -76,9 +76,7 @@ static SecKeyRef PublicKey = NULL;
 
 - (char *)Encrypt:(NSString *)str
 {
-    //NSString * TestString = @"Some epic easy string";
     NSLog(@"Input to encrypt: %@", str);
-    
     if ([self LoadKeys])
     {
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
