@@ -98,6 +98,7 @@ static SecKeyRef PublicKey = NULL;
         if (cfEncryptedData)
         {
             NSData * EncryptedData = (__bridge NSData *)cfEncryptedData;
+            NSLog(@"Raw Encrypted Data: %@", EncryptedData);
             if (!EncryptedData)
             {
                 NSLog(@"Error Converted data has become null");
