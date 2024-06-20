@@ -103,7 +103,8 @@ static SecKeyRef PublicKey = NULL;
             {
                 NSLog(@"Error Converted data has become null");
             }
-            NSString * EncryptedDataString = [[NSString alloc] initWithData:EncryptedData encoding:NSUTF8StringEncoding];
+            //NSString *base64String = [EncryptedData base64EncodedStringWithOptions:0];
+            NSString * EncryptedDataString = [EncryptedData base64EncodedStringWithOptions:0];
             NSLog(@"Encrypted Data: %@", EncryptedDataString);
             char * EncryptedChars = [self ConvertNSStringToChars:EncryptedDataString];
             [self Clean];
