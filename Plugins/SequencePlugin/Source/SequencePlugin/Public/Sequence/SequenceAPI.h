@@ -83,25 +83,105 @@ private:
 	static TArray<FItemPrice_BE> BuildItemUpdateListFromJson(const FString& JSON);
 public:
 	USequenceWallet();
-	
+
+	/*
+	 * Gets the SequenceWallet SubSystem,
+	 * this call will attempt to automatically load stored credentials on disk if any.
+	 */
 	static TOptional<USequenceWallet*> Get();
+
+	/*
+	 * Gets the SequenceWallet SubSystem and initialize it with the given credentials
+	 */
 	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials);
+
+	/*
+	 * Gets the SequenceWallet SubSystem and initializes it with the given credentials & ProviderUrl
+	 */
 	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials, const FString& ProviderUrl);
 
+	/*
+	 * Returns the wallet address of the currently signed in user
+	 */
 	FString GetWalletAddress() const;
+
+	/*
+	 * Allows you to update the provider URL set for the SequenceWallet
+	 */
 	void UpdateProviderURL(const FString& Url) const;
+
+	/*
+	 * Allows you to update the set network for the SequenceWallet
+	 */
 	void UpdateNetworkId(int64 NewNetwork);
+
+	/*
+	 * Allows to get the currently set network for the SequenceWallet
+	 */
 	int64 GetNetworkId() const;
+
+	/*
+	 * Allows you to sign the given message with the SequenceWallet
+	 * @OnSuccess The returned Struct from the signing process
+	 * @OnFailure If an error occurs
+	 */
 	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
 
+	/*
+	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
+	 * @OnSuccess The Semi Struct Parsed JSON response
+	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
+	 */
 	void SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
-	
+
+	/*
+	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
+	 * to pick a valid fee to send with this call
+	 * @OnSuccess The Semi Struct Parsed JSON response
+	 * @OnFailure An error occured during the transaction
+	 */
 	void SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Allows you to get FeeOptions for the transaction you pass in
+	 * @OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
+	 * @OnFailure An error occured
+	 */
 	void GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Allows you to see all potential FeeOptions, Valid ones are marked with bCanAfford = true, in the list of FFeeOptions
+	 * @OnSuccess A list of all feeOptions with valid ones marked with bCanAfford = true. Possible none are valid if your wallet has nothing to cover the fees
+	 * @OnFailure An error occured
+	 */
 	void GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Used to register a Session with Sequence (done automatically)
+	 * @OnSuccess The session is registered
+	 * @OnFailure An error occured
+	 */
 	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Used to list all active sessions for the signed in credentials
+	 * @OnSuccess A list of all active sessions
+	 * @OnFailure An error occured
+	 */
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Used to close the current Session with Sequence
+	 * @OnSuccess The Session is closed
+	 * @OnFailure An error occured
+	 */
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/*
+	 * Used to close the current Session with Sequence & clears all locally stored credentials
+	 * @OnSuccess The Session is closed & local credentials are removed
+	 * @OnFailure An error occured
+	 */
 	void SignOut();
 private:
 	static USequenceWallet * GetSubSystem();

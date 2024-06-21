@@ -490,7 +490,6 @@ TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTo
 	{
 		ParsedBalances.Add(FFeeOption(Balance));
 	}
-	
 	return ParsedBalances;
 }
 
@@ -500,10 +499,7 @@ TArray<FFeeOption> USequenceWallet::MarkValidFeeOptions(TArray<FFeeOption> FeeOp
 	{
 		for (int j = 0; j < BalanceOptions.Num(); j++)
 		{
-			//if (FeeOptions[i].Equals(BalanceOptions[j]))
-			//{
-				FeeOptions[i].bCanAfford |= BalanceOptions[j].CanAfford(FeeOptions[i]);
-			//}			
+			FeeOptions[i].bCanAfford |= BalanceOptions[j].CanAfford(FeeOptions[i]);
 		}
 	}
 	return FeeOptions;
