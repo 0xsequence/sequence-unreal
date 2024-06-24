@@ -5,15 +5,15 @@
 #import <Security/Security.h>
 
 static SecKeyAlgorithm algorithm = kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM;
-static NSString * Tag = @"com.Sequence.keys.Main";
-static SecKeyRef PrivateKey = NULL;
-static SecKeyRef PublicKey = NULL;
+static NSString * TagRef = @"com.Sequence.keys.Main";
+static SecKeyRef PrivateKeyRef = NULL;
+static SecKeyRef PublicKeyRef = NULL;
 
 @implementation NativeAppleEncryptor
 
 - (bool) GenerateKeys
 {
-    NSData* idTag = [Tag dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* idTag = [TagRef dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary* attributes =
     @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
        (id)kSecAttrKeySizeInBits:         @2048,
@@ -24,11 +24,11 @@ static SecKeyRef PublicKey = NULL;
     };
     
     CFErrorRef error = NULL;
-    PrivateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
+    PrivateKeyRef = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
     
-    if (PrivateKey)
+    if (PrivateKeyRef)
     {
-        PublicKey = SecKeyCopyPublicKey(PrivateKey);
+        PublicKeyRef = SecKeyCopyPublicKey(PrivateKeyRef);
         return true;
     }
     else
@@ -42,15 +42,15 @@ static SecKeyRef PublicKey = NULL;
 {
     NSDictionary *query = @ {
         (__bridge id)kSecClass: (__bridge id)kSecClassKey,
-        (__bridge id)kSecAttrApplicationTag: Tag,
+        (__bridge id)kSecAttrApplicationTag: TagRef,
         (__bridge id)kSecReturnRef: @YES,
     };
     
-    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&PrivateKey);
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&PrivateKeyRef);
     
     if (status == errSecSuccess) 
     {
-        PublicKey = SecKeyCopyPublicKey(PrivateKey);
+        PublicKeyRef = SecKeyCopyPublicKey(PrivateKeyRef);
         return true;
     }
     else if (status == errSecItemNotFound)
@@ -66,8 +66,8 @@ static SecKeyRef PublicKey = NULL;
 
 - (void) Clean
 {
-    if (PrivateKey) { CFRelease(PrivateKey);}
-    if (PublicKey) { CFRelease(PublicKey);}
+    if (PrivateKeyRef) { CFRelease(PrivateKeyRef);}
+    if (PublicKeyRef) { CFRelease(PublicKeyRef);}
 }
 
 - (char *)Encrypt:(NSString *)str
@@ -77,7 +77,7 @@ static SecKeyRef PublicKey = NULL;
         CFDataRef plainText = (__bridge CFDataRef)[str dataUsingEncoding:NSUTF8StringEncoding];
         CFErrorRef error = NULL;
         
-        CFDataRef cfEncryptedData = SecKeyCreateEncryptedData(PublicKey,algorithm,plainText,&error);
+        CFDataRef cfEncryptedData = SecKeyCreateEncryptedData(PublicKeyRef,algorithm,plainText,&error);
 
         if (cfEncryptedData)
         {
@@ -112,7 +112,7 @@ static SecKeyRef PublicKey = NULL;
         CFDataRef plainText = (__bridge CFDataRef)DecodedData;
         CFErrorRef error = NULL;
             
-        CFDataRef cfDecryptedData = SecKeyCreateDecryptedData(PrivateKey,algorithm,plainText,&error);
+        CFDataRef cfDecryptedData = SecKeyCreateDecryptedData(PrivateKeyRef,algorithm,plainText,&error);
         
         if (cfDecryptedData)
         {
