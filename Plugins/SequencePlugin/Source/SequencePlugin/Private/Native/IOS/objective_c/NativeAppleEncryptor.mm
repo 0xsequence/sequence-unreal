@@ -11,7 +11,7 @@ static SecKeyRef PublicKeyRef = NULL;
 
 @implementation NativeAppleEncryptor
 
-- (bool) GenerateKeys
+- (BOOL) GenerateKeys
 {
     NSData* idTag = [TagRef dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary* attributes =
@@ -38,7 +38,7 @@ static SecKeyRef PublicKeyRef = NULL;
     }
 }
 
-- (bool) LoadKeys 
+- (BOOL) LoadKeys 
 {
     NSDictionary *query = @ {
         (__bridge id)kSecClass: (__bridge id)kSecClassKey,
