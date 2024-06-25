@@ -9,7 +9,7 @@
 USTRUCT()
 struct FPartner
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 public:
 	FString Name = "";
 	bool IsCardPayment = false;
@@ -28,7 +28,7 @@ public:
 USTRUCT()
 struct FSupportedCountry
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 	
 public:
 	FString Alpha2 = "";
@@ -60,7 +60,7 @@ public:
 USTRUCT()
 struct FSupportedCountryResponse
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 	TArray<FSupportedCountry> Response;
 
 	FSupportedCountryResponse(){}
@@ -74,7 +74,7 @@ struct FSupportedCountryResponse
 USTRUCT()
 struct FAddFundsSettings
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 public:
 	FString WalletAddress = "";
 	FString FiatCurrency = "";
@@ -96,19 +96,12 @@ public:
 	}	
 };
 
-/*
- *      public string AsQueryParameters()
-		{
-			return $"apiKey={apiKey}&referrerDomain={referrerDomain}&walletAddress={walletAddress}&fiatCurrency={fiatCurrency}&disableWalletAddressForm={disableWalletAddressForm}&defaultFiatAmount={defaultFiatAmount}&defaultCryptoCurrency={defaultCryptoCurrency}&networks={networks}";
-		}
- */
-
 USTRUCT()
 struct FOnOffQueryParameters
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 public:
-	const FString ApiKey = "5911d9ec-46b5-48fa-a755-d59a715ff0cf"; // This can be hardcoded as it is a public API key
+	const static inline FString ApiKey = "5911d9ec-46b5-48fa-a755-d59a715ff0cf"; // This can be hardcoded as it is a public API key
 	FString ReferrerDomain = "";
 	FString WalletAddress = "";
 	FString FiatCurrency = "";
@@ -149,7 +142,7 @@ public:
 USTRUCT()
 struct FTransakOnRamp
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 private:
 	FString WalletAddress = "";
 public:
@@ -159,5 +152,4 @@ public:
 	{
 		WalletAddress = WalletAddressIn;
 	}
-	
 };
