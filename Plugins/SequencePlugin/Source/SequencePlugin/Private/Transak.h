@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GeneralProjectSettings.h"
 #include "UObject/Object.h"
 #include "Transak.generated.h"
 
@@ -80,17 +81,27 @@ public:
 	FString DefaultFiatAmount = "";
 	FString DefaultCryptoCurrency = "USDC";
 	FString Networks = "";
-	const FString DefaultNetworks = "ethereum,mainnet,arbitrum,optimism,polygon,polygonzkevm,zksync,base,bnb,oasys,astar,avaxcchain";
-
+	inline const static FString DefaultSetNetworks = "ethereum,mainnet,arbitrum,optimism,polygon,polygonzkevm,zksync,base,bnb,oasys,astar,avaxcchain";
+	inline const static FString DefaultSetCryptoCurrency = "USDC";
+	
 	FAddFundsSettings(){}
 
-	FAddFundsSettings(const FString& WalletAddressIn)
+	FAddFundsSettings(const FString& WalletAddressIn, const FString& FiatCurrencyIn = "USD", const FString& DefaultFiatAmountIn = "50", const FString& DefaultCryptoCurrencyIn = DefaultSetCryptoCurrency, const FString& NetworksIn = DefaultSetNetworks)
 	{
-		
-	}
-	
-	
+		WalletAddress = WalletAddressIn;
+		FiatCurrency = FiatCurrencyIn;
+		DefaultFiatAmount = DefaultFiatAmountIn;
+		DefaultCryptoCurrency = DefaultCryptoCurrencyIn;
+		Networks = NetworksIn;
+	}	
 };
+
+/*
+ *      public string AsQueryParameters()
+		{
+			return $"apiKey={apiKey}&referrerDomain={referrerDomain}&walletAddress={walletAddress}&fiatCurrency={fiatCurrency}&disableWalletAddressForm={disableWalletAddressForm}&defaultFiatAmount={defaultFiatAmount}&defaultCryptoCurrency={defaultCryptoCurrency}&networks={networks}";
+		}
+ */
 
 USTRUCT()
 struct FOnOffQueryParameters
@@ -108,9 +119,30 @@ public:
 
 	FOnOffQueryParameters(){}
 
-	FOnOffQueryParameters(const FString& WalletAddressIn)
+	FOnOffQueryParameters(const FString& WalletAddressIn, const FAddFundsSettings& AddFundSettingsIn, bool DisableWalletAddressFormIn = true)
 	{
-		
+		WalletAddress = WalletAddressIn;
+		const UGeneralProjectSettings& ProjectSettings = *GetDefault<UGeneralProjectSettings>(); 
+		ReferrerDomain = "sequence-unreal: " + ProjectSettings.ProjectName;
+		FiatCurrency = AddFundSettingsIn.FiatCurrency;
+		DisableWalletAddressForm = DisableWalletAddressFormIn;
+		DefaultFiatAmount = AddFundSettingsIn.DefaultFiatAmount;
+		DefaultCryptoCurrency = AddFundSettingsIn.DefaultCryptoCurrency;
+		Networks = AddFundSettingsIn.Networks;
+	}
+	
+	FString AsQueryParameters() const
+	{
+		const FString DisableWalletFormString = (DisableWalletAddressForm) ? "true" : "false";
+		const FString Ret = "apiKey=" + ApiKey +
+			"&referrerDomain=" + ReferrerDomain +
+			"&walletAddress=" + WalletAddress +
+			"&fiatCurrency=" + FiatCurrency +
+			"&disableWalletAddressForm=" + DisableWalletFormString +
+			"&defaultFiatAmount=" + DefaultFiatAmount +
+			"&defaultCryptoCurrency=" + DefaultCryptoCurrency +
+			"&networks=" + Networks;
+		return Ret;
 	}
 };
 
