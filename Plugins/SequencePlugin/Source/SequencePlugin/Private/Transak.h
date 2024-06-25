@@ -3,7 +3,12 @@
 
 #include "CoreMinimal.h"
 #include "GeneralProjectSettings.h"
+#include "Http.h"
+#include "HttpManager.h"
 #include "UObject/Object.h"
+#include "Util/Async.h"
+#include "Indexer/IndexerSupport.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 #include "Transak.generated.h"
 
 USTRUCT()
@@ -151,5 +156,53 @@ public:
 	FTransakOnRamp(const FString& WalletAddressIn)
 	{
 		WalletAddress = WalletAddressIn;
+	}
+	
+	static void GetSupportedCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure)
+	{
+		const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
+		http_post_req->SetVerb("GET");
+		http_post_req->SetHeader("","");
+		http_post_req->SetTimeout(30);
+		http_post_req->SetURL("https://api.transak.com/api/v2/countries");
+		http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+		{ 
+			if(bWasSuccessful)
+			{
+				const FString Content = Request->GetResponse()->GetContentAsString();
+				UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Content);
+				const FSupportedCountryResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSupportedCountryResponse>(Content);
+				OnSuccess(ParsedResponse.Response);
+			}
+			else
+			{
+				if(Request.IsValid() && Request->GetResponse().IsValid())
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				}
+			}
+		});
+		http_post_req->ProcessRequest();
+	}
+
+	FString GetTransakLink(const FString& FiatCurrencyIn = "USD", const FString& DefaultFiatAmountIn = "50", const FString& DefaultCryptoCurrencyIn = FAddFundsSettings::DefaultSetCryptoCurrency, const FString& NetworksIn = FAddFundsSettings::DefaultSetNetworks, bool DisableWalletAddressFormIn = true)
+	{
+		const FAddFundsSettings AddFundsSettings(WalletAddress,FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn);
+		const FOnOffQueryParameters QueryParameters(WalletAddress,AddFundsSettings,DisableWalletAddressFormIn);
+		return "https://global.transak.com?" + QueryParameters.AsQueryParameters();
+	}
+
+	void OpenTransakLink(const FString& FiatCurrencyIn = "USD", const FString& DefaultFiatAmountIn = "50", const FString& DefaultCryptoCurrencyIn = FAddFundsSettings::DefaultSetCryptoCurrency, const FString& NetworksIn = FAddFundsSettings::DefaultSetNetworks, bool DisableWalletAddressFormIn = true)
+	{
+		FString * ErrorPtr = nullptr;
+		FGenericPlatformProcess::LaunchURL(*GetTransakLink(FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
+		if (ErrorPtr)
+		{
+			UE_LOG(LogTemp,Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
+		}
 	}
 };
