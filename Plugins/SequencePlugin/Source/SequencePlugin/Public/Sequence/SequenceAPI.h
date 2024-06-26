@@ -16,6 +16,7 @@
 #include "Types/TransactionReceipt.h"
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
+#include "TransakDataTypes.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -95,9 +96,8 @@ public:
 	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
 	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignOut();
-
-	void GetSupportedTransakCountries();
-	void OpenTransakLink();
+	void GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenTransakLink(const FString& FiatCurrency = FDefaultTransak::FiatCurrency, const FString& DefaultAmount = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrency = FDefaultTransak::CryptoCurrency, const FString& Networks = FDefaultTransak::Networks, bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm);
 private:
 	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
