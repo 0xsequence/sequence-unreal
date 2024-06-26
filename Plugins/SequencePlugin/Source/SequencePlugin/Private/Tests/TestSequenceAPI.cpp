@@ -361,3 +361,25 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 		Api->CloseSession(OnResponse,GenericFailure);
 	}
 }
+
+void SequenceAPITest::GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->GetSupportedTransakCountries(OnSuccess,OnFailure);
+	}
+}
+
+void SequenceAPITest::TestLoadTransakUrl()
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->OpenTransakLink();
+	}
+}
