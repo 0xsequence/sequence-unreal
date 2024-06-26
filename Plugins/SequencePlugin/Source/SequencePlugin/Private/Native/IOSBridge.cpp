@@ -5,12 +5,31 @@
 #include <sstream>
 #include <functional>
 #include "Native/IOS/objective_c/IOSOAuth.h"
+#include "Native/IOS/objective_c/IOSEncryptor.h"
 
 using namespace std;
 
 UIOSBridge::UIOSBridge()
 {
     
+}
+
+FString UIOSBridge::IOSEncrypt(const FString& StringIn)
+{
+	FString Result = "";
+#if PLATFORM_IOS
+	NSString * _url = StringIn.GetNSString();
+#endif
+	return Result;
+}
+
+FString UIOSBridge::IOSDecrypt(const FString& StringIn)
+{
+	FString Result = "";
+#if PLATFORM_IOS
+	NSString * _url = StringIn.GetNSString();
+#endif
+	return Result;
 }
 
 void UIOSBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken))

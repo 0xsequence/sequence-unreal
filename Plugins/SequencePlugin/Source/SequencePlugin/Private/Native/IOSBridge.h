@@ -13,4 +13,7 @@ public:
 	UIOSBridge();
 	static void InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken));
 	static void InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken));
+
+	static FString IOSEncrypt(const FString& StringIn);
+	static FString IOSDecrypt(const FString& StringIn);
 };
