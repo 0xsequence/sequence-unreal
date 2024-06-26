@@ -210,7 +210,7 @@ void AGeneralTesting::TestGetSupportedCountries() const
 {
 	const TFunction<void (TArray<FSupportedCountry>)> OnSuccess = [this](TArray<FSupportedCountry> SupportedCountries)
 	{
-		for (const FSupportedCountry Country : SupportedCountries)
+		for (FSupportedCountry Country : SupportedCountries)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *UIndexerSupport::StructToString(Country));
 		}
