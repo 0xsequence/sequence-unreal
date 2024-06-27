@@ -22,7 +22,7 @@ Within **[SequenceConfig.ini]** add the following lines:
 
       [/Script/Sequence.Config]
       FallbackEncryptionKey = ""
-      WaaSTenantKey = ""
+      WaaSConfigKey = ""
       ProjectAccessKey = ""
       GoogleClientID = ""
       AppleClientID = ""
@@ -66,7 +66,7 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 
 Before you can use this plugin, you need to acquire the following credentials from [Sequence](https://sequence.xyz/builder)
 
-- `WaaSTenantKey`
+- `WaaSConfigKey`
 - `ProjectAccessKey`
 
 You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini

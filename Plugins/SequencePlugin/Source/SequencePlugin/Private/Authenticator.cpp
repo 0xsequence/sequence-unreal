@@ -34,7 +34,7 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
+	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	if constexpr (PLATFORM_ANDROID)

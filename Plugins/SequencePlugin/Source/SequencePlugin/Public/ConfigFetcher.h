@@ -15,7 +15,7 @@ class SEQUENCEPLUGIN_API UConfigFetcher : public UObject
 public:
 	//Config keys
 	static inline FString FallBackEncryptionKey = "FallbackEncryptionKey";
-	static inline FString WaaSTenantKey = "WaaSTenantKey";
+	static inline FString WaaSConfigKey = "WaaSConfigKey";
 	static inline FString ProjectAccessKey = "ProjectAccessKey";
 	static inline FString GoogleClientID = "GoogleClientID";
 	static inline FString AppleClientID = "AppleClientID";
