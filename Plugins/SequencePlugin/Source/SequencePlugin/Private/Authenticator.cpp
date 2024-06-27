@@ -270,7 +270,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	}
 	else
 	{
-		UE_LOG(LogTemp,Display,TEXT("Email based Auth not setup properly please ensure your WaasTenant key is configured properly"));
+		UE_LOG(LogTemp,Error,TEXT("Email based Auth not setup properly please ensure your WaaSConfigKey is configured properly"));
 		this->CallAuthFailure();
 	}
 }

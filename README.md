@@ -33,6 +33,16 @@ Within **[SequenceConfig.ini]** add the following lines:
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
+## Installing Sequence from EpicGame Store
+If you are installing the plugin from the Epic game store the process is slightly different.
+First you'll actually want to install the plugin into the engine from the store. Once this is done
+you'll open up a project, Go to Edit/Plugins/Sequence/SequencePlugin. You'll need to enable the plugin
+as it won't be enabled by default. The engine will need to restart before you'll be able to see the plugin content.
+
+The second thing you'll need to be aware of is the location of the SequencePluginContent folder. Because it's
+installed as an engine plugin, you'll need to enable engine content in the content drawer to be able to find it.
+The location will be All/Engine/Plugins/SequencePluginContent/Core, within the content drawer.
+
 ### Upgrading to Unreal 5.4
 If your project is currently on 5.2 or 5.3, then for this version you'll want to upgrade to 5.4.
 To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
