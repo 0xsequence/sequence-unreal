@@ -264,8 +264,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	if (this->CanHandleEmailLogin())
 	{
 		this->ResetRetryEmailLogin();
-		this->Cached_Email = EmailIn;
-		EmailIn = EmailIn.ToLower();
+		this->Cached_Email = EmailIn.ToLower();
 		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 	}
 	else
@@ -426,7 +425,7 @@ void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHt
 void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email.ToLower() +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
+	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
 	
 	if (this->CanRetryEmailLogin())
 	{
@@ -459,7 +458,6 @@ void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResp
 void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
 {
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	Email = Email.ToLower();
 	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
 	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
 }
@@ -495,7 +493,6 @@ void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHt
 
 void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
 {
-	Email = Email.ToLower();
 	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
 	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
 	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
