@@ -16,6 +16,7 @@
 #include "Indexer/Indexer.h"
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
+#include "SequenceIntent.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {
@@ -210,14 +211,10 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& O
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		const TSharedPtr<FJsonObject> * SessionObj = nullptr;
 		const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 		
-		//UE_LOG(LogTemp,Display,TEXT("Pre Processing, Response: %s"),*Response);
 		if (Json.Get()->TryGetObjectField(TEXT("session"),SessionObj) && Json.Get()->TryGetObjectField(TEXT("response"),ResponseObj))
 		{
 			const TSharedPtr<FJsonObject> * DataObj = nullptr;
@@ -272,16 +269,12 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnS
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
 		TArray<FSession> Sessions;
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FListSessionsResponseObj ResponseStruct;
 		if (FJsonObjectConverter::JsonObjectToUStruct<FListSessionsResponseObj>(Json.ToSharedRef(), &ResponseStruct))
 		{
 			const FString ParsedResponse = UIndexerSupport::StructToString(ResponseStruct);
-			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
 			OnSuccess(ResponseStruct.response.data);
 		}
 		else
@@ -328,16 +321,11 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
-		//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FCloseResponseObj ResponseStruct;
 		if (FJsonObjectConverter::JsonObjectToUStruct<FCloseResponseObj>(Json.ToSharedRef(), &ResponseStruct))
 		{
 			const FString ParsedResponse = UIndexerSupport::StructToString(ResponseStruct);
-			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
 			if (ResponseStruct.response.code.Compare("sessionClosed")==0)
 			{
 				this->Credentials.UnRegisterCredentials();
@@ -402,15 +390,11 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
 		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
 		FSignedMessageResponseObj Msg;
 		if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessageResponseObj>(Json.ToSharedRef(), &Msg))
 		{
 			const FString ParsedResponse = UIndexerSupport::StructToString(Msg);
-			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *ParsedResponse);
 			OnSuccess(Msg.response);
 		}
 		else
@@ -430,42 +414,14 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FString TransactionsPayload = "[";
-	
-	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
+	Transactions.Insert(FeeOption.CreateTransaction(),0);
+	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
 	{
-		switch(Transaction.GetCurrentSubtypeIndex())
-		{
-		case 0: //RawTransaction
-			TransactionsPayload += Transaction.GetSubtype<FRawTransaction>().GetJsonString() + ",";
-			break;
-		case 1: //ERC20
-			TransactionsPayload += Transaction.GetSubtype<FERC20Transaction>().GetJsonString() + ",";
-			break;
-		case 2: //ERC721
-			TransactionsPayload += Transaction.GetSubtype<FERC721Transaction>().GetJsonString() + ",";
-			break;
-		case 3: //ERC1155
-			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
-			break;
-		default: //Doesn't match
-			break;
-		}
-	}
-	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
-	TransactionsPayload += "]";
-	const TSuccessCallback<FString> OnResponse = [=](FString Response)
-	{
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog(Response);
-#endif
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
 		{
-			//parse out what we want and wrap it nicely for ease of use
-			//UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
 			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
 			{
@@ -518,12 +474,332 @@ void USequenceWallet::SendTransaction(TArray<TUnion<FRawTransaction, FERC20Trans
 	if (this->Credentials.RegisteredValid())
 	{
 		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
-		this->SequenceRPC(URL, BuildSendTransactionIntent(TransactionsPayload), OnResponse, OnFailure);
+		this->SequenceRPC(URL,BuildSendTransactionWithFeeIntent(Transactions,this->CachedFeeQuote),OnResponse,OnFailure);
 	}
 	else
 	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 	}
+}
+
+TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList)
+{
+	TArray<FFeeOption> ParsedBalances;
+
+	for (auto Balance : BalanceList)
+	{
+		ParsedBalances.Add(FFeeOption(Balance));
+	}
+	return ParsedBalances;
+}
+
+TArray<FFeeOption> USequenceWallet::MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions)
+{
+	for (int i = 0; i < FeeOptions.Num(); i++)
+	{
+		for (int j = 0; j < BalanceOptions.Num(); j++)
+		{
+			FeeOptions[i].bCanAfford |= BalanceOptions[j].CanAfford(FeeOptions[i]);
+		}
+	}
+	return FeeOptions;
+}
+
+TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions)
+{
+	TArray<FFeeOption> ValidFeeOptions;
+
+	for (auto BalanceOption : BalanceOptions)
+	{
+		for (auto FeeOption : FeeOptions)
+		{
+			if (BalanceOption.CanAfford(FeeOption))
+			{
+				ValidFeeOptions.Add(FeeOption);
+			}
+		}
+	}
+	
+	return ValidFeeOptions;
+}
+
+TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList)
+{
+	TArray<FFeeOption> ParsedFeeOptionList;
+	for (auto FeeOption : FeeOptionList)
+	{
+		ParsedFeeOptionList.Add(FFeeOption(FeeOption));
+	}
+	return ParsedFeeOptionList;
+}
+
+void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
+	{
+		TSharedPtr<FJsonObject> jsonObj;
+		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		{
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
+				{
+					const TArray<TSharedPtr<FJsonValue>> * FeeList = nullptr;
+					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList) && DataObj->Get()->TryGetStringField(TEXT("feeQuote"),this->CachedFeeQuote))
+					{	
+						TArray<FFeeOption> Fees = JsonFeeOptionListToFeeOptionList(*FeeList);
+						FGetTokenBalancesArgs args;
+						args.accountAddress = this->GetWalletAddress();
+						args.includeMetaData = true;
+
+						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [this, Fees, OnSuccess, OnFailure] (const FGetTokenBalancesReturn& BalanceResponse)
+						{
+							TArray<FTokenBalance> PreProcBalances = BalanceResponse.balances;
+							const TSuccessCallback<FEtherBalance> EtherSuccess = [this, PreProcBalances, Fees, OnSuccess] (const FEtherBalance& EtherBalance)
+							{
+								TArray<FFeeOption> Balances = this->BalancesListToFeeOptionList(PreProcBalances);
+								Balances.Add(FFeeOption(EtherBalance));
+								OnSuccess(this->FindValidFeeOptions(Fees,Balances));
+							};
+
+							const FFailureCallback EtherFailure = [this,OnFailure] (const FSequenceError& Err)
+							{
+								OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
+							};
+
+							this->GetEtherBalance(this->GetWalletAddress(),EtherSuccess,EtherFailure);
+						};
+
+						const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
+						{
+							OnFailure(FSequenceError(RequestFail, "Failed to Get Balances from Indexer"));
+						};
+						
+						this->GetTokenBalances(args,BalanceSuccess,BalanceFailure);
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("Error in 3rd level parsing GetFeeOptions"));
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	
+	if (this->Credentials.RegisteredValid())
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,BuildGetFeeOptionsIntent(Transactions),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
+void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
+	{
+		TSharedPtr<FJsonObject> jsonObj;
+		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		{
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
+				{
+					const TArray<TSharedPtr<FJsonValue>> * FeeList = nullptr;
+					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList) && DataObj->Get()->TryGetStringField(TEXT("feeQuote"),this->CachedFeeQuote))
+					{	
+						TArray<FFeeOption> Fees = this->JsonFeeOptionListToFeeOptionList(*FeeList);
+						FGetTokenBalancesArgs args;
+						args.accountAddress = this->GetWalletAddress();
+						args.includeMetaData = true;
+
+						const TSuccessCallback<FGetTokenBalancesReturn> BalanceSuccess = [this, Fees, OnSuccess, OnFailure] (const FGetTokenBalancesReturn& BalanceResponse)
+						{
+							TArray<FTokenBalance> PreProcBalances = BalanceResponse.balances;
+							const TSuccessCallback<FEtherBalance> EtherSuccess = [this, PreProcBalances, Fees, OnSuccess] (const FEtherBalance& EtherBalance)
+							{
+								TArray<FFeeOption> Balances = this->BalancesListToFeeOptionList(PreProcBalances);
+								Balances.Add(FFeeOption(EtherBalance));
+								OnSuccess(this->MarkValidFeeOptions(Fees,Balances));
+							};
+
+							const FFailureCallback EtherFailure = [this,OnFailure] (const FSequenceError& Err)
+							{
+								OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
+							};
+
+							this->GetEtherBalance(this->GetWalletAddress(),EtherSuccess,EtherFailure);
+						};
+
+						const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
+						{
+							OnFailure(FSequenceError(RequestFail, "Failed to Get Balances from Indexer"));
+						};
+						
+						this->GetTokenBalances(args,BalanceSuccess,BalanceFailure);
+					}
+					else
+					{
+						UE_LOG(LogTemp, Error, TEXT("Error in 3rd level parsing in GetFeeOptions"));
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in GetFeeOptions"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in GetFeeOptionsResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	
+	if (this->Credentials.RegisteredValid())
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,BuildGetFeeOptionsIntent(Transactions),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
+void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TSuccessCallback<FString> OnResponse = [=](FString Response)
+	{
+		TSharedPtr<FJsonObject> jsonObj;
+		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		{
+			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
+			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
+			{
+				const TSharedPtr<FJsonObject> * DataObj = nullptr;
+				FString Code = "";
+				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
+				{
+					FString TxHash = "";
+					FString MetaTxHash = "";
+
+					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
+					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
+					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
+					
+					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
+						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
+						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
+						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
+						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
+					{						
+						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
+						OnSuccess(TxnResponse);
+					}
+					else
+					{
+						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			}
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+		}
+	};
+	
+	if (this->Credentials.RegisteredValid())
+	{
+		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/SendIntent";
+		this->SequenceRPC(URL,BuildSendTransactionIntent(Transactions),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
+FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote) const
+{	
+	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
+	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,this->Credentials.GetNetworkString(),Txns,FeeQuote,this->Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FSendTransactionWithFeeOptionData>(SendTransactionWithFeeOptionData);
+	return Intent;
+}
+
+template<typename T> FString USequenceWallet::GenerateIntent(T Data) const
+{
+	const int64 Issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 Expires = Issued + 86400;
+	FGenericData * LocalDataPtr = &Data;
+	const FString Operation = LocalDataPtr->Operation;
+	const FSignatureIntent SigIntent(LocalDataPtr,Expires,Issued,Operation,this->Credentials.GetWaasVersion());
+	const FString Signature = this->GeneratePacketSignature(SigIntent.GetJson<T>());
+	const FSignatureEntry SigEntry(this->Credentials.GetSessionId(),Signature);
+	const FSignedIntent SignedIntent(LocalDataPtr,Expires,Issued,Operation,{SigEntry},this->Credentials.GetWaasVersion());
+	
+	if (Operation.Equals(OpenSessionOP,ESearchCase::IgnoreCase))
+	{
+		const FRegisterFinalIntent FinalIntent(SignedIntent,FGuid::NewGuid().ToString());
+		return FinalIntent.GetJson<T>();
+	}
+	else
+	{
+		const FGenericFinalIntent FinalIntent(SignedIntent);
+		return FinalIntent.GetJson<T>();
+	}
+}
+
+FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
+{
+	const FGetFeeOptionsData GetFeeOptionsData(this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData);
+	return Intent;
 }
 
 FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
@@ -532,8 +808,8 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 	const int64 expires = issued + 86400;
 	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
 	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	
 	const FString Wallet = this->Credentials.GetWalletAddress();
+	
 	//eip-191 and keccak hashing the message
 	const FString LeadingByte = "\x19";//leading byte
 	FString Payload = LeadingByte + "Ethereum Signed Message:\n";
@@ -541,76 +817,45 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 	Payload += Message;
 	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
 	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
-	//UE_LOG(LogTemp,Display,TEXT("EIP_191: %s"),*EIP_Message);
 	
-	//EIP-191
-	const FString Data = "{\"message\":\""+EIP_Message+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"}";
-	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"signMessage\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("SignMessage Intent: %s"),*Intent);
+	const FSignMessageData SignMessageData(EIP_Message,this->Credentials.GetNetworkString(),this->Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FSignMessageData>(SignMessageData);
+
 	return Intent;
 }
 
-FString USequenceWallet::BuildSendTransactionIntent(const FString& Txns) const
+FString USequenceWallet::BuildSendTransactionIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
 	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
-	const FString SigIntent = "{\"data\":{\"identifier\":\""+identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	FString Intent = "{\"intent\":{\"data\":{\"identifier\":\""+identifier+"\",\"network\":\""+this->Credentials.GetNetworkString()+"\",\"transactions\":"+Txns+",\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"sendTransaction\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("SendTransactionIntent: %s"),*Intent);
+	const FSendTransactionData SendTransactionData(identifier,this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FSendTransactionData>(SendTransactionData);
 	return Intent;
 }
 
 FString USequenceWallet::BuildRegisterSessionIntent() const
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString GUID = FGuid::NewGuid().ToString();
-	const FString Data = "{\"idToken\":\""+this->Credentials.GetIDToken()+"\",\"sessionId\":\""+this->Credentials.GetSessionId()+"\"}";
-	const FString SigIntent = "{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":"+Data+",\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"openSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"},\"friendlyName\":\""+GUID+"\"}";
-	//UE_LOG(LogTemp,Display,TEXT("RegisterSession Intent: %s"),*Intent);
+	const FRegisterSessionData RegisterSessionData(this->Credentials.GetIDToken(),this->Credentials.GetSessionId());
+	const FString Intent = this->GenerateIntent<FRegisterSessionData>(RegisterSessionData);
 	return Intent;
 }
 
 FString USequenceWallet::BuildListSessionIntent() const
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString SigIntent = "{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":{\"wallet\":\""+this->Credentials.GetWalletAddress()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"listSessions\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("ListSessionIntent: %s"),*Intent);
+	const FListSessionsData ListSessionsData(this->Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FListSessionsData>(ListSessionsData);
 	return Intent;
 }
 
 FString USequenceWallet::BuildCloseSessionIntent() const
 {
-	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
-	const int64 expires = issued + 86400;
-	const FString issuedString = FString::Printf(TEXT("%lld"),issued);
-	const FString expiresString = FString::Printf(TEXT("%lld"),expires);
-	const FString SigIntent = "{\"data\":{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"closeSession\",\"version\":\""+this->Credentials.GetWaasVersion()+"\"}";
-	const FString Signature = this->GeneratePacketSignature(SigIntent);
-	const FString Intent = "{\"intent\":{\"data\":{\"sessionId\":\""+this->Credentials.GetSessionId()+"\"},\"expiresAt\":"+expiresString+",\"issuedAt\":"+issuedString+",\"name\":\"closeSession\",\"signatures\":[{\"sessionId\":\""+this->Credentials.GetSessionId()+"\",\"signature\":\""+Signature+"\"}],\"version\":\""+this->Credentials.GetWaasVersion()+"\"}}";
-	//UE_LOG(LogTemp,Display,TEXT("CloseSessionIntent: %s"),*Intent);
+	const FCloseSessionData CloseSessionData(this->Credentials.GetSessionId());
+	const FString Intent = this->GenerateIntent(CloseSessionData);
 	return Intent;
 }
 
 FString USequenceWallet::BuildSessionValidationIntent() const
 {
 	const FString Intent = "{\\\"sessionId\\\":\\\""+this->Credentials.GetSessionId()+"\\\"}";
-	//UE_LOG(LogTemp,Display,TEXT("SessionValidationIntent: %s"),*Intent);
 	return Intent;
 }
 
@@ -679,7 +924,6 @@ void USequenceWallet::GetFriends(FString username, TSuccessCallback<TArray<FCont
 
 TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
 {
-	//UE_LOG(LogTemp, Error, TEXT("Received json: %s"), *JSON);
 	TSharedPtr<FJsonObject> jsonObj;
 	FUpdatedPriceReturn updatedPrices;
 

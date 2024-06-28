@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
+#include "Containers/Union.h"
 #include "Util/Structs/BE_Structs.h"
 #include "IndexerSupport.generated.h"
 
@@ -22,6 +23,8 @@ class SEQUENCEPLUGIN_API UIndexerSupport : public UObject
 public:
 	static float GetAmount(int64 Amount,int32 Decimals);
 	static float GetAmount(int64 Amount,float Decimals);
+	
+	static FString TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions);
 	
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings

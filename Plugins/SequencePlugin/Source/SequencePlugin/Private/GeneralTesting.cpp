@@ -5,21 +5,19 @@
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "Util/HexUtility.h"
 #include "Indexer/IndexerSupport.h"
 #include "SequenceEncryptor.h"
-#include "SystemDataBuilder.h"
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
-#include "Types/Wallet.h"
-#include "Indexer/Indexer_Enums.h"
+#include "Sequence/SequenceIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	imgHandler = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -148,6 +146,51 @@ void AGeneralTesting::TestSendERC1155() const
 	SequenceAPITest::SendERC1155(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestSendTransactionWithFee() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](const FString& State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](const FString& Data, const FSequenceError& Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::SendTransactionWithFee(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetUnFilteredFeeOptions() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetUnfilteredFeeOptions(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetFeeOptions() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetFeeOptions(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestCloseSessions() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)
@@ -214,7 +257,7 @@ void AGeneralTesting::TestHistory() const
 		}
 	};
 
-	const FFailureCallback GenericFailure = [](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
 	};
@@ -233,6 +276,17 @@ void AGeneralTesting::TestHistory() const
 	}
 }
 
+void AGeneralTesting::TestGetWalletAddress() const
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet * Api = WalletOptional.GetValue();
+		UE_LOG(LogTemp, Display, TEXT("Wallet Address: %s"), *Api->GetWalletAddress());
+	}
+}
+
 void AGeneralTesting::TestEncryption() const
 {
 	const FString PreEncrypt = "testing text";
@@ -248,10 +302,16 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	//ESortOrder_Sequence TestOrder = ESortOrder_Sequence::ASC;
-	//FString TestResult = UEnum::GetValueAsString(TestOrder);
-	SequenceAPITest::BasicProviderTests();
-	//UE_LOG(LogTemp, Display, TEXT("Printed UEnum: %s"), *TestResult);
+	FRegisterSessionData GenericData = FRegisterSessionData();
+	FGenericData * GPointer = &GenericData;
+	
+	//FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
+	const FString GenericString = UIndexerSupport::StructToPartialSimpleString(*GPointer);
+	
+	FString Ret;
+	FJsonObjectConverter::UStructToJsonObjectString<FRegisterSessionData>(*static_cast<FRegisterSessionData*>(GPointer), Ret, 0, 0);
+	
+	UE_LOG(LogTemp, Display, TEXT("Parsed response: %s"), *GenericString);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()

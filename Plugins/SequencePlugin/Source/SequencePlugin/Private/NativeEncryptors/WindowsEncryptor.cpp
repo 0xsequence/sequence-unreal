@@ -86,11 +86,7 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 	{
 		const FString PreResult = BytesToString(DataOut.pbData,DataOut.cbData);
 		
-		if (FBase64::Decode(PreResult,Result))
-		{
-			UE_LOG(LogTemp,Display,TEXT("Successful B64 Decode in Windows Encryptor"));
-		}
-		else
+		if (!FBase64::Decode(PreResult,Result))
 		{
 			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode in Windows Encryptor"));
 		}

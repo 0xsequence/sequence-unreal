@@ -22,6 +22,10 @@ public:
         FString originAddress = "";
     UPROPERTY()
         bool blacklist = false;
+    UPROPERTY()
+        bool verified = false;
+    UPROPERTY()
+        FString verifiedBy = "";
 
     /*
     * Gets the json object formed by this struct
@@ -35,6 +39,8 @@ public:
         ret.Get()->SetNumberField("originChainId", originChainId);
         ret.Get()->SetStringField("originAddress", originAddress);
         ret.Get()->SetBoolField("blacklist", blacklist);
+        ret.Get()->SetBoolField("verified",verified);
+        ret.Get()->SetStringField("verifiedBy",verifiedBy);
         return ret;
     };
 };

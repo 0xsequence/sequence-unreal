@@ -8,6 +8,11 @@
 #include "BE_Structs.generated.h"
 
 //Sequence API Structs
+USTRUCT(BlueprintType)
+struct FGenericTransaction
+{
+    GENERATED_USTRUCT_BODY()
+};
 
 USTRUCT(BlueprintType)
 struct FRawTransaction
@@ -146,7 +151,7 @@ public:
 	    Json += "\"id\":\"" + id + "\",";
 	    Json += "\"safe\":" + safeState + ",";
 	    Json += "\"to\":\"" + to + "\",";
-	    Json += "\"token\":\"" + tokenAddress + "\",";
+	    Json += "\"tokenAddress\":\"" + tokenAddress + "\",";
 	    Json += "\"type\":\"" + type + "\"";
 	    Json += "}";
 	    return Json;
@@ -225,7 +230,7 @@ public:
 	    FString Json = "{";
 	    Json += "\"data\":\"" + data + "\",";
 	    Json += "\"to\":\"" + to + "\",";
-	    Json += "\"token\":\"" + tokenAddress + "\",";
+	    Json += "\"tokenAddress\":\"" + tokenAddress + "\",";
 	    Json += "\"type\":\"" + type + "\",";
 	    Json += "\"vals\":";
 	    Json += "[";

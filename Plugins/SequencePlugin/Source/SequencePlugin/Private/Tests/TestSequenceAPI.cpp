@@ -97,23 +97,19 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 
 void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-#if PLATFORM_ANDROID
-	NativeOAuth::AndroidLog("ListSessions");
-#endif
 	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
 	{
+		for (auto Session : Response)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *UIndexerSupport::StructToString(Session));	
+		}
+		
 		OnSuccess("List Sessions Test Passed");
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("ListSessionsDone");
-#endif
 	};
 	
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Test Failed", Error);
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("ListSessionsFail");
-#endif
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
@@ -271,9 +267,9 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 
 	FERC721Transaction T721;
 	T721.safe = true;
-	T721.id = "54530968763798660137294927684252503703134533114052628080002308208148824588621";
-	T721.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T721.tokenAddress = "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f";
+	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
+	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
 	
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
 
@@ -292,6 +288,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 		},GenericFailure);
 	}
 }
+
 void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
@@ -303,12 +300,12 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	
 	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
 	FERC1155Transaction T1155;
-	T1155.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	T1155.tokenAddress = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
+	T1155.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T1155.tokenAddress = "0x44b3f42e2bf34f62868ff9e9dab7c2f807ba97cb";
 	
 	FERC1155TxnValue Val;
 	Val.amount = "1";
-	Val.id = "66635";
+	Val.id = "130";
 	T1155.vals.Add(Val);
 
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));
@@ -359,5 +356,139 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
 		Api->CloseSession(OnResponse,GenericFailure);
+	}
+}
+
+void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
+	{
+		for (const FFeeOption& Fee : Response)
+		{
+			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);
+		}
+		OnSuccess("Get FeeOptions Test Passed");
+	};
+
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Test Failed", Error);
+	};
+
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+
+		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+
+		FERC20Transaction T20;
+		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+		T20.value = "1000";
+		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		
+		Api->GetFeeOptions(Transactions,OnResponse,GenericFailure);
+	}
+}
+
+void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess, TFunction<void(FString,FSequenceError)> OnFailure)
+{
+	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Transactions;
+
+	FERC721Transaction T721;
+	T721.safe = true;
+	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
+	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
+
+	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
+	
+	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
+	{
+		if (Response.Num() > 0)
+		{
+			const FFeeOption SelectedFeeOption = Response[0];
+			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *UIndexerSupport::StructToString(SelectedFeeOption));
+			
+			const FFailureCallback OnTransactionFailure = [OnFailure](const FSequenceError& Error)
+			{
+				OnFailure("Transaction failure", Error);
+			};
+
+			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+			if (WalletOptional.IsSet() && WalletOptional.GetValue())
+			{
+				USequenceWallet * Api = WalletOptional.GetValue();
+				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FTransactionResponse& Transaction)
+				{
+					FString OutputString;
+					const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+					FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
+					OnSuccess(OutputString);
+				}, OnTransactionFailure);
+			}
+		}
+		else
+		{
+			OnFailure("Test failed no fee options in response",FSequenceError(EErrorType::EmptyResponse,"Empty fee option response"));
+		}
+	};
+
+	const FFailureCallback OnFeeFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Get Fee Option Response failure", Error);
+	};
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->GetFeeOptions(Transactions,OnFeeResponse,OnFeeFailure);
+	}
+}
+
+void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
+	{
+		for (const FFeeOption& Fee : Response)
+		{
+			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString CanAfford = (Fee.bCanAfford) ? "Yes" : "No";
+			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
+			
+		}
+		OnSuccess("Get FeeOptions Test Passed");
+	};
+
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure("Test Failed", Error);
+	};
+
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetUnfilteredFeeOptions Test]========================"));
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+
+		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+
+		FERC20Transaction T20;
+		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+		T20.value = "1000";
+		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		
+		Api->GetUnfilteredFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 }

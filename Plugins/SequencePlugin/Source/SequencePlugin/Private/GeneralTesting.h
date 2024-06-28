@@ -59,6 +59,18 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestSendERC1155() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetFeeOptions() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestSendTransactionWithFee() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetUnFilteredFeeOptions() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetWalletAddress() const;
 	
 	/*
 	* Called by frontend to test the indexer
