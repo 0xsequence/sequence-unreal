@@ -84,6 +84,10 @@ Lastpass Password generator or equivalent,
 Encryption Key Generators,
 etc
 
+##### Important for values you place in FallbackEncryptionKey
+Be sure what ever key data you place in **[FallbackEncryptionKey]** is of hex form & does NOT contain any extraneous symbols, eg) *,/\ etc.
+In the event unrecognized symbols are seen the engine will not load the .ini file.
+
 ***
 
 ## Getting Started With the Builtin GUI
@@ -907,6 +911,10 @@ Set NDK API Level to anything in the range [26,33] (We personally used android-3
 
 ### Hardware Requirements
 For Hardware Requirements with Unreal please refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine?application_version=5.3)
+
+#### SequencePlugin Login Notes
+During login on OSX it's likely users will be asked to login to their keychain if they aren't already.
+This is because we store a random encryption key in the Users keychain and it may require permission from the user to do so.
 
 #### Unreal and Xcode Specifics
 During the Unreal Package process in the event a code signing error occurs you can take the following steps within XCode to get your packaged .app file

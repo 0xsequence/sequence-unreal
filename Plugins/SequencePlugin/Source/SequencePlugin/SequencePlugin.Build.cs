@@ -78,6 +78,21 @@ public class SequencePlugin : ModuleRules
 				}
 				);
 		}
+	
+		//Add Mac specific Dependencies
+		if (Target.Platform == UnrealTargetPlatform.Mac)
+		{
+			PublicFrameworks.AddRange(new string[]
+			{
+				"Foundation",
+				"Security",
+				"CoreFoundation",
+				"SystemConfiguration",
+				"AVFoundation",
+				"LocalAuthentication",
+				"AuthenticationServices",
+			});
+		}
 		
 		//Add IOS Specific Dependencies
 		if (Target.Platform == UnrealTargetPlatform.IOS)
