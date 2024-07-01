@@ -265,7 +265,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	if (this->CanHandleEmailLogin())
 	{
 		this->ResetRetryEmailLogin();
-		this->Cached_Email = EmailIn;
+		this->Cached_Email = EmailIn.ToLower();
 		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 	}
 	else
