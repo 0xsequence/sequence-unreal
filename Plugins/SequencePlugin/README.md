@@ -33,6 +33,11 @@ Within **[SequenceConfig.ini]** add the following lines:
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
 
+### Note when upgrading from older versions of the plugin
+The WaaSTenantKey value in the SequenceConfig.ini has been changed to WaaSConfigKey
+if you do not update this value in the SequenceConfig.ini, the SequencePlugin will be unable
+to load your settings.
+
 ## Installing Sequence from EpicGame Store
 If you are installing the plugin from the Epic game store the process is slightly different.
 First you'll actually want to install the plugin into the engine from the store. Once this is done
