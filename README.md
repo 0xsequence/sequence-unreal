@@ -22,7 +22,7 @@ Within **[SequenceConfig.ini]** add the following lines:
 
       [/Script/Sequence.Config]
       FallbackEncryptionKey = ""
-      WaaSTenantKey = ""
+      WaaSConfigKey = ""
       ProjectAccessKey = ""
       GoogleClientID = ""
       AppleClientID = ""
@@ -32,6 +32,21 @@ Within **[SequenceConfig.ini]** add the following lines:
 
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
+
+### Note when upgrading from older versions of the plugin
+The WaaSTenantKey value in the SequenceConfig.ini has been changed to WaaSConfigKey
+if you do not update this value in the SequenceConfig.ini, the SequencePlugin will be unable
+to load your settings.
+
+## Installing Sequence from EpicGame Store
+If you are installing the plugin from the Epic game store the process is slightly different.
+First you'll actually want to install the plugin into the engine from the store. Once this is done
+you'll open up a project, Go to Edit/Plugins/Sequence/SequencePlugin. You'll need to enable the plugin
+as it won't be enabled by default. The engine will need to restart before you'll be able to see the plugin content.
+
+The second thing you'll need to be aware of is the location of the SequencePluginContent folder. Because it's
+installed as an engine plugin, you'll need to enable engine content in the content drawer to be able to find it.
+The location will be All/Engine/Plugins/SequencePluginContent/Core, within the content drawer.
 
 ### Upgrading to Unreal 5.4
 If your project is currently on 5.2 or 5.3, then for this version you'll want to upgrade to 5.4.
@@ -66,7 +81,7 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 
 Before you can use this plugin, you need to acquire the following credentials from [Sequence](https://sequence.xyz/builder)
 
-- `WaaSTenantKey`
+- `WaaSConfigKey`
 - `ProjectAccessKey`
 
 You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini

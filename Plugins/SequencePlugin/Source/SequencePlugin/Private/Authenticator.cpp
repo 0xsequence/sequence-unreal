@@ -34,7 +34,7 @@ UAuthenticator::UAuthenticator()
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
 	FString ParsedJWT;
-	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSTenantKey),ParsedJWT);
+	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	if constexpr (PLATFORM_ANDROID)
@@ -265,12 +265,12 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	if (this->CanHandleEmailLogin())
 	{
 		this->ResetRetryEmailLogin();
-		this->Cached_Email = EmailIn;
+		this->Cached_Email = EmailIn.ToLower();
 		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
 	}
 	else
 	{
-		UE_LOG(LogTemp,Display,TEXT("Email based Auth not setup properly please ensure your WaasTenant key is configured properly"));
+		UE_LOG(LogTemp,Error,TEXT("Email based Auth not setup properly please ensure your WaaSConfigKey is configured properly"));
 		this->CallAuthFailure();
 	}
 }

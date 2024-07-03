@@ -1191,30 +1191,6 @@ void USequenceWallet::EstimateContractCallGas(const FContractCall& ContractCall,
 	}
 }
 
-void USequenceWallet::EstimateDeploymentGas(const FAddress& From, const FString& Bytecode, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Provider)
-	{
-		this->Provider->EstimateDeploymentGas(From,Bytecode,OnSuccess,OnFailure);
-	}
-}
-
-void USequenceWallet::DeployContract(const FString& Bytecode, const FPrivateKey& PrivKey, int64 ChainId, const TSuccessCallback<FAddress>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Provider)
-	{
-		this->Provider->DeployContract(Bytecode, PrivKey, ChainId, OnSuccess, OnFailure);
-	}
-}
-
-void USequenceWallet::DeployContractWithHash(const FString& Bytecode, const FPrivateKey& PrivKey, int64 ChainId, const TSuccessCallbackTuple<FAddress, FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Provider)
-	{
-		this->Provider->DeployContractWithHash(Bytecode,PrivKey,ChainId,OnSuccess,OnFailure);
-	}
-}
-
 void USequenceWallet::NonceAt(uint64 Number, const TSuccessCallback<FBlockNonce>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)

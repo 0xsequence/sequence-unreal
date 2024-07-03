@@ -296,17 +296,6 @@ public:
 	void GetGasPrice(const TFunction<void(FUnsizedData)>& OnSuccess, const TFunction<void(FSequenceError)>& OnFailure) const;
 	void EstimateContractCallGas(const FContractCall& ContractCall, const TFunction<void(FUnsizedData)>& OnSuccess,
 	                             const TFunction<void(FSequenceError)>& OnFailure) const;
-
-	//deprecated//
-	void EstimateDeploymentGas(const FAddress& From, const FString& Bytecode, const TFunction<void(FUnsizedData)>& OnSuccess,
-	                           const TFunction<void(FSequenceError)>& OnFailure) const;
-
-	void DeployContract(const FString& Bytecode, const FPrivateKey& PrivKey, int64 ChainId, const TFunction<void(FAddress)>& OnSuccess,
-	                    const TFunction<void(FSequenceError)>& OnFailure) const;
-	void DeployContractWithHash(const FString& Bytecode, const FPrivateKey& PrivKey, int64 ChainId,
-	                            const TFunction<void(FAddress, FUnsizedData)>& OnSuccess,
-	                            const TFunction<void(FSequenceError)>& OnFailure) const;
-	//deprecated//
 	
 	void NonceAt(uint64 Number, const TFunction<void(FBlockNonce)>& OnSuccess, const TFunction<void(FSequenceError)>& OnFailure) const;
 	void NonceAt(EBlockTag Tag, const TFunction<void(FBlockNonce)>& OnSuccess, const TFunction<void(FSequenceError)>& OnFailure) const;
