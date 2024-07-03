@@ -9,8 +9,11 @@ struct SEQUENCEPLUGIN_API FPartner
 {
 	GENERATED_USTRUCT_BODY()
 public:
+	UPROPERTY()
 	FString Name = "";
+	UPROPERTY()
 	bool IsCardPayment = false;
+	UPROPERTY()
 	FString CurrencyCode = "";
 
 	FPartner(){}
@@ -29,13 +32,21 @@ struct SEQUENCEPLUGIN_API FSupportedCountry
 	GENERATED_USTRUCT_BODY()
 	
 public:
+	UPROPERTY()
 	FString Alpha2 = "";
+	UPROPERTY()
 	FString Alpha3 = "";
+	UPROPERTY()
 	bool IsAllowed = false;
+	UPROPERTY()
 	bool IsLightKycAllowed = false;
+	UPROPERTY()
 	FString Name = "";
+	UPROPERTY()
 	TArray<FString> SupportedDocuments;
+	UPROPERTY()
 	FString CurrencyCode = "";
+	UPROPERTY()
 	TArray<FPartner> Partners;
 
 	FSupportedCountry(){}
@@ -59,6 +70,7 @@ USTRUCT()
 struct SEQUENCEPLUGIN_API FSupportedCountryResponse
 {
 	GENERATED_USTRUCT_BODY()
+	UPROPERTY()
 	TArray<FSupportedCountry> Response;
 
 	FSupportedCountryResponse(){}

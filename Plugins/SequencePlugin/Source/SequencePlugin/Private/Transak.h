@@ -14,8 +14,8 @@ class SEQUENCEPLUGIN_API UTransakOnRamp : public UObject
 private:
 	FString WalletAddress = "";
 public:
+	static UTransakOnRamp * Init(const FString& WalletAddressIn);
 	UTransakOnRamp();
-	UTransakOnRamp(const FString& WalletAddressIn);
 	static void GetSupportedCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure);
 	void OpenTransakLink(const FString& FiatCurrencyIn = FDefaultTransak::FiatCurrency, const FString& DefaultFiatAmountIn = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrencyIn = FDefaultTransak::CryptoCurrency, const FString& NetworksIn = FDefaultTransak::Networks, bool DisableWalletAddressFormIn = FDefaultTransak::DisableWalletAddressForm);
 private:

@@ -363,8 +363,15 @@ void USequenceWallet::GetSupportedTransakCountries(const TSuccessCallback<TArray
 
 void USequenceWallet::OpenTransakLink(const FString& FiatCurrency, const FString& DefaultAmount, const FString& DefaultCryptoCurrency, const FString& Networks, bool DisableWalletAddressForm)
 {
-	UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
-	Transak->OpenTransakLink(FiatCurrency, DefaultAmount, DefaultCryptoCurrency, Networks, DisableWalletAddressForm);
+	if (Credentials.RegisteredValid())
+	{
+		UTransakOnRamp * Transak = UTransakOnRamp::Init(this->GetWalletAddress());
+		Transak->OpenTransakLink(FiatCurrency, DefaultAmount, DefaultCryptoCurrency, Networks, DisableWalletAddressForm);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Please login first."));
+	}
 }
 
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const

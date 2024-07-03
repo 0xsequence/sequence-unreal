@@ -7,9 +7,11 @@
 
 UTransakOnRamp::UTransakOnRamp(){}
 
-UTransakOnRamp::UTransakOnRamp(const FString& WalletAddressIn)
+UTransakOnRamp * UTransakOnRamp::Init(const FString& WalletAddressIn)
 {
-	WalletAddress = WalletAddressIn;
+	UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
+	Transak->WalletAddress = WalletAddressIn;
+	return Transak;
 }
 
 void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure)
@@ -24,7 +26,6 @@ void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCou
 		if(bWasSuccessful)
 		{
 			const FString Content = Request->GetResponse()->GetContentAsString();
-			UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Content);
 			const FSupportedCountryResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSupportedCountryResponse>(Content);
 			OnSuccess(ParsedResponse.Response);
 		}
@@ -53,7 +54,7 @@ FString UTransakOnRamp::GetTransakLink(const FString& FiatCurrencyIn, const FStr
 void UTransakOnRamp::OpenTransakLink(const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)
 {
 	FString * ErrorPtr = nullptr;
-	FGenericPlatformProcess::LaunchURL(*GetTransakLink(FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
+	FPlatformProcess::LaunchURL(*GetTransakLink(FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
 	if (ErrorPtr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);

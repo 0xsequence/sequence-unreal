@@ -359,6 +359,7 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 	}
 }
 
+<<<<<<< HEAD
 void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const TFunction<void(TArray<FFeeOption>)> OnResponse = [OnSuccess](const TArray<FFeeOption>& Response)
@@ -378,11 +379,16 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
 
+=======
+void SequenceAPITest::GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+>>>>>>> 8a6f0091 (Fixed a crash for the TransakOnRamp link, Updated the supported countries structs to be parsable by unreal)
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
+<<<<<<< HEAD
 
 		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
 
@@ -445,11 +451,20 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 		OnFailure("Get Fee Option Response failure", Error);
 	};
 
+=======
+		Api->GetSupportedTransakCountries(OnSuccess,OnFailure);
+	}
+}
+
+void SequenceAPITest::TestLoadTransakUrl()
+{
+>>>>>>> 8a6f0091 (Fixed a crash for the TransakOnRamp link, Updated the supported countries structs to be parsable by unreal)
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
+<<<<<<< HEAD
 		Api->GetFeeOptions(Transactions,OnFeeResponse,OnFeeFailure);
 	}
 }
@@ -490,5 +505,8 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
 		
 		Api->GetUnfilteredFeeOptions(Transactions,OnResponse,GenericFailure);
+=======
+		Api->OpenTransakLink();
+>>>>>>> 8a6f0091 (Fixed a crash for the TransakOnRamp link, Updated the supported countries structs to be parsable by unreal)
 	}
 }

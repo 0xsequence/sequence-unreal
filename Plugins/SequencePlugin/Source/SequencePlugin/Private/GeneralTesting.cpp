@@ -206,6 +206,30 @@ void AGeneralTesting::TestCloseSessions() const
 	SequenceAPITest::CloseSession(OnSuccess, OnFailure);
 }
 
+void AGeneralTesting::TestGetSupportedCountries() const
+{
+	const TFunction<void (TArray<FSupportedCountry>)> OnSuccess = [this](TArray<FSupportedCountry> SupportedCountries)
+	{
+		for (const FSupportedCountry Country : SupportedCountries)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *UIndexerSupport::StructToString(Country));
+		}
+		CallbackPassed("TestPassed");
+	};
+
+	const TFunction<void (FSequenceError)> OnFailure = [this]( const FSequenceError& Err)
+	{
+		CallbackFailed(TEXT("Error getting TransakCountry Data"), Err);
+	};
+
+	SequenceAPITest::GetSupportedCountries(OnSuccess,OnFailure);
+}
+
+void AGeneralTesting::TestLoadTransakUrl() const
+{
+	SequenceAPITest::TestLoadTransakUrl();
+}
+
 void AGeneralTesting::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)
