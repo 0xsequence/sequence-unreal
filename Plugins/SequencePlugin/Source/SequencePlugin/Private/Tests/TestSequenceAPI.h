@@ -1,6 +1,8 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "Errors.h"
+#include "TransakDataTypes.h"
+#include "Util/Async.h"
 
 class SequenceAPITest
 {
@@ -18,4 +20,6 @@ public:
 	static void GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void SendTransactionWithFee(TFunction<void(FString)> OnSuccess, TFunction<void(FString,FSequenceError)> OnFailure);
 	static void GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
+	static void TestLoadTransakUrl();
 };

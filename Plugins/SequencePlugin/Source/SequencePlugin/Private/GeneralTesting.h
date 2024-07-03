@@ -71,6 +71,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestGetWalletAddress() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetSupportedCountries() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestLoadTransakUrl() const;
 	
 	/*
 	* Called by frontend to test the indexer

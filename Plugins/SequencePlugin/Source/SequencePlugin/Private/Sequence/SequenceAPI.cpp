@@ -17,6 +17,7 @@
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "SequenceIntent.h"
+#include "Transak.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {
@@ -351,6 +352,25 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 	else
 	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
+void USequenceWallet::GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
+	Transak->GetSupportedCountries(OnSuccess,OnFailure);
+}
+
+void USequenceWallet::OpenTransakLink(const FString& FiatCurrency, const FString& DefaultAmount, const FString& DefaultCryptoCurrency, const FString& Networks, bool DisableWalletAddressForm)
+{
+	if (Credentials.RegisteredValid())
+	{
+		UTransakOnRamp * Transak = UTransakOnRamp::Init(this->GetWalletAddress());
+		Transak->OpenTransakLink(FiatCurrency, DefaultAmount, DefaultCryptoCurrency, Networks, DisableWalletAddressForm);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Please login first."));
 	}
 }
 
