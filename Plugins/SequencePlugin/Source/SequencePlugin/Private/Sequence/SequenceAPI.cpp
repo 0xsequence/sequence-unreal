@@ -17,6 +17,7 @@
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "SequenceIntent.h"
+#include "Transak.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {

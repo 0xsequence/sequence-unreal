@@ -183,6 +183,9 @@ public:
 	 * @OnFailure An error occured
 	 */
 	void SignOut();
+
+	void GetSupportedTransakCountries();
+	void OpenTransakLink();
 private:
 	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
