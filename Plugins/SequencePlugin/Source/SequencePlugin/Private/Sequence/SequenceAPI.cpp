@@ -355,6 +355,18 @@ void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, c
 	}
 }
 
+void USequenceWallet::GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
+	Transak->GetSupportedCountries(OnSuccess,OnFailure);
+}
+
+void USequenceWallet::OpenTransakLink(const FString& FiatCurrency, const FString& DefaultAmount, const FString& DefaultCryptoCurrency, const FString& Networks, bool DisableWalletAddressForm)
+{
+	UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
+	Transak->OpenTransakLink(FiatCurrency, DefaultAmount, DefaultCryptoCurrency, Networks, DisableWalletAddressForm);
+}
+
 FString USequenceWallet::GeneratePacketSignature(const FString& Packet) const
 {
 	//keccakhash of the packet first

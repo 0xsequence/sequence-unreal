@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Transak.h"
 #include "Http.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 #include "HttpManager.h"
 #include "Indexer/IndexerSupport.h"
 
