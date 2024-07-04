@@ -56,7 +56,7 @@ public:
 	void UpdateProviderUrl(const FString& NewProviderUrl);
 	
 	UFUNCTION(BlueprintCallable)
-	void OpenTransakUrl();
+	void OpenTransakUrl(const FTransakSettings& Settings);
 
 	UFUNCTION(BlueprintCallable)
 	void SignOut();

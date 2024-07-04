@@ -60,14 +60,13 @@ void USequenceWalletBP::UpdateProviderUrl(const FString& NewProviderUrl)
 	}
 }
 
-//Create a FStruct that is initialized with default values, then users can simply update portions that they need! and pass it in here
-void USequenceWalletBP::OpenTransakUrl()
+void USequenceWalletBP::OpenTransakUrl(const FTransakSettings& Settings)
 {
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Wallet = WalletOptional.GetValue();
-		//Wallet->OpenTransakLink(FiatCurrency,DefaultAmount,DefaultCryptoCurrency,Networks,DisableWalletAddressForm);
+		Wallet->OpenTransakLink(Settings.FiatCurrency,Settings.FiatAmount,Settings.CryptoCurrency,Settings.Networks,Settings.DisableWalletAddressForm);
 	}
 }
 
