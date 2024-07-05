@@ -11,34 +11,35 @@ struct FTokenMetaData
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 tokenId = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString name = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString description = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString image = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         float decimals = 0.0;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString video = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString audio = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString image_data = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString external_url = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString background_color = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString animation_url = "";
-
-    TMap<FString, FString> properties;
-
-    TArray<FAttributeMap> attributes;
+    //These 2 need to be manually built
+    UPROPERTY(BlueprintReadWrite)
+        TMap<FString, FString> properties;
+    UPROPERTY(BlueprintReadWrite)
+        TArray<FAttributeMap> attributes;
 
     /*
     * Used to get the json object formed by this struct

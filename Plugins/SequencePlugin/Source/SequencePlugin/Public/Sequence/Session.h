@@ -6,39 +6,39 @@
 #include "UObject/Object.h"
 #include "Session.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FIdentity
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString type = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString iss = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString sub = "";
 };
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSession
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString id = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	int64 projectId = -1;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString userId = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FIdentity identity;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString friendlyName = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString createdAt = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString refreshedAt = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString expiresAt = "";
 };
 

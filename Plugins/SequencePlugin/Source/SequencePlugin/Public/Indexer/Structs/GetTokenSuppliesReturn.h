@@ -12,11 +12,11 @@ struct FGetTokenSuppliesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FPage page;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TArray<FTokenSupply> tokenIDs;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating

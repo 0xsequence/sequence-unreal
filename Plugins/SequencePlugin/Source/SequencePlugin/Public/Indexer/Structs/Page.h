@@ -12,19 +12,19 @@ struct FPage
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     int32 page = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString column = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString before = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString after = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     TArray<FSortBy> sort;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     int32 pageSize = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     bool more = false;
 
     /// <summary>

@@ -12,29 +12,29 @@ struct FTokenBalance
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int32 id = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString accountAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 tokenID = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 balance = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString blockHash = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 blockNumber = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 updateID = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 chainId = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FContractInfo contractInfo;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FTokenMetaData tokenMetaData;
 
     /*

@@ -10,11 +10,11 @@ struct FGetTokenSuppliesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         bool includeMetaData = false;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FPage page;
 
     bool customGetter = false;

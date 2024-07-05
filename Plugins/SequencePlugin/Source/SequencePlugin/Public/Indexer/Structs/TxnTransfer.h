@@ -13,25 +13,25 @@ struct FTxnTransfer
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TEnumAsByte<ETxnTransferType> transferType = ETxnTransferType::RECEIVE;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString from = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString to = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TArray<int64> tokenIds;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TArray<int64> amounts;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int32 logIndex = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FContractInfo contractInfo;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TMap<FString, FTokenMetaData> tokenMetaData;
 
     /*

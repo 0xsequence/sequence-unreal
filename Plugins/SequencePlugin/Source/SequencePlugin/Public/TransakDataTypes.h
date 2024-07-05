@@ -4,16 +4,16 @@
 #include "GeneralProjectSettings.h"
 #include "TransakDataTypes.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FPartner
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool IsCardPayment = false;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString CurrencyCode = "";
 
 	FPartner(){}
@@ -26,27 +26,27 @@ public:
 	}
 };
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSupportedCountry
 {
 	GENERATED_USTRUCT_BODY()
 	
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Alpha2 = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Alpha3 = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool IsAllowed = false;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool IsLightKycAllowed = false;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FString> SupportedDocuments;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString CurrencyCode = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FPartner> Partners;
 
 	FSupportedCountry(){}

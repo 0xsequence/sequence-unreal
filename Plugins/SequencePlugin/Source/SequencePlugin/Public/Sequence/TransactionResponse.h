@@ -7,16 +7,16 @@
 #include "Dom/JsonObject.h"
 #include "TransactionResponse.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FTransactionResponse
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString IdentifyingCode = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString TxHash = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString MetaTxHash = "";
 
 	TSharedPtr<FJsonObject> Request;

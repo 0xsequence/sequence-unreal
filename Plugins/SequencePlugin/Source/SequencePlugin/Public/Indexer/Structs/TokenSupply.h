@@ -11,15 +11,15 @@ struct FTokenSupply
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 tokenID = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString supply = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 chainId = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FContractInfo contractInfo;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FTokenMetaData tokenMetaData;
 
     /*

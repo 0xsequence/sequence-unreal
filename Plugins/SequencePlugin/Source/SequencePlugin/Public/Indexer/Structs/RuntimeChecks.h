@@ -9,10 +9,10 @@ struct FRuntimeChecks
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         bool running = false;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString syncMode = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 lastBlockNum = -1;
 };

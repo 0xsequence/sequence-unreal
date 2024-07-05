@@ -11,21 +11,21 @@ struct FContractInfo
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 chainId = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString address = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString name = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString type = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString symbol = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int32 decimals = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString logoURI = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FContractInfoExtensions extensions;
 
     /*

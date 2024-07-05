@@ -11,9 +11,9 @@ struct FGetBalanceUpdatesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FPage page;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TArray<FTokenBalance> balances;
     //we don't need custom constructor for this!
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!

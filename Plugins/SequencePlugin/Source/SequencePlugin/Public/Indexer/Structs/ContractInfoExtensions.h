@@ -10,21 +10,21 @@ struct FContractInfoExtensions
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString link = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString description = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString ogImage = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int32 originChainId = -1;//might be int64?
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString originAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         bool blacklist = false;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         bool verified = false;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString verifiedBy = "";
 
     /*

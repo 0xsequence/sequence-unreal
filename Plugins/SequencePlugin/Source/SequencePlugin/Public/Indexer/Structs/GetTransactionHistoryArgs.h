@@ -11,11 +11,11 @@ struct FGetTransactionHistoryArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FTransactionHistoryFilter filter;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FPage page;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         bool includeMetaData = false;
 
     bool customGetter = true;

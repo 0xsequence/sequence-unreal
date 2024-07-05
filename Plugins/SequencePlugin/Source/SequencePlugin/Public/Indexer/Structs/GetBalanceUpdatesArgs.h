@@ -10,11 +10,11 @@ struct FGetBalanceUpdatesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int32 lastUpdateID = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FPage page;
     bool customGetter = true;
     /*

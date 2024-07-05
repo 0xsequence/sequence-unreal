@@ -10,19 +10,19 @@ struct FTransaction
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString txnHash = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 blockNumber = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString blockHash = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         int64 chainId = -1;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString metaTxnID = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         TArray<FTxnTransfer> transfers;
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
         FString timestamp = "";
 
     /*
