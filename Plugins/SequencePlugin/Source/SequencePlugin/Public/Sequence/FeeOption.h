@@ -5,6 +5,7 @@
 #include "JsonObjectConverter.h"
 #include "Indexer/Structs/TokenBalance.h"
 #include "Containers/Union.h"
+#include "Indexer/Structs/EtherBalance.h"
 #include "Util/Structs/BE_Structs.h"
 #include "FeeOption.generated.h"
 
@@ -16,31 +17,31 @@ enum EFeeType
 	Erc1155Token UMETA(DisplayName = "erc1155token"),
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFeeToken
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
-	uint64 ChainID = 0;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
+	int64 ChainID = 0;
+	UPROPERTY(BlueprintReadWrite)
 	FString ContractAddress = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	int32 Decimals = 0;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString LogoURL = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Symbol = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString TokenID = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TEnumAsByte<EFeeType> Type = Unknown;
 
 	FFeeToken(){}
 	
-	FFeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
+	FFeeToken(int64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
 		const FString& TokenIDIn, EFeeType TypeIn)
 	{
@@ -55,20 +56,22 @@ public:
 	}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFeeOption
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
-	uint32 GasLimit = 0;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
+	int64 GasLimit = 0;
+	UPROPERTY(BlueprintReadWrite)
 	FString To = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FFeeToken Token;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString Value = "";
+	UPROPERTY(BlueprintReadWrite)
 	int64 ValueNumber = 0;//Used for making easy comparisons
+	UPROPERTY(BlueprintReadWrite)
 	bool bCanAfford = false;
 	FFeeOption(){}
 
@@ -125,7 +128,7 @@ public:
 		}
 	}
 	
-	FFeeOption(uint32 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
+	FFeeOption(int64 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
 	{
 		GasLimit = GasLimitIn;
 		To = ToIn;

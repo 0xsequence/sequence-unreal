@@ -22,11 +22,11 @@ private:
     UPROPERTY()
     FString type = "transaction";
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString to = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString data = "null";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString value = "";
 
     FRawTransaction(){}
@@ -70,11 +70,11 @@ private:
 	UPROPERTY()
 	FString type = "erc20send";
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString to = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString value = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString tokenAddress = "";
 
 	FERC20Transaction(){}
@@ -116,15 +116,15 @@ private:
 	UPROPERTY()
 	FString type = "erc721send";
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString to = "";
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite)
     FString id = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString data = "null";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString tokenAddress = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool safe = true;
 
 	FERC721Transaction(){}
@@ -163,9 +163,9 @@ struct FERC1155TxnValue
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString amount = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString id = "";
 
 	FERC1155TxnValue(){}
@@ -200,13 +200,13 @@ private:
 	UPROPERTY()
 	FString type = "erc1155send";
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString to = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString data = "null";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString tokenAddress = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FERC1155TxnValue> vals;
 		
 	FERC1155Transaction(){}
