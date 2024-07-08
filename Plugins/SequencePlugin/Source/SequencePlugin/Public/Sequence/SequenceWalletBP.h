@@ -6,9 +6,26 @@
 #include "UObject/NoExportTypes.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "SequenceWalletBPTypes.h"
+#include "Transactions.h"
+#include "SignedMessage.h"
+#include "TransactionResponse.h"
 #include "SequenceWalletBP.generated.h"
 
 //ASYNC Response Delegates//
+
+//Api//
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSignedMessage, SignedMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, TArray<FFeeOption>, FeeOptions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, TArray<FFeeOption>, FeeOptions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, TArray<FSession>, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, TArray<FSupportedCountry>, SupportedCountries);
+
+//Api//
+
+//Indexer
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerPing, FSequenceResponseStatus, ResponseStatus, bool, PingResponse);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerVersion, FSequenceResponseStatus, ResponseStatus, FVersion, Version);
@@ -20,6 +37,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSeque
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FGetTokenSuppliesMapReturn, TokenSuppliesMap);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetBalanceUpdates, FSequenceResponseStatus, ResponseStatus, FGetBalanceUpdatesReturn, BalanceUpdates);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FGetTransactionHistoryReturn, TransactionHistory);
+
+//Indexer//
 
 //ASYNC Response Delegates//
 
@@ -38,6 +57,33 @@ public:
 
 	//ASYNC Response Bindable Delegates//
 
+	//Api//
+	
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiSignMessage OnApiSignMessage;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiGetFilteredFeeOptions OnApiGetFilteredFeeOptions;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiGetUnFilteredFeeOptions OnApiGetUnFilteredFeeOptions;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiSendTransactionWtihFeeOption OnApiSendTransactionWithFeeOption;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiSendTransaction OnApiSendTransaction;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiListSessions OnApiListSessions;
+
+	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
+	
+	//Api//
+
+	//Indexer//
+	
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerPing OnIndexerPing;
 
@@ -67,12 +113,28 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
+
+	//Indexer//
 	
 	//ASYNC Response Bindable Delegates//
 private:
 
 	//ASYNC Response Internal Calls//
 
+	//Api//
+
+	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSignedMessage& SignedMessage) const;
+	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
+	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
+	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
+	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
+	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSession>& Sessions) const;
+	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
+	
+	//Api//
+
+	//Indexer//
+	
 	void CallOnIndexerPing(const FSequenceResponseStatus& Status, bool PingResponse) const;
 	void CallOnIndexerVersion(const FSequenceResponseStatus& Status, const FVersion& Version) const;
 	void CallOnIndexerRuntimeStatus(const FSequenceResponseStatus& Status, const FRuntimeStatus& RuntimeStatus) const;
@@ -83,34 +145,67 @@ private:
 	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
 	void CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FGetBalanceUpdatesReturn& BalanceUpdates) const;
 	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FGetTransactionHistoryReturn& TransactionHistory) const;
+
+	//Indexer//
 	
 	//ASYNC Response Internal Calls//
 	
 public:
 	//SYNC//
 	
-	UFUNCTION(BlueprintCallable)
-	FString GetWalletAddress();
-
-	UFUNCTION(BlueprintCallable)
-	int64 GetNetworkId();
-
-	UFUNCTION(BlueprintCallable)
-	void UpdateNetworkId(int64 NewNetworkId);
-
-	UFUNCTION(BlueprintCallable)
-	void UpdateProviderUrl(const FString& NewProviderUrl);
+	//SequenceApi//
 	
 	UFUNCTION(BlueprintCallable)
-	void OpenTransakUrl(const FTransakSettings& Settings);
+	FString ApiGetWalletAddress();
 
 	UFUNCTION(BlueprintCallable)
-	void SignOut();
+	int64 ApiGetNetworkId();
+
+	UFUNCTION(BlueprintCallable)
+	void ApiUpdateNetworkId(int64 NewNetworkId);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiUpdateProviderUrl(const FString& NewProviderUrl);
+	
+	UFUNCTION(BlueprintCallable)
+	void ApiOpenTransakUrl(const FTransakSettings& Settings);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiSignOut();
+
+	//SequenceApi//
 	
 	//SYNC//
 	
 	//ASYNC//
 
+	//SequenceApi//
+
+	UFUNCTION(BlueprintCallable)
+	void ApiSignMessage(const FString& Message);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiGetFilteredFeeOptions(UTransactions * Transactions);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiGetUnfilteredFeeOptions(UTransactions * Transactions);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiSendTransactionWithFee(UTransactions * Transactions);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiSendTransaction(UTransactions * Transactions);
+
+	UFUNCTION(BlueprintCallable)
+	void ApiListSessions();
+
+	UFUNCTION(BlueprintCallable)
+	void ApiGetSupportedTransakCountries();
+	
+	//SequenceApi//
+
+	//Indexer//
+	
 	UFUNCTION(BlueprintCallable)
 	void IndexerPing();
 
@@ -140,6 +235,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void IndexerGetTransactionHistory(const FGetTransactionHistoryArgs& Args);
+
+	//Indexer//
 	
 	//ASYNC//
 };
