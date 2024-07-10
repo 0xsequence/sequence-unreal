@@ -34,7 +34,7 @@ public:
         int64 chainId = -1;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FContractInfo contractInfo;
-    UPROPERTY(BEditAnywhere, lueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FTokenMetaData tokenMetaData;
 
     /*
