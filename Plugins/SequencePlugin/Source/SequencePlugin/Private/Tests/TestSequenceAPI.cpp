@@ -390,13 +390,12 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 {
 	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Transactions;
 
-	FERC721Transaction T721;
-	T721.safe = true;
-	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
-	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
-	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
+	FERC20Transaction T20;
+	T20.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+	T20.value = "100";
 
-	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
+	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
 	
 	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
 	{
