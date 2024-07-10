@@ -95,12 +95,16 @@ public:
     */
     void setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
+
+        attributes.Empty();
+        properties.Empty();
+        
         const TSharedPtr<FJsonObject>* refPtr;
         if (json_in.TryGetObjectField(TEXT("properties"), refPtr))
         {
             properties = UIndexerSupport::JSONObjectParser(*refPtr);
         }
-
+        
         //now we create the attribute map!
         const TArray<TSharedPtr<FJsonValue>>* lstPtr;
         if (json_in.TryGetArrayField(TEXT("attributes"),lstPtr))//attempt to assign!
