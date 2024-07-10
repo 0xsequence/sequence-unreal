@@ -15,6 +15,6 @@ struct FTokenList
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TArray<FString> token_list;
 };

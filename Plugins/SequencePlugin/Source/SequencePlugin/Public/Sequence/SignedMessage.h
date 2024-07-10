@@ -21,7 +21,7 @@ struct SEQUENCEPLUGIN_API FSignedMessage
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSignedMessageSignature data;
 };
 

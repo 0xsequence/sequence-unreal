@@ -11,9 +11,9 @@ struct FSortBy
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         FString column = "";
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TEnumAsByte<ESortOrder_Sequence> order = ESortOrder_Sequence::ASC;
 
     /*

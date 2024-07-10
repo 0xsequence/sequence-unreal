@@ -535,6 +535,7 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 		{
 			if (BalanceOption.CanAfford(FeeOption))
 			{
+				FeeOption.bCanAfford = true;
 				ValidFeeOptions.Add(FeeOption);
 			}
 		}

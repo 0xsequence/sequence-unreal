@@ -12,11 +12,11 @@ struct SEQUENCEPLUGIN_API FTransactionResponse
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString IdentifyingCode = "";
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString TxHash = "";
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString MetaTxHash = "";
 
 	TSharedPtr<FJsonObject> Request;

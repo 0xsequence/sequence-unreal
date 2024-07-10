@@ -12,19 +12,19 @@ struct SEQUENCEPLUGIN_API FTransakSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString FiatCurrency = FDefaultTransak::FiatCurrency;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString FiatAmount = FDefaultTransak::FiatAmount;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString CryptoCurrency = FDefaultTransak::CryptoCurrency;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Networks = FDefaultTransak::Networks;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm;
 
 	FTransakSettings(){}
@@ -35,10 +35,10 @@ struct SEQUENCEPLUGIN_API FSequenceResponseStatus
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Status = false;
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString StatusMessage = "";
 
 	FSequenceResponseStatus(){}

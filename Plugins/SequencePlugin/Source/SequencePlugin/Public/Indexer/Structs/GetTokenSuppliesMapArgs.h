@@ -12,9 +12,9 @@ struct FGetTokenSuppliesMapArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         TMap<FString, FTokenList> tokenMap;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
         bool includeMetaData = false;
 
 	bool customGetter = true;
