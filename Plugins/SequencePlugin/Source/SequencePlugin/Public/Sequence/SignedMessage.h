@@ -10,9 +10,9 @@ USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSignedMessageSignature
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString message = "";
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString signature = "";
 };
 
@@ -21,7 +21,7 @@ struct SEQUENCEPLUGIN_API FSignedMessage
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FSignedMessageSignature data;
 };
 

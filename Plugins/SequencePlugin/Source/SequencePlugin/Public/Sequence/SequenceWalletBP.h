@@ -155,22 +155,22 @@ public:
 	
 	//SequenceApi//
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	FString ApiGetWalletAddress();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	int64 ApiGetNetworkId();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiUpdateNetworkId(int64 NewNetworkId);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiUpdateProviderUrl(const FString& NewProviderUrl);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiOpenTransakUrl(const FTransakSettings& Settings);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiSignOut();
 
 	//SequenceApi//
@@ -181,59 +181,59 @@ public:
 
 	//SequenceApi//
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSignMessage(const FString& Message);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetFilteredFeeOptions(UTransactions * Transactions);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetUnfilteredFeeOptions(UTransactions * Transactions);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSendTransactionWithFee(UTransactions * Transactions);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSendTransaction(UTransactions * Transactions);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiListSessions();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetSupportedTransakCountries();
 	
 	//SequenceApi//
 
 	//Indexer//
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerPing();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerVersion();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerRuntimeStatus();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetChainId();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetEtherBalance(const FString& WalletAddress);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenBalances(const FGetTokenBalancesArgs& Args);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenSupplies(const FGetTokenSuppliesArgs& Args);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenSuppliesMap(const FGetTokenSuppliesMapArgs& Args);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetBalanceUpdates(const FGetBalanceUpdatesArgs& Args);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTransactionHistory(const FGetTransactionHistoryArgs& Args);
 
 	//Indexer//

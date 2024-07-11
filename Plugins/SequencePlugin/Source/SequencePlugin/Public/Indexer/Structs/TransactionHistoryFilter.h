@@ -10,21 +10,21 @@ struct FTransactionHistoryFilter
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         FString accountAddress = "";
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         FString contractAddress = "";
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         TArray<FString> accountAddresses;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         TArray<FString> contractAddresses;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         TArray<FString> transactionHashes;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         TArray<FString> metaTransactionIDs;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         int32 fromBlock = -1;
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
         int32 toBlock = -1;
 
     /// <summary>
