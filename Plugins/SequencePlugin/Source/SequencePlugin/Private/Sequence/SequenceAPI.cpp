@@ -449,29 +449,10 @@ void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction
 				FString Code = "";
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
-					FString TxHash = "";
-					FString MetaTxHash = "";
-
-					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
-					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
-					
-					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
-						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
-						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
-						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
-					{						
-						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
-						OnSuccess(TxnResponse);
-					}
-					else
-					{
-						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-					}
+					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
+					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					TxnResponse.Setup(*DataObj);
+					OnSuccess(TxnResponse);
 				}
 				else
 				{
@@ -720,7 +701,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransactio
 
 void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [=](FString Response)
+	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
 	{
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
@@ -732,29 +713,10 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 				FString Code = "";
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
-					FString TxHash = "";
-					FString MetaTxHash = "";
-
-					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
-					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
-					
-					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
-						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
-						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
-						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
-					{						
-						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
-						OnSuccess(TxnResponse);
-					}
-					else
-					{
-						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-					}
+					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
+					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					TxnResponse.Setup(*DataObj);
+					OnSuccess(TxnResponse);
 				}
 				else
 				{
