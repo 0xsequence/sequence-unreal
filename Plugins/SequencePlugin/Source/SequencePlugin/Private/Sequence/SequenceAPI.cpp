@@ -434,7 +434,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
@@ -535,7 +535,7 @@ TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArra
 	return ParsedFeeOptionList;
 }
 
-void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
@@ -617,7 +617,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 	}
 }
 
-void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
@@ -699,7 +699,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransactio
 	}
 }
 
-void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
 	{
@@ -747,7 +747,7 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 	}
 }
 
-FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote) const
+FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const
 {	
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
 	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,this->Credentials.GetNetworkString(),Txns,FeeQuote,this->Credentials.GetWalletAddress());
@@ -778,7 +778,7 @@ template<typename T> FString USequenceWallet::GenerateIntent(T Data) const
 	}
 }
 
-FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
+FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TransactionUnion>& Txns) const
 {
 	const FGetFeeOptionsData GetFeeOptionsData(this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData);
@@ -807,7 +807,7 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 	return Intent;
 }
 
-FString USequenceWallet::BuildSendTransactionIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
+FString USequenceWallet::BuildSendTransactionIntent(const TArray<TransactionUnion>& Txns) const
 {
 	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
 	const FSendTransactionData SendTransactionData(identifier,this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());

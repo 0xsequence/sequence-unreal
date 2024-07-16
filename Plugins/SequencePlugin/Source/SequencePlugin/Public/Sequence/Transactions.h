@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "FeeOption.h"
-#include "Containers/Union.h"
+#include "Types/Types.h"
 #include "UObject/NoExportTypes.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Transactions.generated.h"
@@ -17,7 +17,7 @@ class SEQUENCEPLUGIN_API UTransactions : public UObject
 {
 	GENERATED_BODY()
 private:
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+	TArray<TransactionUnion> Transactions;
 
 	//By default we will assume our txn is gassed up
 	bool FeeSet = false;
@@ -40,11 +40,14 @@ public:
 	void AddRaw(const FRawTransaction& Item);
 
 	UFUNCTION(BlueprintCallable, Category = "Default")
+	void AddDelayed(const FDelayedTransaction& Item);
+
+	UFUNCTION(BlueprintCallable, Category = "Default")
 	void SetFee(const FFeeOption& Fee);
 
 	bool IsFeeSet() const;
 
 	FFeeOption GetFee();
 
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> GetTransactions();
+	TArray<TransactionUnion> GetTransactions();
 };

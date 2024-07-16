@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Containers/Union.h"
+#include "Types/Types.h"
 #include "Util/Structs/BE_Structs.h"
 #include "IndexerSupport.generated.h"
 
@@ -24,7 +25,7 @@ public:
 	static float GetAmount(int64 Amount,int32 Decimals);
 	static float GetAmount(int64 Amount,float Decimals);
 	
-	static FString TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions);
+	static FString TransactionListToJsonString(const TArray<TransactionUnion>& Transactions);
 	
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings

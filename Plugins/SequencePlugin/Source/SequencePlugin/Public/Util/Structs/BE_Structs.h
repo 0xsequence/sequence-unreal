@@ -6,9 +6,36 @@
 #include "Indexer/Indexer_Enums.h"
 #include "Engine/Texture2D.h"
 #include "Dom/JsonValue.h"
+#include "Sequence/DelayedEncodingBP.h"
 #include "BE_Structs.generated.h"
 
 //Sequence API Structs
+
+USTRUCT(BlueprintType)
+struct SEQUENCEPLUGIN_API FDelayedTransaction
+{
+    GENERATED_USTRUCT_BODY()
+private:
+    FString type = "delayedEncode";
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UDelayedEncodingBP * data;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    FString to = "";
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    FString value = "";
+
+    FString GetJsonString() const
+    {
+        FString Json = "{";
+        Json += "\"data\":\"" + data->GetJsonString() + "\",";
+        Json += "\"to\":\"" + to + "\",";
+        Json += "\"type\":\"" + type + "\",";
+        Json += "\"value\":\"" + value + "\"";
+        Json += "}";
+        return Json;
+    }
+};
 
 USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FRawTransaction

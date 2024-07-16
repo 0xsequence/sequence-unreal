@@ -136,9 +136,9 @@ public:
 		Value = ValueIn;
 	}
 
-	TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> CreateTransaction()
+	TransactionUnion CreateTransaction()
 	{
-		TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction;
+		TransactionUnion Transaction;
 		switch(Token.Type)
 		{
 		case EFeeType::Unknown:

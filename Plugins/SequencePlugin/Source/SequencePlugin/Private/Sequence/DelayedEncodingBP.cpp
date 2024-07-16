@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/DelayedEncodingBP.h"
-
 #include "Indexer/IndexerSupport.h"
 #include "Sequence/DelayedEncodingArgsBP.h"
 

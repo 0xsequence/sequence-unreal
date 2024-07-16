@@ -24,11 +24,11 @@ float UIndexerSupport::GetAmount(int64 Amount, float Decimals)
 	return ret;
 }
 
-FString UIndexerSupport::TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions)
+FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)
 {
 	FString TransactionsPayload = "[";
 	
-	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
+	for (TransactionUnion Transaction : Transactions)
 	{
 		switch(Transaction.GetCurrentSubtypeIndex())
 		{
