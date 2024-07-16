@@ -21,10 +21,8 @@ private:
 	TArray<TSharedPtr<FJsonValue>> Args;//We need to support nesting here!
 	//This could be done like abi either enum or FString
 	FString Func = "";
-
-	void SetArgs(const FDelayedEncodingArgs& ArgsIn);
     
-	//FString GetJsonString();
+	FString GetJsonString() const;
 };
 
 UCLASS(BlueprintType)
@@ -35,12 +33,18 @@ private:
 	FDelayedEncoding DlyEncObject;
 public:
 
+	//create an enum'd version of this with a short list of common abi use cases (maybe)
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void SetAbi(const FString& Abi);
 
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void SetArgs(UDelayedEncodingArgsBP * ArgsIn);
 
+	//create an enum'd version of this with a short list of common abi use cases
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void SetFunc(const FString& Func);
+
+	FString GetJsonString() const;
+
+	FDelayedEncoding GetDelayedEncoding();
 };

@@ -21,6 +21,8 @@ public:
 
 	void AddFloatArg(const float ArgIn);
 
+	void AddDoubleArg(const double ArgIn);
+
 	void AddInt32Arg(const int32 ArgIn);
 
 	void AddInt64Arg(const int64 ArgIn);
@@ -46,6 +48,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddFloatArg(const float ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddDoubleArg(const double ArgIn);
 
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddInt32Arg(const int32 ArgIn);
