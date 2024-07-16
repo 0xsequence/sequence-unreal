@@ -11,8 +11,8 @@ FString FDelayedEncoding::GetJsonString() const
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
 	FJsonSerializer::Serialize(Args, Writer);
 
-	const FString Json = "{\"type\":\"" + type + "\",\"abi\":\"" + Abi + "\",\"args\":" + JsonList + ",\"func\":\"" + Func + "\"}";
-	return Json;
+	const FString Json = "{\"abi\":\"" + Abi + "\",\"args\":" + JsonList + ",\"func\":\"" + Func + "\"}";
+	return UIndexerSupport::SimplifyStringParsable(Json);
 }
 
 void UDelayedEncodingBP::SetAbi(const FString& Abi)

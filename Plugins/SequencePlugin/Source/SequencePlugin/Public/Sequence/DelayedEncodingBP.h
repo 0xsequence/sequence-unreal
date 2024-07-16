@@ -12,8 +12,6 @@ USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FDelayedEncoding
 {
 	GENERATED_USTRUCT_BODY()
-private:
-	FString type = "delayedEncode";//Hide this and hard code it
 	public:
 	//Have this bound to be set either by a custom enum OR by FString
 	FString Abi = "[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_orderId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_maxCost\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_fees\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"}],\"name\":\"fillOrKillOrder\",\"outputs\":[],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"otherMethods\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";//We'd need to know this ahead of time (or I hard code it with a default?)

@@ -6,6 +6,5 @@
 
 void ASqncSpecPawn::SetupCredentials(FCredentials_BE CredentialsIn)
 {
-	this->Credentials = CredentialsIn;
-	const FString CredentialsParsed = UIndexerSupport::StructToString(CredentialsIn);
+	
 }

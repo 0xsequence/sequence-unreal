@@ -10,6 +10,8 @@
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
+#include "Sequence/DelayedEncodingArgsBP.h"
+#include "Sequence/DelayedEncodingBP.h"
 #include "Sequence/SequenceIntent.h"
 
 // Sets default values
@@ -326,16 +328,33 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	FRegisterSessionData GenericData = FRegisterSessionData();
-	FGenericData * GPointer = &GenericData;
+	UDelayedEncodingBP * Inner = NewObject<UDelayedEncodingBP>();
+	UDelayedEncodingArgsBP * ArgsInner = NewObject<UDelayedEncodingArgsBP>();
+	ArgsInner->AddBoolArg(true);
+	ArgsInner->AddDoubleArg(10.01);
+	ArgsInner->AddFloatArg(1.1);
+	ArgsInner->AddInt32Arg(10);
+	ArgsInner->AddInt64Arg(1000);
+	ArgsInner->AddStringArg(TEXT("Inner String Arg"));
+	Inner->SetArgs(ArgsInner);
+	Inner->SetAbi(TEXT("Inner ABI"));
+	Inner->SetFunc(TEXT("Inner Function"));
 	
-	//FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
-	const FString GenericString = UIndexerSupport::StructToPartialSimpleString(*GPointer);
-	
-	FString Ret;
-	FJsonObjectConverter::UStructToJsonObjectString<FRegisterSessionData>(*static_cast<FRegisterSessionData*>(GPointer), Ret, 0, 0);
-	
-	UE_LOG(LogTemp, Display, TEXT("Parsed response: %s"), *GenericString);
+	UDelayedEncodingBP * Outer = NewObject<UDelayedEncodingBP>();
+	UDelayedEncodingArgsBP * ArgsOuter = NewObject<UDelayedEncodingArgsBP>();
+	ArgsOuter->AddBoolArg(false);
+	ArgsOuter->AddDoubleArg(7.32);
+	ArgsOuter->AddFloatArg(3.14);
+	ArgsOuter->AddInt32Arg(7);
+	ArgsOuter->AddInt64Arg(81);
+	ArgsOuter->AddStringArg(TEXT("Outer String Arg"));
+	ArgsOuter->AddDelayedEncodingArg(Inner);
+	Outer->SetArgs(ArgsOuter);
+	Outer->SetAbi(TEXT("Outer ABI"));
+	Outer->SetFunc(TEXT("Outer Function"));
+
+	const FString JsonString = Outer->GetJsonString();
+	UE_LOG(LogTemp, Display, TEXT("%s"), *JsonString);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()
