@@ -51,7 +51,10 @@ FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUni
 			break;
 		}
 	}
-	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	if (TransactionsPayload.Len() > 1)
+	{
+		TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	}
 	TransactionsPayload += "]";
 	return TransactionsPayload;
 }

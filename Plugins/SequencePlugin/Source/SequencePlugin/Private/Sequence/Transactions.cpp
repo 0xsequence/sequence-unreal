@@ -24,6 +24,7 @@ void UTransactions::AddRaw(const FRawTransaction& Item)
 
 void UTransactions::AddDelayed(const FDelayedTransaction& Item)
 {
+	this->Transactions.Push(TransactionUnion(Item));
 }
 
 void UTransactions::SetFee(const FFeeOption& Fee)
