@@ -1,11 +1,9 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #pragma once
-
 #include "CoreMinimal.h"
 #include "FeeOption.h"
 #include "Types/Types.h"
-#include "UObject/NoExportTypes.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Transactions.generated.h"
 

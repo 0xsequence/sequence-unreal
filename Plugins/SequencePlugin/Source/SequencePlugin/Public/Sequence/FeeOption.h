@@ -227,6 +227,6 @@ struct FIntentDataFeeOptions
 public:
 	FString Identifier = "";
 	FString Network = "";
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+	TArray<TransactionUnion> Transactions;
 	FString Wallet = "";
 };
