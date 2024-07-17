@@ -844,6 +844,7 @@ FString USequenceWallet::BuildSessionValidationIntent() const
 
 template <typename T> void USequenceWallet::SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
 {
+	UE_LOG(LogTemp, Display, TEXT("JsonPayload: %s"), *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)

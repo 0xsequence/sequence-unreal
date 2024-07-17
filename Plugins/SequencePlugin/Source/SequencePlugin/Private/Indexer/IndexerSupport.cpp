@@ -44,6 +44,9 @@ FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUni
 		case 3: //ERC1155
 			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
 			break;
+		case 4: //DelayedEncoding
+			TransactionsPayload += Transaction.GetSubtype<FDelayedTransaction>().GetJsonString() + ",";
+			break;
 		default: //Doesn't match
 			break;
 		}
@@ -252,6 +255,14 @@ FString UIndexerSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObje
 	}
 	ret.Append("]");
 	return ret;
+}
+
+FString UIndexerSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData)
+{
+	FString JsonList;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
+	FJsonSerializer::Serialize(JsonData, Writer);
+	return SimplifyStringParsable(JsonList);
 }
 
 FString UIndexerSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)

@@ -4,37 +4,23 @@
 #include "Indexer/IndexerSupport.h"
 #include "Sequence/DelayedEncodingArgsBP.h"
 
-FString FDelayedEncoding::GetJsonString() const
+void UDelayedEncodingBP::SetAbi(const FString& AbiIn)
 {
-	FString JsonList;
-	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
-	FJsonSerializer::Serialize(Args, Writer);
-
-	const FString Json = "{\"abi\":\"" + Abi + "\",\"args\":" + JsonList + ",\"func\":\"" + Func + "\"}";
-	return UIndexerSupport::SimplifyStringParsable(Json);
-}
-
-void UDelayedEncodingBP::SetAbi(const FString& Abi)
-{
-	DlyEncObject.Abi = Abi;
+	this->Abi = AbiIn;
 }
 
 void UDelayedEncodingBP::SetArgs(UDelayedEncodingArgsBP* ArgsIn)
 {
-	DlyEncObject.Args = ArgsIn->GetArgs();
+	this->Args = ArgsIn;
 }
 
-void UDelayedEncodingBP::SetFunc(const FString& Func)
+void UDelayedEncodingBP::SetFunc(const FString& FuncIn)
 {
-	DlyEncObject.Func = Func;
+	this->Func = FuncIn;
 }
 
 FString UDelayedEncodingBP::GetJsonString() const
 {
-	return DlyEncObject.GetJsonString();
-}
-
-FDelayedEncoding UDelayedEncodingBP::GetDelayedEncoding()
-{
-	return DlyEncObject;
+	const FString Json = "{\"abi\":\"" + Abi + "\",\"args\":" + this->Args->GetJsonString() + ",\"func\":\"" + Func + "\"}";
+	return UIndexerSupport::SimplifyStringParsable(Json);
 }

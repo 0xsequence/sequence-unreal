@@ -5,41 +5,62 @@
 #include "Dom/JsonValue.h"
 #include "DelayedEncodingArgsBP.generated.h"
 
-struct FDelayedEncoding;
-class UDelayedEncodingBP;
+class UDelayedEncodingObjectArgsBP;
+class UDelayedEncodingArrayArgsBP;
 
-USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FDelayedEncodingArgs
-{
-	GENERATED_USTRUCT_BODY()
-private:
-	TArray<TSharedPtr<FJsonValue>> Args;
-public:
-	void AddStringArg(const FString& ArgIn);
-
-	void AddBoolArg(const bool ArgIn);
-
-	void AddFloatArg(const float ArgIn);
-
-	void AddDoubleArg(const double ArgIn);
-
-	void AddInt32Arg(const int32 ArgIn);
-
-	void AddInt64Arg(const int64 ArgIn);
-
-	void AddDelayedEncodingArg(const FDelayedEncoding& Obj);
-
-	TArray<TSharedPtr<FJsonValue>> GetArgs();
-};
-
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Abstract)
 class SEQUENCEPLUGIN_API UDelayedEncodingArgsBP : public UObject
 {
 	GENERATED_BODY()
-private:
-	FDelayedEncodingArgs Args;
 public:
+	virtual FString GetJsonString();
+};
 
+UCLASS(BlueprintType)
+class SEQUENCEPLUGIN_API UDelayedEncodingObjectArgsBP : public UDelayedEncodingArgsBP
+{
+	GENERATED_BODY()
+private:
+	TSharedPtr<FJsonObject> JsonObjectArg;
+public:
+	UDelayedEncodingObjectArgsBP();
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddStringArg(const FString& ArgName, const FString& ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddBoolArg(const FString& ArgName, const bool ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddFloatArg(const FString& ArgName, const float ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddDoubleArg(const FString& ArgName, const double ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddInt32Arg(const FString& ArgName, const int32 ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddInt64Arg(const FString& ArgName, const int64 ArgIn);
+	
+	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
+	void AddObjectArg(const FString& ArgName, UDelayedEncodingObjectArgsBP * ArgIn);
+
+	UFUNCTION(BlueprintCallable, Category = "Delayed Encoding")
+	void AddArrayArg(const FString& ArgName,UDelayedEncodingArrayArgsBP * ArgIn);
+
+	virtual FString GetJsonString() override;
+	
+	TSharedPtr<FJsonObject> GetJson();
+};
+
+UCLASS(BlueprintType)
+class SEQUENCEPLUGIN_API UDelayedEncodingArrayArgsBP : public UDelayedEncodingArgsBP
+{
+	GENERATED_BODY()
+private:
+	TArray<TSharedPtr<FJsonValue>> JsonArrayArg;
+public:
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddStringArg(const FString& ArgIn);
 
@@ -57,9 +78,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddInt64Arg(const int64 ArgIn);
-
+	
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
-	void AddDelayedEncodingArg(UDelayedEncodingBP * ArgIn);
+	void AddObjectArg(UDelayedEncodingObjectArgsBP * ArgIn);
 
-	TArray<TSharedPtr<FJsonValue>> GetArgs();
+	UFUNCTION(BlueprintCallable, Category = "Delayed Encoding")
+	void AddArrayArg(UDelayedEncodingArrayArgsBP * ArgIn);
+
+	virtual FString GetJsonString() override;
+
+	TArray<TSharedPtr<FJsonValue>> GetJson();
 };

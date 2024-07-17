@@ -137,6 +137,8 @@ public:
 
 	static FString JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData);
 
+	static FString JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData);
+
 	static FString JsonToString(TSharedPtr<FJsonValue> JsonData);
 
 	static FString JsonToSimpleString(TSharedPtr<FJsonValue> JsonData);

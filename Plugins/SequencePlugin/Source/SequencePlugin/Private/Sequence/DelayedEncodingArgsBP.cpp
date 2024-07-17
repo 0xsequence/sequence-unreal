@@ -1,94 +1,122 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/DelayedEncodingArgsBP.h"
-
 #include "Indexer/IndexerSupport.h"
-#include "Sequence/DelayedEncodingBP.h"
 
-void FDelayedEncodingArgs::AddStringArg(const FString& ArgIn)
+FString UDelayedEncodingArgsBP::GetJsonString()
+{
+	return "";
+}
+
+UDelayedEncodingObjectArgsBP::UDelayedEncodingObjectArgsBP()
+{
+	this->JsonObjectArg = MakeShareable(new FJsonObject);
+}
+
+void UDelayedEncodingObjectArgsBP::AddStringArg(const FString& ArgName, const FString& ArgIn)
+{
+	this->JsonObjectArg.Get()->SetStringField(ArgName,ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddBoolArg(const FString& ArgName, const bool ArgIn)
+{
+	this->JsonObjectArg.Get()->SetBoolField(ArgName, ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddFloatArg(const FString& ArgName, const float ArgIn)
+{
+	this->JsonObjectArg.Get()->SetNumberField(ArgName, ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddDoubleArg(const FString& ArgName, const double ArgIn)
+{
+	this->JsonObjectArg.Get()->SetNumberField(ArgName, ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddInt32Arg(const FString& ArgName, const int32 ArgIn)
+{
+	this->JsonObjectArg.Get()->SetNumberField(ArgName, ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddInt64Arg(const FString& ArgName, const int64 ArgIn)
+{
+	this->JsonObjectArg.Get()->SetNumberField(ArgName, ArgIn);
+}
+
+void UDelayedEncodingObjectArgsBP::AddObjectArg(const FString& ArgName, UDelayedEncodingObjectArgsBP* ArgIn)
+{
+	this->JsonObjectArg.Get()->SetObjectField(ArgName, ArgIn->GetJson());
+}
+
+void UDelayedEncodingObjectArgsBP::AddArrayArg(const FString& ArgName, UDelayedEncodingArrayArgsBP* ArgIn)
+{
+	this->JsonObjectArg.Get()->SetArrayField(ArgName, ArgIn->GetJson());
+}
+
+FString UDelayedEncodingObjectArgsBP::GetJsonString()
+{
+	return UIndexerSupport::JsonToParsableString(this->JsonObjectArg);
+}
+
+TSharedPtr<FJsonObject> UDelayedEncodingObjectArgsBP::GetJson()
+{
+	return this->JsonObjectArg;
+}
+
+void UDelayedEncodingArrayArgsBP::AddStringArg(const FString& ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddBoolArg(const bool ArgIn)
+void UDelayedEncodingArrayArgsBP::AddBoolArg(const bool ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueBoolean(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddFloatArg(const float ArgIn)
+void UDelayedEncodingArrayArgsBP::AddFloatArg(const float ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueNumber(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddDoubleArg(const double ArgIn)
+void UDelayedEncodingArrayArgsBP::AddDoubleArg(const double ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueNumber(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddInt32Arg(const int32 ArgIn)
+void UDelayedEncodingArrayArgsBP::AddInt32Arg(const int32 ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueNumber(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddInt64Arg(const int64 ArgIn)
+void UDelayedEncodingArrayArgsBP::AddInt64Arg(const int64 ArgIn)
 {
 	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueNumber(ArgIn));
-	Args.Add(Value);
+	this->JsonArrayArg.Add(Value);
 }
 
-void FDelayedEncodingArgs::AddDelayedEncodingArg(const FDelayedEncoding& Obj)
+void UDelayedEncodingArrayArgsBP::AddObjectArg(UDelayedEncodingObjectArgsBP* ArgIn)
 {
-	const TSharedPtr<FJsonObject> JsonObject = UIndexerSupport::JsonStringToObject(Obj.GetJsonString());
-	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueObject(JsonObject));
-	Args.Add(Value);
+	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueObject(ArgIn->GetJson()));
+	this->JsonArrayArg.Add(Value);
 }
 
-TArray<TSharedPtr<FJsonValue>> FDelayedEncodingArgs::GetArgs()
+void UDelayedEncodingArrayArgsBP::AddArrayArg(UDelayedEncodingArrayArgsBP* ArgIn)
 {
-	return Args;
+	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueArray(ArgIn->GetJson()));
+	this->JsonArrayArg.Add(Value);
 }
 
-void UDelayedEncodingArgsBP::AddStringArg(const FString& ArgIn)
+FString UDelayedEncodingArrayArgsBP::GetJsonString()
 {
-	Args.AddStringArg(ArgIn);
+	return UIndexerSupport::JsonValueListToParsableString(this->JsonArrayArg);
 }
 
-void UDelayedEncodingArgsBP::AddBoolArg(const bool ArgIn)
+TArray<TSharedPtr<FJsonValue>> UDelayedEncodingArrayArgsBP::GetJson()
 {
-	Args.AddBoolArg(ArgIn);
-}
-
-void UDelayedEncodingArgsBP::AddFloatArg(const float ArgIn)
-{
-	Args.AddFloatArg(ArgIn);
-}
-
-void UDelayedEncodingArgsBP::AddDoubleArg(const double ArgIn)
-{
-	Args.AddDoubleArg(ArgIn);
-}
-
-void UDelayedEncodingArgsBP::AddInt32Arg(const int32 ArgIn)
-{
-	Args.AddInt32Arg(ArgIn);
-}
-
-void UDelayedEncodingArgsBP::AddInt64Arg(const int64 ArgIn)
-{
-	Args.AddInt64Arg(ArgIn);
-}
-
-void UDelayedEncodingArgsBP::AddDelayedEncodingArg(UDelayedEncodingBP* ArgIn)
-{
-	Args.AddDelayedEncodingArg(ArgIn->GetDelayedEncoding());
-}
-
-TArray<TSharedPtr<FJsonValue>> UDelayedEncodingArgsBP::GetArgs()
-{
-	return Args.GetArgs();
+	return this->JsonArrayArg;
 }

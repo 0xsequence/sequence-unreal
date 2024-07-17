@@ -28,7 +28,7 @@ public:
     FString GetJsonString() const
     {
         FString Json = "{";
-        Json += "\"data\":\"" + data->GetJsonString() + "\",";
+        Json += "\"data\":" + data->GetJsonString() + ",";
         Json += "\"to\":\"" + to + "\",";
         Json += "\"type\":\"" + type + "\",";
         Json += "\"value\":\"" + value + "\"";
