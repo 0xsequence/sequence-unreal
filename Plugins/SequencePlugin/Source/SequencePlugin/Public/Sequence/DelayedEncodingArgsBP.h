@@ -25,6 +25,10 @@ private:
 public:
 	UDelayedEncodingObjectArgsBP();
 
+	/*
+	 * Used to add a string Arg, Note: adding " inside of strings provided will automatically be given a leading \,
+	 * to ensure json compatibility.
+	 */
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddStringArg(const FString& ArgName, const FString& ArgIn);
 
@@ -61,6 +65,11 @@ class SEQUENCEPLUGIN_API UDelayedEncodingArrayArgsBP : public UDelayedEncodingAr
 private:
 	TArray<TSharedPtr<FJsonValue>> JsonArrayArg;
 public:
+
+	/*
+	* Used to add a string Arg, Note: adding " inside of strings provided will automatically be given a leading \,
+	* to ensure json compatibility.
+	*/
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddStringArg(const FString& ArgIn);
 

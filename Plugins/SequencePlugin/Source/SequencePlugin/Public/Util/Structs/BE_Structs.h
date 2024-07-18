@@ -19,7 +19,7 @@ private:
     FString type = "delayedEncode";
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-    UDelayedEncodingBP * data;
+    UDelayedEncodingBP * data = nullptr;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString to = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")

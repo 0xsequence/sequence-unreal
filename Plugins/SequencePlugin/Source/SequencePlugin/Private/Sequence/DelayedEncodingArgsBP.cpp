@@ -15,7 +15,7 @@ UDelayedEncodingObjectArgsBP::UDelayedEncodingObjectArgsBP()
 
 void UDelayedEncodingObjectArgsBP::AddStringArg(const FString& ArgName, const FString& ArgIn)
 {
-	this->JsonObjectArg.Get()->SetStringField(ArgName,ArgIn);
+	this->JsonObjectArg.Get()->SetStringField(ArgName,*ArgIn);
 }
 
 void UDelayedEncodingObjectArgsBP::AddBoolArg(const FString& ArgName, const bool ArgIn)
@@ -65,7 +65,7 @@ TSharedPtr<FJsonObject> UDelayedEncodingObjectArgsBP::GetJson()
 
 void UDelayedEncodingArrayArgsBP::AddStringArg(const FString& ArgIn)
 {
-	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(ArgIn));
+	const TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(*ArgIn));
 	this->JsonArrayArg.Add(Value);
 }
 
