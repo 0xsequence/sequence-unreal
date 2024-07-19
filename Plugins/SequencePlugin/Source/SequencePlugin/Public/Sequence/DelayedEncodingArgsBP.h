@@ -31,10 +31,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddStringArg(const FString& ArgName, const FString& ArgIn);
-
+	
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddBoolArg(const FString& ArgName, const bool ArgIn);
-
+	
 	UFUNCTION(BlueprintCallable, Category="Delayed Encoding")
 	void AddFloatArg(const FString& ArgName, const float ArgIn);
 

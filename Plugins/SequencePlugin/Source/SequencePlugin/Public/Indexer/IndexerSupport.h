@@ -22,8 +22,37 @@ class SEQUENCEPLUGIN_API UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:
+	/*
+	 * Used to get the amount that users can read,
+	 * int64 Amount, the integer amount of Crypto
+	 * int32 Decimals, the integer amount of Decimal places used to represent the Amount
+	 * Return, The user readable Float amount
+	 */
 	static float GetAmount(int64 Amount,int32 Decimals);
+
+	/*
+	* Used to get the amount that users can read,
+	* int64 Amount, the integer amount of Crypto
+	* float Decimals, the float amount of Decimal places used to represent the Amount
+	* Return, The user readable Float amount
+	*/
 	static float GetAmount(int64 Amount,float Decimals);
+
+	/*
+	* Used to convert a user readable amount into a usable amount value for transactions,
+	* float Amount, the user readable amount they wish to use
+	* float Decimals, the float amount of Decimal places used to represent the Amount
+	* Return, The transaction usable amount
+	*/
+	static int64 GetAmount(float Amount, float Decimals);
+
+	/*
+	* Used to convert a user readable amount into a usable amount value for transactions,
+	* float Amount, the user readable amount they wish to use
+	* int32 Decimals, the integer amount of Decimal places used to represent the Amount
+	* Return, The transaction usable amount
+	*/
+	static int64 GetAmount(float Amount, int32 Decimals);
 	
 	static FString TransactionListToJsonString(const TArray<TransactionUnion>& Transactions);
 	
