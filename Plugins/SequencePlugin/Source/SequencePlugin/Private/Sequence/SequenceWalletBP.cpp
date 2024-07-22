@@ -229,12 +229,12 @@ void USequenceWalletBP::ApiSignMessage(const FString& Message)
 {
 	const TFunction<void (FSignedMessage)> OnSuccess = [this](const FSignedMessage& SignedMessage)
 	{
-		this->CallOnApiSignMessage(FSequenceResponseStatus(true), SignedMessage);
+		this->CallOnApiSignMessage(FSequenceResponseStatus(true, SignMessageTrt), SignedMessage);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiSignMessage(FSequenceResponseStatus(false, Err.Message), FSignedMessage());
+		this->CallOnApiSignMessage(FSequenceResponseStatus(false, Err.Message,SignMessageTrt), FSignedMessage());
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -249,12 +249,12 @@ void USequenceWalletBP::ApiGetFilteredFeeOptions(UTransactions * Transactions)
 {
 	const TFunction<void (TArray<FFeeOption>)> OnSuccess = [this](const TArray<FFeeOption>& FeeOptions)
 	{
-		this->CallOnApiGetFilteredFeeOptions(FSequenceResponseStatus(true), FeeOptions);
+		this->CallOnApiGetFilteredFeeOptions(FSequenceResponseStatus(true, GetFilteredFeeTrt), FeeOptions);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiGetFilteredFeeOptions(FSequenceResponseStatus(false, Err.Message),{});
+		this->CallOnApiGetFilteredFeeOptions(FSequenceResponseStatus(false, Err.Message, GetFilteredFeeTrt),{});
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -269,12 +269,12 @@ void USequenceWalletBP::ApiGetUnfilteredFeeOptions(UTransactions * Transactions)
 {
 	const TFunction<void (TArray<FFeeOption>)> OnSuccess = [this](const TArray<FFeeOption>& FeeOptions)
 	{
-		this->CallOnApiGetUnFilteredFeeOptions(FSequenceResponseStatus(true), FeeOptions);
+		this->CallOnApiGetUnFilteredFeeOptions(FSequenceResponseStatus(true, GetUnFilteredFeeOptionsTrt), FeeOptions);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiGetUnFilteredFeeOptions(FSequenceResponseStatus(false, Err.Message), {});
+		this->CallOnApiGetUnFilteredFeeOptions(FSequenceResponseStatus(false, Err.Message, GetUnFilteredFeeOptionsTrt), {});
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -289,12 +289,12 @@ void USequenceWalletBP::ApiSendTransactionWithFee(UTransactions * Transactions)
 {
 	const TFunction<void (FTransactionResponse)> OnSuccess = [this](const FTransactionResponse& Response)
 	{
-		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(true), Response);
+		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(true, SendTransactionWithFeeTrt), Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(false, Err.Message), FTransactionResponse());
+		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(false, Err.Message, SendTransactionWithFeeTrt), FTransactionResponse());
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -316,12 +316,12 @@ void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 {
 	const TFunction<void (FTransactionResponse)> OnSuccess = [this](const FTransactionResponse& Response)
 	{
-		this->CallOnApiSendTransaction(FSequenceResponseStatus(true), Response);
+		this->CallOnApiSendTransaction(FSequenceResponseStatus(true, SendTransactionTrt), Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiSendTransaction(FSequenceResponseStatus(false, Err.Message), FTransactionResponse());
+		this->CallOnApiSendTransaction(FSequenceResponseStatus(false, Err.Message, SendTransactionTrt), FTransactionResponse());
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -336,12 +336,12 @@ void USequenceWalletBP::ApiListSessions()
 {
 	const TFunction<void (TArray<FSession>)> OnSuccess = [this](const TArray<FSession>& Sessions)
 	{
-		this->CallOnApiListSessions(FSequenceResponseStatus(true), Sessions);
+		this->CallOnApiListSessions(FSequenceResponseStatus(true, ListSessionsTrt), Sessions);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiListSessions(FSequenceResponseStatus(false, Err.Message), {});
+		this->CallOnApiListSessions(FSequenceResponseStatus(false, Err.Message, ListSessionsTrt), {});
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -356,12 +356,12 @@ void USequenceWalletBP::ApiGetSupportedTransakCountries()
 {
 	const TFunction<void (TArray<FSupportedCountry>)> OnSuccess = [this](const TArray<FSupportedCountry>& SupportedCountries)
 	{
-		this->CallOnApiGetSupportedTransakCountries(FSequenceResponseStatus(true), SupportedCountries);
+		this->CallOnApiGetSupportedTransakCountries(FSequenceResponseStatus(true, GetSupportedTransakCountriesTrt), SupportedCountries);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiGetSupportedTransakCountries(FSequenceResponseStatus(false, Err.Message), {});
+		this->CallOnApiGetSupportedTransakCountries(FSequenceResponseStatus(false, Err.Message, GetSupportedTransakCountriesTrt), {});
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -381,12 +381,12 @@ void USequenceWalletBP::IndexerPing()
 
 		const TSuccessCallback<bool> OnSuccess = [this](const bool bSuccess)
 		{
-			this->CallOnIndexerPing(FSequenceResponseStatus(true), bSuccess);
+			this->CallOnIndexerPing(FSequenceResponseStatus(true, PingTrt), bSuccess);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerPing(FSequenceResponseStatus(false,Error.Message),false);
+			this->CallOnIndexerPing(FSequenceResponseStatus(false,Error.Message, PingTrt),false);
 		};
 		
 		Wallet->Ping(OnSuccess, OnFailure);
@@ -402,12 +402,12 @@ void USequenceWalletBP::IndexerVersion()
 
 		const TSuccessCallback<FVersion> OnSuccess = [this](const FVersion& Version)
 		{
-			this->CallOnIndexerVersion(FSequenceResponseStatus(true), Version);
+			this->CallOnIndexerVersion(FSequenceResponseStatus(true, VersionTrt), Version);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerVersion(FSequenceResponseStatus(false, Error.Message), FVersion());
+			this->CallOnIndexerVersion(FSequenceResponseStatus(false, Error.Message, VersionTrt), FVersion());
 		};
 		
 		Wallet->Version(OnSuccess, OnFailure);
@@ -423,12 +423,12 @@ void USequenceWalletBP::IndexerRuntimeStatus()
 
 		const TSuccessCallback<FRuntimeStatus> OnSuccess = [this](const FRuntimeStatus& RuntimeStatus)
 		{
-			this->CallOnIndexerRuntimeStatus(FSequenceResponseStatus(true), RuntimeStatus);
+			this->CallOnIndexerRuntimeStatus(FSequenceResponseStatus(true, RuntimeStatusTrt), RuntimeStatus);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerRuntimeStatus(FSequenceResponseStatus(false, Error.Message), FRuntimeStatus());
+			this->CallOnIndexerRuntimeStatus(FSequenceResponseStatus(false, Error.Message, RuntimeStatusTrt), FRuntimeStatus());
 		};
 		
 		Wallet->RunTimeStatus(OnSuccess, OnFailure);
@@ -444,12 +444,12 @@ void USequenceWalletBP::IndexerGetChainId()
 
 		const TSuccessCallback<int64> OnSuccess = [this](const int64& ChainId)
 		{
-			this->CallOnIndexerGetChainId(FSequenceResponseStatus(true), ChainId);
+			this->CallOnIndexerGetChainId(FSequenceResponseStatus(true, GetChainIdTrt), ChainId);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetChainId(FSequenceResponseStatus(false, Error.Message),-1);
+			this->CallOnIndexerGetChainId(FSequenceResponseStatus(false, Error.Message, GetChainIdTrt),-1);
 		};
 		
 		Wallet->GetChainID(OnSuccess, OnFailure);
@@ -465,12 +465,12 @@ void USequenceWalletBP::IndexerGetEtherBalance(const FString& WalletAddress)
 
 		const TSuccessCallback<FEtherBalance> OnSuccess = [this](const FEtherBalance& EtherBalance)
 		{
-			this->CallOnIndexerGetEtherBalance(FSequenceResponseStatus(true), EtherBalance);
+			this->CallOnIndexerGetEtherBalance(FSequenceResponseStatus(true, GetEtherBalanceTrt), EtherBalance);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetEtherBalance(FSequenceResponseStatus(false, Error.Message), FEtherBalance());
+			this->CallOnIndexerGetEtherBalance(FSequenceResponseStatus(false, Error.Message, GetEtherBalanceTrt), FEtherBalance());
 		};
 		
 		Wallet->GetEtherBalance(WalletAddress, OnSuccess, OnFailure);
@@ -486,12 +486,12 @@ void USequenceWalletBP::IndexerGetTokenBalances(const FGetTokenBalancesArgs& Arg
 
 		const TSuccessCallback<FGetTokenBalancesReturn> OnSuccess = [this](const FGetTokenBalancesReturn& TokenBalances)
 		{
-			this->CallOnIndexerGetTokenBalances(FSequenceResponseStatus(true),TokenBalances);
+			this->CallOnIndexerGetTokenBalances(FSequenceResponseStatus(true, GetTokenBalancesTrt),TokenBalances);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetTokenBalances(FSequenceResponseStatus(false, Error.Message),FGetTokenBalancesReturn());
+			this->CallOnIndexerGetTokenBalances(FSequenceResponseStatus(false, Error.Message, GetTokenBalancesTrt),FGetTokenBalancesReturn());
 		};
 		
 		Wallet->GetTokenBalances(Args, OnSuccess, OnFailure);
@@ -507,12 +507,12 @@ void USequenceWalletBP::IndexerGetTokenSupplies(const FGetTokenSuppliesArgs& Arg
 
 		const TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess = [this](const FGetTokenSuppliesReturn& TokenSupplies)
 		{
-			this->CallOnIndexerGetTokenSupplies(FSequenceResponseStatus(true),TokenSupplies);
+			this->CallOnIndexerGetTokenSupplies(FSequenceResponseStatus(true, GetTokenSuppliesTrt),TokenSupplies);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetTokenSupplies(FSequenceResponseStatus(false, Error.Message), FGetTokenSuppliesReturn());
+			this->CallOnIndexerGetTokenSupplies(FSequenceResponseStatus(false, Error.Message, GetTokenSuppliesTrt), FGetTokenSuppliesReturn());
 		};
 		
 		Wallet->GetTokenSupplies(Args, OnSuccess, OnFailure);
@@ -528,12 +528,12 @@ void USequenceWalletBP::IndexerGetTokenSuppliesMap(const FGetTokenSuppliesMapArg
 
 		const TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess = [this](const FGetTokenSuppliesMapReturn& TokenSuppliesMap)
 		{
-			this->CallOnIndexerGetTokenSuppliesMap(FSequenceResponseStatus(true), TokenSuppliesMap);
+			this->CallOnIndexerGetTokenSuppliesMap(FSequenceResponseStatus(true, GetTokenSuppliesMapTrt), TokenSuppliesMap);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetTokenSuppliesMap(FSequenceResponseStatus(false, Error.Message),FGetTokenSuppliesMapReturn());
+			this->CallOnIndexerGetTokenSuppliesMap(FSequenceResponseStatus(false, Error.Message, GetTokenSuppliesMapTrt),FGetTokenSuppliesMapReturn());
 		};
 		
 		Wallet->GetTokenSuppliesMap(Args, OnSuccess, OnFailure);
@@ -549,12 +549,12 @@ void USequenceWalletBP::IndexerGetBalanceUpdates(const FGetBalanceUpdatesArgs& A
 
 		const TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess = [this](const FGetBalanceUpdatesReturn& BalanceUpdates)
 		{
-			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(true), BalanceUpdates);
+			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(true, GetBalanceUpdatesTrt), BalanceUpdates);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(false, Error.Message), FGetBalanceUpdatesReturn());
+			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(false, Error.Message, GetBalanceUpdatesTrt), FGetBalanceUpdatesReturn());
 		};
 		
 		Wallet->GetBalanceUpdates(Args, OnSuccess, OnFailure);
@@ -570,12 +570,12 @@ void USequenceWalletBP::IndexerGetTransactionHistory(const FGetTransactionHistor
 
 		const TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess = [this](const FGetTransactionHistoryReturn& TransactionHistory)
 		{
-			this->CallOnIndexerGetTransactionHistory(FSequenceResponseStatus(true), TransactionHistory);
+			this->CallOnIndexerGetTransactionHistory(FSequenceResponseStatus(true, GetTransactionHistoryTrt), TransactionHistory);
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallOnIndexerGetTransactionHistory(FSequenceResponseStatus(false, Error.Message), FGetTransactionHistoryReturn());
+			this->CallOnIndexerGetTransactionHistory(FSequenceResponseStatus(false, Error.Message, GetTransactionHistoryTrt), FGetTransactionHistoryReturn());
 		};
 		
 		Wallet->GetTransactionHistory(Args, OnSuccess, OnFailure);

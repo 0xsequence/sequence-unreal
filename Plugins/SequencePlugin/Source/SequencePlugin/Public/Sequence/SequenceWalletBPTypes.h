@@ -30,6 +30,28 @@ public:
 	FTransakSettings(){}
 };
 
+UENUM(BlueprintType)
+enum ETransactionResponseType
+{
+	SignMessageTrt UMETA(DisplayName = "SignMessage"),
+	GetFilteredFeeTrt UMETA(DisplayName = "GetFilteredFeeOptions"),
+	GetUnFilteredFeeOptionsTrt UMETA(DisplayName = "GetUnFilteredFeeOptions"),
+	SendTransactionWithFeeTrt UMETA(DisplayName = "SendTransactionWithFee"),
+	SendTransactionTrt UMETA(DisplayName = "SendTransaction"),
+	ListSessionsTrt UMETA(DisplayName = "ListSessions"),
+	GetSupportedTransakCountriesTrt UMETA(DisplayName = "GetSupportedTransakCountries"),
+	PingTrt UMETA(DisplayName = "Ping"),
+	VersionTrt UMETA(DisplayName = "Version"),
+	RuntimeStatusTrt UMETA(DisplayName = "RuntimeStatus"),
+	GetChainIdTrt UMETA(DisplayName = "GetChainId"),
+	GetEtherBalanceTrt UMETA(DisplayName = "GetEtherBalances"),
+	GetTokenBalancesTrt UMETA(DisplayName = "GetTokenBalances"),
+	GetTokenSuppliesTrt UMETA(DisplayName = "GetTokenSupplies"),
+	GetTokenSuppliesMapTrt UMETA(DisplayName = "GetTokenSuppliesMap"),
+	GetBalanceUpdatesTrt UMETA(DisplayName = "GetBalanceUpdates"),
+	GetTransactionHistoryTrt UMETA(DisplayName = "GetTransactionHistory"),	
+};
+
 USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSequenceResponseStatus
 {
@@ -37,20 +59,25 @@ struct SEQUENCEPLUGIN_API FSequenceResponseStatus
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool Status = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	TEnumAsByte<ETransactionResponseType> Operation = ETransactionResponseType::PingTrt;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString StatusMessage = "";
 
 	FSequenceResponseStatus(){}
 
-	FSequenceResponseStatus(bool StatusIn)
+	FSequenceResponseStatus(const bool StatusIn, const ETransactionResponseType OperationIn)
 	{
 		Status = StatusIn;
+		Operation = OperationIn;
 	}
 
-	FSequenceResponseStatus(bool StatusIn, const FString& StatusMessageIn)
+	FSequenceResponseStatus(const bool StatusIn, const FString& StatusMessageIn, const ETransactionResponseType OperationIn)
 	{
 		Status = StatusIn;
 		StatusMessage = StatusMessageIn;
+		Operation = OperationIn;
 	}
 };
