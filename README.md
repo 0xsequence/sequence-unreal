@@ -306,7 +306,132 @@ be sure you register and set your bundle identifier properly for your app
 ### Apple Specific SSO Requirements
 For Apple SSO to work please be sure to register the **[RedirectUrl]** in **[YourProject/Config/SequenceConfig.ini]** appropriately for your app.
 
-### Sequence API
+### Blueprint Sequence API
+
+In order to use the Blueprint Sequence API, you must create an actor or pawn and attach the **[AC_SequencePawn_Component]**
+
+#### Sequence API
+
+##### Get Wallet Address , Type Sync
+
+[Get Wallet Address](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Wallet_Address.PNG)
+
+##### Get Network Id , Type Sync
+
+[Get Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Network_Id.PNG)
+
+##### Update Network Id , Type Sync
+
+[Update Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Update_Network_Id.PNG)
+
+##### Open Transak Url , Type Sync
+
+[Open Transak Url](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Open_Transak_Url.PNG)
+
+##### SignOut , Type Sync
+
+[SignOut](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Signout.PNG)
+
+##### Sign Message , Type Async
+
+[Sign Message](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SignMessage.PNG)
+
+##### The following 4 calls use a Transactions Object
+You can add the various transaction types to a Transactions UObject like so in blueprints.
+
+###### ERC20
+
+[Creating a Transactions Object & a ERC20 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC20.PNG)
+[Where the DemoERC20 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC20.PNG)
+
+###### ERC721
+
+[Creating a Transactions Object & a ERC721 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC721.PNG)
+[Where the DemoERC721 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC721.PNG)
+
+###### ERC1155
+
+[Creating a Transactions Object & a ERC1155 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC1155.PNG)
+[Where the DemoERC1155 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC1155.PNG)
+
+###### Raw
+
+[Creating a Transactions Object & a Raw Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_Raw.PNG)
+[Where the DemoRaw struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Raw.PNG)
+
+###### DelayedEncoded
+
+[Creating a Transactions Object & a DelayedEncoding Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Delayed_Pt1.PNG)
+
+[You can go about creating the Arguments object like so](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_DelayedEncode_Pt2.PNG)
+
+##### Get Filtered Fee Options , Type Async
+
+[Get Filtered Fees](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetFilteredFees.PNG)
+
+##### Get Unfiltered Fee Options , Type Async
+
+[Get UnFiltered Fees](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetUnfilteredFees.PNG)
+
+##### Send Transaction With Fee , Type Async
+
+[Send Transaction with Fee](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SendTransactionWithFee.PNG)
+
+##### Send Transaction , Type Async
+
+[Send Transaction](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SendTransaction.PNG)
+
+##### List Sessions , Type Async
+
+[List Sessions](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ListSessions.PNG)
+
+##### Get Supported Transak Countries , Type Async
+
+[Get Supported Transak Countries](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetSupportedTransakCountries.PNG)
+
+#### Indexer
+
+##### Ping , Type Async
+
+[Indexer Ping](ReadmeImages/BP_Demo/Indexer/Example_Ping.PNG)
+
+##### Version , Type Async
+
+[Indexer Version](ReadmeImages/BP_Demo/Indexer/Example_Version.PNG)
+
+##### RunTime Status , Type Async
+
+[Indexer RuntimeStatus](ReadmeImages/BP_Demo/Indexer/Example_RuntimeStatus.PNG)
+
+##### Get Chain Id , Type Async
+
+[Indexer GetChainId](ReadmeImages/BP_Demo/Indexer/Example_GetChainId.PNG)
+
+##### Get Ether Balance , Type Async
+
+[Indexer GetEtherBalance](ReadmeImages/BP_Demo/Indexer/Example_GetEtherBalance.PNG)
+
+##### Get Token Balances , Type Async
+
+[Indexer GetTokenBalances](ReadmeImages/BP_Demo/Indexer/Example_GetTokenBalances.PNG)
+
+##### Get Token Supplies , Type Async
+
+[Indexer GetTokenSupplies](ReadmeImages/BP_Demo/Indexer/Example_GetTokenSupplies.PNG)
+
+##### Get Token Supplies Map , Type Async
+
+[Indexer GetTokenSuppliesMap](ReadmeImages/BP_Demo/Indexer/Example_GetTokenSuppliesMap.PNG)
+
+##### Get Balance Updates , Type Async
+
+[Indexer GetBalanceUpdates](ReadmeImages/BP_Demo/Indexer/Example_GetBalanceUpdates.PNG)
+
+##### Get Transaction History , Type Async
+
+[Indexer GetTransactionHistory](ReadmeImages/BP_Demo/Indexer/Example_GetTransactionHistory.PNG)
+
+### C++ Sequence API
 
 In order to gain access to the SequenceAPI be sure to #include "Sequence/SequenceAPI.h"
 After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet*]** by using:
@@ -378,8 +503,7 @@ no data is reset when a level is changed in your games!
 		//Process Failure state
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -405,8 +529,7 @@ no data is reset when a level is changed in your games!
       //Process Failure state
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -466,8 +589,7 @@ no data is reset when a level is changed in your games!
 		OnFailure("Get Fee Option Response failure", Error);
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -476,7 +598,7 @@ no data is reset when a level is changed in your games!
 
 ### GetSupportedCountries
 #### Used to get a list of supported countries and requirements for transak
-   
+
    	const TFunction<void (TArray<FSupportedCountry>)> OnSuccess = [=](TArray<FSupportedCountry> SupportedCountries)
 	{
       //Process success
@@ -487,8 +609,7 @@ no data is reset when a level is changed in your games!
 		//Process error
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -498,8 +619,7 @@ no data is reset when a level is changed in your games!
 ### Example LoadTransakURL
 #### Used to open a TransakURL in an external browser
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -518,9 +638,8 @@ no data is reset when a level is changed in your games!
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -588,8 +707,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));//ContractCall
 
     //Now send the transaction
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
       USequenceWallet * Api = WalletOptional.GetValue();
@@ -619,8 +737,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them  
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -640,8 +757,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -651,8 +767,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example SignOut
 ##### Closes the session & clears out cached credentials with blank ones
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -672,8 +787,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -683,8 +797,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example GetWalletAddress
 #### Gets the wallet address currently being used
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -694,8 +807,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example GetNetworkId
 #### Gets the network id being used
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -705,8 +817,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example UpdateNetworkId
 #### Used to update the stored network id
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -716,8 +827,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -742,8 +852,7 @@ the indexer. The default network we set is `137`
 		//Ping failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -762,8 +871,7 @@ the indexer. The default network we set is `137`
 		//Version Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -782,8 +890,7 @@ the indexer. The default network we set is `137`
 		//RunTimeStatus Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -801,9 +908,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetChainID Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -821,9 +927,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetEtherBalance Failure
 	};
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -841,9 +946,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTokenBalances Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -864,9 +968,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTokenSupplies Failure
 	};
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -888,8 +991,7 @@ the indexer. The default network we set is `137`
         //GetTokenSuppliesMap Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();    
@@ -916,9 +1018,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetBalanceUpdates Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -941,9 +1042,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTransactionHistory Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();

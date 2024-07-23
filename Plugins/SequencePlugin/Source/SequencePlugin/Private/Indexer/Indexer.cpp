@@ -195,6 +195,7 @@ void UIndexer::GetTokenBalances(int64 ChainID, FGetTokenBalancesArgs Args, TSucc
 	const FString endpoint = "GetTokenBalances";
 	HTTPPost(ChainID, endpoint, BuildArgs<FGetTokenBalancesArgs>(Args), [this,OnSuccess](FString Content)
 	{
+		UE_LOG(LogTemp,Display,TEXT("%s"),*Content);
 		FGetTokenBalancesReturn response = this->BuildResponse<FGetTokenBalancesReturn>(Content);
 		OnSuccess(response);
 	}, OnFailure);
