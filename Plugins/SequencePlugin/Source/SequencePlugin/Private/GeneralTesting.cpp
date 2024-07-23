@@ -332,8 +332,7 @@ void AGeneralTesting::TestMisc()
 	
 	TArray<TransactionUnion> Txn;
 	FDelayedTransaction TDelayed;
-
-	TDelayed.data = NewObject<UDelayedEncodingBP>();
+	
 	TDelayed.data->SetFunc("setInt()");
 	TDelayed.data->SetAbi("Epic ABI");
 

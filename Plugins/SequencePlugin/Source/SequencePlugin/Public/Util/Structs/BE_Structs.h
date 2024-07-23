@@ -25,6 +25,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString value = "";
 
+    FDelayedTransaction()
+    {
+        data = NewObject<UDelayedEncodingBP>();
+    }
+    
     FString GetJsonString() const
     {
         FString Json = "{";
