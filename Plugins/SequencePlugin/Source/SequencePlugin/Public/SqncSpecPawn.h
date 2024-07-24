@@ -18,5 +18,5 @@ private:
 	FCredentials_BE Credentials;
 	
 	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
-	void SetupCredentials(FCredentials_BE CredentialsIn);
+	void SystemReady();
 };

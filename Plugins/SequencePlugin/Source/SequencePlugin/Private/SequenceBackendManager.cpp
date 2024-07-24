@@ -29,11 +29,10 @@ void ASequenceBackendManager::CallShowAuthFailureScreen()
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn)
+void ASequenceBackendManager::CallShowAuthSuccessScreen()
 {
-	this->Credentials = CredentialsIn;
 	if (this->ShowAuthSuccessDelegate.IsBound())
-		this->ShowAuthSuccessDelegate.Broadcast(Credentials);
+		this->ShowAuthSuccessDelegate.Broadcast();
 	else
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
 }
@@ -136,21 +135,15 @@ FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
 	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
 	if (PCred.GetValid())
 	{
-		this->Credentials = PCred.GetCredentials();
-		return this->Credentials;
+		return PCred.GetCredentials();
 	}
 	return FCredentials_BE();
 }
 
 bool ASequenceBackendManager::StoredCredentialsValid()
 {
-	FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
-	const bool valid = PCred.GetValid();
-	if (valid)
-	{
-		this->Credentials = PCred.GetCredentials();
-	}
-	return valid;
+	const FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();
+	return PCred.GetValid();
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

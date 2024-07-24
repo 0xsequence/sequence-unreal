@@ -307,7 +307,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthSuccess, FCredentials_BE, Credentials);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
 
 /**
  * 
@@ -327,7 +327,7 @@ public:
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure() const;
-	void CallAuthSuccess(const FCredentials_BE& Credentials) const;
+	void CallAuthSuccess() const;
 //vars
 private:
 	UPROPERTY()

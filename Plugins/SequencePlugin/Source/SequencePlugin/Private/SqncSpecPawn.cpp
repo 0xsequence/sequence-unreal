@@ -4,7 +4,7 @@
 #include "Indexer/IndexerSupport.h"
 #include "Sequence/SequenceAPI.h"
 
-void ASqncSpecPawn::SetupCredentials(FCredentials_BE CredentialsIn)
+void ASqncSpecPawn::SystemReady()
 {
 	
 }

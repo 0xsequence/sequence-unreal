@@ -26,7 +26,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthISuccess, FCredentials_BE, Credentials);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor
@@ -47,10 +47,8 @@ private:
 	UFUNCTION()
 		void CallShowAuthFailureScreen();
 	UFUNCTION()
-		void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
-private:
-	FCredentials_BE Credentials;
-	
+		void CallShowAuthSuccessScreen();
+private:	
 	UPROPERTY()
 	UAuthenticator* Authenticator;
 
