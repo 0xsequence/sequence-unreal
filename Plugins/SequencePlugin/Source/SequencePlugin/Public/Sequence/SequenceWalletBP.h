@@ -158,38 +158,20 @@ public:
 	/*
 	* Used to get the amount that users can read,
 	* int64 Amount, the integer amount of Crypto
-	* int32 Decimals, the integer amount of Decimal places used to represent the Amount
+	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
 	* Return, The user readable Float amount
 	*/
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
-	float GetUserReadableAmountIntDecimals(int64 Amount, int32 Decimals);
-
-	/*
-	* Used to get the amount that users can read,
-	* int64 Amount, the integer amount of Crypto
-	* float Decimals, the float amount of Decimal places used to represent the Amount
-	* Return, The user readable Float amount
-	*/
-	UFUNCTION(BlueprintCallable, Category="Sync Api")
-	float GetUserReadableAmountFloatDecimals(int64 Amount, float Decimals);
+	float GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals);
 
 	/*
 	* Used to convert a user readable amount into a usable amount value for transactions,
 	* float Amount, the user readable amount they wish to use, EG) 0.01 Eth
-	* float Decimals, the float amount of Decimal places used to represent the Amount
+	* int64 Decimals, the int64 amount of Decimal places used to represent the Amount
 	* Return, The transaction usable amount
 	*/
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
-	int64 GetTransactionReadableAmountIntDecimals(float Amount, int32 Decimals);
-	
-	/*
-	* Used to convert a user readable amount into a usable amount value for transactions,
-	* float Amount, the user readable amount they wish to use, EG) 0.01 Eth
-	* int32 Decimals, the integer amount of Decimal places used to represent the Amount
-	* Return, The transaction usable amount
-	*/
-	UFUNCTION(BlueprintCallable, Category="Sync Api")
-	int64 GetTransactionReadableAmountFloatDecimals(float Amount, float Decimals);
+	int64 GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals);
 	
 	//Support//
 	

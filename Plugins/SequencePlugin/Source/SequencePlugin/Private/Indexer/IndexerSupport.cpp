@@ -6,32 +6,19 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
+#include "Logging/StructuredLogFormat.h"
 
-float UIndexerSupport::GetAmount(const int64 Amount, const int32 Decimals)
+float UIndexerSupport::GetAmount(const int64 Amount, const int64 Decimals)
 {
-	float ret = Amount;
-
-	ret /= FMath::Pow(10,static_cast<float>(Decimals));
-
-	return ret;
-}
-float UIndexerSupport::GetAmount(const int64 Amount, const float Decimals)
-{
-	float ret = Amount;
-
-	ret /= FMath::Pow(10, Decimals);
-
-	return ret;
+	const float Ret = static_cast<float>(Amount);
+	return static_cast<float>(Ret / FMath::Pow(10, static_cast<double>(Decimals)));
 }
 
-int64 UIndexerSupport::GetAmount(const float Amount, const float Decimals)
+int64 UIndexerSupport::GetAmount(const float Amount, const int64 Decimals)
 {
-	return FMath::Pow(10, Decimals) / Amount;
-}
-
-int64 UIndexerSupport::GetAmount(const float Amount, const int32 Decimals)
-{
-	return FMath::Pow(10, static_cast<float>(Decimals)) / Amount;
+	const double Operand = FMath::Pow(10, static_cast<double>(Decimals));
+	const int64 Ret = static_cast<int64>(Operand * Amount);
+	return Ret;
 }
 
 FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)

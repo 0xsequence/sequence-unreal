@@ -143,22 +143,12 @@ void USequenceWalletBP::CallOnIndexerGetTransactionHistory(const FSequenceRespon
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnIndexerGetTransactionHistory]"));
 }
 
-float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int32 Decimals)
+float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
 {
 	return UIndexerSupport::GetAmount(Amount,Decimals);
 }
 
-float USequenceWalletBP::GetUserReadableAmountFloatDecimals(int64 Amount, float Decimals)
-{
-	return UIndexerSupport::GetAmount(Amount,Decimals);
-}
-
-int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, int32 Decimals)
-{
-	return UIndexerSupport::GetAmount(Amount,Decimals);
-}
-
-int64 USequenceWalletBP::GetTransactionReadableAmountFloatDecimals(float Amount, float Decimals)
+int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals)
 {
 	return UIndexerSupport::GetAmount(Amount,Decimals);
 }
