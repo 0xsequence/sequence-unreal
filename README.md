@@ -312,6 +312,24 @@ In order to use the Blueprint Sequence API, you must create an actor or pawn and
 
 #### Sequence API
 
+###### Sequence Utils
+
+###### Human Readable Values to Transaction Readable Values
+When setting values for ERC20 amounts you may try to set a value like 0.15 USDC in the ValueString of the FERC20Transaction struct,
+However this is NOT the value you put inside the Value String for ERC20 Transactions, The value you put in is 0.15 * 10^6. To simplify this process
+there are Util functions in Blueprints that you can use to put human readable values in like so.
+
+[Example Conversion](ReadmeImages/BP_Demo/SequenceApi/Util/Example_HumanReadable_To_Transaction_Readable.PNG)
+
+Where the TokenBalance Structure is the same type that's contained in the return from the Indexer Call GetTokenBalances
+
+[Example TokenBalance](ReadmeImages/BP_Demo/SequenceApi/Util/Example_TokenBalance.PNG)
+
+In some cases the TokenBalance Struct won't have a decimals Value initiated properly. In which case you can actually hard code
+the decimals value with the following conversion function instead.
+
+[Example Hardcode](ReadmeImages/BP_Demo/SequenceApi/Util/Example_Hardcode.PNG)
+
 ##### Get Wallet Address , Type Sync
 
 [Get Wallet Address](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Wallet_Address.PNG)
@@ -433,6 +451,13 @@ You can add the various transaction types to a Transactions UObject like so in b
 
 ### C++ Sequence API
 
+### Updates to C++ Sequence API
+
+We have created a wrapper TypeDef for TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction, FDelayedTransaction>
+called TransactionUnion, You should use the TransactionUnion DataType instead. This change also comes as we have introduced the Delayed Transaction Type.
+
+### Using the C++ Sequence API
+
 In order to gain access to the SequenceAPI be sure to #include "Sequence/SequenceAPI.h"
 After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet*]** by using:
 
@@ -507,12 +532,12 @@ no data is reset when a level is changed in your games!
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+		TArray<TransactionUnion> Transactions;
 		FERC20Transaction T20;
 		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 		T20.value = "1000";
-		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		Transactions.Push(TransactionUnion(T20));
 		Api->GetFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 
@@ -533,25 +558,25 @@ no data is reset when a level is changed in your games!
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+		TArray<TransactionUnion> Transactions;
 		FERC20Transaction T20;
 		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 		T20.value = "1000";
-		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		Transactions.Push(TransactionUnion(T20));
 		Api->GetUnfilteredFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 
 ### Example SendTransactionWithFeeOption
 #### Used to get a list of fee's and send a transaction with one of them valid ones
 
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Transactions;
+	TArray<TransactionUnion> Transactions;
 	FERC721Transaction T721;
 	T721.safe = true;
 	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
 	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
 	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
-	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
+	Transactions.Push(TransactionUnion(T721));
 	
 	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
 	{
@@ -658,7 +683,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	};
 	
     //Create the Transaction object list
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+	TArray<TransactionUnion> Txn;
 	
     //Create the transactions you wish to perform
 
@@ -701,10 +726,10 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	
     //Now append your transaction requests to the Txn object
     
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));//ERC20
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));//ERC721
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));//ERC1155
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));//ContractCall
+	Txn.Push(TransactionUnion(T20));//ERC20
+	Txn.Push(TransactionUnion(T721));//ERC721
+	Txn.Push(TransactionUnion(T1155));//ERC1155
+	Txn.Push(TransactionUnion(T));//ContractCall
 
     //Now send the transaction
     const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -833,6 +858,55 @@ Note: if you want call contracts with the Raw type you'll want include the heade
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->UpdateProviderURL("NewProviderUrl");
     }
+
+## Using Delayed Encoding
+The Delayed encoding TransactionType is added onto a TArray<TransactionUnion> like any other type,
+However the way this transaction is built is very different from the others.
+This type is meant to allow you to send unencoded data to the server for it to encode for you into valid ethereum transaction.
+
+There are 4 DataTypes you need to know about in order to use DelayedEncoding,
+
+1) FDelayedTransaction, This Data type houses all of the arguments for the encoding.
+2) UDelayedEncodingBP, This Object is used to represent the Data Portion of the FDelayedTransaction.
+3) UDelayedEncodingArrayArgsBP, This is one of two argument UObjects, This one is used for housing Array Args
+4) UDelayedEncodingObjectArgsBP, This is the other argument UObject, This one is used for housing Object Args.
+
+The 2 Argument UObjects support full nesting, Meaning you can have an ArrayArg inside an ArrayArg, As well as an ObjectArg
+inside an ObjectArg. They also support nesting ObjectArgs in ArrayArgs and ArrayArgs in ObjectArgs. As well as the traditional
+JSON Primitives, Such as Bool, Number(float, double, int32, int64), String.
+
+Below is an example of how to Construct an FDelayedTransaction with lots of nesting.
+
+	TArray<TransactionUnion> Txn;
+	FDelayedTransaction TDelayed;
+
+	TDelayed.data->SetFunc("setInt()");
+	TDelayed.data->SetAbi("Epic ABI");
+
+	UDelayedEncodingObjectArgsBP * NestedObj = NewObject<UDelayedEncodingObjectArgsBP>();
+	NestedObj->AddStringArg(TEXT("Deep String"), TEXT("Blah"));
+	
+	UDelayedEncodingArrayArgsBP * NestedArg = NewObject<UDelayedEncodingArrayArgsBP>();
+	NestedArg->AddObjectArg(NestedObj);
+
+	UDelayedEncodingArrayArgsBP * ArgsListInner = NewObject<UDelayedEncodingArrayArgsBP>();
+	ArgsListInner->AddBoolArg(false);
+	ArgsListInner->AddInt32Arg(32);
+	ArgsListInner->AddInt64Arg(64);
+	ArgsListInner->AddStringArg(TEXT("String Arg"));
+	ArgsListInner->AddArrayArg(NestedArg);
+	
+	UDelayedEncodingObjectArgsBP * ArgsMain = NewObject<UDelayedEncodingObjectArgsBP>();
+	ArgsMain->AddBoolArg(TEXT("Epic Boolean"), false);
+	ArgsMain->AddDoubleArg(TEXT("Epic Double Arg"), 0.1);
+	ArgsMain->AddInt64Arg(TEXT("Epic integer64 arg"), -1);
+	ArgsMain->AddArrayArg(TEXT("List Arg"),ArgsListInner);
+	
+	TDelayed.data->SetArgs(ArgsMain);
+	TDelayed.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	TDelayed.value = "0";
+	
+	Txn.Push(TransactionUnion(TDelayed));
 
 ### Indexer & the Wallet
 
