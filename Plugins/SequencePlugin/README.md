@@ -118,7 +118,7 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 ### For Blueprints
 
-1) Create a blueprint Actor Or Pawn (if you wish to use it with a Gamemode)
+1) Create a blueprint Actor (if you wish to spawn it your self) Or Pawn (if you wish to use it with a Gamemode)
 
 2) Attach the **[AC_SequencePawn_Component]** to the Blueprint you created via the add components section.
 
@@ -128,9 +128,9 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 [How to setup the Blueprint](ReadmeImages/Example_BP_Setup.PNG)
 
-Note: Auth Success Forwarder will let you know when the system is ready.
+Note: Auth Success Forwarder will let you know when the system is ready to be used
 
-4) Depending on how you set your blueprint you can do one of two things to finish this 
+4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this 
 process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
 your scene if it's just an actor Blueprint.
 
