@@ -116,39 +116,52 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 4) If you wish to use the in built sequence UI for login you have to do the following:
 
-   a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
+### For Blueprints
+
+1) Create a blueprint Actor Or Pawn (if you wish to use it with a Gamemode)
+
+2) Attach the **[AC_SequencePawn_Component]** to the Blueprint you created via the add components section.
+
+[Where to find Components window](ReadmeImages/Example_AddComponent.PNG)
+
+3) Then you can setup you blueprint like so to start utilizing the SequenceAPI
+
+[How to setup the Blueprint](ReadmeImages/Example_BP_Setup.PNG)
+
+Note: Auth Success Forwarder will let you know when the system is ready.
+
+4) Depending on how you set your blueprint you can do one of two things to finish this 
+process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
+your scene if it's just an actor Blueprint.
+
+### For C++
+
+1) Create a C++ Class that Inherits from **[Pawn]** (If you wish to use it with Gamemode) or **[Actor]** (If you'll be spawning it yourself)
+   If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
    for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-   b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+2) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
-   c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
+3) Create a BlueprintCallable function within the **[C++ Parent]** (this may not be necessary any more)
 
-   d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
+4) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
+   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP_Setup.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
    own Blueprint graph.
 
-   The important part here is forwarding the Credentials received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]**,
-   that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
-   You can do this by swapping the SetupCredentials BlueprintCallable Function for your own Blueprint Callable Function from **[C++ Parent]**.
-
-   d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
+-  For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
    drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
    for your **[C++ Parent]** class you just made.
 
-   d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
-   to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
-   then click add custom event.
+Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** (if you do this be sure to move the duplicate outside 
+of the plugin folder into YOUR content folder, Otherwise your work could be lost during an update to the plugin).
 
-Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
-during updates all code you place there could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
-it's recommended you duplicate the BP_CustomSpectatorPawn out of the plugin folder, then update it's parent class to a C++ class of your own making that also
-resides outside the plugins content folder.
+5) If your **[C++ Parent]** was a pawn, you can set it to be the default pawn in your Gamemode and it will spawn on BeginPlay,
+   If your **[C++ Parent]** was an Actor, you can manually add it to the scene.
+   In both cases the UI will show up on BeginPlay.
 
-5) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
-   GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
-   Then open up **[GM_Sequence]** and set the DefaultPawn to the Pawn Blueprint you've just made.
-
-6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
+Note: If you don't know how to modify / update the Gamemode / Gamemode settings go to ProjectSettings -> Maps & Modes, From there
+you can set the Gamemode and update the default pawn. Or in the case you wish to use our Gamemode for testing it's
+**[GM_Sequence]** You'll just need to set your pawn as the default pawn.
 
 If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
 To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
@@ -227,16 +240,9 @@ To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthen
 Be sure to bind to the Delegates for **[AuthSuccess]**, **[AuthFailure]**, **[AuthRequiresCode]** prior to making any signin calls You can bind to these delegates like so:
 
 ```clike
-this->authenticator->AuthRequiresCode.AddDynamic(this, &AYourClass::YourCallReadyToReceiveCode);
-this->authenticator->AuthFailure.AddDynamic(this, &AYourClass::YourCallShowAuthFailureScreen);
-```
-
-In the case of **[AuthSuccess]** since a parameter is also passed we bind to it like this
-
-```clike
-FScriptDelegate del;
-del.BindUFunction(this, "CallShowAuthSuccessScreen");
-this->authenticator->AuthSuccess.Add(del);
+this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);
+this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
+this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 ```
 
 Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
@@ -245,17 +251,17 @@ Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` a
 
 ```clike
 UFUNCTION()
-void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
+void CallShowAuthSuccessScreen();
 ```
 
 And in `SequenceBackendManager.cpp` like so:
 
 ```clike
-void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn) 
+void ASequenceBackendManager::CallShowAuthSuccessScreen() 
 {
 this->Credentials = CredentialsIn;
 if (this->ShowAuthSuccessDelegate.IsBound())
-  this->ShowAuthSuccessDelegate.Broadcast(Credentials);
+  this->ShowAuthSuccessDelegate.Broadcast();
 else
   UE_LOG(LogTemp, Error, TEXT("**[Nothing bound to: ShowAuthSuccessDelegate]**"));
 }

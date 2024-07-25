@@ -52,9 +52,7 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator = NewObject<UAuthenticator>();
 
 	//setup up delegate bindings
-	FScriptDelegate del;
-	del.BindUFunction(this, "CallShowAuthSuccessScreen");
-	this->Authenticator->AuthSuccess.Add(del);
+	this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);
 	this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 }
