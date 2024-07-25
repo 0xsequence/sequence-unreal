@@ -4,16 +4,16 @@
 #include "GeneralProjectSettings.h"
 #include "TransakDataTypes.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FPartner
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool IsCardPayment = false;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString CurrencyCode = "";
 
 	FPartner(){}
@@ -26,27 +26,27 @@ public:
 	}
 };
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSupportedCountry
 {
 	GENERATED_USTRUCT_BODY()
 	
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString Alpha2 = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString Alpha3 = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool IsAllowed = false;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool IsLightKycAllowed = false;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	TArray<FString> SupportedDocuments;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString CurrencyCode = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	TArray<FPartner> Partners;
 
 	FSupportedCountry(){}

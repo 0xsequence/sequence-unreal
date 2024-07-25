@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "RuntimeStatus.h"
+#include "Dom/JsonObject.h"
 #include "RuntimeStatusReturn.generated.h"
 
 USTRUCT(BlueprintType)

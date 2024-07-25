@@ -10,22 +10,22 @@ struct FRuntimeStatus
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool healthOK = false;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool indexerEnabled = false;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString startTime = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         double uptime = 0.0;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString ver = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString branch = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString commitHash = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         int64 chainID = -1;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FRuntimeChecks checks;
 };

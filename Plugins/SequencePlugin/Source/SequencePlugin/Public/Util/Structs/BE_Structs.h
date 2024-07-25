@@ -5,28 +5,56 @@
 #include "BE_Enums.h"
 #include "Indexer/Indexer_Enums.h"
 #include "Engine/Texture2D.h"
+#include "Dom/JsonValue.h"
+#include "Sequence/DelayedEncodingBP.h"
 #include "BE_Structs.generated.h"
 
 //Sequence API Structs
+
 USTRUCT(BlueprintType)
-struct FGenericTransaction
+struct SEQUENCEPLUGIN_API FDelayedTransaction
 {
     GENERATED_USTRUCT_BODY()
+private:
+    FString type = "delayedEncode";
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UDelayedEncodingBP * data = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    FString to = "";
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    FString value = "";
+
+    FDelayedTransaction()
+    {
+        data = NewObject<UDelayedEncodingBP>();
+    }
+    
+    FString GetJsonString() const
+    {
+        FString Json = "{";
+        Json += "\"data\":" + data->GetJsonString() + ",";
+        Json += "\"to\":\"" + to + "\",";
+        Json += "\"type\":\"" + type + "\",";
+        Json += "\"value\":\"" + value + "\"";
+        Json += "}";
+        return Json;
+    }
 };
 
 USTRUCT(BlueprintType)
-struct FRawTransaction
+struct SEQUENCEPLUGIN_API FRawTransaction
 {
     GENERATED_USTRUCT_BODY()
 private:
     UPROPERTY()
     FString type = "transaction";
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString to = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString data = "null";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString value = "";
 
     FRawTransaction(){}
@@ -63,18 +91,18 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FERC20Transaction
+struct SEQUENCEPLUGIN_API FERC20Transaction
 {
 	GENERATED_USTRUCT_BODY()
 private:
 	UPROPERTY()
 	FString type = "erc20send";
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString to = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString value = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString tokenAddress = "";
 
 	FERC20Transaction(){}
@@ -109,22 +137,22 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FERC721Transaction
+struct SEQUENCEPLUGIN_API FERC721Transaction
 {
 	GENERATED_USTRUCT_BODY()
 private:
 	UPROPERTY()
 	FString type = "erc721send";
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString to = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FString id = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString data = "null";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString tokenAddress = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool safe = true;
 
 	FERC721Transaction(){}
@@ -159,13 +187,13 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FERC1155TxnValue
+struct SEQUENCEPLUGIN_API FERC1155TxnValue
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString amount = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString id = "";
 
 	FERC1155TxnValue(){}
@@ -193,20 +221,20 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FERC1155Transaction
+struct SEQUENCEPLUGIN_API FERC1155Transaction
 {
 	GENERATED_USTRUCT_BODY()
 private:
 	UPROPERTY()
 	FString type = "erc1155send";
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString to = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString data = "null";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString tokenAddress = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	TArray<FERC1155TxnValue> vals;
 		
 	FERC1155Transaction(){}
@@ -245,6 +273,8 @@ public:
 	}
 };
 
+
+
 //Sequence API Structs
 
 
@@ -253,7 +283,7 @@ public:
 * info
 */
 USTRUCT(BlueprintType)
-struct FNetworkProfileSetting_BE
+struct SEQUENCEPLUGIN_API FNetworkProfileSetting_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -270,7 +300,7 @@ public:
 * FNetwork_Profile_BE
 */
 USTRUCT(BlueprintType)
-struct FNetwork_BE
+struct SEQUENCEPLUGIN_API FNetwork_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -292,7 +322,7 @@ public:
 * specific to the computing system ie) wintel or arm mac os for example
 */
 USTRUCT(BlueprintType)
-struct FSystemSession_BE
+struct SEQUENCEPLUGIN_API FSystemSession_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -312,7 +342,7 @@ public:
 * outside that it may be independent of platform specific details
 */
 USTRUCT(BlueprintType)
-struct FActiveSession_BE
+struct SEQUENCEPLUGIN_API FActiveSession_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -335,7 +365,7 @@ public:
 * critical data is the public address
 */
 USTRUCT(BlueprintType)
-struct FContact_BE
+struct SEQUENCEPLUGIN_API FContact_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -352,7 +382,7 @@ public:
 * Based on the a ref from Sequence.go ExchangeRate struct {}
 */
 USTRUCT(BlueprintType)
-struct FSelectableCurrency_BE
+struct SEQUENCEPLUGIN_API FSelectableCurrency_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -380,7 +410,7 @@ public:
 * 
 */
 USTRUCT(BlueprintType)
-struct FHistoryElement_BE
+struct SEQUENCEPLUGIN_API FHistoryElement_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -409,7 +439,7 @@ public:
 * good enough for now
 */
 USTRUCT(BlueprintType)
-struct FMonthDayYear_BE
+struct SEQUENCEPLUGIN_API FMonthDayYear_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -426,7 +456,7 @@ public:
 * this is used more so for frontend use rather than backend parsing
 */
 USTRUCT(BlueprintType)
-struct FTokenHistoryCollection_BE
+struct SEQUENCEPLUGIN_API FTokenHistoryCollection_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -445,7 +475,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FID_BE
+struct SEQUENCEPLUGIN_API FID_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -464,7 +494,7 @@ public:
 * Used for updating the front with up to date pricing data
 */
 USTRUCT(BlueprintType)
-struct FPrice_BE
+struct SEQUENCEPLUGIN_API FPrice_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -480,7 +510,7 @@ public:
 * hence the differing names!
 */
 USTRUCT(BlueprintType)
-struct FItemPrice_BE
+struct SEQUENCEPLUGIN_API FItemPrice_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -494,7 +524,7 @@ public:
 * This is how coin data is stored in system
 */
 USTRUCT(BlueprintType)
-struct FCoin_BE
+struct SEQUENCEPLUGIN_API FCoin_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -525,7 +555,7 @@ public:
 * Specific details about nft's
 */
 USTRUCT(BlueprintType)
-struct FNFTDetails_BE
+struct SEQUENCEPLUGIN_API FNFTDetails_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -549,7 +579,7 @@ public:
 * this is how nft data is stored in system
 */
 USTRUCT(BlueprintType)
-struct FNFT_BE
+struct SEQUENCEPLUGIN_API FNFT_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -585,7 +615,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FNFT_UData_BE//this is the unique data of an nft!
+struct SEQUENCEPLUGIN_API FNFT_UData_BE//this is the unique data of an nft!
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -601,7 +631,7 @@ public:
 * redundent data stored within the system and vastly improving the memory footprint!
 */
 USTRUCT(BlueprintType)
-struct FNFT_Master_BE
+struct SEQUENCEPLUGIN_API FNFT_Master_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -636,7 +666,7 @@ public:
 * this is how coin based transactions can get stored in history!
 */
 USTRUCT(BlueprintType)
-struct FCoinTxn_BE
+struct SEQUENCEPLUGIN_API FCoinTxn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -650,7 +680,7 @@ public:
 * this is how nft based txn's are stored in history!
 */
 USTRUCT(BlueprintType)
-struct FNFTTxn_BE
+struct SEQUENCEPLUGIN_API FNFTTxn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -666,7 +696,7 @@ public:
 * then store a list of coinTXN's and tokenTXN's as members of this struct
 */
 USTRUCT(BlueprintType)
-struct FTransactionHistoryItem_BE
+struct SEQUENCEPLUGIN_API FTransactionHistoryItem_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -689,7 +719,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FUserData_BE
+struct SEQUENCEPLUGIN_API FUserData_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -728,7 +758,7 @@ public:
 * as when we hit the frontend this needs to get seperated anyway
 */
 USTRUCT(BlueprintType)
-struct FSystemData_BE
+struct SEQUENCEPLUGIN_API FSystemData_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -753,7 +783,7 @@ public:
 * through OR Undo the TXN if it failed to process
 */
 USTRUCT(BlueprintType)
-struct FPendingTxn_BE
+struct SEQUENCEPLUGIN_API FPendingTxn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -770,7 +800,7 @@ public:
 * Used to let the frontend know what the final state of a given pending txn is!
 */
 USTRUCT(BlueprintType)
-struct FTxnCallback_BE
+struct SEQUENCEPLUGIN_API FTxnCallback_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -786,7 +816,7 @@ public:
 * for initiating the transaction
 */
 USTRUCT(BlueprintType)
-struct FNFT_Send_Txn_BE
+struct SEQUENCEPLUGIN_API FNFT_Send_Txn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -803,7 +833,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FCoin_Send_Txn_BE
+struct SEQUENCEPLUGIN_API FCoin_Send_Txn_BE
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -816,7 +846,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FUpdatedPriceReturn
+struct SEQUENCEPLUGIN_API FUpdatedPriceReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -825,7 +855,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FSemiParsedTokenBalances
+struct SEQUENCEPLUGIN_API FSemiParsedTokenBalances
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -836,7 +866,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FCoinUpdatable
+struct SEQUENCEPLUGIN_API FCoinUpdatable
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -847,7 +877,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FNFTUpdatable
+struct SEQUENCEPLUGIN_API FNFTUpdatable
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -860,7 +890,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FUpdatableItemDataArgs
+struct SEQUENCEPLUGIN_API FUpdatableItemDataArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -875,7 +905,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FUpdatableHistoryArgs
+struct SEQUENCEPLUGIN_API FUpdatableHistoryArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
@@ -889,7 +919,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FTransaction_FE
+struct SEQUENCEPLUGIN_API FTransaction_FE
 {
     GENERATED_USTRUCT_BODY()
 public:

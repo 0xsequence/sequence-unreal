@@ -10,6 +10,8 @@
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
+#include "Sequence/DelayedEncodingArgsBP.h"
+#include "Sequence/DelayedEncodingBP.h"
 #include "Sequence/SequenceIntent.h"
 
 // Sets default values
@@ -320,22 +322,55 @@ void AGeneralTesting::TestEncryption() const
 	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
 	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *EncryptedData);
 	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *DecryptedData);
-	FString TestState = (PreEncrypt.Compare(DecryptedData) == 0) ? "Passed" : "Falied";
+	const FString TestState = (PreEncrypt.Compare(DecryptedData) == 0) ? "Passed" : "Failed";
 	UE_LOG(LogTemp, Display, TEXT("Test: [%s]"), *TestState);
 }
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	FRegisterSessionData GenericData = FRegisterSessionData();
-	FGenericData * GPointer = &GenericData;
+	const FFailureCallback GenericFailure = [=](const FSequenceError& Error){};
 	
-	//FRegisterSessionData * Test = static_cast<FRegisterSessionData*>(GPointer);
-	const FString GenericString = UIndexerSupport::StructToPartialSimpleString(*GPointer);
+	TArray<TransactionUnion> Txn;
+	FDelayedTransaction TDelayed;
 	
-	FString Ret;
-	FJsonObjectConverter::UStructToJsonObjectString<FRegisterSessionData>(*static_cast<FRegisterSessionData*>(GPointer), Ret, 0, 0);
+	TDelayed.data->SetFunc("setInt()");
+	TDelayed.data->SetAbi("Epic ABI");
+
+	UDelayedEncodingObjectArgsBP * NestedObj = NewObject<UDelayedEncodingObjectArgsBP>();
+	NestedObj->AddStringArg(TEXT("Deep String"), TEXT("Blah"));
 	
-	UE_LOG(LogTemp, Display, TEXT("Parsed response: %s"), *GenericString);
+	UDelayedEncodingArrayArgsBP * NestedArg = NewObject<UDelayedEncodingArrayArgsBP>();
+	NestedArg->AddObjectArg(NestedObj);
+
+	UDelayedEncodingArrayArgsBP * ArgsListInner = NewObject<UDelayedEncodingArrayArgsBP>();
+	ArgsListInner->AddBoolArg(false);
+	ArgsListInner->AddInt32Arg(32);
+	ArgsListInner->AddInt64Arg(64);
+	ArgsListInner->AddStringArg(TEXT("String Arg"));
+	ArgsListInner->AddArrayArg(NestedArg);
+	
+	UDelayedEncodingObjectArgsBP * ArgsMain = NewObject<UDelayedEncodingObjectArgsBP>();
+	ArgsMain->AddBoolArg(TEXT("Epic Boolean"), false);
+	ArgsMain->AddDoubleArg(TEXT("Epic Double Arg"), 0.1);
+	ArgsMain->AddInt64Arg(TEXT("Epic integer64 arg"), -1);
+	ArgsMain->AddArrayArg(TEXT("List Arg"),ArgsListInner);
+	
+	TDelayed.data->SetArgs(ArgsMain);
+	TDelayed.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	TDelayed.value = "0";
+	
+	Txn.Push(TransactionUnion(TDelayed));
+
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		{
+			
+		},GenericFailure);
+	}
 }
 
 void AGeneralTesting::OnDoneImageProcessing()

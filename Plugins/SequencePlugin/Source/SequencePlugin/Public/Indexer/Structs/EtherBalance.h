@@ -9,8 +9,8 @@ struct FEtherBalance
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString accountAddress = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         int64 balanceWei = -1;
 };

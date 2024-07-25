@@ -12,7 +12,7 @@ struct FGetTokenSuppliesMapReturn
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 		TMap<FString, FTokenSupplyList> supplies;
 	bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
 

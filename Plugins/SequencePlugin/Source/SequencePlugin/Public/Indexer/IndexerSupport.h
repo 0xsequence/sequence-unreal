@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Containers/Union.h"
+#include "Types/Types.h"
 #include "Util/Structs/BE_Structs.h"
 #include "IndexerSupport.generated.h"
 
@@ -21,10 +22,24 @@ class SEQUENCEPLUGIN_API UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:
-	static float GetAmount(int64 Amount,int32 Decimals);
-	static float GetAmount(int64 Amount,float Decimals);
+
+	/*
+	* Used to get the amount that users can read,
+	* int64 Amount, the integer amount of Crypto
+	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
+	* Return, The user readable Float amount
+	*/
+	static float GetAmount(const int64 Amount, const int64 Decimals);
+
+	/*
+	* Used to convert a user readable amount into a usable amount value for transactions,
+	* float Amount, the user readable amount they wish to use
+	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
+	* Return, The transaction usable amount
+	*/
+	static int64 GetAmount(const float Amount, const int64 Decimals);
 	
-	static FString TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions);
+	static FString TransactionListToJsonString(const TArray<TransactionUnion>& Transactions);
 	
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings
@@ -135,6 +150,8 @@ public:
 	static FString JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData);
 
 	static FString JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData);
+
+	static FString JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData);
 
 	static FString JsonToString(TSharedPtr<FJsonValue> JsonData);
 

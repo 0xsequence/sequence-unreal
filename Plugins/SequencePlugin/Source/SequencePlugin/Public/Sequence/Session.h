@@ -6,39 +6,39 @@
 #include "UObject/Object.h"
 #include "Session.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FIdentity
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString type = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString iss = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString sub = "";
 };
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSession
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString id = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	int64 projectId = -1;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString userId = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FIdentity identity;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString friendlyName = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString createdAt = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString refreshedAt = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString expiresAt = "";
 };
 

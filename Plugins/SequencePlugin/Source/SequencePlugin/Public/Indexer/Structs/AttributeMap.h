@@ -16,6 +16,7 @@ struct FAttributeMap
 {
     GENERATED_USTRUCT_BODY()
 public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         TMap<FString, FString> AttributeMap;
         
         /*

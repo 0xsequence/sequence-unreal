@@ -58,7 +58,7 @@ struct FCloseSessionData : public FGenericData
 struct FGetFeeOptionsData : public FGenericData
 {
  FString network = "";
- TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> transactions;
+ TArray<TransactionUnion> transactions;
  FString wallet = "";
 
  FGetFeeOptionsData()
@@ -67,7 +67,7 @@ struct FGetFeeOptionsData : public FGenericData
   Operation = FeeOptionsOP;
  }
  
- FGetFeeOptionsData(const FString& NetworkIn, const TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>>& TransactionsIn, const FString& WalletIn)
+ FGetFeeOptionsData(const FString& NetworkIn, const TArray<TransactionUnion>& TransactionsIn, const FString& WalletIn)
  {
   UseCustomParser = true;
   Operation = FeeOptionsOP;
@@ -87,7 +87,7 @@ struct FSendTransactionData : public FGenericData
 {
  FString identifier = "";
  FString network = "";
- TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> transactions;
+ TArray<TransactionUnion> transactions;
  FString wallet = "";
 
  FSendTransactionData()
@@ -96,7 +96,7 @@ struct FSendTransactionData : public FGenericData
   Operation = SendTransactionOP;
  }
  
- FSendTransactionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& TransactionsIn, const FString& WalletIn)
+ FSendTransactionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TransactionUnion>& TransactionsIn, const FString& WalletIn)
  {
   UseCustomParser = true;
   Operation = SendTransactionOP;
@@ -117,7 +117,7 @@ struct FSendTransactionWithFeeOptionData : public FGenericData
 {
  FString identifier = "";
  FString network = "";
- TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> transactions;
+ TArray<TransactionUnion> transactions;
  FString transactionsFeeQuote = "";
  FString wallet = "";
 
@@ -127,7 +127,7 @@ struct FSendTransactionWithFeeOptionData : public FGenericData
   Operation = SendTransactionOP;
  }
  
- FSendTransactionWithFeeOptionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& TransactionsIn,const FString& TransactionsFeeQuoteIn, const FString& WalletIn)
+ FSendTransactionWithFeeOptionData(const FString& IdentifierIn, const FString& NetworkIn, const TArray<TransactionUnion>& TransactionsIn,const FString& TransactionsFeeQuoteIn, const FString& WalletIn)
  {
   UseCustomParser = true;
   Operation = SendTransactionOP;

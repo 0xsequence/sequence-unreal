@@ -434,7 +434,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
@@ -449,29 +449,10 @@ void USequenceWallet::SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction
 				FString Code = "";
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
-					FString TxHash = "";
-					FString MetaTxHash = "";
-
-					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
-					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
-					
-					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
-						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
-						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
-						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
-					{						
-						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
-						OnSuccess(TxnResponse);
-					}
-					else
-					{
-						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-					}
+					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
+					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					TxnResponse.Setup(*DataObj);
+					OnSuccess(TxnResponse);
 				}
 				else
 				{
@@ -535,6 +516,7 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 		{
 			if (BalanceOption.CanAfford(FeeOption))
 			{
+				FeeOption.bCanAfford = true;
 				ValidFeeOptions.Add(FeeOption);
 			}
 		}
@@ -553,7 +535,7 @@ TArray<FFeeOption> USequenceWallet::JsonFeeOptionListToFeeOptionList(const TArra
 	return ParsedFeeOptionList;
 }
 
-void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
@@ -635,7 +617,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20T
 	}
 }
 
-void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
@@ -717,9 +699,9 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransactio
 	}
 }
 
-void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [=](FString Response)
+	const TSuccessCallback<FString> OnResponse = [=](const FString& Response)
 	{
 		TSharedPtr<FJsonObject> jsonObj;
 		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
@@ -731,29 +713,10 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 				FString Code = "";
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj) && ResponseObj->Get()->TryGetStringField(TEXT("code"),Code))
 				{
-					FString TxHash = "";
-					FString MetaTxHash = "";
-
-					const TSharedPtr<FJsonObject> * NativeReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * ReceiptObj = nullptr;
-					const TSharedPtr<FJsonObject> * RequestObj = nullptr;
-					const TArray<TSharedPtr<FJsonValue>> * SimulationsObj = nullptr;
-					
-					if (DataObj->Get()->TryGetStringField(TEXT("txHash"),TxHash) &&
-						DataObj->Get()->TryGetStringField(TEXT("metaTxHash"),MetaTxHash) &&
-						DataObj->Get()->TryGetObjectField(TEXT("nativeReceipt"),NativeReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("receipt"),ReceiptObj) &&
-						DataObj->Get()->TryGetObjectField(TEXT("request"),RequestObj) &&
-						DataObj->Get()->TryGetArrayField(TEXT("simulations"), SimulationsObj))
-					{						
-						const FTransactionResponse TxnResponse(Code,TxHash,MetaTxHash,*RequestObj,*NativeReceiptObj,*ReceiptObj,*SimulationsObj,jsonObj);
-						OnSuccess(TxnResponse);
-					}
-					else
-					{
-						UE_LOG(LogTemp,Error,TEXT("Error in 3rd level parsing in Transaction"));
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-					}
+					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
+					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					TxnResponse.Setup(*DataObj);
+					OnSuccess(TxnResponse);
 				}
 				else
 				{
@@ -784,7 +747,7 @@ void USequenceWallet::SendTransaction(const TArray<TUnion<FRawTransaction, FERC2
 	}
 }
 
-FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote) const
+FString USequenceWallet::BuildSendTransactionWithFeeIntent(const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const
 {	
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
 	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,this->Credentials.GetNetworkString(),Txns,FeeQuote,this->Credentials.GetWalletAddress());
@@ -815,7 +778,7 @@ template<typename T> FString USequenceWallet::GenerateIntent(T Data) const
 	}
 }
 
-FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
+FString USequenceWallet::BuildGetFeeOptionsIntent(const TArray<TransactionUnion>& Txns) const
 {
 	const FGetFeeOptionsData GetFeeOptionsData(this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData);
@@ -844,7 +807,7 @@ FString USequenceWallet::BuildSignMessageIntent(const FString& Message) const
 	return Intent;
 }
 
-FString USequenceWallet::BuildSendTransactionIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const
+FString USequenceWallet::BuildSendTransactionIntent(const TArray<TransactionUnion>& Txns) const
 {
 	const FString identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + this->Credentials.GetWalletAddress();
 	const FSendTransactionData SendTransactionData(identifier,this->Credentials.GetNetworkString(),Txns,this->Credentials.GetWalletAddress());

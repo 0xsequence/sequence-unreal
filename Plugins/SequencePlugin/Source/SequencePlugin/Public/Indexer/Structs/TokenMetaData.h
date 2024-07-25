@@ -11,34 +11,35 @@ struct FTokenMetaData
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         int64 tokenId = -1;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString contractAddress = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString name = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString description = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString image = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         float decimals = 0.0;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString video = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString audio = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString image_data = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString external_url = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString background_color = "";
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FString animation_url = "";
-
-    TMap<FString, FString> properties;
-
-    TArray<FAttributeMap> attributes;
+    //These 2 need to be manually built
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+        TMap<FString, FString> properties;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+        TArray<FAttributeMap> attributes;
 
     /*
     * Used to get the json object formed by this struct
@@ -94,12 +95,16 @@ public:
     */
     void setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
+
+        attributes.Empty();
+        properties.Empty();
+        
         const TSharedPtr<FJsonObject>* refPtr;
         if (json_in.TryGetObjectField(TEXT("properties"), refPtr))
         {
             properties = UIndexerSupport::JSONObjectParser(*refPtr);
         }
-
+        
         //now we create the attribute map!
         const TArray<TSharedPtr<FJsonValue>>* lstPtr;
         if (json_in.TryGetArrayField(TEXT("attributes"),lstPtr))//attempt to assign!

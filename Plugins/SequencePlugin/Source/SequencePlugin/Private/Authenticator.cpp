@@ -154,10 +154,10 @@ void UAuthenticator::CallAuthFailure() const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
 
-void UAuthenticator::CallAuthSuccess(const FCredentials_BE& Credentials) const
+void UAuthenticator::CallAuthSuccess() const
 {
 	if (this->AuthSuccess.IsBound())
-		this->AuthSuccess.Broadcast(Credentials);
+		this->AuthSuccess.Broadcast();
 	else
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
@@ -506,7 +506,7 @@ void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
 		if (Credentials.IsRegistered())
 		{
 			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials"));
-			this->CallAuthSuccess(Credentials);
+			this->CallAuthSuccess();
 		}
 		else
 		{

@@ -6,22 +6,22 @@
 #include "UObject/Object.h"
 #include "SignedMessage.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSignedMessageSignature
 {
 	GENERATED_BODY()
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString message = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString signature = "";
 };
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSignedMessage
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FSignedMessageSignature data;
 };
 

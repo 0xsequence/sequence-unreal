@@ -62,9 +62,6 @@ FString UIndexer::HostName(int64 ChainID)
 void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FString& Args, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-
-	UE_LOG(LogTemp, Display, TEXT("URL: %s"), *this->Url(ChainID,Endpoint));
-	UE_LOG(LogTemp, Display, TEXT("Body: %s"), *Args);
 	
 	http_post_req->SetVerb("POST");
 	http_post_req->SetHeader("Content-Type", "application/json");//2 differing headers for the request

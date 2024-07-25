@@ -11,9 +11,9 @@ struct FGetTransactionHistoryReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
     FPage page;
-    UPROPERTY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         TArray<FTransaction> transactions;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating

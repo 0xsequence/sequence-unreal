@@ -5,6 +5,7 @@
 #include "JsonObjectConverter.h"
 #include "Indexer/Structs/TokenBalance.h"
 #include "Containers/Union.h"
+#include "Indexer/Structs/EtherBalance.h"
 #include "Util/Structs/BE_Structs.h"
 #include "FeeOption.generated.h"
 
@@ -16,31 +17,31 @@ enum EFeeType
 	Erc1155Token UMETA(DisplayName = "erc1155token"),
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFeeToken
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
-	uint64 ChainID = 0;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	int64 ChainID = 0;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString ContractAddress = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	int32 Decimals = 0;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString LogoURL = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Name = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Symbol = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString TokenID = "";
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	TEnumAsByte<EFeeType> Type = Unknown;
 
 	FFeeToken(){}
 	
-	FFeeToken(uint64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
+	FFeeToken(int64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
 		const FString& TokenIDIn, EFeeType TypeIn)
 	{
@@ -55,20 +56,22 @@ public:
 	}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFeeOption
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY()
-	uint32 GasLimit = 0;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	int64 GasLimit = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString To = "";
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FFeeToken Token;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString Value = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	int64 ValueNumber = 0;//Used for making easy comparisons
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	bool bCanAfford = false;
 	FFeeOption(){}
 
@@ -125,7 +128,7 @@ public:
 		}
 	}
 	
-	FFeeOption(uint32 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
+	FFeeOption(int64 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
 	{
 		GasLimit = GasLimitIn;
 		To = ToIn;
@@ -133,9 +136,9 @@ public:
 		Value = ValueIn;
 	}
 
-	TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> CreateTransaction()
+	TransactionUnion CreateTransaction()
 	{
-		TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction;
+		TransactionUnion Transaction;
 		switch(Token.Type)
 		{
 		case EFeeType::Unknown:
@@ -224,6 +227,6 @@ struct FIntentDataFeeOptions
 public:
 	FString Identifier = "";
 	FString Network = "";
-	TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+	TArray<TransactionUnion> Transactions;
 	FString Wallet = "";
 };

@@ -116,39 +116,52 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 4) If you wish to use the in built sequence UI for login you have to do the following:
 
-   a) Create a C++ Class that Inherits from **[Pawn]** If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
+### For Blueprints
+
+1) Create a blueprint Actor (if you wish to spawn it your self) Or Pawn (if you wish to use it with a Gamemode)
+
+2) Attach the **[AC_SequencePawn_Component]** to the Blueprint you created via the add components section.
+
+[Where to find Components window](ReadmeImages/Example_AddComponent.PNG)
+
+3) Then you can setup you blueprint like so to start utilizing the SequenceAPI
+
+[How to setup the Blueprint](ReadmeImages/Example_BP_Setup.PNG)
+
+Note: Auth Success Forwarder will let you know when the system is ready to be used
+
+4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this
+   process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
+   your scene if it's just an actor Blueprint.
+
+### For C++
+
+1) Create a C++ Class that Inherits from **[Pawn]** (If you wish to use it with Gamemode) or **[Actor]** (If you'll be spawning it yourself)
+   If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
    for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
 
-   b) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
+2) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
-   c) Create a BlueprintCallable function within the **[C++ Parent]** that accepts **[FCredentials_BE]** as a Parameter.
+3) Create a BlueprintCallable function within the **[C++ Parent]** (this may not be necessary any more)
 
-   d) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
+4) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
+   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP_Setup.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
    own Blueprint graph.
 
-   The important part here is forwarding the Credentials received from the inbuilt UI to your **[C++ Parent]** by binding to the delegate from **[AC_SequencePawn_Component]**,
-   that gives you Credentials **[Auth_Success_Forwarder]** & Calling your Blueprint Callable C++ function.
-   You can do this by swapping the SetupCredentials BlueprintCallable Function for your own Blueprint Callable Function from **[C++ Parent]**.
-
-   d i) For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
+-  For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
    drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
    for your **[C++ Parent]** class you just made.
 
-   d ii) For those who aren't familiar with Unreal's delegate system, There will be a red empty box on a delegate you'll wish
-   to bind to. Click on this box and drag out into the blueprint editor. From the menu that appears Click the Add Event dropdown
-   then click add custom event.
+Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** (if you do this be sure to move the duplicate outside
+of the plugin folder into YOUR content folder, Otherwise your work could be lost during an update to the plugin).
 
-Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** but since it & its parent class reside within the realm of the plugin,
-during updates all code you place there could potentially be lost. These are here as a reference for how things should be done. If you wish to use these components
-it's recommended you duplicate the BP_CustomSpectatorPawn out of the plugin folder, then update it's parent class to a C++ class of your own making that also
-resides outside the plugins content folder.
+5) If your **[C++ Parent]** was a pawn, you can set it to be the default pawn in your Gamemode and it will spawn on BeginPlay,
+   If your **[C++ Parent]** was an Actor, you can manually add it to the scene.
+   In both cases the UI will show up on BeginPlay.
 
-5) Some additional setup of the GameMode will need to be done prior to any UI showing up. The SequencePlugin comes bundled with an example
-   GameMode **[GM_Sequence]** stored within **[Demonstration]** in the plugin content folder. Duplicate this GameMode and move it outside the plugin folder.
-   Then open up **[GM_Sequence]** and set the DefaultPawn to the Pawn Blueprint you've just made.
-
-6) Lastly in Project Settings you'll need to set this GameMode as the default GameMode. Specifically in ProjectSettings -> Maps & Modes
+Note: If you don't know how to modify / update the Gamemode / Gamemode settings go to ProjectSettings -> Maps & Modes, From there
+you can set the Gamemode and update the default pawn. Or in the case you wish to use our Gamemode for testing it's
+**[GM_Sequence]** You'll just need to set your pawn as the default pawn.
 
 If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
 To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
@@ -227,16 +240,9 @@ To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthen
 Be sure to bind to the Delegates for **[AuthSuccess]**, **[AuthFailure]**, **[AuthRequiresCode]** prior to making any signin calls You can bind to these delegates like so:
 
 ```clike
-this->authenticator->AuthRequiresCode.AddDynamic(this, &AYourClass::YourCallReadyToReceiveCode);
-this->authenticator->AuthFailure.AddDynamic(this, &AYourClass::YourCallShowAuthFailureScreen);
-```
-
-In the case of **[AuthSuccess]** since a parameter is also passed we bind to it like this
-
-```clike
-FScriptDelegate del;
-del.BindUFunction(this, "CallShowAuthSuccessScreen");
-this->authenticator->AuthSuccess.Add(del);
+this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);
+this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
+this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 ```
 
 Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
@@ -245,17 +251,17 @@ Where **[CallShowAuthSuccessScreen]** is defined in `SequenceBackendManager.h` a
 
 ```clike
 UFUNCTION()
-void CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn);
+void CallShowAuthSuccessScreen();
 ```
 
 And in `SequenceBackendManager.cpp` like so:
 
 ```clike
-void ASequenceBackendManager::CallShowAuthSuccessScreen(const FCredentials_BE& CredentialsIn) 
+void ASequenceBackendManager::CallShowAuthSuccessScreen() 
 {
 this->Credentials = CredentialsIn;
 if (this->ShowAuthSuccessDelegate.IsBound())
-  this->ShowAuthSuccessDelegate.Broadcast(Credentials);
+  this->ShowAuthSuccessDelegate.Broadcast();
 else
   UE_LOG(LogTemp, Error, TEXT("**[Nothing bound to: ShowAuthSuccessDelegate]**"));
 }
@@ -306,7 +312,157 @@ be sure you register and set your bundle identifier properly for your app
 ### Apple Specific SSO Requirements
 For Apple SSO to work please be sure to register the **[RedirectUrl]** in **[YourProject/Config/SequenceConfig.ini]** appropriately for your app.
 
-### Sequence API
+### Blueprint Sequence API
+
+In order to use the Blueprint Sequence API, you must create an actor or pawn and attach the **[AC_SequencePawn_Component]**
+
+#### Sequence API
+
+###### Sequence Utils
+
+###### Human Readable Values to Transaction Readable Values
+When setting values for ERC20 amounts you may try to set a value like 0.15 USDC in the ValueString of the FERC20Transaction struct,
+However this is NOT the value you put inside the Value String for ERC20 Transactions, The value you put in is 0.15 * 10^6. To simplify this process
+there are Util functions in Blueprints that you can use to put human readable values in like so.
+
+[Example Conversion](ReadmeImages/BP_Demo/SequenceApi/Util/Example_HumanReadable_To_Transaction_Readable.PNG)
+
+Where the TokenBalance Structure is the same type that's contained in the return from the Indexer Call GetTokenBalances
+
+[Example TokenBalance](ReadmeImages/BP_Demo/SequenceApi/Util/Example_TokenBalance.PNG)
+
+In some cases the TokenBalance Struct won't have a decimals Value initiated properly. In which case you can actually hard code
+the decimals value with the following conversion function instead.
+
+[Example Hardcode](ReadmeImages/BP_Demo/SequenceApi/Util/Example_Hardcode.PNG)
+
+##### Get Wallet Address , Type Sync
+
+[Get Wallet Address](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Wallet_Address.PNG)
+
+##### Get Network Id , Type Sync
+
+[Get Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Network_Id.PNG)
+
+##### Update Network Id , Type Sync
+
+[Update Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Update_Network_Id.PNG)
+
+##### Open Transak Url , Type Sync
+
+[Open Transak Url](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Open_Transak_Url.PNG)
+
+##### SignOut , Type Sync
+
+[SignOut](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Signout.PNG)
+
+##### Sign Message , Type Async
+
+[Sign Message](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SignMessage.PNG)
+
+##### The following 4 calls use a Transactions Object
+You can add the various transaction types to a Transactions UObject like so in blueprints.
+
+###### ERC20
+
+[Creating a Transactions Object & a ERC20 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC20.PNG)
+[Where the DemoERC20 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC20.PNG)
+
+###### ERC721
+
+[Creating a Transactions Object & a ERC721 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC721.PNG)
+[Where the DemoERC721 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC721.PNG)
+
+###### ERC1155
+
+[Creating a Transactions Object & a ERC1155 Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_ERC1155.PNG)
+[Where the DemoERC1155 struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ERC1155.PNG)
+
+###### Raw
+
+[Creating a Transactions Object & a Raw Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Add_Raw.PNG)
+[Where the DemoRaw struct looks like](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Raw.PNG)
+
+###### DelayedEncoded
+
+[Creating a Transactions Object & a DelayedEncoding Type to it](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_Delayed_Pt1.PNG)
+
+[You can go about creating the Arguments object like so](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_DelayedEncode_Pt2.PNG)
+
+##### Get Filtered Fee Options , Type Async
+
+[Get Filtered Fees](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetFilteredFees.PNG)
+
+##### Get Unfiltered Fee Options , Type Async
+
+[Get UnFiltered Fees](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetUnfilteredFees.PNG)
+
+##### Send Transaction With Fee , Type Async
+
+[Send Transaction with Fee](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SendTransactionWithFee.PNG)
+
+##### Send Transaction , Type Async
+
+[Send Transaction](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_SendTransaction.PNG)
+
+##### List Sessions , Type Async
+
+[List Sessions](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_ListSessions.PNG)
+
+##### Get Supported Transak Countries , Type Async
+
+[Get Supported Transak Countries](ReadmeImages/BP_Demo/SequenceApi/ASync/Example_GetSupportedTransakCountries.PNG)
+
+#### Indexer
+
+##### Ping , Type Async
+
+[Indexer Ping](ReadmeImages/BP_Demo/Indexer/Example_Ping.PNG)
+
+##### Version , Type Async
+
+[Indexer Version](ReadmeImages/BP_Demo/Indexer/Example_Version.PNG)
+
+##### RunTime Status , Type Async
+
+[Indexer RuntimeStatus](ReadmeImages/BP_Demo/Indexer/Example_RuntimeStatus.PNG)
+
+##### Get Chain Id , Type Async
+
+[Indexer GetChainId](ReadmeImages/BP_Demo/Indexer/Example_GetChainId.PNG)
+
+##### Get Ether Balance , Type Async
+
+[Indexer GetEtherBalance](ReadmeImages/BP_Demo/Indexer/Example_GetEtherBalance.PNG)
+
+##### Get Token Balances , Type Async
+
+[Indexer GetTokenBalances](ReadmeImages/BP_Demo/Indexer/Example_GetTokenBalances.PNG)
+
+##### Get Token Supplies , Type Async
+
+[Indexer GetTokenSupplies](ReadmeImages/BP_Demo/Indexer/Example_GetTokenSupplies.PNG)
+
+##### Get Token Supplies Map , Type Async
+
+[Indexer GetTokenSuppliesMap](ReadmeImages/BP_Demo/Indexer/Example_GetTokenSuppliesMap.PNG)
+
+##### Get Balance Updates , Type Async
+
+[Indexer GetBalanceUpdates](ReadmeImages/BP_Demo/Indexer/Example_GetBalanceUpdates.PNG)
+
+##### Get Transaction History , Type Async
+
+[Indexer GetTransactionHistory](ReadmeImages/BP_Demo/Indexer/Example_GetTransactionHistory.PNG)
+
+### C++ Sequence API
+
+### Updates to C++ Sequence API
+
+We have created a wrapper TypeDef for TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction, FDelayedTransaction>
+called TransactionUnion, You should use the TransactionUnion DataType instead. This change also comes as we have introduced the Delayed Transaction Type.
+
+### Using the C++ Sequence API
 
 In order to gain access to the SequenceAPI be sure to #include "Sequence/SequenceAPI.h"
 After you've completed initial authentication and have intercepted the credentials either through your UI or ours, to use the Sequence API you'll need to create a **[USequenceWallet*]** by using:
@@ -378,17 +534,16 @@ no data is reset when a level is changed in your games!
 		//Process Failure state
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+		TArray<TransactionUnion> Transactions;
 		FERC20Transaction T20;
 		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 		T20.value = "1000";
-		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		Transactions.Push(TransactionUnion(T20));
 		Api->GetFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 
@@ -405,30 +560,29 @@ no data is reset when a level is changed in your games!
       //Process Failure state
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions;
+		TArray<TransactionUnion> Transactions;
 		FERC20Transaction T20;
 		T20.to = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 		T20.tokenAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 		T20.value = "1000";
-		Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));
+		Transactions.Push(TransactionUnion(T20));
 		Api->GetUnfilteredFeeOptions(Transactions,OnResponse,GenericFailure);
 	}
 
 ### Example SendTransactionWithFeeOption
 #### Used to get a list of fee's and send a transaction with one of them valid ones
 
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Transactions;
+	TArray<TransactionUnion> Transactions;
 	FERC721Transaction T721;
 	T721.safe = true;
 	T721.id = "101424663676543340124133645812717438592241191887187111290563634379068086785120";
 	T721.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
 	T721.tokenAddress = "0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f";
-	Transactions.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));
+	Transactions.Push(TransactionUnion(T721));
 	
 	const TFunction<void(TArray<FFeeOption>)> OnFeeResponse = [Transactions, OnSuccess, OnFailure](const TArray<FFeeOption>& Response)
 	{
@@ -466,8 +620,7 @@ no data is reset when a level is changed in your games!
 		OnFailure("Get Fee Option Response failure", Error);
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -476,7 +629,7 @@ no data is reset when a level is changed in your games!
 
 ### GetSupportedCountries
 #### Used to get a list of supported countries and requirements for transak
-   
+
    	const TFunction<void (TArray<FSupportedCountry>)> OnSuccess = [=](TArray<FSupportedCountry> SupportedCountries)
 	{
       //Process success
@@ -487,8 +640,7 @@ no data is reset when a level is changed in your games!
 		//Process error
 	};
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -498,8 +650,7 @@ no data is reset when a level is changed in your games!
 ### Example LoadTransakURL
 #### Used to open a TransakURL in an external browser
 
-	const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -518,9 +669,8 @@ no data is reset when a level is changed in your games!
 	{
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -539,7 +689,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	};
 	
     //Create the Transaction object list
-	TArray<TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>> Txn;
+	TArray<TransactionUnion> Txn;
 	
     //Create the transactions you wish to perform
 
@@ -582,14 +732,13 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 	
     //Now append your transaction requests to the Txn object
     
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T20));//ERC20
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T721));//ERC721
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T1155));//ERC1155
-	Txn.Push(TUnion<FRawTransaction,FERC20Transaction,FERC721Transaction,FERC1155Transaction>(T));//ContractCall
+	Txn.Push(TransactionUnion(T20));//ERC20
+	Txn.Push(TransactionUnion(T721));//ERC721
+	Txn.Push(TransactionUnion(T1155));//ERC1155
+	Txn.Push(TransactionUnion(T));//ContractCall
 
     //Now send the transaction
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
       USequenceWallet * Api = WalletOptional.GetValue();
@@ -619,8 +768,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them  
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -640,8 +788,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -651,8 +798,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example SignOut
 ##### Closes the session & clears out cached credentials with blank ones
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -672,8 +818,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
     };
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -683,8 +828,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example GetWalletAddress
 #### Gets the wallet address currently being used
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
@@ -694,8 +838,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example GetNetworkId
 #### Gets the network id being used
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -705,8 +848,7 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example UpdateNetworkId
 #### Used to update the stored network id
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -716,13 +858,61 @@ Note: if you want call contracts with the Raw type you'll want include the heade
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 	   Api->UpdateProviderURL("NewProviderUrl");
     }
+
+## Using Delayed Encoding
+The Delayed encoding TransactionType is added onto a TArray<TransactionUnion> like any other type,
+However the way this transaction is built is very different from the others.
+This type is meant to allow you to send unencoded data to the server for it to encode for you into valid ethereum transaction.
+
+There are 4 DataTypes you need to know about in order to use DelayedEncoding,
+
+1) FDelayedTransaction, This Data type houses all of the arguments for the encoding.
+2) UDelayedEncodingBP, This Object is used to represent the Data Portion of the FDelayedTransaction.
+3) UDelayedEncodingArrayArgsBP, This is one of two argument UObjects, This one is used for housing Array Args
+4) UDelayedEncodingObjectArgsBP, This is the other argument UObject, This one is used for housing Object Args.
+
+The 2 Argument UObjects support full nesting, Meaning you can have an ArrayArg inside an ArrayArg, As well as an ObjectArg
+inside an ObjectArg. They also support nesting ObjectArgs in ArrayArgs and ArrayArgs in ObjectArgs. As well as the traditional
+JSON Primitives, Such as Bool, Number(float, double, int32, int64), String.
+
+Below is an example of how to Construct an FDelayedTransaction with lots of nesting.
+
+	TArray<TransactionUnion> Txn;
+	FDelayedTransaction TDelayed;
+
+	TDelayed.data->SetFunc("setInt()");
+	TDelayed.data->SetAbi("Epic ABI");
+
+	UDelayedEncodingObjectArgsBP * NestedObj = NewObject<UDelayedEncodingObjectArgsBP>();
+	NestedObj->AddStringArg(TEXT("Deep String"), TEXT("Blah"));
+	
+	UDelayedEncodingArrayArgsBP * NestedArg = NewObject<UDelayedEncodingArrayArgsBP>();
+	NestedArg->AddObjectArg(NestedObj);
+
+	UDelayedEncodingArrayArgsBP * ArgsListInner = NewObject<UDelayedEncodingArrayArgsBP>();
+	ArgsListInner->AddBoolArg(false);
+	ArgsListInner->AddInt32Arg(32);
+	ArgsListInner->AddInt64Arg(64);
+	ArgsListInner->AddStringArg(TEXT("String Arg"));
+	ArgsListInner->AddArrayArg(NestedArg);
+	
+	UDelayedEncodingObjectArgsBP * ArgsMain = NewObject<UDelayedEncodingObjectArgsBP>();
+	ArgsMain->AddBoolArg(TEXT("Epic Boolean"), false);
+	ArgsMain->AddDoubleArg(TEXT("Epic Double Arg"), 0.1);
+	ArgsMain->AddInt64Arg(TEXT("Epic integer64 arg"), -1);
+	ArgsMain->AddArrayArg(TEXT("List Arg"),ArgsListInner);
+	
+	TDelayed.data->SetArgs(ArgsMain);
+	TDelayed.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
+	TDelayed.value = "0";
+	
+	Txn.Push(TransactionUnion(TDelayed));
 
 ### Indexer & the Wallet
 
@@ -742,8 +932,7 @@ the indexer. The default network we set is `137`
 		//Ping failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -762,8 +951,7 @@ the indexer. The default network we set is `137`
 		//Version Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -782,8 +970,7 @@ the indexer. The default network we set is `137`
 		//RunTimeStatus Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -801,9 +988,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetChainID Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -821,9 +1007,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetEtherBalance Failure
 	};
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -841,9 +1026,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTokenBalances Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -864,9 +1048,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTokenSupplies Failure
 	};
-    
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -888,8 +1071,7 @@ the indexer. The default network we set is `137`
         //GetTokenSuppliesMap Failure
 	};
 
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();    
@@ -916,9 +1098,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetBalanceUpdates Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
@@ -941,9 +1122,8 @@ the indexer. The default network we set is `137`
 	{
 		//GetTransactionHistory Failure
 	};
-   
-    const FCredentials_BE Credentials;//Replace this var with your own credentials however you choose to get them
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
+
+    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();

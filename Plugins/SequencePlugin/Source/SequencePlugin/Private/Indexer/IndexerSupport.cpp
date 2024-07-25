@@ -6,29 +6,26 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
+#include "Logging/StructuredLogFormat.h"
 
-float UIndexerSupport::GetAmount(int64 Amount, int32 Decimals)
+float UIndexerSupport::GetAmount(const int64 Amount, const int64 Decimals)
 {
-	float ret = Amount;
-
-	ret /= FMath::Pow(10,float(Decimals));
-
-	return ret;
-}
-float UIndexerSupport::GetAmount(int64 Amount, float Decimals)
-{
-	float ret = Amount;
-
-	ret /= FMath::Pow(10, Decimals);
-
-	return ret;
+	const float Ret = static_cast<float>(Amount);
+	return static_cast<float>(Ret / FMath::Pow(10, static_cast<double>(Decimals)));
 }
 
-FString UIndexerSupport::TransactionListToJsonString(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions)
+int64 UIndexerSupport::GetAmount(const float Amount, const int64 Decimals)
+{
+	const double Operand = FMath::Pow(10, static_cast<double>(Decimals));
+	const int64 Ret = static_cast<int64>(Operand * Amount);
+	return Ret;
+}
+
+FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)
 {
 	FString TransactionsPayload = "[";
 	
-	for (TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction> Transaction : Transactions)
+	for (TransactionUnion Transaction : Transactions)
 	{
 		switch(Transaction.GetCurrentSubtypeIndex())
 		{
@@ -44,11 +41,17 @@ FString UIndexerSupport::TransactionListToJsonString(const TArray<TUnion<FRawTra
 		case 3: //ERC1155
 			TransactionsPayload += Transaction.GetSubtype<FERC1155Transaction>().GetJsonString() + ",";
 			break;
+		case 4: //DelayedEncoding
+			TransactionsPayload += Transaction.GetSubtype<FDelayedTransaction>().GetJsonString() + ",";
+			break;
 		default: //Doesn't match
 			break;
 		}
 	}
-	TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	if (TransactionsPayload.Len() > 1)
+	{
+		TransactionsPayload.RemoveAt(TransactionsPayload.Len() - 1);
+	}
 	TransactionsPayload += "]";
 	return TransactionsPayload;
 }
@@ -252,6 +255,14 @@ FString UIndexerSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObje
 	}
 	ret.Append("]");
 	return ret;
+}
+
+FString UIndexerSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData)
+{
+	FString JsonList;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
+	FJsonSerializer::Serialize(JsonData, Writer);
+	return SimplifyStringParsable(JsonList);
 }
 
 FString UIndexerSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)

@@ -133,7 +133,7 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
@@ -141,21 +141,21 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to get FeeOptions for the transaction you pass in
 	 * @OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
 	 * @OnFailure An error occured
 	 */
-	void GetFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to see all potential FeeOptions, Valid ones are marked with bCanAfford = true, in the list of FFeeOptions
 	 * @OnSuccess A list of all feeOptions with valid ones marked with bCanAfford = true. Possible none are valid if your wallet has nothing to cover the fees
 	 * @OnFailure An error occured
 	 */
-	void GetUnfilteredFeeOptions(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Used to register a Session with Sequence (done automatically)
@@ -196,10 +196,10 @@ private:
 	static TArray<FFeeOption> JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList);
 	
-	FString BuildGetFeeOptionsIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const;
+	FString BuildGetFeeOptionsIntent(const TArray<TransactionUnion>& Txns) const;
 	FString BuildSignMessageIntent(const FString& Message) const;
-	FString BuildSendTransactionIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns) const;
-	FString BuildSendTransactionWithFeeIntent(const TArray<TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction>>& Txns,const FString& FeeQuote) const;
+	FString BuildSendTransactionIntent(const TArray<TransactionUnion>& Txns) const;
+	FString BuildSendTransactionWithFeeIntent(const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const;
 	FString BuildRegisterSessionIntent() const;
 	FString BuildListSessionIntent() const;
 	FString BuildCloseSessionIntent() const;

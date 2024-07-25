@@ -4,8 +4,7 @@
 #include "Indexer/IndexerSupport.h"
 #include "Sequence/SequenceAPI.h"
 
-void ASqncSpecPawn::SetupCredentials(FCredentials_BE CredentialsIn)
+void ASqncSpecPawn::SystemReady()
 {
-	this->Credentials = CredentialsIn;
-	const FString CredentialsParsed = UIndexerSupport::StructToString(CredentialsIn);
+	
 }
