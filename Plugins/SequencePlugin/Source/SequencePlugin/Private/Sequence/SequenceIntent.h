@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Containers/Union.h"
 #include "Indexer/IndexerSupport.h"
 #include "Util/Structs/BE_Structs.h"
@@ -9,11 +10,17 @@
 //Operations Constants//
 
 static const FString OpenSessionOP = "openSession";
+static const FString InitiateAuthOP = "initiateAuth";//need to find the OPCode for this!
 static const FString CloseSessionOP = "closeSession";
 static const FString SendTransactionOP = "sendTransaction";
 static const FString FeeOptionsOP = "feeOptions";
 static const FString ListSessionsOP = "listSessions";
 static const FString SignMessageOP = "signMessage";
+
+static const FString EmailType = "Email";
+static const FString GuestType = "Guest";
+static const FString OIDCType = "OIDC";
+static const FString PlayFabType = "PlayFab";
 
 //Operations Constants//
 
@@ -226,6 +233,129 @@ struct FSignMessageData : public FGenericData
  }
 };
 
+USTRUCT()
+struct FOpenSessionData : public FGenericData
+{
+ GENERATED_USTRUCT_BODY()
+ 
+ UPROPERTY()
+ FString answer = "";
+ UPROPERTY()
+ bool forceCreateAccount = false;
+ UPROPERTY()
+ FString identityType = "";
+ UPROPERTY()
+ FString sessionId = "";
+ UPROPERTY()
+ FString verifier = "";
+
+ FOpenSessionData()
+ {
+  Operation = OpenSessionOP;
+ }
+
+ void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(Challenge + Code)
+  const FHash256 AnswerHash = FHash256::New();
+  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
+  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
+  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength());
+  
+  forceCreateAccount = ForceCreateAccountIn;
+  identityType = EmailType;
+  sessionId = SessionIdIn;
+  verifier = VerifierIn;
+ }
+
+ void InitForGuest(const FString& ChallengeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(Challenge + SessionId)
+  const FHash256 AnswerHash = FHash256::New();
+  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + SessionIdIn);
+  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
+  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength());
+
+  forceCreateAccount = ForceCreateAccountIn;
+  identityType = GuestType;
+  sessionId = SessionIdIn;
+  verifier = VerifierIn;
+ }
+ 
+ void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(IdToken)
+  const FHash256 PreTokenHash = FHash256::New();
+  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
+  Keccak256::getHash(EncodedTokenData.Arr.Get()->GetData(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + BytesToHex(PreTokenHash.Ptr(),PreTokenHash.GetLength());
+
+  forceCreateAccount = ForceCreateAccountIn;
+  answer = IdTokenIn;
+  identityType = OIDCType;
+  sessionId = SessionIdIn;
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+ }
+
+ void InitForPlayFab(const FString& TitleIdIn, const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(SessionTicketIn)
+  const FHash256 PreTicketHash = FHash256::New();
+  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
+  Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
+  const FString TicketHash = "0x" + BytesToHex(PreTicketHash.Ptr(),PreTicketHash.GetLength());
+
+  forceCreateAccount = ForceCreateAccountIn;
+  answer = SessionTicketIn;
+  identityType = PlayFabType;
+  sessionId = SessionIdIn;
+  verifier = TitleIdIn + ";" + TicketHash; 
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
+};
+
+USTRUCT()
+struct FInitiateAuthData : public FGenericData
+{
+ GENERATED_USTRUCT_BODY()
+ UPROPERTY()
+ FString identityType = "";
+ UPROPERTY()
+ FString metaData = "";
+ UPROPERTY()
+ FString sessionId = "";
+ UPROPERTY()
+ FString verifier = "";
+
+ FInitiateAuthData()
+ {
+  Operation = InitiateAuthOP;
+ }
+
+ void InitForEmail(const FString& SessionIdIn, const FString& EmailIn)
+ {
+  sessionId = SessionIdIn;
+  identityType = EmailType;
+  verifier = EmailIn + ";" + SessionIdIn;
+ }
+
+ void InitForGuest(const FString& SessionIdIn)
+ {
+  sessionId = SessionIdIn;
+  identityType = GuestType;
+  verifier = SessionIdIn;
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
+};
+
 struct FSignatureIntent
 { 
  FGenericData * data = nullptr;
@@ -356,115 +486,3 @@ struct FRegisterFinalIntent
   return Json;
  }
 };
-// test function signature
-// FString GenerateIntent(const FString& Data, const FString& Operation)
-
-/*
- * Data portion of FeeOptions Intent
- {"network":"","transactions":[],"wallet":""}
- * Intent portion of FeeOptions Intent
- {"data":{},"expiresAt":,"issuedAt":,"name":"feeOptions","version":""}
-*/
-
-/*
- * Data
- {"network":"","transactions":[],"wallet":""}
- * FeeOptions final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"feeOptions","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
- * Data portion of SendTransaction intent
- {"identifier":"","network":"","transactions":[],"wallet":""}
- * Intent portion of SendTransaction intent
- {"data":{},"expiresAt":,"issuedAt":,"name":"sendTransaction","version":""}
-*/
-
-/*
- * Data
- {"identifier":"","network":"","transactions":[],"wallet":""}
- * Send transaction final intent
- {"intent":{"data":{},"expiresAt":"","issuedAt":"","name":"sendTransaction","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
- * Data portion of SendTransactionWithFeeOption intent
- {"identifier":"","network":"","transactions":"","transactionsFeeQuote":"","wallet":""}
- * Intent portion of SendTransaction intent
- {"data":{},"expiresAt":"","issuedAt":"","name":"sendTransaction","version":""}
-*/
-
-/*
- * Data
- {"identifier":"","network":"","transactions":[],"transactionsFeeQuote":"","wallet":""}
- * SendTransactionWithFee final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"sendTransaction","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
- * Data portion of SignMessage Intent
- {"message":"","network":"","wallet":""}
- * Intent portion of SignMessage Intent
- {"data":{},"expiresAt":"","issuedAt":"","name":"signMessage","version":""}
-*/
-
-/*
- * Data
- {"message":"","network":"","wallet":""}
- * SignMessage final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"signMessage","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
- * Data portion of register session intent
- {"idToken":"","sessionId":""}
- * Intent portion of register session intent
- {"data":{},"expiresAt":"","issuedAt":"","name":"openSession","version":""}
-*/
-
-/*
- * Data
- {"idToken":"","sessionId":""}
- * Register session final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"openSession","signatures":[{"sessionId":"","signature":""}],"version":""},"friendlyName":""}
-*/
-
-/*
- * Data portion of list session intent
- {"wallet":""}
- * Intent portion of list session intent
- {"data":{},"expiresAt":"","issuedAt":"","name":"listSessions","version":""}
-*/
-
-/*
- * Data
- {"wallet":""}
- * List session final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"listSessions","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
- * Data portion of Close session intent
- {"sessionId":""}
- * Intent portion of CLose Session Intent
- {"data":{},"expiresAt":"","issuedAt":"","name":"closeSession","version":""}
-*/
-
-/*
- * Data
- {"sessionId":""}
- * Close session final intent
- {"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"closeSession","signatures":[{"sessionId":"","signature":""}],"version":""}}
-*/
-
-/*
-
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""},"friendlyName":""}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-{"intent":{"data":{},"expiresAt":,"issuedAt":,"name":"","signatures":[{"sessionId":"","signature":""}],"version":""}}
-
-*/

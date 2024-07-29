@@ -38,6 +38,18 @@ public:
 	* Return, The transaction usable amount
 	*/
 	static int64 GetAmount(const float Amount, const int64 Decimals);
+
+	static FString GetStringFromToken(const FString& IdToken, const FString& ParameterName);
+
+	static int32 GetInt32FromToken(const FString& IdToken, const FString& ParameterName);
+	
+	static int64 GetInt64FromToken(const FString& IdToken, const FString& ParameterName);
+
+	static float GetFloatFromToken(const FString& IdToken, const FString& ParameterName);
+
+	static double GetDoubleFromToken(const FString& IdToken, const FString& ParameterName);
+
+	static bool GetBoolFromToken(const FString& IdToken, const FString& ParameterName);
 	
 	static FString TransactionListToJsonString(const TArray<TransactionUnion>& Transactions);
 	

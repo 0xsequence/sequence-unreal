@@ -1,12 +1,10 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Indexer/IndexerSupport.h"
-#include "Indexer/Structs/Version.h"
 #include "Indexer/Structs/GetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
-#include "Logging/StructuredLogFormat.h"
 
 float UIndexerSupport::GetAmount(const int64 Amount, const int64 Decimals)
 {
@@ -19,6 +17,150 @@ int64 UIndexerSupport::GetAmount(const float Amount, const int64 Decimals)
 	const double Operand = FMath::Pow(10, static_cast<double>(Decimals));
 	const int64 Ret = static_cast<int64>(Operand * Amount);
 	return Ret;
+}
+
+FString UIndexerSupport::GetStringFromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		FString Parameter;
+		if (PartJson.Get()->TryGetStringField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return "";
+}
+
+int32 UIndexerSupport::GetInt32FromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		int32 Parameter;
+		if (PartJson.Get()->TryGetNumberField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return -1;
+}
+
+int64 UIndexerSupport::GetInt64FromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		int64 Parameter;
+		if (PartJson.Get()->TryGetNumberField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return -1;
+}
+
+float UIndexerSupport::GetFloatFromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		float Parameter;
+		if (PartJson.Get()->TryGetNumberField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return -1;
+}
+
+double UIndexerSupport::GetDoubleFromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		double Parameter;
+		if (PartJson.Get()->TryGetNumberField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return -1;
+}
+
+bool UIndexerSupport::GetBoolFromToken(const FString& IdToken, const FString& ParameterName)
+{
+	TArray<FString> B64Json;
+	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
+	
+	for (int i = 0; i < B64Json.Num(); i++)
+	{
+		FString T;
+		FBase64::Decode(B64Json[i], T);
+		B64Json[i] = T;
+	}
+
+	for (auto Part : B64Json)
+	{
+		const TSharedPtr<FJsonObject> PartJson = JsonStringToObject(Part);
+		bool Parameter;
+		if (PartJson.Get()->TryGetBoolField(ParameterName,Parameter))
+		{
+			return Parameter;
+		}
+	}	
+	return false;
 }
 
 FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)
