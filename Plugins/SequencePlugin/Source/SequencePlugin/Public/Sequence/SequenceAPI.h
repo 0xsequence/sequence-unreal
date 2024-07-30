@@ -18,7 +18,6 @@
 #include "ProviderEnum.h"
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
-#include "SequenceRPCManager.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -26,6 +25,7 @@ using TransactionID = FString;
 
 class UIndexer;
 class UProvider;
+class USequenceRPCManager;
 
 //Sequence Specific Version of Transaction
 struct SEQUENCEPLUGIN_API FTransaction_Sequence
@@ -60,7 +60,7 @@ private:
 	USequenceRPCManager * SequenceRPCManager;
 	
 	UPROPERTY()
-	UIndexer* Indexer;
+	UIndexer * Indexer;
 
 	UPROPERTY()
 	UProvider * Provider;
@@ -68,8 +68,7 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 
-	FString CachedFeeQuote = "";
-	
+	//this will be removed
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
 	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
@@ -130,14 +129,14 @@ public:
 	 * @OnSuccess The returned Struct from the signing process
 	 * @OnFailure If an error occurs
 	 */
-	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
@@ -145,61 +144,39 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to get FeeOptions for the transaction you pass in
 	 * @OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
 	 * @OnFailure An error occured
 	 */
-	void GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to see all potential FeeOptions, Valid ones are marked with bCanAfford = true, in the list of FFeeOptions
 	 * @OnSuccess A list of all feeOptions with valid ones marked with bCanAfford = true. Possible none are valid if your wallet has nothing to cover the fees
 	 * @OnFailure An error occured
 	 */
-	void GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
-	 * Used to register a Session with Sequence (done automatically)
-	 * @OnSuccess The session is registered
-	 * @OnFailure An error occured
+	 * @Deprecated
+	 * this will be removed entirely from the API and will be handled by the UAuthenticator & SequenceRPC manager
 	 */
 	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void InitEmailAuth(const FString& SessionIdIn, const FString& EmailIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void InitGuestAuth(const FString& SessionIdIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void OpenEmailSession(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void OpenOIDCSession(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void OpenGuestSession(const FString& ChallengeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void OpenPlayFabSession(const FString& TitleIdIn, const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/*
 	 * Used to list all active sessions for the signed in credentials
 	 * @OnSuccess A list of all active sessions
 	 * @OnFailure An error occured
 	 */
-	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
-	 * Used to close the current Session with Sequence
-	 * @OnSuccess The Session is closed
-	 * @OnFailure An error occured
-	 */
-	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
-	 * @OnSuccess The Session is closed & local credentials are removed
-	 * @OnFailure An error occured
 	 */
-	void SignOut();
+	void SignOut() const;
 	
 	void GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
 	void OpenTransakLink(const FString& FiatCurrency = FDefaultTransak::FiatCurrency, const FString& DefaultAmount = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrency = FDefaultTransak::CryptoCurrency, const FString& Networks = FDefaultTransak::Networks, bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm);

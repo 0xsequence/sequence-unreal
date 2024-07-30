@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Authenticator.h"
+#include "Credentials.h"
 #include "Sequence/FeeOption.h"
 #include "Sequence/SequenceIntent.h"
 #include "Sequence/Session.h"

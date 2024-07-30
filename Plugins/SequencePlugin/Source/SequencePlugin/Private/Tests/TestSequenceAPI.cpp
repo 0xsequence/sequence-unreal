@@ -329,14 +329,14 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API CloseSession Test]========================"));
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignOut Test]========================"));
 
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->CloseSession(OnResponse,GenericFailure);
+		const USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SignOut();
 	}
 }
 

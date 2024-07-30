@@ -4,7 +4,6 @@
 #include "Indexer/IndexerSupport.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
-#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Eth/Crypto.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
@@ -12,12 +11,11 @@
 #include "Native/NativeOAuth.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Sequence/Close.h"
 #include "Indexer/Indexer.h"
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
-#include "SequenceIntent.h"
 #include "Transak.h"
+#include "SequenceRPCManager.h"
 
 FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
 {
@@ -173,6 +171,7 @@ void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
+	this->SequenceRPCManager = USequenceRPCManager::Make(this->Credentials.GetSessionWallet());
 	if (!this->Provider)
 	{
 		this->Provider = UProvider::Make("");
@@ -183,6 +182,7 @@ void USequenceWallet::Init(const FCredentials_BE& CredentialsIn,const FString& P
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
+	this->SequenceRPCManager = USequenceRPCManager::Make(this->Credentials.GetSessionWallet());
 	if (!this->Provider)
 	{
 		this->Provider = UProvider::Make(ProviderURL);
@@ -267,88 +267,36 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& O
 	}*/
 }
 
-void USequenceWallet::InitEmailAuth(const FString& SessionIdIn, const FString& EmailIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	/*const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
-	{
-		
-	};
-
-	FInitiateAuthData AuthData;
-	AuthData.InitForEmail(SessionIdIn,EmailIn);
-	//Could have all auth calls use a bootstrap datum that contains the initial decoded JWT read from the Authenticator
-	const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";//needs to be updated
-	this->SequenceRPC(URL,this->BuildInitiateAuthIntent(AuthData),OnResponse,OnFailure);*/
-}
-
-void USequenceWallet::InitGuestAuth(const FString& SessionIdIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-}
-
-void USequenceWallet::OpenEmailSession(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-}
-
-void USequenceWallet::OpenOIDCSession(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-}
-
-void USequenceWallet::OpenGuestSession(const FString& ChallengeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-}
-
-void USequenceWallet::OpenPlayFabSession(const FString& TitleIdIn, const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-}
-
-void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->ListSessions(this->Credentials,OnSuccess,OnFailure);
+	}
 }
 
-void USequenceWallet::SignOut()
+void USequenceWallet::SignOut() const
 {
-	const UAuthenticator * auth = NewObject<UAuthenticator>();
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	if (this->Credentials.IsRegistered())
 	{
-		const TFunction<void (FString)> OnSuccess = [this,auth](FString State)
+		const TFunction<void (FString)> OnSuccess = [this,Auth](FString State)
 		{
-			auth->ClearStoredCredentials();
+			Auth->ClearStoredCredentials();
 		};
 
-		const TFunction<void (FSequenceError)> OnFailure = [this,auth](FSequenceError Err)
+		const TFunction<void (FSequenceError)> OnFailure = [this,Auth](FSequenceError Err)
 		{
-			auth->ClearStoredCredentials();
+			Auth->ClearStoredCredentials();
 		};
-	
-		this->CloseSession(OnSuccess, OnFailure);
+
+		if (this->SequenceRPCManager)
+			this->SequenceRPCManager->CloseSession(this->Credentials, OnSuccess, OnFailure);
 	}
 	else
 	{
-		auth->ClearStoredCredentials();
+		Auth->ClearStoredCredentials();
 	}
-}
-
-void USequenceWallet::CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
-	{
-		if (Response.Compare("sessionClosed")==0)
-		{
-			this->Credentials.UnRegisterCredentials();
-			const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
-			TUAuth->StoreCredentials(this->Credentials);
-			OnSuccess(Response);
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
-		}
-	};
-
-	if (this->SequenceRPCManager)
-		this->SequenceRPCManager->CloseSession(this->Credentials,OnResponse,OnFailure);
 }
 
 void USequenceWallet::GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
@@ -390,16 +338,20 @@ void USequenceWallet::UpdateProviderURL(const FString& Url) const
 	}
 }
 
-void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->SignMessage(this->Credentials,Message,OnSuccess,OnFailure);
+	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->SendTransactionWithFeeOption(this->Credentials,Transactions,FeeOption,OnSuccess,OnFailure);
+	}
 }
 
 TArray<FFeeOption> USequenceWallet::BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList)
@@ -444,7 +396,7 @@ TArray<FFeeOption> USequenceWallet::FindValidFeeOptions(const TArray<FFeeOption>
 	return ValidFeeOptions;
 }
 
-void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<TArray<FFeeOption>> OnResponse = [this, OnSuccess, OnFailure](const TArray<FFeeOption>& Fees)
 	{
@@ -480,10 +432,12 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 	};
 
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->GetFeeOptions(this->Credentials,Transactions,OnResponse,OnFailure);
+	}
 }
 
-void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const
 {	
 	const TSuccessCallback<TArray<FFeeOption>> OnResponse = [this, OnSuccess, OnFailure](const TArray<FFeeOption>& Fees)
 	{
@@ -518,13 +472,17 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 	};
 
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->GetFeeOptions(this->Credentials,Transactions,OnResponse,OnFailure);
+	}
 }
 
-void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
+	{
 		this->SequenceRPCManager->SendTransaction(this->Credentials, Transactions, OnSuccess, OnFailure);
+	}
 }
 
 FString USequenceWallet::getSequenceURL(const FString& endpoint) const

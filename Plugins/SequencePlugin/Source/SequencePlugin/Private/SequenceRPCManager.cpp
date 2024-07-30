@@ -3,6 +3,7 @@
 #include "SequenceRPCManager.h"
 #include "RequestHandler.h"
 #include "Sequence/Close.h"
+#include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const

@@ -13,7 +13,7 @@
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
 #include "WebBrowserModule.h"
-#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
+#include "SequenceRPCManager.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
 #include "NativeEncryptors/AppleEncryptor.h"
@@ -27,14 +27,15 @@ UAuthenticator::UAuthenticator()
 	this->SessionId = this->SessionWallet->GetSessionId();
 	this->SessionHash = this->SessionWallet->GetSessionHash();
 	
-	this->Nonce = this->SessionHash;
+	this->Nonce = this->SessionHash;//this needs to be removed
 	this->StateToken = FGuid::NewGuid().ToString();
+	
+	//we may not need this anymore
 	FString ParsedJWT;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
-	//Right here we'd pass in this->WaasSettings to USequenceWallet to enable it for bootStrapping.
-	//Alternatively is we could read it from disk AGAIN inside USequenceWallet. (this would probably be cleaner actually)
+	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
 	
 	if constexpr (PLATFORM_ANDROID)
 	{
@@ -256,6 +257,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 	this->StoreCredentials(Credentials);
+	//May need to change this up! OIDC will be used here!
 	this->AutoRegister(Credentials);
 }
 
@@ -317,6 +319,7 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	return SigninUrl;
 }
 
+//potentially deprecated code here prepare to remove
 FString UAuthenticator::GetISSClaim(const FString& JWT) const
 {
 	FString ISSClaim = "";
