@@ -18,6 +18,7 @@
 #include "ProviderEnum.h"
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
+#include "SequenceRPCManager.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -55,6 +56,9 @@ public:
 
 	virtual void Deinitialize() override;
 private:
+	UPROPERTY()
+	USequenceRPCManager * SequenceRPCManager;
+	
 	UPROPERTY()
 	UIndexer* Indexer;
 
@@ -164,6 +168,18 @@ public:
 	 */
 	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
+	void InitEmailAuth(const FString& SessionIdIn, const FString& EmailIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void InitGuestAuth(const FString& SessionIdIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void OpenEmailSession(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void OpenOIDCSession(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void OpenGuestSession(const FString& ChallengeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void OpenPlayFabSession(const FString& TitleIdIn, const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	
 	/*
 	 * Used to list all active sessions for the signed in credentials
 	 * @OnSuccess A list of all active sessions
@@ -184,6 +200,7 @@ public:
 	 * @OnFailure An error occured
 	 */
 	void SignOut();
+	
 	void GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
 	void OpenTransakLink(const FString& FiatCurrency = FDefaultTransak::FiatCurrency, const FString& DefaultAmount = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrency = FDefaultTransak::CryptoCurrency, const FString& Networks = FDefaultTransak::Networks, bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm);
 private:
@@ -193,19 +210,7 @@ private:
 
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
-	static TArray<FFeeOption> JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList);
-	
-	FString BuildGetFeeOptionsIntent(const TArray<TransactionUnion>& Txns) const;
-	FString BuildSignMessageIntent(const FString& Message) const;
-	FString BuildSendTransactionIntent(const TArray<TransactionUnion>& Txns) const;
-	FString BuildSendTransactionWithFeeIntent(const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const;
-	FString BuildRegisterSessionIntent() const;
-	FString BuildListSessionIntent() const;
-	FString BuildCloseSessionIntent() const;
-	FString BuildSessionValidationIntent() const;
-	FString GeneratePacketSignature(const FString& Packet) const;
-	template<typename T> FString GenerateIntent(T Data) const;
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
@@ -215,8 +220,7 @@ private:
 	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
 	FString BuildQr_Request_URL(const FString& Data, int32 Size) const;
-private:
-	template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
+
 public:
 	//Indexer Specific Calls
 	

@@ -27,7 +27,19 @@ public:
 	* Signs the given message
 	*/
 	TArray<uint8> SignMessage(FString Message);
+	
+	FString SignMessageWithoutPrefix(const FString& Message);
+	
+	FString SignMessageWithoutPrefix(const TArray<uint8>& MessageBytes,int32 MessageLength);
+	
+	FString SignMessageWithPrefix(const FString& Message);
+	
+	FString SignMessageWithPrefix(const TArray<uint8>& MessageBytes,int32 MessageLength);
 
+	FString GetSessionId();
+
+	FString GetSessionHash();
+	
 	//Accessors//
 	FPrivateKey GetWalletPrivateKey();
 	FPublicKey GetWalletPublicKey();

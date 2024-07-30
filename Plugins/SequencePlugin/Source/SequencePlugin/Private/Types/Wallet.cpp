@@ -177,6 +177,47 @@ TArray<uint8> UWallet::SignMessage(FString Message)
 	return sig;
 }
 
+FString UWallet::SignMessageWithoutPrefix(const FString& Message)
+{
+	TArray<uint8> SigBytes = SignMessage(Message);
+	FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+	return Signature;
+}
+
+FString UWallet::SignMessageWithoutPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
+{
+	TArray<uint8> SigBytes = SignMessage(MessageBytes, MessageLength);
+	FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+	return Signature;
+}
+
+FString UWallet::SignMessageWithPrefix(const FString& Message)
+{
+	TArray<uint8> SigBytes = SignMessage(Message);
+	FString Signature = "0x" + BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+	return Signature;
+}
+
+FString UWallet::SignMessageWithPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
+{
+	TArray<uint8> SigBytes = SignMessage(MessageBytes, MessageLength);
+	FString Signature = "0x" + BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
+	return Signature;
+}
+
+FString UWallet::GetSessionId()
+{
+	return "0x00" + GetWalletAddress().ToHex().ToLower();
+}
+
+FString UWallet::GetSessionHash()
+{
+	const FHash256 SessionHashBytes = FHash256::New();
+	const FUnsizedData EncodedSigningData = StringToUTF8(GetSessionId());
+	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SessionHashBytes.Ptr());
+	return "0x" + SessionHashBytes.ToHex().ToLower();
+}
+
 FPrivateKey UWallet::GetWalletPrivateKey()
 {
 	return this->PrivateKey;

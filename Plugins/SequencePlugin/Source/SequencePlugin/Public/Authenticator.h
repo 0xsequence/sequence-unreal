@@ -185,20 +185,28 @@ public:
 		return AddressStr;
 	}
 
-	FString SignMessageWithSessionWallet(const TArray<uint8>& Message, const int32 MessageLength) const
+	FString SignMessageWithSessionWalletWithoutPrefix(const TArray<uint8>& Message, const int32 MessageLength) const
 	{
 		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet->SignMessage(Message, MessageLength);
-		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		return Signature;
+		return TWallet->SignMessageWithoutPrefix(Message, MessageLength);
 	}
 	
-	FString SignMessageWithSessionWallet(const FString& Message) const
+	FString SignMessageWithSessionWalletWithoutPrefix(const FString& Message) const
 	{
 		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet->SignMessage(Message);
-		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		return Signature;
+		return TWallet->SignMessageWithoutPrefix(Message);
+	}
+
+	FString SignMessageWithSessionWalletWithPrefix(const FString& Message) const
+	{
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		return TWallet->SignMessageWithPrefix(Message);
+	}
+
+	FString SignMessageWithSessionWalletWithPrefix(const TArray<uint8>& Message, const int32 MessageLength) const
+	{
+		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
+		return TWallet->SignMessageWithPrefix(Message, MessageLength);
 	}
 
 	FString GetSessionId() const
@@ -366,8 +374,6 @@ private:
 	UPROPERTY()
 	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
 	UPROPERTY()
-	FString ChallengeSession = "";
-	UPROPERTY()
 	UWallet* SessionWallet;
 	UPROPERTY()
 	bool PurgeCache = true;
@@ -395,6 +401,8 @@ public:
 
 	void EmailLogin(const FString& EmailIn);
 
+	void GuestLogin();
+
 	void EmailLoginCode(const FString& CodeIn);
 
 	FStoredCredentials_BE GetStoredCredentials() const;
@@ -419,8 +427,6 @@ private:
 
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
 
-	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
-
 	FString GenerateSignUpPassword();
 
 	FString BuildYYYYMMDD(const FDateTime& Date);
@@ -430,18 +436,8 @@ private:
 	//RPC Calls//
 	static FString ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful);
 
-	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
-	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID);
-	void ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
-	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void AutoRegister(const FCredentials_BE& Credentials) const;
 
 	//RPC Calls//
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
-	void UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
 };

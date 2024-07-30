@@ -24,12 +24,8 @@
 UAuthenticator::UAuthenticator()
 {
 	this->SessionWallet = UWallet::Make();//Generate a new Random UWallet
-	this->SessionId = "0x00" + this->SessionWallet->GetWalletAddress().ToHex().ToLower();
-
-	const FHash256 SessionHashBytes = FHash256::New();
-	const FUnsizedData EncodedSigningData = StringToUTF8(this->SessionId);
-	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SessionHashBytes.Ptr());
-	this->SessionHash = "0x" + SessionHashBytes.ToHex().ToLower();
+	this->SessionId = this->SessionWallet->GetSessionId();
+	this->SessionHash = this->SessionWallet->GetSessionHash();
 	
 	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
@@ -37,6 +33,9 @@ UAuthenticator::UAuthenticator()
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
 	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
+	//Right here we'd pass in this->WaasSettings to USequenceWallet to enable it for bootStrapping.
+	//Alternatively is we could read it from disk AGAIN inside USequenceWallet. (this would probably be cleaner actually)
+	
 	if constexpr (PLATFORM_ANDROID)
 	{
 		this->Encryptor = NewObject<UAndroidEncryptor>();
@@ -266,13 +265,17 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 	{
 		this->ResetRetryEmailLogin();
 		this->Cached_Email = EmailIn.ToLower();
-		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
+		//Email Init
 	}
 	else
 	{
 		UE_LOG(LogTemp,Error,TEXT("Email based Auth not setup properly please ensure your WaaSConfigKey is configured properly"));
 		this->CallAuthFailure();
 	}
+}
+
+void UAuthenticator::GuestLogin()
+{
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
@@ -312,12 +315,6 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 		break;
 	}
 	return SigninUrl;
-}
-
-FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
-{
-	FString Ret = "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
-	return Ret;
 }
 
 FString UAuthenticator::GetISSClaim(const FString& JWT) const
@@ -398,47 +395,6 @@ void UAuthenticator::ResetRetryEmailLogin()
 	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
 }
 
-void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response, bWasSuccessful);
-	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
-	FString SessionPtr;
-	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
-	{//good state
-		this->ChallengeSession = SessionPtr;
-		this->CallAuthRequiresCode();
-	}
-	else
-	{//error state
-		if (response.Contains("user not found", ESearchCase::IgnoreCase))
-		{//no user exists so create one!
-			UE_LOG(LogTemp, Display, TEXT("Creating New User"));
-			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasSettings.GetEmailClientId());
-		}
-		else
-		{//unknown error
-			UE_LOG(LogTemp, Error, TEXT("[Unexpected error when trying to authenticate]"));
-			this->CallAuthFailure();
-		}
-	}
-}
-
-void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
-	
-	if (this->CanRetryEmailLogin())
-	{
-		this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[Max login attempts reached]"));
-		this->CallAuthFailure();
-	}
-}
-
 FString UAuthenticator::GenerateSignUpPassword()
 {
 	FString pw = "aB1%";
@@ -448,55 +404,6 @@ FString UAuthenticator::GenerateSignUpPassword()
 		pw += this->PWCharList[FMath::RandRange(0,this->PWCharList.Num()-1)];
 	}
 	return pw;
-}
-
-void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
-}
-
-void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
-	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
-}
-
-void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
-	FString IDTokenPtr;
-	const TSharedPtr<FJsonObject> *AuthObject;
-	if (responseObj->TryGetObjectField(TEXT("AuthenticationResult"), AuthObject))
-	{
-		if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
-		{//good state
-			this->Cached_IDToken = IDTokenPtr;
-			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
-			this->StoreCredentials(Credentials);
-			this->AutoRegister(Credentials);
-		}
-		else
-		{//error state
-			UE_LOG(LogTemp, Error, TEXT("[No idToken found in AuthenticationResult]"));
-			this->CallAuthFailure();
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[No Authentication Result found]"));
-		this->CallAuthFailure();
-	}
-}
-
-void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
-	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
 }
 
 void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
@@ -544,7 +451,7 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
-	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasSettings.GetEmailClientId());
+	
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
@@ -553,17 +460,4 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	FCredentials_BE* Credentials = &CredData;
 	const bool IsValid = this->GetStoredCredentials(Credentials);
 	return FStoredCredentials_BE(IsValid, *Credentials);
-}
-
-void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
-{
-	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("POST");
-	http_post_req->SetURL(Url);
-	http_post_req->SetHeader("Content-type", "application/x-amz-json-1.1");
-	http_post_req->SetHeader("X-AMZ-TARGET", AMZTarget);
-	http_post_req->SetContentAsString(RequestBody);
-	http_post_req->SetTimeout(15);
-	http_post_req->OnProcessRequestComplete().BindUObject(this,Callback);
-	http_post_req->ProcessRequest();
 }
