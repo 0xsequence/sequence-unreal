@@ -30,7 +30,7 @@ public:
 	* Return, The user readable Float amount
 	*/
 	static float GetAmount(const int64 Amount, const int64 Decimals);
-
+	
 	/*
 	* Used to convert a user readable amount into a usable amount value for transactions,
 	* float Amount, the user readable amount they wish to use
@@ -181,6 +181,8 @@ public:
 	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
 	static FUpdatableItemDataArgs ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances);
 
+	static int64 StringDateToUnixDate(const FString& Iso8601);
+	
 private:
 	/*
 	* Similar to simplifyString EXCEPT we also cleanup 

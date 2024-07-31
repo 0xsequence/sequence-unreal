@@ -12,7 +12,7 @@
 #include "Authenticator.h"
 #include "Sequence/DelayedEncodingArgsBP.h"
 #include "Sequence/DelayedEncodingBP.h"
-#include "Sequence/SequenceIntent.h"
+#include "Sequence\SequenceSendIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()

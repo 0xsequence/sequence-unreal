@@ -69,15 +69,12 @@ private:
 	FString StateToken = "";
 	UPROPERTY()
 	FString Nonce = "";
-
 	UPROPERTY()
 	FString Cached_IDToken;
 	UPROPERTY()
 	FString Cached_Email;
 	UPROPERTY()
 	FString Cached_Issuer;
-	UPROPERTY()
-	FWaasJWT WaasSettings;
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},

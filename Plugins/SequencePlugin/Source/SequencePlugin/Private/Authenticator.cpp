@@ -29,11 +29,6 @@ UAuthenticator::UAuthenticator()
 	
 	this->Nonce = this->SessionHash;//this needs to be removed
 	this->StateToken = FGuid::NewGuid().ToString();
-	
-	//we may not need this anymore
-	FString ParsedJWT;
-	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
-	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
 
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
 	
@@ -109,11 +104,13 @@ FString UAuthenticator::BuildRedirectPrefix() const
 		return Redirect + "/" + this->RedirectPrefixTrailer;
 }
 
+/*
+ * BE SURE TO RE ADDRESS THIS!
+ * @TODO Either remove or update!
+ */
 bool UAuthenticator::CanHandleEmailLogin() const
 {
 	bool ret = true;
-	ret &= this->WaasSettings.GetEmailRegion().Len() > 0;
-	ret &= this->WaasSettings.GetEmailClientId().Len() > 0;
 	return ret;
 }
 
@@ -255,7 +252,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {	
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
+	const FCredentials_BE Credentials(UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 	this->StoreCredentials(Credentials);
 	//May need to change this up! OIDC will be used here!
 	this->AutoRegister(Credentials);
@@ -265,9 +262,21 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
 	if (this->CanHandleEmailLogin())
 	{
-		this->ResetRetryEmailLogin();
+		this->ResetRetryEmailLogin();//@TODO this may no longer be necessary
 		this->Cached_Email = EmailIn.ToLower();
-		//Email Init
+
+		const TFunction<void()> OnSuccess = [this]
+		{
+			this->CallAuthRequiresCode();
+		};
+
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			this->CallAuthFailure();
+		};
+
+		this->SequenceRPCManager->InitEmailAuth(this->Cached_Email,OnSuccess,OnFailure);
 	}
 	else
 	{
@@ -454,7 +463,17 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		
+	};
 	
+	this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const

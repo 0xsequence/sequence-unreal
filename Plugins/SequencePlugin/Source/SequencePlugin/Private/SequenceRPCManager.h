@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Credentials.h"
 #include "Sequence/FeeOption.h"
-#include "Sequence/SequenceIntent.h"
+#include "Sequence\SequenceSendIntent.h"
 #include "Sequence/Session.h"
 #include "Sequence/SignedMessage.h"
 #include "Sequence/TransactionResponse.h"
@@ -28,14 +28,17 @@ private:
 
 	FWaasJWT WaaSSettings;
 
-	FString ProjectAccessKey = "";
-
 	UPROPERTY()
 	UWallet * SessionWallet = nullptr;
 
-	inline static const FString WaaSVersion = "1.0.0";//Still need to address this properly
+	FString Cached_ProjectAccessKey = "";
+	FString Cached_FeeQuote = "";
+	FString Cached_Verifier = "";
+	FString Cached_Challenge = "";
 
-	FString CachedFeeQuote = "";
+	inline const static FString WaaSVersion = "1.0.0";//Still need to address this properly
+	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
+	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
 	
 	//Vars//
 
@@ -60,6 +63,14 @@ private:
 
 	//Requires Bootstrap//
 
+	//Url Builder//
+
+	FString BuildUrl() const;
+
+	FString BuildRegisterUrl() const;
+	
+	//Url Builder//
+	
 	//RPC Caller//
 
 	template <typename T> void SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
@@ -122,17 +133,17 @@ public:
 
 	//Auth Calls//
 	
-	void InitEmailAuth(const FString& EmailIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void InitGuestAuth(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void OpenEmailSession(const FString& ChallengeIn, const FString& CodeIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenGuestSession(const FString& ChallengeIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void OpenPlayFabSession(const FString& TitleIdIn, const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	//Auth Calls//
 	

@@ -4,8 +4,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Containers/Union.h"
 #include "Indexer/IndexerSupport.h"
-#include "Util/Structs/BE_Structs.h"
-#include "SequenceIntent.generated.h"
+#include "SequenceSendIntent.generated.h"
 
 //Operations Constants//
 
@@ -260,7 +259,7 @@ struct FOpenSessionData : public FGenericData
   const FHash256 AnswerHash = FHash256::New();
   const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
   Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
-  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength());
+  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength()).ToLower();
   
   forceCreateAccount = ForceCreateAccountIn;
   identityType = EmailType;
@@ -325,7 +324,7 @@ struct FInitiateAuthData : public FGenericData
  UPROPERTY()
  FString identityType = "";
  UPROPERTY()
- FString metaData = "";
+ FString metadata = "";
  UPROPERTY()
  FString sessionId = "";
  UPROPERTY()

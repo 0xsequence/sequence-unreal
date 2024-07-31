@@ -73,10 +73,6 @@ private:
 	UPROPERTY()
 	int64 Network = 137;
 	UPROPERTY()
-	FString ProjectId = "";
-	UPROPERTY()
-	FString RPCServer = "";
-	UPROPERTY()
 	FString Type = "";
 	UPROPERTY()
 	FString UserId = "";
@@ -86,16 +82,14 @@ private:
 	bool Registered = false;
 public:
 	FCredentials_BE(){}
-	FCredentials_BE(const FString& RPCServerIn,const FString& ProjectIdIn, const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
+	FCredentials_BE(const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
 	{
-		ProjectId = ProjectIdIn;
 		ProjectAccessKey = ProjectAccessKeyIn;
 		SessionPrivateKey = SessionPrivateKeyIn;
 		SessionId = SessionIdIn;
 		IDToken = IdTokenIn;
 		Email = EmailIn;
 		WaasVersion = WaasVersionIn;
-		RPCServer = RPCServerIn;
 	}
 
 	void UpdateNetwork(int64 NewNetwork)
@@ -115,16 +109,6 @@ public:
 		Refreshed = RefreshedAtIn;
 		Expires = ExpiresAtIn;
 		Registered = true;
-	}
-
-	FString GetRPCServer() const
-	{
-		return RPCServer;
-	}
-	
-	FString GetProjectId() const
-	{
-		return ProjectId;
 	}
 	
 	FString GetNetworkString() const

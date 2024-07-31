@@ -625,6 +625,13 @@ FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 	return date;
 }
 
+int64 UIndexerSupport::StringDateToUnixDate(const FString& Iso8601)
+{
+	FDateTime ParsedDate;
+	FDateTime::ParseIso8601(*Iso8601,ParsedDate);
+	return ParsedDate.ToUnixTimestamp();
+}
+
 //indexer response extractors
 
 FUpdatableItemDataArgs UIndexerSupport::ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances)

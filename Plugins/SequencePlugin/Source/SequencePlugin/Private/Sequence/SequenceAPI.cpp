@@ -280,18 +280,24 @@ void USequenceWallet::SignOut() const
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	if (this->Credentials.IsRegistered())
 	{
-		const TFunction<void (FString)> OnSuccess = [this,Auth](FString State)
+		const TFunction<void (FString)> OnSuccess = [Auth](FString State)
 		{
 			Auth->ClearStoredCredentials();
 		};
 
-		const TFunction<void (FSequenceError)> OnFailure = [this,Auth](FSequenceError Err)
+		const TFunction<void (FSequenceError)> OnFailure = [Auth](FSequenceError Err)
 		{
 			Auth->ClearStoredCredentials();
 		};
 
 		if (this->SequenceRPCManager)
+		{
 			this->SequenceRPCManager->CloseSession(this->Credentials, OnSuccess, OnFailure);
+		}
+		else
+		{
+			Auth->ClearStoredCredentials();
+		}
 	}
 	else
 	{
