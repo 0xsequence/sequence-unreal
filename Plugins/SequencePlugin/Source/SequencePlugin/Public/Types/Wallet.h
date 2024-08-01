@@ -44,6 +44,8 @@ public:
 	FPrivateKey GetWalletPrivateKey();
 	FPublicKey GetWalletPublicKey();
 	FAddress GetWalletAddress();
+
+	FString GetWalletPrivateKeyString();
 	//Accessors//
 
 	//Used to build out the nonce used during the signing process

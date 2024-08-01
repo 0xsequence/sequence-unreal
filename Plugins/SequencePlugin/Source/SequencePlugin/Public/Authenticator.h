@@ -83,11 +83,6 @@ private:
 		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
 	
 	UPROPERTY()
-	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
-	const int32 EmailAuthMaxRetries = 2;
-	UPROPERTY()
-	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
-	UPROPERTY()
 	UWallet* SessionWallet;
 	UPROPERTY()
 	USequenceRPCManager * SequenceRPCManager = nullptr;
@@ -119,41 +114,31 @@ public:
 
 	void GuestLogin();
 
-	void EmailLoginCode(const FString& CodeIn);
+	void EmailLoginCode(const FString& CodeIn) const;
 
 	FStoredCredentials_BE GetStoredCredentials() const;
 
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
 	void ClearStoredCredentials() const;
-private:
-	FString BuildRedirectPrefix() const;
 	
-	bool CanHandleEmailLogin() const;
+private:
+	
+	FString BuildRedirectPrefix() const;
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
 	
 	FString GetISSClaim(const FString& JWT) const;
 
-	bool CanRetryEmailLogin();
-
-	void ResetRetryEmailLogin();
-
 	FString GenerateSigninURL(const ESocialSigninType& Type) const;
 
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
-
-	FString GenerateSignUpPassword();
 
 	FString BuildYYYYMMDD(const FDateTime& Date);
 
 	static FString BuildFullDateTime(const FDateTime& Date);
 
-	//RPC Calls//
-	static FString ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful);
-
-	void AutoRegister(const FCredentials_BE& Credentials) const;
-
-	//RPC Calls//
+	void InitializeSequence(const FCredentials_BE& Credentials) const;
+	
 	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
 };

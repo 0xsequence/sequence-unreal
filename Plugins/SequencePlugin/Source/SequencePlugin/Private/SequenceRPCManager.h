@@ -35,6 +35,7 @@ private:
 	FString Cached_FeeQuote = "";
 	FString Cached_Verifier = "";
 	FString Cached_Challenge = "";
+	FString Cached_Email = "";
 
 	inline const static FString WaaSVersion = "1.0.0";//Still need to address this properly
 	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
@@ -49,8 +50,8 @@ private:
 	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns) const;
 	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const;	
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
-	FString BuildCloseSessionIntent(const FCredentials_BE& Credentials) const;
-	FString BuildSessionValidationIntent(const FCredentials_BE& Credentials) const;
+	FString BuildCloseSessionIntent() const;
+	FString BuildSessionValidationIntent() const;
 
 	//Requires Credentials//
 

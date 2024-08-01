@@ -232,3 +232,8 @@ FAddress UWallet::GetWalletAddress()
 {
 	return this->Address;
 }
+
+FString UWallet::GetWalletPrivateKeyString()
+{
+	return BytesToHex(GetWalletPrivateKey().Ptr(), GetWalletPrivateKey().GetLength()).ToLower();
+}

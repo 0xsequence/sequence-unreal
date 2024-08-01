@@ -125,6 +125,21 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse
 	UPROPERTY()
 	FOpenSessionResponse_Response Response;
 
+	int64 GetCreatedAt() const
+	{
+		return Session.GetCreatedAt();
+	}
+
+	int64 GetRefreshedAt() const
+	{
+		return Session.GetRefreshedAt();
+	}
+
+	int64 GetExpiresAt() const
+	{
+		return Session.GetExpiresAt();
+	}
+	
 	bool IsValid() const
 	{
 		bool IsValid = true;

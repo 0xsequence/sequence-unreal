@@ -104,16 +104,6 @@ FString UAuthenticator::BuildRedirectPrefix() const
 		return Redirect + "/" + this->RedirectPrefixTrailer;
 }
 
-/*
- * BE SURE TO RE ADDRESS THIS!
- * @TODO Either remove or update!
- */
-bool UAuthenticator::CanHandleEmailLogin() const
-{
-	bool ret = true;
-	return ret;
-}
-
 bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
@@ -252,37 +242,27 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {	
 	this->Cached_IDToken = IDTokenIn;
 	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
-	this->StoreCredentials(Credentials);
+	//const FCredentials_BE Credentials(UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
+	//this->StoreCredentials(Credentials);
 	//May need to change this up! OIDC will be used here!
-	this->AutoRegister(Credentials);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
-	if (this->CanHandleEmailLogin())
+	this->Cached_Email = EmailIn.ToLower();
+
+	const TFunction<void()> OnSuccess = [this]
 	{
-		this->ResetRetryEmailLogin();//@TODO this may no longer be necessary
-		this->Cached_Email = EmailIn.ToLower();
+		this->CallAuthRequiresCode();
+	};
 
-		const TFunction<void()> OnSuccess = [this]
-		{
-			this->CallAuthRequiresCode();
-		};
-
-		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
-			this->CallAuthFailure();
-		};
-
-		this->SequenceRPCManager->InitEmailAuth(this->Cached_Email,OnSuccess,OnFailure);
-	}
-	else
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp,Error,TEXT("Email based Auth not setup properly please ensure your WaaSConfigKey is configured properly"));
+		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
-	}
+	};
+
+	this->SequenceRPCManager->InitEmailAuth(this->Cached_Email,OnSuccess,OnFailure);
 }
 
 void UAuthenticator::GuestLogin()
@@ -366,25 +346,6 @@ FString UAuthenticator::GetISSClaim(const FString& JWT) const
 	return ISSClaim;
 }
 
-FString UAuthenticator::ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful)
-{
-	FString Ret = "";
-
-	if(WasSuccessful)
-	{
-		Ret = Response.Get()->GetContentAsString();
-	}
-	else
-	{
-		if(Response.IsValid())
-			Ret = "Request is invalid!";
-		else
-			Ret = "Request failed: " + Response->GetContentAsString();
-	}
-	
-	return Ret;
-}
-
 FString UAuthenticator::BuildYYYYMMDD(const FDateTime& Date)
 {
 	return Date.ToString(TEXT("%Y%m%d"));//YYYYMMDD
@@ -395,56 +356,12 @@ FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
 	return Date.ToString(TEXT("%Y%m%dT%H%M%SZ"));//YYYYMMDDTHHMMSSZ
 }
 
-bool UAuthenticator::CanRetryEmailLogin()
+void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
 {
-	const bool CanRetry = this->EmailAuthCurrRetries > 0;
-	this->EmailAuthCurrRetries--;
-	return CanRetry;
-}
-
-void UAuthenticator::ResetRetryEmailLogin()
-{
-	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
-}
-
-FString UAuthenticator::GenerateSignUpPassword()
-{
-	FString pw = "aB1%";
-	constexpr int32 len = 12;
-	for (int i = 0; i < len; i++)
+	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		pw += this->PWCharList[FMath::RandRange(0,this->PWCharList.Num()-1)];
-	}
-	return pw;
-}
-
-void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
-{	
-	const TFunction<void (FCredentials_BE)> OnSuccess = [this](const FCredentials_BE& Credentials)
-	{
-		if (Credentials.IsRegistered())
-		{
-			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials"));
-			this->CallAuthSuccess();
-		}
-		else
-		{
-			UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register, Credentials weren't registered"));
-			this->CallAuthFailure();
-		}
-	};
-	
-	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
-	{
-		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
-		this->CallAuthFailure();
-	};
-
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->RegisterSession(OnSuccess,OnFailure);
+		this->StoreCredentials(Credentials);
+		this->CallAuthSuccess();
 	}
 	else
 	{
@@ -461,16 +378,17 @@ TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
 		return nullptr;
 }
 
-void UAuthenticator::EmailLoginCode(const FString& CodeIn)
+void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
-		
+		this->InitializeSequence(Credentials);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		
+		UE_LOG(LogTemp, Error, TEXT("Error logging in: %s"), *Error.Message);
+		this->CallAuthFailure();
 	};
 	
 	this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);

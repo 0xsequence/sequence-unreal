@@ -51,15 +51,19 @@ private:
 	UPROPERTY()
     FString SessionPrivateKey = "";
 	UPROPERTY()
-    FString SessionId = "";
+	FString IDToken = "";
+	UPROPERTY()
+	FString Email = "";
 	UPROPERTY()
     FString WalletAddress = "";
 	UPROPERTY()
-    FString IDToken = "";
-	UPROPERTY()
-    FString Email = "";
-	UPROPERTY()
     FString Issuer = "";
+	UPROPERTY()
+	FString Type = "";
+	UPROPERTY()
+	FString Sub = "";
+	UPROPERTY()
+	FString UserId = "";
 	UPROPERTY()
 	int64 Created = -1;
 	UPROPERTY()
@@ -67,48 +71,34 @@ private:
 	UPROPERTY()
 	int64 Expires = -1;
 	UPROPERTY()
-	FString ProjectAccessKey = "";
-	UPROPERTY()
-	FString WaasVersion = "";
-	UPROPERTY()
 	int64 Network = 137;
-	UPROPERTY()
-	FString Type = "";
-	UPROPERTY()
-	FString UserId = "";
-	UPROPERTY()
-	FString Sub = "";
 	UPROPERTY()
 	bool Registered = false;
 public:
 	FCredentials_BE(){}
-	FCredentials_BE(const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
-	{
-		ProjectAccessKey = ProjectAccessKeyIn;
-		SessionPrivateKey = SessionPrivateKeyIn;
-		SessionId = SessionIdIn;
-		IDToken = IdTokenIn;
-		Email = EmailIn;
-		WaasVersion = WaasVersionIn;
-	}
 
-	void UpdateNetwork(int64 NewNetwork)
+	FCredentials_BE(const FString& SessionPrivateKeyIn, const FString& IdTokenIn,
+					const FString& EmailIn, const FString& WalletIn, const FString& IssuerIn,
+					const FString& TypeIn, const FString& SubIn, const FString& UserIdIn,
+					const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
 	{
-		Network = NewNetwork;
-	}
-	
-	void RegisterCredentials(const FString& WalletIn, const FString& EmailIn, const FString& IssuerIn, const FString& TypeIn, const FString& SubIn, const FString& UserIdIn, const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
-	{
-		WalletAddress = WalletIn;
+		SessionPrivateKey = SessionPrivateKeyIn;
+		IDToken = IdTokenIn;//Not used in Email Auth
 		Email = EmailIn;
-		Issuer = IssuerIn;
+		WalletAddress = WalletIn;
+		Issuer = IssuerIn;//Not used in Email Auth
 		Type = TypeIn;
 		Sub = SubIn;
 		UserId = UserIdIn;
 		Created = CreatedAtIn;
 		Refreshed = RefreshedAtIn;
-		Expires = ExpiresAtIn;
+		Expires = ExpiresAtIn;		
 		Registered = true;
+	}
+	
+	void UpdateNetwork(int64 NewNetwork)
+	{
+		Network = NewNetwork;
 	}
 	
 	FString GetNetworkString() const
@@ -120,68 +110,10 @@ public:
 	{
 		return Network;
 	}
-	
-	FString GetWaasVersion() const
-	{
-		return WaasVersion;
-	}
-
-	FString GetProjectAccessKey() const
-	{
-		return ProjectAccessKey;
-	}
-
-	FString GetSessionPrivateKey() const
-	{
-		return SessionPrivateKey;
-	}
 
 	UWallet * GetSessionWallet() const
 	{
 		return UWallet::Make(SessionPrivateKey);
-	}
-	
-	FString GetSessionPublicKey() const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		FString PublicKeyStr = BytesToHex(TWallet->GetWalletPublicKey().Ptr(),TWallet->GetWalletPublicKey().GetLength()).ToLower();
-		return PublicKeyStr;
-	}
-
-	FString GetSessionWalletAddress() const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		FString AddressStr = BytesToHex(TWallet->GetWalletAddress().Ptr(), TWallet->GetWalletAddress().GetLength()).ToLower();
-		return AddressStr;
-	}
-
-	FString SignMessageWithSessionWalletWithoutPrefix(const TArray<uint8>& Message, const int32 MessageLength) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		return TWallet->SignMessageWithoutPrefix(Message, MessageLength);
-	}
-	
-	FString SignMessageWithSessionWalletWithoutPrefix(const FString& Message) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		return TWallet->SignMessageWithoutPrefix(Message);
-	}
-
-	FString SignMessageWithSessionWalletWithPrefix(const FString& Message) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		return TWallet->SignMessageWithPrefix(Message);
-	}
-
-	FString SignMessageWithSessionWalletWithPrefix(const TArray<uint8>& Message, const int32 MessageLength) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		return TWallet->SignMessageWithPrefix(Message, MessageLength);
-	}
-
-	FString GetSessionId() const
-	{
-		return SessionId;
 	}
 
 	FString GetWalletAddress() const
@@ -230,7 +162,7 @@ public:
 		bool IsValidRegistered = true;
 		IsValidRegistered &= Registered;
 		IsValidRegistered &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
-		IsValidRegistered &= IDToken.Len() > 0;
+		//IsValidRegistered &= IDToken.Len() > 0; @TODO check for Per type validation but this is a stop gap
 		IsValidRegistered &= SessionPrivateKey.Len() > 0;
 		return IsValidRegistered;
 	}
