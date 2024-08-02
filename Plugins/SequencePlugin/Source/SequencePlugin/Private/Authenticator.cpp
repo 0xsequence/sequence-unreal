@@ -26,8 +26,6 @@ UAuthenticator::UAuthenticator()
 	this->SessionWallet = UWallet::Make();//Generate a new Random UWallet
 	this->SessionId = this->SessionWallet->GetSessionId();
 	this->SessionHash = this->SessionWallet->GetSessionHash();
-	
-	this->Nonce = this->SessionHash;//this needs to be removed
 	this->StateToken = FGuid::NewGuid().ToString();
 
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
@@ -241,7 +239,21 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 {	
 	this->Cached_IDToken = IDTokenIn;
-	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
+
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error logging in: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+
+	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
+	
+	//const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
 	//const FCredentials_BE Credentials(UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
 	//this->StoreCredentials(Credentials);
 	//May need to change this up! OIDC will be used here!
@@ -271,7 +283,7 @@ void UAuthenticator::GuestLogin()
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString RedirectUrl = this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = this->BuildRedirectPrefix() + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
@@ -291,13 +303,13 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
-	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
-		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:

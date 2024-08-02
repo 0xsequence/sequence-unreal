@@ -392,34 +392,22 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 
 void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure] (const FString& Response)
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		
-		const TSharedPtr<FJsonObject> JsonObj = UIndexerSupport::JsonStringToObject(Response);
-		const TSharedPtr<FJsonObject> * ResponseObj;
-		if (JsonObj.Get()->TryGetObjectField(TEXT("response"), ResponseObj))
+		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
+		
+		if (StructResponse.IsValid())
 		{
-			const TSharedPtr<FJsonObject> * DataObj;
-			if (ResponseObj->Get()->TryGetObjectField(TEXT("data"), DataObj))
-			{
-				if (DataObj->Get()->TryGetStringField(TEXT("challenge"), this->Cached_Challenge))
-				{
-					OnSuccess();
-				}
-				else
-				{
-					OnFailure(FSequenceError(RequestFail, "3rd Level Parsing: Request failed: " + Response));
-				}
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
-			}
+			this->Cached_Challenge = StructResponse.Response.Data.Challenge;
+			OnSuccess();
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "1st Level Parsing: Request failed: " + Response));
+			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Error Initiating Email Auth")));
 		}
 	};
 	
@@ -430,9 +418,38 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::InitGuestAuth(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::InitGuestAuth(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		
+		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+		
+		if (StructResponse.IsValid())
+		{
+			const TSuccessCallback<FString> OnOpenResponse = [ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+			{
+				const FOpenSessionResponse OpenSessionResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
 
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(OpenSessionResponse));
+			};
+			
+			this->Cached_Challenge = StructResponse.Response.Data.Challenge;
+			FOpenSessionData OpenSessionData;
+			OpenSessionData.InitForGuest(this->Cached_Challenge, this->SessionWallet->GetSessionId(), ForceCreateAccountIn);
+			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Error Initiating Guest Auth")));
+		}
+	};
+	
+	FInitiateAuthData InitiateAuthData;
+	InitiateAuthData.InitForGuest(this->SessionWallet->GetSessionId());
+	this->Cached_Verifier = this->SessionWallet->GetSessionId();
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
 void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
@@ -441,7 +458,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 	{
 		const FOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
 
-		FCredentials_BE Credentials(
+		const FCredentials_BE Credentials(
 		this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
 		ParsedResponse.Session.Identity.Email,
 		ParsedResponse.Response.Data.Wallet, TEXT(""),
@@ -470,10 +487,60 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 
 void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		
+		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+
+		if (StructResponse.IsValid())
+		{
+			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& Response)
+			{		
+				const FOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+				const FCredentials_BE Credentials(
+				this->SessionWallet->GetWalletPrivateKeyString(),
+				IdTokenIn,
+				ParsedResponse.Session.Identity.Email,
+				ParsedResponse.Response.Data.Wallet,
+				ParsedResponse.Session.Identity.Iss,
+				ParsedResponse.Session.Identity.Type,
+				ParsedResponse.Session.Identity.Sub,
+				ParsedResponse.Session.UserId,
+				ParsedResponse.GetCreatedAt(),
+				ParsedResponse.GetRefreshedAt(),
+				ParsedResponse.GetExpiresAt());
+				
+				if (ParsedResponse.IsValid() && Credentials.RegisteredValid())
+				{
+					OnSuccess(Credentials);
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Response);
+					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+				}
+			};
+
+			FOpenSessionData OpenSessionData;
+			OpenSessionData.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
+			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Failed to Initiate OIDC Auth")));
+		}
+	};
+	
+	FInitiateAuthData InitiateAuthData;
+	InitiateAuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenGuestSession(const FString& ChallengeIn, const FString& VerifierIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::OpenGuestSession(const FString& ChallengeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	
 }
 
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)

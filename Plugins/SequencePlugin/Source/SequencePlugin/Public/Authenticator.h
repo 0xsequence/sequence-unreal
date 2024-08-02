@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
-#include "Interfaces/IHttpRequest.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
@@ -68,8 +67,6 @@ private:
 	UPROPERTY()
 	FString StateToken = "";
 	UPROPERTY()
-	FString Nonce = "";
-	UPROPERTY()
 	FString Cached_IDToken;
 	UPROPERTY()
 	FString Cached_Email;
@@ -97,6 +94,7 @@ private:
 	inline static FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
 	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
 	inline static FString RedirectPrefixTrailer = "oauth/callback";
+	
 private:
 	UAuthenticator();
 public:

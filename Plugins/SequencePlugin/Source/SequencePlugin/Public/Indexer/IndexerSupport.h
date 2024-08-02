@@ -22,7 +22,7 @@ class SEQUENCEPLUGIN_API UIndexerSupport : public UObject
 {
 	GENERATED_BODY()
 public:
-
+	
 	/*
 	* Used to get the amount that users can read,
 	* int64 Amount, the integer amount of Crypto

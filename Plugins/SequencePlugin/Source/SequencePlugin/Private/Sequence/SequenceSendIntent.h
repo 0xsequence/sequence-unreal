@@ -267,7 +267,7 @@ struct FOpenSessionData : public FGenericData
   verifier = VerifierIn;
  }
 
- void InitForGuest(const FString& ChallengeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn)
+ void InitForGuest(const FString& ChallengeIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
  {
   //Get Keccak(Challenge + SessionId)
   const FHash256 AnswerHash = FHash256::New();
@@ -278,7 +278,7 @@ struct FOpenSessionData : public FGenericData
   forceCreateAccount = ForceCreateAccountIn;
   identityType = GuestType;
   sessionId = SessionIdIn;
-  verifier = VerifierIn;
+  verifier = SessionIdIn;
  }
  
  void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
@@ -286,8 +286,8 @@ struct FOpenSessionData : public FGenericData
   //Get Keccak(IdToken)
   const FHash256 PreTokenHash = FHash256::New();
   const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
-  Keccak256::getHash(EncodedTokenData.Arr.Get()->GetData(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
-  const FString IdTokenHash = "0x" + BytesToHex(PreTokenHash.Ptr(),PreTokenHash.GetLength());
+  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
 
   forceCreateAccount = ForceCreateAccountIn;
   answer = IdTokenIn;
@@ -347,6 +347,23 @@ struct FInitiateAuthData : public FGenericData
   sessionId = SessionIdIn;
   identityType = GuestType;
   verifier = SessionIdIn;
+ }
+
+ void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn)
+ {
+  const FHash256 PreTokenHash = FHash256::New();
+  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
+  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
+  
+  identityType = OIDCType;
+  sessionId = SessionIdIn;
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+ }
+
+ void InitForPlayFab()
+ {
+  
  }
 
  virtual FString GetJson() const override

@@ -6,11 +6,66 @@
 #include "SequenceResponseIntent.generated.h"
 
 USTRUCT()
+struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Data
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY()
+	FString SessionId = "";
+	UPROPERTY()
+	FString IdentityType = "";
+	UPROPERTY()
+	int64 ExpiresIn = -1;
+	UPROPERTY()
+	FString Challenge = "";
+
+	bool IsValid() const
+	{
+		bool IsValid = true;
+		IsValid &= SessionId.Len() > 0;
+		IsValid &= IdentityType.Len() > 0;		
+		return IsValid;
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Response
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FInitiateAuthResponse_Data Data;
+	
+	bool IsValid() const
+	{
+		bool IsValid = true;
+		IsValid &= Code.Equals(TEXT("authInitiated"), ESearchCase::IgnoreCase);
+		IsValid &= Data.IsValid();
+		return IsValid;
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FInitiateSqcAuthResponse
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY()
+	FInitiateAuthResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+USTRUCT()
 struct SEQUENCEPLUGIN_API FOpenSessionResponse_Identity
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
 	FString Type = "";
+	UPROPERTY()
+	FString Iss = "";
 	UPROPERTY()
 	FString Sub = "";
 	UPROPERTY()
@@ -110,7 +165,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Response
 	bool IsValid() const
 	{
 		bool IsValid = true;
-		IsValid &= Code.Len() > 0;
+		IsValid &= Code.Len() > 0;//check code here
 		IsValid &= Data.IsValid();
 		return IsValid;
 	}

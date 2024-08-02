@@ -5,6 +5,7 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
+#include "Types/BinaryData.h"
 
 float UIndexerSupport::GetAmount(const int64 Amount, const int64 Decimals)
 {
