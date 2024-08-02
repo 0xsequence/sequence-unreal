@@ -90,25 +90,31 @@ public:
 	 */
 	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure);
 
-	/*
-	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
-	 * @OnSuccess The Semi Struct Parsed JSON response
-	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
+	/**
+	 * Used to send transactions via the sequence rpc api
+	 * @param Credentials Credentials Credentials used to build Intent
+	 * @param Transactions List of Transaction Items you wish to send
+	 * @param OnSuccess Called if the operation succeeds with Transaction Details
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure);
 
-	/*
-	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
-	 * to pick a valid fee to send with this call
-	 * @OnSuccess The Semi Struct Parsed JSON response
-	 * @OnFailure An error occured during the transaction
+	/**
+	 * Used to send transactions via the sequence rpc api with a set fee
+	 * @param Credentials Credentials Credentials used to build Intent
+	 * @param Transactions List of Transaction Items you wish to send
+	 * @param FeeOption The Fee option you are using for this transaction
+	 * @param OnSuccess Called if the operation succeeds with Transaction Details
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure);
 
-	/*
-	 * Allows you to get FeeOptions for the transaction you pass in
-	 * @OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
-	 * @OnFailure An error occured
+	/**
+	 * Allows you to get FeeOptions for the transactions you pass in
+	 * @param Credentials Credentials Credentials used to build Intent
+	 * @param Transactions List of Transaction Items you wish to send
+	 * @param OnSuccess Called if the operation succeeds with FeeOptions
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
 	void GetFeeOptions(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
 

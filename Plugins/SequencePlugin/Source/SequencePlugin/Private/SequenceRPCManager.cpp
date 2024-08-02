@@ -179,39 +179,19 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 	}
 }
 
-void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		TSharedPtr<FJsonObject> jsonObj;
-		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		const FSeqTransactionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+
+		if (ResponseStruct.IsValid())
 		{
-			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
-			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
-			{
-				const TSharedPtr<FJsonObject> * DataObj = nullptr;
-				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj))
-				{
-					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
-					FSeqTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(JsonString);
-					TxnResponse.Setup(*DataObj);
-					OnSuccess(TxnResponse);
-				}
-				else
-				{
-					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-			}
+			OnSuccess(ResponseStruct.Response.Data);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
 		}
 	};
 	
@@ -225,40 +205,20 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 	}
 }
 
-void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
-	{
-		TSharedPtr<FJsonObject> jsonObj;
-		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+	{		
+		const FSeqTransactionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+
+		if (ResponseStruct.IsValid())
 		{
-			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
-			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
-			{
-				const TSharedPtr<FJsonObject> * DataObj = nullptr;
-				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj))
-				{
-					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
-					FSeqTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(JsonString);
-					TxnResponse.Setup(*DataObj);
-					OnSuccess(TxnResponse);
-				}
-				else
-				{
-					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-			}
+			OnSuccess(ResponseStruct.Response.Data);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
 		}
 	};
 	
@@ -276,11 +236,11 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
 		const FSeqGetFeeOptionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
 
 		if (ResponseStruct.IsValid())
 		{
+			this->Cached_FeeQuote = ResponseStruct.Response.FeeQuote;//@TODO make sure this is set properly on Tuesday
 			OnSuccess(ResponseStruct.Response.Data.FeeOptions);
 		}
 		else

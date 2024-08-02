@@ -134,7 +134,7 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
@@ -142,7 +142,7 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to get FeeOptions for the transaction you pass in

@@ -31,7 +31,7 @@ void USequenceWalletBP::CallOnApiGetUnFilteredFeeOptions(const FSequenceResponse
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetUnFilteredFeeOptions]"));
 }
 
-void USequenceWalletBP::CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse& Response) const
+void USequenceWalletBP::CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const
 {
 	if (this->OnApiSendTransactionWithFeeOption.IsBound())
 		this->OnApiSendTransactionWithFeeOption.Broadcast(Status,Response);
@@ -39,7 +39,7 @@ void USequenceWalletBP::CallOnApiSendTransactionWithFee(const FSequenceResponseS
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSendTransactionWithFeeOption]"));
 }
 
-void USequenceWalletBP::CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse& Response) const
+void USequenceWalletBP::CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const
 {
 	if (this->OnApiSendTransaction.IsBound())
 		this->OnApiSendTransaction.Broadcast(Status,Response);
@@ -277,14 +277,14 @@ void USequenceWalletBP::ApiGetUnfilteredFeeOptions(UTransactions * Transactions)
 
 void USequenceWalletBP::ApiSendTransactionWithFee(UTransactions * Transactions)
 {
-	const TFunction<void (FSeqTransactionResponse)> OnSuccess = [this](const FSeqTransactionResponse& Response)
+	const TFunction<void (FSeqTransactionResponse_Data)> OnSuccess = [this](const FSeqTransactionResponse_Data& Response)
 	{
 		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(true, SendTransactionWithFeeTrt), Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(false, Err.Message, SendTransactionWithFeeTrt), FSeqTransactionResponse());
+		this->CallOnApiSendTransactionWithFee(FSequenceResponseStatus(false, Err.Message, SendTransactionWithFeeTrt), FSeqTransactionResponse_Data());
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -304,14 +304,14 @@ void USequenceWalletBP::ApiSendTransactionWithFee(UTransactions * Transactions)
 
 void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 {
-	const TFunction<void (FSeqTransactionResponse)> OnSuccess = [this](const FSeqTransactionResponse& Response)
+	const TFunction<void (FSeqTransactionResponse_Data)> OnSuccess = [this](const FSeqTransactionResponse_Data& Response)
 	{
 		this->CallOnApiSendTransaction(FSequenceResponseStatus(true, SendTransactionTrt), Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
 	{
-		this->CallOnApiSendTransaction(FSequenceResponseStatus(false, Err.Message, SendTransactionTrt), FSeqTransactionResponse());
+		this->CallOnApiSendTransaction(FSequenceResponseStatus(false, Err.Message, SendTransactionTrt), FSeqTransactionResponse_Data());
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();

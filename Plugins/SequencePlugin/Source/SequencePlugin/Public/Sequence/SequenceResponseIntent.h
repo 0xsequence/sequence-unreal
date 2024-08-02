@@ -2,7 +2,6 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#include "Indexer/IndexerSupport.h"
 #include "Sequence/FeeOption.h"
 #include "SequenceResponseIntent.generated.h"
 
@@ -83,7 +82,7 @@ struct SEQUENCEPLUGIN_API FSeqCloseSessionResponse
 //SendTransaction//
 
 USTRUCT(BlueprintType)
-struct FSeqTxnLog
+struct SEQUENCEPLUGIN_API FSeqTxnLog
 {
 	GENERATED_BODY()
 
@@ -167,7 +166,7 @@ struct SEQUENCEPLUGIN_API FSeqTxnSignature
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Response
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Transaction
 {
 	GENERATED_BODY()
 
@@ -191,7 +190,7 @@ struct SEQUENCEPLUGIN_API FSeqTxnData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Network = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TArray<FSeqTransactionResponse_Response> Transactions;
+	TArray<FSeqTransactionResponse_Transaction> Transactions;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString TransactionFeeQuote = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
@@ -237,7 +236,7 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Receipt
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqTransactionResponse
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Data
 {
 	GENERATED_BODY()
 	
@@ -262,6 +261,38 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse
 	void Setup(const TSharedPtr<FJsonObject>& JsonIn)
 	{
 		Json = JsonIn;
+	}
+};
+
+//transactionReceipt
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqTransactionResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("transactionReceipt"),ESearchCase::IgnoreCase);
+	}
+	
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	FSeqTransactionResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
 	}
 };
 
