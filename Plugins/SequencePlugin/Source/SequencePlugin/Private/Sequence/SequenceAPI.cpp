@@ -280,7 +280,7 @@ void USequenceWallet::SignOut() const
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	if (this->Credentials.IsRegistered())
 	{
-		const TFunction<void (FString)> OnSuccess = [Auth](FString State)
+		const TFunction<void()> OnSuccess = [Auth]
 		{
 			Auth->ClearStoredCredentials();
 		};
