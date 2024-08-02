@@ -141,16 +141,6 @@ FString USequenceRPCManager::BuildRegisterUrl() const
 	return this->WaaSSettings.GetRPCServer() + this->UrlRegisterPath;
 }
 
-TArray<FFeeOption> USequenceRPCManager::JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList)
-{
-	TArray<FFeeOption> ParsedFeeOptionList;
-	for (auto FeeOption : FeeOptionList)
-	{
-		ParsedFeeOptionList.Add(FFeeOption(FeeOption));
-	}
-	return ParsedFeeOptionList;
-}
-
 USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
 {
 	USequenceRPCManager * SequenceRPCManager = NewObject<USequenceRPCManager>();
@@ -167,7 +157,6 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		const FSeqSignMessageResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
 
 		if (ResponseStruct.IsValid())
@@ -176,7 +165,7 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Malformed Response: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
 		}
 	};
 
@@ -287,42 +276,16 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		TSharedPtr<FJsonObject> jsonObj;
-		if(FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), jsonObj))
+		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *Response);
+		const FSeqGetFeeOptionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
+
+		if (ResponseStruct.IsValid())
 		{
-			const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
-			if (jsonObj->TryGetObjectField(TEXT("response"),ResponseObj))
-			{
-				const TSharedPtr<FJsonObject> * DataObj = nullptr;
-				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj))
-				{
-					const TArray<TSharedPtr<FJsonValue>> * FeeList = nullptr;
-					if (DataObj->Get()->TryGetArrayField(TEXT("feeOptions"),FeeList) && DataObj->Get()->TryGetStringField(TEXT("feeQuote"),this->Cached_FeeQuote))
-					{	
-						const TArray<FFeeOption> Fees = this->JsonFeeOptionListToFeeOptionList(*FeeList);//need this
-						OnSuccess(Fees);
-					}
-					else
-					{
-						UE_LOG(LogTemp, Error, TEXT("Error in 3rd level parsing GetFeeOptions"));
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-					}
-				}
-				else
-				{
-					UE_LOG(LogTemp,Error,TEXT("Error in 2nd level parsing in Transaction"));
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp,Error,TEXT("Error in 1st level parsing in TransactionResponse"));
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
-			}
+			OnSuccess(ResponseStruct.Response.Data.FeeOptions);
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
 		}
 	};
 	
@@ -340,9 +303,16 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		const FSeqListSessionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
-		OnSuccess(ResponseStruct.Response.Data);
+
+		if (ResponseStruct.IsValid())
+		{
+			OnSuccess(ResponseStruct.Response.Data);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
+		}
 	};
 	
 	if (Credentials.RegisteredValid())
@@ -359,7 +329,6 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		const FSeqCloseSessionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
 
 		if (ResponseStruct.IsValid())

@@ -3,7 +3,51 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Indexer/IndexerSupport.h"
+#include "Sequence/FeeOption.h"
 #include "SequenceResponseIntent.generated.h"
+
+//GetFeeOptions//
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetFeeOptionsResponse_Data
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	TArray<FFeeOption> FeeOptions;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetFeeOptionsResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqGetFeeOptionsResponse_Data Data;
+	UPROPERTY()
+	FString FeeQuote = "";
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("feeOptions"),ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetFeeOptionsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqGetFeeOptionsResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+//GetFeeOptions//
 
 //CloseSession//
 
@@ -239,9 +283,15 @@ USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSeqSignMessageResponse_Response
 {
 	GENERATED_BODY()
-
+	UPROPERTY()
+	FString Code = "";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FSeqSignMessageResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("signedMessage"),ESearchCase::IgnoreCase);
+	}
 };
 
 USTRUCT()
@@ -254,7 +304,7 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
 
 	bool IsValid() const
 	{
-		return true;
+		return Response.IsValid();
 	}
 };
 
@@ -303,7 +353,14 @@ struct SEQUENCEPLUGIN_API FSeqListSessionResponse_Response
 {
 	GENERATED_BODY()
 	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
 	TArray<FSeqListSessions_Session> Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("sessionList"),ESearchCase::IgnoreCase);
+	}
 };
 
 USTRUCT()
@@ -313,6 +370,11 @@ struct SEQUENCEPLUGIN_API FSeqListSessionsResponse
 
 	UPROPERTY()
 	FSeqListSessionResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
 };
 
 //ListSessions//

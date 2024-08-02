@@ -75,22 +75,18 @@ private:
 	template <typename T> void SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
 	
 	//RPC Caller//
-
-	//Support functions//
-
-	static TArray<FFeeOption> JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList);
-
-	//Support functions//
 	
 public:
 	static USequenceRPCManager * Make(UWallet * SessionWalletIn);
 	
 	//RPC Calls//
 
-	/*
-	 * Allows you to sign the given message with the SequenceWallet
-	 * @OnSuccess The returned Struct from the signing process
-	 * @OnFailure If an error occurs
+	/**
+	 * Used to Sign a given Message with the Sequence Api
+	 * @param Credentials Credentials used to build Intent
+	 * @param Message The message you're signing
+	 * @param OnSuccess Called if the operation succeeds with your signed message
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
 	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure);
 
@@ -115,18 +111,20 @@ public:
 	 * @OnFailure An error occured
 	 */
 	void GetFeeOptions(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
-	
-	/*
-	 * Used to list all active sessions for the signed in credentials
-	 * @OnSuccess A list of all active sessions
-	 * @OnFailure An error occured
+
+	/**
+	 * Used to fetch a list of active sessions
+	 * @param Credentials Credentials used to build Intent
+	 * @param OnSuccess Called if the operation succeeds with your Sessions
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure);
 
-	/*
-	 * Used to close the current Session with Sequence
-	 * @OnSuccess The Session is closed
-	 * @OnFailure An error occured
+	/**
+	 * Used to close the Current Session
+	 * @param Credentials Credentials used to build Intent
+	 * @param OnSuccess Called if the operation succeeds
+	 * @param OnFailure Called if the operation fails with an Error
 	 */
 	void CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 	
