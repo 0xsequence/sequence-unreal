@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Credentials.h"
 #include "Sequence/FeeOption.h"
-#include "Sequence\SequenceSendIntent.h"
+#include "Sequence/SequenceSendIntent.h"
 #include "Sequence/Session.h"
 #include "Sequence/SignedMessage.h"
 #include "Sequence/TransactionResponse.h"
@@ -136,13 +136,11 @@ public:
 	
 	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void InitGuestAuth(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void OpenGuestSession(const FString& ChallengeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	

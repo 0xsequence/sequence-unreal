@@ -397,8 +397,6 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		
 		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
-
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
 		
 		if (StructResponse.IsValid())
 		{
@@ -418,7 +416,7 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::InitGuestAuth(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
 	{
@@ -456,6 +454,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		const FOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
 
 		const FCredentials_BE Credentials(
@@ -536,11 +535,6 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 	FInitiateAuthData InitiateAuthData;
 	InitiateAuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
-}
-
-void USequenceRPCManager::OpenGuestSession(const FString& ChallengeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	
 }
 
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)

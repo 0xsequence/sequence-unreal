@@ -165,7 +165,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Response
 	bool IsValid() const
 	{
 		bool IsValid = true;
-		IsValid &= Code.Len() > 0;//check code here
+		IsValid &= Code.Equals(TEXT("sessionOpened"), ESearchCase::IgnoreCase);
 		IsValid &= Data.IsValid();
 		return IsValid;
 	}
