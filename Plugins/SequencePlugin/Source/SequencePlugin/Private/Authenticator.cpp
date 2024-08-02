@@ -24,10 +24,7 @@
 UAuthenticator::UAuthenticator()
 {
 	this->SessionWallet = UWallet::Make();//Generate a new Random UWallet
-	this->SessionId = this->SessionWallet->GetSessionId();
-	this->SessionHash = this->SessionWallet->GetSessionHash();
 	this->StateToken = FGuid::NewGuid().ToString();
-
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
 	
 	if constexpr (PLATFORM_ANDROID)
@@ -236,10 +233,8 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-void UAuthenticator::SocialLogin(const FString& IDTokenIn)
-{	
-	this->Cached_IDToken = IDTokenIn;
-
+void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
+{
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		this->InitializeSequence(Credentials);
@@ -247,22 +242,15 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error logging in: %s"), *Error.Message);
+		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
 
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
-	
-	//const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	//const FCredentials_BE Credentials(UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
-	//this->StoreCredentials(Credentials);
-	//May need to change this up! OIDC will be used here!
 }
 
-void UAuthenticator::EmailLogin(const FString& EmailIn)
+void UAuthenticator::EmailLogin(const FString& EmailIn) const
 {
-	this->Cached_Email = EmailIn.ToLower();
-
 	const TFunction<void()> OnSuccess = [this]
 	{
 		this->CallAuthRequiresCode();
@@ -274,11 +262,39 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 		this->CallAuthFailure();
 	};
 
-	this->SequenceRPCManager->InitEmailAuth(this->Cached_Email,OnSuccess,OnFailure);
+	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::GuestLogin()
+void UAuthenticator::GuestLogin() const
 {
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+
+	this->SequenceRPCManager->OpenGuestSession(false,OnSuccess,OnFailure);
+}
+
+void UAuthenticator::PlayFabLogin() const
+{
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayFab Auth Error: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+
+	this->SequenceRPCManager->OpenPlayFabSession(TEXT("SessionTicket"), false,OnSuccess,OnFailure);
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
@@ -320,54 +336,6 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	return SigninUrl;
 }
 
-//potentially deprecated code here prepare to remove
-FString UAuthenticator::GetISSClaim(const FString& JWT) const
-{
-	FString ISSClaim = "";
-
-	TArray<FString> B64Json;
-	JWT.ParseIntoArray(B64Json, TEXT("."), true);
-	
-	for (int i = 0; i < B64Json.Num(); i++)
-	{
-		FString T;
-		FBase64::Decode(B64Json[i], T);
-		B64Json[i] = T;
-	}
-
-	if (B64Json.Num() > 1)
-	{
-		const TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
-		FString iss;
-		if (json.Get()->TryGetStringField(TEXT("iss"), iss))
-		{
-			if (iss.Contains("https://",ESearchCase::IgnoreCase))
-				ISSClaim = iss.RightChop(8);
-			else
-				ISSClaim = iss;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("[JWT didn't contain an ISS field]"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[JWT Parse Failure]"));
-	}
-	return ISSClaim;
-}
-
-FString UAuthenticator::BuildYYYYMMDD(const FDateTime& Date)
-{
-	return Date.ToString(TEXT("%Y%m%d"));//YYYYMMDD
-}
-
-FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
-{
-	return Date.ToString(TEXT("%Y%m%dT%H%M%SZ"));//YYYYMMDDTHHMMSSZ
-}
-
 void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
 {
 	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
@@ -381,15 +349,6 @@ void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) cons
 	}
 }
 
-TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
-{
-	TSharedPtr<FJsonObject> responseObj;
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), responseObj))
-		return responseObj;
-	else
-		return nullptr;
-}
-
 void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
@@ -399,7 +358,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error logging in: %s"), *Error.Message);
+		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
 	

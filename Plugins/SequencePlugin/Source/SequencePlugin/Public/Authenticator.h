@@ -59,19 +59,9 @@ private:
 	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
-
-	UPROPERTY()
-	FString SessionId = "";
-	UPROPERTY()
-	FString SessionHash = "";
+	
 	UPROPERTY()
 	FString StateToken = "";
-	UPROPERTY()
-	FString Cached_IDToken;
-	UPROPERTY()
-	FString Cached_Email;
-	UPROPERTY()
-	FString Cached_Issuer;
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -87,7 +77,6 @@ private:
 	bool PurgeCache = true;
 
 	//Static Config variables
-	inline static FString WaasVersion = "1.0.0";
 	inline static FString UrlScheme = "powered-by-sequence";
 	inline static FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
 	inline static FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
@@ -106,11 +95,13 @@ public:
 
 	void UpdateMobileLogin(const FString& TokenizedUrl);
 	
-	void SocialLogin(const FString& IDTokenIn);
+	void SocialLogin(const FString& IDTokenIn) const;
 
-	void EmailLogin(const FString& EmailIn);
+	void EmailLogin(const FString& EmailIn) const;
 
-	void GuestLogin();
+	void GuestLogin() const;
+
+	void PlayFabLogin() const;
 
 	void EmailLoginCode(const FString& CodeIn) const;
 
@@ -125,18 +116,10 @@ private:
 	FString BuildRedirectPrefix() const;
 	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
-	
-	FString GetISSClaim(const FString& JWT) const;
 
 	FString GenerateSigninURL(const ESocialSigninType& Type) const;
 
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
 
-	FString BuildYYYYMMDD(const FDateTime& Date);
-
-	static FString BuildFullDateTime(const FDateTime& Date);
-
 	void InitializeSequence(const FCredentials_BE& Credentials) const;
-	
-	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
 };
