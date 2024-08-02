@@ -233,6 +233,12 @@ void AGeneralTesting::TestLoadTransakUrl() const
 	SequenceAPITest::TestLoadTransakUrl();
 }
 
+void AGeneralTesting::TestGuestLogin() const
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	Auth->GuestLogin(false);
+}
+
 void AGeneralTesting::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)

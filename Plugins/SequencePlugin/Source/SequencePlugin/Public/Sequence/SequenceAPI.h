@@ -6,16 +6,14 @@
 #include "Eth/EthTransaction.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
-#include "Session.h"
-#include "SignedMessage.h"
 #include "Containers/Union.h"
-#include "TransactionResponse.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Types/Header.h"
 #include "Dom/JsonObject.h"
 #include "Types/TransactionReceipt.h"
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
+#include "SequenceResponseIntent.h"
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
 #include "SequenceAPI.generated.h"
@@ -129,14 +127,14 @@ public:
 	 * @OnSuccess The returned Struct from the signing process
 	 * @OnFailure If an error occurs
 	 */
-	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
@@ -144,7 +142,7 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Allows you to get FeeOptions for the transaction you pass in
@@ -171,7 +169,7 @@ public:
 	 * @OnSuccess A list of all active sessions
 	 * @OnFailure An error occured
 	 */
-	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 	 * Used to close the current Session with Sequence & clears all locally stored credentials

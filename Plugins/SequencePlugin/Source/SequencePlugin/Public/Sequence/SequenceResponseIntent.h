@@ -1,14 +1,45 @@
-﻿// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #pragma once
-
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
-#include "Dom/JsonObject.h"
-#include "TransactionResponse.generated.h"
+#include "Indexer/IndexerSupport.h"
+#include "SequenceResponseIntent.generated.h"
+
+//CloseSession//
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqCloseSessionResponse_Response
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Code = "";
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("sessionClosed"),ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqCloseSessionResponse
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FSeqCloseSessionResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+//CloseSession//
+
+//SendTransaction//
 
 USTRUCT(BlueprintType)
-struct FTxnLog
+struct FSeqTxnLog
 {
 	GENERATED_BODY()
 
@@ -33,7 +64,7 @@ struct FTxnLog
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnNativeReceipt
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_NativeReceipt
 {
 	GENERATED_BODY()
 
@@ -48,7 +79,7 @@ struct SEQUENCEPLUGIN_API FTxnNativeReceipt
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString GasUsed = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TArray<FTxnLog> Logs;
+	TArray<FSeqTxnLog> Logs;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString LogsBloom = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
@@ -62,7 +93,7 @@ struct SEQUENCEPLUGIN_API FTxnNativeReceipt
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnSimulation
+struct SEQUENCEPLUGIN_API FSeqTxnSimulation
 {
 	GENERATED_BODY()
 
@@ -81,7 +112,7 @@ struct SEQUENCEPLUGIN_API FTxnSimulation
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnSignature
+struct SEQUENCEPLUGIN_API FSeqTxnSignature
 {
 	GENERATED_BODY()
 
@@ -92,7 +123,7 @@ struct SEQUENCEPLUGIN_API FTxnSignature
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnTransactionResponse
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Response
 {
 	GENERATED_BODY()
 
@@ -107,7 +138,7 @@ struct SEQUENCEPLUGIN_API FTxnTransactionResponse
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnData
+struct SEQUENCEPLUGIN_API FSeqTxnData
 {
 	GENERATED_BODY()
 
@@ -116,7 +147,7 @@ struct SEQUENCEPLUGIN_API FTxnData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Network = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TArray<FTxnTransactionResponse> Transactions;
+	TArray<FSeqTransactionResponse_Response> Transactions;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString TransactionFeeQuote = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
@@ -124,12 +155,12 @@ struct SEQUENCEPLUGIN_API FTxnData
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnRequest
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Request
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	FTxnData Data;
+	FSeqTxnData Data;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	int64 ExpiresAt = 0;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
@@ -137,13 +168,13 @@ struct SEQUENCEPLUGIN_API FTxnRequest
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Name = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TArray<FTxnSignature> Signatures;
+	TArray<FSeqTxnSignature> Signatures;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString Version = "";
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTxnReceipt
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Receipt
 {
 	GENERATED_BODY()
 
@@ -152,7 +183,7 @@ struct SEQUENCEPLUGIN_API FTxnReceipt
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	int64 Index = 0;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
-	TArray<FTxnLog> Logs;
+	TArray<FSeqTxnLog> Logs;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
 	FString RevertReason = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
@@ -162,7 +193,7 @@ struct SEQUENCEPLUGIN_API FTxnReceipt
 };
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FTransactionResponse
+struct SEQUENCEPLUGIN_API FSeqTransactionResponse
 {
 	GENERATED_BODY()
 	
@@ -173,13 +204,13 @@ struct SEQUENCEPLUGIN_API FTransactionResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString MetaTxHash = "";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-	FTxnRequest Request;
+	FSeqTransactionResponse_Request Request;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-	FTxnNativeReceipt NativeReceipt;
+	FSeqTransactionResponse_NativeReceipt NativeReceipt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-	FTxnReceipt Receipt;
+	FSeqTransactionResponse_Receipt Receipt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-	TArray<FTxnSimulation> Simulations;
+	TArray<FSeqTxnSimulation> Simulations;
 
 	//Raw Json Response for ease of use with older code
 	TSharedPtr<FJsonObject> Json;
@@ -189,3 +220,99 @@ struct SEQUENCEPLUGIN_API FTransactionResponse
 		Json = JsonIn;
 	}
 };
+
+//SendTransaction//
+
+//SignMessage//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqSignMessageResponse_Data
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString Message = "";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString Signature = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqSignMessageResponse_Response
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FSeqSignMessageResponse_Data Data;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqSignMessageResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return true;
+	}
+};
+
+//SignMessage//
+
+//ListSessions//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqListSessions_Identity
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString Type = "";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString Iss = "";
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString Sub = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqListSessions_Session
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Id = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	int64 ProjectId = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString UserId = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FSeqListSessions_Identity Identity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString FriendlyName = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString CreatedAt = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString RefreshedAt = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString ExpiresAt = "";
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListSessionResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	TArray<FSeqListSessions_Session> Data;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListSessionsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqListSessionResponse_Response Response;
+};
+
+//ListSessions//

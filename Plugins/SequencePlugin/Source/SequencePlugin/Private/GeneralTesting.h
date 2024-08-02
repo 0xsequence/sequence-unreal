@@ -77,6 +77,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestLoadTransakUrl() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGuestLogin() const;
 	
 	/*
 	* Called by frontend to test the indexer

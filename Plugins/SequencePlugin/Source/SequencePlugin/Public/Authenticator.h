@@ -99,7 +99,7 @@ public:
 
 	void EmailLogin(const FString& EmailIn) const;
 
-	void GuestLogin() const;
+	void GuestLogin(const bool ForceCreateAccountIn) const;
 
 	void PlayFabLogin() const;
 

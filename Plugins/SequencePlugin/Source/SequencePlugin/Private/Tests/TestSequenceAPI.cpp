@@ -69,7 +69,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	NativeOAuth::AndroidLog("SignMessage");
 #endif
 	
-	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage Response)
+	const TSuccessCallback<FSeqSignMessageResponse_Response> OnResponse = [OnSuccess] (FSeqSignMessageResponse_Response Response)
 	{
 		OnSuccess("Sign Message Test Passed");
 #if PLATFORM_ANDROID
@@ -97,7 +97,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 
 void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
+	const TSuccessCallback<TArray<FSeqListSessions_Session>> OnResponse = [OnSuccess](TArray<FSeqListSessions_Session> Response)
 	{
 		for (auto Session : Response)
 		{
@@ -144,7 +144,7 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -198,7 +198,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -234,7 +234,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse Transaction)
 		{
 			FString OutputString;
 			const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -269,7 +269,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -306,7 +306,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -405,7 +405,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 			if (WalletOptional.IsSet() && WalletOptional.GetValue())
 			{
 				USequenceWallet * Api = WalletOptional.GetValue();
-				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FTransactionResponse& Transaction)
+				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FSeqTransactionResponse& Transaction)
 				{
 					FString OutputString;
 					const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);

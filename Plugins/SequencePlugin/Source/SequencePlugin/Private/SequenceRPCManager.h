@@ -6,9 +6,7 @@
 #include "Credentials.h"
 #include "Sequence/FeeOption.h"
 #include "Sequence/SequenceSendIntent.h"
-#include "Sequence/Session.h"
-#include "Sequence/SignedMessage.h"
-#include "Sequence/TransactionResponse.h"
+#include "Sequence/SequenceResponseIntent.h"
 #include "UObject/Object.h"
 #include "Types/Types.h"
 #include "Types/Wallet.h"
@@ -94,14 +92,14 @@ public:
 	 * @OnSuccess The returned Struct from the signing process
 	 * @OnFailure If an error occurs
 	 */
-	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
@@ -109,7 +107,7 @@ public:
 	 * @OnSuccess The Semi Struct Parsed JSON response
 	 * @OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Allows you to get FeeOptions for the transaction you pass in
@@ -123,23 +121,43 @@ public:
 	 * @OnSuccess A list of all active sessions
 	 * @OnFailure An error occured
 	 */
-	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
+	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 	 * Used to close the current Session with Sequence
 	 * @OnSuccess The Session is closed
 	 * @OnFailure An error occured
 	 */
-	void CloseSession(const FCredentials_BE& Credentials, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	//Auth Calls//
+	void CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 	
+	//Auth Calls//
+
+	/**
+	 * Used to Initiate Email based Login
+	 * @param EmailIn Email to Login with
+	 * @param OnSuccess If InitiateAuth Succeeds, this will fire and indicate we need a Code to finish Email Login
+	 * @param OnFailure If something went wrong
+	 */
 	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
+	/**
+	 * Used to Login with Email
+	 * @param CodeIn The Email Auth Code collected from the UI
+	 * @param ForceCreateAccountIn Used to Force Account Creation
+	 * @param OnSuccess Fires with Credentials on a Successful Login
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
 	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
+	/**
+	 * Used to Login with OIDC (Social Signin)
+	 * @param IdTokenIn IdToken Collected from UI
+	 * @param ForceCreateAccountIn Used to Force Account Creation
+	 * @param OnSuccess Fires with Credentials on a Successful Login
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
 	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);

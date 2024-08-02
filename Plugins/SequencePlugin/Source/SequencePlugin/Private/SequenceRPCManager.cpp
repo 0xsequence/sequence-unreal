@@ -2,10 +2,9 @@
 
 #include "SequenceRPCManager.h"
 #include "RequestHandler.h"
-#include "Sequence/Close.h"
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
-#include "Sequence/SequenceResponseIntent.h"
+#include "Sequence/SequenceAuthResponseIntent.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 {
@@ -164,16 +163,16 @@ USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
 	return SequenceRPCManager;
 }
 
-void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		FSignedMessageResponseObj Msg;
-		if (FJsonObjectConverter::JsonObjectToUStruct<FSignedMessageResponseObj>(Json.ToSharedRef(), &Msg))
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		const FSeqSignMessageResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
+
+		if (ResponseStruct.IsValid())
 		{
-			const FString ParsedResponse = UIndexerSupport::StructToString(Msg);
-			OnSuccess(Msg.response);
+			OnSuccess(ResponseStruct.Response);
 		}
 		else
 		{
@@ -191,7 +190,7 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 	}
 }
 
-void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -205,7 +204,7 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj))
 				{
 					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
-					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					FSeqTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(JsonString);
 					TxnResponse.Setup(*DataObj);
 					OnSuccess(TxnResponse);
 				}
@@ -237,7 +236,7 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 	}
 }
 
-void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
@@ -252,7 +251,7 @@ void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Cr
 				if (ResponseObj->Get()->TryGetObjectField(TEXT("data"),DataObj))
 				{
 					const FString JsonString = UIndexerSupport::JsonToParsableString(*DataObj);
-					FTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FTransactionResponse>(JsonString);
+					FSeqTransactionResponse TxnResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(JsonString);
 					TxnResponse.Setup(*DataObj);
 					OnSuccess(TxnResponse);
 				}
@@ -337,22 +336,13 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 	}
 }
 
-void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		TArray<FSession> Sessions;
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		FListSessionsResponseObj ResponseStruct;
-		if (FJsonObjectConverter::JsonObjectToUStruct<FListSessionsResponseObj>(Json.ToSharedRef(), &ResponseStruct))
-		{
-			const FString ParsedResponse = UIndexerSupport::StructToString(ResponseStruct);
-			OnSuccess(ResponseStruct.response.data);
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
-		}
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		const FSeqListSessionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
+		OnSuccess(ResponseStruct.Response.Data);
 	};
 	
 	if (Credentials.RegisteredValid())
@@ -365,19 +355,20 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 	}
 }
 
-void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		FCloseResponseObj ResponseStruct;
-		if (FJsonObjectConverter::JsonObjectToUStruct<FCloseResponseObj>(Json.ToSharedRef(), &ResponseStruct))
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		const FSeqCloseSessionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
+
+		if (ResponseStruct.IsValid())
 		{
-			OnSuccess(ResponseStruct.response.code);
+			OnSuccess();
 		}
 		else
 		{
-			OnFailure(FSequenceError(RequestFail, "2nd Level Parsing: Request failed: " + Response));
+			OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
 		}
 	};
 	if (Credentials.RegisteredValid())
@@ -394,9 +385,7 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
-		
-		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
 		
 		if (StructResponse.IsValid())
 		{
@@ -422,13 +411,13 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 	{
 		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
 		
-		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
 		
 		if (StructResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
 			{
-				const FOpenSessionResponse OpenSessionResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
+				const FSeqOpenSessionResponse OpenSessionResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 
 				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(OpenSessionResponse));
 			};
@@ -454,8 +443,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
-		const FOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
+		const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 
 		const FCredentials_BE Credentials(
 		this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
@@ -487,17 +475,14 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
-		
-		const FInitiateSqcAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FInitiateSqcAuthResponse>(Response);
+	{		
+		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
 
 		if (StructResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& Response)
 			{		
-				const FOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FOpenSessionResponse>(Response);
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+				const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(),
 				IdTokenIn,
@@ -540,4 +525,5 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	//We read title ID from Sequence Config
+	//Still not sure how to get the SessionTicket though
 }

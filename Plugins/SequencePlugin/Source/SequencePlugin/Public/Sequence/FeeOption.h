@@ -200,33 +200,3 @@ public:
 		return bCanAfford;
 	}
 };
-
-USTRUCT()
-struct FFeeOptionReturn
-{
-	GENERATED_USTRUCT_BODY()
-public:
-	UPROPERTY()
-	TArray<FFeeOption> FeeOptions;
-	UPROPERTY()
-	bool InWallet = false;
-
-	FFeeOptionReturn() {}
-	
-	FFeeOptionReturn(const TArray<FFeeOption>& FeeOptionsIn, bool InWalletIn)
-	{
-		FeeOptions = FeeOptionsIn;
-		InWallet = InWalletIn;
-	}
-};
-
-USTRUCT()
-struct FIntentDataFeeOptions
-{
-	GENERATED_USTRUCT_BODY()
-public:
-	FString Identifier = "";
-	FString Network = "";
-	TArray<TransactionUnion> Transactions;
-	FString Wallet = "";
-};

@@ -267,7 +267,7 @@ void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& O
 	}*/
 }
 
-void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
 	{
@@ -344,7 +344,7 @@ void USequenceWallet::UpdateProviderURL(const FString& Url) const
 	}
 }
 
-void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
 	{
@@ -352,7 +352,7 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
-void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
 	{
@@ -483,7 +483,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 	}
 }
 
-void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
 	{

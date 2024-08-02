@@ -3,10 +3,12 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Indexer/IndexerSupport.h"
-#include "SequenceResponseIntent.generated.h"
+#include "SequenceAuthResponseIntent.generated.h"
+
+//InitiateAuth//
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Data
+struct SEQUENCEPLUGIN_API FSeqInitiateAuthResponse_Data
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
@@ -28,13 +30,13 @@ struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Data
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Response
+struct SEQUENCEPLUGIN_API FSeqInitiateAuthResponse_Response
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
 	FString Code = "";
 	UPROPERTY()
-	FInitiateAuthResponse_Data Data;
+	FSeqInitiateAuthResponse_Data Data;
 	
 	bool IsValid() const
 	{
@@ -46,11 +48,11 @@ struct SEQUENCEPLUGIN_API FInitiateAuthResponse_Response
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FInitiateSqcAuthResponse
+struct SEQUENCEPLUGIN_API FSeqInitiateAuthResponse
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
-	FInitiateAuthResponse_Response Response;
+	FSeqInitiateAuthResponse_Response Response;
 
 	bool IsValid() const
 	{
@@ -58,8 +60,12 @@ struct SEQUENCEPLUGIN_API FInitiateSqcAuthResponse
 	}
 };
 
+//InitiateAuth//
+
+//OpenSession//
+
 USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionResponse_Identity
+struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Identity
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
@@ -82,7 +88,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Identity
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionResponse_Session
+struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Session
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
@@ -92,7 +98,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Session
 	UPROPERTY()
 	FString UserId = "";
 	UPROPERTY()
-	FOpenSessionResponse_Identity Identity;
+	FSeqOpenSessionResponse_Identity Identity;
 	UPROPERTY()
 	FString FriendlyName = "";
 	UPROPERTY()
@@ -136,7 +142,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Session
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionResponse_Data
+struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Data
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
@@ -154,13 +160,13 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Data
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionResponse_Response
+struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Response
 {
 	GENERATED_USTRUCT_BODY()	
 	UPROPERTY()
 	FString Code = "";
 	UPROPERTY()
-	FOpenSessionResponse_Data Data;
+	FSeqOpenSessionResponse_Data Data;
 
 	bool IsValid() const
 	{
@@ -172,13 +178,13 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse_Response
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionResponse
+struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY()
-	FOpenSessionResponse_Session Session;
+	FSeqOpenSessionResponse_Session Session;
 	UPROPERTY()
-	FOpenSessionResponse_Response Response;
+	FSeqOpenSessionResponse_Response Response;
 
 	int64 GetCreatedAt() const
 	{
@@ -203,3 +209,5 @@ struct SEQUENCEPLUGIN_API FOpenSessionResponse
 		return IsValid;
 	}
 };
+
+//OpenSession//

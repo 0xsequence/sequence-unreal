@@ -7,20 +7,19 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "SequenceWalletBPTypes.h"
 #include "Transactions.h"
-#include "SignedMessage.h"
-#include "TransactionResponse.h"
+#include "SequenceResponseIntent.h"
 #include "SequenceWalletBP.generated.h"
 
 //ASYNC Response Delegates//
 
 //Api//
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSignedMessage, SignedMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSession>&, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
 
 //Api//
@@ -123,12 +122,12 @@ private:
 
 	//Api//
 
-	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSignedMessage& SignedMessage) const;
+	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const;
 	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
-	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
-	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
-	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSession>& Sessions) const;
+	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse& Response) const;
+	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse& Response) const;
+	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
 	//Api//

@@ -265,7 +265,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn) const
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::GuestLogin() const
+void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -278,7 +278,7 @@ void UAuthenticator::GuestLogin() const
 		this->CallAuthFailure();
 	};
 
-	this->SequenceRPCManager->OpenGuestSession(false,OnSuccess,OnFailure);
+	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
 void UAuthenticator::PlayFabLogin() const
