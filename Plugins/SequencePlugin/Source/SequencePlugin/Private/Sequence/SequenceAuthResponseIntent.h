@@ -19,14 +19,6 @@ struct SEQUENCEPLUGIN_API FSeqInitiateAuthResponse_Data
 	int64 ExpiresIn = -1;
 	UPROPERTY()
 	FString Challenge = "";
-
-	bool IsValid() const
-	{
-		bool IsValid = true;
-		IsValid &= SessionId.Len() > 0;
-		IsValid &= IdentityType.Len() > 0;		
-		return IsValid;
-	}
 };
 
 USTRUCT()
@@ -42,7 +34,6 @@ struct SEQUENCEPLUGIN_API FSeqInitiateAuthResponse_Response
 	{
 		bool IsValid = true;
 		IsValid &= Code.Equals(TEXT("authInitiated"), ESearchCase::IgnoreCase);
-		IsValid &= Data.IsValid();
 		return IsValid;
 	}
 };
@@ -76,15 +67,6 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Identity
 	FString Sub = "";
 	UPROPERTY()
 	FString Email = "";
-
-	bool IsValid() const
-	{
-		bool IsValid = true;
-		IsValid &= Type.Len() > 0;
-		IsValid &= Sub.Len() > 0;
-		IsValid &= Email.Len() > 0;
-		return IsValid;
-	}
 };
 
 USTRUCT()
@@ -122,23 +104,6 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Session
 	{
 		return UIndexerSupport::StringDateToUnixDate(ExpiresAt);
 	}
-
-	bool IsValid() const
-	{
-		bool IsValid = true;
-		IsValid &= Id.Len() > 0;
-		IsValid &= ProjectId > -1;
-		IsValid &= UserId.Len() > 0;
-		IsValid &= Identity.IsValid();
-		IsValid &= FriendlyName.Len() > 0;
-		IsValid &= CreatedAt.Len() > 0;
-		IsValid &= RefreshedAt.Len() > 0;
-		IsValid &= ExpiresAt.Len() > 0;
-		IsValid &= GetExpiresAt() > -1;
-		IsValid &= GetCreatedAt() > -1;
-		IsValid &= GetRefreshedAt() > -1;
-		return IsValid;
-	}
 };
 
 USTRUCT()
@@ -149,14 +114,6 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Data
 	FString SessionId = "";
 	UPROPERTY()
 	FString Wallet = "";
-
-	bool IsValid() const
-	{
-		bool IsValid = true;
-		IsValid &= SessionId.Len() > 0;
-		IsValid &= Wallet.Len() > 0;
-		return IsValid;
-	}
 };
 
 USTRUCT()
@@ -172,7 +129,6 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Response
 	{
 		bool IsValid = true;
 		IsValid &= Code.Equals(TEXT("sessionOpened"), ESearchCase::IgnoreCase);
-		IsValid &= Data.IsValid();
 		return IsValid;
 	}
 };
@@ -204,7 +160,6 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse
 	bool IsValid() const
 	{
 		bool IsValid = true;
-		IsValid &= Session.IsValid();
 		IsValid &= Response.IsValid();
 		return IsValid;
 	}

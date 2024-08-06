@@ -274,7 +274,7 @@ struct FOpenSessionData : public FGenericData
   const FHash256 AnswerHash = FHash256::New();
   const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + SessionIdIn);
   Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
-  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength());
+  answer = "0x" + AnswerHash.ToHex();
 
   forceCreateAccount = ForceCreateAccountIn;
   identityType = GuestType;
@@ -297,7 +297,7 @@ struct FOpenSessionData : public FGenericData
   verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
- void InitForPlayFab(const FString& TitleIdIn, const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
  {
   //Get Keccak(SessionTicketIn)
   const FHash256 PreTicketHash = FHash256::New();
@@ -309,7 +309,7 @@ struct FOpenSessionData : public FGenericData
   answer = SessionTicketIn;
   identityType = PlayFabType;
   sessionId = SessionIdIn;
-  verifier = TitleIdIn + ";" + TicketHash; 
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
  }
 
  virtual FString GetJson() const override
@@ -371,7 +371,7 @@ struct FInitiateAuthData : public FGenericData
   
   identityType = PlayFabType;
   sessionId = SessionIdIn;
-  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + ";" + TicketHash;
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
  }
 
  virtual FString GetJson() const override

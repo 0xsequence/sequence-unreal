@@ -335,22 +335,39 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 
 void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Response);
+		const FSeqInitiateAuthResponse InitStructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 		
-		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
-		
-		if (StructResponse.IsValid())
+		if (InitStructResponse.IsValid())
 		{
-			const TSuccessCallback<FString> OnOpenResponse = [ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure](const FString& OpenResponse)
 			{
-				const FSeqOpenSessionResponse OpenSessionResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
-
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(OpenSessionResponse));
+				const FSeqOpenSessionResponse OpenSessionStructResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				
+				const FCredentials_BE Credentials(
+				this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
+				OpenSessionStructResponse.Session.Identity.Email,
+				OpenSessionStructResponse.Response.Data.Wallet, TEXT(""),
+				OpenSessionStructResponse.Session.Identity.Type,
+				OpenSessionStructResponse.Session.Identity.Sub,
+				OpenSessionStructResponse.Session.UserId,
+				OpenSessionStructResponse.GetCreatedAt(),
+				OpenSessionStructResponse.GetRefreshedAt(),
+				OpenSessionStructResponse.GetExpiresAt());
+				
+				if (OpenSessionStructResponse.IsValid())
+				{
+					OnSuccess(Credentials);
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+				}
 			};
 			
-			this->Cached_Challenge = StructResponse.Response.Data.Challenge;
+			this->Cached_Challenge = InitStructResponse.Response.Data.Challenge;
 			FOpenSessionData OpenSessionData;
 			OpenSessionData.InitForGuest(this->Cached_Challenge, this->SessionWallet->GetSessionId(), ForceCreateAccountIn);
 			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
@@ -402,15 +419,15 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 
 void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& Response)
+	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{		
-		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
+		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
 		if (StructResponse.IsValid())
 		{
-			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& Response)
+			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& OpenResponse)
 			{		
-				const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
+				const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(),
 				IdTokenIn,
@@ -430,7 +447,7 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 				}
 				else
 				{
-					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Response);
+					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
 					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
 				}
 			};
@@ -452,9 +469,28 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	//We read title ID from Sequence Config
-	//Still not sure how to get the SessionTicket though
+	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure] (const FString& InitResponse)
+	{
+		const FSeqInitiateAuthResponse InitiateAuthResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
+		if (InitiateAuthResponse.IsValid())
+		{
+			const TSuccessCallback<FString> OnOpenResponse = [this] (const FString& OpenResponse)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *OpenResponse);				
+			};
+			
+			FOpenSessionData OpenSessionData;
+			OpenSessionData.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
+			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Failed to Initiate PlayFab Auth")));
+		}
+	};
+	
 	FInitiateAuthData InitiateAuthData;
-	//InitiateAuthData.InitForPlayFab();
+	InitiateAuthData.InitForPlayFab(SessionTicketIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }

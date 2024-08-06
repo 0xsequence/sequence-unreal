@@ -293,8 +293,19 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		if (StructResponse.IsValid())
 		{
 			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
-			//Start doing SequencePlayFabAuth RPC here!
-			//We need to also track the expiration of the PlayFab ticket here though!
+
+			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+			{
+				this->InitializeSequence(Credentials);
+			};
+
+			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+				this->CallAuthFailure();
+			};
+			
+			this->SequenceRPCManager->OpenPlayFabSession(StructResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
 		}
 		else
 		{
@@ -324,6 +335,19 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		if (StructResponse.IsValid())
 		{
 			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
+
+			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+			{
+				this->InitializeSequence(Credentials);
+			};
+
+			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+				this->CallAuthFailure();
+			};
+			
+			this->SequenceRPCManager->OpenPlayFabSession(StructResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
 		}
 		else
 		{

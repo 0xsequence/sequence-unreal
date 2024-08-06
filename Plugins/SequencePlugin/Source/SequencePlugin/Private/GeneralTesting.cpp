@@ -335,9 +335,10 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
 	//Authenticator->PlayFabRegisterAndLogin(TEXT("TBPTest0"), TEXT("calvin.kork@zemind.ca"), TEXT("Ac-123Bd-456#!ef"));
-	Authenticator->PlayFabLogin(TEXT("TBPTest0"), TEXT("Ac-123Bd-456#!ef"));
+	//Authenticator->PlayFabLogin(TEXT("TBPTest0"), TEXT("Ac-123Bd-456#!ef"));
+	Authenticator->GuestLogin(false);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()
