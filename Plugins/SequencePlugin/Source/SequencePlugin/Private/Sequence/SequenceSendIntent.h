@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "ConfigFetcher.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Containers/Union.h"
 #include "Indexer/IndexerSupport.h"
@@ -361,9 +362,16 @@ struct FInitiateAuthData : public FGenericData
   verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
- void InitForPlayFab()
+ void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
  {
+  const FHash256 PreTicketHash = FHash256::New();
+  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
+  Keccak256::getHash(EncodedTicketData.Ptr(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
+  const FString TicketHash = "0x" + PreTicketHash.ToHex();
   
+  identityType = PlayFabType;
+  sessionId = SessionIdIn;
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + ";" + TicketHash;
  }
 
  virtual FString GetJson() const override

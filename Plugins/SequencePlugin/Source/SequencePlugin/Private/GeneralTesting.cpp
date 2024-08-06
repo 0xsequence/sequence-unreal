@@ -333,19 +333,11 @@ void AGeneralTesting::TestEncryption() const
 	UE_LOG(LogTemp, Display, TEXT("Test: [%s]"), *TestState);
 }
 
-/* {"intent":{"data":{"answer":"eyJraWQiOiJGZnRPTlR4b0VnIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLmhvcml6b24uc2VxdWVuY2Uud2FhcyIsImV4cCI6MTcyMjYyNTQ5OSwiaWF0IjoxNzIyNTM5MDk5LCJzdWIiOiIwMDAzODguYWY5MGU3MDY5N2E5NDFiOTk2Zjk3Yjc3YjUwNzc0NzQuMTQwMiIsImNfaGFzaCI6ImgwZHFqUERhQS1uMkxzWjM0aW1WZEEiLCJlbWFpbCI6InNodzYya2h5d2pAcHJpdmF0ZXJlbGF5LmFwcGxlaWQuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImlzX3ByaXZhdGVfZW1haWwiOnRydWUsImF1dGhfdGltZSI6MTcyMjUzOTA5OSwibm9uY2Vfc3VwcG9ydGVkIjp0cnVlfQ.Z-KoSGpuEJ5yuoJOj-OyqBIuxk7CqDgb9bOIukpns7PkErknIQaeDq54sFPATSD5Qrf9onbCHWAriMjBvUpo67xalROEm27QLOyuSLpZllgGBmXFIOy_WrSOARsO-SZGvoxdSeGydJWf97iGrBQooxkAVpNutqFrGbd_dH17ba_EoSxtVkWCvO9-ZghHKLT69VworgH4DgM1v8ajwZ3Yclg6ZFCkW6INBhiLeJohuamzDZnxpelkQ4BAPE4hFqZgoSnkwDb_Y5oX2M7f2QHiwMlr9SEi1JUwNnOFIGGqBEdFBAaWtHFZDHjm3e7a5iyYWSFQ1xlMJnw-C9KW-s8DRQ","forceCreateAccount":false,"identityType":"OIDC","sessionId":"0x00a9a5292e11e04818e5c19f1fc95aca0480fa9971","verifier":"0x5b671cdd8a3bec31e5c65d6ec58a7ffd6bf9c3eebd1399d39c777ed0cecde9f9;1722625499"},"expiresAt":1722625470,"issuedAt":1722539070,"name":"openSession","signatures":[{"sessionId":"0x00a9a5292e11e04818e5c19f1fc95aca0480fa9971","signature":"0xb117b0bf73874e99498dbc4e3fb943b8b35044023769d1220a35520e1246a5c002e7ccb6f4b5dbe97f7633766703bde1d51d01ccea61f1e87775861047056ca100"}],"version":"1.0.0"},"friendlyName":"7CC75DD14D1EB2DA4C3A3596A3AD3687"}*/
-
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	const FString TestIdToken = "eyJraWQiOiJGZnRPTlR4b0VnIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLmhvcml6b24uc2VxdWVuY2Uud2FhcyIsImV4cCI6MTcyMjYyNTQ5OSwiaWF0IjoxNzIyNTM5MDk5LCJzdWIiOiIwMDAzODguYWY5MGU3MDY5N2E5NDFiOTk2Zjk3Yjc3YjUwNzc0NzQuMTQwMiIsImNfaGFzaCI6ImgwZHFqUERhQS1uMkxzWjM0aW1WZEEiLCJlbWFpbCI6InNodzYya2h5d2pAcHJpdmF0ZXJlbGF5LmFwcGxlaWQuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImlzX3ByaXZhdGVfZW1haWwiOnRydWUsImF1dGhfdGltZSI6MTcyMjUzOTA5OSwibm9uY2Vfc3VwcG9ydGVkIjp0cnVlfQ.Z-KoSGpuEJ5yuoJOj-OyqBIuxk7CqDgb9bOIukpns7PkErknIQaeDq54sFPATSD5Qrf9onbCHWAriMjBvUpo67xalROEm27QLOyuSLpZllgGBmXFIOy_WrSOARsO-SZGvoxdSeGydJWf97iGrBQooxkAVpNutqFrGbd_dH17ba_EoSxtVkWCvO9-ZghHKLT69VworgH4DgM1v8ajwZ3Yclg6ZFCkW6INBhiLeJohuamzDZnxpelkQ4BAPE4hFqZgoSnkwDb_Y5oX2M7f2QHiwMlr9SEi1JUwNnOFIGGqBEdFBAaWtHFZDHjm3e7a5iyYWSFQ1xlMJnw-C9KW-s8DRQ";
-
-	const FHash256 PreTokenHash = FHash256::New();
-	const FUnsizedData EncodedTokenData = StringToUTF8(TestIdToken);
-	
-	Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
-	const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
-	
-	UE_LOG(LogTemp, Display, TEXT("Hash:\n%s"),*IdTokenHash);
+	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	//Authenticator->PlayFabRegisterAndLogin(TEXT("TBPTest0"), TEXT("calvin.kork@zemind.ca"), TEXT("Ac-123Bd-456#!ef"));
+	Authenticator->PlayFabLogin(TEXT("TBPTest0"), TEXT("Ac-123Bd-456#!ef"));
 }
 
 void AGeneralTesting::OnDoneImageProcessing()

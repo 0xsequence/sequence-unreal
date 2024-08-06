@@ -97,6 +97,12 @@ public:
 		return Ret;
 	}
 
+	/**
+	 * Converts a UStruct into a Json usable String
+	 * @tparam T Templated UStruct
+	 * @param StructVar Struct to parse
+	 * @return JsonString version of parsed UStruct
+	 */
 	template < typename T > static FString StructToPartialSimpleString(T StructVar)
 	{
 		FString Ret;

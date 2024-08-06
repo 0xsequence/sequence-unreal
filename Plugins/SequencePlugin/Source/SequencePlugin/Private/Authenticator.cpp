@@ -12,6 +12,8 @@
 #include "SequenceEncryptor.h"
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
+#include "PlayFabSendIntent.h"
+#include "RequestHandler.h"
 #include "WebBrowserModule.h"
 #include "SequenceRPCManager.h"
 #include "Interfaces/IHttpResponse.h"
@@ -19,6 +21,7 @@
 #include "NativeEncryptors/AppleEncryptor.h"
 #include "NativeEncryptors/AndroidEncryptor.h"
 #include "NativeEncryptors/WindowsEncryptor.h"
+#include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
@@ -281,20 +284,64 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
-void UAuthenticator::PlayFabLogin() const
+void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
-	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
 	{
-		this->InitializeSequence(Credentials);
+		const FPlayFabRegisterUserResponse StructResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response);
+
+		if (StructResponse.IsValid())
+		{
+			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
+			//Start doing SequencePlayFabAuth RPC here!
+			//We need to also track the expiration of the PlayFab ticket here though!
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Response);
+			this->CallAuthFailure();
+		}
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayFab Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure();
+		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
 	};
 
-	this->SequenceRPCManager->OpenPlayFabSession(TEXT("SessionTicket"), false,OnSuccess,OnFailure);
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
+	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(RegisterUser);
+	
+	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnResponse, OnFailure);
+}
+
+void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+{
+	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
+	{
+		const FPlayFabLoginUserResponse StructResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response);
+
+		if (StructResponse.IsValid())
+		{
+			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Response);
+			this->CallAuthFailure();
+		}
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+	};
+
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
+	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(LoginUser);
+	
+	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnResponse, OnFailure);
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
@@ -347,6 +394,29 @@ void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) cons
 	{
 		this->CallAuthFailure();
 	}
+}
+
+FString UAuthenticator::GeneratePlayFabUrl()
+{
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	return "https://" + TitleId + ".playfabapi.com/Client/LoginWithPlayFab";
+}
+
+FString UAuthenticator::GeneratePlayFabRegisterUrl()
+{
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	return "https://" + TitleId + ".playfabapi.com/Client/RegisterPlayFabUser";
+}
+
+void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	NewObject<URequestHandler>()
+	->PrepareRequest()
+	->WithUrl(Url)
+	->WithHeader("Content-type", "application/json")
+	->WithVerb("POST")
+	->WithContentAsString(Content)
+	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn) const

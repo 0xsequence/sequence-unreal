@@ -72,7 +72,7 @@ private:
 	
 	//RPC Caller//
 
-	template <typename T> void SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
+	void SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	
 	//RPC Caller//
 	

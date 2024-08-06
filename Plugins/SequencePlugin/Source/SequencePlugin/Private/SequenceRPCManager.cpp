@@ -29,8 +29,7 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 	}
 }
 
-template <typename T>
-void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure)
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	UE_LOG(LogTemp, Display, TEXT("Url: %s\nIntent: %s"), *Url, *Content);
 	NewObject<URequestHandler>()
@@ -455,4 +454,7 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 {
 	//We read title ID from Sequence Config
 	//Still not sure how to get the SessionTicket though
+
+	FInitiateAuthData InitiateAuthData;
+	//InitiateAuthData.InitForPlayFab();
 }

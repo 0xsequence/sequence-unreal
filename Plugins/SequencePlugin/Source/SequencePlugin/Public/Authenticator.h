@@ -9,6 +9,7 @@
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
+#include "Util/Async.h"
 #include "Authenticator.generated.h"
 
 class USequenceRPCManager;
@@ -101,7 +102,11 @@ public:
 
 	void GuestLogin(const bool ForceCreateAccountIn) const;
 
-	void PlayFabLogin() const;
+	//Used to register a new user & login with it right away
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	//User to login with an existing user
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	void EmailLoginCode(const FString& CodeIn) const;
 
@@ -122,4 +127,14 @@ private:
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
 
 	void InitializeSequence(const FCredentials_BE& Credentials) const;
+
+	//PlayFab RPC//
+
+	static FString GeneratePlayFabUrl();
+	
+	static FString GeneratePlayFabRegisterUrl();
+	
+	static void PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	
+	//PlayFab RPC//
 };

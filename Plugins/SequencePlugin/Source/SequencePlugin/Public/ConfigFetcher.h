@@ -22,6 +22,7 @@ public:
 	static inline FString FacebookClientID = "FacebookClientID";
 	static inline FString DiscordClientID = "DiscordClientID";
 	static inline FString RedirectUrl = "RedirectUrl";
+	static inline FString PlayFabTitleID = "PlayFabTitleID";
 	//Config Keys
 	
 	static FString GetConfigVar(const FString& ConfigKey);
