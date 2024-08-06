@@ -177,7 +177,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
 		break;
 	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID),this->Nonce,this);
+		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
 		break;
 	case ESocialSigninType::FaceBook:
 		break;

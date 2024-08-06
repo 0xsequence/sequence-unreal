@@ -16,11 +16,11 @@ namespace NativeOAuth
 #endif
 	}
 	
-	void SignInWithGoogle(const FString& clientId, const FString& nonce, UAuthenticator * AuthCallback)
+	void SignInWithGoogle(const FString& clientId, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
-		AndroidThunkCpp_SignInWithGoogle(clientId, nonce);
+		AndroidThunkCpp_SignInWithGoogle(clientId);
 #endif // PLATFORM_ANDROID
 	}
 
@@ -77,10 +77,9 @@ namespace NativeOAuth
 
     	 		jenv->DeleteLocalRef(gameActivityClass);
     	 	}*/
-
         }
 
-    	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce) 
+    	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId) 
     	{
     		if (JNIEnv* jenv{FAndroidApplication::GetJavaEnv()})   
     		{
@@ -89,15 +88,14 @@ namespace NativeOAuth
 					jenv,
 					gameActivityClass, 
 					"AndroidThunkJava_SequenceSignInWithGoogle", 
-					"(Ljava/lang/String;Ljava/lang/String;)V", 
+					"(Ljava/lang/String;)V", 
 					false
 				)};
 
     			jenv->CallStaticVoidMethod(
 					gameActivityClass, 
 					methodId, 
-					ConvertToJavaString(jenv, clientId),
-					ConvertToJavaString(jenv, nonce)
+					ConvertToJavaString(jenv, clientId)
 				);
 
     			jenv->DeleteLocalRef(gameActivityClass);
