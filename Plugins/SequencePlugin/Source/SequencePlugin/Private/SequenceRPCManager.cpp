@@ -29,9 +29,8 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 	}
 }
 
-void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Display, TEXT("Url: %s\nIntent: %s"), *Url, *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -43,9 +42,9 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns) const
+FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
 {
-	const FGetFeeOptionsData GetFeeOptionsData(Credentials.GetNetworkString(),Txns,Credentials.GetWalletAddress());
+	const FGetFeeOptionsData GetFeeOptionsData(Credentials.GetNetworkString(),Transactions,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData);
 	return Intent;
 }
@@ -72,18 +71,18 @@ FString USequenceRPCManager::BuildSignMessageIntent(const FCredentials_BE& Crede
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns) const
+FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
-	const FSendTransactionData SendTransactionData(Identifier,Credentials.GetNetworkString(),Txns,Credentials.GetWalletAddress());
+	const FSendTransactionData SendTransactionData(Identifier,Credentials.GetNetworkString(),Transactions,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FSendTransactionData>(SendTransactionData);
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns, const FString& FeeQuote) const
+FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
-	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,Credentials.GetNetworkString(),Txns,FeeQuote,Credentials.GetWalletAddress());
+	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,Credentials.GetNetworkString(),Transactions,FeeQuote,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FSendTransactionWithFeeOptionData>(SendTransactionWithFeeOptionData);
 	return Intent;
 }
@@ -152,15 +151,15 @@ USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
 	return SequenceRPCManager;
 }
 
-void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqSignMessageResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
+		const FSeqSignMessageResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			OnSuccess(ResponseStruct.Response);
+			OnSuccess(ParsedResponse.Response);
 		}
 		else
 		{
@@ -178,15 +177,15 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 	}
 }
 
-void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqTransactionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+		const FSeqTransactionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			OnSuccess(ResponseStruct.Response.Data);
+			OnSuccess(ParsedResponse.Response.Data);
 		}
 		else
 		{
@@ -204,16 +203,16 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 	}
 }
 
-void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{		
-		const FSeqTransactionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+		const FSeqTransactionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			OnSuccess(ResponseStruct.Response.Data);
+			OnSuccess(ParsedResponse.Response.Data);
 		}
 		else
 		{
@@ -235,12 +234,12 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqGetFeeOptionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
+		const FSeqGetFeeOptionsResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			this->Cached_FeeQuote = ResponseStruct.Response.FeeQuote;//@TODO make sure this is set properly on Tuesday
-			OnSuccess(ResponseStruct.Response.Data.FeeOptions);
+			this->Cached_FeeQuote = ParsedResponse.Response.FeeQuote;
+			OnSuccess(ParsedResponse.Response.Data.FeeOptions);
 		}
 		else
 		{
@@ -258,15 +257,15 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 	}
 }
 
-void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqListSessionsResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
+		const FSeqListSessionsResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			OnSuccess(ResponseStruct.Response.Data);
+			OnSuccess(ParsedResponse.Response.Data);
 		}
 		else
 		{
@@ -284,13 +283,13 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 	}
 }
 
-void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqCloseSessionResponse ResponseStruct = UIndexerSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
+		const FSeqCloseSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
 
-		if (ResponseStruct.IsValid())
+		if (ParsedResponse.IsValid())
 		{
 			OnSuccess();
 		}
@@ -313,11 +312,11 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
+		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
 		
-		if (StructResponse.IsValid())
+		if (ParsedInitResponse.IsValid())
 		{
-			this->Cached_Challenge = StructResponse.Response.Data.Challenge;
+			this->Cached_Challenge = ParsedInitResponse.Response.Data.Challenge;
 			OnSuccess();
 		}
 		else
@@ -337,26 +336,26 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		const FSeqInitiateAuthResponse InitStructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 		
-		if (InitStructResponse.IsValid())
+		if (ParsedInitResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure](const FString& OpenResponse)
 			{
-				const FSeqOpenSessionResponse OpenSessionStructResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
-				OpenSessionStructResponse.Session.Identity.Email,
-				OpenSessionStructResponse.Response.Data.Wallet, TEXT(""),
-				OpenSessionStructResponse.Session.Identity.Type,
-				OpenSessionStructResponse.Session.Identity.Sub,
-				OpenSessionStructResponse.Session.UserId,
-				OpenSessionStructResponse.GetCreatedAt(),
-				OpenSessionStructResponse.GetRefreshedAt(),
-				OpenSessionStructResponse.GetExpiresAt());
+				ParsedOpenResponse.Session.Identity.Email,
+				ParsedOpenResponse.Response.Data.Wallet, TEXT(""),
+				ParsedOpenResponse.Session.Identity.Type,
+				ParsedOpenResponse.Session.Identity.Sub,
+				ParsedOpenResponse.Session.UserId,
+				ParsedOpenResponse.GetCreatedAt(),
+				ParsedOpenResponse.GetRefreshedAt(),
+				ParsedOpenResponse.GetExpiresAt());
 				
-				if (OpenSessionStructResponse.IsValid())
+				if (ParsedOpenResponse.IsValid())
 				{
 					OnSuccess(Credentials);
 				}
@@ -367,7 +366,7 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 				}
 			};
 			
-			this->Cached_Challenge = InitStructResponse.Response.Data.Challenge;
+			this->Cached_Challenge = ParsedInitResponse.Response.Data.Challenge;
 			FOpenSessionData OpenSessionData;
 			OpenSessionData.InitForGuest(this->Cached_Challenge, this->SessionWallet->GetSessionId(), ForceCreateAccountIn);
 			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
@@ -384,24 +383,24 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
+		const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 
 		const FCredentials_BE Credentials(
 		this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
-		ParsedResponse.Session.Identity.Email,
-		ParsedResponse.Response.Data.Wallet, TEXT(""),
-		ParsedResponse.Session.Identity.Type,
-		ParsedResponse.Session.Identity.Sub,
-		ParsedResponse.Session.UserId,
-		ParsedResponse.GetCreatedAt(),
-		ParsedResponse.GetRefreshedAt(),
-		ParsedResponse.GetExpiresAt());
+		ParsedOpenResponse.Session.Identity.Email,
+		ParsedOpenResponse.Response.Data.Wallet, TEXT(""),
+		ParsedOpenResponse.Session.Identity.Type,
+		ParsedOpenResponse.Session.Identity.Sub,
+		ParsedOpenResponse.Session.UserId,
+		ParsedOpenResponse.GetCreatedAt(),
+		ParsedOpenResponse.GetRefreshedAt(),
+		ParsedOpenResponse.GetExpiresAt());
 		
-		if (ParsedResponse.IsValid() && Credentials.RegisteredValid())
+		if (ParsedOpenResponse.IsValid() && Credentials.RegisteredValid())
 		{
 			OnSuccess(Credentials);
 		}
@@ -417,31 +416,31 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{		
-		const FSeqInitiateAuthResponse StructResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
-		if (StructResponse.IsValid())
+		if (ParsedInitResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& OpenResponse)
 			{		
-				const FSeqOpenSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(),
 				IdTokenIn,
-				ParsedResponse.Session.Identity.Email,
-				ParsedResponse.Response.Data.Wallet,
-				ParsedResponse.Session.Identity.Iss,
-				ParsedResponse.Session.Identity.Type,
-				ParsedResponse.Session.Identity.Sub,
-				ParsedResponse.Session.UserId,
-				ParsedResponse.GetCreatedAt(),
-				ParsedResponse.GetRefreshedAt(),
-				ParsedResponse.GetExpiresAt());
+				ParsedOpenResponse.Session.Identity.Email,
+				ParsedOpenResponse.Response.Data.Wallet,
+				ParsedOpenResponse.Session.Identity.Iss,
+				ParsedOpenResponse.Session.Identity.Type,
+				ParsedOpenResponse.Session.Identity.Sub,
+				ParsedOpenResponse.Session.UserId,
+				ParsedOpenResponse.GetCreatedAt(),
+				ParsedOpenResponse.GetRefreshedAt(),
+				ParsedOpenResponse.GetExpiresAt());
 				
-				if (ParsedResponse.IsValid() && Credentials.RegisteredValid())
+				if (ParsedOpenResponse.IsValid() && Credentials.RegisteredValid())
 				{
 					OnSuccess(Credentials);
 				}
@@ -467,17 +466,39 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure] (const FString& InitResponse)
 	{
-		const FSeqInitiateAuthResponse InitiateAuthResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
-		if (InitiateAuthResponse.IsValid())
+		if (ParsedInitResponse.IsValid())
 		{
-			const TSuccessCallback<FString> OnOpenResponse = [this] (const FString& OpenResponse)
+			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure] (const FString& OpenResponse)
 			{
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *OpenResponse);				
+				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+
+				const FCredentials_BE Credentials(
+				this->SessionWallet->GetWalletPrivateKeyString(),TEXT(""),
+				ParsedOpenResponse.Session.Identity.Email,
+				ParsedOpenResponse.Response.Data.Wallet,
+				ParsedOpenResponse.Session.Identity.Iss,
+				ParsedOpenResponse.Session.Identity.Type,
+				ParsedOpenResponse.Session.Identity.Sub,
+				ParsedOpenResponse.Session.UserId,
+				ParsedOpenResponse.GetCreatedAt(),
+				ParsedOpenResponse.GetRefreshedAt(),
+				ParsedOpenResponse.GetExpiresAt());
+				
+				if (ParsedOpenResponse.IsValid())
+				{
+					OnSuccess(Credentials);
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+				}
 			};
 			
 			FOpenSessionData OpenSessionData;

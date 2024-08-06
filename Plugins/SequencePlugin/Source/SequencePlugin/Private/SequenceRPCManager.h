@@ -43,10 +43,10 @@ private:
 
 	//Requires Credentials//
 	
-	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns) const;
+	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
 	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message) const;
-	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns) const;
-	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const;	
+	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
+	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
@@ -72,7 +72,7 @@ private:
 	
 	//RPC Caller//
 
-	void SequenceRPC(const FString& Url, const FString& Content, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
+	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//RPC Caller//
 	
@@ -88,7 +88,7 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with your signed message
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Used to send transactions via the sequence rpc api
@@ -97,7 +97,7 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with Transaction Details
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Used to send transactions via the sequence rpc api with a set fee
@@ -107,7 +107,7 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with Transaction Details
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(const FCredentials_BE& Credentials, TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Allows you to get FeeOptions for the transactions you pass in
@@ -124,7 +124,7 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with your Sessions
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure);
+	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Used to close the Current Session
@@ -132,7 +132,7 @@ public:
 	 * @param OnSuccess Called if the operation succeeds
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
-	void CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	void CloseSession(const FCredentials_BE& Credentials, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Auth Calls//
 
@@ -144,6 +144,12 @@ public:
 	 */
 	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
+	/**
+	 * Used to open a guest session with the SequenceApi
+	 * @param ForceCreateAccountIn Used to Force Account Creation
+	 * @param OnSuccess Fires with Credentials on a Successful Login
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
 	void OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
@@ -153,7 +159,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Used to Login with OIDC (Social Signin)
@@ -162,9 +168,16 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	/**
+	 * Used to Authenticate a User via PlayFab
+	 * @param SessionTicketIn SessionTicket Acquired from PlayFab
+	 * @param ForceCreateAccountIn Used to Force Account Creation
+	 * @param OnSuccess Fires with Credentials on a Successful Login
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
+	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Auth Calls//
 	

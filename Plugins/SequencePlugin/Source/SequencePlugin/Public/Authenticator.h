@@ -94,7 +94,7 @@ public:
 
 	void InitiateMobileSSO(const ESocialSigninType& Type);
 
-	void UpdateMobileLogin(const FString& TokenizedUrl);
+	void UpdateMobileLogin(const FString& TokenizedUrl) const;
 	
 	void SocialLogin(const FString& IDTokenIn) const;
 

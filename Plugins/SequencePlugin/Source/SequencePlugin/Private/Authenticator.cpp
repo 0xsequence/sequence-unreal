@@ -1,10 +1,8 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Authenticator.h"
-#include "HttpModule.h"
 #include "Misc/Guid.h"
 #include "Misc/Base64.h"
-#include "Eth/EthTransaction.h"
 #include "Types/Wallet.h"
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,7 +14,6 @@
 #include "RequestHandler.h"
 #include "WebBrowserModule.h"
 #include "SequenceRPCManager.h"
-#include "Interfaces/IHttpResponse.h"
 #include "Native/NativeOAuth.h"
 #include "NativeEncryptors/AppleEncryptor.h"
 #include "NativeEncryptors/AndroidEncryptor.h"
@@ -147,7 +144,7 @@ void UAuthenticator::CallAuthSuccess() const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
+void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
@@ -221,7 +218,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
-	//clear webcache here so signin will be clean eachtime!
+	//clear web cache here so signin will be clean each time!
 	if (this->PurgeCache)
 	{
 		if (const IWebBrowserSingleton* WebBrowserSingleton = IWebBrowserModule::Get().GetSingleton())
@@ -288,12 +285,10 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 {
 	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
 	{
-		const FPlayFabRegisterUserResponse StructResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response);
+		const FPlayFabRegisterUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response);
 
-		if (StructResponse.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
-
 			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 			{
 				this->InitializeSequence(Credentials);
@@ -305,7 +300,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 				this->CallAuthFailure();
 			};
 			
-			this->SequenceRPCManager->OpenPlayFabSession(StructResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
+			this->SequenceRPCManager->OpenPlayFabSession(ParsedResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
 		}
 		else
 		{
@@ -330,12 +325,10 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 {
 	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
 	{
-		const FPlayFabLoginUserResponse StructResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response);
+		const FPlayFabLoginUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response);
 
-		if (StructResponse.IsValid())
+		if (ParsedResponse.IsValid())
 		{
-			UE_LOG(LogTemp, Display, TEXT("Response: %s"), *UIndexerSupport::StructToString(StructResponse));
-
 			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 			{
 				this->InitializeSequence(Credentials);
@@ -347,7 +340,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 				this->CallAuthFailure();
 			};
 			
-			this->SequenceRPCManager->OpenPlayFabSession(StructResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
+			this->SequenceRPCManager->OpenPlayFabSession(ParsedResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
 		}
 		else
 		{

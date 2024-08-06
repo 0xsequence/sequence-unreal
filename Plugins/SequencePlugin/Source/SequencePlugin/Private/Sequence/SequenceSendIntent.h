@@ -260,7 +260,7 @@ struct FOpenSessionData : public FGenericData
   const FHash256 AnswerHash = FHash256::New();
   const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
   Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
-  answer = "0x" + BytesToHex(AnswerHash.Ptr(),AnswerHash.GetLength()).ToLower();
+  answer = "0x" + AnswerHash.ToHex();
   
   forceCreateAccount = ForceCreateAccountIn;
   identityType = EmailType;
@@ -303,7 +303,7 @@ struct FOpenSessionData : public FGenericData
   const FHash256 PreTicketHash = FHash256::New();
   const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
   Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
-  const FString TicketHash = "0x" + BytesToHex(PreTicketHash.Ptr(),PreTicketHash.GetLength());
+  const FString TicketHash = "0x" + PreTicketHash.ToHex();
 
   forceCreateAccount = ForceCreateAccountIn;
   answer = SessionTicketIn;
