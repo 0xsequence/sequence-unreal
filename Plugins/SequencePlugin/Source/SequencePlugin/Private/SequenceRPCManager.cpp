@@ -322,7 +322,8 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 		}
 		else
 		{
-			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Error Initiating Email Auth")));
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate Email Auth: %s"), *Response);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
 		}
 	};
 	
@@ -374,7 +375,8 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 		}
 		else
 		{
-			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Error Initiating Guest Auth")));
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate Guest Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
 		}
 	};
 	
@@ -458,7 +460,8 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 		}
 		else
 		{
-			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Failed to Initiate OIDC Auth")));
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate OIDC Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
 		}
 	};
 	
@@ -508,7 +511,8 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 		}
 		else
 		{
-			OnFailure(FSequenceError(EErrorType::RequestFail, TEXT("Failed to Initiate PlayFab Auth")));
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate PlayFab Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
 		}
 	};
 	

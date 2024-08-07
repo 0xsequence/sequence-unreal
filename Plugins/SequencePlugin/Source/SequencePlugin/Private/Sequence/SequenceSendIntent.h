@@ -325,8 +325,6 @@ struct FInitiateAuthData : public FGenericData
  UPROPERTY()
  FString identityType = "";
  UPROPERTY()
- FString metadata = "";
- UPROPERTY()
  FString sessionId = "";
  UPROPERTY()
  FString verifier = "";
