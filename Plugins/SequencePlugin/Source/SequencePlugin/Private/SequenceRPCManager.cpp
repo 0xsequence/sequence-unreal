@@ -4,6 +4,7 @@
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
+#include "Misc/Base64.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const

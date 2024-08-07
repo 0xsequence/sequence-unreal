@@ -10,7 +10,7 @@
 namespace NativeOAuth
 {
 #if PLATFORM_ANDROID
-	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId, const FString& nonce);
+	void AndroidThunkCpp_SignInWithGoogle(const FString& clientId);
 	void AndroidThunkCpp_RequestAuthInWebView(const FString& requestUrl, const FString& redirectUrl);
 	void AndroidLog(const FString& message);
 #endif // PLATFORM_ANDROID
