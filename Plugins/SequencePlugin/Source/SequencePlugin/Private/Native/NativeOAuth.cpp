@@ -48,10 +48,10 @@ namespace NativeOAuth
 		});
 	}
 	
-	void SignInWithApple(const FString& clientID, const FString& nonce, UAuthenticator * AuthCallback)
+	void SignInWithApple(const FString& clientID, UAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;		
-		UAppleBridge::InitiateIosSSO(clientID, nonce, ProcessIosCallback);
+		UAppleBridge::InitiateIosSSO(clientID, ProcessIosCallback);
 	}
 	
 #if PLATFORM_ANDROID

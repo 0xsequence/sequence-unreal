@@ -12,7 +12,7 @@ typedef void(^Callback)(char *idToken);
 + (NSString *)userId;
 + (Callback)completion;
 + (IOSOAuth*)GetDelegate;
-- (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback;
+- (void)loadBrowserWithUrl:(NSString *)cID callback:(void(^)(char *))callback;
 - (void)loadBrowserURLInIOSThread: (NSString *)clientID nonce:(NSString *)nonce;
 - (ASPresentationAnchor)presentationAnchorForAuthorizationController: (ASAuthorizationController *)controller;
 - (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session;

@@ -191,7 +191,7 @@ void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 	switch (Type)
 	{
 	case ESocialSigninType::Apple:
-		NativeOAuth::SignInWithApple(clientID, this->Nonce, this);
+		NativeOAuth::SignInWithApple(clientID this);
 		break;
 	case ESocialSigninType::Google:
 		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);

@@ -51,13 +51,12 @@ void UAppleBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, 
 #endif
 }
 
-void UAppleBridge::InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken))
+void UAppleBridge::InitiateIosSSO(const FString& clientID, void(*IOSCallback)(char *idToken))
 {
 #if PLATFORM_IOS
 	NSString * cID = clientID.GetNSString();
-	NSString * n = nonce.GetNSString();
 	IOSOAuth *auth = [[IOSOAuth alloc] init];
-	[auth loadBrowserWithUrl:cID nonce:n callback:^(char *idToken){
+	[auth loadBrowserWithUrl:cID callback:^(char *idToken){
 		IOSCallback(idToken);
 	}];
 #endif
