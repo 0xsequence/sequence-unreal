@@ -45,6 +45,42 @@ UAuthenticator::UAuthenticator()
 	}
 }
 
+void UAuthenticator::InitiateMobleSSO_Internal(const ESocialSigninType& Type)
+{
+#if PLATFORM_ANDROID
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
+		break;
+	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
+	
+#if PLATFORM_IOS
+	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::SignInWithApple(clientID, this);
+		break;
+	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
+}
+
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
@@ -170,38 +206,8 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-#if PLATFORM_ANDROID
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
-#endif
-	
-#if PLATFORM_IOS
-	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::SignInWithApple(clientID, this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
-#endif
+	this->IsFederating = false;
+	this->InitiateMobleSSO_Internal(Type);
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
@@ -459,12 +465,17 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 	this->IsFederating = true;
 }
 
-void UAuthenticator::FederateOIDC(const FString& IdTokenIn)
+void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 {
 }
 
-void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn,
-	const FString& PasswordIn)
+void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
+{
+	this->IsFederating = true;
+	this->InitiateMobleSSO_Internal(Type);
+}
+
+void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn)
 {
 }
 

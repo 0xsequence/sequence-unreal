@@ -94,6 +94,8 @@ private:
 	
 private:
 	UAuthenticator();
+
+	void InitiateMobleSSO_Internal(const ESocialSigninType& Type);
 public:
 	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
@@ -119,7 +121,9 @@ public:
 
 	void FederateEmail(const FString& EmailIn);
 	
-	void FederateOIDC(const FString& IdTokenIn);
+	void FederateOIDCIdToken(const FString& IdTokenIn);
+
+	void InitiateMobileFederateOIDC(const ESocialSigninType& Type);
 
 	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
 	

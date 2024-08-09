@@ -107,7 +107,10 @@ public:
 		void FederateEmail(const FString& EmailIn) const;
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
-    	void FederateOIDC(const FString& IdTokenIn) const;
+    	void FederateOIDCIdToken(const FString& IdTokenIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void InitiateMobileFederateOIDC(const ESocialSigninType& TypeIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
     	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;

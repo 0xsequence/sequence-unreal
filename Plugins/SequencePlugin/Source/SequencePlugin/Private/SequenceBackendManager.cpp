@@ -139,11 +139,19 @@ void ASequenceBackendManager::FederateEmail(const FString& EmailIn) const
 	}
 }
 
-void ASequenceBackendManager::FederateOIDC(const FString& IdTokenIn) const
+void ASequenceBackendManager::FederateOIDCIdToken(const FString& IdTokenIn) const
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->FederateOIDC(IdTokenIn);
+		this->Authenticator->FederateOIDCIdToken(IdTokenIn);
+	}
+}
+
+void ASequenceBackendManager::InitiateMobileFederateOIDC(const ESocialSigninType& TypeIn)
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->InitiateMobileFederateOIDC(TypeIn);
 	}
 }
 
