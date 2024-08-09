@@ -128,13 +128,13 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 	});//lambda
 }
 
-
-void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure)
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const
 {
-	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 	{		
 		if(bWasSuccessful)
 		{
+			UE_LOG(LogTemp, Display, TEXT("RPC Response: %s"), *Response.Get()->GetContentAsString());
 			OnSuccess(Response.Get()->GetContentAsString());
 		}
 		else

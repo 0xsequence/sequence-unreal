@@ -50,6 +50,7 @@ private:
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
+	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const;
 
 	//Requires Credentials//
 
@@ -180,6 +181,16 @@ public:
 	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Auth Calls//
+
+	//Federation Calls//
+
+	void FederateEmailSession(const FCredentials_BE& Credentials, const FString& CodeIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	void FederateOIDCSession(const FCredentials_BE& Credentials, const FString& IdTokenIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	void FederatePlayFabSession(const FCredentials_BE& Credentials, const FString& SessionTicketIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	
+	//Federation Calls//
 	
 	//RPC Calls//
 };

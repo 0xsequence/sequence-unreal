@@ -12,7 +12,6 @@ FUserDetails ASequenceBackendManager::GetUserDetails()
 	return ret;
 }
 
-
 void ASequenceBackendManager::CallReadyToReceiveCode()
 {
 	if (this->ReadyToReceiveCodeDelegate.IsBound())
@@ -94,10 +93,6 @@ void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
 	{
 		this->Authenticator->InitiateMobileSSO(Type);
 	}
-	else
-	{
-		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
-	}
 }
 
 FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
@@ -108,24 +103,64 @@ FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 	}
 	else
 	{
-		UE_LOG(LogTemp,Display,TEXT("Authenticator invalid!"));
 		return "invalid";
 	}
 }
 
 void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
 {
-	this->Authenticator->SocialLogin(IDTokenIn);
+	if (this->Authenticator)
+	{
+		this->Authenticator->SocialLogin(IDTokenIn);
+	}
 }
 
 void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
 {
-	this->Authenticator->EmailLogin(EmailIn);
+	if (this->Authenticator)
+	{
+		this->Authenticator->EmailLogin(EmailIn);
+	}
 }
 
 void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 {
-	this->Authenticator->EmailLoginCode(CodeIn);
+	if (this->Authenticator)
+	{
+		this->Authenticator->EmailLoginCode(CodeIn);
+	}
+}
+
+void ASequenceBackendManager::FederateEmail(const FString& EmailIn) const
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->FederateEmail(EmailIn);
+	}
+}
+
+void ASequenceBackendManager::FederateOIDC(const FString& IdTokenIn) const
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->FederateOIDC(IdTokenIn);
+	}
+}
+
+void ASequenceBackendManager::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->FederatePlayFabNewAccount(UsernameIn, EmailIn, PasswordIn);
+	}
+}
+
+void ASequenceBackendManager::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->FederatePlayFabLogin(UsernameIn, PasswordIn);
+	}
 }
 
 FCredentials_BE ASequenceBackendManager::GetStoredCredentials()

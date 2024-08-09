@@ -16,7 +16,7 @@ jstring ConvertToJavaString(JNIEnv* jenv, const FString& string)
 
 /*
  * Logs an FString into Android Logs
- */
+*/
 void JavaLog(const FString& message)
 {
 	

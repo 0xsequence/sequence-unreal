@@ -102,6 +102,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+		void FederateEmail(const FString& EmailIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederateOIDC(const FString& IdTokenIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Login")
 		bool StoredCredentialsValid();

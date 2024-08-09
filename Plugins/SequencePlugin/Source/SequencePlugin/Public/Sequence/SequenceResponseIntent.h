@@ -5,6 +5,34 @@
 #include "Sequence/FeeOption.h"
 #include "SequenceResponseIntent.generated.h"
 
+//FederateAccount//
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FFederateAccountResponse_Account
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FString Email = "";
+	UPROPERTY()
+	FString Id = "";
+	UPROPERTY()
+	FString IdentityType = "";
+	UPROPERTY()
+	FString Answer = "";
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FFederateAccountResponse//_Data
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FFederateAccountResponse_Account Account;
+};
+
+//FederateAccount//
+
 //GetFeeOptions//
 
 USTRUCT()

@@ -45,7 +45,7 @@ public:
 	UPROPERTY()
 	FOnAuthRequiresCode AuthRequiresCode;
 	UPROPERTY()
-	FOnAuthFailure AuthFailure;
+	FOnAuthFailure AuthFailure;//Could update auth failure to include a set code, that indicates that Federation is an option
 	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
 	
@@ -60,9 +60,16 @@ private:
 	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
-	
-	UPROPERTY()
 	FString StateToken = "";
+
+	/**
+	 * Temporary Variable used to change behaviour
+	 * if the user is federating accounts
+	 * OR
+	 * if the user is logging in normally
+	 */
+	bool IsFederating = false;
+	
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -98,17 +105,25 @@ public:
 	
 	void SocialLogin(const FString& IDTokenIn) const;
 
-	void EmailLogin(const FString& EmailIn) const;
+	void EmailLogin(const FString& EmailIn);
 
 	void GuestLogin(const bool ForceCreateAccountIn) const;
 
 	//Used to register a new user & login with it right away
 	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
 
-	//User to login with an existing user
+	//Used to login with an existing user
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	void EmailLoginCode(const FString& CodeIn) const;
+
+	void FederateEmail(const FString& EmailIn);
+	
+	void FederateOIDC(const FString& IdTokenIn);
+
+	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+	
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
 
 	FStoredCredentials_BE GetStoredCredentials() const;
 

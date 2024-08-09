@@ -249,8 +249,10 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::EmailLogin(const FString& EmailIn) const
+void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
+	this->IsFederating = false;
+	
 	const TFunction<void()> OnSuccess = [this]
 	{
 		this->CallAuthRequiresCode();
@@ -450,6 +452,24 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 	};
 	
 	this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
+}
+
+void UAuthenticator::FederateEmail(const FString& EmailIn)
+{
+	this->IsFederating = true;
+}
+
+void UAuthenticator::FederateOIDC(const FString& IdTokenIn)
+{
+}
+
+void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn,
+	const FString& PasswordIn)
+{
+}
+
+void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
+{
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const

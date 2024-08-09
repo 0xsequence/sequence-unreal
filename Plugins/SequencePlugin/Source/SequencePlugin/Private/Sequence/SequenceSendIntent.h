@@ -25,7 +25,7 @@ static const FString PlayFabType = "PlayFab";
 //Operations Constants//
 
 USTRUCT()
-struct FGenericData
+struct SEQUENCEPLUGIN_API FGenericData
 {
  FString Operation = "";
  bool UseCustomParser = false;
@@ -39,7 +39,70 @@ struct FGenericData
 };
 
 USTRUCT()
-struct FCloseSessionData : public FGenericData
+struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
+{
+ GENERATED_USTRUCT_BODY()
+
+ UPROPERTY()
+ FString answer = "";
+ UPROPERTY()
+ FString identityType = "";
+ UPROPERTY()
+ FString sessionId = "";
+ UPROPERTY()
+ FString verifier = "";
+ UPROPERTY()
+ FString wallet = "";
+ 
+ void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn)
+ {
+  //Get Keccak(Challenge + Code)
+  const FHash256 AnswerHash = FHash256::New();
+  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
+  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
+  answer = "0x" + AnswerHash.ToHex();
+  
+  identityType = EmailType;
+  sessionId = SessionIdIn;
+  verifier = VerifierIn;
+ }
+ 
+ void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn)
+ {
+  //Get Keccak(IdToken)
+  const FHash256 PreTokenHash = FHash256::New();
+  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
+  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
+  
+  answer = IdTokenIn;
+  identityType = OIDCType;
+  sessionId = SessionIdIn;
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+ }
+
+ void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
+ {
+  //Get Keccak(SessionTicketIn)
+  const FHash256 PreTicketHash = FHash256::New();
+  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
+  Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
+  const FString TicketHash = "0x" + PreTicketHash.ToHex();
+  
+  answer = SessionTicketIn;
+  identityType = PlayFabType;
+  sessionId = SessionIdIn;
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FCloseSessionData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
  UPROPERTY()
@@ -62,7 +125,7 @@ struct FCloseSessionData : public FGenericData
  }
 };
 
-struct FGetFeeOptionsData : public FGenericData
+struct SEQUENCEPLUGIN_API FGetFeeOptionsData : public FGenericData
 {
  FString network = "";
  TArray<TransactionUnion> transactions;
@@ -90,7 +153,7 @@ struct FGetFeeOptionsData : public FGenericData
  }
 };
 
-struct FSendTransactionData : public FGenericData
+struct SEQUENCEPLUGIN_API FSendTransactionData : public FGenericData
 {
  FString identifier = "";
  FString network = "";
@@ -120,7 +183,7 @@ struct FSendTransactionData : public FGenericData
  }
 };
 
-struct FSendTransactionWithFeeOptionData : public FGenericData
+struct SEQUENCEPLUGIN_API FSendTransactionWithFeeOptionData : public FGenericData
 {
  FString identifier = "";
  FString network = "";
@@ -153,34 +216,7 @@ struct FSendTransactionWithFeeOptionData : public FGenericData
 };
 
 USTRUCT()
-struct FRegisterSessionData : public FGenericData
-{
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString idToken = "";
- UPROPERTY()
- FString sessionId = "";
-
- FRegisterSessionData()
- {
-  Operation = OpenSessionOP;
- }
- 
- FRegisterSessionData(const FString& IdTokenIn, const FString& SessionIdIn)
- {
-  Operation = OpenSessionOP;
-  idToken = IdTokenIn;
-  sessionId = SessionIdIn;
- }
-
- virtual FString GetJson() const override
- {
-  return "";
- }
-};
-
-USTRUCT()
-struct FListSessionsData : public FGenericData
+struct SEQUENCEPLUGIN_API FListSessionsData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
  UPROPERTY()
@@ -204,7 +240,7 @@ struct FListSessionsData : public FGenericData
 };
 
 USTRUCT()
-struct FSignMessageData : public FGenericData
+struct SEQUENCEPLUGIN_API FSignMessageData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
  UPROPERTY()
@@ -234,7 +270,7 @@ struct FSignMessageData : public FGenericData
 };
 
 USTRUCT()
-struct FOpenSessionData : public FGenericData
+struct SEQUENCEPLUGIN_API FOpenSessionData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
  
@@ -319,7 +355,7 @@ struct FOpenSessionData : public FGenericData
 };
 
 USTRUCT()
-struct FInitiateAuthData : public FGenericData
+struct SEQUENCEPLUGIN_API FInitiateAuthData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
  UPROPERTY()
@@ -378,7 +414,7 @@ struct FInitiateAuthData : public FGenericData
  }
 };
 
-struct FSignatureIntent
+struct SEQUENCEPLUGIN_API FSignatureIntent
 { 
  FGenericData * data = nullptr;
  int64 expiresAt = 0;
@@ -409,7 +445,7 @@ struct FSignatureIntent
 };
 
 USTRUCT()
-struct FSignatureEntry
+struct SEQUENCEPLUGIN_API FSignatureEntry
 {
  GENERATED_USTRUCT_BODY()
  UPROPERTY()
@@ -426,7 +462,7 @@ struct FSignatureEntry
  }
 };
 
-struct FSignedIntent
+struct SEQUENCEPLUGIN_API FSignedIntent
 {
  FGenericData * data = nullptr;
  int64 expiresAt = 0;
@@ -469,7 +505,7 @@ struct FSignedIntent
  }
 };
 
-struct FGenericFinalIntent
+struct SEQUENCEPLUGIN_API FGenericFinalIntent
 {
  FSignedIntent intent;
 
@@ -488,7 +524,7 @@ struct FGenericFinalIntent
  }
 };
 
-struct FRegisterFinalIntent
+struct SEQUENCEPLUGIN_API FRegisterFinalIntent
 {
  FSignedIntent intent;
  FString friendlyName = "";
