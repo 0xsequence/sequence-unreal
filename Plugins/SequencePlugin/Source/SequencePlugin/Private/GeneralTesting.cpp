@@ -13,7 +13,7 @@
 #include "Logging/StructuredLogFormat.h"
 #include "Sequence/DelayedEncodingArgsBP.h"
 #include "Sequence/DelayedEncodingBP.h"
-#include "Sequence\SequenceSendIntent.h"
+#include "Sequence/SequenceSendIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
