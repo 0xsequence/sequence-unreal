@@ -184,11 +184,11 @@ public:
 
 	//Federation Calls//
 
-	void FederateEmailSession(const FCredentials_BE& Credentials, const FString& CodeIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void FederateOIDCSession(const FCredentials_BE& Credentials, const FString& IdTokenIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void FederatePlayFabSession(const FCredentials_BE& Credentials, const FString& SessionTicketIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederatePlayFabSession(const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Federation Calls//
 	

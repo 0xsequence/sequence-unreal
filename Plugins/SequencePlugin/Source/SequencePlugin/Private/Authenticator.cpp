@@ -180,6 +180,30 @@ void UAuthenticator::CallAuthSuccess() const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
+void UAuthenticator::CallFederateSuccess() const
+{
+	if (this->FederateSuccess.IsBound())
+	{
+		this->FederateSuccess.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess]"));
+	}
+}
+
+void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
+{
+	if (this->FederateFailure.IsBound())
+	{
+		this->FederateFailure.Broadcast(ErrorMessageIn);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess], Captured Error Message: %s"), *ErrorMessageIn);
+	}
+}
+
 void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 {
 	//we need to parse out the id_token out of TokenizedUrl
@@ -196,7 +220,15 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					SocialLogin(Token);
+
+					if (this->IsFederating)
+					{
+						FederateOIDCIdToken(Token);
+					}
+					else
+					{
+						SocialLogin(Token);
+					}
 					return;
 				}//find id_token
 			}//parse out &
@@ -291,82 +323,56 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 
 void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
-	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
-		const FPlayFabRegisterUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response);
-
-		if (ParsedResponse.IsValid())
+		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
-			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
-			{
-				this->InitializeSequence(Credentials);
-			};
+			this->InitializeSequence(Credentials);
+		};
 
-			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
-				this->CallAuthFailure();
-			};
-			
-			this->SequenceRPCManager->OpenPlayFabSession(ParsedResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
-		}
-		else
+		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Response);
+			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->CallAuthFailure();
-		}
+		};
+			
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		this->CallAuthFailure();
 	};
-
-	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
-	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
-	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(RegisterUser);
 	
-	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnResponse, OnFailure);
+	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
 void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
 {
-	const TFunction<void(FString)> OnResponse = [this](const FString& Response)
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
-		const FPlayFabLoginUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response);
-
-		if (ParsedResponse.IsValid())
+		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
-			const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
-			{
-				this->InitializeSequence(Credentials);
-			};
+			this->InitializeSequence(Credentials);
+		};
 
-			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
-				this->CallAuthFailure();
-			};
-			
-			this->SequenceRPCManager->OpenPlayFabSession(ParsedResponse.Data.SessionTicket,false, OnSuccess, OnFailure);
-		}
-		else
+		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Response);
+			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->CallAuthFailure();
-		}
+		};
+			
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		this->CallAuthFailure();
 	};
-
-	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
-	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
-	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(LoginUser);
 	
-	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnResponse, OnFailure);
+	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
@@ -421,6 +427,48 @@ void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) cons
 	}
 }
 
+void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
+	{
+		if (const FPlayFabLoginUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
+		{
+			OnSuccess(ParsedResponse.Data.SessionTicket);
+		}
+		else
+		{
+			OnFailure(FSequenceError(ResponseParseError,Response));
+		}
+	};
+
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
+	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(LoginUser);
+	
+	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnSuccessResponse, OnFailure);
+}
+
+void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
+	{
+		if (const FPlayFabRegisterUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
+		{
+			OnSuccess(ParsedResponse.Data.SessionTicket);
+		}
+		else
+		{
+			OnFailure(FSequenceError(ResponseParseError,Response));
+		}
+	};
+
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
+	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(RegisterUser);
+	
+	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnSuccessResponse, OnFailure);
+}
+
 FString UAuthenticator::GeneratePlayFabUrl()
 {
 	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
@@ -446,18 +494,35 @@ void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, cons
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 {
-	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	if (this->IsFederating)
 	{
-		this->InitializeSequence(Credentials);
-	};
+		const TFunction<void()> OnSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
 
-	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		{
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederateEmailSession(CodeIn, OnSuccess, OnFailure);
+	}
+	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure();
-	};
+		const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+		{
+			this->InitializeSequence(Credentials);
+		};
+
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			this->CallAuthFailure();
+		};
 	
-	this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
+		this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
+	}
 }
 
 void UAuthenticator::FederateEmail(const FString& EmailIn)
@@ -465,8 +530,19 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 	this->IsFederating = true;
 }
 
-void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
+void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 {
+	const TFunction<void()> OnSuccess = [this]()
+	{
+		this->CallAuthSuccess();
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		this->CallFederateFailure(Error.Message);
+	};
+	
+	this->SequenceRPCManager->FederateOIDCSession(IdTokenIn, OnSuccess, OnFailure);
 }
 
 void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
@@ -475,12 +551,58 @@ void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
 	this->InitiateMobleSSO_Internal(Type);
 }
 
-void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn)
+void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
+
+		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederatePlayFabSession(SessionTicket, OnFederateSuccess, OnFederateFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
+void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
 {
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
+
+		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederatePlayFabSession(SessionTicket, OnFederateSuccess, OnFederateFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const

@@ -526,7 +526,7 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateEmailSession(const FCredentials_BE& Credentials, const FString& CodeIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -535,18 +535,10 @@ void USequenceRPCManager::FederateEmailSession(const FCredentials_BE& Credential
 	
 	FFederateAccountData FederateAccount;
 	FederateAccount.InitForEmail(this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
-
-	if (Credentials.RegisteredValid())
-	{
-		this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
-	}
-	else
-	{
-		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
-	}
+	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateOIDCSession(const FCredentials_BE& Credentials, const FString& IdTokenIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -555,18 +547,10 @@ void USequenceRPCManager::FederateOIDCSession(const FCredentials_BE& Credentials
 	
 	FFederateAccountData FederateAccount;
 	FederateAccount.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId());
-
-	if (Credentials.RegisteredValid())
-	{
-		this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
-	}
-	else
-	{
-		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
-	}
+	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederatePlayFabSession(const FCredentials_BE& Credentials, const FString& SessionTicketIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederatePlayFabSession(const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -575,13 +559,5 @@ void USequenceRPCManager::FederatePlayFabSession(const FCredentials_BE& Credenti
 	
 	FFederateAccountData FederateAccount;
 	FederateAccount.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId());
-
-	if (Credentials.RegisteredValid())
-	{
-		this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
-	}
-	else
-	{
-		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
-	}
+	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
 }

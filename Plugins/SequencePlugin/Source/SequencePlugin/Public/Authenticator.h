@@ -34,6 +34,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, FString, Error);
+
 /**
  * 
  */
@@ -45,14 +49,20 @@ public:
 	UPROPERTY()
 	FOnAuthRequiresCode AuthRequiresCode;
 	UPROPERTY()
-	FOnAuthFailure AuthFailure;//Could update auth failure to include a set code, that indicates that Federation is an option
+	FOnAuthFailure AuthFailure;
 	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
+	UPROPERTY()
+	FOnFederateSuccess FederateSuccess;
+	UPROPERTY()
+	FOnFederateFailure FederateFailure;
 	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure() const;
 	void CallAuthSuccess() const;
+	void CallFederateSuccess() const;
+	void CallFederateFailure(const FString& ErrorMessageIn) const;
 //vars
 private:
 	UPROPERTY()
@@ -63,13 +73,12 @@ private:
 	FString StateToken = "";
 
 	/**
-	 * Temporary Variable used to change behaviour
+	 * Used to change behaviour
 	 * if the user is federating accounts
 	 * OR
 	 * if the user is logging in normally
 	 */
 	bool IsFederating = false;
-	
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -111,23 +120,36 @@ public:
 
 	void GuestLogin(const bool ForceCreateAccountIn) const;
 
-	//Used to register a new user & login with it right away
+	/**
+	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param EmailIn Email
+	 * @param PasswordIn Password
+	 */
 	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
 
-	//Used to login with an existing user
+	/**
+	 * Used to login with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param PasswordIn Password
+	 */
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
+	/**
+	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
+	 * @param CodeIn Received Code from email
+	 */
 	void EmailLoginCode(const FString& CodeIn) const;
-
+	
 	void FederateEmail(const FString& EmailIn);
 	
-	void FederateOIDCIdToken(const FString& IdTokenIn);
+	void FederateOIDCIdToken(const FString& IdTokenIn) const;
 
 	void InitiateMobileFederateOIDC(const ESocialSigninType& Type);
 
-	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
 	
-	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	FStoredCredentials_BE GetStoredCredentials() const;
 
@@ -148,6 +170,25 @@ private:
 	void InitializeSequence(const FCredentials_BE& Credentials) const;
 
 	//PlayFab RPC//
+
+	/**
+	 * Used to Login a user with PlayFab
+	 * @param UsernameIn Username to login with
+	 * @param PasswordIn password for account
+	 * @param OnSuccess Called when successful (returns sessionTicket)
+	 * @param OnFailure Called when unsuccessful (returns error)
+	 */
+	static void PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/**
+	 * Used to Create a new user & log them in with PlayFab
+	 * @param UsernameIn New Username
+	 * @param EmailIn New Email
+	 * @param PasswordIn New Password
+	 * @param OnSuccess Called when successful (returns sessionTicket)
+	 * @param OnFailure Called when unsuccessful (returns error)
+	 */
+	static void PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	static FString GeneratePlayFabUrl();
 	
