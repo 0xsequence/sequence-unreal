@@ -131,6 +131,22 @@ void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 	}
 }
 
+void ASequenceBackendManager::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->PlayFabLogin(UsernameIn, PasswordIn);
+	}
+}
+
+void ASequenceBackendManager::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn)
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->PlayFabRegisterAndLogin(UsernameIn, EmailIn, PasswordIn);
+	}
+}
+
 void ASequenceBackendManager::FederateEmail(const FString& EmailIn) const
 {
 	if (this->Authenticator)

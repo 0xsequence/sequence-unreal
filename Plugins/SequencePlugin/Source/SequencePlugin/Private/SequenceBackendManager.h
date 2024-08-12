@@ -103,6 +103,12 @@ public:
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
 
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
 		void FederateEmail(const FString& EmailIn) const;
 
