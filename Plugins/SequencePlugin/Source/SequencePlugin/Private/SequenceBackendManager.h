@@ -28,6 +28,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateISuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateIFailure, FString, Error);
+
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor
 {
@@ -41,6 +45,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Auth")
 		FOnAuthISuccess ShowAuthSuccessDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="Federation")
+		FOnFederateISuccess ShowFederateSuccessDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="Federation")
+		FOnFederateIFailure ShowFederationFailureDelegate;
 private:
 	UFUNCTION()
 		void CallReadyToReceiveCode();
@@ -48,6 +58,10 @@ private:
 		void CallShowAuthFailureScreen();
 	UFUNCTION()
 		void CallShowAuthSuccessScreen();
+	UFUNCTION()
+		void CallShowFederationSuccess();
+	UFUNCTION()
+		void CallShowFederationFailure(const FString& Error);
 private:	
 	UPROPERTY()
 	UAuthenticator* Authenticator;

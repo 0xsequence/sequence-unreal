@@ -36,7 +36,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, FString, Error);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
 
 /**
  * 

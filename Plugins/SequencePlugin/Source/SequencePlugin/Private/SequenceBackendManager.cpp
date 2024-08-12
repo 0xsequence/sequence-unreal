@@ -36,6 +36,30 @@ void ASequenceBackendManager::CallShowAuthSuccessScreen()
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
 }
 
+void ASequenceBackendManager::CallShowFederationSuccess()
+{
+	if (this->ShowFederateSuccessDelegate.IsBound())
+	{
+		this->ShowFederateSuccessDelegate.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederateSuccessDelegate]"));
+	}
+}
+
+void ASequenceBackendManager::CallShowFederationFailure(const FString& Error)
+{
+	if (this->ShowFederationFailureDelegate.IsBound())
+	{
+		this->ShowFederationFailureDelegate.Broadcast(Error);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederationFailureDelegate]"));
+	}
+}
+
 // Sets default values
 ASequenceBackendManager::ASequenceBackendManager()
 {
@@ -54,6 +78,8 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);
 	this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
+	this->Authenticator->FederateSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowFederationSuccess);
+	this->Authenticator->FederateFailure.AddDynamic(this, &ASequenceBackendManager::CallShowFederationFailure);
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
