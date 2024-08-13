@@ -528,13 +528,26 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 void UAuthenticator::FederateEmail(const FString& EmailIn)
 {
 	this->IsFederating = true;
+
+	const TFunction<void()> OnSuccess = [this]
+	{
+		this->CallAuthRequiresCode();
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
 void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 {
 	const TFunction<void()> OnSuccess = [this]()
 	{
-		this->CallAuthSuccess();
+		this->CallFederateSuccess();
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)

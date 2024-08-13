@@ -32,6 +32,7 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	UE_LOG(LogTemp, Display, TEXT("Request: %s"), *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)

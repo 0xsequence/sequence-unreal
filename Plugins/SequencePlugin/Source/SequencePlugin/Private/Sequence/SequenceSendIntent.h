@@ -10,12 +10,13 @@
 //Operations Constants//
 
 static const FString OpenSessionOP = "openSession";
-static const FString InitiateAuthOP = "initiateAuth";//need to find the OPCode for this!
+static const FString InitiateAuthOP = "initiateAuth";
 static const FString CloseSessionOP = "closeSession";
 static const FString SendTransactionOP = "sendTransaction";
 static const FString FeeOptionsOP = "feeOptions";
 static const FString ListSessionsOP = "listSessions";
 static const FString SignMessageOP = "signMessage";
+static const FString FederateSessionOP = "federateAccount";
 
 static const FString EmailType = "Email";
 static const FString GuestType = "Guest";
@@ -53,6 +54,11 @@ struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
  FString verifier = "";
  UPROPERTY()
  FString wallet = "";
+
+ FFederateAccountData()
+ {
+  Operation = FederateSessionOP;
+ }
  
  void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn)
  {
