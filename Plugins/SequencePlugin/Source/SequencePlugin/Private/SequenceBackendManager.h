@@ -118,6 +118,9 @@ public:
 		void EmailCode(const FString& CodeIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void GuestLogin();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")

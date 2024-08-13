@@ -157,6 +157,14 @@ void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 	}
 }
 
+void ASequenceBackendManager::GuestLogin()
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->GuestLogin(false);
+	}
+}
+
 void ASequenceBackendManager::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
 {
 	if (this->Authenticator)
