@@ -153,6 +153,31 @@ int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, i
 	return USequenceSupport::GetAmount(Amount,Decimals);
 }
 
+int64 USequenceWalletBP::GetNetworkIdFromName(const FString& NetworkNameIn)
+{
+	return USequenceSupport::GetNetworkId(NetworkNameIn);
+}
+
+FString USequenceWalletBP::GetNetworkNameFromId(const int64 NetworkIdIn)
+{
+	return USequenceSupport::GetNetworkName(NetworkIdIn);
+}
+
+TArray<FIdNamePair> USequenceWalletBP::GetAllNetworks()
+{
+	return USequenceSupport::GetAllNetworksAsStructs();
+}
+
+TArray<FString> USequenceWalletBP::GetAllNetworkNames()
+{
+	return USequenceSupport::GetAllNetworkNames();
+}
+
+TArray<int64> USequenceWalletBP::GetAllNetworkIds()
+{
+	return USequenceSupport::GetAllNetworkIds();
+}
+
 FString USequenceWalletBP::ApiGetWalletAddress()
 {
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -210,7 +235,7 @@ void USequenceWalletBP::ApiSignOut()
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SignOut();
 	}
 }
@@ -230,7 +255,7 @@ void USequenceWalletBP::ApiSignMessage(const FString& Message)
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SignMessage(Message, OnSuccess, OnFailure);
 	}
 }
@@ -250,7 +275,7 @@ void USequenceWalletBP::ApiGetFilteredFeeOptions(UTransactions * Transactions)
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->GetFeeOptions(Transactions->GetTransactions(), OnSuccess, OnFailure);
 	}
 }
@@ -270,7 +295,7 @@ void USequenceWalletBP::ApiGetUnfilteredFeeOptions(UTransactions * Transactions)
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->GetUnfilteredFeeOptions(Transactions->GetTransactions(), OnSuccess, OnFailure);
 	}
 }
@@ -290,7 +315,7 @@ void USequenceWalletBP::ApiSendTransactionWithFee(UTransactions * Transactions)
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		if (Transactions->IsFeeSet())
 		{
 			Wallet->SendTransactionWithFeeOption(Transactions->GetTransactions(), Transactions->GetFee(), OnSuccess, OnFailure);
@@ -317,7 +342,7 @@ void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SendTransaction(Transactions->GetTransactions(), OnSuccess, OnFailure);
 	}
 }
@@ -337,7 +362,7 @@ void USequenceWalletBP::ApiListSessions()
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->ListSessions(OnSuccess, OnFailure);
 	}
 }

@@ -17,6 +17,25 @@ struct FUpdatableItemDataArgs;
 typedef TPair<FString, int64> FNameId;
 typedef TPair<int64, FString> FIdName;
 
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FIdNamePair
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Network Data")
+	int64 NetworkId = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Network Data")
+	FString NetworkName = "";
+
+	FIdNamePair(){}
+
+	FIdNamePair(const FIdName& IdNameIn)
+	{
+		NetworkId = IdNameIn.Key;
+		NetworkName = IdNameIn.Value;
+	}
+};
+
 /**
  * Support class for the indexer
  */
@@ -112,6 +131,8 @@ public:
 	 */
 	static TArray<FIdName> GetAllNetworks();
 
+	static TArray<FIdNamePair> GetAllNetworksAsStructs();
+
 	/**
 	 * Gets all Network Names supported by sequence
 	 * @return A list of all network names in the system
@@ -157,7 +178,7 @@ public:
 	/*
 	* Used to convert a jsonObject into a hash map of FStrings
 	*/
-	static TMap<FString, FString> JSONObjectParser(TSharedPtr<FJsonObject> JSONData);
+	static TMap<FString, FString> JSONObjectParser(const TSharedPtr<FJsonObject>& JSONData);
 
 	static TSharedPtr<FJsonObject> JsonStringToObject(const FString& JSON);
 	
@@ -170,13 +191,13 @@ public:
 	static FString PartialSimpleString(FString String);
 
 	/*
-	* Similar to simplify string EXCEPT we keept he /" because we are trying
+	* Similar to simplify string EXCEPT we keep the /" because we are trying
 	* to maintain json correctness for parsing!
 	*/
 	static FString SimplifyStringParsable(FString String);
 
 	/*
-	* Allows for the converting of a Struct straigt into a nicely formatted json string!
+	* Allows for the converting of a Struct straight into a nicely formatted json string!
 	*/
 	template < typename T > static FString StructToString(T StructVar)
 	{
@@ -186,7 +207,7 @@ public:
 	}
 
 	/*
-	* Allows for the converting of a Struct straigt into a nicely formatted json string!
+	* Allows for the converting of a Struct straight into a nicely formatted json string!
 	* This also cleans up the string from json formatting in the event we just want an
 	* easily testable string!
 	*/
@@ -270,21 +291,21 @@ public:
 
 	static FString JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData);
 
-	static FString JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData);
+	static FString JsonValueListToParsableString(const TArray<TSharedPtr<FJsonValue>>& JsonData);
 
-	static FString JsonToString(TSharedPtr<FJsonValue> JsonData);
+	static FString JsonToString(const TSharedPtr<FJsonValue>& JsonData);
 
-	static FString JsonToSimpleString(TSharedPtr<FJsonValue> JsonData);
+	static FString JsonToSimpleString(const TSharedPtr<FJsonValue>& JsonData);
 
-	static FString JsonToParsableString(TSharedPtr<FJsonValue> JsonData);
+	static FString JsonToParsableString(const TSharedPtr<FJsonValue>& JsonData);
 
-	static FString JsonToParsableString(TSharedPtr<FJsonObject> JsonData);
+	static FString JsonToParsableString(const TSharedPtr<FJsonObject>& JsonData);
 
-	static FString JsonToString(TSharedPtr<FJsonObject> JsonData);
+	static FString JsonToString(const TSharedPtr<FJsonObject>& JsonData);
 
-	static FString JsonToSimpleString(TSharedPtr<FJsonObject> JsonData);
+	static FString JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData);
 
-	//indexer reponse extraction functions used to parse response into a frontend usable form!
+	//indexer response extraction functions used to parse response into a frontend usable form!
 	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
 	static FUpdatableItemDataArgs ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances);
 
@@ -297,5 +318,5 @@ private:
 	*/
 	static FString StringCleanup(FString String);
 
-	static FMonthDayYear_BE TimestampToMonthDayYear_Be(FString Timestamp);
+	static FMonthDayYear_BE TimestampToMonthDayYear_Be(const FString& Timestamp);
 };

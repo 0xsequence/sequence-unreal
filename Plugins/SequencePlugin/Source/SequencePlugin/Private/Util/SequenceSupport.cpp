@@ -35,6 +35,18 @@ TArray<FIdName> USequenceSupport::GetAllNetworks()
 	return NetworkIdToNameMap.Array();
 }
 
+TArray<FIdNamePair> USequenceSupport::GetAllNetworksAsStructs()
+{
+	TArray<FIdNamePair> Networks;
+
+	for (FIdName IdName : NetworkIdToNameMap.Array())
+	{
+		Networks.Add(FIdNamePair(IdName));
+	}
+	
+	return Networks;
+}
+
 TArray<FString> USequenceSupport::GetAllNetworkNames()
 {
 	TArray<FString> NetworkNames;
@@ -245,7 +257,7 @@ FString USequenceSupport::TransactionListToJsonString(const TArray<TransactionUn
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
 * object usable in the UI!
 */
-TMap<FString, FString> USequenceSupport::JSONObjectParser(TSharedPtr<FJsonObject> JSONData)
+TMap<FString, FString> USequenceSupport::JSONObjectParser(const TSharedPtr<FJsonObject>& JSONData)
 {
 	TArray<TPair<FString, TSharedPtr<FJsonValue>>> jsonList = JSONData.Get()->Values.Array();
 	TMap<FString, FString> ret;
@@ -270,179 +282,179 @@ TSharedPtr<FJsonObject> USequenceSupport::JsonStringToObject(const FString& JSON
 
 FString USequenceSupport::PartialSimpleString(FString String)
 {
-	FString* ret = &String;
+	FString* Ret = &String;
 
-	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
-	FString srch_r = TEXT("\r");
-	FString srch_t = TEXT("\t");
-	FString replace = TEXT("");
+	const FString Search_N = TEXT("\n");//we want no returns the UI will take of this for us!
+	const FString Search_R = TEXT("\r");
+	const FString Search_T = TEXT("\t");
+	const FString Replace = TEXT("");
 
-	const TCHAR* srch_ptr_n = *srch_n;
-	const TCHAR* srch_ptr_r = *srch_r;
-	const TCHAR* srch_ptr_t = *srch_t;
-	const TCHAR* rep_ptr = *replace;
+	const TCHAR* Search_Ptr_N = *Search_N;
+	const TCHAR* Search_Ptr_R = *Search_R;
+	const TCHAR* Search_Ptr_T = *Search_T;
+	const TCHAR* Rep_Ptr = *Replace;
 
-	(*ret).RemoveSpacesInline();//remove spaces
-	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
-	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
-	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
+	Ret->RemoveSpacesInline();//remove spaces
+	Ret->ReplaceInline(Search_Ptr_N, Rep_Ptr, ESearchCase::IgnoreCase);//remove \n
+	Ret->ReplaceInline(Search_Ptr_R, Rep_Ptr, ESearchCase::IgnoreCase);//remove \r
+	Ret->ReplaceInline(Search_Ptr_T, Rep_Ptr, ESearchCase::IgnoreCase);//remove \t
 
-	return (*ret);
+	return (*Ret);
 }
 
 FString USequenceSupport::SimplifyString(FString String)
 {
-	FString* ret = &String;
+	FString* Ret = &String;
 
-	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
-	FString srch_r = TEXT("\r");
-	FString srch_t = TEXT("\t");
-	FString srch_c = TEXT("\"");//this will be apart of json formatting get rid of it!
-	FString replace = TEXT("");
+	const FString Search_N = TEXT("\n");//we want no returns the UI will take of this for us!
+	const FString Search_R = TEXT("\r");
+	const FString Search_T = TEXT("\t");
+	const FString Search_C = TEXT("\"");//this will be apart of json formatting get rid of it!
+	const FString Replace = TEXT("");
 
-	const TCHAR* srch_ptr_n = *srch_n;
-	const TCHAR* srch_ptr_r = *srch_r;
-	const TCHAR* srch_ptr_t = *srch_t;
-	const TCHAR* srch_ptr_c = *srch_c;
-	const TCHAR* rep_ptr = *replace;
+	const TCHAR* Search_Ptr_N = *Search_N;
+	const TCHAR* Search_Ptr_R = *Search_R;
+	const TCHAR* Search_Ptr_T = *Search_T;
+	const TCHAR* Search_Ptr_C = *Search_C;
+	const TCHAR* Rep_Ptr = *Replace;
 
-	(*ret).RemoveSpacesInline();//remove spaces
-	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
-	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
-	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
-	(*ret).ReplaceInline(srch_ptr_c, rep_ptr, ESearchCase::IgnoreCase);//remove \"
+	Ret->RemoveSpacesInline();//remove spaces
+	Ret->ReplaceInline(Search_Ptr_N, Rep_Ptr, ESearchCase::IgnoreCase);//remove \n
+	Ret->ReplaceInline(Search_Ptr_R, Rep_Ptr, ESearchCase::IgnoreCase);//remove \r
+	Ret->ReplaceInline(Search_Ptr_T, Rep_Ptr, ESearchCase::IgnoreCase);//remove \t
+	Ret->ReplaceInline(Search_Ptr_C, Rep_Ptr, ESearchCase::IgnoreCase);//remove \"
 
-	return (*ret);
+	return (*Ret);
 }
 
 FString USequenceSupport::SimplifyStringParsable(FString String)
 {
-	FString* ret = &String;
+	FString* Ret = &String;
 
-	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
-	FString srch_r = TEXT("\r");
-	FString srch_t = TEXT("\t");
-	FString replace = TEXT("");
+	const FString Search_N = TEXT("\n");//we want no returns the UI will take of this for us!
+	const FString Search_R = TEXT("\r");
+	const FString Search_T = TEXT("\t");
+	const FString Replace = TEXT("");
 
-	const TCHAR* srch_ptr_n = *srch_n;
-	const TCHAR* srch_ptr_r = *srch_r;
-	const TCHAR* srch_ptr_t = *srch_t;
-	const TCHAR* rep_ptr = *replace;
+	const TCHAR* Search_Ptr_N = *Search_N;
+	const TCHAR* Search_Ptr_R = *Search_R;
+	const TCHAR* Search_Ptr_T = *Search_T;
+	const TCHAR* Rep_Ptr = *Replace;
 
-	(*ret).RemoveSpacesInline();//remove spaces
-	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
-	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
-	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
+	Ret->RemoveSpacesInline();//remove spaces
+	Ret->ReplaceInline(Search_Ptr_N, Rep_Ptr, ESearchCase::IgnoreCase);//remove \n
+	Ret->ReplaceInline(Search_Ptr_R, Rep_Ptr, ESearchCase::IgnoreCase);//remove \r
+	Ret->ReplaceInline(Search_Ptr_T, Rep_Ptr, ESearchCase::IgnoreCase);//remove \t
 
-	return (*ret);
+	return (*Ret);
 }
 
 FString USequenceSupport::StringListToSimpleString(TArray<FString> StringData)
 {
-	FString ret = "[";
+	FString Ret = "[";
 
 	for (FString string : StringData)
 	{
-		ret += string;
-		ret += ",";
+		Ret += string;
+		Ret += ",";
 	}
 
 	if (StringData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+		Ret.RemoveAt(Ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
-	ret += "]";
-	return ret;
+	Ret += "]";
+	return Ret;
 }
 
 FString USequenceSupport::StringListToParsableString(TArray<FString> StringData)
 {
-	FString ret = "[";
-	for (FString string : StringData)
+	FString Ret = "[";
+	for (FString StringDatum : StringData)
 	{
-		ret += "\""+string+"\"";
-		ret += ",";
+		Ret += "\""+StringDatum+"\"";
+		Ret += ",";
 	}
 
 	if (StringData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+		Ret.RemoveAt(Ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
-	ret += "]";
-	return ret;
+	Ret += "]";
+	return Ret;
 }
 
 FString USequenceSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {
-	FString ret = "[";
+	FString Ret = "[";
 
-	for (int64 iData : IntData)
+	for (int64 IData : IntData)
 	{
-		FString iDataString = FString::Printf(TEXT("%lld"), iData);
-		ret += iDataString + ",";
+		FString IDataString = FString::Printf(TEXT("%lld"), IData);
+		Ret += IDataString + ",";
 	}
 
 	if (IntData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);//remove the last comma as it'll be wrong!
+		Ret.RemoveAt(Ret.Len() - 1);//remove the last comma as it'll be wrong!
 	}
 
-	ret += "]";
-	return ret;
+	Ret += "]";
+	return Ret;
 }
 
 FString USequenceSupport::JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
-	FString ret = "[";
+	FString Ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(USequenceSupport::JsonToString(jObj));
-		ret.Append(",");
+		Ret.Append(USequenceSupport::JsonToString(jObj));
+		Ret.Append(",");
 	}
 
 	if (JsonData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);
+		Ret.RemoveAt(Ret.Len() - 1);
 	}
-	ret.Append("]");
-	return ret;
+	Ret.Append("]");
+	return Ret;
 }
 
 FString USequenceSupport::JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
-	FString ret = "[";
+	FString Ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(USequenceSupport::JsonToSimpleString(jObj));
-		ret.Append(",");
+		Ret.Append(USequenceSupport::JsonToSimpleString(jObj));
+		Ret.Append(",");
 	}
 
 	if (JsonData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);
+		Ret.RemoveAt(Ret.Len() - 1);
 	}
-	ret.Append("]");
-	return ret;
+	Ret.Append("]");
+	return Ret;
 }
 
 FString USequenceSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
-	FString ret = "[";
+	FString Ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(USequenceSupport::JsonToParsableString(jObj));
-		ret.Append(",");
+		Ret.Append(USequenceSupport::JsonToParsableString(jObj));
+		Ret.Append(",");
 	}
 
 	if (JsonData.Num() > 0)
 	{
-		ret.RemoveAt(ret.Len() - 1);
+		Ret.RemoveAt(Ret.Len() - 1);
 	}
-	ret.Append("]");
-	return ret;
+	Ret.Append("]");
+	return Ret;
 }
 
-FString USequenceSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData)
+FString USequenceSupport::JsonValueListToParsableString(const TArray<TSharedPtr<FJsonValue>>& JsonData)
 {
 	FString JsonList;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
@@ -450,20 +462,20 @@ FString USequenceSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonV
 	return SimplifyStringParsable(JsonList);
 }
 
-FString USequenceSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToString(const TSharedPtr<FJsonObject>& JsonData)
 {
 	FString ret;
-	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
+	const TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
 	FJsonSerializer::Serialize(JsonData.ToSharedRef(), Writer);
 	return ret;
 }
 
-FString USequenceSupport::JsonToSimpleString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToSimpleString(const TSharedPtr<FJsonValue>& JsonData)
 {
 	return SimplifyString(JsonToString(JsonData));
 }
 
-FString USequenceSupport::JsonToSimpleString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData)
 {
 	return SimplifyString(JsonToString(JsonData));
 }
@@ -481,7 +493,7 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 		
 		for(FTxnTransfer Transfer : Transaction.transfers)
 		{
-			//preprocess all the indexable amounts and properties
+			//preprocess all the Indexed amounts and properties
 			int64 TokenId = -1;
 			int64 amount = -1;
 
@@ -599,12 +611,12 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 	return UpdateItems;
 }
 
-FString USequenceSupport::JsonToParsableString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToParsableString(const TSharedPtr<FJsonValue>& JsonData)
 {
 	return SimplifyStringParsable(JsonToString(JsonData));
 }
 
-FString USequenceSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToParsableString(const TSharedPtr<FJsonObject>& JsonData)
 {
 	return SimplifyStringParsable(JsonToString(JsonData));
 }
@@ -612,17 +624,17 @@ FString USequenceSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
 /*
 * This will convert a json value to an FString!
 */
-FString USequenceSupport::JsonToString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToString(const TSharedPtr<FJsonValue>& JsonData)
 {
 	FString ret;
-	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
+	const TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
 	FJsonSerializer::Serialize(JsonData.ToSharedRef(),"", Writer);
 	return ret;
 }
 
 FString USequenceSupport::StringCleanup(FString String)
 {
-	FString *ret = &String;
+	FString *Ret = &String;
 
 	//For some reason FJsonValues when they get parsed will have leading commas!
 	if (String[0] == ',')
@@ -630,42 +642,42 @@ FString USequenceSupport::StringCleanup(FString String)
 		String.RemoveAt(0);//remove the initial character if it's a treasonous comma!
 	}
 
-	FString srch_n = TEXT("\n");//we want no returns the UI will take of this for us!
-	FString srch_r = TEXT("\r");
-	FString srch_t = TEXT("\t");
-	FString srch_c = TEXT("\"");//this will be apart of json formatting get rid of it!
-	FString replace = TEXT("");
+	const FString Search_N = TEXT("\n");//we want no returns the UI will take of this for us!
+	const FString Search_R = TEXT("\r");
+	const FString Search_T = TEXT("\t");
+	const FString Search_C = TEXT("\"");//this will be apart of json formatting get rid of it!
+	const FString Replace = TEXT("");
 
-	const TCHAR* srch_ptr_n = *srch_n;
-	const TCHAR* srch_ptr_r = *srch_r;
-	const TCHAR* srch_ptr_t = *srch_t;
-	const TCHAR* srch_ptr_c = *srch_c;
-	const TCHAR* rep_ptr = *replace;
+	const TCHAR* Search_Ptr_N = *Search_N;
+	const TCHAR* Search_Ptr_R = *Search_R;
+	const TCHAR* Search_Ptr_T = *Search_T;
+	const TCHAR* Search_Ptr_C = *Search_C;
+	const TCHAR* Rep_Ptr = *Replace;
 
-	(*ret).ReplaceInline(srch_ptr_n, rep_ptr, ESearchCase::IgnoreCase);//remove \n
-	(*ret).ReplaceInline(srch_ptr_r, rep_ptr, ESearchCase::IgnoreCase);//remove \r
-	(*ret).ReplaceInline(srch_ptr_t, rep_ptr, ESearchCase::IgnoreCase);//remove \t
-	(*ret).ReplaceInline(srch_ptr_c, rep_ptr, ESearchCase::IgnoreCase);//remove \"
+	Ret->ReplaceInline(Search_Ptr_N, Rep_Ptr, ESearchCase::IgnoreCase);//remove \n
+	Ret->ReplaceInline(Search_Ptr_R, Rep_Ptr, ESearchCase::IgnoreCase);//remove \r
+	Ret->ReplaceInline(Search_Ptr_T, Rep_Ptr, ESearchCase::IgnoreCase);//remove \t
+	Ret->ReplaceInline(Search_Ptr_C, Rep_Ptr, ESearchCase::IgnoreCase);//remove \"
 
-	return (*ret);
+	return (*Ret);
 }
 
-FMonthDayYear_BE USequenceSupport::TimestampToMonthDayYear_Be(FString Timestamp)
+FMonthDayYear_BE USequenceSupport::TimestampToMonthDayYear_Be(const FString& Timestamp)
 {
 	//format: 2023-08-21T15:06:09Z to 21,08,2023
-	FMonthDayYear_BE date;
-	int32 loc = Timestamp.Find("T", ESearchCase::CaseSensitive);
-	FString dateString = Timestamp.Left(loc);
+	FMonthDayYear_BE Date;
+	const int32 Loc = Timestamp.Find("T", ESearchCase::CaseSensitive);
+	const FString DateString = Timestamp.Left(Loc);
 	//need to do 2 splits
-	FString yearData, monthDayData, monthData, dayData;
-	FString *yearString = &yearData, *monthDayString = &monthDayData,*monthString = &monthData,*dayString = &dayData;
-	dateString.Split("-",yearString,monthDayString);
-	monthDayString->Split("-",monthString,dayString);
+	FString YearData, MonthDayData, MonthData, DayData;
+	FString *YearString = &YearData, *MonthDayString = &MonthDayData,*MonthString = &MonthData,*DayString = &DayData;
+	DateString.Split("-",YearString,MonthDayString);
+	MonthDayString->Split("-",MonthString,DayString);
 	//now year is in yearString, month is in monthString & day is in dayString
-	date.Day = FCString::Atoi(**dayString);
-	date.Month = FCString::Atoi(**monthString);
-	date.Year = FCString::Atoi(**yearString);
-	return date;
+	Date.Day = FCString::Atoi(**DayString);
+	Date.Month = FCString::Atoi(**MonthString);
+	Date.Year = FCString::Atoi(**YearString);
+	return Date;
 }
 
 int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
