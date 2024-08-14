@@ -172,19 +172,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	int64 GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals);
 
-	UFUNCTION(Blueprintable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static int64 GetNetworkIdFromName(const FString& NetworkNameIn);
 
-	UFUNCTION(Blueprintable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static FString GetNetworkNameFromId(const int64 NetworkIdIn);
 
-	UFUNCTION(Blueprintable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static TArray<FIdNamePair> GetAllNetworks();
 
-	UFUNCTION(Blueprintable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static TArray<FString> GetAllNetworkNames();
 
-	UFUNCTION(Blueprintable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static TArray<int64> GetAllNetworkIds();
 	
 	//Support//
