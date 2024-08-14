@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "GeneralTesting.h"
-#include "Indexer/IndexerTests.h"
+#include "Tests/IndexerTests.h"
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
@@ -10,10 +10,6 @@
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
-#include "Logging/StructuredLogFormat.h"
-#include "Sequence/DelayedEncodingArgsBP.h"
-#include "Sequence/DelayedEncodingBP.h"
-#include "Sequence/SequenceSendIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()

@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Indexer/IndexerTests.h"
+#include "Tests//IndexerTests.h"
 
 void PingTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
@@ -16,7 +16,7 @@ void PingTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<v
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Ping Failure", Error);
 	};
@@ -26,17 +26,17 @@ void PingTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<v
 
 void VersionTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FVersion> GenericSuccess = [OnSuccess](const FVersion version)
+	const TSuccessCallback<FVersion> GenericSuccess = [OnSuccess](const FVersion& Version)
 	{
 		OnSuccess("Received Version Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FVersion>(version);
-			UE_LOG(LogTemp, Display, TEXT("Parsed Version Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FVersion>(Version);
+			UE_LOG(LogTemp, Display, TEXT("Parsed Version Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Version Failure", Error);
 	};
@@ -46,17 +46,17 @@ void VersionTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunctio
 
 void RunTimeStatusTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FRuntimeStatus> GenericSuccess = [OnSuccess](const FRuntimeStatus runTimeStatus)
+	const TSuccessCallback<FRuntimeStatus> GenericSuccess = [OnSuccess](const FRuntimeStatus& RunTimeStatus)
 	{
 		OnSuccess("Received RunTimeStatus Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FRuntimeStatus>(runTimeStatus);
-			UE_LOG(LogTemp, Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FRuntimeStatus>(RunTimeStatus);
+			UE_LOG(LogTemp, Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("RunTimeStatus Failure", Error);
 	};
@@ -66,17 +66,17 @@ void RunTimeStatusTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TF
 
 void GetChainIDTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<int64> GenericSuccess = [OnSuccess](const int64 chainID)
+	const TSuccessCallback<int64> GenericSuccess = [OnSuccess](const int64 ChainID)
 	{
 		OnSuccess("Received ChainID Data");
 		if (GPrintAll)
 		{
-			FString ret = FString::Printf(TEXT("%lld"), chainID);
-			UE_LOG(LogTemp, Display, TEXT("ChainID: %s"), *ret);
+			const FString Ret = FString::Printf(TEXT("%lld"), ChainID);
+			UE_LOG(LogTemp, Display, TEXT("ChainID: %s"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("ChainID Failure", Error);
 	};
@@ -86,17 +86,17 @@ void GetChainIDTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunc
 
 void GetEtherBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FEtherBalance> GenericSuccess = [OnSuccess](const FEtherBalance etherBalance)
+	const TSuccessCallback<FEtherBalance> GenericSuccess = [OnSuccess](const FEtherBalance& EtherBalance)
 	{
 		OnSuccess("Received etherBalance Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FEtherBalance>(etherBalance);
-			UE_LOG(LogTemp, Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FEtherBalance>(EtherBalance);
+			UE_LOG(LogTemp, Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("etherBalance Failure", Error);
 	};
@@ -106,131 +106,131 @@ void GetEtherBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 
 void GetTokenBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [OnSuccess](const FGetTokenBalancesReturn tokenBalances)
+	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [OnSuccess](const FGetTokenBalancesReturn& TokenBalances)
 	{
 		OnSuccess("Received Token Balances Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
-			UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FGetTokenBalancesReturn>(TokenBalances);
+			UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("Token Balances Failure", Error);
 	};
-	FGetTokenBalancesArgs args;
-	args.accountAddress = GTestingAddress;
-	args.includeMetaData = true;
-	Indexer->GetTokenBalances(GTestingChainID, args, GenericSuccess, GenericFailure);
+	FGetTokenBalancesArgs Args;
+	Args.accountAddress = GTestingAddress;
+	Args.includeMetaData = true;
+	Indexer->GetTokenBalances(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
 void GetTokenSuppliesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesReturn tokenSupplies)
+	const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesReturn& TokenSupplies)
 	{
 		OnSuccess("Received TokenSupplies Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FGetTokenSuppliesReturn>(tokenSupplies);
-			UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FGetTokenSuppliesReturn>(TokenSupplies);
+			UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("TokenSupplies Failure", Error);
 	};
-	FGetTokenSuppliesArgs args;
-	args.contractAddress = GTestingContractAddress;
-	args.includeMetaData = true;
-	Indexer->GetTokenSupplies(GTestingChainID, args, GenericSuccess, GenericFailure);
+	FGetTokenSuppliesArgs Args;
+	Args.contractAddress = GTestingContractAddress;
+	Args.includeMetaData = true;
+	Indexer->GetTokenSupplies(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
 void GetTokenSuppliesMapTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesMapReturn tokenSuppliesMap)
+	const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [OnSuccess](const FGetTokenSuppliesMapReturn& TokenSuppliesMap)
 	{
 		OnSuccess("Received TokenSuppliesMap Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FGetTokenSuppliesMapReturn>(tokenSuppliesMap);
-			UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FGetTokenSuppliesMapReturn>(TokenSuppliesMap);
+			UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("TokenSuppliesMap Failure", Error);
 	};
 
-	FGetTokenSuppliesMapArgs args;
-	TMap<FString, FTokenList> tokenMap;
-	TPair<FString,FTokenList> item;
-	tokenMap.Add(item);
-	args.includeMetaData = true;
-	args.tokenMap = tokenMap;
-	Indexer->GetTokenSuppliesMap(GTestingChainID, args, GenericSuccess, GenericFailure);
+	FGetTokenSuppliesMapArgs Args;
+	TMap<FString, FTokenList> TokenMap;
+	const TPair<FString,FTokenList> Item;
+	TokenMap.Add(Item);
+	Args.includeMetaData = true;
+	Args.tokenMap = TokenMap;
+	Indexer->GetTokenSuppliesMap(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
 void GetBalanceUpdatesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [OnSuccess](const FGetBalanceUpdatesReturn balanceUpdates)
+	const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [OnSuccess](const FGetBalanceUpdatesReturn& BalanceUpdates)
 	{
 		OnSuccess("Received balance Updates Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FGetBalanceUpdatesReturn>(balanceUpdates);
+			const FString ret = USequenceSupport::StructToString<FGetBalanceUpdatesReturn>(BalanceUpdates);
 			UE_LOG(LogTemp, Display, TEXT("Parsed balanceUpdatesReturn Struct:\n%s\n"), *ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("balanceUpdates Failure", Error);
 	};
 
-	FGetBalanceUpdatesArgs args;
-	args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	args.page.page = 10;
-	args.page.more = true;
-	Indexer->GetBalanceUpdates(GTestingChainID, args, GenericSuccess, GenericFailure);
+	FGetBalanceUpdatesArgs Args;
+	Args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	Args.page.page = 10;
+	Args.page.more = true;
+	Indexer->GetBalanceUpdates(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
 void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [OnSuccess](const FGetTransactionHistoryReturn transactionHistory)
+	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [OnSuccess](const FGetTransactionHistoryReturn& TransactionHistory)
 	{
 		OnSuccess("Received transactionHistory Data");
 		if (GPrintAll)
 		{
-			FString ret = USequenceSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
-			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
+			const FString Ret = USequenceSupport::StructToString<FGetTransactionHistoryReturn>(TransactionHistory);
+			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError Error)
+	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
 	{
 		OnFailure("transactionHistory Failure", Error);
 	};
 
-	FGetTransactionHistoryArgs args;
-	args.filter.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	args.includeMetaData = true;
-	args.page.page = 0;
-	args.page.more = true;
-	Indexer->GetTransactionHistory(GTestingChainID, args, GenericSuccess, GenericFailure);
+	FGetTransactionHistoryArgs Args;
+	Args.filter.accountAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
+	Args.includeMetaData = true;
+	Args.page.page = 0;
+	Args.page.more = true;
+	Indexer->GetTransactionHistory(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
 void EmptyResponseTest(UIndexer * Indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("EmptyResponseTest"));
-	FString args = "{}";
-	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
+	const FString Args = "{}";
+	const FPingReturn Rep = Indexer->BuildResponse<FPingReturn>(Args);
 	//by default this should still be false!
-	if (!rep.status)
+	if (!Rep.status)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Passed"));
 	}
@@ -245,10 +245,10 @@ void InvalidResponseTest(UIndexer* Indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Invalid Response Test"));
-	FString args = "+)0asfjlkj;ksjfa{sdfkaljsa;f[}}}skaflasjfd;";
-	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
+	const FString Args = "+)0asfjlkj;ksjfa{sdfkaljsa;f[}}}skaflasjfd;";
+	const FPingReturn Rep = Indexer->BuildResponse<FPingReturn>(Args);
 	//by default this should still be false!
-	if (!rep.status)
+	if (!Rep.status)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Passed"));
 	}
@@ -263,10 +263,10 @@ void WrongResponseReceivedTest1(UIndexer* Indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Wrong Response Received Test 1"));
-	FString args = "{\"wrong_arg\" : true}";
-	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
+	const FString Args = "{\"wrong_arg\" : true}";
+	const FPingReturn Rep = Indexer->BuildResponse<FPingReturn>(Args);
 	//by default this should still be false!
-	if (!rep.status)
+	if (!Rep.status)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Passed"));
 	}
@@ -281,8 +281,8 @@ void WrongResponseReceivedTest2(UIndexer* Indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Wrong Response Received Test 2"));
-	FString args = "{ [ \"alt1\" , \"alt2\" , \"alt3\" ] }";
-	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
+	const FString Args = "{ [ \"alt1\" , \"alt2\" , \"alt3\" ] }";
+	const FPingReturn rep = Indexer->BuildResponse<FPingReturn>(Args);
 	//by default this should still be false!
 	if (!rep.status)
 	{
@@ -301,11 +301,11 @@ void PingParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Ping Parsing Test"));
 	FString args = "{\"status\":true}";
-	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
+	const FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = USequenceSupport::StructToSimpleString<FPingReturn>(rep);
+	const FString repString = USequenceSupport::StructToSimpleString<FPingReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -329,11 +329,11 @@ void VersionParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Version Parsing Test"));
 	FString args = "{\"version\":{\"webrpcVersion\":\"1.0\" , \"schemaVersion\":\"s1.0\" , \"schemaHash\":\"0x1\" , \"appVersion\":\"a1.0\"}}";
-	FVersionReturn rep = Indexer->BuildResponse<FVersionReturn>(args);
+	const FVersionReturn rep = Indexer->BuildResponse<FVersionReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = USequenceSupport::StructToSimpleString<FVersionReturn>(rep);
+	const FString repString = USequenceSupport::StructToSimpleString<FVersionReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -357,11 +357,11 @@ void RunTimeStatusParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Runtime Status Parsing Test"));
 	FString args = "{\"status\":{\"healthOK\":true,\"indexerEnabled\":true,\"startTime\":\"now\",\"uptime\":10.1,\"ver\":\"1.1\",\"branch\":\"main\",\"commitHash\":\"0x12\",\"chainID\":1,\"checks\":{\"running\":true,\"syncMode\":\"Synced\",\"lastBlockNum\":10}}}";
-	FRuntimeStatusReturn rep = Indexer->BuildResponse<FRuntimeStatusReturn>(args);
+	const FRuntimeStatusReturn rep = Indexer->BuildResponse<FRuntimeStatusReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = USequenceSupport::StructToSimpleString<FRuntimeStatusReturn>(rep);
+	const FString repString = USequenceSupport::StructToSimpleString<FRuntimeStatusReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -385,11 +385,11 @@ void GetChainIDParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Chain ID Parsing Test"));
 	FString args = "{\"chainID\":169}";
-	FGetChainIDReturn rep = Indexer->BuildResponse<FGetChainIDReturn>(args);
+	const FGetChainIDReturn rep = Indexer->BuildResponse<FGetChainIDReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = USequenceSupport::StructToSimpleString<FGetChainIDReturn>(rep);
+	const FString repString = USequenceSupport::StructToSimpleString<FGetChainIDReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -413,11 +413,11 @@ void GetEtherBalanceParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Ether Balance Parsing Test"));
 	FString args = "{\"balance\":{\"accountAddress\":\"main_address\",\"balanceWei\":101}}";
-	FGetEtherBalanceReturn rep = Indexer->BuildResponse<FGetEtherBalanceReturn>(args);
+	const FGetEtherBalanceReturn rep = Indexer->BuildResponse<FGetEtherBalanceReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = USequenceSupport::StructToSimpleString<FGetEtherBalanceReturn>(rep);
+	const FString repString = USequenceSupport::StructToSimpleString<FGetEtherBalanceReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -447,7 +447,7 @@ void GetTokenBalanceParsingTest(UIndexer* Indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
+	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -477,7 +477,7 @@ void GetTokenSuppliesParsingTest(UIndexer* Indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
+	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -507,7 +507,7 @@ void GetTokenSuppliesMapParsingTest(UIndexer* Indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
+	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -537,7 +537,7 @@ void GetBalanceUpdatesParsingTest(UIndexer* Indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
+	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -567,7 +567,7 @@ void GetTransactionHistoryParsingTest(UIndexer* Indexer)
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
+	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -599,8 +599,8 @@ void TokenBalanceMaxArgsTest(UIndexer* Indexer)
 	args.contractAddress = GTestingContractAddress;
 	args.includeMetaData = true;
 	args.page = BuildTestPage();
-	
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -629,7 +629,7 @@ void TokenBalanceMinArgsTest(UIndexer* Indexer)
 	FGetTokenBalancesArgs args;
 	args.accountAddress = GTestingAddress;
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -713,7 +713,7 @@ void TokenSuppliesArgsTest(UIndexer* Indexer)
 	args.includeMetaData = true;
 	args.page = BuildTestPage();
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -742,7 +742,7 @@ void TokenSuppliesMapArgsTest(UIndexer* Indexer)
 	FGetTokenSuppliesMapArgs args;
 	args.tokenMap = BuildTokenMap();
 	args.includeMetaData = true;
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -773,7 +773,7 @@ void BalanceUpdatesMaxArgsTest(UIndexer* Indexer)
 	args.lastUpdateID = 10;
 	args.page = BuildTestPage();
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -802,7 +802,7 @@ void BalanceUpdatesMinArgsTest(UIndexer * Indexer)
 	FGetBalanceUpdatesArgs args;
 	args.contractAddress = GTestingContractAddress;
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -835,7 +835,7 @@ void TransactionHistoryArgsMaxTest(UIndexer* Indexer)
 	args.page = BuildTestPage();
 	args.includeMetaData = true;
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -865,7 +865,7 @@ void TransactionHistoryArgsMinTest(UIndexer* Indexer)
 	args.filter.accountAddress = GTestingAddress;
 	args.includeMetaData = true;
 
-	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
@@ -885,7 +885,7 @@ void TransactionHistoryArgsMinTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
-void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
+void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString, FSequenceError)>& OnFailure)
 {
 	//now we need to test all the different calls!
 	UIndexer* indexer = NewObject<UIndexer>();//for testing!

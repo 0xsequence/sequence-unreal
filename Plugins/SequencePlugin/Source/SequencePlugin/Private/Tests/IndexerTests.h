@@ -3,15 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer.h"
+#include "Indexer/Indexer.h"
 
-/**
- * 
- */
 const static FString GTestingAddress = "0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9";//peter's public address
 const static FString GTestingContractAddress = "0xc58b7abe57605dee6355646aefd09c2dbfb68eb4";//contract address pulled from peter's data
-const static int64 GTestingChainID = 137;//polygon for testing!
-const static bool GPrintAll = true;//used to enable / disable printing of the received data for observation
+static constexpr int64 GTestingChainID = 137;//polygon for testing!
+static constexpr bool GPrintAll = true;//used to enable / disable printing of the received data for observation
 
 //testing inputs
 const static FString GTestingPage = "{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true}";
@@ -36,7 +33,7 @@ FPage BuildTestPage();
 
 /*
 * Builds a mirror TMap<FString,FTokenList> to FString testTokenMap
-* for testing purposes, if anychanges occur to FString testTokenMap then
+* for testing purposes, if any changes occur to FString testTokenMap then
 * matching changes must be made to this function in order to maintain
 * test correctness
 */
@@ -72,7 +69,7 @@ void GetBalanceUpdatesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess
 
 void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 
-void IndexerTest(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString, FSequenceError)>& OnFailure);
 
 //response parsing tests
 void EmptyResponseTest(UIndexer* Indexer);
@@ -103,7 +100,7 @@ void GetBalanceUpdatesParsingTest(UIndexer* Indexer);
 
 void GetTransactionHistoryParsingTest(UIndexer* Indexer);
 
-//arguement parsing tests
+//argument parsing tests
 void TokenBalanceMaxArgsTest(UIndexer* Indexer);
 
 void TokenBalanceMinArgsTest(UIndexer* Indexer);
