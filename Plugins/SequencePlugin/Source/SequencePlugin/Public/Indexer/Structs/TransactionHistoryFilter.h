@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "TransactionHistoryFilter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -44,24 +44,24 @@ public:
         if (!accountAddresses.IsEmpty())
         {
             ret.Append(",\"accountAddresses\":");
-            ret.Append(UIndexerSupport::StringListToParsableString(accountAddresses));
+            ret.Append(USequenceSupport::StringListToParsableString(accountAddresses));
         }
 
         if (!contractAddresses.IsEmpty())
         {
-            ret.Append(",\"contractAddresses\":" + UIndexerSupport::StringListToParsableString(contractAddresses));
+            ret.Append(",\"contractAddresses\":" + USequenceSupport::StringListToParsableString(contractAddresses));
         }
 
         if (!transactionHashes.IsEmpty())
         {
             ret.Append(",\"transactionHashes\":");
-            ret.Append(UIndexerSupport::StringListToParsableString(transactionHashes));
+            ret.Append(USequenceSupport::StringListToParsableString(transactionHashes));
         }
 
         if (!metaTransactionIDs.IsEmpty())
         {
             ret.Append(",\"metaTransactionIDs\":");
-            ret.Append(UIndexerSupport::StringListToParsableString(metaTransactionIDs));
+            ret.Append(USequenceSupport::StringListToParsableString(metaTransactionIDs));
         }
         
         if (fromBlock != -1)

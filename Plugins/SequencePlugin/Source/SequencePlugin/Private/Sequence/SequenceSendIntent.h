@@ -4,7 +4,7 @@
 #include "ConfigFetcher.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Containers/Union.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceSendIntent.generated.h"
 
 //Operations Constants//
@@ -84,7 +84,7 @@ struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
   answer = IdTokenIn;
   identityType = OIDCType;
   sessionId = SessionIdIn;
-  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
  void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
@@ -154,7 +154,7 @@ struct SEQUENCEPLUGIN_API FGetFeeOptionsData : public FGenericData
 
  virtual FString GetJson() const override
  {
-  const FString Json = "{\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
+  const FString Json = "{\"network\":\""+network+"\",\"transactions\":"+USequenceSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
   return Json;
  }
 };
@@ -184,7 +184,7 @@ struct SEQUENCEPLUGIN_API FSendTransactionData : public FGenericData
 
  virtual FString GetJson() const override
  {
-  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
+  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+USequenceSupport::TransactionListToJsonString(transactions)+",\"wallet\":\""+wallet+"\"}";
   return Json;
  }
 };
@@ -216,7 +216,7 @@ struct SEQUENCEPLUGIN_API FSendTransactionWithFeeOptionData : public FGenericDat
 
  virtual FString GetJson() const override
  {
-  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+UIndexerSupport::TransactionListToJsonString(transactions)+",\"transactionsFeeQuote\":\""+transactionsFeeQuote+"\",\"wallet\":\""+wallet+"\"}";
+  const FString Json = "{\"identifier\":\""+identifier+"\",\"network\":\""+network+"\",\"transactions\":"+USequenceSupport::TransactionListToJsonString(transactions)+",\"transactionsFeeQuote\":\""+transactionsFeeQuote+"\",\"wallet\":\""+wallet+"\"}";
   return Json;
  }
 };
@@ -336,7 +336,7 @@ struct SEQUENCEPLUGIN_API FOpenSessionData : public FGenericData
   answer = IdTokenIn;
   identityType = OIDCType;
   sessionId = SessionIdIn;
-  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
  void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
@@ -399,7 +399,7 @@ struct SEQUENCEPLUGIN_API FInitiateAuthData : public FGenericData
   
   identityType = OIDCType;
   sessionId = SessionIdIn;
-  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),UIndexerSupport::GetInt64FromToken(IdTokenIn, "exp"));
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
  void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
@@ -442,7 +442,7 @@ struct SEQUENCEPLUGIN_API FSignatureIntent
  template<typename T> FString GetJson() const
  {
   T CData = *static_cast<T*>(data);
-  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : UIndexerSupport::StructToPartialSimpleString<T>(CData);
+  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
   const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
   const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
   const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\""+name+"\",\"version\":\""+version+"\"}";
@@ -492,13 +492,13 @@ struct SEQUENCEPLUGIN_API FSignedIntent
  template <typename T> FString GetJson() const
  {
   T CData = *static_cast<T*>(data);
-  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : UIndexerSupport::StructToPartialSimpleString<T>(CData);
+  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
   const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
   const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
   FString SigListJson = "[";
   for (int i = 0; i < signatures.Num(); i++)
   {
-   SigListJson += UIndexerSupport::StructToPartialSimpleString(signatures[i]);
+   SigListJson += USequenceSupport::StructToPartialSimpleString(signatures[i]);
    if (i+1 < signatures.Num())
    {
     SigListJson += ",";

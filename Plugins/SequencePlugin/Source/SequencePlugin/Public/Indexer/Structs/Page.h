@@ -2,9 +2,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SortBy.h"
-#include "Indexer/IndexerSupport.h"
 #include "Page.generated.h"
 
 USTRUCT(BlueprintType)
@@ -74,7 +73,7 @@ public:
                     stringList.Add(sItem.GetJsonString());
                 }
                 //Parse the string list into a JsonString
-                ret.Append(UIndexerSupport::StringListToSimpleString(stringList));
+                ret.Append(USequenceSupport::StringListToSimpleString(stringList));
             }
 
             if (pageSize != -1)
@@ -105,7 +104,7 @@ public:
         FString sortString = "[";
         for (FSortBy s : sort)
         {
-            sortString.Append(UIndexerSupport::SimplifyString(s.GetJsonString()));
+            sortString.Append(USequenceSupport::SimplifyString(s.GetJsonString()));
             sortString.Append(",");
         }
         if (sort.Num() > 0)

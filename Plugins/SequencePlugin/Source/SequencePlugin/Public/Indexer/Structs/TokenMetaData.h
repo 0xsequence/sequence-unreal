@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Indexer/Structs/AttributeMap.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "TokenMetaData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -77,7 +77,7 @@ public:
         FString attributeString = "[";
         for (FAttributeMap aMap : attributes)
         {
-            attributeString.Append(UIndexerSupport::SimplifyString(aMap.GetJsonString()));
+            attributeString.Append(USequenceSupport::SimplifyString(aMap.GetJsonString()));
             attributeString.Append(",");
         }
         if (attributes.Num() > 0)
@@ -102,7 +102,7 @@ public:
         const TSharedPtr<FJsonObject>* refPtr;
         if (json_in.TryGetObjectField(TEXT("properties"), refPtr))
         {
-            properties = UIndexerSupport::JSONObjectParser(*refPtr);
+            properties = USequenceSupport::JSONObjectParser(*refPtr);
         }
         
         //now we create the attribute map!

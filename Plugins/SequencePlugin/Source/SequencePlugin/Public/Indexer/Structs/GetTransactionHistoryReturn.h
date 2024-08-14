@@ -32,7 +32,7 @@ public:
         {
             jList.Add(tItem.GetJson());
         }
-        ret.Get()->SetStringField("transactions", UIndexerSupport::JsonObjListToSimpleString(jList));
+        ret.Get()->SetStringField("transactions", USequenceSupport::JsonObjListToSimpleString(jList));
         return ret;
     }
 

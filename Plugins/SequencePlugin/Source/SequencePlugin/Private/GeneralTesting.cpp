@@ -5,7 +5,7 @@
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
@@ -215,7 +215,7 @@ void AGeneralTesting::TestGetSupportedCountries() const
 	{
 		for (FSupportedCountry Country : SupportedCountries)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *UIndexerSupport::StructToString(Country));
+			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *USequenceSupport::StructToString(Country));
 		}
 		CallbackPassed("TestPassed");
 	};
@@ -258,7 +258,7 @@ void AGeneralTesting::TestTokenBalances() const
 {
 	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
 	{
-		const FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
+		const FString ret = USequenceSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -285,7 +285,7 @@ void AGeneralTesting::TestHistory() const
 	{
 		if (GPrintAll)
 		{
-			const FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
+			const FString ret = USequenceSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};

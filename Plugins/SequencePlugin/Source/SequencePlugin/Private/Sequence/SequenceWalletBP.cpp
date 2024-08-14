@@ -145,12 +145,12 @@ void USequenceWalletBP::CallOnIndexerGetTransactionHistory(const FSequenceRespon
 
 float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
 {
-	return UIndexerSupport::GetAmount(Amount,Decimals);
+	return USequenceSupport::GetAmount(Amount,Decimals);
 }
 
 int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals)
 {
-	return UIndexerSupport::GetAmount(Amount,Decimals);
+	return USequenceSupport::GetAmount(Amount,Decimals);
 }
 
 FString USequenceWalletBP::ApiGetWalletAddress()

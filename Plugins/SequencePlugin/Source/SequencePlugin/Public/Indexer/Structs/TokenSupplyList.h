@@ -32,7 +32,7 @@ public:
         {
             jsonList.Add(tItem.GetJson());
         }
-        FString ret = UIndexerSupport::JsonObjListToSimpleString(jsonList);
+        FString ret = USequenceSupport::JsonObjListToSimpleString(jsonList);
 
         return ret;
     }

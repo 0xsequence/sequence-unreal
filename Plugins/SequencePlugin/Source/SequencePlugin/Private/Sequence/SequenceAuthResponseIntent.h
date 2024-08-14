@@ -2,7 +2,7 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceAuthResponseIntent.generated.h"
 
 //InitiateAuth//
@@ -92,17 +92,17 @@ struct SEQUENCEPLUGIN_API FSeqOpenSessionResponse_Session
 
 	int64 GetCreatedAt() const
 	{
-		return UIndexerSupport::StringDateToUnixDate(CreatedAt);
+		return USequenceSupport::StringDateToUnixDate(CreatedAt);
 	}
 
 	int64 GetRefreshedAt() const
 	{
-		return UIndexerSupport::StringDateToUnixDate(RefreshedAt);
+		return USequenceSupport::StringDateToUnixDate(RefreshedAt);
 	}
 
 	int64 GetExpiresAt() const
 	{
-		return UIndexerSupport::StringDateToUnixDate(ExpiresAt);
+		return USequenceSupport::StringDateToUnixDate(ExpiresAt);
 	}
 };
 

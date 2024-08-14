@@ -6,7 +6,7 @@
 #include "Types/Wallet.h"
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceEncryptor.h"
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
@@ -105,7 +105,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
+		const FString CTS_Json = USequenceSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
 		if (Encryptor)
@@ -150,7 +150,7 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 		}
 
-		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+		ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= Credentials->RegisteredValid();
 	}
 	return ret;
@@ -431,7 +431,7 @@ void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& P
 {
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		if (const FPlayFabLoginUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
+		if (const FPlayFabLoginUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
 		{
 			OnSuccess(ParsedResponse.Data.SessionTicket);
 		}
@@ -443,7 +443,7 @@ void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& P
 
 	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
 	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
-	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(LoginUser);
+	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(LoginUser);
 	
 	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnSuccessResponse, OnFailure);
 }
@@ -452,7 +452,7 @@ void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const 
 {
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		if (const FPlayFabRegisterUserResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
+		if (const FPlayFabRegisterUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
 		{
 			OnSuccess(ParsedResponse.Data.SessionTicket);
 		}
@@ -464,7 +464,7 @@ void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const 
 
 	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
 	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
-	const FString RequestBody = UIndexerSupport::StructToPartialSimpleString(RegisterUser);
+	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(RegisterUser);
 	
 	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnSuccessResponse, OnFailure);
 }

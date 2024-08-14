@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/DelayedEncodingBP.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "Sequence/DelayedEncodingArgsBP.h"
 
 void UDelayedEncodingBP::SetAbi(const FString& AbiIn)
@@ -22,5 +22,5 @@ void UDelayedEncodingBP::SetFunc(const FString& FuncIn)
 FString UDelayedEncodingBP::GetJsonString() const
 {
 	const FString Json = "{\"abi\":\"" + Abi + "\",\"args\":" + this->Args->GetJsonString() + ",\"func\":\"" + Func + "\"}";
-	return UIndexerSupport::SimplifyStringParsable(Json);
+	return USequenceSupport::SimplifyStringParsable(Json);
 }

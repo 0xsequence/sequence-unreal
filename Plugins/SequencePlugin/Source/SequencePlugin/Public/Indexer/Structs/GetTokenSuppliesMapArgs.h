@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "TokenList.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "JsonObjectConverter.h"
 #include "GetTokenSuppliesMapArgs.generated.h"
 
@@ -57,7 +57,7 @@ public:
 
 		for (FString key : keys)
 		{
-			ret += "\"" + key + "\":" + UIndexerSupport::StringListToParsableString(tokenMap.Find(key)->token_list);
+			ret += "\"" + key + "\":" + USequenceSupport::StringListToParsableString(tokenMap.Find(key)->token_list);
 		}
 		ret += "},";//close off tokenMap subObject
 		ret += "\"includeMetaData\":";

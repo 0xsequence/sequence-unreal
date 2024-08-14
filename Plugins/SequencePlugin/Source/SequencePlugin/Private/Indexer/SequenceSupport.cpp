@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "Indexer/Structs/GetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
@@ -8,20 +8,61 @@
 #include "Misc/Base64.h"
 #include "Types/BinaryData.h"
 
-float UIndexerSupport::GetAmount(const int64 Amount, const int64 Decimals)
+FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
+{
+	if (NetworkIdToNameMap.Contains(NetworkIdIn))
+	{
+		return *NetworkIdToNameMap.Find(NetworkIdIn);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
+	return TEXT("");
+}
+
+int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
+{
+	FString SearchKey = NetworkNameIn.ToLower();
+	SearchKey.RemoveSpacesInline();
+	if (NetworkNameToIdMap.Contains(SearchKey))
+	{
+		return *NetworkNameToIdMap.Find(SearchKey);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
+	return -1;
+}
+
+TArray<FIdName> USequenceSupport::GetAllNetworks()
+{
+	return NetworkIdToNameMap.Array();
+}
+
+TArray<FString> USequenceSupport::GetAllNetworkNames()
+{
+	TArray<FString> NetworkNames;
+	NetworkNameToIdMap.GetKeys(NetworkNames);
+	return NetworkNames;
+}
+
+TArray<int64> USequenceSupport::GetAllNetworkIds()
+{
+	TArray<int64> NetworkIds;
+	NetworkIdToNameMap.GetKeys(NetworkIds);
+	return NetworkIds;
+}
+
+float USequenceSupport::GetAmount(const int64 Amount, const int64 Decimals)
 {
 	const float Ret = static_cast<float>(Amount);
 	return static_cast<float>(Ret / FMath::Pow(10, static_cast<double>(Decimals)));
 }
 
-int64 UIndexerSupport::GetAmount(const float Amount, const int64 Decimals)
+int64 USequenceSupport::GetAmount(const float Amount, const int64 Decimals)
 {
 	const double Operand = FMath::Pow(10, static_cast<double>(Decimals));
 	const int64 Ret = static_cast<int64>(Operand * Amount);
 	return Ret;
 }
 
-FString UIndexerSupport::GetStringFromToken(const FString& IdToken, const FString& ParameterName)
+FString USequenceSupport::GetStringFromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -45,7 +86,7 @@ FString UIndexerSupport::GetStringFromToken(const FString& IdToken, const FStrin
 	return "";
 }
 
-int32 UIndexerSupport::GetInt32FromToken(const FString& IdToken, const FString& ParameterName)
+int32 USequenceSupport::GetInt32FromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -69,7 +110,7 @@ int32 UIndexerSupport::GetInt32FromToken(const FString& IdToken, const FString& 
 	return -1;
 }
 
-int64 UIndexerSupport::GetInt64FromToken(const FString& IdToken, const FString& ParameterName)
+int64 USequenceSupport::GetInt64FromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -93,7 +134,7 @@ int64 UIndexerSupport::GetInt64FromToken(const FString& IdToken, const FString& 
 	return -1;
 }
 
-float UIndexerSupport::GetFloatFromToken(const FString& IdToken, const FString& ParameterName)
+float USequenceSupport::GetFloatFromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -117,7 +158,7 @@ float UIndexerSupport::GetFloatFromToken(const FString& IdToken, const FString& 
 	return -1;
 }
 
-double UIndexerSupport::GetDoubleFromToken(const FString& IdToken, const FString& ParameterName)
+double USequenceSupport::GetDoubleFromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -141,7 +182,7 @@ double UIndexerSupport::GetDoubleFromToken(const FString& IdToken, const FString
 	return -1;
 }
 
-bool UIndexerSupport::GetBoolFromToken(const FString& IdToken, const FString& ParameterName)
+bool USequenceSupport::GetBoolFromToken(const FString& IdToken, const FString& ParameterName)
 {
 	TArray<FString> B64Json;
 	IdToken.ParseIntoArray(B64Json, TEXT("."), true);
@@ -165,7 +206,7 @@ bool UIndexerSupport::GetBoolFromToken(const FString& IdToken, const FString& Pa
 	return false;
 }
 
-FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)
+FString USequenceSupport::TransactionListToJsonString(const TArray<TransactionUnion>& Transactions)
 {
 	FString TransactionsPayload = "[";
 	
@@ -204,7 +245,7 @@ FString UIndexerSupport::TransactionListToJsonString(const TArray<TransactionUni
 * This will convert a jsonObject into a TMap<FString,FString> thereby making a dynamic
 * object usable in the UI!
 */
-TMap<FString, FString> UIndexerSupport::JSONObjectParser(TSharedPtr<FJsonObject> JSONData)
+TMap<FString, FString> USequenceSupport::JSONObjectParser(TSharedPtr<FJsonObject> JSONData)
 {
 	TArray<TPair<FString, TSharedPtr<FJsonValue>>> jsonList = JSONData.Get()->Values.Array();
 	TMap<FString, FString> ret;
@@ -218,7 +259,7 @@ TMap<FString, FString> UIndexerSupport::JSONObjectParser(TSharedPtr<FJsonObject>
 	return ret;
 }
 
-TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& JSON)
+TSharedPtr<FJsonObject> USequenceSupport::JsonStringToObject(const FString& JSON)
 {
 	TSharedPtr<FJsonObject> Ret;
 	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), Ret))
@@ -227,7 +268,7 @@ TSharedPtr<FJsonObject> UIndexerSupport::JsonStringToObject(const FString& JSON)
 		return nullptr;
 }
 
-FString UIndexerSupport::PartialSimpleString(FString String)
+FString USequenceSupport::PartialSimpleString(FString String)
 {
 	FString* ret = &String;
 
@@ -249,7 +290,7 @@ FString UIndexerSupport::PartialSimpleString(FString String)
 	return (*ret);
 }
 
-FString UIndexerSupport::SimplifyString(FString String)
+FString USequenceSupport::SimplifyString(FString String)
 {
 	FString* ret = &String;
 
@@ -274,7 +315,7 @@ FString UIndexerSupport::SimplifyString(FString String)
 	return (*ret);
 }
 
-FString UIndexerSupport::SimplifyStringParsable(FString String)
+FString USequenceSupport::SimplifyStringParsable(FString String)
 {
 	FString* ret = &String;
 
@@ -296,7 +337,7 @@ FString UIndexerSupport::SimplifyStringParsable(FString String)
 	return (*ret);
 }
 
-FString UIndexerSupport::StringListToSimpleString(TArray<FString> StringData)
+FString USequenceSupport::StringListToSimpleString(TArray<FString> StringData)
 {
 	FString ret = "[";
 
@@ -314,7 +355,7 @@ FString UIndexerSupport::StringListToSimpleString(TArray<FString> StringData)
 	return ret;
 }
 
-FString UIndexerSupport::StringListToParsableString(TArray<FString> StringData)
+FString USequenceSupport::StringListToParsableString(TArray<FString> StringData)
 {
 	FString ret = "[";
 	for (FString string : StringData)
@@ -331,7 +372,7 @@ FString UIndexerSupport::StringListToParsableString(TArray<FString> StringData)
 	return ret;
 }
 
-FString UIndexerSupport::Int64ListToSimpleString(TArray<int64> IntData)
+FString USequenceSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {
 	FString ret = "[";
 
@@ -350,12 +391,12 @@ FString UIndexerSupport::Int64ListToSimpleString(TArray<int64> IntData)
 	return ret;
 }
 
-FString UIndexerSupport::JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData)
+FString USequenceSupport::JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::JsonToString(jObj));
+		ret.Append(USequenceSupport::JsonToString(jObj));
 		ret.Append(",");
 	}
 
@@ -367,12 +408,12 @@ FString UIndexerSupport::JsonObjListToString(TArray<TSharedPtr<FJsonObject>> Jso
 	return ret;
 }
 
-FString UIndexerSupport::JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData)
+FString USequenceSupport::JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::JsonToSimpleString(jObj));
+		ret.Append(USequenceSupport::JsonToSimpleString(jObj));
 		ret.Append(",");
 	}
 
@@ -384,12 +425,12 @@ FString UIndexerSupport::JsonObjListToSimpleString(TArray<TSharedPtr<FJsonObject
 	return ret;
 }
 
-FString UIndexerSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData)
+FString USequenceSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObject>> JsonData)
 {
 	FString ret = "[";
 	for (TSharedPtr<FJsonObject> jObj : JsonData)
 	{
-		ret.Append(UIndexerSupport::JsonToParsableString(jObj));
+		ret.Append(USequenceSupport::JsonToParsableString(jObj));
 		ret.Append(",");
 	}
 
@@ -401,7 +442,7 @@ FString UIndexerSupport::JsonObjListToParsableString(TArray<TSharedPtr<FJsonObje
 	return ret;
 }
 
-FString UIndexerSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData)
+FString USequenceSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonValue>> JsonData)
 {
 	FString JsonList;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonList);
@@ -409,7 +450,7 @@ FString UIndexerSupport::JsonValueListToParsableString(TArray<TSharedPtr<FJsonVa
 	return SimplifyStringParsable(JsonList);
 }
 
-FString UIndexerSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)
 {
 	FString ret;
 	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
@@ -417,17 +458,17 @@ FString UIndexerSupport::JsonToString(TSharedPtr<FJsonObject> JsonData)
 	return ret;
 }
 
-FString UIndexerSupport::JsonToSimpleString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToSimpleString(TSharedPtr<FJsonValue> JsonData)
 {
 	return SimplifyString(JsonToString(JsonData));
 }
 
-FString UIndexerSupport::JsonToSimpleString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToSimpleString(TSharedPtr<FJsonObject> JsonData)
 {
 	return SimplifyString(JsonToString(JsonData));
 }
 
-FUpdatableHistoryArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
+FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
 {
 	FUpdatableHistoryArgs UpdateItems;
 
@@ -469,7 +510,7 @@ FUpdatableHistoryArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyA
 				if (hasMetaData)
 				{
 					TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
-					NftTxn.amount = UIndexerSupport::GetAmount(amount, TokenMetaData->decimals);
+					NftTxn.amount = USequenceSupport::GetAmount(amount, TokenMetaData->decimals);
 					NftTxn.nft.NFT_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Short_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Icon_URL = TokenMetaData->image;
@@ -502,7 +543,7 @@ FUpdatableHistoryArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyA
 			else if (Transfer.contractType == EContractType::ERC721 || Transfer.contractType == EContractType::ERC721_BRIDGE || Transfer.contractType == EContractType::ERC20 || Transfer.contractType == EContractType::ERC20_BRIDGE)
 			{//coin
 				FCoinTxn_BE CoinTxn;
-				CoinTxn.amount = UIndexerSupport::GetAmount(amount,Transfer.contractInfo.decimals);
+				CoinTxn.amount = USequenceSupport::GetAmount(amount,Transfer.contractInfo.decimals);
 				CoinTxn.coin.Coin_Symbol_URL = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.symbol;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
@@ -558,12 +599,12 @@ FUpdatableHistoryArgs UIndexerSupport::ExtractFromTransactionHistory(FString MyA
 	return UpdateItems;
 }
 
-FString UIndexerSupport::JsonToParsableString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToParsableString(TSharedPtr<FJsonValue> JsonData)
 {
 	return SimplifyStringParsable(JsonToString(JsonData));
 }
 
-FString UIndexerSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
+FString USequenceSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
 {
 	return SimplifyStringParsable(JsonToString(JsonData));
 }
@@ -571,7 +612,7 @@ FString UIndexerSupport::JsonToParsableString(TSharedPtr<FJsonObject> JsonData)
 /*
 * This will convert a json value to an FString!
 */
-FString UIndexerSupport::JsonToString(TSharedPtr<FJsonValue> JsonData)
+FString USequenceSupport::JsonToString(TSharedPtr<FJsonValue> JsonData)
 {
 	FString ret;
 	TSharedRef< TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ret);
@@ -579,7 +620,7 @@ FString UIndexerSupport::JsonToString(TSharedPtr<FJsonValue> JsonData)
 	return ret;
 }
 
-FString UIndexerSupport::StringCleanup(FString String)
+FString USequenceSupport::StringCleanup(FString String)
 {
 	FString *ret = &String;
 
@@ -609,7 +650,7 @@ FString UIndexerSupport::StringCleanup(FString String)
 	return (*ret);
 }
 
-FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
+FMonthDayYear_BE USequenceSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 {
 	//format: 2023-08-21T15:06:09Z to 21,08,2023
 	FMonthDayYear_BE date;
@@ -627,7 +668,7 @@ FMonthDayYear_BE UIndexerSupport::TimestampToMonthDayYear_Be(FString Timestamp)
 	return date;
 }
 
-int64 UIndexerSupport::StringDateToUnixDate(const FString& Iso8601)
+int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 {
 	FDateTime ParsedDate;
 	FDateTime::ParseIso8601(*Iso8601,ParsedDate);
@@ -636,7 +677,7 @@ int64 UIndexerSupport::StringDateToUnixDate(const FString& Iso8601)
 
 //indexer response extractors
 
-FUpdatableItemDataArgs UIndexerSupport::ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances)
+FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances)
 {
 	FUpdatableItemDataArgs ret;
 	
@@ -651,7 +692,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTokenBalances(FGetTokenBalanc
 			nft.Collection_Short_Name = token.contractInfo.symbol;
 			nft.Description = token.tokenMetaData.description;
 			nft.Properties = token.tokenMetaData.properties;
-			nft.Amount = UIndexerSupport::GetAmount(token.balance,token.tokenMetaData.decimals);
+			nft.Amount = USequenceSupport::GetAmount(token.balance,token.tokenMetaData.decimals);
 			nft.Value = -1;
 			nft.NFT_Icon_URL = token.tokenMetaData.image;
 			nft.Collection_Icon_URL = token.contractInfo.extensions.ogImage;
@@ -679,7 +720,7 @@ FUpdatableItemDataArgs UIndexerSupport::ExtractFromTokenBalances(FGetTokenBalanc
 			coin.Coin_Standard = token.contractType;
 			coin.itemID.chainID = token.chainId;
 			coin.itemID.contractAddress = token.contractAddress;
-			coin.Coin_Amount = UIndexerSupport::GetAmount(token.balance,token.contractInfo.decimals);
+			coin.Coin_Amount = USequenceSupport::GetAmount(token.balance,token.contractInfo.decimals);
 			coin.Coin_Value = -1;
 			coin.Coin_Symbol_URL = token.contractInfo.logoURI;
 			ret.semiParsedBalances.coins.Add(coin);//add the semi parsed coin data

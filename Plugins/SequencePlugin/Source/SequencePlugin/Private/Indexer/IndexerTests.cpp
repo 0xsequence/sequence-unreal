@@ -31,7 +31,7 @@ void VersionTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunctio
 		OnSuccess("Received Version Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FVersion>(version);
+			FString ret = USequenceSupport::StructToString<FVersion>(version);
 			UE_LOG(LogTemp, Display, TEXT("Parsed Version Struct:\n%s\n"), *ret);
 		}
 	};
@@ -51,7 +51,7 @@ void RunTimeStatusTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TF
 		OnSuccess("Received RunTimeStatus Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FRuntimeStatus>(runTimeStatus);
+			FString ret = USequenceSupport::StructToString<FRuntimeStatus>(runTimeStatus);
 			UE_LOG(LogTemp, Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *ret);
 		}
 	};
@@ -91,7 +91,7 @@ void GetEtherBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 		OnSuccess("Received etherBalance Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FEtherBalance>(etherBalance);
+			FString ret = USequenceSupport::StructToString<FEtherBalance>(etherBalance);
 			UE_LOG(LogTemp, Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *ret);
 		}
 	};
@@ -111,7 +111,7 @@ void GetTokenBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 		OnSuccess("Received Token Balances Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
+			FString ret = USequenceSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
 			UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -133,7 +133,7 @@ void GetTokenSuppliesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess,
 		OnSuccess("Received TokenSupplies Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetTokenSuppliesReturn>(tokenSupplies);
+			FString ret = USequenceSupport::StructToString<FGetTokenSuppliesReturn>(tokenSupplies);
 			UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -155,7 +155,7 @@ void GetTokenSuppliesMapTest(UIndexer* Indexer, TFunction<void(FString)> OnSucce
 		OnSuccess("Received TokenSuppliesMap Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetTokenSuppliesMapReturn>(tokenSuppliesMap);
+			FString ret = USequenceSupport::StructToString<FGetTokenSuppliesMapReturn>(tokenSuppliesMap);
 			UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -181,7 +181,7 @@ void GetBalanceUpdatesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess
 		OnSuccess("Received balance Updates Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetBalanceUpdatesReturn>(balanceUpdates);
+			FString ret = USequenceSupport::StructToString<FGetBalanceUpdatesReturn>(balanceUpdates);
 			UE_LOG(LogTemp, Display, TEXT("Parsed balanceUpdatesReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -205,7 +205,7 @@ void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuc
 		OnSuccess("Received transactionHistory Data");
 		if (GPrintAll)
 		{
-			FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
+			FString ret = USequenceSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -302,10 +302,10 @@ void PingParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Ping Parsing Test"));
 	FString args = "{\"status\":true}";
 	FPingReturn rep = Indexer->BuildResponse<FPingReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = UIndexerSupport::StructToSimpleString<FPingReturn>(rep);
+	FString repString = USequenceSupport::StructToSimpleString<FPingReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -330,10 +330,10 @@ void VersionParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Version Parsing Test"));
 	FString args = "{\"version\":{\"webrpcVersion\":\"1.0\" , \"schemaVersion\":\"s1.0\" , \"schemaHash\":\"0x1\" , \"appVersion\":\"a1.0\"}}";
 	FVersionReturn rep = Indexer->BuildResponse<FVersionReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = UIndexerSupport::StructToSimpleString<FVersionReturn>(rep);
+	FString repString = USequenceSupport::StructToSimpleString<FVersionReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -358,10 +358,10 @@ void RunTimeStatusParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Runtime Status Parsing Test"));
 	FString args = "{\"status\":{\"healthOK\":true,\"indexerEnabled\":true,\"startTime\":\"now\",\"uptime\":10.1,\"ver\":\"1.1\",\"branch\":\"main\",\"commitHash\":\"0x12\",\"chainID\":1,\"checks\":{\"running\":true,\"syncMode\":\"Synced\",\"lastBlockNum\":10}}}";
 	FRuntimeStatusReturn rep = Indexer->BuildResponse<FRuntimeStatusReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = UIndexerSupport::StructToSimpleString<FRuntimeStatusReturn>(rep);
+	FString repString = USequenceSupport::StructToSimpleString<FRuntimeStatusReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -386,10 +386,10 @@ void GetChainIDParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Chain ID Parsing Test"));
 	FString args = "{\"chainID\":169}";
 	FGetChainIDReturn rep = Indexer->BuildResponse<FGetChainIDReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = UIndexerSupport::StructToSimpleString<FGetChainIDReturn>(rep);
+	FString repString = USequenceSupport::StructToSimpleString<FGetChainIDReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -414,10 +414,10 @@ void GetEtherBalanceParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Ether Balance Parsing Test"));
 	FString args = "{\"balance\":{\"accountAddress\":\"main_address\",\"balanceWei\":101}}";
 	FGetEtherBalanceReturn rep = Indexer->BuildResponse<FGetEtherBalanceReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
-	FString repString = UIndexerSupport::StructToSimpleString<FGetEtherBalanceReturn>(rep);
+	FString repString = USequenceSupport::StructToSimpleString<FGetEtherBalanceReturn>(rep);
 
 	if (GPrintAll)
 	{
@@ -442,12 +442,12 @@ void GetTokenBalanceParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("Token Balance Parsing Test"));
 	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"balances\":[{\"id\":15,\"contractAddress\":\"0xc1\",\"contractType\":\"ERC20\",\"accountAddress\":\"0xa1\",\"tokenID\":11,\"balance\":16384,\"blockHash\":\"0xb1\",\"blockNumber\":1,\"updateID\":3,\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FGetTokenBalancesReturn rep = Indexer->BuildResponse<FGetTokenBalancesReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::JsonToSimpleString(rep.GetJson());
+	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -472,12 +472,12 @@ void GetTokenSuppliesParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Parsing Test"));
 	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"contractType\":\"ERC1155\",\"tokenIDs\":[{\"tokenID\":69,\"supply\":\"supply_data\",\"chainId\":9,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FGetTokenSuppliesReturn rep = Indexer->BuildResponse<FGetTokenSuppliesReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::JsonToSimpleString(rep.GetJson());
+	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -502,12 +502,12 @@ void GetTokenSuppliesMapParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Map Parsing Test"));
 	FString args = "{\"supplies\":{\"key1\":[{\"tokenID\":101,\"supply\":\"supply_data\",\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}}";
 	FGetTokenSuppliesMapReturn rep = Indexer->BuildResponse<FGetTokenSuppliesMapReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::JsonToSimpleString(rep.GetJson());
+	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -532,12 +532,12 @@ void GetBalanceUpdatesParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("get Balance Updates Parsing Test"));
 	FString args = "{\"page\":"+GTestingPage+",\"balances\":["+GTestingBalanceData+"]}";
 	FGetBalanceUpdatesReturn rep = Indexer->BuildResponse<FGetBalanceUpdatesReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::JsonToSimpleString(rep.GetJson());
+	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -562,12 +562,12 @@ void GetTransactionHistoryParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("get Transaction History Parsing Test"));
 	FString args = "{\"page\":"+GTestingPage+",\"transactions\":["+GTestingTransactionData+"]}";
 	FGetTransactionHistoryReturn rep = Indexer->BuildResponse<FGetTransactionHistoryReturn>(args);
-	args = UIndexerSupport::SimplifyString(args);
+	args = USequenceSupport::SimplifyString(args);
 
 	//convert response to string testable string format
 	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
 	//to parse it completely
-	FString repString = UIndexerSupport::JsonToSimpleString(rep.GetJson());
+	FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
 
 	if (GPrintAll)
 	{
@@ -600,8 +600,8 @@ void TokenBalanceMaxArgsTest(UIndexer* Indexer)
 	args.includeMetaData = true;
 	args.page = BuildTestPage();
 	
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -629,8 +629,8 @@ void TokenBalanceMinArgsTest(UIndexer* Indexer)
 	FGetTokenBalancesArgs args;
 	args.accountAddress = GTestingAddress;
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenBalancesArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -713,8 +713,8 @@ void TokenSuppliesArgsTest(UIndexer* Indexer)
 	args.includeMetaData = true;
 	args.page = BuildTestPage();
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -742,8 +742,8 @@ void TokenSuppliesMapArgsTest(UIndexer* Indexer)
 	FGetTokenSuppliesMapArgs args;
 	args.tokenMap = BuildTokenMap();
 	args.includeMetaData = true;
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTokenSuppliesMapArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -773,8 +773,8 @@ void BalanceUpdatesMaxArgsTest(UIndexer* Indexer)
 	args.lastUpdateID = 10;
 	args.page = BuildTestPage();
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -802,8 +802,8 @@ void BalanceUpdatesMinArgsTest(UIndexer * Indexer)
 	FGetBalanceUpdatesArgs args;
 	args.contractAddress = GTestingContractAddress;
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetBalanceUpdatesArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -835,8 +835,8 @@ void TransactionHistoryArgsMaxTest(UIndexer* Indexer)
 	args.page = BuildTestPage();
 	args.includeMetaData = true;
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{
@@ -865,8 +865,8 @@ void TransactionHistoryArgsMinTest(UIndexer* Indexer)
 	args.filter.accountAddress = GTestingAddress;
 	args.includeMetaData = true;
 
-	FString stringArgs = UIndexerSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
-	testArgs = UIndexerSupport::SimplifyStringParsable(testArgs);
+	FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FGetTransactionHistoryArgs>(args));
+	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
 
 	if (GPrintAll)
 	{

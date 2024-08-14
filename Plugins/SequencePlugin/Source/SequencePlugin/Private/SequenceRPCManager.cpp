@@ -153,7 +153,7 @@ USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
 
 	FString ParsedJwt;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJwt);
-	SequenceRPCManager->WaaSSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);
+	SequenceRPCManager->WaaSSettings = USequenceSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);
 	SequenceRPCManager->Cached_ProjectAccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 	return SequenceRPCManager;
 }
@@ -162,7 +162,7 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqSignMessageResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
+		const FSeqSignMessageResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqSignMessageResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -188,7 +188,7 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqTransactionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+		const FSeqTransactionResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -215,7 +215,7 @@ void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Cr
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{		
-		const FSeqTransactionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
+		const FSeqTransactionResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -241,7 +241,7 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqGetFeeOptionsResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
+		const FSeqGetFeeOptionsResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -268,7 +268,7 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqListSessionsResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
+		const FSeqListSessionsResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqListSessionsResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -294,7 +294,7 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 {
 	const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
 	{
-		const FSeqCloseSessionResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
+		const FSeqCloseSessionResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqCloseSessionResponse>(Response);
 
 		if (ParsedResponse.IsValid())
 		{
@@ -319,7 +319,7 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
 		
 		if (ParsedInitResponse.IsValid())
 		{
@@ -344,13 +344,13 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 		
 		if (ParsedInitResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure](const FString& OpenResponse)
 			{
-				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
@@ -396,7 +396,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 {
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
-		const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
+		const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 
 		const FCredentials_BE Credentials(
 		this->SessionWallet->GetWalletPrivateKeyString(), TEXT(""),
@@ -429,13 +429,13 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{		
-		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
 		if (ParsedInitResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& OpenResponse)
 			{		
-				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(),
 				IdTokenIn,
@@ -480,13 +480,13 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 {
 	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure] (const FString& InitResponse)
 	{
-		const FSeqInitiateAuthResponse ParsedInitResponse = UIndexerSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
 		if (ParsedInitResponse.IsValid())
 		{
 			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure] (const FString& OpenResponse)
 			{
-				const FSeqOpenSessionResponse ParsedOpenResponse = UIndexerSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
+				const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 
 				const FCredentials_BE Credentials(
 				this->SessionWallet->GetWalletPrivateKeyString(),TEXT(""),

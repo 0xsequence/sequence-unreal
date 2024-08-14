@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Sequence/SequenceAPI.h"
 #include "RequestHandler.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
 #include "Eth/Crypto.h"
@@ -578,7 +578,7 @@ void USequenceWallet::GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSucces
 		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
 			parsedItems.Add(jsonObjString);
 	}
-	args += UIndexerSupport::StringListToSimpleString(parsedItems);
+	args += USequenceSupport::StringListToSimpleString(parsedItems);
 	args += "}";
 
 	SendRPC(getSequenceURL("getCoinPrices"), args, [this,OnSuccess](const FString& Content)
@@ -604,7 +604,7 @@ void USequenceWallet::GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, 
 		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
 			parsedItems.Add(jsonObjString);
 	}
-	args += UIndexerSupport::StringListToSimpleString(parsedItems);
+	args += USequenceSupport::StringListToSimpleString(parsedItems);
 	args += "}";
 
 	SendRPC(getSequenceURL("getCollectiblePrices"), args, [this,OnSuccess](const FString& Content)

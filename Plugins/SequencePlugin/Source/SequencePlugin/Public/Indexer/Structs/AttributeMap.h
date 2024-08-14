@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "AttributeMap.generated.h"
 
 /*
@@ -50,6 +50,6 @@ public:
         void setup(TSharedPtr<FJsonObject> JsonIn)
         {//the json_in will be a mirror of what we have here!
             //we just need to convert the json object into an attributeMap now!
-            AttributeMap = UIndexerSupport::JSONObjectParser(JsonIn);
+            AttributeMap = USequenceSupport::JSONObjectParser(JsonIn);
         }
 };

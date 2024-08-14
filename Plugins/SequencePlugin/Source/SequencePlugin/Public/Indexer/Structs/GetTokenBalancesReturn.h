@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Page.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "TokenBalance.h"
 #include "GetTokenBalancesReturn.generated.h"
 
@@ -32,7 +32,7 @@ public:
         {
             balancesList.Add(tBalance.GetJson());
         }
-        ret.Get()->SetStringField("balances",UIndexerSupport::JsonObjListToSimpleString(balancesList));
+        ret.Get()->SetStringField("balances",USequenceSupport::JsonObjListToSimpleString(balancesList));
         return ret;
     }
 

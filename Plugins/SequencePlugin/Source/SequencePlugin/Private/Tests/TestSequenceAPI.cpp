@@ -101,7 +101,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 	{
 		for (auto Session : Response)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *UIndexerSupport::StructToString(Session));	
+			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *USequenceSupport::StructToString(Session));	
 		}
 		
 		OnSuccess("List Sessions Test Passed");
@@ -346,7 +346,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 	{
 		for (const FFeeOption& Fee : Response)
 		{
-			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString FeeOption = USequenceSupport::StructToString(Fee);
 			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);
 		}
 		OnSuccess("Get FeeOptions Test Passed");
@@ -393,7 +393,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 		if (Response.Num() > 0)
 		{
 			const FFeeOption SelectedFeeOption = Response[0];
-			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *UIndexerSupport::StructToString(SelectedFeeOption));
+			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *USequenceSupport::StructToString(SelectedFeeOption));
 			
 			const FFailureCallback OnTransactionFailure = [OnFailure](const FSequenceError& Error)
 			{
@@ -440,7 +440,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 	{
 		for (const FFeeOption& Fee : Response)
 		{
-			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString FeeOption = USequenceSupport::StructToString(Fee);
 			FString CanAfford = (Fee.bCanAfford) ? "Yes" : "No";
 			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
 			
