@@ -320,7 +320,7 @@ void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, int64 Chai
 	this->SystemData.user_data.username = this->SqncMngr->GetUserDetails().Username;
 	FNetwork_BE default_network;
 	default_network.is_default = true;
-	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
+	default_network.network_name = USequenceSupport::GetNetworkName(this->GChainId);
 	this->SystemData.user_data.networks.Add(default_network);
 	this->SystemDataGuard.Unlock();
 	//ASYNC Operations next!

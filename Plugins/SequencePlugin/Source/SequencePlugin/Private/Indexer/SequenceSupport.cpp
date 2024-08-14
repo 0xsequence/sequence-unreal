@@ -475,7 +475,7 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 	for(FTransaction Transaction : TransactionHistory.transactions)
 	{
 		FTransactionHistoryItem_BE Item;
-		Item.network_name = *UIndexer::GetIndexerNames().Find(Transaction.chainId);
+		Item.network_name = USequenceSupport::GetNetworkName(Transaction.chainId);
 		Item.network_icon = nullptr;
 		bool TxnTypeSet = false;
 		
@@ -703,7 +703,7 @@ FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FGetTokenBalan
 			nft.NFT_Details.itemID.contractAddress = nft.NFT_Details.Contract_Address;
 			nft.NFT_Details.itemID.chainID = token.chainId;
 			nft.NFT_Details.Token_Standard = token.contractType;
-			nft.NFT_Details.Network = UIndexer::GetIndexerName(token.chainId);
+			nft.NFT_Details.Network = USequenceSupport::GetNetworkName(token.chainId);
 			ret.semiParsedBalances.nfts.Add(nft);
 
 			FNFTUpdatable uNFT;//prep the updatable

@@ -15,7 +15,6 @@ struct FGetTransactionHistoryReturn;
 struct FUpdatableItemDataArgs;
 
 typedef TPair<FString, int64> FNameId;
-
 typedef TPair<int64, FString> FIdName;
 
 /**
