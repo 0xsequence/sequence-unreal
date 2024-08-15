@@ -185,7 +185,7 @@ private:
 
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
-	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList);
+	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
@@ -207,12 +207,12 @@ public:
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(const TSuccessCallback<FVersion>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void Version(const TSuccessCallback<FSeqVersion>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(const TSuccessCallback<FRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void RunTimeStatus(const TSuccessCallback<FSeqRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Used to get the chainID from the Chain
@@ -225,32 +225,32 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FSeqEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(const FGetTokenBalancesArgs& Args, const TSuccessCallback<FGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenBalances(const FSeqGetTokenBalancesArgs& Args, const TSuccessCallback<FSeqGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(const FGetTokenSuppliesArgs& Args, const TSuccessCallback<FGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(const FGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(const FGetBalanceUpdatesArgs& Args, const TSuccessCallback<FGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(const FGetTransactionHistoryArgs& Args, const TSuccessCallback<FGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Provider calls
 

@@ -125,23 +125,23 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 void UIndexer::Ping(const int64 ChainID, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "Ping", "", [this,OnSuccess](const FString& Content) {
-		OnSuccess(this->BuildResponse<FPingReturn>(Content).status);
+		OnSuccess(this->BuildResponse<FSeqPingReturn>(Content).status);
 	}, OnFailure);
 }
 
-void UIndexer::Version(const int64 ChainID, TSuccessCallback<FVersion> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "Version", "", [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FVersionReturn>(Content).version);
+		OnSuccess(this->BuildResponse<FSeqVersionReturn>(Content).version);
 	}, OnFailure);
 }
 
-void UIndexer::RunTimeStatus(const int64 ChainID, TSuccessCallback<FRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::RunTimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "RuntimeStatus", "", [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FRuntimeStatusReturn>(Content).status);
+		OnSuccess(this->BuildResponse<FSeqRuntimeStatusReturn>(Content).status);
 	}, OnFailure);
 }
 
@@ -149,11 +149,11 @@ void UIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess
 {
 	HTTPPost(ChainID, "GetChainID", "", [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FGetChainIDReturn>(Content).chainID);
+		OnSuccess(this->BuildResponse<FSeqGetChainIDReturn>(Content).chainID);
 	}, OnFailure);
 }
 
-void UIndexer::GetEtherBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetEtherBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString JSON_Arg = "{\"accountAddress\":\"";
 	JSON_Arg.Append(AccountAddr);
@@ -161,60 +161,60 @@ void UIndexer::GetEtherBalance(const int64 ChainID, FString AccountAddr, TSucces
 
 	HTTPPost(ChainID, "GetEtherBalance", JSON_Arg, [this,OnSuccess](const FString& Content)
 	{
-		const FGetEtherBalanceReturn Response = this->BuildResponse<FGetEtherBalanceReturn>(Content);
+		const FSeqGetEtherBalanceReturn Response = this->BuildResponse<FSeqGetEtherBalanceReturn>(Content);
 		OnSuccess(Response.balance);
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenBalances(const int64 ChainID, const FGetTokenBalancesArgs& Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetTokenBalances(const int64 ChainID, const FSeqGetTokenBalancesArgs& Args, TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "GetTokenBalances";
-	HTTPPost(ChainID, Endpoint, BuildArgs<FGetTokenBalancesArgs>(Args), [this,OnSuccess](const FString& Content)
+	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetTokenBalancesArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
-		const FGetTokenBalancesReturn Response = this->BuildResponse<FGetTokenBalancesReturn>(Content);
+		const FSeqGetTokenBalancesReturn Response = this->BuildResponse<FSeqGetTokenBalancesReturn>(Content);
 		OnSuccess(Response);
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSupplies(const int64 ChainID, const FGetTokenSuppliesArgs& Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetTokenSupplies(const int64 ChainID, const FSeqGetTokenSuppliesArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
-	HTTPPost(ChainID, "GetTokenSupplies", BuildArgs<FGetTokenSuppliesArgs>(Args), [this,OnSuccess](const FString& Content)
+	HTTPPost(ChainID, "GetTokenSupplies", BuildArgs<FSeqGetTokenSuppliesArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FGetTokenSuppliesReturn>(Content));
+		OnSuccess(this->BuildResponse<FSeqGetTokenSuppliesReturn>(Content));
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FGetTokenSuppliesMapArgs& Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppliesMapArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
-	HTTPPost(ChainID, "GetTokenSuppliesMap", BuildArgs<FGetTokenSuppliesMapArgs>(Args), [this,OnSuccess](const FString& Content)
+	HTTPPost(ChainID, "GetTokenSuppliesMap", BuildArgs<FSeqGetTokenSuppliesMapArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FGetTokenSuppliesMapReturn>(Content));
+		OnSuccess(this->BuildResponse<FSeqGetTokenSuppliesMapReturn>(Content));
 	}, OnFailure);
 }
 
-void UIndexer::GetBalanceUpdates(const int64 ChainID, const FGetBalanceUpdatesArgs& Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetBalanceUpdates(const int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
-	HTTPPost(ChainID, "GetBalanceUpdates", BuildArgs<FGetBalanceUpdatesArgs>(Args), [this,OnSuccess](const FString& Content)
+	HTTPPost(ChainID, "GetBalanceUpdates", BuildArgs<FSeqGetBalanceUpdatesArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FGetBalanceUpdatesReturn>(Content));
+		OnSuccess(this->BuildResponse<FSeqGetBalanceUpdatesReturn>(Content));
 	}, OnFailure);
 }
 
-void UIndexer::GetTransactionHistory(const int64 ChainID, const FGetTransactionHistoryArgs& Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetTransactionHistory(const int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
-	HTTPPost(ChainID, "GetTransactionHistory", BuildArgs<FGetTransactionHistoryArgs>(Args), [this,OnSuccess](const FString& Content)
+	HTTPPost(ChainID, "GetTransactionHistory", BuildArgs<FSeqGetTransactionHistoryArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
-		OnSuccess(this->BuildResponse<FGetTransactionHistoryReturn>(Content));
+		OnSuccess(this->BuildResponse<FSeqGetTransactionHistoryReturn>(Content));
 	}, OnFailure);
 }
 
-TMap<int64, FTokenBalance> UIndexer::GetTokenBalancesAsMap(TArray<FTokenBalance> Balances)
+TMap<int64, FSeqTokenBalance> UIndexer::GetTokenBalancesAsMap(TArray<FSeqTokenBalance> Balances)
 {
-	TMap<int64, FTokenBalance> BalanceMap;
+	TMap<int64, FSeqTokenBalance> BalanceMap;
 
-	for (FTokenBalance Balance : Balances)
+	for (FSeqTokenBalance Balance : Balances)
 	{
-		BalanceMap.Add(TPair<int64,FTokenBalance>(Balance.tokenID,Balance));
+		BalanceMap.Add(TPair<int64,FSeqTokenBalance>(Balance.tokenID,Balance));
 	}
 	
 	return BalanceMap;

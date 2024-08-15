@@ -68,12 +68,12 @@ public:
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(int64 ChainID, TSuccessCallback<FVersion> OnSuccess, const FFailureCallback& OnFailure);
+	void Version(int64 ChainID, TSuccessCallback<FSeqVersion> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(int64 ChainID, TSuccessCallback<FRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure);
+	void RunTimeStatus(int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		Used to get the chainID from the Chain
@@ -86,38 +86,38 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls
 	*/
-	void GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FEtherBalance> OnSuccess, const FFailureCallback& OnFailure);
+	void GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(int64 ChainID, const FGetTokenBalancesArgs& Args, TSuccessCallback<FGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetTokenBalances(int64 ChainID, const FSeqGetTokenBalancesArgs& Args, TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(int64 ChainID, const FGetTokenSuppliesArgs& Args, TSuccessCallback<FGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetTokenSupplies(int64 ChainID, const FSeqGetTokenSuppliesArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(int64 ChainID, const FGetTokenSuppliesMapArgs& Args, TSuccessCallback<FGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetTokenSuppliesMap(int64 ChainID, const FSeqGetTokenSuppliesMapArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure);
 	
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(int64 ChainID, const FGetBalanceUpdatesArgs& Args, TSuccessCallback<FGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetBalanceUpdates(int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(int64 ChainID, const FGetTransactionHistoryArgs& Args, TSuccessCallback<FGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetTransactionHistory(int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure);
 	
 	/*
 	 *	Converts a TArray<FTokenBalance> Into a TMap<int64, FTokenBalance>
 	 *	where the key is the TokenID
 	 */
-	static TMap<int64, FTokenBalance> GetTokenBalancesAsMap(TArray<FTokenBalance> Balances);
+	static TMap<int64, FSeqTokenBalance> GetTokenBalancesAsMap(TArray<FSeqTokenBalance> Balances);
 	
 //end of public functions
 };

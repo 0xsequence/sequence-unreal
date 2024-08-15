@@ -9,9 +9,9 @@
 #include "Util/Structs/BE_Structs.h"
 #include "SequenceSupport.generated.h"
 
-struct FGetTokenBalancesReturn;
+struct FSeqGetTokenBalancesReturn;
 struct FTokenBalanceExtractorReturn;
-struct FGetTransactionHistoryReturn;
+struct FSeqGetTransactionHistoryReturn;
 struct FUpdatableItemDataArgs;
 
 typedef TPair<FString, int64> FNameId;
@@ -306,8 +306,8 @@ public:
 	static FString JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData);
 
 	//indexer response extraction functions used to parse response into a frontend usable form!
-	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory);
-	static FUpdatableItemDataArgs ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances);
+	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FSeqGetTransactionHistoryReturn TransactionHistory);
+	static FUpdatableItemDataArgs ExtractFromTokenBalances(FSeqGetTokenBalancesReturn TokenBalances);
 
 	static int64 StringDateToUnixDate(const FString& Iso8601);
 	

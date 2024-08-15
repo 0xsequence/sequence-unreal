@@ -29,7 +29,7 @@ const static FString GTestHistoryFilterMin = "{\"accountAddress\":\""+GTestingAd
 * FString testingPage and if any changes to FString testingPage occur
 * the same changes need to be reflected here otherwise tests will fail!
 */
-FPage BuildTestPage();
+FSeqPage BuildTestPage();
 
 /*
 * Builds a mirror TMap<FString,FTokenList> to FString testTokenMap
@@ -37,14 +37,14 @@ FPage BuildTestPage();
 * matching changes must be made to this function in order to maintain
 * test correctness
 */
-TMap<FString, FTokenList> BuildTokenMap();
+TMap<FString, FSeqTokenList> BuildTokenMap();
 
 /*
 * Builds a mirror to FString testHistoryFilter to testTransactionHistoryFull
 * if any changes occur to FString testHistoryFilter then you must update this function to
 *  match otherwise the test will fail due to a mismatch!
 */
-FTransactionHistoryFilter BuildHistoryFilter();
+FSeqTransactionHistoryFilter BuildHistoryFilter();
 
 //generators for testing//
 

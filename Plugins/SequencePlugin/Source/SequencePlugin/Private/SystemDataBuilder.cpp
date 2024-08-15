@@ -216,7 +216,7 @@ void USystemDataBuilder::OnGetItemDataDone()
 void USystemDataBuilder::InitGetTokenData()
 {
 	this->GetItemDataSyncer->OnDoneDelegate.BindUFunction(this, "OnGetItemDataDone");
-	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [&,this](const FGetTokenBalancesReturn tokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [&,this](const FSeqGetTokenBalancesReturn tokenBalances)
 	{//once indexer responds!
 		//only thing I can do is apply compression earlier for a cleaner setup
 		FUpdatableItemDataArgs semiParsedTokenBalance = USequenceSupport::ExtractFromTokenBalances(tokenBalances);
@@ -232,7 +232,7 @@ void USystemDataBuilder::InitGetTokenData()
 		//dec the request & throw error?
 		this->DecMasterSyncer();
 	};
-	FGetTokenBalancesArgs args;
+	FSeqGetTokenBalancesArgs args;
 	args.accountAddress = this->GPublicAddress;
 	args.includeMetaData = true;
 	this->TIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
@@ -499,7 +499,7 @@ void USystemDataBuilder::InitGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 void USystemDataBuilder::InitGetTxnHistory()
 {
 	this->GetTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
-	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [&, this](const FSeqGetTransactionHistoryReturn history)
 	{//once indexer responds!
 		FUpdatableHistoryArgs semiParsedHistory = USequenceSupport::ExtractFromTransactionHistory(this->GPublicAddress,history);
 		this->SystemDataGuard.Lock();
@@ -514,7 +514,7 @@ void USystemDataBuilder::InitGetTxnHistory()
 		this->DecMasterSyncer();
 	};
 
-	FGetTransactionHistoryArgs args;
+	FSeqGetTransactionHistoryArgs args;
 	args.includeMetaData = true;
 	args.filter.accountAddress = this->GPublicAddress;
 

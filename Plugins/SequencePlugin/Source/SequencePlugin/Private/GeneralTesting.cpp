@@ -252,9 +252,9 @@ void AGeneralTesting::TestIndexer()
 
 void AGeneralTesting::TestTokenBalances() const
 {
-	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [](const FSeqGetTokenBalancesReturn tokenBalances)
 	{
-		const FString ret = USequenceSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
+		const FString ret = USequenceSupport::StructToString<FSeqGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -268,7 +268,7 @@ void AGeneralTesting::TestTokenBalances() const
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		FGetTokenBalancesArgs args;
+		FSeqGetTokenBalancesArgs args;
 		args.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
 		Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
@@ -277,11 +277,11 @@ void AGeneralTesting::TestTokenBalances() const
 
 void AGeneralTesting::TestHistory() const
 {	
-	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [](const FSeqGetTransactionHistoryReturn transactionHistory)
 	{
 		if (GPrintAll)
 		{
-			const FString ret = USequenceSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
+			const FString ret = USequenceSupport::StructToString<FSeqGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -296,7 +296,7 @@ void AGeneralTesting::TestHistory() const
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		FGetTransactionHistoryArgs args;
+		FSeqGetTransactionHistoryArgs args;
 		args.filter.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
 		args.page.page = 0;

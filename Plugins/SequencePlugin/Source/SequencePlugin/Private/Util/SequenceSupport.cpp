@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Util/SequenceSupport.h"
-#include "Indexer/Structs/GetTransactionHistoryReturn.h"
+#include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Indexer/Indexer.h"
@@ -480,18 +480,18 @@ FString USequenceSupport::JsonToSimpleString(const TSharedPtr<FJsonObject>& Json
 	return SimplifyString(JsonToString(JsonData));
 }
 
-FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString MyAddress, FGetTransactionHistoryReturn TransactionHistory)
+FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString MyAddress, FSeqGetTransactionHistoryReturn TransactionHistory)
 {
 	FUpdatableHistoryArgs UpdateItems;
 
-	for(FTransaction Transaction : TransactionHistory.transactions)
+	for(FSeqTransaction Transaction : TransactionHistory.transactions)
 	{
 		FTransactionHistoryItem_BE Item;
 		Item.network_name = USequenceSupport::GetNetworkName(Transaction.chainId);
 		Item.network_icon = nullptr;
 		bool TxnTypeSet = false;
 		
-		for(FTxnTransfer Transfer : Transaction.transfers)
+		for(FSeqTxnTransfer Transfer : Transaction.transfers)
 		{
 			//preprocess all the Indexed amounts and properties
 			int64 TokenId = -1;
@@ -508,7 +508,7 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 			}
 
 			bool hasMetaData = false;
-			FTokenMetaData* TokenMetaData = nullptr;
+			FSeqTokenMetaData* TokenMetaData = nullptr;
 			if (Transfer.tokenMetaData.Contains(FString::FromInt(TokenId)))
 			{
 				hasMetaData = true;
@@ -689,11 +689,11 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 
 //indexer response extractors
 
-FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FGetTokenBalancesReturn TokenBalances)
+FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FSeqGetTokenBalancesReturn TokenBalances)
 {
 	FUpdatableItemDataArgs ret;
 	
-	for (FTokenBalance token : TokenBalances.balances)
+	for (FSeqTokenBalance token : TokenBalances.balances)
 	{
 		if (token.contractType == EContractType::ERC1155 || token.contractType == EContractType::ERC1155_BRIDGE)
 		{//NFT
