@@ -32,7 +32,6 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Display, TEXT("Request: %s"), *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -531,7 +530,7 @@ void USequenceRPCManager::FederateEmailSession(const FString& CodeIn, const TFun
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
 	};
 	
 	FFederateAccountData FederateAccount;
@@ -543,7 +542,7 @@ void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TF
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
 	};
 	
 	FFederateAccountData FederateAccount;
@@ -555,7 +554,7 @@ void USequenceRPCManager::FederatePlayFabSession(const FString& SessionTicketIn,
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
 	};
 	
 	FFederateAccountData FederateAccount;

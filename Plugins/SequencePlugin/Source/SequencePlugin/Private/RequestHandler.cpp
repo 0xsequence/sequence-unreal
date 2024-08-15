@@ -134,7 +134,6 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 	{		
 		if(bWasSuccessful)
 		{
-			UE_LOG(LogTemp, Display, TEXT("RPC Response: %s"), *Response.Get()->GetContentAsString());
 			OnSuccess(Response.Get()->GetContentAsString());
 		}
 		else
