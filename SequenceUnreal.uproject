@@ -27,8 +27,6 @@
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Mac",
-				"Win64",
-				"Android",
 				"IOS"
 			],
 			"MarketplaceURL": "com.epicgames.launcher: //ue/marketplace/product/b5bcb95abc344bd5b835d281ae8892f3"
@@ -44,9 +42,6 @@
 	],
 	"TargetPlatforms": [
 		"Mac",
-		"Win64",
-		"Android",
-		"IOS",
-		"Windows"
+		"IOS"
 	]
 }
