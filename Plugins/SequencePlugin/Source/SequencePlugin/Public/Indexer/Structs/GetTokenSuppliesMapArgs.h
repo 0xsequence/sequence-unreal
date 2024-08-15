@@ -8,7 +8,7 @@
 #include "GetTokenSuppliesMapArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTokenSuppliesMapArgs
+struct SEQUENCEPLUGIN_API FGetTokenSuppliesMapArgs
 {
     GENERATED_USTRUCT_BODY()
 public:

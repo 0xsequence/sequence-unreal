@@ -6,7 +6,7 @@
 #include "EventLog.generated.h"
 
 USTRUCT(BlueprintType)
-struct FEventLog
+struct SEQUENCEPLUGIN_API FEventLog
 {
     GENERATED_USTRUCT_BODY()
 public:

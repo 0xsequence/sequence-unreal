@@ -7,7 +7,7 @@
 #include "GetBalanceUpdatesReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetBalanceUpdatesReturn
+struct SEQUENCEPLUGIN_API FGetBalanceUpdatesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

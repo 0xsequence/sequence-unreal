@@ -7,7 +7,7 @@
 #include "TokenMetaData.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTokenMetaData
+struct SEQUENCEPLUGIN_API FTokenMetaData
 {
     GENERATED_USTRUCT_BODY()
 public:

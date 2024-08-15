@@ -6,7 +6,7 @@
 #include "TokenHistory.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTokenHistory
+struct SEQUENCEPLUGIN_API FTokenHistory
 {
     GENERATED_USTRUCT_BODY()
 public:

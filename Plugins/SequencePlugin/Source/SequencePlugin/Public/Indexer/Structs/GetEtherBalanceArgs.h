@@ -5,7 +5,7 @@
 #include "GetEtherBalanceArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetEtherBalanceArgs
+struct SEQUENCEPLUGIN_API FGetEtherBalanceArgs
 {
     GENERATED_USTRUCT_BODY()
 public:

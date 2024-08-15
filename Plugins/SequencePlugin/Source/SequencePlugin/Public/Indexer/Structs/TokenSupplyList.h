@@ -13,7 +13,7 @@
 
 //For use in TokenSuppliesMapReturn
 USTRUCT(BlueprintType)
-struct FTokenSupplyList
+struct SEQUENCEPLUGIN_API FTokenSupplyList
 {
     GENERATED_USTRUCT_BODY()
 public:

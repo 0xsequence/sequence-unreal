@@ -7,7 +7,7 @@
 #include "SortBy.generated.h"
 
 USTRUCT(BlueprintType)
-struct FSortBy
+struct SEQUENCEPLUGIN_API FSortBy
 {
     GENERATED_USTRUCT_BODY()
 public:

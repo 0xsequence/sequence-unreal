@@ -6,7 +6,7 @@
 #include "Transaction.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTransaction
+struct SEQUENCEPLUGIN_API FTransaction
 {
     GENERATED_USTRUCT_BODY()
 public:

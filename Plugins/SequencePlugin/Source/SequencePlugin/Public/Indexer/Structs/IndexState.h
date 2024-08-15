@@ -5,7 +5,7 @@
 #include "IndexState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FIndexState
+struct SEQUENCEPLUGIN_API FIndexState
 {
     GENERATED_USTRUCT_BODY()
 public:

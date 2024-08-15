@@ -7,7 +7,7 @@
 #include "GetTransactionHistoryArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTransactionHistoryArgs
+struct SEQUENCEPLUGIN_API FGetTransactionHistoryArgs
 {
     GENERATED_USTRUCT_BODY()
 public:

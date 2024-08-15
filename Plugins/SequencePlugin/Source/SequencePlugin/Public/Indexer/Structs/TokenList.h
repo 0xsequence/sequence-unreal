@@ -11,7 +11,7 @@
 
 //For use in GetTokenSuppliesMapArgs
 USTRUCT(BlueprintType)
-struct FTokenList
+struct SEQUENCEPLUGIN_API FTokenList
 {
     GENERATED_USTRUCT_BODY()
 public:

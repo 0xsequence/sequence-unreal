@@ -6,7 +6,7 @@
 #include "RuntimeStatus.generated.h"
 
 USTRUCT(BlueprintType)
-struct FRuntimeStatus
+struct SEQUENCEPLUGIN_API FRuntimeStatus
 {
     GENERATED_USTRUCT_BODY()
 public:

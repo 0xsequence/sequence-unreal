@@ -5,7 +5,7 @@
 #include "GetChainIDArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetChainIDArgs
+struct SEQUENCEPLUGIN_API FGetChainIDArgs
 {
     GENERATED_USTRUCT_BODY()
 public:

@@ -6,7 +6,7 @@
 #include "ContractInfoExtensions.generated.h"
 
 USTRUCT(BlueprintType)
-struct FContractInfoExtensions
+struct SEQUENCEPLUGIN_API FContractInfoExtensions
 {
     GENERATED_USTRUCT_BODY()
 public:

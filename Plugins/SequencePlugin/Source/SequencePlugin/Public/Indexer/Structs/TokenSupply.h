@@ -7,7 +7,7 @@
 #include "TokenSupply.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTokenSupply
+struct SEQUENCEPLUGIN_API FTokenSupply
 {
     GENERATED_USTRUCT_BODY()
 public:

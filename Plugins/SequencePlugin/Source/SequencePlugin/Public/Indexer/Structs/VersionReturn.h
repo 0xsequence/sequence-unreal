@@ -6,7 +6,7 @@
 #include "VersionReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FVersionReturn
+struct SEQUENCEPLUGIN_API FVersionReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

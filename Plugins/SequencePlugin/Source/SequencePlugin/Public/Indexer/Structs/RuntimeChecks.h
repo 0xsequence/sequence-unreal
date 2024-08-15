@@ -5,7 +5,7 @@
 #include "RuntimeChecks.generated.h"
 
 USTRUCT(BlueprintType)
-struct FRuntimeChecks
+struct SEQUENCEPLUGIN_API FRuntimeChecks
 {
     GENERATED_USTRUCT_BODY()
 public:

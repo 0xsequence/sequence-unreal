@@ -12,7 +12,7 @@
 
 //for use in TokenMetaData
 USTRUCT(BlueprintType)
-struct FAttributeMap
+struct SEQUENCEPLUGIN_API FAttributeMap
 {
     GENERATED_USTRUCT_BODY()
 public:

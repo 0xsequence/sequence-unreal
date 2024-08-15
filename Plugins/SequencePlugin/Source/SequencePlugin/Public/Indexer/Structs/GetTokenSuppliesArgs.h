@@ -6,7 +6,7 @@
 #include "GetTokenSuppliesArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTokenSuppliesArgs
+struct SEQUENCEPLUGIN_API FGetTokenSuppliesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:

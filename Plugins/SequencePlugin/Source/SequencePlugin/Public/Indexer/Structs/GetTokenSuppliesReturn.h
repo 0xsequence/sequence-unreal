@@ -8,7 +8,7 @@
 #include "GetTokenSuppliesReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGetTokenSuppliesReturn
+struct SEQUENCEPLUGIN_API FGetTokenSuppliesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

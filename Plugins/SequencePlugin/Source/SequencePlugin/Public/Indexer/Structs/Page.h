@@ -7,7 +7,7 @@
 #include "Page.generated.h"
 
 USTRUCT(BlueprintType)
-struct FPage
+struct SEQUENCEPLUGIN_API FPage
 {
     GENERATED_USTRUCT_BODY()
 public:

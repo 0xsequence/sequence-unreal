@@ -1,8 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "Indexer/Indexer_Enums.h"
-#include "Struct_0.h"
-#include "Struct_1.h"
 #include "ContractInfo.h"
 #include "ContractInfoExtensions.h"
 #include "EtherBalance.h"
@@ -36,7 +34,6 @@
 #include "TxnTransfer.h"
 #include "Version.h"
 #include "VersionReturn.h"
-#include "WebRPCError.h"
 #include "Indexer/Structs/AttributeMap.h"
 #include "TokenSupplyList.h"
 #include "TokenList.h"

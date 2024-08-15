@@ -6,7 +6,7 @@
 #include "TransactionHistoryFilter.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTransactionHistoryFilter
+struct SEQUENCEPLUGIN_API FTransactionHistoryFilter
 {
     GENERATED_USTRUCT_BODY()
 public:

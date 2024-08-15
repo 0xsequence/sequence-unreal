@@ -7,7 +7,7 @@
 #include "RuntimeStatusReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FRuntimeStatusReturn
+struct SEQUENCEPLUGIN_API FRuntimeStatusReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

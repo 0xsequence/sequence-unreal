@@ -8,7 +8,7 @@
 #include "TokenBalance.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTokenBalance
+struct SEQUENCEPLUGIN_API FTokenBalance
 {
     GENERATED_USTRUCT_BODY()
 public:

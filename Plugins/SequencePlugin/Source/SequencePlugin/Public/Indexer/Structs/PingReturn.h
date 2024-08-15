@@ -5,7 +5,7 @@
 #include "PingReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct FPingReturn
+struct SEQUENCEPLUGIN_API FPingReturn
 {
     GENERATED_USTRUCT_BODY()
 public:

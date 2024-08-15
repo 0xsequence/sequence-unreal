@@ -9,7 +9,7 @@
 
 
 USTRUCT(BlueprintType)
-struct FTxnTransfer
+struct SEQUENCEPLUGIN_API FTxnTransfer
 {
     GENERATED_USTRUCT_BODY()
 public:

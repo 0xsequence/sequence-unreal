@@ -5,7 +5,7 @@
 #include "EtherBalance.generated.h"
 
 USTRUCT(BlueprintType)
-struct FEtherBalance
+struct SEQUENCEPLUGIN_API FEtherBalance
 {
     GENERATED_USTRUCT_BODY()
 public:
