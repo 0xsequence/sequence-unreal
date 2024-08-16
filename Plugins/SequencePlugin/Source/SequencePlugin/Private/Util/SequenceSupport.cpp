@@ -56,13 +56,13 @@ TArray<int64> USequenceSupport::GetAllNetworkIds()
 	return NetworkIds;
 }
 
-float USequenceSupport::GetAmount(const int64 Amount, const int64 Decimals)
+float USequenceSupport::GetUserReadableAmount(const int64 Amount, const int64 Decimals)
 {
 	const float Ret = static_cast<float>(Amount);
 	return static_cast<float>(Ret / FMath::Pow(10, static_cast<double>(Decimals)));
 }
 
-int64 USequenceSupport::GetAmount(const float Amount, const int64 Decimals)
+int64 USequenceSupport::GetSystemReadableAmount(const float Amount, const int64 Decimals)
 {
 	const double Operand = FMath::Pow(10, static_cast<double>(Decimals));
 	const int64 Ret = static_cast<int64>(Operand * Amount);
@@ -517,7 +517,7 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 				if (hasMetaData)
 				{
 					TokenMetaData = Transfer.tokenMetaData.Find(FString::FromInt(TokenId));
-					NftTxn.amount = USequenceSupport::GetAmount(amount, TokenMetaData->decimals);
+					NftTxn.amount = USequenceSupport::GetUserReadableAmount(amount, TokenMetaData->decimals);
 					NftTxn.nft.NFT_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Short_Name = TokenMetaData->name;
 					NftTxn.nft.NFT_Icon_URL = TokenMetaData->image;
@@ -550,7 +550,7 @@ FUpdatableHistoryArgs USequenceSupport::ExtractFromTransactionHistory(FString My
 			else if (Transfer.contractType == EContractType::ERC721 || Transfer.contractType == EContractType::ERC721_BRIDGE || Transfer.contractType == EContractType::ERC20 || Transfer.contractType == EContractType::ERC20_BRIDGE)
 			{//coin
 				FCoinTxn_BE CoinTxn;
-				CoinTxn.amount = USequenceSupport::GetAmount(amount,Transfer.contractInfo.decimals);
+				CoinTxn.amount = USequenceSupport::GetUserReadableAmount(amount,Transfer.contractInfo.decimals);
 				CoinTxn.coin.Coin_Symbol_URL = Transfer.contractInfo.logoURI;
 				CoinTxn.coin.Coin_Short_Name = Transfer.contractInfo.symbol;
 				CoinTxn.coin.Coin_Long_Name = Transfer.contractInfo.name;
@@ -699,7 +699,7 @@ FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FSeqGetTokenBa
 			nft.Collection_Short_Name = token.contractInfo.symbol;
 			nft.Description = token.tokenMetaData.description;
 			nft.Properties = token.tokenMetaData.properties;
-			nft.Amount = USequenceSupport::GetAmount(token.balance,token.tokenMetaData.decimals);
+			nft.Amount = USequenceSupport::GetUserReadableAmount(token.balance,token.tokenMetaData.decimals);
 			nft.Value = -1;
 			nft.NFT_Icon_URL = token.tokenMetaData.image;
 			nft.Collection_Icon_URL = token.contractInfo.extensions.ogImage;
@@ -727,7 +727,7 @@ FUpdatableItemDataArgs USequenceSupport::ExtractFromTokenBalances(FSeqGetTokenBa
 			coin.Coin_Standard = token.contractType;
 			coin.itemID.chainID = token.chainId;
 			coin.itemID.contractAddress = token.contractAddress;
-			coin.Coin_Amount = USequenceSupport::GetAmount(token.balance,token.contractInfo.decimals);
+			coin.Coin_Amount = USequenceSupport::GetUserReadableAmount(token.balance,token.contractInfo.decimals);
 			coin.Coin_Value = -1;
 			coin.Coin_Symbol_URL = token.contractInfo.logoURI;
 			ret.semiParsedBalances.coins.Add(coin);//add the semi parsed coin data

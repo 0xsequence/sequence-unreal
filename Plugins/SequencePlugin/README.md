@@ -130,9 +130,9 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 Note: Auth Success Forwarder will let you know when the system is ready to be used
 
-4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this 
-process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
-your scene if it's just an actor Blueprint.
+4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this
+   process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
+   your scene if it's just an actor Blueprint.
 
 ### For C++
 
@@ -152,7 +152,7 @@ your scene if it's just an actor Blueprint.
    drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
    for your **[C++ Parent]** class you just made.
 
-Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** (if you do this be sure to move the duplicate outside 
+Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** (if you do this be sure to move the duplicate outside
 of the plugin folder into YOUR content folder, Otherwise your work could be lost during an update to the plugin).
 
 5) If your **[C++ Parent]** was a pawn, you can set it to be the default pawn in your Gamemode and it will spawn on BeginPlay,
@@ -340,13 +340,33 @@ the decimals value with the following conversion function instead.
 
 [Get Wallet Address](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Wallet_Address.PNG)
 
-##### Get Network Id , Type Sync
+##### Get Currently Set Network Id , Type Sync
 
 [Get Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Get_Network_Id.PNG)
 
-##### Update Network Id , Type Sync
+##### Update Currently Set Network Id , Type Sync
 
 [Update Network Id](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_Update_Network_Id.PNG)
+
+#### Get All Networks , Type Sync
+
+[Get All Networks](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_GetAllNetworks.PNG)
+
+#### Get All Network Names , Type Sync
+
+[Get All Networks](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_GetAllNetworkNames.PNG)
+
+#### Get All Network Ids , Type Sync
+
+[Get All Networks](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_GetAllNetworkIds.PNG)
+
+#### Get Network Id , Type Sync
+
+[Get All Networks](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_GetNetworkId.PNG)
+
+#### Get Network Name , Type Sync
+
+[Get All Networks](ReadmeImages/BP_Demo/SequenceApi/Sync/Example_GetNetworkName.PNG)
 
 ##### Open Transak Url , Type Sync
 
@@ -520,6 +540,16 @@ as if it was a static variable in your C++ code. But it also persists for the li
 no data is reset when a level is changed in your games!
 
 ### USequenceWallet Functions
+
+### Example GetSystemReadableAmount
+#### Used to convert a user readable amount of a token into a system usable one, IE) 1 USDC -> 1000000 (int64 representation of 1 USDC)
+
+      int64 SystemReadableAmount = USequenceWallet::GetSystemReadableAmount(0.01, 6);//0.01 USDC
+
+### Example GetUserReadableAmount
+#### Used to convert a system readable amount of a token into a user readable one IE) 1000000 (int64 representation of 1 USDC) -> 1 USDC
+
+      float UserReadableAmount = USequenceWallet::GetUserReadableAmount(1000000, 6);//1 USDC
 
 ### Example GetFeeOptions
 #### Used to get Filtered Fee Options (that is options that your wallet can pay)
@@ -775,26 +805,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
        Api->ListSessions(OnSuccess,OnFailure);
     }
 
-### Example CloseSession
-##### Closes the session
-
-	const TFunction<void(FString)> OnSuccess = [=](const FString& Response)
-	{
-		//Response is just a confirmation string
-    };
-
-	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
-	{
-		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
-    };
-
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-    if (WalletOptional.IsSet() && WalletOptional.GetValue())
-    {
-	   USequenceWallet * Api = WalletOptional.GetValue();
-	   Api->CloseSession(OnSuccess,OnFailure);
-    }
-
 ### Example SignOut
 ##### Closes the session & clears out cached credentials with blank ones
 
@@ -803,26 +813,6 @@ Note: if you want call contracts with the Raw type you'll want include the heade
     {
 	   USequenceWallet * Api = WalletOptional.GetValue();
        Api->SignOut();
-    }
-
-### Example RegisterSession
-##### Used to register a session (done automatically for you by UAuthenticator)
-
-    const TFunction<void(FCredentials_BE)> OnSuccess = [=](FCredentials_BE Response)
-    {
-        //Successful registration
-    };
-
-	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
-	{
-		UE_LOG(LogTemp,Display,TEXT("Error Message: %s"),*Error.Message);
-    };
-
-    const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-    if (WalletOptional.IsSet() && WalletOptional.GetValue())
-    {
-	   USequenceWallet * Api = WalletOptional.GetValue();
-	   Api->RegisterSession(OnSuccess,OnFailure);
     }
 
 ### Example GetWalletAddress
@@ -854,6 +844,31 @@ Note: if you want call contracts with the Raw type you'll want include the heade
        USequenceWallet * Api = WalletOptional.GetValue();
        Api->UpdateNetworkId(137);
     }
+
+### Example GetAllNetworks
+#### Used to get all available networks as structs of their names & ids
+
+	TArray<FIdNamePair> Networks = USequenceWallet::GetAllNetworks();
+
+### Example GetAllNetworkNames
+#### Used to get all available network names
+
+	TArray<FString> NetworkNames = USequenceWallet::GetAllNetworkNames();
+
+### Example GetAllNetworkIds
+#### Used to get all available network Ids
+
+	TArray<int64> NetworkIds = USequenceWallet::GetAllNetworkIds();
+
+### Example GetNetworkId
+#### Used to get the network Id associated with the given name
+
+	int64 NetworkId = USequenceWallet::GetNetworkId(TEXT("polygon"));
+
+### Example GetNetworkName
+#### Used to get the network name associated with the id
+
+	FString NetworkName = USequenceWallet::GetNetworkName(137);
 
 ### Example UpdateProviderUrl
 #### Used to update the provider url of the wallet
@@ -941,9 +956,9 @@ the indexer. The default network we set is `137`
 
 ## Version
 
-    const TSuccessCallback<FVersion> GenericSuccess = [=](const FVersion& version)
+    const TSuccessCallback<FSeqVersion> GenericSuccess = [=](const FSeqVersion& version)
     {
-        //Response contained in FVersion
+        //Response contained in FSeqVersion
     };
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -960,9 +975,9 @@ the indexer. The default network we set is `137`
 
 ## RunTimeStatus
 
-    const TSuccessCallback<FRuntimeStatus> GenericSuccess = [=](const FRuntimeStatus& runTimeStatus)
+    const TSuccessCallback<FSeqRuntimeStatus> GenericSuccess = [=](const FSeqRuntimeStatus& runTimeStatus)
     {
-        //Response is in FRunTimeStatus
+        //Response is in FSeqRunTimeStatus
     };
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -998,9 +1013,9 @@ the indexer. The default network we set is `137`
 
 ## GetEtherBalance
 
-    const TSuccessCallback<FEtherBalance> GenericSuccess = [=](const FEtherBalance& etherBalance)
+    const TSuccessCallback<FSeqEtherBalance> GenericSuccess = [=](const FSeqEtherBalance& etherBalance)
 	{
-        //Response in FEtherBalance
+        //Response in FSeqEtherBalance
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1017,9 +1032,9 @@ the indexer. The default network we set is `137`
 
 ## GetTokenBalances
 
-    const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [=](const FGetTokenBalancesReturn& tokenBalances)
+    const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [=](const FSeqGetTokenBalancesReturn& tokenBalances)
 	{
-        //Response in FGetTokenBalancesReturn
+        //Response in FSeqGetTokenBalancesReturn
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1031,7 +1046,7 @@ the indexer. The default network we set is `137`
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
-	   FGetTokenBalancesArgs args;
+	   FSeqGetTokenBalancesArgs args;
 	   args.accountAddress = Api->GetWalletAddress();
 	   args.includeMetaData = true;
 	   Api->GetTokenBalances(args, GenericSuccess, GenericFailure);
@@ -1039,9 +1054,9 @@ the indexer. The default network we set is `137`
 
 ## GetTokenSupplies
 
-    const TSuccessCallback<FGetTokenSuppliesReturn> GenericSuccess = [=](const FGetTokenSuppliesReturn& tokenSupplies)
+    const TSuccessCallback<FSeqGetTokenSuppliesReturn> GenericSuccess = [=](const FSeqGetTokenSuppliesReturn& tokenSupplies)
 	{
-        //Response is in FGetTokenSuppliesReturn
+        //Response is in FSeqGetTokenSuppliesReturn
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1053,7 +1068,7 @@ the indexer. The default network we set is `137`
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
-	   FGetTokenSuppliesArgs args;
+	   FSeqGetTokenSuppliesArgs args;
 	   args.contractAddress = "0x01";//Testing Contract Address in hex with leading 0x
 	   args.includeMetaData = true;
 	   Api->GetTokenSupplies(args, GenericSuccess, GenericFailure);
@@ -1061,9 +1076,9 @@ the indexer. The default network we set is `137`
 
 ## GetTokenSuppliesMap
 
-    const TSuccessCallback<FGetTokenSuppliesMapReturn> GenericSuccess = [=](const FGetTokenSuppliesMapReturn& tokenSuppliesMap)
+    const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> GenericSuccess = [=](const FSeqGetTokenSuppliesMapReturn& tokenSuppliesMap)
 	{
-        //Response is in FGetTokenSuppliesMapReturn
+        //Response is in FSeqGetTokenSuppliesMapReturn
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1080,7 +1095,7 @@ the indexer. The default network we set is `137`
 	   const TPair<FString,FTokenList> item;
 	   tokenMap.Add(item);
 
-       FGetTokenSuppliesMapArgs args;
+       FSeqGetTokenSuppliesMapArgs args;
 	   args.includeMetaData = true;
 	   args.tokenMap = tokenMap;
 
@@ -1089,9 +1104,9 @@ the indexer. The default network we set is `137`
 
 ## GetBalanceUpdates
 
-    const TSuccessCallback<FGetBalanceUpdatesReturn> GenericSuccess = [=](const FGetBalanceUpdatesReturn& balanceUpdates)
+    const TSuccessCallback<FSeqGetBalanceUpdatesReturn> GenericSuccess = [=](const FSeqGetBalanceUpdatesReturn& balanceUpdates)
 	{
-        //Response in FGetBalanceUpdatesReturn
+        //Response in FSeqGetBalanceUpdatesReturn
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1103,7 +1118,7 @@ the indexer. The default network we set is `137`
     if (WalletOptional.IsSet() && WalletOptional.GetValue())
     {
        USequenceWallet * Api = WalletOptional.GetValue();
-	   FGetBalanceUpdatesArgs args;
+	   FSeqGetBalanceUpdatesArgs args;
 	   args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
 	   args.page.page = 10;
 	   args.page.more = true;
@@ -1113,9 +1128,9 @@ the indexer. The default network we set is `137`
 
 ## GetTransactionHistory
 
-    const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [=](const FGetTransactionHistoryReturn& transactionHistory)
+    const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [=](const FSeqGetTransactionHistoryReturn& transactionHistory)
 	{
-        //Response is in FGetTransactionHistoryReturn
+        //Response is in FSeqGetTransactionHistoryReturn
 	};
 
 	const FFailureCallback GenericFailure = [=](const FSequenceError& Error)
@@ -1128,7 +1143,7 @@ the indexer. The default network we set is `137`
     {
        USequenceWallet * Api = WalletOptional.GetValue();
 
-	   FGetTransactionHistoryArgs args;
+	   FSeqGetTransactionHistoryArgs args;
 	   args.filter.accountAddress = Api->GetWalletAddress();
 	   args.includeMetaData = true;
 	   args.page.page = 0;

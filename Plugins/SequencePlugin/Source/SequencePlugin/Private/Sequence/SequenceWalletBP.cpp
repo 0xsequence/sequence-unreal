@@ -145,12 +145,12 @@ void USequenceWalletBP::CallOnIndexerGetTransactionHistory(const FSequenceRespon
 
 float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
 {
-	return USequenceSupport::GetAmount(Amount,Decimals);
+	return USequenceSupport::GetUserReadableAmount(Amount,Decimals);
 }
 
 int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals)
 {
-	return USequenceSupport::GetAmount(Amount,Decimals);
+	return USequenceSupport::GetSystemReadableAmount(Amount,Decimals);
 }
 
 int64 USequenceWalletBP::GetNetworkIdFromName(const FString& NetworkNameIn)

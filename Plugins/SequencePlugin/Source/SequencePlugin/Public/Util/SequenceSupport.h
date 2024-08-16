@@ -149,7 +149,7 @@ public:
 	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
 	* Return, The user readable Float amount
 	*/
-	static float GetAmount(const int64 Amount, const int64 Decimals);
+	static float GetUserReadableAmount(const int64 Amount, const int64 Decimals);
 	
 	/*
 	* Used to convert a user readable amount into a usable amount value for transactions,
@@ -157,7 +157,7 @@ public:
 	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
 	* Return, The transaction usable amount
 	*/
-	static int64 GetAmount(const float Amount, const int64 Decimals);
+	static int64 GetSystemReadableAmount(const float Amount, const int64 Decimals);
 
 	static FString GetStringFromToken(const FString& IdToken, const FString& ParameterName);
 

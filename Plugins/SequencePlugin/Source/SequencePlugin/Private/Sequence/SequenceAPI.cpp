@@ -192,6 +192,16 @@ int64 USequenceWallet::GetNetworkId(const FString& NetworkNameIn)
 	return USequenceSupport::GetNetworkId(NetworkNameIn);
 }
 
+int64 USequenceWallet::GetSystemReadableAmount(const float AmountIn, const int64 DecimalsIn)
+{
+	return USequenceSupport::GetSystemReadableAmount(AmountIn, DecimalsIn);
+}
+
+float USequenceWallet::GetUserReadableAmount(const int64 AmountIn, const int64 DecimalsIn)
+{
+	return USequenceSupport::GetUserReadableAmount(AmountIn, DecimalsIn);
+}
+
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
