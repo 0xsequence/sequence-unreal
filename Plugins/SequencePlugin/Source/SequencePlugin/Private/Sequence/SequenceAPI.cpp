@@ -244,64 +244,6 @@ FString USequenceWallet::GetWalletAddress() const
 	return Addr;
 }
 
-void USequenceWallet::RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	/*const TSuccessCallback<FString> OnResponse = [this,OnSuccess,OnFailure](const FString& Response)
-	{
-		const TSharedPtr<FJsonObject> Json = UIndexerSupport::JsonStringToObject(Response);
-		const TSharedPtr<FJsonObject> * SessionObj = nullptr;
-		const TSharedPtr<FJsonObject> * ResponseObj = nullptr;
-		
-		if (Json.Get()->TryGetObjectField(TEXT("session"),SessionObj) && Json.Get()->TryGetObjectField(TEXT("response"),ResponseObj))
-		{
-			const TSharedPtr<FJsonObject> * DataObj = nullptr;
-			const TSharedPtr<FJsonObject> * IdentityObj = nullptr;
-
-			FString CreatedAt = "", RefreshedAt = "", ExpiresAt = "", UserId = "";
-			if (ResponseObj->Get()->TryGetObjectField(TEXT("data"), DataObj) && SessionObj->Get()->TryGetObjectField(TEXT("identity"), IdentityObj) && SessionObj->Get()->TryGetStringField(TEXT("userId"),UserId) && SessionObj->Get()->TryGetStringField(TEXT("createdAt"),CreatedAt) && SessionObj->Get()->TryGetStringField(TEXT("refreshedAt"), RefreshedAt) && SessionObj->Get()->TryGetStringField(TEXT("expiresAt"), ExpiresAt))
-			{
-				FString Wallet = "", Type = "", ISS = "", Sub = "", Email = "";
-				if (IdentityObj->Get()->TryGetStringField(TEXT("email"), Email) && IdentityObj->Get()->TryGetStringField(TEXT("sub"), Sub) && IdentityObj->Get()->TryGetStringField(TEXT("iss"),ISS) && IdentityObj->Get()->TryGetStringField(TEXT("type"),Type) && DataObj->Get()->TryGetStringField(TEXT("wallet"),Wallet))
-				{
-					FDateTime ParsedCreatedAt, ParsedRefreshedAt, ParsedExpiresAt;
-					FDateTime::ParseIso8601(*CreatedAt,ParsedCreatedAt);
-					FDateTime::ParseIso8601(*RefreshedAt,ParsedRefreshedAt);
-					FDateTime::ParseIso8601(*ExpiresAt,ParsedExpiresAt);
-					const int64 UnixIssuedAt = ParsedCreatedAt.ToUnixTimestamp();
-					const int64 UnixRefreshedAt = ParsedRefreshedAt.ToUnixTimestamp();
-					const int64 UnixExpiresAt = ParsedExpiresAt.ToUnixTimestamp();
-					this->Credentials.RegisterCredentials(Wallet,Email,ISS,Type,Sub,UserId,UnixIssuedAt,UnixRefreshedAt,UnixExpiresAt);
-					const UAuthenticator * TUAuth = NewObject<UAuthenticator>();
-					TUAuth->StoreCredentials(this->Credentials);
-					OnSuccess(this->Credentials);
-				}
-				else
-				{
-					OnFailure(FSequenceError(RequestFail, "3rd Level parsing: Request failed: " + Response));
-				}
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "2nd Level parsing: Request failed: " + Response));
-			}
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "1st Level parsing: Request failed: " + Response));
-		}
-	};
-	
-	if (this->Credentials.UnRegisteredValid())
-	{
-		const FString URL = this->Credentials.GetRPCServer() + "/rpc/WaasAuthenticator/RegisterSession";
-		this->SequenceRPC(URL,this->BuildRegisterSessionIntent(),OnResponse,OnFailure);
-	}
-	else
-	{
-		OnFailure(FSequenceError(RequestFail, "[Invalid Credentials please login first]"));
-	}*/
-}
-
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)

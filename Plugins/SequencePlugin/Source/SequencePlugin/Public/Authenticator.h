@@ -106,18 +106,48 @@ private:
 
 	void InitiateMobleSSO_Internal(const ESocialSigninType& Type);
 public:
-	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
+	/**
+	 * Sets a custom encryptor
+	 * @param EncryptorIn Encryptor to use
+	 */
+	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+
+	/**
+	 * Used to get an OIDC Login Url
+	 * @param Type Type of OIDC Url need
+	 * @return An OIDC login Url of the specified Type
+	 */
 	FString GetSigninURL(const ESocialSigninType& Type) const;
 
+	/**
+	 * Used to initiate mobile Login
+	 * @param Type Type of OIDC to conduct on Mobile
+	 */
 	void InitiateMobileSSO(const ESocialSigninType& Type);
 
+	/**
+	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
+	 * @param TokenizedUrl The URL containing an IdToken
+	 */
 	void UpdateMobileLogin(const FString& TokenizedUrl) const;
-	
+
+	/**
+	 * Used to initiate OIDC login
+	 * @param IDTokenIn OIDC Token granted from login
+	 */
 	void SocialLogin(const FString& IDTokenIn) const;
 
+	/**
+	 * Used to initiate email login
+	 * @param EmailIn Email
+	 */
 	void EmailLogin(const FString& EmailIn);
 
+	/**
+	 * Used to login as a Guest into Sequence
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
 	void GuestLogin(const bool ForceCreateAccountIn) const;
 
 	/**
@@ -140,21 +170,55 @@ public:
 	 * @param CodeIn Received Code from email
 	 */
 	void EmailLoginCode(const FString& CodeIn) const;
-	
+
+	/**
+	 * Used To Federate an Email (WIP)
+	 * @param EmailIn Email to federate
+	 */
 	void FederateEmail(const FString& EmailIn);
-	
+
+	/**
+	 * Used to Federate an OIDC Login
+	 * @param IdTokenIn OIDC Token To federate
+	 */
 	void FederateOIDCIdToken(const FString& IdTokenIn) const;
 
+	/**
+	 * Used to initiate OIDC account federation on mobile
+	 * @param Type Type of OIDC account to federate
+	 */
 	void InitiateMobileFederateOIDC(const ESocialSigninType& Type);
 
+	/**
+	 * Used to federate a new PlayFab account
+	 * @param UsernameIn PlayFab Username
+	 * @param EmailIn PlayFab Email
+	 * @param PasswordIn PlayFab Password
+	 */
 	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
-	
+
+	/**
+	 * Used to federate an existing account on PlayFab
+	 * @param UsernameIn PlayFab Username
+	 * @param PasswordIn PlayFab Password
+	 */
 	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
+	/**
+	 * Used to get stored credentials from Disk
+	 * @return Stored Credentials
+	 */
 	FStoredCredentials_BE GetStoredCredentials() const;
 
+	/**
+	 * Used to store Credentials on Disk
+	 * @param Credentials Credentials to be Stored
+	 */
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
+	/**
+	 * Clears stored credentials on disk with blanks
+	 */
 	void ClearStoredCredentials() const;
 	
 private:

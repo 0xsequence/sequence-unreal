@@ -28,9 +28,6 @@ protected:
 
 //Testing Functions//
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
-	void TestRegisterSession() const;
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestSignMessage() const;
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")

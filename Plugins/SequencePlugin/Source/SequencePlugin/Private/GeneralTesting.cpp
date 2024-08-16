@@ -25,21 +25,6 @@ void AGeneralTesting::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AGeneralTesting::TestRegisterSession() const
-{
-	const TFunction<void (FString)> OnSuccess = [this](FString State)
-	{
-		CallbackPassed(State);
-	};
-
-	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
-	{
-		CallbackFailed(Data, Err);
-	};
-	
-	SequenceAPITest::RegisterSession(OnSuccess, OnFailure);
-}
-
 void AGeneralTesting::TestSignMessage() const
 {
 	const TFunction<void (FString)> OnSuccess = [this](FString State)

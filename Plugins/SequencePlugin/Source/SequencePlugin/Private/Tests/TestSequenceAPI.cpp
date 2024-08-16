@@ -31,38 +31,6 @@ void SequenceAPITest::BasicProviderTests()
 	}
 }
 
-void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
-{
-#if PLATFORM_ANDROID
-	NativeOAuth::AndroidLog("RegisterSession");
-#endif
-	const TFunction<void(FCredentials_BE)> OnResponse = [OnSuccess](FCredentials_BE Response)
-	{
-		OnSuccess("RegisterSession Test Passed");
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("RegisterSessionDone");
-#endif
-	};
-	
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
-	{
-		OnFailure("Test Failed", Error);
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("RegisterSessionFail");
-#endif
-	};
-	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
-
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->RegisterSession(OnResponse,GenericFailure);
-	}
-}
-
 void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 #if PLATFORM_ANDROID
