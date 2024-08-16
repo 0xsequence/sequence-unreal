@@ -29,6 +29,7 @@ Within **[SequenceConfig.ini]** add the following lines:
       FacebookClientID = ""
       DiscordClientID = ""
       RedirectUrl = "https://api.sequence.app"
+      PlayFabTitleID = ""
 
 Here is where you'll fill in the various configuration values for the plugin.
 For the time being we don't support Facebook or Discord authentication so feel free to ignore those 2 clientId's for now.
@@ -85,6 +86,9 @@ Before you can use this plugin, you need to acquire the following credentials fr
 - `ProjectAccessKey`
 
 You can then add these credentials in the **[SequenceConfig.ini]** file under [YourProject]/Config/SequenceConfig.ini
+
+Before you can use PlayFab you'll need to create a game with PlayFab [Here](https://developer.playfab.com/)
+Then in the SequencePluginConfig.ini, set the PlayFabTitleID String to the TitleID of your game.
 
 ## Security
 
@@ -224,6 +228,27 @@ void EmailLogin(const FString& EmailIn);
 */
 void EmailCode(const FString& CodeIn);
 
+/**
+ * Used to login as a Guest into Sequence
+ * @param ForceCreateAccountIn Force create account if it already exists
+ */
+void GuestLogin(const bool ForceCreateAccountIn) const;
+
+/**
+ * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
+ * @param UsernameIn Username
+ * @param EmailIn Email
+ * @param PasswordIn Password
+ */
+void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+/**
+ * Used to login with PlayFab, Then OpenSession with Sequence
+ * @param UsernameIn Username
+ * @param PasswordIn Password
+ */
+void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+
 /*
    Optional call used to retrieve stored credentials on disk
 */
@@ -288,6 +313,13 @@ else
 1) To start mobile SSO you will need to make use of the **[UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)]**
    where type is the Type of SSO you want to use. IE) Google or Apple, for the time being Discord & Facebook aren't supported.
    This function call is all that's required for Mobile SSO.
+
+### PlayFab Social Signin based Authentication with CustomUI
+1) Start by calling either PlayFabLogin (Login With Existing) 
+   or PlayFabRegisterAndLogin (Create a new PlayFab account & Login with it) that's it.
+
+### Guest Login with CustomUI
+1) Start by calling GuestLogin, and that's it.
 
 ### Android SSO Requirements
 
