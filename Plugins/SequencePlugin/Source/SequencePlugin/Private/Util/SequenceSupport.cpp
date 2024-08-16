@@ -30,12 +30,7 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 	return -1;
 }
 
-TArray<FIdName> USequenceSupport::GetAllNetworks()
-{
-	return NetworkIdToNameMap.Array();
-}
-
-TArray<FIdNamePair> USequenceSupport::GetAllNetworksAsStructs()
+TArray<FIdNamePair> USequenceSupport::GetAllNetworks()
 {
 	TArray<FIdNamePair> Networks;
 

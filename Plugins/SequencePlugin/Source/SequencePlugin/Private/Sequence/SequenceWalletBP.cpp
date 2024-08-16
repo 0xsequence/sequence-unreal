@@ -165,7 +165,7 @@ FString USequenceWalletBP::GetNetworkNameFromId(const int64 NetworkIdIn)
 
 TArray<FIdNamePair> USequenceWalletBP::GetAllNetworks()
 {
-	return USequenceSupport::GetAllNetworksAsStructs();
+	return USequenceSupport::GetAllNetworks();
 }
 
 TArray<FString> USequenceWalletBP::GetAllNetworkNames()

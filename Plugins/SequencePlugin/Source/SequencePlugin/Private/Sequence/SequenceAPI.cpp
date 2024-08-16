@@ -167,6 +167,31 @@ TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credenti
 	return nullptr;
 }
 
+TArray<FIdNamePair> USequenceWallet::GetAllNetworks()
+{
+	return USequenceSupport::GetAllNetworks();
+}
+
+TArray<FString> USequenceWallet::GetAllNetworkNames()
+{
+	return USequenceSupport::GetAllNetworkNames();
+}
+
+TArray<int64> USequenceWallet::GetAllNetworkIds()
+{
+	return USequenceSupport::GetAllNetworkIds();
+}
+
+FString USequenceWallet::GetNetworkName(const int64 NetworkIdIn)
+{
+	return USequenceSupport::GetNetworkName(NetworkIdIn);
+}
+
+int64 USequenceWallet::GetNetworkId(const FString& NetworkNameIn)
+{
+	return USequenceSupport::GetNetworkId(NetworkNameIn);
+}
+
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;

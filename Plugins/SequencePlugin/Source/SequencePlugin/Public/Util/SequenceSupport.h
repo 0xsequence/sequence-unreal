@@ -126,12 +126,10 @@ public:
 	static int64 GetNetworkId(const FString& NetworkNameIn);
 
 	/**
-	 * Gets all networks supported by sequence
-	 * @return A list of Pairs of Network Ids & Names
+	 * Gets all networks in the system
+	 * @return a TArray of all networks
 	 */
-	static TArray<FIdName> GetAllNetworks();
-
-	static TArray<FIdNamePair> GetAllNetworksAsStructs();
+	static TArray<FIdNamePair> GetAllNetworks();
 
 	/**
 	 * Gets all Network Names supported by sequence

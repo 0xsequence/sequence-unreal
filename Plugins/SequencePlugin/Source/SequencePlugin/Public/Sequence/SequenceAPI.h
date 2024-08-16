@@ -16,6 +16,7 @@
 #include "SequenceResponseIntent.h"
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -101,6 +102,16 @@ public:
 	 * Gets the SequenceWallet SubSystem and initializes it with the given credentials & ProviderUrl
 	 */
 	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials, const FString& ProviderUrl);
+
+	static TArray<FIdNamePair> GetAllNetworks();
+
+	static TArray<FString> GetAllNetworkNames();
+
+	static TArray<int64> GetAllNetworkIds();
+
+	static FString GetNetworkName(const int64 NetworkIdIn);
+
+	static int64 GetNetworkId(const FString& NetworkNameIn);
 
 	/*
 	 * Returns the wallet address of the currently signed in user
