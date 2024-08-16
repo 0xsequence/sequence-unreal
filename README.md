@@ -1091,8 +1091,8 @@ the indexer. The default network we set is `137`
     {
        USequenceWallet * Api = WalletOptional.GetValue();    
 
-	   TMap<FString, FTokenList> tokenMap;
-	   const TPair<FString,FTokenList> item;
+	   TMap<FString, FSeqTokenList> tokenMap;
+	   const TPair<FString,FSeqTokenList> item;
 	   tokenMap.Add(item);
 
        FSeqGetTokenSuppliesMapArgs args;
