@@ -146,7 +146,7 @@ Note: Auth Success Forwarder will let you know when the system is ready to be us
 
 2) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
 
-3) Create a BlueprintCallable function within the **[C++ Parent]** (this may not be necessary any more)
+3) Create a BlueprintCallable function within the **[C++ Parent]**
 
 4) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
    please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP_Setup.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
@@ -1228,7 +1228,7 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 
 One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
 something and start over writing memory. If you require lots of nesting swapping to a better approach using
-UFUNCTION callbacks helps to avoid these problems similar to how things are done in **[UAuthenticator.h/cpp]**
+UFUNCTION callbacks helps to avoid these problems.
 
 ### Blockchain Functionality
 
