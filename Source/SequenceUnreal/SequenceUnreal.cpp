@@ -5,8 +5,9 @@
 #include "ABI/ABI.h"
 #include "Sequence/SequenceAPI.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, SequenceUnreal, "SequenceUnreal" );
+IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, SequenceUnreal, "SequenceUnreal");
 
 void Test()
 {
+	
 }

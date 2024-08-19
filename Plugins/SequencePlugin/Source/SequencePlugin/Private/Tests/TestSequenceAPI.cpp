@@ -31,45 +31,13 @@ void SequenceAPITest::BasicProviderTests()
 	}
 }
 
-void SequenceAPITest::RegisterSession(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
-{
-#if PLATFORM_ANDROID
-	NativeOAuth::AndroidLog("RegisterSession");
-#endif
-	const TFunction<void(FCredentials_BE)> OnResponse = [OnSuccess](FCredentials_BE Response)
-	{
-		OnSuccess("RegisterSession Test Passed");
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("RegisterSessionDone");
-#endif
-	};
-	
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
-	{
-		OnFailure("Test Failed", Error);
-#if PLATFORM_ANDROID
-		NativeOAuth::AndroidLog("RegisterSessionFail");
-#endif
-	};
-	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API RegisterSession Test]========================"));
-
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->RegisterSession(OnResponse,GenericFailure);
-	}
-}
-
 void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 #if PLATFORM_ANDROID
 	NativeOAuth::AndroidLog("SignMessage");
 #endif
 	
-	const TSuccessCallback<FSignedMessage> OnResponse = [OnSuccess] (FSignedMessage Response)
+	const TSuccessCallback<FSeqSignMessageResponse_Response> OnResponse = [OnSuccess] (FSeqSignMessageResponse_Response Response)
 	{
 		OnSuccess("Sign Message Test Passed");
 #if PLATFORM_ANDROID
@@ -97,11 +65,11 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 
 void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	const TSuccessCallback<TArray<FSession>> OnResponse = [OnSuccess](TArray<FSession> Response)
+	const TSuccessCallback<TArray<FSeqListSessions_Session>> OnResponse = [OnSuccess](TArray<FSeqListSessions_Session> Response)
 	{
 		for (auto Session : Response)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *UIndexerSupport::StructToString(Session));	
+			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *USequenceSupport::StructToString(Session));	
 		}
 		
 		OnSuccess("List Sessions Test Passed");
@@ -144,7 +112,7 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse_Data Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -198,7 +166,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse_Data Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -234,7 +202,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse_Data Transaction)
 		{
 			FString OutputString;
 			const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -269,7 +237,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse_Data Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -306,7 +274,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
+		Api->SendTransaction(Txn,[=](FSeqTransactionResponse_Data Transaction)
 		{
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -329,14 +297,14 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API CloseSession Test]========================"));
+	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignOut Test]========================"));
 
 	const UAuthenticator * Auth = NewObject<UAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->CloseSession(OnResponse,GenericFailure);
+		const USequenceWallet * Api = WalletOptional.GetValue();
+		Api->SignOut();
 	}
 }
 
@@ -346,7 +314,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 	{
 		for (const FFeeOption& Fee : Response)
 		{
-			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString FeeOption = USequenceSupport::StructToString(Fee);
 			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);
 		}
 		OnSuccess("Get FeeOptions Test Passed");
@@ -393,7 +361,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 		if (Response.Num() > 0)
 		{
 			const FFeeOption SelectedFeeOption = Response[0];
-			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *UIndexerSupport::StructToString(SelectedFeeOption));
+			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *USequenceSupport::StructToString(SelectedFeeOption));
 			
 			const FFailureCallback OnTransactionFailure = [OnFailure](const FSequenceError& Error)
 			{
@@ -405,7 +373,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 			if (WalletOptional.IsSet() && WalletOptional.GetValue())
 			{
 				USequenceWallet * Api = WalletOptional.GetValue();
-				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FTransactionResponse& Transaction)
+				Api->SendTransactionWithFeeOption(Transactions,SelectedFeeOption,[=](const FSeqTransactionResponse_Data& Transaction)
 				{
 					FString OutputString;
 					const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
@@ -440,7 +408,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 	{
 		for (const FFeeOption& Fee : Response)
 		{
-			FString FeeOption = UIndexerSupport::StructToString(Fee);
+			FString FeeOption = USequenceSupport::StructToString(Fee);
 			FString CanAfford = (Fee.bCanAfford) ? "Yes" : "No";
 			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
 			

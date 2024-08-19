@@ -28,9 +28,6 @@ protected:
 
 //Testing Functions//
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
-	void TestRegisterSession() const;
-
-	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestSignMessage() const;
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
@@ -77,6 +74,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestLoadTransakUrl() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGuestLogin() const;
 	
 	/*
 	* Called by frontend to test the indexer

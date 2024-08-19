@@ -1,18 +1,15 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "GeneralTesting.h"
-#include "Indexer/IndexerTests.h"
+#include "Tests/IndexerTests.h"
 #include "ObjectHandler.h"
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
 #include "Authenticator.h"
-#include "Sequence/DelayedEncodingArgsBP.h"
-#include "Sequence/DelayedEncodingBP.h"
-#include "Sequence/SequenceIntent.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
@@ -26,21 +23,6 @@ AGeneralTesting::AGeneralTesting()
 void AGeneralTesting::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void AGeneralTesting::TestRegisterSession() const
-{
-	const TFunction<void (FString)> OnSuccess = [this](FString State)
-	{
-		CallbackPassed(State);
-	};
-
-	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
-	{
-		CallbackFailed(Data, Err);
-	};
-	
-	SequenceAPITest::RegisterSession(OnSuccess, OnFailure);
 }
 
 void AGeneralTesting::TestSignMessage() const
@@ -214,7 +196,7 @@ void AGeneralTesting::TestGetSupportedCountries() const
 	{
 		for (FSupportedCountry Country : SupportedCountries)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *UIndexerSupport::StructToString(Country));
+			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *USequenceSupport::StructToString(Country));
 		}
 		CallbackPassed("TestPassed");
 	};
@@ -230,6 +212,12 @@ void AGeneralTesting::TestGetSupportedCountries() const
 void AGeneralTesting::TestLoadTransakUrl() const
 {
 	SequenceAPITest::TestLoadTransakUrl();
+}
+
+void AGeneralTesting::TestGuestLogin() const
+{
+	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	Auth->GuestLogin(false);
 }
 
 void AGeneralTesting::TestIndexer()
@@ -249,9 +237,9 @@ void AGeneralTesting::TestIndexer()
 
 void AGeneralTesting::TestTokenBalances() const
 {
-	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [](const FGetTokenBalancesReturn tokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [](const FSeqGetTokenBalancesReturn tokenBalances)
 	{
-		const FString ret = UIndexerSupport::StructToString<FGetTokenBalancesReturn>(tokenBalances);
+		const FString ret = USequenceSupport::StructToString<FSeqGetTokenBalancesReturn>(tokenBalances);
 		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
@@ -265,7 +253,7 @@ void AGeneralTesting::TestTokenBalances() const
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		FGetTokenBalancesArgs args;
+		FSeqGetTokenBalancesArgs args;
 		args.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
 		Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
@@ -274,11 +262,11 @@ void AGeneralTesting::TestTokenBalances() const
 
 void AGeneralTesting::TestHistory() const
 {	
-	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [](const FGetTransactionHistoryReturn transactionHistory)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [](const FSeqGetTransactionHistoryReturn transactionHistory)
 	{
 		if (GPrintAll)
 		{
-			const FString ret = UIndexerSupport::StructToString<FGetTransactionHistoryReturn>(transactionHistory);
+			const FString ret = USequenceSupport::StructToString<FSeqGetTransactionHistoryReturn>(transactionHistory);
 			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
@@ -293,7 +281,7 @@ void AGeneralTesting::TestHistory() const
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
-		FGetTransactionHistoryArgs args;
+		FSeqGetTransactionHistoryArgs args;
 		args.filter.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
 		args.page.page = 0;
@@ -328,49 +316,10 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	const FFailureCallback GenericFailure = [=](const FSequenceError& Error){};
-	
-	TArray<TransactionUnion> Txn;
-	FDelayedTransaction TDelayed;
-	
-	TDelayed.data->SetFunc("setInt()");
-	TDelayed.data->SetAbi("Epic ABI");
-
-	UDelayedEncodingObjectArgsBP * NestedObj = NewObject<UDelayedEncodingObjectArgsBP>();
-	NestedObj->AddStringArg(TEXT("Deep String"), TEXT("Blah"));
-	
-	UDelayedEncodingArrayArgsBP * NestedArg = NewObject<UDelayedEncodingArrayArgsBP>();
-	NestedArg->AddObjectArg(NestedObj);
-
-	UDelayedEncodingArrayArgsBP * ArgsListInner = NewObject<UDelayedEncodingArrayArgsBP>();
-	ArgsListInner->AddBoolArg(false);
-	ArgsListInner->AddInt32Arg(32);
-	ArgsListInner->AddInt64Arg(64);
-	ArgsListInner->AddStringArg(TEXT("String Arg"));
-	ArgsListInner->AddArrayArg(NestedArg);
-	
-	UDelayedEncodingObjectArgsBP * ArgsMain = NewObject<UDelayedEncodingObjectArgsBP>();
-	ArgsMain->AddBoolArg(TEXT("Epic Boolean"), false);
-	ArgsMain->AddDoubleArg(TEXT("Epic Double Arg"), 0.1);
-	ArgsMain->AddInt64Arg(TEXT("Epic integer64 arg"), -1);
-	ArgsMain->AddArrayArg(TEXT("List Arg"),ArgsListInner);
-	
-	TDelayed.data->SetArgs(ArgsMain);
-	TDelayed.to = "0x245b738089F1fa668D927422d2943F75A9e89819";
-	TDelayed.value = "0";
-	
-	Txn.Push(TransactionUnion(TDelayed));
-
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->SendTransaction(Txn,[=](FTransactionResponse Transaction)
-		{
-			
-		},GenericFailure);
-	}
+	const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	//Authenticator->PlayFabRegisterAndLogin(TEXT("TBPTest1"), TEXT("calvinvermeulen18@gmail.com"), TEXT("Ac-123Bd-456#!ef"));
+	Authenticator->PlayFabLogin(TEXT("TBPTest1"), TEXT("Ac-123Bd-456#!ef"));
+	//Authenticator->GuestLogin(false);
 }
 
 void AGeneralTesting::OnDoneImageProcessing()

@@ -216,10 +216,10 @@ void USystemDataBuilder::OnGetItemDataDone()
 void USystemDataBuilder::InitGetTokenData()
 {
 	this->GetItemDataSyncer->OnDoneDelegate.BindUFunction(this, "OnGetItemDataDone");
-	const TSuccessCallback<FGetTokenBalancesReturn> GenericSuccess = [&,this](const FGetTokenBalancesReturn tokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [&,this](const FSeqGetTokenBalancesReturn tokenBalances)
 	{//once indexer responds!
 		//only thing I can do is apply compression earlier for a cleaner setup
-		FUpdatableItemDataArgs semiParsedTokenBalance = UIndexerSupport::ExtractFromTokenBalances(tokenBalances);
+		FUpdatableItemDataArgs semiParsedTokenBalance = USequenceSupport::ExtractFromTokenBalances(tokenBalances);
 		this->SystemDataGuard.Lock();
 		this->SystemData.user_data.coins = semiParsedTokenBalance.semiParsedBalances.coins;
 		this->SystemData.user_data.nfts = this->CompressNftData(semiParsedTokenBalance.semiParsedBalances.nfts);
@@ -232,7 +232,7 @@ void USystemDataBuilder::InitGetTokenData()
 		//dec the request & throw error?
 		this->DecMasterSyncer();
 	};
-	FGetTokenBalancesArgs args;
+	FSeqGetTokenBalancesArgs args;
 	args.accountAddress = this->GPublicAddress;
 	args.includeMetaData = true;
 	this->TIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
@@ -320,7 +320,7 @@ void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, int64 Chai
 	this->SystemData.user_data.username = this->SqncMngr->GetUserDetails().Username;
 	FNetwork_BE default_network;
 	default_network.is_default = true;
-	default_network.network_name = UIndexer::GetIndexerName(this->GChainId);
+	default_network.network_name = USequenceSupport::GetNetworkName(this->GChainId);
 	this->SystemData.user_data.networks.Add(default_network);
 	this->SystemDataGuard.Unlock();
 	//ASYNC Operations next!
@@ -334,7 +334,7 @@ void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, int64 Chai
 void USystemDataBuilder::OnDoneTesting()
 {
 	//here is where we will 1 print out the system data, 2 send some image data upfront to be viewed / verified
-	FString result = UIndexerSupport::StructToSimpleString<FSystemData_BE>(this->SystemData);
+	FString result = USequenceSupport::StructToSimpleString<FSystemData_BE>(this->SystemData);
 	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
 }
 
@@ -499,9 +499,9 @@ void USystemDataBuilder::InitGetHistoryAuxData(FUpdatableHistoryArgs history_dat
 void USystemDataBuilder::InitGetTxnHistory()
 {
 	this->GetTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
-	const TSuccessCallback<FGetTransactionHistoryReturn> GenericSuccess = [&, this](const FGetTransactionHistoryReturn history)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [&, this](const FSeqGetTransactionHistoryReturn history)
 	{//once indexer responds!
-		FUpdatableHistoryArgs semiParsedHistory = UIndexerSupport::ExtractFromTransactionHistory(this->GPublicAddress,history);
+		FUpdatableHistoryArgs semiParsedHistory = USequenceSupport::ExtractFromTransactionHistory(this->GPublicAddress,history);
 		this->SystemDataGuard.Lock();
 		this->SystemData.user_data.transaction_history = semiParsedHistory.semiParsedHistory;//assign what we have so far!
 		this->SystemDataGuard.Unlock();
@@ -514,7 +514,7 @@ void USystemDataBuilder::InitGetTxnHistory()
 		this->DecMasterSyncer();
 	};
 
-	FGetTransactionHistoryArgs args;
+	FSeqGetTransactionHistoryArgs args;
 	args.includeMetaData = true;
 	args.filter.accountAddress = this->GPublicAddress;
 

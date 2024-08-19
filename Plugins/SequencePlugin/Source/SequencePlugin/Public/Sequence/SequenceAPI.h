@@ -6,18 +6,17 @@
 #include "Eth/EthTransaction.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
-#include "Session.h"
-#include "SignedMessage.h"
 #include "Containers/Union.h"
-#include "TransactionResponse.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Types/Header.h"
 #include "Dom/JsonObject.h"
 #include "Types/TransactionReceipt.h"
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
+#include "SequenceResponseIntent.h"
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceAPI.generated.h"
 
 using FSignature = FUnsizedData;
@@ -25,6 +24,7 @@ using TransactionID = FString;
 
 class UIndexer;
 class UProvider;
+class USequenceRPCManager;
 
 //Sequence Specific Version of Transaction
 struct SEQUENCEPLUGIN_API FTransaction_Sequence
@@ -56,7 +56,10 @@ public:
 	virtual void Deinitialize() override;
 private:
 	UPROPERTY()
-	UIndexer* Indexer;
+	USequenceRPCManager * SequenceRPCManager;
+	
+	UPROPERTY()
+	UIndexer * Indexer;
 
 	UPROPERTY()
 	UProvider * Provider;
@@ -64,8 +67,7 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 
-	FString CachedFeeQuote = "";
-	
+	//this will be removed
 	const FString Hostname = "https://next-api.sequence.app";
 	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
 	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
@@ -85,107 +87,170 @@ private:
 public:
 	USequenceWallet();
 
-	/*
+	/**
 	 * Gets the SequenceWallet SubSystem,
 	 * this call will attempt to automatically load stored credentials on disk if any.
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
 	 */
 	static TOptional<USequenceWallet*> Get();
-
-	/*
+	
+	/**
 	 * Gets the SequenceWallet SubSystem and initialize it with the given credentials
+	 * @param Credentials Credentials used to Initiate USequenceWallet
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
 	 */
 	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials);
 
-	/*
+	/**
 	 * Gets the SequenceWallet SubSystem and initializes it with the given credentials & ProviderUrl
+	 * @param Credentials Credentials used to Initiate USequenceWallet
+	 * @param ProviderUrl ProviderUrl used to Initiate USequenceWallet
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
 	 */
 	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials, const FString& ProviderUrl);
 
-	/*
+	/**
+	 * Gets all networks in the system
+	 * @return TArray of all networks
+	 */
+	static TArray<FIdNamePair> GetAllNetworks();
+
+	/**
+	 * Gets all Network Names supported by sequence
+	 * @return A list of all network names in the system
+	 */
+	static TArray<FString> GetAllNetworkNames();
+
+	/**
+	 * Gets a list of all network Ids support by sequence
+	 * @return A list of all network ids in the system
+	 */
+	static TArray<int64> GetAllNetworkIds();
+
+	/**
+	 * Pass in a network Id and receive the name associated with that Id
+	 * @param NetworkIdIn The Id associated with the Network Name
+	 * @return The matching network name, OR an empty FString if nothing was found
+	 */
+	static FString GetNetworkName(const int64 NetworkIdIn);
+
+	/**
+	 * Gets the associated Network Id with the given Network Name
+	 * @param NetworkNameIn The network's name
+	 * @return The associated Id, if none was found returns -1
+	 */
+	static int64 GetNetworkId(const FString& NetworkNameIn);
+
+	/**
+	 * Converts a decimal value like 3.2 and converts it into an amount that the system uses to sendTransactions with
+	 * @param AmountIn The User readable decimal amount ie) 3.2
+	 * @param DecimalsIn The Decimals value associated with the token, IE) USDC is 6
+	 * @return The Converted Decimals amount
+	 */
+	static int64 GetSystemReadableAmount(const float AmountIn, const int64 DecimalsIn);
+
+	/**
+	 * Takes a Received amount and converts it into a user readable amount
+	 * @param AmountIn The received System amount
+	 * @param DecimalsIn The decimal value associated with the Token IE) USDC is 6
+	 * @return The user readable amount
+	 */
+	static float GetUserReadableAmount(const int64 AmountIn, const int64 DecimalsIn);
+
+	/**
 	 * Returns the wallet address of the currently signed in user
+	 * @return wallet address of the currently signed in user
 	 */
 	FString GetWalletAddress() const;
 
-	/*
+	/**
 	 * Allows you to update the provider URL set for the SequenceWallet
+	 * @param Url New provider Url you wish to use
 	 */
 	void UpdateProviderURL(const FString& Url) const;
 
-	/*
+	/**
 	 * Allows you to update the set network for the SequenceWallet
+	 * @param NewNetwork New network you wish to use
 	 */
 	void UpdateNetworkId(int64 NewNetwork);
 
-	/*
+	/**
 	 * Allows to get the currently set network for the SequenceWallet
+	 * @return currently set network for the SequenceWallet
 	 */
 	int64 GetNetworkId() const;
 
-	/*
+	/**
 	 * Allows you to sign the given message with the SequenceWallet
-	 * @OnSuccess The returned Struct from the signing process
-	 * @OnFailure If an error occurs
+	 * @param Message The message you wish to sign
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
 	 */
-	void SignMessage(const FString& Message, const TSuccessCallback<FSignedMessage>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	/*
+	/**
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
-	 * @OnSuccess The Semi Struct Parsed JSON response
-	 * @OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
+	 * @param Transactions The transaction you wish to send
+	 * @param OnSuccess FSeqTransactionResponse_Data containing information about the Successful Transaction
+	 * @param OnFailure An error occured during the transaction OR the token provided wasn't able to be automatically gassed
 	 */
-	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	/*
+	/**
 	 * Allows you to send a transaction with a given Fee, Use GetFeeOptions Or GetUnfilteredFeeOptions
-	 * to pick a valid fee to send with this call
-	 * @OnSuccess The Semi Struct Parsed JSON response
-	 * @OnFailure An error occured during the transaction
+	 * @param Transactions The transaction you wish to send
+	 * @param FeeOption The FeeOption you are using to pay for the transaction
+	 * @param OnSuccess FSeqTransactionResponse_Data containing information about the Successful Transaction
+	 * @param OnFailure An error occured during the transaction
 	 */
-	void SendTransactionWithFeeOption(TArray<TransactionUnion> Transactions, FFeeOption FeeOption, const TSuccessCallback<FTransactionResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	/*
-	 * Allows you to get FeeOptions for the transaction you pass in
-	 * @OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
-	 * @OnFailure An error occured
+	/**
+	 * Allows you to get Valid FeeOptions for the transaction you pass in, Can be empty if none can be afforded
+	 * @param Transactions List of transactions you want to determine fee data for
+	 * @param OnSuccess A list of all VALID feeOptions for the presented transaction (can be empty if your wallet contains nothing that can cover any of the feeOptions)
+	 * @param OnFailure An error occured
 	 */
-	void GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	/*
+	/**
 	 * Allows you to see all potential FeeOptions, Valid ones are marked with bCanAfford = true, in the list of FFeeOptions
-	 * @OnSuccess A list of all feeOptions with valid ones marked with bCanAfford = true. Possible none are valid if your wallet has nothing to cover the fees
-	 * @OnFailure An error occured
+	 * @param Transactions List of transactions you want to determine fee data for
+	 * @param OnSuccess A list of all feeOptions with valid ones marked with bCanAfford = true. Possible none are valid if your wallet has nothing to cover the fees
+	 * @param OnFailure An error occured
 	 */
-	void GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
-	 * Used to register a Session with Sequence (done automatically)
-	 * @OnSuccess The session is registered
-	 * @OnFailure An error occured
-	 */
-	void RegisterSession(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
+	void GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const;
+	
+	/**
 	 * Used to list all active sessions for the signed in credentials
-	 * @OnSuccess A list of all active sessions
-	 * @OnFailure An error occured
+	 * @param OnSuccess A list of all active sessions
+	 * @param OnFailure An error occured
 	 */
-	void ListSessions(const TSuccessCallback<TArray<FSession>>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
-	 * Used to close the current Session with Sequence
-	 * @OnSuccess The Session is closed
-	 * @OnFailure An error occured
-	 */
-	void CloseSession(const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
+	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
+	
+	/**
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
-	 * @OnSuccess The Session is closed & local credentials are removed
-	 * @OnFailure An error occured
 	 */
-	void SignOut();
+	void SignOut() const;
+
+	/**
+	 * Gets a list of supported Transak Countries
+	 * @param OnSuccess TArray<FSupportedCountry> containing supported countries
+	 * @param OnFailure An FSequenceError
+	 */
 	void GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/**
+	 * Opens a link in Transak with the parameters set
+	 * @param FiatCurrency FiatCurrency to use in Transak
+	 * @param DefaultAmount Default amount to use in Transak
+	 * @param DefaultCryptoCurrency Default CryptoCurrency to use in Transak
+	 * @param Networks List of networks used in Transak
+	 * @param DisableWalletAddressForm DisableWalletAddressForm in Transak
+	 */
 	void OpenTransakLink(const FString& FiatCurrency = FDefaultTransak::FiatCurrency, const FString& DefaultAmount = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrency = FDefaultTransak::CryptoCurrency, const FString& Networks = FDefaultTransak::Networks, bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm);
+
 private:
 	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
@@ -193,19 +258,7 @@ private:
 
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
-	static TArray<FFeeOption> JsonFeeOptionListToFeeOptionList(const TArray<TSharedPtr<FJsonValue>>& FeeOptionList);
-	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FTokenBalance>& BalanceList);
-	
-	FString BuildGetFeeOptionsIntent(const TArray<TransactionUnion>& Txns) const;
-	FString BuildSignMessageIntent(const FString& Message) const;
-	FString BuildSendTransactionIntent(const TArray<TransactionUnion>& Txns) const;
-	FString BuildSendTransactionWithFeeIntent(const TArray<TransactionUnion>& Txns,const FString& FeeQuote) const;
-	FString BuildRegisterSessionIntent() const;
-	FString BuildListSessionIntent() const;
-	FString BuildCloseSessionIntent() const;
-	FString BuildSessionValidationIntent() const;
-	FString GeneratePacketSignature(const FString& Packet) const;
-	template<typename T> FString GenerateIntent(T Data) const;
+	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
 	
 private:
 	//these functions are meant for the UI Only and have been removed for this version
@@ -215,8 +268,7 @@ private:
 	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
 	FString BuildQr_Request_URL(const FString& Data, int32 Size) const;
-private:
-	template <typename T> void SequenceRPC(FString Url, FString Content, TSuccessCallback<T> OnSuccess, FFailureCallback OnFailure);
+
 public:
 	//Indexer Specific Calls
 	
@@ -228,12 +280,12 @@ public:
 	/*
 		Used to get version data back from the Chain
 	*/
-	void Version(const TSuccessCallback<FVersion>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void Version(const TSuccessCallback<FSeqVersion>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(const TSuccessCallback<FRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void RunTimeStatus(const TSuccessCallback<FSeqRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Used to get the chainID from the Chain
@@ -246,32 +298,32 @@ public:
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
 	*/
-	void GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FSeqEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Gets the token balances from the Chain
 	*/
-	void GetTokenBalances(const FGetTokenBalancesArgs& Args, const TSuccessCallback<FGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenBalances(const FSeqGetTokenBalancesArgs& Args, const TSuccessCallback<FSeqGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		gets the token supplies from the Chain
 	*/
-	void GetTokenSupplies(const FGetTokenSuppliesArgs& Args, const TSuccessCallback<FGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		gets the token supplies map from the Chain
 	*/
-	void GetTokenSuppliesMap(const FGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		Get the balance updates from the Chain
 	*/
-	void GetBalanceUpdates(const FGetBalanceUpdatesArgs& Args, const TSuccessCallback<FGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		get transaction history from the Chain
 	*/
-	void GetTransactionHistory(const FGetTransactionHistoryArgs& Args, const TSuccessCallback<FGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Provider calls
 

@@ -3,7 +3,7 @@
 #include "Http.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 #include "HttpManager.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 
 UTransakOnRamp::UTransakOnRamp(){}
 
@@ -26,7 +26,7 @@ void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCou
 		if(bWasSuccessful)
 		{
 			const FString Content = Request->GetResponse()->GetContentAsString();
-			const FSupportedCountryResponse ParsedResponse = UIndexerSupport::JSONStringToStruct<FSupportedCountryResponse>(Content);
+			const FSupportedCountryResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSupportedCountryResponse>(Content);
 			OnSuccess(ParsedResponse.Response);
 		}
 		else

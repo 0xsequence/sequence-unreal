@@ -26,26 +26,16 @@ import com.epicgames.unreal.GameActivity;
 public class SequenceGoogleSignInHelper {
     private static final String TAG = "SequenceGoogleSignIn";
 
-    public static void signIn(
-        Context context,
-        String clientId,
-        String nonce
-    ) {
-        getCredentialAsync(context, clientId, nonce);
+    public static void signIn(Context context, String clientId)
+    {
+        getCredentialAsync(context, clientId);
     }
 
-    private static void getCredentialAsync(
-        Context context,
-        String clientId,
-        String nonce
-    ) {
-        GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId)
-                .setNonce(nonce)
-                .build();
+    private static void getCredentialAsync(Context context, String clientId)
+    {
+        GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId).build();
 
-        GetCredentialRequest request = new GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build();
+        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
 
         CredentialManager credentialManager = CredentialManager.create(context);
         credentialManager.getCredentialAsync(

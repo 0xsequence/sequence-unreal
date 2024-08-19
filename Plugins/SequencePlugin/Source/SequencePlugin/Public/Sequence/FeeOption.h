@@ -3,9 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
-#include "Indexer/Structs/TokenBalance.h"
+#include "Indexer/Structs/SeqTokenBalance.h"
 #include "Containers/Union.h"
-#include "Indexer/Structs/EtherBalance.h"
+#include "Indexer/Structs/SeqEtherBalance.h"
 #include "Util/Structs/BE_Structs.h"
 #include "FeeOption.generated.h"
 
@@ -75,13 +75,13 @@ public:
 	bool bCanAfford = false;
 	FFeeOption(){}
 
-	FFeeOption(const FEtherBalance& EtherBalance)
+	FFeeOption(const FSeqEtherBalance& EtherBalance)
 	{
 		ValueNumber = EtherBalance.balanceWei;
 		Token.Type = EFeeType::Unknown;
 	}
 	
-	FFeeOption(const FTokenBalance& BalanceOption)
+	FFeeOption(const FSeqTokenBalance& BalanceOption)
 	{
 		Value = "";
 		Value.AppendInt(BalanceOption.balance);
@@ -199,34 +199,4 @@ public:
 		bCanAfford = Equals(Fee) && ValueNumber >= Fee.ValueNumber;
 		return bCanAfford;
 	}
-};
-
-USTRUCT()
-struct FFeeOptionReturn
-{
-	GENERATED_USTRUCT_BODY()
-public:
-	UPROPERTY()
-	TArray<FFeeOption> FeeOptions;
-	UPROPERTY()
-	bool InWallet = false;
-
-	FFeeOptionReturn() {}
-	
-	FFeeOptionReturn(const TArray<FFeeOption>& FeeOptionsIn, bool InWalletIn)
-	{
-		FeeOptions = FeeOptionsIn;
-		InWallet = InWalletIn;
-	}
-};
-
-USTRUCT()
-struct FIntentDataFeeOptions
-{
-	GENERATED_USTRUCT_BODY()
-public:
-	FString Identifier = "";
-	FString Network = "";
-	TArray<TransactionUnion> Transactions;
-	FString Wallet = "";
 };

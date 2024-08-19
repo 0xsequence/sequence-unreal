@@ -1,42 +1,32 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Authenticator.h"
-#include "HttpModule.h"
 #include "Misc/Guid.h"
 #include "Misc/Base64.h"
-#include "Eth/EthTransaction.h"
 #include "Types/Wallet.h"
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 #include "SequenceEncryptor.h"
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
+#include "PlayFabSendIntent.h"
+#include "RequestHandler.h"
 #include "WebBrowserModule.h"
-#include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
-#include "Interfaces/IHttpResponse.h"
+#include "SequenceRPCManager.h"
 #include "Native/NativeOAuth.h"
 #include "NativeEncryptors/AppleEncryptor.h"
 #include "NativeEncryptors/AndroidEncryptor.h"
 #include "NativeEncryptors/WindowsEncryptor.h"
+#include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
 
 UAuthenticator::UAuthenticator()
 {
 	this->SessionWallet = UWallet::Make();//Generate a new Random UWallet
-	this->SessionId = "0x00" + this->SessionWallet->GetWalletAddress().ToHex().ToLower();
-
-	const FHash256 SessionHashBytes = FHash256::New();
-	const FUnsizedData EncodedSigningData = StringToUTF8(this->SessionId);
-	Keccak256::getHash(EncodedSigningData.Arr.Get()->GetData(), EncodedSigningData.GetLength(), SessionHashBytes.Ptr());
-	this->SessionHash = "0x" + SessionHashBytes.ToHex().ToLower();
-	
-	this->Nonce = this->SessionHash;
 	this->StateToken = FGuid::NewGuid().ToString();
-	FString ParsedJWT;
-	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJWT);
-	this->WaasSettings = UIndexerSupport::JSONStringToStruct<FWaasJWT>(ParsedJWT);
-
+	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
+	
 	if constexpr (PLATFORM_ANDROID)
 	{
 		this->Encryptor = NewObject<UAndroidEncryptor>();
@@ -53,6 +43,42 @@ UAuthenticator::UAuthenticator()
 	{
 		this->Encryptor = NewObject<UAppleEncryptor>();
 	}
+}
+
+void UAuthenticator::InitiateMobleSSO_Internal(const ESocialSigninType& Type)
+{
+#if PLATFORM_ANDROID
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
+		break;
+	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
+	
+#if PLATFORM_IOS
+	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
+	switch (Type)
+	{
+	case ESocialSigninType::Apple:
+		NativeOAuth::SignInWithApple(clientID, this);
+		break;
+	case ESocialSigninType::Google:
+		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
+		break;
+	case ESocialSigninType::FaceBook:
+		break;
+	case ESocialSigninType::Discord:
+		break;
+	}
+#endif
 }
 
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
@@ -79,7 +105,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		const FString CTS_Json = UIndexerSupport::StructToString<FCredentials_BE>(Credentials);
+		const FString CTS_Json = USequenceSupport::StructToString<FCredentials_BE>(Credentials);
 		const int32 CTS_Json_Length = CTS_Json.Len();
 
 		if (Encryptor)
@@ -109,14 +135,6 @@ FString UAuthenticator::BuildRedirectPrefix() const
 		return Redirect + "/" + this->RedirectPrefixTrailer;
 }
 
-bool UAuthenticator::CanHandleEmailLogin() const
-{
-	bool ret = true;
-	ret &= this->WaasSettings.GetEmailRegion().Len() > 0;
-	ret &= this->WaasSettings.GetEmailClientId().Len() > 0;
-	return ret;
-}
-
 bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
@@ -132,7 +150,7 @@ bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 		}
 
-		ret = UIndexerSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+		ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 		ret &= Credentials->RegisteredValid();
 	}
 	return ret;
@@ -162,7 +180,31 @@ void UAuthenticator::CallAuthSuccess() const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
+void UAuthenticator::CallFederateSuccess() const
+{
+	if (this->FederateSuccess.IsBound())
+	{
+		this->FederateSuccess.Broadcast();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess]"));
+	}
+}
+
+void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
+{
+	if (this->FederateFailure.IsBound())
+	{
+		this->FederateFailure.Broadcast(ErrorMessageIn);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess], Captured Error Message: %s"), *ErrorMessageIn);
+	}
+}
+
+void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
@@ -178,7 +220,15 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					SocialLogin(Token);
+
+					if (this->IsFederating)
+					{
+						FederateOIDCIdToken(Token);
+					}
+					else
+					{
+						SocialLogin(Token);
+					}
 					return;
 				}//find id_token
 			}//parse out &
@@ -188,38 +238,8 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-#if PLATFORM_ANDROID
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID),this->Nonce,this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
-#endif
-	
-#if PLATFORM_IOS
-	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::SignInWithApple(clientID, this->Nonce, this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
-#endif
+	this->IsFederating = false;
+	this->InitiateMobleSSO_Internal(Type);
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
@@ -236,7 +256,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
-	//clear webcache here so signin will be clean eachtime!
+	//clear web cache here so signin will be clean each time!
 	if (this->PurgeCache)
 	{
 		if (const IWebBrowserSingleton* WebBrowserSingleton = IWebBrowserModule::Get().GetSingleton())
@@ -251,33 +271,113 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-void UAuthenticator::SocialLogin(const FString& IDTokenIn)
-{	
-	this->Cached_IDToken = IDTokenIn;
-	const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-	const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
-	this->StoreCredentials(Credentials);
-	this->AutoRegister(Credentials);
+void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
+{
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+
+	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
 {
-	if (this->CanHandleEmailLogin())
+	this->IsFederating = false;
+	
+	const TFunction<void()> OnSuccess = [this]
 	{
-		this->ResetRetryEmailLogin();
-		this->Cached_Email = EmailIn.ToLower();
-		CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
-	}
-	else
+		this->CallAuthRequiresCode();
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp,Error,TEXT("Email based Auth not setup properly please ensure your WaaSConfigKey is configured properly"));
+		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
-	}
+	};
+
+	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
+}
+
+void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
+{
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+
+	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
+}
+
+void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+{
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
+		{
+			this->InitializeSequence(Credentials);
+		};
+
+		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			this->CallAuthFailure();
+		};
+			
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+	
+	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
+}
+
+void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+{
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
+		{
+			this->InitializeSequence(Credentials);
+		};
+
+		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			this->CallAuthFailure();
+		};
+			
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+	
+	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
 FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
-	FString RedirectUrl = this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString RedirectUrl = this->BuildRedirectPrefix() + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
@@ -297,13 +397,13 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
-	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+	FString SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
 	{
 	case ESocialSigninType::Google:
 		break;
 	case ESocialSigninType::Apple://For apple we have no scope, as well as the trailing response_mode
-		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&nonce=" + this->Nonce + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
+		SigninUrl = AuthUrl +"?response_type=code+id_token&client_id="+ AuthClientId +"&redirect_uri="+ this->BuildRedirectPrefix() + "&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 		SigninUrl += "&response_mode=fragment";
 		break;
 	case ESocialSigninType::FaceBook:
@@ -314,237 +414,208 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	return SigninUrl;
 }
 
-FString UAuthenticator::BuildAWSURL(const FString& Service, const FString& AWSRegion)
+void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
 {
-	FString Ret = "https://"+ Service +"."+ AWSRegion +".amazonaws.com";
-	return Ret;
-}
-
-FString UAuthenticator::GetISSClaim(const FString& JWT) const
-{
-	FString ISSClaim = "";
-
-	TArray<FString> B64Json;
-	JWT.ParseIntoArray(B64Json, TEXT("."), true);
-	
-	for (int i = 0; i < B64Json.Num(); i++)
+	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		FString T;
-		FBase64::Decode(B64Json[i], T);
-		B64Json[i] = T;
-	}
-
-	if (B64Json.Num() > 1)
-	{
-		const TSharedPtr<FJsonObject> json = this->ResponseToJson(B64Json[1]);
-		FString iss;
-		if (json.Get()->TryGetStringField(TEXT("iss"), iss))
-		{
-			if (iss.Contains("https://",ESearchCase::IgnoreCase))
-				ISSClaim = iss.RightChop(8);
-			else
-				ISSClaim = iss;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("[JWT didn't contain an ISS field]"));
-		}
+		this->StoreCredentials(Credentials);
+		this->CallAuthSuccess();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[JWT Parse Failure]"));
+		this->CallAuthFailure();
 	}
-	return ISSClaim;
 }
 
-FString UAuthenticator::ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful)
+void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	FString Ret = "";
-
-	if(WasSuccessful)
+	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		Ret = Response.Get()->GetContentAsString();
+		if (const FPlayFabLoginUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
+		{
+			OnSuccess(ParsedResponse.Data.SessionTicket);
+		}
+		else
+		{
+			OnFailure(FSequenceError(ResponseParseError,Response));
+		}
+	};
+
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
+	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(LoginUser);
+	
+	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnSuccessResponse, OnFailure);
+}
+
+void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
+	{
+		if (const FPlayFabRegisterUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
+		{
+			OnSuccess(ParsedResponse.Data.SessionTicket);
+		}
+		else
+		{
+			OnFailure(FSequenceError(ResponseParseError,Response));
+		}
+	};
+
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
+	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(RegisterUser);
+	
+	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnSuccessResponse, OnFailure);
+}
+
+FString UAuthenticator::GeneratePlayFabUrl()
+{
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	return "https://" + TitleId + ".playfabapi.com/Client/LoginWithPlayFab";
+}
+
+FString UAuthenticator::GeneratePlayFabRegisterUrl()
+{
+	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
+	return "https://" + TitleId + ".playfabapi.com/Client/RegisterPlayFabUser";
+}
+
+void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	NewObject<URequestHandler>()
+	->PrepareRequest()
+	->WithUrl(Url)
+	->WithHeader("Content-type", "application/json")
+	->WithVerb("POST")
+	->WithContentAsString(Content)
+	->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
+{
+	if (this->IsFederating)
+	{
+		const TFunction<void()> OnSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
+
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		{
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederateEmailSession(CodeIn, OnSuccess, OnFailure);
 	}
 	else
 	{
-		if(Response.IsValid())
-			Ret = "Request is invalid!";
-		else
-			Ret = "Request failed: " + Response->GetContentAsString();
-	}
+		const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+		{
+			this->InitializeSequence(Credentials);
+		};
+
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			this->CallAuthFailure();
+		};
 	
-	return Ret;
+		this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
+	}
 }
 
-FString UAuthenticator::BuildYYYYMMDD(const FDateTime& Date)
+void UAuthenticator::FederateEmail(const FString& EmailIn)
 {
-	return Date.ToString(TEXT("%Y%m%d"));//YYYYMMDD
-}
+	this->IsFederating = true;
 
-FString UAuthenticator::BuildFullDateTime(const FDateTime& Date)
-{
-	return Date.ToString(TEXT("%Y%m%dT%H%M%SZ"));//YYYYMMDDTHHMMSSZ
-}
-
-bool UAuthenticator::CanRetryEmailLogin()
-{
-	const bool CanRetry = this->EmailAuthCurrRetries > 0;
-	this->EmailAuthCurrRetries--;
-	return CanRetry;
-}
-
-void UAuthenticator::ResetRetryEmailLogin()
-{
-	this->EmailAuthCurrRetries = this->EmailAuthMaxRetries;
-}
-
-void UAuthenticator::ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response, bWasSuccessful);
-	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
-	FString SessionPtr;
-	if (responseObj->TryGetStringField(TEXT("Session"), SessionPtr))
-	{//good state
-		this->ChallengeSession = SessionPtr;
+	const TFunction<void()> OnSuccess = [this]
+	{
 		this->CallAuthRequiresCode();
-	}
-	else
-	{//error state
-		if (response.Contains("user not found", ESearchCase::IgnoreCase))
-		{//no user exists so create one!
-			UE_LOG(LogTemp, Display, TEXT("Creating New User"));
-			this->CognitoIdentitySignUp(this->Cached_Email, this->GenerateSignUpPassword(),this->WaasSettings.GetEmailClientId());
-		}
-		else
-		{//unknown error
-			UE_LOG(LogTemp, Error, TEXT("[Unexpected error when trying to authenticate]"));
-			this->CallAuthFailure();
-		}
-	}
-}
-
-void UAuthenticator::CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"AuthFlow\":\"CUSTOM_AUTH\",\"AuthParameters\":{\"USERNAME\":\""+ Email +"\"},\"ClientId\":\""+ AWSCognitoClientID +"\"}";
-	
-	if (this->CanRetryEmailLogin())
-	{
-		this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.InitiateAuth", &UAuthenticator::ProcessCognitoIdentityInitiateAuth);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[Max login attempts reached]"));
-		this->CallAuthFailure();
-	}
-}
-
-FString UAuthenticator::GenerateSignUpPassword()
-{
-	FString pw = "aB1%";
-	constexpr int32 len = 12;
-	for (int i = 0; i < len; i++)
-	{
-		pw += this->PWCharList[FMath::RandRange(0,this->PWCharList.Num()-1)];
-	}
-	return pw;
-}
-
-void UAuthenticator::ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	this->CognitoIdentityInitiateAuth(this->Cached_Email,this->WaasSettings.GetEmailClientId());
-}
-
-void UAuthenticator::CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"ClientId\":\""+ AWSCognitoClientID +"\",\"Password\":\""+ Password +"\",\"UserAttributes\":[{\"Name\":\"email\",\"Value\":\""+ Email +"\"}],\"Username\":\""+ Email +"\"}";
-	this->UEAmazonWebServerRPC(URL,RequestBody, "AWSCognitoIdentityProviderService.SignUp",&UAuthenticator::ProcessCognitoIdentitySignUp);
-}
-
-void UAuthenticator::ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	const FString response = this->ParseResponse(Response,bWasSuccessful);
-	const TSharedPtr<FJsonObject> responseObj = this->ResponseToJson(response);
-	FString IDTokenPtr;
-	const TSharedPtr<FJsonObject> *AuthObject;
-	if (responseObj->TryGetObjectField(TEXT("AuthenticationResult"), AuthObject))
-	{
-		if (AuthObject->Get()->TryGetStringField(TEXT("IdToken"), IDTokenPtr))
-		{//good state
-			this->Cached_IDToken = IDTokenPtr;
-			const FString SessionPrivateKey = BytesToHex(this->SessionWallet->GetWalletPrivateKey().Ptr(), this->SessionWallet->GetWalletPrivateKey().GetLength()).ToLower();
-			const FCredentials_BE Credentials(this->WaasSettings.GetRPCServer(), this->WaasSettings.GetProjectId(), UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey),SessionPrivateKey,this->SessionId,this->Cached_IDToken,this->Cached_Email,WaasVersion);
-			this->StoreCredentials(Credentials);
-			this->AutoRegister(Credentials);
-		}
-		else
-		{//error state
-			UE_LOG(LogTemp, Error, TEXT("[No idToken found in AuthenticationResult]"));
-			this->CallAuthFailure();
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[No Authentication Result found]"));
-		this->CallAuthFailure();
-	}
-}
-
-void UAuthenticator::AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID)
-{
-	const FString URL = BuildAWSURL("cognito-idp",this->WaasSettings.GetEmailRegion());
-	const FString RequestBody = "{\"ChallengeName\":\"CUSTOM_CHALLENGE\",\"ClientId\":\""+ AWSCognitoClientID +"\",\"Session\":\""+ ChallengeSessionString +"\",\"ChallengeResponses\":{\"USERNAME\":\""+ Email +"\",\"ANSWER\":\""+ Answer +"\"},\"ClientMetadata\":{\"SESSION_HASH\":\""+this->SessionHash+"\"}}";
-	this->UEAmazonWebServerRPC(URL, RequestBody,"AWSCognitoIdentityProviderService.RespondToAuthChallenge",&UAuthenticator::ProcessAdminRespondToAuthChallenge);
-}
-
-void UAuthenticator::AutoRegister(const FCredentials_BE& Credentials) const
-{	
-	const TFunction<void (FCredentials_BE)> OnSuccess = [this](const FCredentials_BE& Credentials)
-	{
-		if (Credentials.IsRegistered())
-		{
-			UE_LOG(LogTemp,Display,TEXT("Successfully Auto Registered Credentials"));
-			this->CallAuthSuccess();
-		}
-		else
-		{
-			UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register, Credentials weren't registered"));
-			this->CallAuthFailure();
-		}
-	};
-	
-	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
-	{
-		UE_LOG(LogTemp,Display,TEXT("Failure During Auto Register: %s"),*Err.Message);
-		this->CallAuthFailure();
 	};
 
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials);
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->RegisterSession(OnSuccess,OnFailure);
-	}
-	else
-	{
-		this->CallAuthFailure();
-	}
+		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-TSharedPtr<FJsonObject> UAuthenticator::ResponseToJson(const FString& Response)
+void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 {
-	TSharedPtr<FJsonObject> responseObj;
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Response), responseObj))
-		return responseObj;
-	else
-		return nullptr;
+	const TFunction<void()> OnSuccess = [this]()
+	{
+		this->CallFederateSuccess();
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		this->CallFederateFailure(Error.Message);
+	};
+	
+	this->SequenceRPCManager->FederateOIDCSession(IdTokenIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::EmailLoginCode(const FString& CodeIn)
+void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
 {
-	this->AdminRespondToAuthChallenge(this->Cached_Email,CodeIn,this->ChallengeSession,this->WaasSettings.GetEmailClientId());
+	this->IsFederating = true;
+	this->InitiateMobleSSO_Internal(Type);
+}
+
+void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+{
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
+
+		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederatePlayFabSession(SessionTicket, OnFederateSuccess, OnFederateFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
+}
+
+void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+{
+	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [this]()
+		{
+			this->CallFederateSuccess();
+		};
+
+		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			this->CallFederateFailure(Error.Message);
+		};
+		
+		this->SequenceRPCManager->FederatePlayFabSession(SessionTicket, OnFederateSuccess, OnFederateFailure);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		this->CallFederateFailure(Error.Message);
+	};
+
+	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
@@ -553,17 +624,4 @@ FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 	FCredentials_BE* Credentials = &CredData;
 	const bool IsValid = this->GetStoredCredentials(Credentials);
 	return FStoredCredentials_BE(IsValid, *Credentials);
-}
-
-void UAuthenticator::UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful))
-{
-	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("POST");
-	http_post_req->SetURL(Url);
-	http_post_req->SetHeader("Content-type", "application/x-amz-json-1.1");
-	http_post_req->SetHeader("X-AMZ-TARGET", AMZTarget);
-	http_post_req->SetContentAsString(RequestBody);
-	http_post_req->SetTimeout(15);
-	http_post_req->OnProcessRequestComplete().BindUObject(this,Callback);
-	http_post_req->ProcessRequest();
 }

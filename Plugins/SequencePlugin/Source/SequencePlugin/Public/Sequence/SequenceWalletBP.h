@@ -3,24 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Util/SequenceSupport.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "SequenceWalletBPTypes.h"
 #include "Transactions.h"
-#include "SignedMessage.h"
-#include "TransactionResponse.h"
+#include "SequenceResponseIntent.h"
 #include "SequenceWalletBP.generated.h"
 
 //ASYNC Response Delegates//
 
 //Api//
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSignedMessage, SignedMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FTransactionResponse, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSession>&, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
 
 //Api//
@@ -28,15 +27,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries
 //Indexer
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerPing, FSequenceResponseStatus, ResponseStatus, bool, PingResponse);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerVersion, FSequenceResponseStatus, ResponseStatus, FVersion, Version);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerRuntimeStatus, FSequenceResponseStatus, ResponseStatus, FRuntimeStatus, RuntimeStatus);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerVersion, FSequenceResponseStatus, ResponseStatus, FSeqVersion, Version);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerRuntimeStatus, FSequenceResponseStatus, ResponseStatus, FSeqRuntimeStatus, RuntimeStatus);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetChainId, FSequenceResponseStatus, ResponseStatus, int64, ChainId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetEtherBalance, FSequenceResponseStatus, ResponseStatus, FEtherBalance, EtherBalance);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenBalances, FSequenceResponseStatus, ResponseStatus, FGetTokenBalancesReturn, TokenBalances);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSequenceResponseStatus, ResponseStatus, FGetTokenSuppliesReturn, TokenSupplies);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FGetTokenSuppliesMapReturn, TokenSuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetBalanceUpdates, FSequenceResponseStatus, ResponseStatus, FGetBalanceUpdatesReturn, BalanceUpdates);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FGetTransactionHistoryReturn, TransactionHistory);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetEtherBalance, FSequenceResponseStatus, ResponseStatus, FSeqEtherBalance, EtherBalance);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenBalances, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenBalancesReturn, TokenBalances);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesReturn, TokenSupplies);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesMapReturn, TokenSuppliesMap);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetBalanceUpdates, FSequenceResponseStatus, ResponseStatus, FSeqGetBalanceUpdatesReturn, BalanceUpdates);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FSeqGetTransactionHistoryReturn, TransactionHistory);
 
 //Indexer//
 
@@ -123,12 +122,12 @@ private:
 
 	//Api//
 
-	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSignedMessage& SignedMessage) const;
+	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const;
 	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
-	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
-	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FTransactionResponse& Response) const;
-	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSession>& Sessions) const;
+	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
+	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
+	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
 	//Api//
@@ -136,15 +135,15 @@ private:
 	//Indexer//
 	
 	void CallOnIndexerPing(const FSequenceResponseStatus& Status, bool PingResponse) const;
-	void CallOnIndexerVersion(const FSequenceResponseStatus& Status, const FVersion& Version) const;
-	void CallOnIndexerRuntimeStatus(const FSequenceResponseStatus& Status, const FRuntimeStatus& RuntimeStatus) const;
+	void CallOnIndexerVersion(const FSequenceResponseStatus& Status, const FSeqVersion& Version) const;
+	void CallOnIndexerRuntimeStatus(const FSequenceResponseStatus& Status, const FSeqRuntimeStatus& RuntimeStatus) const;
 	void CallOnIndexerGetChainId(const FSequenceResponseStatus& Status, int64 ChainId) const;
-	void CallOnIndexerGetEtherBalance(const FSequenceResponseStatus& Status, const FEtherBalance& EtherBalance) const;
-	void CallOnIndexerGetTokenBalances(const FSequenceResponseStatus& Status, const FGetTokenBalancesReturn& TokenBalances) const;
-	void CallOnIndexerGetTokenSupplies(const FSequenceResponseStatus& Status, const FGetTokenSuppliesReturn& TokenSupplies) const;
-	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
-	void CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FGetBalanceUpdatesReturn& BalanceUpdates) const;
-	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FGetTransactionHistoryReturn& TransactionHistory) const;
+	void CallOnIndexerGetEtherBalance(const FSequenceResponseStatus& Status, const FSeqEtherBalance& EtherBalance) const;
+	void CallOnIndexerGetTokenBalances(const FSequenceResponseStatus& Status, const FSeqGetTokenBalancesReturn& TokenBalances) const;
+	void CallOnIndexerGetTokenSupplies(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesReturn& TokenSupplies) const;
+	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
+	void CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const;
+	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 
 	//Indexer//
 	
@@ -172,6 +171,21 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	int64 GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals);
+
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	static int64 GetNetworkIdFromName(const FString& NetworkNameIn);
+
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	static FString GetNetworkNameFromId(const int64 NetworkIdIn);
+
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	static TArray<FIdNamePair> GetAllNetworks();
+
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	static TArray<FString> GetAllNetworkNames();
+
+	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	static TArray<int64> GetAllNetworkIds();
 	
 	//Support//
 	
@@ -244,19 +258,19 @@ public:
 	void IndexerGetEtherBalance(const FString& WalletAddress);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetTokenBalances(const FGetTokenBalancesArgs& Args);
+	void IndexerGetTokenBalances(const FSeqGetTokenBalancesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetTokenSupplies(const FGetTokenSuppliesArgs& Args);
+	void IndexerGetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetTokenSuppliesMap(const FGetTokenSuppliesMapArgs& Args);
+	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetBalanceUpdates(const FGetBalanceUpdatesArgs& Args);
+	void IndexerGetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetTransactionHistory(const FGetTransactionHistoryArgs& Args);
+	void IndexerGetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args);
 
 	//Indexer//
 	

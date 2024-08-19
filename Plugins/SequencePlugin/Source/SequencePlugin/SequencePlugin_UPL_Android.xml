@@ -68,8 +68,8 @@ import com.Plugins.SequencePlugin.SequenceWebViewAuth;
         return "";    
     }
             
-    public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId, String nonce) {
-        SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId, nonce);
+    public static void AndroidThunkJava_SequenceSignInWithGoogle(String clientId) {
+        SequenceGoogleSignInHelper.signIn(GameActivity.sequenceGetInstance(), clientId);
     }
 
     public static void AndroidThunkJava_SequenceRequestAuthInWebView(String requestUrl, String redirectUrl) {

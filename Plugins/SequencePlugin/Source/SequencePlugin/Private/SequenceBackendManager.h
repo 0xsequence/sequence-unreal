@@ -28,6 +28,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateISuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateIFailure, FString, Error);
+
 UCLASS()
 class SEQUENCEPLUGIN_API ASequenceBackendManager : public AActor
 {
@@ -41,6 +45,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Auth")
 		FOnAuthISuccess ShowAuthSuccessDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="Federation")
+		FOnFederateISuccess ShowFederateSuccessDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="Federation")
+		FOnFederateIFailure ShowFederationFailureDelegate;
 private:
 	UFUNCTION()
 		void CallReadyToReceiveCode();
@@ -48,6 +58,10 @@ private:
 		void CallShowAuthFailureScreen();
 	UFUNCTION()
 		void CallShowAuthSuccessScreen();
+	UFUNCTION()
+		void CallShowFederationSuccess();
+	UFUNCTION()
+		void CallShowFederationFailure(const FString& Error);
 private:	
 	UPROPERTY()
 	UAuthenticator* Authenticator;
@@ -102,6 +116,30 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void GuestLogin();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
+		void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+	
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+		void FederateEmail(const FString& EmailIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederateOIDCIdToken(const FString& IdTokenIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void InitiateMobileFederateOIDC(const ESocialSigninType& TypeIn);
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
+    	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Login")
 		bool StoredCredentialsValid();

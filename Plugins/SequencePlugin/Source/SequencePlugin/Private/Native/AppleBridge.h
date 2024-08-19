@@ -11,7 +11,7 @@ class SEQUENCEPLUGIN_API UAppleBridge : public UObject
 public:
 	UAppleBridge();
 	static void InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken));
-	static void InitiateIosSSO(const FString& clientID, const FString& nonce, void(*IOSCallback)(char *idToken));
+	static void InitiateIosSSO(const FString& clientID, void(*IOSCallback)(char *idToken));
 
 	static FString AppleEncrypt(const FString& StringIn);
 	static FString AppleDecrypt(const FString& StringIn);

@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/DelayedEncodingArgsBP.h"
-#include "Indexer/IndexerSupport.h"
+#include "Util/SequenceSupport.h"
 
 FString UDelayedEncodingArgsBP::GetJsonString()
 {
@@ -55,7 +55,7 @@ void UDelayedEncodingObjectArgsBP::AddArrayArg(const FString& ArgName, UDelayedE
 
 FString UDelayedEncodingObjectArgsBP::GetJsonString()
 {
-	return UIndexerSupport::JsonToParsableString(this->JsonObjectArg);
+	return USequenceSupport::JsonToParsableString(this->JsonObjectArg);
 }
 
 TSharedPtr<FJsonObject> UDelayedEncodingObjectArgsBP::GetJson()
@@ -113,7 +113,7 @@ void UDelayedEncodingArrayArgsBP::AddArrayArg(UDelayedEncodingArrayArgsBP* ArgIn
 
 FString UDelayedEncodingArrayArgsBP::GetJsonString()
 {
-	return UIndexerSupport::JsonValueListToParsableString(this->JsonArrayArg);
+	return USequenceSupport::JsonValueListToParsableString(this->JsonArrayArg);
 }
 
 TArray<TSharedPtr<FJsonValue>> UDelayedEncodingArrayArgsBP::GetJson()

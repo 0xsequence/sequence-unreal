@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "Util/Structs/BE_Enums.h"
 #include "Types/Wallet.h"
-#include "Interfaces/IHttpRequest.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
+#include "Credentials.h"
+#include "Util/Async.h"
 #include "Authenticator.generated.h"
+
+class USequenceRPCManager;
 
 USTRUCT()
 struct SEQUENCEPLUGIN_API FSSOCredentials
@@ -25,289 +28,15 @@ struct SEQUENCEPLUGIN_API FSSOCredentials
 	}
 };
 
-USTRUCT()
-struct SEQUENCEPLUGIN_API FWaasJWT
-{
-	GENERATED_USTRUCT_BODY()
-private:
-	UPROPERTY()
-	int32 projectId = 0;
-	UPROPERTY()
-	FString rpcServer = "";
-	UPROPERTY()
-	FString emailRegion = "";
-	UPROPERTY()
-	FString emailClientId = "";
-public:
-	FString GetProjectId() const
-	{
-		FString ret = "";
-		ret.AppendInt(projectId);
-		return ret;
-	}
-
-	FString GetRPCServer() const
-	{
-		return rpcServer;
-	}
-
-	FString GetEmailRegion() const
-	{
-		return emailRegion;
-	}
-
-	FString GetEmailClientId() const
-	{
-		return emailClientId;
-	}
-};
-
-USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FCredentials_BE
-{
-    GENERATED_USTRUCT_BODY()
-private:
-	UPROPERTY()
-    FString SessionPrivateKey = "";
-	UPROPERTY()
-    FString SessionId = "";
-	UPROPERTY()
-    FString WalletAddress = "";
-	UPROPERTY()
-    FString IDToken = "";
-	UPROPERTY()
-    FString Email = "";
-	UPROPERTY()
-    FString Issuer = "";
-	UPROPERTY()
-	int64 Created = -1;
-	UPROPERTY()
-	int64 Refreshed = -1;
-	UPROPERTY()
-	int64 Expires = -1;
-	UPROPERTY()
-	FString ProjectAccessKey = "";
-	UPROPERTY()
-	FString WaasVersion = "";
-	UPROPERTY()
-	int64 Network = 137;
-	UPROPERTY()
-	FString ProjectId = "";
-	UPROPERTY()
-	FString RPCServer = "";
-	UPROPERTY()
-	FString Type = "";
-	UPROPERTY()
-	FString UserId = "";
-	UPROPERTY()
-	FString Sub = "";
-	UPROPERTY()
-	bool Registered = false;
-public:
-	FCredentials_BE(){}
-	FCredentials_BE(const FString& RPCServerIn,const FString& ProjectIdIn, const FString& ProjectAccessKeyIn, const FString& SessionPrivateKeyIn, const FString& SessionIdIn, const FString& IdTokenIn, const FString& EmailIn, const FString& WaasVersionIn)
-	{
-		ProjectId = ProjectIdIn;
-		ProjectAccessKey = ProjectAccessKeyIn;
-		SessionPrivateKey = SessionPrivateKeyIn;
-		SessionId = SessionIdIn;
-		IDToken = IdTokenIn;
-		Email = EmailIn;
-		WaasVersion = WaasVersionIn;
-		RPCServer = RPCServerIn;
-	}
-
-	void UpdateNetwork(int64 NewNetwork)
-	{
-		Network = NewNetwork;
-	}
-	
-	void RegisterCredentials(const FString& WalletIn, const FString& EmailIn, const FString& IssuerIn, const FString& TypeIn, const FString& SubIn, const FString& UserIdIn, const int64 CreatedAtIn, const int64 RefreshedAtIn, const int64 ExpiresAtIn)
-	{
-		WalletAddress = WalletIn;
-		Email = EmailIn;
-		Issuer = IssuerIn;
-		Type = TypeIn;
-		Sub = SubIn;
-		UserId = UserIdIn;
-		Created = CreatedAtIn;
-		Refreshed = RefreshedAtIn;
-		Expires = ExpiresAtIn;
-		Registered = true;
-	}
-
-	FString GetRPCServer() const
-	{
-		return RPCServer;
-	}
-	
-	FString GetProjectId() const
-	{
-		return ProjectId;
-	}
-	
-	FString GetNetworkString() const
-	{
-		return FString::Printf(TEXT("%lld"),Network);
-	}
-	
-	int64 GetNetwork() const
-	{
-		return Network;
-	}
-	
-	FString GetWaasVersion() const
-	{
-		return WaasVersion;
-	}
-
-	FString GetProjectAccessKey() const
-	{
-		return ProjectAccessKey;
-	}
-
-	FString GetSessionPrivateKey() const
-	{
-		return SessionPrivateKey;
-	}
-
-	FString GetSessionPublicKey() const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		FString PublicKeyStr = BytesToHex(TWallet->GetWalletPublicKey().Ptr(),TWallet->GetWalletPublicKey().GetLength()).ToLower();
-		return PublicKeyStr;
-	}
-
-	FString GetSessionWalletAddress() const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		FString AddressStr = BytesToHex(TWallet->GetWalletAddress().Ptr(), TWallet->GetWalletAddress().GetLength()).ToLower();
-		return AddressStr;
-	}
-
-	FString SignMessageWithSessionWallet(const TArray<uint8>& Message, const int32 MessageLength) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet->SignMessage(Message, MessageLength);
-		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		return Signature;
-	}
-	
-	FString SignMessageWithSessionWallet(const FString& Message) const
-	{
-		UWallet * TWallet = UWallet::Make(SessionPrivateKey);
-		TArray<uint8> SigBytes = TWallet->SignMessage(Message);
-		FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
-		return Signature;
-	}
-
-	FString GetSessionId() const
-	{
-		return SessionId;
-	}
-
-	FString GetWalletAddress() const
-	{
-		return WalletAddress;
-	}
-
-	FString GetIDToken() const
-	{
-		return IDToken;
-	}
-
-	FString GetEmail() const
-	{
-		return Email;
-	}
-
-	FString GetIssuer() const
-	{
-		return Issuer;
-	}
-
-	int64 GetCreated() const
-	{
-		return Created;
-	}
-
-	int64 GetRefreshed() const
-	{
-		return Refreshed;
-	}
-
-	int64 GetExpires() const
-	{
-		return Expires;
-	}
-
-	bool IsRegistered() const
-	{
-		return Registered;
-	}
-
-	//Used to check cases where we are registered and in a good state
-	bool RegisteredValid() const
-	{
-		bool IsValidRegistered = true;
-		IsValidRegistered &= Registered;
-		IsValidRegistered &= Expires > FDateTime::UtcNow().ToUnixTimestamp();
-		IsValidRegistered &= IDToken.Len() > 0;
-		IsValidRegistered &= SessionPrivateKey.Len() > 0;
-		return IsValidRegistered;
-	}
-
-	//Used to check in cases where we don't care if we are registered, just valid
-	bool UnRegisteredValid() const
-	{
-		bool IsValid = true;
-		IsValid &= IDToken.Len() > 0;
-		IsValid &= SessionPrivateKey.Len() > 0;
-		return IsValid;
-	}
-
-	void UnRegisterCredentials()
-	{
-		Expires = -1;
-		Created = -1;
-		Refreshed = -1;
-		Registered = false;
-	}
-};
-
-USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FStoredCredentials_BE
-{
-	GENERATED_USTRUCT_BODY()
-private:
-	UPROPERTY()
-	bool Valid = false;
-	UPROPERTY()
-	FCredentials_BE Credentials;
-public:
-	FStoredCredentials_BE(){}
-	FStoredCredentials_BE(const bool& ValidIn, const FCredentials_BE& CredentialsIn)
-	{
-		Valid = ValidIn;
-		Credentials = CredentialsIn;
-	}
-
-	bool GetValid() const
-	{
-		return Valid;
-	}
-
-	FCredentials_BE GetCredentials()
-	{
-		return Credentials;
-	}
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
 
 /**
  * 
@@ -323,11 +52,17 @@ public:
 	FOnAuthFailure AuthFailure;
 	UPROPERTY()
 	FOnAuthSuccess AuthSuccess;
+	UPROPERTY()
+	FOnFederateSuccess FederateSuccess;
+	UPROPERTY()
+	FOnFederateFailure FederateFailure;
 	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure() const;
 	void CallAuthSuccess() const;
+	void CallFederateSuccess() const;
+	void CallFederateFailure(const FString& ErrorMessageIn) const;
 //vars
 private:
 	UPROPERTY()
@@ -335,24 +70,15 @@ private:
 	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
-
-	UPROPERTY()
-	FString SessionId = "";
-	UPROPERTY()
-	FString SessionHash = "";
-	UPROPERTY()
 	FString StateToken = "";
-	UPROPERTY()
-	FString Nonce = "";
 
-	UPROPERTY()
-	FString Cached_IDToken;
-	UPROPERTY()
-	FString Cached_Email;
-	UPROPERTY()
-	FString Cached_Issuer;
-	UPROPERTY()
-	FWaasJWT WaasSettings;
+	/**
+	 * Used to change behaviour
+	 * if the user is federating accounts
+	 * OR
+	 * if the user is logging in normally
+	 */
+	bool IsFederating = false;
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -361,87 +87,178 @@ private:
 		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
 	
 	UPROPERTY()
-	TArray<FString> PWCharList = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9"};
-	const int32 EmailAuthMaxRetries = 2;
-	UPROPERTY()
-	int32 EmailAuthCurrRetries = EmailAuthMaxRetries;
-	UPROPERTY()
-	FString ChallengeSession = "";
-	UPROPERTY()
 	UWallet* SessionWallet;
+	UPROPERTY()
+	USequenceRPCManager * SequenceRPCManager = nullptr;
 	UPROPERTY()
 	bool PurgeCache = true;
 
 	//Static Config variables
-	inline static FString WaasVersion = "1.0.0";
 	inline static FString UrlScheme = "powered-by-sequence";
 	inline static FString GoogleAuthURL = "https://accounts.google.com/o/oauth2/auth";
 	inline static FString FacebookAuthURL = "https://www.facebook.com/v18.0/dialog/oauth";
 	inline static FString DiscordAuthURL = "https://discord.com/api/oauth2/authorize";
 	inline static FString AppleAuthURL = "https://appleid.apple.com/auth/authorize";
 	inline static FString RedirectPrefixTrailer = "oauth/callback";
+	
 private:
 	UAuthenticator();
+
+	void InitiateMobleSSO_Internal(const ESocialSigninType& Type);
 public:
-	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 	
+	/**
+	 * Sets a custom encryptor
+	 * @param EncryptorIn Encryptor to use
+	 */
+	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+
+	/**
+	 * Used to get an OIDC Login Url
+	 * @param Type Type of OIDC Url need
+	 * @return An OIDC login Url of the specified Type
+	 */
 	FString GetSigninURL(const ESocialSigninType& Type) const;
 
+	/**
+	 * Used to initiate mobile Login
+	 * @param Type Type of OIDC to conduct on Mobile
+	 */
 	void InitiateMobileSSO(const ESocialSigninType& Type);
 
-	void UpdateMobileLogin(const FString& TokenizedUrl);
-	
-	void SocialLogin(const FString& IDTokenIn);
+	/**
+	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
+	 * @param TokenizedUrl The URL containing an IdToken
+	 */
+	void UpdateMobileLogin(const FString& TokenizedUrl) const;
 
+	/**
+	 * Used to initiate OIDC login
+	 * @param IDTokenIn OIDC Token granted from login
+	 */
+	void SocialLogin(const FString& IDTokenIn) const;
+
+	/**
+	 * Used to initiate email login
+	 * @param EmailIn Email
+	 */
 	void EmailLogin(const FString& EmailIn);
 
-	void EmailLoginCode(const FString& CodeIn);
+	/**
+	 * Used to login as a Guest into Sequence
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void GuestLogin(const bool ForceCreateAccountIn) const;
 
+	/**
+	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param EmailIn Email
+	 * @param PasswordIn Password
+	 */
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to login with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param PasswordIn Password
+	 */
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
+	 * @param CodeIn Received Code from email
+	 */
+	void EmailLoginCode(const FString& CodeIn) const;
+
+	/**
+	 * Used To Federate an Email (WIP)
+	 * @param EmailIn Email to federate
+	 */
+	void FederateEmail(const FString& EmailIn);
+
+	/**
+	 * Used to Federate an OIDC Login
+	 * @param IdTokenIn OIDC Token To federate
+	 */
+	void FederateOIDCIdToken(const FString& IdTokenIn) const;
+
+	/**
+	 * Used to initiate OIDC account federation on mobile
+	 * @param Type Type of OIDC account to federate
+	 */
+	void InitiateMobileFederateOIDC(const ESocialSigninType& Type);
+
+	/**
+	 * Used to federate a new PlayFab account
+	 * @param UsernameIn PlayFab Username
+	 * @param EmailIn PlayFab Email
+	 * @param PasswordIn PlayFab Password
+	 */
+	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to federate an existing account on PlayFab
+	 * @param UsernameIn PlayFab Username
+	 * @param PasswordIn PlayFab Password
+	 */
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to get stored credentials from Disk
+	 * @return Stored Credentials
+	 */
 	FStoredCredentials_BE GetStoredCredentials() const;
 
+	/**
+	 * Used to store Credentials on Disk
+	 * @param Credentials Credentials to be Stored
+	 */
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 
+	/**
+	 * Clears stored credentials on disk with blanks
+	 */
 	void ClearStoredCredentials() const;
+	
 private:
+	
 	FString BuildRedirectPrefix() const;
 	
-	bool CanHandleEmailLogin() const;
-	
 	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
-	
-	FString GetISSClaim(const FString& JWT) const;
-
-	bool CanRetryEmailLogin();
-
-	void ResetRetryEmailLogin();
 
 	FString GenerateSigninURL(const ESocialSigninType& Type) const;
 
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
 
-	FString BuildAWSURL(const FString& Service, const FString& AWSRegion);
+	void InitializeSequence(const FCredentials_BE& Credentials) const;
 
-	FString GenerateSignUpPassword();
+	//PlayFab RPC//
 
-	FString BuildYYYYMMDD(const FDateTime& Date);
+	/**
+	 * Used to Login a user with PlayFab
+	 * @param UsernameIn Username to login with
+	 * @param PasswordIn password for account
+	 * @param OnSuccess Called when successful (returns sessionTicket)
+	 * @param OnFailure Called when unsuccessful (returns error)
+	 */
+	static void PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
-	static FString BuildFullDateTime(const FDateTime& Date);
+	/**
+	 * Used to Create a new user & log them in with PlayFab
+	 * @param UsernameIn New Username
+	 * @param EmailIn New Email
+	 * @param PasswordIn New Password
+	 * @param OnSuccess Called when successful (returns sessionTicket)
+	 * @param OnFailure Called when unsuccessful (returns error)
+	 */
+	static void PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
-	//RPC Calls//
-	static FString ParseResponse(const FHttpResponsePtr& Response,bool WasSuccessful);
-
-	void CognitoIdentityInitiateAuth(const FString& Email, const FString& AWSCognitoClientID);
-	void ProcessCognitoIdentityInitiateAuth(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void CognitoIdentitySignUp(const FString& Email, const FString& Password, const FString& AWSCognitoClientID);
-	void ProcessCognitoIdentitySignUp(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void AdminRespondToAuthChallenge(const FString& Email, const FString& Answer, const FString& ChallengeSessionString, const FString& AWSCognitoClientID);
-	void ProcessAdminRespondToAuthChallenge(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful);
-
-	void AutoRegister(const FCredentials_BE& Credentials) const;
-
-	//RPC Calls//
-	static TSharedPtr<FJsonObject> ResponseToJson(const FString& Response);
-	void UEAmazonWebServerRPC(const FString& Url, const FString& RequestBody,const FString& AMZTarget,void(UAuthenticator::*Callback)(FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful));
+	static FString GeneratePlayFabUrl();
+	
+	static FString GeneratePlayFabRegisterUrl();
+	
+	static void PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	
+	//PlayFab RPC//
 };

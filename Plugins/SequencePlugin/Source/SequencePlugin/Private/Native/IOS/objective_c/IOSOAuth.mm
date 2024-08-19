@@ -48,17 +48,16 @@ typedef void(^Callback)(char *idToken);
     [authSession start];
 }
 
-- (void)loadBrowserWithUrl:(NSString *)cID nonce:(NSString *)nonce callback:(void(^)(char *))callback {
+- (void)loadBrowserWithUrl:(NSString *)cID callback:(void(^)(char *))callback {
     completion = [callback copy];
-    [[IOSOAuth GetDelegate] loadBrowserURLInIOSThread:cID nonce:nonce];
+    [[IOSOAuth GetDelegate] loadBrowserURLInIOSThread:cID];
 }
 
-- (void)loadBrowserURLInIOSThread: (NSString *)clientID nonce:(NSString *)nonce {
+- (void)loadBrowserURLInIOSThread: (NSString *)clientID {
     NSURL *_url = [NSURL URLWithString:[IOSOAuth url]];
     
     ASAuthorizationAppleIDProvider *appleIDProvider = [ASAuthorizationAppleIDProvider new];
     ASAuthorizationAppleIDRequest *request = appleIDProvider.createRequest;
-    request.nonce = nonce;
     request.state = clientID;
     request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
     ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
