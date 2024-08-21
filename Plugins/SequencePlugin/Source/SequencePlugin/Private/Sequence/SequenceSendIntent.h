@@ -87,14 +87,15 @@ struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
   verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
  }
 
- void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
+ void InitForPlayFab(const FString& WalletIn, const FString& SessionTicketIn, const FString& SessionIdIn)
  {
   //Get Keccak(SessionTicketIn)
   const FHash256 PreTicketHash = FHash256::New();
   const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
   Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
   const FString TicketHash = "0x" + PreTicketHash.ToHex();
-  
+
+  wallet = WalletIn;
   answer = SessionTicketIn;
   identityType = PlayFabType;
   sessionId = SessionIdIn;

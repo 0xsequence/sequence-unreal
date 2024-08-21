@@ -32,6 +32,7 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	UE_LOG(LogTemp, Display, TEXT("Intent: %s"), *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -530,7 +531,7 @@ void USequenceRPCManager::FederateEmailSession(const FString& CodeIn, const TFun
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
 	};
 	
 	FFederateAccountData FederateAccount;
@@ -542,7 +543,7 @@ void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TF
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
 	};
 	
 	FFederateAccountData FederateAccount;
@@ -550,14 +551,31 @@ void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TF
 	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederatePlayFabSession(const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, SessionTicketIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
-	};
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+
+		if (ParsedInitResponse.IsValid())
+		{		
+			const TSuccessCallback<FString> OnFederateResponse = [this, SessionTicketIn, OnSuccess, OnFailure](const FString& FederateResponse)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Response %s"), *FederateResponse);
+			};
 	
-	FFederateAccountData FederateAccount;
-	FederateAccount.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
+			FFederateAccountData FederateAccount;
+			FederateAccount.InitForPlayFab(WalletIn, SessionTicketIn,this->SessionWallet->GetSessionId());
+			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate PlayFab Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+
+	FInitiateAuthData AuthData;
+	AuthData.InitForPlayFab(SessionTicketIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
 }
