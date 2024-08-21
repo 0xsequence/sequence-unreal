@@ -586,6 +586,8 @@ void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TF
 	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
 }
 
+//{"response":{"code":"accountFederated","data":{"account":{"id":"PlayFab:5D31D#5BF891473E575F76","type":"PlayFab","issuer":"5D31D","email":"testbed992@gmail.com"}}}}
+
 void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, SessionTicketIn, OnSuccess, OnFailure](const FString& InitResponse)

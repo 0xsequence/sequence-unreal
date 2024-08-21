@@ -6,29 +6,59 @@
 #include "SequenceResponseIntent.generated.h"
 
 //FederateAccount//
-
+//{"response":{"code":"accountFederated","data":{"account":{"id":"","type":"","issuer":"","email":""}}}}
 USTRUCT()
 struct SEQUENCEPLUGIN_API FFederateAccountResponse_Account
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FString Email = "";
-	UPROPERTY()
 	FString Id = "";
 	UPROPERTY()
-	FString IdentityType = "";
+	FString Type = "";
 	UPROPERTY()
-	FString Answer = "";
+	FString Issuer = "";
+	UPROPERTY()
+	FString Email = "";
 };
 
 USTRUCT()
-struct SEQUENCEPLUGIN_API FFederateAccountResponse//_Data
+struct SEQUENCEPLUGIN_API FFederateAccountResponse_Data
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
 	FFederateAccountResponse_Account Account;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FFederateAccountResponse_Response
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FFederateAccountResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("accountFederated"),ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FFederateAccountResponse
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY()
+	FFederateAccountResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
 };
 
 //FederateAccount//
