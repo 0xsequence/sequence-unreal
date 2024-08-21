@@ -3,7 +3,6 @@
 #include "Authenticator.h"
 #include "Misc/Guid.h"
 #include "Misc/Base64.h"
-#include "Types/Wallet.h"
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
 #include "Util/SequenceSupport.h"
@@ -24,8 +23,7 @@
 UAuthenticator::UAuthenticator()
 {
 	this->StateToken = FGuid::NewGuid().ToString();
-	this->SequenceRPCManager = nullptr;
-	this->SessionWallet = nullptr;
+	this->SequenceRPCManager = USequenceRPCManager::Make(false);
 	
 	if constexpr (PLATFORM_ANDROID)
 	{
@@ -45,13 +43,7 @@ UAuthenticator::UAuthenticator()
 	}
 }
 
-void UAuthenticator::SetupSessionData()
-{
-	this->SessionWallet = UWallet::Make();
-	this->SequenceRPCManager = USequenceRPCManager::Make(this->SessionWallet);
-}
-
-void UAuthenticator::InitiateMobleSSO_Internal(const ESocialSigninType& Type)
+void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 {
 #if PLATFORM_ANDROID
 	switch (Type)
@@ -210,7 +202,7 @@ void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
 	}
 }
 
-void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
+void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
@@ -243,9 +235,8 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
 {
-	this->SetupSessionData();
 	this->IsFederating = false;
-	this->InitiateMobleSSO_Internal(Type);
+	this->InitiateMobileSSO_Internal(Type);
 }
 
 FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
@@ -277,7 +268,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-void UAuthenticator::SocialLogin(const FString& IDTokenIn)
+void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -289,8 +280,8 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn)
 		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
-
-	this->SetupSessionData();
+	
+	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
 }
 
@@ -309,11 +300,11 @@ void UAuthenticator::EmailLogin(const FString& EmailIn)
 		this->CallAuthFailure();
 	};
 
-	this->SetupSessionData();
+	this->SequenceRPCManager->UpdateWithRandomSessionWallet();	
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
+void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -326,11 +317,11 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 		this->CallAuthFailure();
 	};
 
-	this->SetupSessionData();
+	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
-void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn)
+void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
@@ -344,7 +335,8 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->CallAuthFailure();
 		};
-			
+
+		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
 		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
 	};
 
@@ -353,12 +345,11 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
-
-	this->SetupSessionData();
+	
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
+void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
@@ -372,7 +363,8 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->CallAuthFailure();
 		};
-			
+
+		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
 		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
 	};
 
@@ -381,8 +373,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
-
-	this->SetupSessionData();
+	
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
@@ -551,6 +542,7 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 		this->CallFederateFailure(Error.Message);
 	};
 
+	this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
@@ -565,14 +557,15 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 	{
 		this->CallFederateFailure(Error.Message);
 	};
-	
+
+	this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 	this->SequenceRPCManager->FederateOIDCSession(IdTokenIn, OnSuccess, OnFailure);
 }
 
 void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
 {
 	this->IsFederating = true;
-	this->InitiateMobleSSO_Internal(Type);
+	this->InitiateMobileSSO_Internal(Type);
 }
 
 void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
@@ -594,6 +587,7 @@ void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const 
 
 		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
+			this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else
@@ -632,6 +626,7 @@ void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FStri
 
 		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
+			this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else

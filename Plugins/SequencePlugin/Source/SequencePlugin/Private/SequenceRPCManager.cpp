@@ -1,10 +1,13 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceRPCManager.h"
+
+#include "Authenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
+#include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
@@ -144,6 +147,38 @@ FString USequenceRPCManager::BuildUrl() const
 FString USequenceRPCManager::BuildRegisterUrl() const
 {
 	return this->WaaSSettings.GetRPCServer() + this->UrlRegisterPath;
+}
+
+void USequenceRPCManager::UpdateWithRandomSessionWallet()
+{	
+	this->SessionWallet = UWallet::Make();
+}
+
+void USequenceRPCManager::UpdateWithStoredSessionWallet()
+{
+	const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+	{
+		this->SessionWallet = StoredCredentials.GetCredentials().GetSessionWallet();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Stored Credentials are Invalid, Please Login"));
+	}
+}
+
+
+USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
+{
+	if (UseStoredSessionId)
+	{
+		const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+		if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+		{
+			return Make(StoredCredentials.GetCredentials().GetSessionWallet());
+		}
+	}
+	return Make(UWallet::Make());
 }
 
 USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)

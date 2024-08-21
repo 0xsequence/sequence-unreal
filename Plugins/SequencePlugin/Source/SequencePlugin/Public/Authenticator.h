@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Util/Structs/BE_Enums.h"
-#include "Types/Wallet.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
@@ -87,8 +86,6 @@ private:
 		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
 	
 	UPROPERTY()
-	UWallet* SessionWallet;
-	UPROPERTY()
 	USequenceRPCManager * SequenceRPCManager = nullptr;
 	UPROPERTY()
 	bool PurgeCache = true;
@@ -104,12 +101,7 @@ private:
 private:
 	UAuthenticator();
 	
-	/**
-	 * Constructs session specific data
-	 */
-	void SetupSessionData();
-	
-	void InitiateMobleSSO_Internal(const ESocialSigninType& Type);
+	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
 public:
 	
 	/**
@@ -135,13 +127,13 @@ public:
 	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
 	 * @param TokenizedUrl The URL containing an IdToken
 	 */
-	void UpdateMobileLogin(const FString& TokenizedUrl);
+	void UpdateMobileLogin(const FString& TokenizedUrl) const;
 
 	/**
 	 * Used to initiate OIDC login
 	 * @param IDTokenIn OIDC Token granted from login
 	 */
-	void SocialLogin(const FString& IDTokenIn);
+	void SocialLogin(const FString& IDTokenIn) const;
 
 	/**
 	 * Used to initiate email login
@@ -153,7 +145,7 @@ public:
 	 * Used to login as a Guest into Sequence
 	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void GuestLogin(const bool ForceCreateAccountIn);
+	void GuestLogin(const bool ForceCreateAccountIn) const;
 
 	/**
 	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
@@ -161,14 +153,14 @@ public:
 	 * @param EmailIn Email
 	 * @param PasswordIn Password
 	 */
-	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
 
 	/**
 	 * Used to login with PlayFab, Then OpenSession with Sequence
 	 * @param UsernameIn Username
 	 * @param PasswordIn Password
 	 */
-	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation

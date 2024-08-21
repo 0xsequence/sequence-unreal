@@ -78,6 +78,29 @@ private:
 	//RPC Caller//
 	
 public:
+	/**
+	 * Updates the SessionWallet with a random one
+	 */
+	void UpdateWithRandomSessionWallet();
+
+	/**
+	 * Updates the SessionWallet with one stored on disk if possible,
+	 * does nothing if credentials on disk are invalid
+	 */
+	void UpdateWithStoredSessionWallet();
+
+	/**
+	 * Allows you to create a new Manager with a session wallet that's either random or set by on disk credentials
+	 * @param UseStoredSessionId If True set sessionWallet to on disk credentials, If False use random session wallet
+	 * @return Returns the USequenceRPCManager with the SessionWallet initialized accordingly
+	 */
+	static USequenceRPCManager * Make(const bool UseStoredSessionId);
+
+	/**
+	 * Creates a USequenceRPCManager and sets the SessionWallet to the given one
+	 * @param SessionWalletIn The SessionWallet to Initialize with
+	 * @return The Initialized USequenceRPCManager
+	 */
 	static USequenceRPCManager * Make(UWallet * SessionWalletIn);
 	
 	//RPC Calls//
