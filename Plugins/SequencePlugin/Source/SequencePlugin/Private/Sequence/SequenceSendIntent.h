@@ -60,27 +60,27 @@ struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
   Operation = FederateSessionOP;
  }
  
- void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn)
+ void InitForEmail(const FString& WalletIn, const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn)
  {
   //Get Keccak(Challenge + Code)
   const FHash256 AnswerHash = FHash256::New();
   const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
   Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
   answer = "0x" + AnswerHash.ToHex();
-  
+  wallet = WalletIn;
   identityType = EmailType;
   sessionId = SessionIdIn;
   verifier = VerifierIn;
  }
  
- void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn)
+ void InitForOIDC(const FString& WalletIn, const FString& IdTokenIn, const FString& SessionIdIn)
  {
   //Get Keccak(IdToken)
   const FHash256 PreTokenHash = FHash256::New();
   const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
   Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
   const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
-  
+  wallet = WalletIn;
   answer = IdTokenIn;
   identityType = OIDCType;
   sessionId = SessionIdIn;

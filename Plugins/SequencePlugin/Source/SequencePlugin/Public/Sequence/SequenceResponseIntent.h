@@ -7,6 +7,7 @@
 
 //FederateAccount//
 //{"response":{"code":"accountFederated","data":{"account":{"id":"","type":"","issuer":"","email":""}}}}
+
 USTRUCT()
 struct SEQUENCEPLUGIN_API FFederateAccountResponse_Account
 {

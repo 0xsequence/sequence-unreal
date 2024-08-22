@@ -207,9 +207,9 @@ public:
 
 	//Federation Calls//
 
-	void FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	void FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	

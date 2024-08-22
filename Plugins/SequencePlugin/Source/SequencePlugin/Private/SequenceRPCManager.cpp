@@ -562,31 +562,66 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	const TSuccessCallback<FString> OnFederateResponse = [OnSuccess, OnFailure](const FString& FederateResponse)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+		if (ParsedFederateResponse.IsValid())
+		{
+			OnSuccess();
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate PlayFab Auth: %s"), *FederateResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
 	};
 	
 	FFederateAccountData FederateAccount;
-	FederateAccount.InitForEmail(this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
+	FederateAccount.InitForEmail(WalletIn, this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
+	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, IdTokenIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
-	};
-	
-	FFederateAccountData FederateAccount;
-	FederateAccount.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
-}
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
-//{"response":{"code":"accountFederated","data":{"account":{"id":"PlayFab:5D31D#5BF891473E575F76","type":"PlayFab","issuer":"5D31D","email":"testbed992@gmail.com"}}}}
+		if (ParsedInitResponse.IsValid())
+		{
+			const TSuccessCallback<FString> OnFederateResponse = [OnSuccess, OnFailure](const FString& FederateResponse)
+			{
+				const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+				if (ParsedFederateResponse.IsValid())
+				{
+					OnSuccess();
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate OIDC Auth: %s"), *FederateResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+				}
+			};
+	
+			FFederateAccountData FederateAccount;
+			FederateAccount.InitForOIDC(WalletIn, IdTokenIn,this->SessionWallet->GetSessionId());
+			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate OIDC Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+
+	FInitiateAuthData AuthData;
+	AuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
+}
 
 void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
@@ -598,7 +633,17 @@ void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const 
 		{		
 			const TSuccessCallback<FString> OnFederateResponse = [this, SessionTicketIn, OnSuccess, OnFailure](const FString& FederateResponse)
 			{
-				UE_LOG(LogTemp, Display, TEXT("Response %s"), *FederateResponse);
+				const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+				if (ParsedFederateResponse.IsValid())
+				{
+					OnSuccess();
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate PlayFab Auth: %s"), *FederateResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+				}
 			};
 	
 			FFederateAccountData FederateAccount;

@@ -508,7 +508,16 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 			this->CallFederateFailure(Error.Message);
 		};
 		
-		this->SequenceRPCManager->FederateEmailSession(CodeIn, OnSuccess, OnFailure);
+		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+		{
+			this->SequenceRPCManager->FederateEmailSession(StoredCredentials.GetCredentials().GetWalletAddress(), CodeIn, OnSuccess, OnFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
+			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+			this->CallFederateFailure(ErrorMessage);
+		}
 	}
 	else
 	{
@@ -558,8 +567,17 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 		this->CallFederateFailure(Error.Message);
 	};
 
-	this->SequenceRPCManager->UpdateWithStoredSessionWallet();
-	this->SequenceRPCManager->FederateOIDCSession(IdTokenIn, OnSuccess, OnFailure);
+	if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+	{
+		this->SequenceRPCManager->UpdateWithStoredSessionWallet();
+		this->SequenceRPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnSuccess, OnFailure);
+	}
+	else
+	{
+		const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
+		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+		this->CallFederateFailure(ErrorMessage);
+	}
 }
 
 void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
