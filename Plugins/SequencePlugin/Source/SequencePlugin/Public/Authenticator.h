@@ -37,6 +37,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateOrForce);//Need to forward the federation types we want to allow in a TArray<>
+
 /**
  * 
  */

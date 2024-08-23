@@ -26,6 +26,11 @@ private:
 
 	FWaasJWT WaaSSettings;
 
+	/**
+	 * Updated ONLY on Auth Failure States
+	 */
+	FOpenSessionData Cached_OpenSessionData;
+
 	UPROPERTY()
 	UWallet * SessionWallet = nullptr;
 
@@ -183,7 +188,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Used to Login with OIDC (Social Signin)
@@ -192,7 +197,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Used to Authenticate a User via PlayFab
@@ -201,7 +206,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	//Auth Calls//
 
@@ -212,6 +217,8 @@ public:
 	void FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	void FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	void FederateSessionInUse(const FString& WalletIn);
 	
 	//Federation Calls//
 	

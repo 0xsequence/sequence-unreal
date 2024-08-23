@@ -40,6 +40,151 @@ struct SEQUENCEPLUGIN_API FGenericData
 };
 
 USTRUCT()
+struct SEQUENCEPLUGIN_API FOpenSessionData : public FGenericData
+{
+ GENERATED_USTRUCT_BODY()
+ 
+ UPROPERTY()
+ FString answer = "";
+ UPROPERTY()
+ bool forceCreateAccount = false;
+ UPROPERTY()
+ FString identityType = "";
+ UPROPERTY()
+ FString sessionId = "";
+ UPROPERTY()
+ FString verifier = "";
+
+ FOpenSessionData()
+ {
+  Operation = OpenSessionOP;
+ }
+
+ void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(Challenge + Code)
+  const FHash256 AnswerHash = FHash256::New();
+  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
+  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
+  answer = "0x" + AnswerHash.ToHex();
+  
+  forceCreateAccount = ForceCreateAccountIn;
+  identityType = EmailType;
+  sessionId = SessionIdIn;
+  verifier = VerifierIn;
+ }
+
+ void InitForGuest(const FString& ChallengeIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(Challenge + SessionId)
+  const FHash256 AnswerHash = FHash256::New();
+  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + SessionIdIn);
+  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
+  answer = "0x" + AnswerHash.ToHex();
+
+  forceCreateAccount = ForceCreateAccountIn;
+  identityType = GuestType;
+  sessionId = SessionIdIn;
+  verifier = SessionIdIn;
+ }
+ 
+ void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(IdToken)
+  const FHash256 PreTokenHash = FHash256::New();
+  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
+  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
+
+  forceCreateAccount = ForceCreateAccountIn;
+  answer = IdTokenIn;
+  identityType = OIDCType;
+  sessionId = SessionIdIn;
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
+ }
+
+ void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
+ {
+  //Get Keccak(SessionTicketIn)
+  const FHash256 PreTicketHash = FHash256::New();
+  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
+  Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
+  const FString TicketHash = "0x" + PreTicketHash.ToHex();
+
+  forceCreateAccount = ForceCreateAccountIn;
+  answer = SessionTicketIn;
+  identityType = PlayFabType;
+  sessionId = SessionIdIn;
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FInitiateAuthData : public FGenericData
+{
+ GENERATED_USTRUCT_BODY()
+ UPROPERTY()
+ FString identityType = "";
+ UPROPERTY()
+ FString sessionId = "";
+ UPROPERTY()
+ FString verifier = "";
+
+ FInitiateAuthData()
+ {
+  Operation = InitiateAuthOP;
+ }
+
+ void InitForEmail(const FString& SessionIdIn, const FString& EmailIn)
+ {
+  sessionId = SessionIdIn;
+  identityType = EmailType;
+  verifier = EmailIn + ";" + SessionIdIn;
+ }
+
+ void InitForGuest(const FString& SessionIdIn)
+ {
+  sessionId = SessionIdIn;
+  identityType = GuestType;
+  verifier = SessionIdIn;
+ }
+
+ void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn)
+ {
+  const FHash256 PreTokenHash = FHash256::New();
+  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
+  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
+  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
+  
+  identityType = OIDCType;
+  sessionId = SessionIdIn;
+  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
+ }
+
+ void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
+ {
+  const FHash256 PreTicketHash = FHash256::New();
+  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
+  Keccak256::getHash(EncodedTicketData.Ptr(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
+  const FString TicketHash = "0x" + PreTicketHash.ToHex();
+  
+  identityType = PlayFabType;
+  sessionId = SessionIdIn;
+  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
+ }
+
+ virtual FString GetJson() const override
+ {
+  return "";
+ }
+};
+
+USTRUCT()
 struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
 {
  GENERATED_USTRUCT_BODY()
@@ -71,6 +216,15 @@ struct SEQUENCEPLUGIN_API FFederateAccountData : public FGenericData
   identityType = EmailType;
   sessionId = SessionIdIn;
   verifier = VerifierIn;
+ }
+
+ void InitForFederation(const FOpenSessionData& OpenSessionDataIn, const FString& WalletIn)
+ {
+  answer = OpenSessionDataIn.answer;
+  wallet = WalletIn;
+  identityType = OpenSessionDataIn.identityType;
+  sessionId = OpenSessionDataIn.sessionId;
+  verifier = OpenSessionDataIn.verifier;
  }
  
  void InitForOIDC(const FString& WalletIn, const FString& IdTokenIn, const FString& SessionIdIn)
@@ -268,151 +422,6 @@ struct SEQUENCEPLUGIN_API FSignMessageData : public FGenericData
   message = MessageIn;
   network = NetworkIn;
   wallet = WalletIn;
- }
-
- virtual FString GetJson() const override
- {
-  return "";
- }
-};
-
-USTRUCT()
-struct SEQUENCEPLUGIN_API FOpenSessionData : public FGenericData
-{
- GENERATED_USTRUCT_BODY()
- 
- UPROPERTY()
- FString answer = "";
- UPROPERTY()
- bool forceCreateAccount = false;
- UPROPERTY()
- FString identityType = "";
- UPROPERTY()
- FString sessionId = "";
- UPROPERTY()
- FString verifier = "";
-
- FOpenSessionData()
- {
-  Operation = OpenSessionOP;
- }
-
- void InitForEmail(const FString& ChallengeIn, const FString& CodeIn, const FString& SessionIdIn, const FString& VerifierIn, const bool ForceCreateAccountIn)
- {
-  //Get Keccak(Challenge + Code)
-  const FHash256 AnswerHash = FHash256::New();
-  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + CodeIn);
-  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
-  answer = "0x" + AnswerHash.ToHex();
-  
-  forceCreateAccount = ForceCreateAccountIn;
-  identityType = EmailType;
-  sessionId = SessionIdIn;
-  verifier = VerifierIn;
- }
-
- void InitForGuest(const FString& ChallengeIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
- {
-  //Get Keccak(Challenge + SessionId)
-  const FHash256 AnswerHash = FHash256::New();
-  const FUnsizedData EncodedAnswerData = StringToUTF8(ChallengeIn + SessionIdIn);
-  Keccak256::getHash(EncodedAnswerData.Arr.Get()->GetData(), EncodedAnswerData.GetLength(), AnswerHash.Ptr());
-  answer = "0x" + AnswerHash.ToHex();
-
-  forceCreateAccount = ForceCreateAccountIn;
-  identityType = GuestType;
-  sessionId = SessionIdIn;
-  verifier = SessionIdIn;
- }
- 
- void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
- {
-  //Get Keccak(IdToken)
-  const FHash256 PreTokenHash = FHash256::New();
-  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
-  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
-  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
-
-  forceCreateAccount = ForceCreateAccountIn;
-  answer = IdTokenIn;
-  identityType = OIDCType;
-  sessionId = SessionIdIn;
-  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
- }
-
- void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn, const bool ForceCreateAccountIn)
- {
-  //Get Keccak(SessionTicketIn)
-  const FHash256 PreTicketHash = FHash256::New();
-  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
-  Keccak256::getHash(EncodedTicketData.Arr.Get()->GetData(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
-  const FString TicketHash = "0x" + PreTicketHash.ToHex();
-
-  forceCreateAccount = ForceCreateAccountIn;
-  answer = SessionTicketIn;
-  identityType = PlayFabType;
-  sessionId = SessionIdIn;
-  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
- }
-
- virtual FString GetJson() const override
- {
-  return "";
- }
-};
-
-USTRUCT()
-struct SEQUENCEPLUGIN_API FInitiateAuthData : public FGenericData
-{
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString identityType = "";
- UPROPERTY()
- FString sessionId = "";
- UPROPERTY()
- FString verifier = "";
-
- FInitiateAuthData()
- {
-  Operation = InitiateAuthOP;
- }
-
- void InitForEmail(const FString& SessionIdIn, const FString& EmailIn)
- {
-  sessionId = SessionIdIn;
-  identityType = EmailType;
-  verifier = EmailIn + ";" + SessionIdIn;
- }
-
- void InitForGuest(const FString& SessionIdIn)
- {
-  sessionId = SessionIdIn;
-  identityType = GuestType;
-  verifier = SessionIdIn;
- }
-
- void InitForOIDC(const FString& IdTokenIn, const FString& SessionIdIn)
- {
-  const FHash256 PreTokenHash = FHash256::New();
-  const FUnsizedData EncodedTokenData = StringToUTF8(IdTokenIn);
-  Keccak256::getHash(EncodedTokenData.Ptr(), EncodedTokenData.GetLength(), PreTokenHash.Ptr());
-  const FString IdTokenHash = "0x" + PreTokenHash.ToHex();
-  
-  identityType = OIDCType;
-  sessionId = SessionIdIn;
-  verifier = IdTokenHash + ";" + FString::Printf(TEXT("%lld"),USequenceSupport::GetInt64FromToken(IdTokenIn, "exp"));
- }
-
- void InitForPlayFab(const FString& SessionTicketIn, const FString& SessionIdIn)
- {
-  const FHash256 PreTicketHash = FHash256::New();
-  const FUnsizedData EncodedTicketData = StringToUTF8(SessionTicketIn);
-  Keccak256::getHash(EncodedTicketData.Ptr(), EncodedTicketData.GetLength(), PreTicketHash.Ptr());
-  const FString TicketHash = "0x" + PreTicketHash.ToHex();
-  
-  identityType = PlayFabType;
-  sessionId = SessionIdIn;
-  verifier = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID) + "|" + TicketHash;
  }
 
  virtual FString GetJson() const override

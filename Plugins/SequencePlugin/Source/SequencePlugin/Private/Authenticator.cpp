@@ -569,6 +569,8 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 
 	if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
+		//Move the update with stored session wallet to a local level
+		//Update the get wallet address to a local level within RPC Manager as well.
 		this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 		this->SequenceRPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnSuccess, OnFailure);
 	}
