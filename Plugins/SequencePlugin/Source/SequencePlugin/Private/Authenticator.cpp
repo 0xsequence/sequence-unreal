@@ -79,6 +79,13 @@ void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 #endif
 }
 
+bool UAuthenticator::ReadAndResetIsForcing()
+{
+	const bool Cached_Force_State = this->IsForcing;
+	this->IsForcing = false;
+	return Cached_Force_State;
+}
+
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
@@ -214,7 +221,7 @@ void UAuthenticator::CallFederateOrForce(const FFederationSupportData& Federatio
 	}
 }
 
-void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
+void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
@@ -236,7 +243,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 					}
 					else
 					{
-						SocialLogin(Token);
+						SocialLogin(Token, this->ReadAndResetIsForcing());
 					}
 					return;
 				}//find id_token
@@ -245,8 +252,9 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl) const
 	}//parse out ?
 }
 
-void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type)
+void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
 {
+	this->IsForcing = ForceCreateAccountIn;
 	this->IsFederating = false;
 	this->InitiateMobileSSO_Internal(Type);
 }
@@ -280,7 +288,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
+void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn)
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -296,15 +304,17 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		this->IsFederatingSessionInUse = true;
 		this->CallFederateOrForce(FederationData);
 	};
 	
 	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure, OnFederationRequired);
+	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired);
 }
 
-void UAuthenticator::EmailLogin(const FString& EmailIn)
+void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn)
 {
+	this->IsForcing = ForceCreateAccountIn;
 	this->IsFederating = false;
 	
 	const TFunction<void()> OnSuccess = [this]
@@ -339,9 +349,9 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
-void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
-	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
@@ -357,11 +367,12 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->IsFederatingSessionInUse = true;
 			this->CallFederateOrForce(FederationData);
 		};
 
 		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -373,9 +384,9 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
-	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
+	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
@@ -391,11 +402,12 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->IsFederatingSessionInUse = true;
 			this->CallFederateOrForce(FederationData);
 		};
 
 		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -524,8 +536,8 @@ void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, cons
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
-{
+void UAuthenticator::EmailLoginCode(const FString& CodeIn)
+{	
 	if (this->IsFederating)
 	{
 		const TFunction<void()> OnSuccess = [this]()
@@ -565,10 +577,11 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->IsFederatingSessionInUse = true;
 			this->CallFederateOrForce(FederationData);
 		};
-	
-		this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure, OnFederationRequired);
+		
+		this->SequenceRPCManager->OpenEmailSession(CodeIn, this->ReadAndResetIsForcing(), OnSuccess, OnFailure, OnFederationRequired);
 	}
 }
 

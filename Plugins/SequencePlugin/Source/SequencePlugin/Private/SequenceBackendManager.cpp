@@ -130,7 +130,7 @@ void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->InitiateMobileSSO(Type);
+		this->Authenticator->InitiateMobileSSO(Type, false);
 	}
 }
 
@@ -150,7 +150,7 @@ void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->SocialLogin(IDTokenIn);
+		this->Authenticator->SocialLogin(IDTokenIn, false);
 	}
 }
 
@@ -158,7 +158,7 @@ void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->EmailLogin(EmailIn);
+		this->Authenticator->EmailLogin(EmailIn, false);
 	}
 }
 
@@ -182,7 +182,7 @@ void ASequenceBackendManager::PlayFabLogin(const FString& UsernameIn, const FStr
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->PlayFabLogin(UsernameIn, PasswordIn);
+		this->Authenticator->PlayFabLogin(UsernameIn, PasswordIn, false);
 	}
 }
 
@@ -190,7 +190,7 @@ void ASequenceBackendManager::PlayFabRegisterAndLogin(const FString& UsernameIn,
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->PlayFabRegisterAndLogin(UsernameIn, EmailIn, PasswordIn);
+		this->Authenticator->PlayFabRegisterAndLogin(UsernameIn, EmailIn, PasswordIn, false);
 	}
 }
 

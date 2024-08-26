@@ -14,6 +14,14 @@
 
 class USequenceRPCManager;
 
+enum ESeqAuthType
+{
+	Normal,//Normal Usage
+	Federation,//Normal Federation Usage
+	FederationInUse,//Federating an Account that's already logged in Usage
+	Force,//Force Create Account Usage
+};
+
 USTRUCT()
 struct SEQUENCEPLUGIN_API FSSOCredentials
 {
@@ -79,11 +87,29 @@ private:
 
 	/**
 	 * Used to change behaviour
-	 * if the user is federating accounts
+	 * if the user is federating accounts (True)
 	 * OR
-	 * if the user is logging in normally
+	 * if the user is logging in normally (False)
 	 */
 	bool IsFederating = false;
+
+	/**
+	 * Used to change behaviour
+	 * If the user is federating an account in Use (True)
+	 * OR
+	 * if the user is logging in normally (False)
+	 */
+	bool IsFederatingSessionInUse = false;
+
+	/**
+	 * Used to change behaviour for account forcing
+	 * 2 Cases where we have to use this:
+	 * 1) Initiate mobile OIDC Auth
+	 * 2) Email Auth
+	 * These 2 calls both are done in an Async manner where cannot directly hand state from the initial call
+	 * to the finalizing call.
+	 */
+	bool IsForcing = false;
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -108,6 +134,13 @@ private:
 	UAuthenticator();
 	
 	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
+
+	/**
+	 * Reads from the IsForcing State and resets it returning the
+	 * UAuthenticator back to its default state
+	 * @return the state read from IsForcing prior to resetting it
+	 */
+	bool ReadAndResetIsForcing();
 public:
 	
 	/**
@@ -126,26 +159,29 @@ public:
 	/**
 	 * Used to initiate mobile Login
 	 * @param Type Type of OIDC to conduct on Mobile
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void InitiateMobileSSO(const ESocialSigninType& Type);
+	void InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn);
 
 	/**
 	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
 	 * @param TokenizedUrl The URL containing an IdToken
 	 */
-	void UpdateMobileLogin(const FString& TokenizedUrl) const;
+	void UpdateMobileLogin(const FString& TokenizedUrl);
 
 	/**
 	 * Used to initiate OIDC login
 	 * @param IDTokenIn OIDC Token granted from login
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void SocialLogin(const FString& IDTokenIn) const;
+	void SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to initiate email login
 	 * @param EmailIn Email
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void EmailLogin(const FString& EmailIn);
+	void EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to login as a Guest into Sequence
@@ -158,21 +194,23 @@ public:
 	 * @param UsernameIn Username
 	 * @param EmailIn Email
 	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to login with PlayFab, Then OpenSession with Sequence
 	 * @param UsernameIn Username
 	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
 	 */
-	void EmailLoginCode(const FString& CodeIn) const;
+	void EmailLoginCode(const FString& CodeIn);
 
 	/**
 	 * Used To Federate an Email (WIP)

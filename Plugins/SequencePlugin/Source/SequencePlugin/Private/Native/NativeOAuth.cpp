@@ -44,7 +44,7 @@ namespace NativeOAuth
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
 		UAuthenticator * CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->SocialLogin(token);
+			CallbackLcl->SocialLogin(token, false);//this could be a problem for account federation
 		});
 	}
 	

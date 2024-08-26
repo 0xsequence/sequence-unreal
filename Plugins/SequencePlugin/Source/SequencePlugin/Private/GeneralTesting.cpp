@@ -318,7 +318,7 @@ void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
 	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
 	//Authenticator->PlayFabRegisterAndLogin(TEXT("TBPTest1"), TEXT("calvinvermeulen18@gmail.com"), TEXT("Ac-123Bd-456#!ef"));
-	Authenticator->PlayFabLogin(TEXT("TBPTest1"), TEXT("Ac-123Bd-456#!ef"));
+	Authenticator->PlayFabLogin(TEXT("TBPTest1"), TEXT("Ac-123Bd-456#!ef"), false);
 	//Authenticator->GuestLogin(false);
 }
 
