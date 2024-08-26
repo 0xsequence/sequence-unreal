@@ -252,6 +252,11 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 	}//parse out ?
 }
 
+void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
+{
+	this->SocialLogin(IdTokenIn, this->ReadAndResetIsForcing());
+}
+
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
 {
 	this->IsForcing = ForceCreateAccountIn;

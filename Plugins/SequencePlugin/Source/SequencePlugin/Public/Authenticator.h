@@ -170,6 +170,12 @@ public:
 	void UpdateMobileLogin(const FString& TokenizedUrl);
 
 	/**
+	 * Internal Mobile Login Call. Used to complete mobile Login once an IdToken has been received
+	 * @param IdTokenIn IdToken Received from mobile login
+	 */
+	void UpdateMobileLogin_IdToken(const FString& IdTokenIn);
+
+	/**
 	 * Used to initiate OIDC login
 	 * @param IDTokenIn OIDC Token granted from login
 	 * @param ForceCreateAccountIn Force create account if it already exists
