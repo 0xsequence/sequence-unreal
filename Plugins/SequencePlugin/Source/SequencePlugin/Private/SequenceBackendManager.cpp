@@ -60,6 +60,18 @@ void ASequenceBackendManager::CallShowFederationFailure(const FString& Error)
 	}
 }
 
+void ASequenceBackendManager::CallShowFederateOrForce(const FFederationSupportData& FederationData)
+{
+	if (this->ShowFederateOrForceDelegate.IsBound())
+	{
+		this->ShowFederateOrForceDelegate.Broadcast(FederationData);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederateOrForceDelegate]"));
+	}
+}
+
 // Sets default values
 ASequenceBackendManager::ASequenceBackendManager()
 {
@@ -80,6 +92,7 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 	this->Authenticator->FederateSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowFederationSuccess);
 	this->Authenticator->FederateFailure.AddDynamic(this, &ASequenceBackendManager::CallShowFederationFailure);
+	this->Authenticator->FederateOrForce.AddDynamic(this, &ASequenceBackendManager::CallShowFederateOrForce);
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]

@@ -3,10 +3,91 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Sequence/FeeOption.h"
+#include "Sequence/SequenceFederationSupport.h"
 #include "SequenceResponseIntent.generated.h"
 
-//FederateAccount//
-//{"response":{"code":"accountFederated","data":{"account":{"id":"","type":"","issuer":"","email":""}}}}
+//Error Response//
+//{"error":"EmailAlreadyInUse","code":7000,"msg":"Could not create account as the email is already in use","cause":"OIDC|testbed995@gmail.com|https://accounts.google.com","status":409}
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FErrorResponse
+{
+	GENERATED_USTRUCT_BODY()
+
+	FString Error = "";
+	int32 Code = -1;
+	FString Msg = "";
+	FString Cause = "";
+	int32 Status = -1;
+
+	bool IsEmailInUseError() const
+	{
+		return Error.Equals(TEXT("EmailAlreadyInUse"),ESearchCase::IgnoreCase);
+	}
+
+	FString ParseCauseForRequiredEmail() const
+	{
+		FString Email = "";
+
+		TArray<FString> PreParsed;
+		Cause.ParseIntoArray(PreParsed,TEXT(","));
+
+		for (FString Entry : PreParsed)
+		{
+			TArray<FString> PostParsed;
+			Entry.ParseIntoArray(PostParsed,TEXT("|"));
+
+			if (PostParsed.Num() >= 3)
+			{
+				Email = PostParsed[1];
+				break;
+			}
+		}
+		
+		return Email;
+	}
+	
+	TArray<TEnumAsByte<ESequenceLoginType>> ParseCauseForAccountUsage() const
+	{
+		TArray<TEnumAsByte<ESequenceLoginType>> AccountTypes;
+
+		TArray<FString> PreParsed;
+		Cause.ParseIntoArray(PreParsed,TEXT(","));
+
+		for (FString Entry : PreParsed)
+		{
+			TArray<FString> PostParsed;
+			Entry.ParseIntoArray(PostParsed,TEXT("|"));
+			if (PostParsed.Num() >= 3)
+			{
+				if (PostParsed[0].Equals(TEXT("Email"),ESearchCase::IgnoreCase))
+				{
+					AccountTypes.Add(ESequenceLoginType::Email);
+				}
+				else if (PostParsed[0].Equals(TEXT("PlayFab"), ESearchCase::IgnoreCase))
+				{
+					AccountTypes.Add(ESequenceLoginType::PlayFab);
+				}
+				else if (PostParsed[0].Equals(TEXT("OIDC"),ESearchCase::IgnoreCase))
+				{
+					//Now we check which type of OIDC
+					if (PostParsed[2].Contains(TEXT("apple"),ESearchCase::IgnoreCase))
+					{
+						AccountTypes.Add(ESequenceLoginType::OIDC_Apple);
+					}
+					else if (PostParsed[2].Contains(TEXT("google"),ESearchCase::IgnoreCase))
+					{
+						AccountTypes.Add(ESequenceLoginType::OIDC_Google);
+					}
+				}
+			}
+		}
+		
+		return AccountTypes;
+	}
+};
+
+//Error Response//
 
 USTRUCT()
 struct SEQUENCEPLUGIN_API FFederateAccountResponse_Account

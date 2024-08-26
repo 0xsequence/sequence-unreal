@@ -11,6 +11,7 @@
 #include "Types/Types.h"
 #include "Types/Wallet.h"
 #include "Util/Async.h"
+#include "Sequence/SequenceFederationSupport.h"
 #include "SequenceRPCManager.generated.h"
 
 /**
@@ -40,7 +41,7 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
-	inline const static FString WaaSVersion = "1.0.0";//Still need to address this properly
+	inline const static FString WaaSVersion = "1.0.0";
 	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
 	
@@ -188,7 +189,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 
 	/**
 	 * Used to Login with OIDC (Social Signin)
@@ -197,7 +198,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 
 	/**
 	 * Used to Authenticate a User via PlayFab
@@ -206,7 +207,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 	
 	//Auth Calls//
 

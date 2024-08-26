@@ -8,6 +8,7 @@
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
+#include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
 #include "Authenticator.generated.h"
 
@@ -37,7 +38,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateOrForce);//Need to forward the federation types we want to allow in a TArray<>
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederationSupportData&, FederationData);
 
 /**
  * 
@@ -57,6 +58,8 @@ public:
 	FOnFederateSuccess FederateSuccess;
 	UPROPERTY()
 	FOnFederateFailure FederateFailure;
+	UPROPERTY()
+	FOnFederateOrForce FederateOrForce;
 	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
@@ -64,6 +67,7 @@ private://Broadcast handlers
 	void CallAuthSuccess() const;
 	void CallFederateSuccess() const;
 	void CallFederateFailure(const FString& ErrorMessageIn) const;
+	void CallFederateOrForce(const FFederationSupportData& FederationData) const;
 //vars
 private:
 	UPROPERTY()

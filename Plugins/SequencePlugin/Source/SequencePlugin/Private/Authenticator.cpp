@@ -198,7 +198,19 @@ void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess], Captured Error Message: %s"), *ErrorMessageIn);
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateFailure], Captured Error Message: %s"), *ErrorMessageIn);
+	}
+}
+
+void UAuthenticator::CallFederateOrForce(const FFederationSupportData& FederationData) const
+{
+	if (this->FederateOrForce.IsBound())
+	{
+		this->FederateOrForce.Broadcast(FederationData);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateOrForce]"));
 	}
 }
 
@@ -280,9 +292,15 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn) const
 		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
+
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		this->CallFederateOrForce(FederationData);
+	};
 	
 	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure);
+	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, false, OnSuccess, OnFailure, OnFederationRequired);
 }
 
 void UAuthenticator::EmailLogin(const FString& EmailIn)
@@ -336,8 +354,14 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 			this->CallAuthFailure();
 		};
 
+		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->CallFederateOrForce(FederationData);
+		};
+
 		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -364,8 +388,14 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 			this->CallAuthFailure();
 		};
 
+		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->CallFederateOrForce(FederationData);
+		};
+
 		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure);
+		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,false, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -531,8 +561,14 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn) const
 			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 			this->CallAuthFailure();
 		};
+
+		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			this->CallFederateOrForce(FederationData);
+		};
 	
-		this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure);
+		this->SequenceRPCManager->OpenEmailSession(CodeIn, false, OnSuccess, OnFailure, OnFederationRequired);
 	}
 }
 
