@@ -86,6 +86,24 @@ bool UAuthenticator::ReadAndResetIsForcing()
 	return Cached_Force_State;
 }
 
+void UAuthenticator::CheckAndFederateSessionInUse()
+{
+	if (this->IsFederatingSessionInUse)
+	{
+		this->IsFederatingSessionInUse = false;
+		FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials();
+
+		if (StoredCredentials.GetValid())
+		{
+			this->SequenceRPCManager->FederateSessionInUse(StoredCredentials.GetCredentials().GetWalletAddress());
+		}
+		else
+		{
+			this->CallFederateFailure(TEXT("Failed to Federate Session in use"));
+		}
+	}
+}
+
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
@@ -254,7 +272,14 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
 {
-	this->SocialLogin(IdTokenIn, this->ReadAndResetIsForcing());
+	if (this->IsFederating)
+	{
+		FederateOIDCIdToken(IdTokenIn);
+	}
+	else
+	{
+		SocialLogin(IdTokenIn, this->ReadAndResetIsForcing());
+	}
 }
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
@@ -298,6 +323,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		this->InitializeSequence(Credentials);
+		this->CheckAndFederateSessionInUse();
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -361,6 +387,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
 			this->InitializeSequence(Credentials);
+			this->CheckAndFederateSessionInUse();
 		};
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
@@ -396,6 +423,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
 		{
 			this->InitializeSequence(Credentials);
+			this->CheckAndFederateSessionInUse();
 		};
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
@@ -571,6 +599,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 		const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 		{
 			this->InitializeSequence(Credentials);
+			this->CheckAndFederateSessionInUse();
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)

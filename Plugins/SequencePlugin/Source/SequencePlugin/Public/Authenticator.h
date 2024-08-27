@@ -106,8 +106,8 @@ private:
 	 * 2 Cases where we have to use this:
 	 * 1) Initiate mobile OIDC Auth
 	 * 2) Email Auth
-	 * These 2 calls both are done in an Async manner where cannot directly hand state from the initial call
-	 * to the finalizing call.
+	 * These 2 calls both are done in an Async manner where we cannot directly hand state from the initial call
+	 * to the final call.
 	 */
 	bool IsForcing = false;
 	
@@ -141,6 +141,13 @@ private:
 	 * @return the state read from IsForcing prior to resetting it
 	 */
 	bool ReadAndResetIsForcing();
+
+	/**
+	 * Used to check if we are trying to federate a session in use or not,
+	 * If IsFederatingSessionInUse = true, we will attempt to federate it
+	 * If IsFederatingSessionInUse = false, we operate as normal
+	 */
+	void CheckAndFederateSessionInUse();
 public:
 	
 	/**
