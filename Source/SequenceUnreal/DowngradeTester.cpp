@@ -33,7 +33,6 @@ void ADowngradeTester::Authenticate()
 	if (!Credentials.GetValid())
 	{
 		Authenticator->GuestLogin(false);
-		UE_LOG(LogTemp, Display, TEXT("Logged in!"))
 	}
 }
 
