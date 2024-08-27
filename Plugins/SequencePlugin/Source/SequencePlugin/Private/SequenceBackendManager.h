@@ -110,28 +110,28 @@ public:
 		FString GetTransactionHash(FTransaction_FE Transaction);
 
 	UFUNCTION(BlueprintCallable, Category="Login")
-	void InitiateMobileSSO(const ESocialSigninType& Type);
+	void InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		FString GetLoginURL(const ESocialSigninType& Type);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void SocialLogin(const FString& IDTokenIn);
+		void SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void EmailLogin(const FString& EmailIn);
+		void EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void EmailCode(const FString& CodeIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void GuestLogin();
+		void GuestLogin(const bool ForceCreateAccountIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
+		void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
-		void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
+		void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
 		void FederateEmail(const FString& EmailIn) const;
