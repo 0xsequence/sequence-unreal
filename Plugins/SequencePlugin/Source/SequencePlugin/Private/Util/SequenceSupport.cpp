@@ -18,6 +18,16 @@ FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
 	return TEXT("");
 }
 
+FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
+{
+	if (NetworkIdToUrlMap.Contains(NetworkIdIn))
+	{
+		return *NetworkIdToUrlMap.Find(NetworkIdIn);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
+	return TEXT("");
+}
+
 int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 {
 	FString SearchKey = NetworkNameIn.ToLower();
