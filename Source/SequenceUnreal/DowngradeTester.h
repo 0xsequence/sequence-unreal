@@ -7,7 +7,7 @@
 #include "DowngradeTester.generated.h"
 
 UCLASS()
-class SEQUENCEPLUGIN_API ADowngradeTester : public APawn
+class SEQUENCEUNREAL_API ADowngradeTester : public APawn
 {
 	GENERATED_BODY()
 
