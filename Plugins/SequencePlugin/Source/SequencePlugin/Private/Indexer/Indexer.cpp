@@ -4,6 +4,7 @@
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
+#include "Util/SequenceSupport.h"
 #include "HttpManager.h"
 
 UIndexer::UIndexer(){}
@@ -29,7 +30,7 @@ FString UIndexer::Url(const int64& ChainID,const FString& EndPoint) const
 FString UIndexer::HostName(const int64 ChainID)
 {
 	FString Hostname = "https://";
-	Hostname.Append(USequenceSupport::GetNetworkName(ChainID));
+	Hostname.Append(USequenceSupport::GetNetworkNameForUrl(ChainID));
 	Hostname.Append("-indexer.sequence.app");
 	return Hostname;
 }
@@ -39,6 +40,7 @@ FString UIndexer::HostName(const int64 ChainID)
 */
 void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	UE_LOG(LogTemp, Display, TEXT("Url: %s"), *this->Url(ChainID,Endpoint));
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
 	
 	HTTP_Post_Req->SetVerb("POST");

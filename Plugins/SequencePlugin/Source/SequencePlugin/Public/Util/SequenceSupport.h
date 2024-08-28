@@ -47,6 +47,36 @@ class SEQUENCEPLUGIN_API USequenceSupport : public UObject
 private:
 	//Conversion maps for Network Id's and names
 	//when indexing on names compress spaces and to lower
+
+	static inline TMap<int64, FString> NetworkIdToUrlMap = {
+		FIdName(1,TEXT("mainnet")),//good
+		FIdName(10,TEXT("optimism")),//good
+		FIdName(56,TEXT("bsc")),//good
+		FIdName(100,TEXT("gnosis")),//good
+		FIdName(137,TEXT("polygon")),//good
+		FIdName(1101,TEXT("polygon-zkevm")),//good
+		FIdName(3776,TEXT("astar-zkevm")),//good
+		FIdName(8453,TEXT("base")),//good
+		FIdName(19011,TEXT("homeverse")),//good
+		FIdName(42161,TEXT("arbitrum")),//good
+		FIdName(42170,TEXT("arbitrum-nova")),
+		FIdName(43114,TEXT("avalanche")),
+		FIdName(81457,TEXT("blast")),
+		FIdName(660279,TEXT("xai")),
+		FIdName(97,TEXT("bsc-testnet")),
+		FIdName(1993,TEXT("b3-sepolia")),
+		FIdName(2730,TEXT("xr-sepolia")),
+		FIdName(33111,TEXT("apechain-testnet")),
+		FIdName(40875,TEXT("homeverse-testnet")),
+		FIdName(43113,TEXT("avalanche-testnet")),
+		FIdName(80002,TEXT("amoy")),
+		FIdName(84532,TEXT("base-sepolia")),
+		FIdName(421614,TEXT("arbitrum-sepolia")),//good
+		FIdName(6038361,TEXT("astar-zkyoto")),
+		FIdName(11155111,TEXT("sepolia")),
+		FIdName(11155420,TEXT("optimism-sepolia")),
+		FIdName(168587773,TEXT("blast-sepolia")),
+		FIdName(37714555429,TEXT("xai-sepolia"))};
 	
 	static inline TMap<int64, FString> NetworkIdToNameMap = {
 		FIdName(1,TEXT("Ethereum")),
@@ -117,6 +147,8 @@ public:
 	 * @return The matching network name, OR an empty FString if nothing was found
 	 */
 	static FString GetNetworkName(const int64 NetworkIdIn);
+
+	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
 
 	/**
 	 * Gets the associated Network Id with the given Network Name
