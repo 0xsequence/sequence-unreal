@@ -14,12 +14,17 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 {
 	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY()
 	FString Error = "";
+	UPROPERTY()
 	int32 Code = -1;
+	UPROPERTY()
 	FString Msg = "";
+	UPROPERTY()
 	FString Cause = "";
+	UPROPERTY()
 	int32 Status = -1;
-
+	
 	bool IsEmailInUseError() const
 	{
 		return Error.Equals(TEXT("EmailAlreadyInUse"),ESearchCase::IgnoreCase);

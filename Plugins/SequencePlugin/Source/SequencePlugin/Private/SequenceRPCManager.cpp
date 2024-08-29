@@ -454,7 +454,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 		else
 		{
 			const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Response);
-
+			UE_LOG(LogTemp, Display, TEXT("Error: %s"), *USequenceSupport::StructToString(ErrorResponse));
 			if (ErrorResponse.IsEmailInUseError())
 			{
 				this->Cached_OpenSessionData = OpenSessionData;
