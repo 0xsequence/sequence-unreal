@@ -1,4 +1,4 @@
-Sequence Unreal SDK
+Sequence Unreal SDK (GUILess version)
 ===================
 
 This plugin requires the modern xcode setting to be enabled to build on MacOS.
@@ -108,84 +108,6 @@ Be sure what ever key data you place in **[FallbackEncryptionKey]** is of hex fo
 In the event unrecognized symbols are seen the engine will not load the .ini file.
 
 ***
-
-## Getting Started With the Builtin GUI
-
-1) Once you have the `SequencePlugin` folder, you'll need to go to your project directory and create a `Plugins` folder in it,
-   then copy over the `SequencePlugin` folder into the `Plugins` folder. If a `Plugins` folder already exists just copy the `SequencePlugin` folder into it.
-
-2) Launch your project, then allow it to update the UProject Settings.
-
-3) To find the `SequencePlugin` content folder in your content drawer enable view plugin content
-
-4) If you wish to use the in built sequence UI for login you have to do the following:
-
-### For Blueprints
-
-1) Create a blueprint Actor (if you wish to spawn it your self) Or Pawn (if you wish to use it with a Gamemode)
-
-2) Attach the **[AC_SequencePawn_Component]** to the Blueprint you created via the add components section.
-
-[Where to find Components window](ReadmeImages/Example_AddComponent.PNG)
-
-3) Then you can setup you blueprint like so to start utilizing the SequenceAPI
-
-[How to setup the Blueprint](ReadmeImages/Example_BP_Setup.PNG)
-
-Note: Auth Success Forwarder will let you know when the system is ready to be used
-
-4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this
-   process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
-   your scene if it's just an actor Blueprint.
-
-### For C++
-
-1) Create a C++ Class that Inherits from **[Pawn]** (If you wish to use it with Gamemode) or **[Actor]** (If you'll be spawning it yourself)
-   If you don't know how to do this refer to the doc [Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2),
-   for the purpose of these docs I'll refer to the C++ Class created here as the **[C++ Parent]**
-
-2) In **[C++ Parent]** .h file include the Header **[SequenceAPI.h]** this will allow you to access the **[USequenceWallet]**
-
-3) Create a BlueprintCallable function within the **[C++ Parent]**
-
-4) Create a Blueprint that inherits from **[C++ Parent]**, Then Attach the following Actor component to it **[AC_SequencePawn_Component]**. For in depth specifics on how to setup this blueprint
-   please refer to the demonstration BP Graph [Image](ReadmeImages/Example_BP_Setup.PNG), this is the BP Graph of **[BP_CustomSpectatorPawn]** contained within the plugins content folder, & serves as a template for your
-   own Blueprint graph.
-
--  For those who aren't familiar with Unreal's Blueprint system you can create a blueprint by right clicking in the content
-   drawer, then click blueprint class. Within the blueprint class selector select the All Classes dropdown & search  
-   for your **[C++ Parent]** class you just made.
-
-Note: You can simply duplicate the **[BP_CustomSpectatorPawn]** (if you do this be sure to move the duplicate outside
-of the plugin folder into YOUR content folder, Otherwise your work could be lost during an update to the plugin).
-
-5) If your **[C++ Parent]** was a pawn, you can set it to be the default pawn in your Gamemode and it will spawn on BeginPlay,
-   If your **[C++ Parent]** was an Actor, you can manually add it to the scene.
-   In both cases the UI will show up on BeginPlay.
-
-Note: If you don't know how to modify / update the Gamemode / Gamemode settings go to ProjectSettings -> Maps & Modes, From there
-you can set the Gamemode and update the default pawn. Or in the case you wish to use our Gamemode for testing it's
-**[GM_Sequence]** You'll just need to set your pawn as the default pawn.
-
-If you don't know what some of the Entities referred to above are / how they work in unreal please refer to the following Docs:
-To learn more about GameModes and GameMode state refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/game-mode-and-game-state-in-unreal-engine?application_version=5.2)
-To learn more about Pawns refer to [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/pawn-in-unreal-engine?application_version=5.2)
-[Pawns](https://docs.unrealengine.com/4.27/en-US/InteractiveExperiences/Framework/Pawn/)
-[Components](https://dev.epicgames.com/documentation/en-us/unreal-engine/components-in-unreal-engine?application_version=5.2)
-[PlayerController](https://dev.epicgames.com/documentation/en-us/unreal-engine/player-controllers-in-unreal-engine?application_version=5.2)
-[UI in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-widgets-in-unreal-engine?application_version=5.2)
-[C++ & Blueprints](https://dev.epicgames.com/documentation/en-us/unreal-engine/cpp-and-blueprints-example?application_version=5.2)
-[Creating C++ Classes in Unreal](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-the-cplusplus-class-wizard-in-unreal-engine?application_version=5.2)
-
-##### Take away notes on setup
-This isn't the only way you can setup the Builtin GUI, this is here as a quick start reference for those
-just getting started with unreal.
-
-### Customizing the builtin GUI
-
-In the folder located at All/Plugins/SequencePlugin Content/Core/Style you'll find a struct F_SequenceUIStyle,
-In the default values section of this struct you'll be able to update the colours and images displayed throughout the UI.
-For beta we currently only read from Sequence_Style_Dark_Mode
 
 ### Custom UI Integration
 
