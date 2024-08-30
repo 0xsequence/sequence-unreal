@@ -149,6 +149,19 @@ FString USequenceRPCManager::BuildRegisterUrl() const
 	return this->WaaSSettings.GetRPCServer() + this->UrlRegisterPath;
 }
 
+void USequenceRPCManager::CheckAndUpdateSessionFromPreserveSessionWallet()
+{
+	//We need to know if we are using a random session wallet or the current one!
+	if (this->PreserveSessionWallet)
+	{
+		this->PreserveSessionWallet = false;
+	}
+	else
+	{
+		this->UpdateWithRandomSessionWallet();
+	}
+}
+
 void USequenceRPCManager::UpdateWithRandomSessionWallet()
 {	
 	this->SessionWallet = UWallet::Make();
@@ -350,8 +363,17 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 	}
 }
 
-void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::InitEmailAuth(const bool IsFederating, const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	if (IsFederating)
+	{
+		this->UpdateWithStoredSessionWallet();
+	}
+	else
+	{
+		this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	}
+	
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
@@ -377,6 +399,7 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 
 void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->UpdateWithRandomSessionWallet();
 	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -459,6 +482,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 			{
 				this->Cached_OpenSessionData = OpenSessionData;
 				const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+				this->PreserveSessionWallet = true;
 				OnFederationRequired(FederationData);
 			}
 			else
@@ -474,6 +498,8 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 
 void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	
 	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired](const FString& InitResponse)
 	{		
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -511,6 +537,7 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 					{
 						this->Cached_OpenSessionData = OpenSessionData;
 						const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+						this->PreserveSessionWallet = true;
 						OnFederationRequired(FederationData);
 					}
 					else
@@ -537,6 +564,8 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	
 	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired] (const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -574,6 +603,7 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 					{
 						this->Cached_OpenSessionData = OpenSessionData;
 						const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+						this->PreserveSessionWallet = true;
 						OnFederationRequired(FederationData);
 					}
 					else
@@ -598,8 +628,9 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->UpdateWithStoredSessionWallet();
 	const TSuccessCallback<FString> OnFederateResponse = [OnSuccess, OnFailure](const FString& FederateResponse)
 	{
 		const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
@@ -620,8 +651,9 @@ void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FS
 	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->UpdateWithStoredSessionWallet();
 	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, IdTokenIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -659,8 +691,9 @@ void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FSt
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->UpdateWithStoredSessionWallet();
 	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, SessionTicketIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -698,8 +731,25 @@ void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const 
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn)
+void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	const TSuccessCallback<FString> OnFederateResponse = [this, OnSuccess, OnFailure](const FString& FederateResponse)
+	{
+		const FFederateAccountResponse FederateAccountResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+		if (FederateAccountResponse.IsValid())
+		{
+			OnSuccess();
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail, FederateResponse));
+		}
+		
+		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *FederateResponse);
+	};
+	
 	FFederateAccountData FederateAccountData;
 	FederateAccountData.InitForFederation(this->Cached_OpenSessionData, WalletIn);
+	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccountData),OnFederateResponse, OnFailure);
 }

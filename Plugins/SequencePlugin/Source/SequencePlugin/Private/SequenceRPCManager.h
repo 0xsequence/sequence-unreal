@@ -41,6 +41,11 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
+	/**
+	 * If this flag is enabled, we will preserve the SessionWallet for the next request
+	 */
+	bool PreserveSessionWallet = false;
+	
 	inline const static FString WaaSVersion = "1.0.0";
 	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
@@ -76,14 +81,19 @@ private:
 	FString BuildRegisterUrl() const;
 	
 	//Url Builder//
+
+	//Session Wallet Management Code//
+
+	void CheckAndUpdateSessionFromPreserveSessionWallet();
+	
+	//Session Wallet Management Code//
 	
 	//RPC Caller//
 
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//RPC Caller//
-	
-public:
+
 	/**
 	 * Updates the SessionWallet with a random one
 	 */
@@ -94,6 +104,8 @@ public:
 	 * does nothing if credentials on disk are invalid
 	 */
 	void UpdateWithStoredSessionWallet();
+	
+public:
 
 	/**
 	 * Allows you to create a new Manager with a session wallet that's either random or set by on disk credentials
@@ -168,11 +180,12 @@ public:
 
 	/**
 	 * Used to Initiate Email based Login
+	 * @param IsFederating Used to determine which end point of email Auth we are using
 	 * @param EmailIn Email to Login with
 	 * @param OnSuccess If InitiateAuth Succeeds, this will fire and indicate we need a Code to finish Email Login
 	 * @param OnFailure If something went wrong
 	 */
-	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	void InitEmailAuth(const bool IsFederating, const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Used to open a guest session with the SequenceApi
@@ -213,13 +226,13 @@ public:
 
 	//Federation Calls//
 
-	void FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void FederateSessionInUse(const FString& WalletIn);
+	void FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Federation Calls//
 	

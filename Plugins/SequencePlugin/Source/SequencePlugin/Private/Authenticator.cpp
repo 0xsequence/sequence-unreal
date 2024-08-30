@@ -95,7 +95,18 @@ void UAuthenticator::CheckAndFederateSessionInUse()
 
 		if (StoredCredentials.GetValid())
 		{
-			this->SequenceRPCManager->FederateSessionInUse(StoredCredentials.GetCredentials().GetWalletAddress());
+			const TFunction<void()> OnSuccess = [this]()
+			{
+				this->CallFederateSuccess();
+			};
+
+			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+			{
+				this->CallFederateFailure(Error.Message);
+			};
+
+			
+			this->SequenceRPCManager->FederateSessionInUse(StoredCredentials.GetCredentials().GetWalletAddress(), OnSuccess, OnFailure);
 		}
 		else
 		{
@@ -332,14 +343,13 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 		this->CallAuthFailure();
 	};
 
-	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this, IDTokenIn](const FFederationSupportData& FederationData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
 		this->IsFederatingSessionInUse = true;
 		this->CallFederateOrForce(FederationData);
 	};
 	
-	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired);
 }
 
@@ -359,8 +369,12 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 		this->CallAuthFailure();
 	};
 
-	this->SequenceRPCManager->UpdateWithRandomSessionWallet();	
-	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
+	//How do we know when to keep the existing SessionId and when to load a new one?
+	//We hit forceorfederate state
+	//We need to check what email we are using / what email was used
+	//if they are the same we preserve and federate if it's a federate
+	
+	this->SequenceRPCManager->InitEmailAuth(this->IsFederating, EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
 void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
@@ -375,8 +389,7 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
-
-	this->SequenceRPCManager->UpdateWithRandomSessionWallet();
+	
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
@@ -402,8 +415,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 			this->IsFederatingSessionInUse = true;
 			this->CallFederateOrForce(FederationData);
 		};
-
-		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
+		
 		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
@@ -438,8 +450,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 			this->IsFederatingSessionInUse = true;
 			this->CallFederateOrForce(FederationData);
 		};
-
-		this->SequenceRPCManager->UpdateWithRandomSessionWallet();
+		
 		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 	};
 
@@ -633,9 +644,8 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
-
-	this->SequenceRPCManager->UpdateWithStoredSessionWallet();
-	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
+	
+	this->SequenceRPCManager->InitEmailAuth(this->IsFederating, EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
 void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
@@ -651,10 +661,7 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 	};
 
 	if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
-	{
-		//Move the update with stored session wallet to a local level
-		//Update the get wallet address to a local level within RPC Manager as well.
-		this->SequenceRPCManager->UpdateWithStoredSessionWallet();
+	{		
 		this->SequenceRPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnSuccess, OnFailure);
 	}
 	else
@@ -690,7 +697,6 @@ void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const 
 
 		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
-			this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else
@@ -729,7 +735,6 @@ void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FStri
 
 		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
-			this->SequenceRPCManager->UpdateWithStoredSessionWallet();
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else
