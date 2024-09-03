@@ -29,7 +29,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 	{
 		return Error.Equals(TEXT("EmailAlreadyInUse"),ESearchCase::IgnoreCase);
 	}
-
+	
 	FString ParseCauseForRequiredEmail() const
 	{
 		FString Email = "";
@@ -42,7 +42,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 			TArray<FString> PostParsed;
 			Entry.ParseIntoArray(PostParsed,TEXT("|"));
 
-			if (PostParsed.Num() >= 3)
+			if (PostParsed.Num() >= 2)
 			{
 				Email = PostParsed[1];
 				break;
@@ -63,7 +63,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 		{
 			TArray<FString> PostParsed;
 			Entry.ParseIntoArray(PostParsed,TEXT("|"));
-			if (PostParsed.Num() >= 3)
+			if (PostParsed.Num() >= 2)
 			{
 				if (PostParsed[0].Equals(TEXT("Email"),ESearchCase::IgnoreCase))
 				{
@@ -73,7 +73,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 				{
 					AccountTypes.Add(ESequenceLoginType::PlayFab);
 				}
-				else if (PostParsed[0].Equals(TEXT("OIDC"),ESearchCase::IgnoreCase))
+				else if (PostParsed[0].Equals(TEXT("OIDC"),ESearchCase::IgnoreCase) && PostParsed.Num() >= 3)
 				{
 					//Now we check which type of OIDC
 					if (PostParsed[2].Contains(TEXT("apple"),ESearchCase::IgnoreCase))
