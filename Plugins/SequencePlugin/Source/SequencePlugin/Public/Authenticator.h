@@ -98,6 +98,9 @@ private:
 	 * If the user is federating an account in Use (True)
 	 * OR
 	 * if the user is logging in normally (False)
+	 *
+	 * Only works with Non Guest Login.
+	 * 
 	 */
 	bool IsFederatingSessionInUse = false;
 
@@ -136,11 +139,46 @@ private:
 	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
 
 	/**
+	 * Used to aid in the state management of IsForcing
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @param IsForcingIn Is what we set this->IsForcing to
+	 */
+	void SetIsForcing(const bool IsForcingIn);
+
+	/**
+	 * Used to aid in state management of IsFederating
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @param IsFederatingIn what we set this->IsFederating to
+	 */
+	void SetIsFederating(const bool IsFederatingIn);
+
+	/**
+	 * Used to aid in state management of IsFederatingSessionInUse, Sets it to true
+	 */
+	void SetIsFederatingSessionInUse();
+	
+	/**
 	 * Reads from the IsForcing State and resets it returning the
 	 * UAuthenticator back to its default state
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
 	 * @return the state read from IsForcing prior to resetting it
 	 */
 	bool ReadAndResetIsForcing();
+
+	/**
+	 * Reads from the IsFederating State and resets it returning the
+	 * UAuthenticator back to its default state.
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @return the state read from IsFederating prior to resetting it
+	 */
+	bool ReadAndResetIsFederating();
+
+	/**
+	 * Reads from IsFederatingSessionInUse State and resets it returning the
+	 * UAuthenticator back to its default state
+	 * @return the state read from IsFederatingSessionInUse prior to resetting it
+	 */
+	bool ReadAndResetIsFederatingSessionInUse();
 
 	/**
 	 * Used to check if we are trying to federate a session in use or not,
@@ -149,6 +187,13 @@ private:
 	 */
 	void CheckAndFederateSessionInUse();
 public:
+	
+	/**
+	 * Resets the IsFederatingSessionInUse State to false
+	 * For cases where you don't want to Federate a session in use if the error
+	 * occurs for "EmailAlreadyInUse"
+	 */
+	void ResetFederateSessionInUse();
 	
 	/**
 	 * Sets a custom encryptor
@@ -235,7 +280,7 @@ public:
 	 * Used to Federate an OIDC Login
 	 * @param IdTokenIn OIDC Token To federate
 	 */
-	void FederateOIDCIdToken(const FString& IdTokenIn) const;
+	void FederateOIDCIdToken(const FString& IdTokenIn);
 
 	/**
 	 * Used to initiate OIDC account federation on mobile

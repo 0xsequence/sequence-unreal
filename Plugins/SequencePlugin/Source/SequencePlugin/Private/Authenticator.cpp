@@ -79,6 +79,21 @@ void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 #endif
 }
 
+void UAuthenticator::SetIsForcing(const bool IsForcingIn)
+{
+	this->IsForcing = IsForcing;
+}
+
+void UAuthenticator::SetIsFederating(const bool IsFederatingIn)
+{
+	this->IsFederating = IsFederatingIn;
+}
+
+void UAuthenticator::SetIsFederatingSessionInUse()
+{
+	this->IsFederatingSessionInUse = true;
+}
+
 bool UAuthenticator::ReadAndResetIsForcing()
 {
 	const bool Cached_Force_State = this->IsForcing;
@@ -86,11 +101,24 @@ bool UAuthenticator::ReadAndResetIsForcing()
 	return Cached_Force_State;
 }
 
+bool UAuthenticator::ReadAndResetIsFederating()
+{
+	const bool Cached_Federate_State = this->IsFederating;
+	this->IsFederating = false;
+	return Cached_Federate_State;
+}
+
+bool UAuthenticator::ReadAndResetIsFederatingSessionInUse()
+{
+	const bool Cached_FederateSessionInUse_State = this->IsFederatingSessionInUse;
+	this->IsFederatingSessionInUse = false;
+	return Cached_FederateSessionInUse_State;
+}
+
 void UAuthenticator::CheckAndFederateSessionInUse()
 {
-	if (this->IsFederatingSessionInUse)
+	if (this->ReadAndResetIsFederatingSessionInUse())
 	{
-		this->IsFederatingSessionInUse = false;
 		FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials();
 
 		if (StoredCredentials.GetValid())
@@ -113,6 +141,11 @@ void UAuthenticator::CheckAndFederateSessionInUse()
 			this->CallFederateFailure(TEXT("Failed to Federate Session in use"));
 		}
 	}
+}
+
+void UAuthenticator::ResetFederateSessionInUse()
+{
+	this->IsFederatingSessionInUse = false;
 }
 
 void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
@@ -266,7 +299,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
 					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					if (this->IsFederating)
+					if (this->ReadAndResetIsFederating())
 					{
 						FederateOIDCIdToken(Token);
 					}
@@ -283,7 +316,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 
 void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
 {
-	if (this->IsFederating)
+	if (this->ReadAndResetIsFederating())
 	{
 		FederateOIDCIdToken(IdTokenIn);
 	}
@@ -295,8 +328,8 @@ void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
 
 void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
 {
-	this->IsForcing = ForceCreateAccountIn;
-	this->IsFederating = false;
+	this->SetIsForcing(ForceCreateAccountIn);
+	this->SetIsFederating(false);
 	this->InitiateMobileSSO_Internal(Type);
 }
 
@@ -343,10 +376,10 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 		this->CallAuthFailure();
 	};
 
-	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this, IDTokenIn](const FFederationSupportData& FederationData)
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-		this->IsFederatingSessionInUse = true;
+		this->SetIsFederatingSessionInUse();
 		this->CallFederateOrForce(FederationData);
 	};
 	
@@ -355,8 +388,8 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 
 void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn)
 {
-	this->IsForcing = ForceCreateAccountIn;
-	this->IsFederating = false;
+	this->SetIsForcing(ForceCreateAccountIn);
+	this->SetIsFederating(false);
 	
 	const TFunction<void()> OnSuccess = [this]
 	{
@@ -368,13 +401,8 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure();
 	};
-
-	//How do we know when to keep the existing SessionId and when to load a new one?
-	//We hit forceorfederate state
-	//We need to check what email we are using / what email was used
-	//if they are the same we preserve and federate if it's a federate
 	
-	this->SequenceRPCManager->InitEmailAuth(this->IsFederating, EmailIn.ToLower(),OnSuccess,OnFailure);
+	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
 void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
@@ -412,7 +440,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-			this->IsFederatingSessionInUse = true;
+			this->SetIsFederatingSessionInUse();
 			this->CallFederateOrForce(FederationData);
 		};
 		
@@ -447,7 +475,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-			this->IsFederatingSessionInUse = true;
+			this->SetIsFederatingSessionInUse();
 			this->CallFederateOrForce(FederationData);
 		};
 		
@@ -582,7 +610,7 @@ void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, cons
 
 void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 {	
-	if (this->IsFederating)
+	if (this->ReadAndResetIsFederating())
 	{
 		const TFunction<void()> OnSuccess = [this]()
 		{
@@ -622,7 +650,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-			this->IsFederatingSessionInUse = true;
+			this->SetIsFederatingSessionInUse();
 			this->CallFederateOrForce(FederationData);
 		};
 		
@@ -632,7 +660,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 
 void UAuthenticator::FederateEmail(const FString& EmailIn)
 {
-	this->IsFederating = true;
+	this->SetIsFederating(true);
 
 	const TFunction<void()> OnSuccess = [this]
 	{
@@ -644,11 +672,11 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
-	
-	this->SequenceRPCManager->InitEmailAuth(this->IsFederating, EmailIn.ToLower(),OnSuccess,OnFailure);
+
+	this->SequenceRPCManager->InitEmailFederation(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
+void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 {
 	const TFunction<void()> OnSuccess = [this]()
 	{
@@ -674,7 +702,7 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn) const
 
 void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
 {
-	this->IsFederating = true;
+	this->SetIsFederating(true);
 	this->InitiateMobileSSO_Internal(Type);
 }
 

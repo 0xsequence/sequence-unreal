@@ -363,17 +363,36 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 	}
 }
 
-void USequenceRPCManager::InitEmailAuth(const bool IsFederating, const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	if (IsFederating)
-	{
-		this->UpdateWithStoredSessionWallet();
-	}
-	else
-	{
-		this->CheckAndUpdateSessionFromPreserveSessionWallet();
-	}
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
 	
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
+	{
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
+		
+		if (ParsedInitResponse.IsValid())
+		{
+			this->Cached_Challenge = ParsedInitResponse.Response.Data.Challenge;
+			OnSuccess();
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate Email Auth: %s"), *Response);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+	
+	FInitiateAuthData InitiateAuthData;
+	InitiateAuthData.InitForEmail(this->SessionWallet->GetSessionId(), EmailIn);
+	this->Cached_Verifier = InitiateAuthData.verifier;
+	this->Cached_Email = EmailIn;
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
+}
+
+void USequenceRPCManager::InitEmailFederation(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->UpdateWithStoredSessionWallet();
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);

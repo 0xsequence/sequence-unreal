@@ -180,13 +180,20 @@ public:
 
 	/**
 	 * Used to Initiate Email based Login
-	 * @param IsFederating Used to determine which end point of email Auth we are using
 	 * @param EmailIn Email to Login with
 	 * @param OnSuccess If InitiateAuth Succeeds, this will fire and indicate we need a Code to finish Email Login
 	 * @param OnFailure If something went wrong
 	 */
-	void InitEmailAuth(const bool IsFederating, const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
+	/**
+	 * Used to Initiate Email Base Federation
+	 * @param EmailIn The Email we are Federating with
+	 * @param OnSuccess If InitiateAuth Succeeds, this will fire and indicate we need a Code to finish Email Login
+	 * @param OnFailure If something went wrong
+	 */
+	void InitEmailFederation(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	
 	/**
 	 * Used to open a guest session with the SequenceApi
 	 * @param ForceCreateAccountIn Used to Force Account Creation
