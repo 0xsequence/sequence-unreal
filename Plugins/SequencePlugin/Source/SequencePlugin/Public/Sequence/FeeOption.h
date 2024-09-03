@@ -178,7 +178,8 @@ public:
 		}
 		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
 		{
-			IsMatch = true;
+			IsMatch &= Token.Name.Equals(Fee.Token.Name,ESearchCase::IgnoreCase);
+			IsMatch &= Token.Symbol.Equals(Fee.Token.Symbol,ESearchCase::IgnoreCase);
 		}
 		else
 		{
