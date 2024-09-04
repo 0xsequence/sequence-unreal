@@ -1,12 +1,21 @@
-Sequence Unreal SDK
-===================
+# Sequence Unreal SDK
+This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
+
+## Documentation
+https://docs.sequence.xyz/sdk/unreal/overview
+
+## Requirements
+Unreal 5.2*, 5.3*, and 5.4 (* Supported by Beta 1.0.3 and lower)
+
+## Supported Platforms
+
+- Android
+- iOS
+- PC standalone
+- Mac standalone
 
 This plugin requires the modern xcode setting to be enabled to build on MacOS.
 See [the following link](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-modern-xcode-in-unreal-engine-5.3-and-newer) for more details.
-
-===================
-
-This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Manually Upgrading from previous versions
 IF you are using release Beta_1_0_3 or older please backup the values you stored in `PluginConfig/Config.h` or `Config/Config.h`
