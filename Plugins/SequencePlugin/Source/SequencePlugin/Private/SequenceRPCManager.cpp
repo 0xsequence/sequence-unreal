@@ -646,6 +646,18 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
+void USequenceRPCManager::ForceOpenSessionInUse(const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+
+	const TSuccessCallback<FString> OnOpenResponse = [this](const FString& OnResponse)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *OnResponse);		
+	};
+	
+	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(this->Cached_OpenSessionData), OnOpenResponse, OnFailure);
+}
+
 void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->UpdateWithStoredSessionWallet();

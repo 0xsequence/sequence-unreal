@@ -228,6 +228,8 @@ public:
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
 	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
+
+	void ForceOpenSessionInUse(const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	//Auth Calls//
 
