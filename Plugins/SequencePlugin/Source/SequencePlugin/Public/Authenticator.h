@@ -86,10 +86,12 @@ private:
 	FString StateToken = "";
 
 	/**
-	 * Used to change behaviour
-	 * if the user is federating accounts (True)
-	 * OR
-	 * if the user is logging in normally (False)
+	 * Used to track async behaviour for account federation
+	 * 2 Cases where we have to use this:
+	 * 1) Initiate mobile OIDC Auth
+	 * 2) Email Auth
+	 * These 2 calls both are done in an Async manner where we cannot directly hand state from the initial call
+	 * to the final call.
 	 */
 	bool IsFederating = false;
 
@@ -100,12 +102,11 @@ private:
 	 * if the user is logging in normally (False)
 	 *
 	 * Only works with Non Guest Login.
-	 * 
 	 */
 	bool IsFederatingSessionInUse = false;
 
 	/**
-	 * Used to change behaviour for account forcing
+	 * Used to track async behaviour for account forcing
 	 * 2 Cases where we have to use this:
 	 * 1) Initiate mobile OIDC Auth
 	 * 2) Email Auth

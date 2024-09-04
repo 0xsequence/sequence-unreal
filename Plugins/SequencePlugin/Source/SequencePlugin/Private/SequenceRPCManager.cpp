@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceRPCManager.h"
-
 #include "Authenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
@@ -179,7 +178,6 @@ void USequenceRPCManager::UpdateWithStoredSessionWallet()
 		UE_LOG(LogTemp, Error, TEXT("Stored Credentials are Invalid, Please Login"));
 	}
 }
-
 
 USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
 {
