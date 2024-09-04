@@ -304,6 +304,11 @@ public:
 	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	/**
+	 * Used to force open the last failed OpenSession Attempt
+	 */
+	void ForceOpenLastOpenSessionAttempt() const;
+
+	/**
 	 * Used to get stored credentials from Disk
 	 * @return Stored Credentials
 	 */

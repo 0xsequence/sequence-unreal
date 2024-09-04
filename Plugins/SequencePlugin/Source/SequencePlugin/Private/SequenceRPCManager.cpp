@@ -646,15 +646,35 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::ForceOpenSessionInUse(const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->CheckAndUpdateSessionFromPreserveSessionWallet();
 
-	const TSuccessCallback<FString> OnOpenResponse = [this](const FString& OnResponse)
+	const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure](const FString& OnResponse)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Response: %s"), *OnResponse);		
+		const FSeqOpenSessionResponse OpenSessionResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OnResponse);
+		if (OpenSessionResponse.IsValid())
+		{
+			const FCredentials_BE Credentials(
+				this->SessionWallet->GetWalletPrivateKeyString(),TEXT(""),
+				OpenSessionResponse.Session.Identity.Email,
+				OpenSessionResponse.Response.Data.Wallet,
+				OpenSessionResponse.Session.Identity.Iss,
+				OpenSessionResponse.Session.Identity.Type,
+				OpenSessionResponse.Session.Identity.Sub,
+				OpenSessionResponse.Session.UserId,
+				OpenSessionResponse.GetCreatedAt(),
+				OpenSessionResponse.GetRefreshedAt(),
+				OpenSessionResponse.GetExpiresAt());
+			OnSuccess(Credentials);
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail,OnResponse));
+		}
 	};
-	
+
+	this->Cached_OpenSessionData.forceCreateAccount = true;
 	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(this->Cached_OpenSessionData), OnOpenResponse, OnFailure);
 }
 

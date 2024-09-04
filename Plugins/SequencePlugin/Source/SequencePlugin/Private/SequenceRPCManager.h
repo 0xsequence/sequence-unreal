@@ -229,7 +229,12 @@ public:
 	 */
 	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 
-	void ForceOpenSessionInUse(const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	/**
+	 * Uses cached OpenSession Intent from last failed login attempt to force open a session
+	 * @param OnSuccess Fires If the session was successfully forced open
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
+	void ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	//Auth Calls//
 

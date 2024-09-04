@@ -244,6 +244,14 @@ FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
 	return FCredentials_BE();
 }
 
+void ASequenceBackendManager::ForceOpenLastOpenSessionAttempt()
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->ForceOpenLastOpenSessionAttempt();
+	}
+}
+
 bool ASequenceBackendManager::StoredCredentialsValid()
 {
 	const FStoredCredentials_BE PCred = this->Authenticator->GetStoredCredentials();

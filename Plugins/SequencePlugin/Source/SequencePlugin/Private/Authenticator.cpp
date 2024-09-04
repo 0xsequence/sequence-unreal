@@ -782,6 +782,22 @@ void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FStri
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
+void UAuthenticator::ForceOpenLastOpenSessionAttempt() const
+{
+	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+	};
+
+	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
+		this->CallAuthFailure();
+	};
+	
+	this->SequenceRPCManager->ForceOpenSessionInUse(OnSuccess, OnFailure);
+}
+
 FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
 {	
 	FCredentials_BE CredData;
