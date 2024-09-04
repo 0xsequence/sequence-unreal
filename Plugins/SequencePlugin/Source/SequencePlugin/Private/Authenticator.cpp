@@ -373,6 +373,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
+		this->ResetFederateSessionInUse();
 		this->CallAuthFailure();
 	};
 
@@ -434,6 +435,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			this->ResetFederateSessionInUse();
 			this->CallAuthFailure();
 		};
 
@@ -469,6 +471,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			this->ResetFederateSessionInUse();
 			this->CallAuthFailure();
 		};
 
@@ -644,6 +647,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			this->ResetFederateSessionInUse();
 			this->CallAuthFailure();
 		};
 

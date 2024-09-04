@@ -548,7 +548,7 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 				else
 				{
 					const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(OpenResponse);
-
+					UE_LOG(LogTemp, Display, TEXT("Error: %s"), *USequenceSupport::StructToString(ErrorResponse));
 					if (ErrorResponse.IsEmailInUseError())
 					{
 						this->Cached_OpenSessionData = OpenSessionData;
