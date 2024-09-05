@@ -1,12 +1,21 @@
-Sequence Unreal SDK
-===================
+# Sequence Unreal SDK
+This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
+
+## Documentation
+https://docs.sequence.xyz/sdk/unreal/overview
+
+## Requirements
+Unreal 5.2*, 5.3*, and 5.4 (* Supported by Beta 1.0.3 and lower)
+
+## Supported Platforms
+
+- Android
+- iOS
+- PC standalone
+- Mac standalone
 
 This plugin requires the modern xcode setting to be enabled to build on MacOS.
 See [the following link](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-modern-xcode-in-unreal-engine-5.3-and-newer) for more details.
-
-===================
-
-This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Manually Upgrading from previous versions
 IF you are using release Beta_1_0_3 or older please backup the values you stored in `PluginConfig/Config.h` or `Config/Config.h`
@@ -192,72 +201,144 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
-/*
-   Used to initiate mobile Social Signin
-   (No other calls need to be made to complete mobile SSO)
-*/
-void InitiateMobileSSO(const ESocialSigninType& Type)
 
-/*
-   Optional Call,
-   Used to set a custom encryptor implementation for the Authentication Process
-*/
-void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+	/**
+	 * Resets the IsFederatingSessionInUse State to false
+	 * For cases where you don't want to Federate a session in use if the error
+	 * occurs for "EmailAlreadyInUse"
+	 */
+	void ResetFederateSessionInUse();
+	
+	/**
+	 * Sets a custom encryptor
+	 * @param EncryptorIn Encryptor to use
+	 */
+	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
 
-/*
-   This call is for generating a login URL for Desktop based Social Signin
-   the received URL is fed into a WebBrowser to begin the login process
-*/
-FString GetLoginURL(const ESocialSigninType& Type); 
+	/**
+	 * Used to get an OIDC Login Url
+	 * @param Type Type of OIDC Url need
+	 * @return An OIDC login Url of the specified Type
+	 */
+	FString GetSigninURL(const ESocialSigninType& Type) const;
 
-/*
-   This is call is for undergoing social login once an ID_Token has been collected.
-*/
-void SocialLogin(const FString& IDTokenIn);
+	/**
+	 * Used to initiate mobile Login
+	 * @param Type Type of OIDC to conduct on Mobile
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn);
 
-/*
-   This Call is made after you've collected the email address from the Users in the UI
-   The Delegate **[AuthRequiresCode]** will fire when a code is ready to be received
-   by the UAuthenticator
-*/
-void EmailLogin(const FString& EmailIn);
+	/**
+	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
+	 * @param TokenizedUrl The URL containing an IdToken
+	 */
+	void UpdateMobileLogin(const FString& TokenizedUrl);
 
-/*
-   This is call is made after the Delegate **[AuthRequiresCode]** is fired
-   The Code collected from the User in the GUI is sent in via this call
-*/
-void EmailCode(const FString& CodeIn);
+	/**
+	 * Internal Mobile Login Call. Used to complete mobile Login once an IdToken has been received
+	 * @param IdTokenIn IdToken Received from mobile login
+	 */
+	void UpdateMobileLogin_IdToken(const FString& IdTokenIn);
 
-/**
- * Used to login as a Guest into Sequence
- * @param ForceCreateAccountIn Force create account if it already exists
- */
-void GuestLogin(const bool ForceCreateAccountIn) const;
+	/**
+	 * Used to initiate OIDC login
+	 * @param IDTokenIn OIDC Token granted from login
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn);
 
-/**
- * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
- * @param UsernameIn Username
- * @param EmailIn Email
- * @param PasswordIn Password
- */
-void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+	/**
+	 * Used to initiate email login
+	 * @param EmailIn Email
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn);
 
-/**
- * Used to login with PlayFab, Then OpenSession with Sequence
- * @param UsernameIn Username
- * @param PasswordIn Password
- */
-void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+	/**
+	 * Used to login as a Guest into Sequence
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void GuestLogin(const bool ForceCreateAccountIn) const;
 
-/*
-   Optional call used to retrieve stored credentials on disk
-*/
-FStoredCredentials_BE GetStoredCredentials() const;
+	/**
+	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param EmailIn Email
+	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
-/*
-   Optional call used to check if the credentials on disk are valid or not
-*/
-bool StoredCredentialsValid();
+	/**
+	 * Used to login with PlayFab, Then OpenSession with Sequence
+	 * @param UsernameIn Username
+	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
+
+	/**
+	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
+	 * @param CodeIn Received Code from email
+	 */
+	void EmailLoginCode(const FString& CodeIn);
+
+	/**
+	 * Used To Federate an Email (WIP)
+	 * @param EmailIn Email to federate
+	 */
+	void FederateEmail(const FString& EmailIn);
+
+	/**
+	 * Used to Federate an OIDC Login
+	 * @param IdTokenIn OIDC Token To federate
+	 */
+	void FederateOIDCIdToken(const FString& IdTokenIn);
+
+	/**
+	 * Used to initiate OIDC account federation on mobile
+	 * @param Type Type of OIDC account to federate
+	 */
+	void InitiateMobileFederateOIDC(const ESocialSigninType& Type);
+
+	/**
+	 * Used to federate a new PlayFab account
+	 * @param UsernameIn PlayFab Username
+	 * @param EmailIn PlayFab Email
+	 * @param PasswordIn PlayFab Password
+	 */
+	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to federate an existing account on PlayFab
+	 * @param UsernameIn PlayFab Username
+	 * @param PasswordIn PlayFab Password
+	 */
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to force open the last failed OpenSession Attempt
+	 */
+	void ForceOpenLastOpenSessionAttempt() const;
+
+	/**
+	 * Used to get stored credentials from Disk
+	 * @return Stored Credentials
+	 */
+	FStoredCredentials_BE GetStoredCredentials() const;
+
+	/**
+	 * Used to store Credentials on Disk
+	 * @param Credentials Credentials to be Stored
+	 */
+	void StoreCredentials(const FCredentials_BE& Credentials) const;
+
+	/**
+	 * Clears stored credentials on disk with blanks
+	 */
+	void ClearStoredCredentials() const;
+
 ```
 
 To start you'll want to create a **[UAuthenticator]** UObject like so **[UAuthenticator * Auth = NewObject<UAuthenticator>()]**, this UObject manages the authentication side of Sequence.
@@ -268,6 +349,9 @@ Be sure to bind to the Delegates for **[AuthSuccess]**, **[AuthFailure]**, **[Au
 this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);
 this->Authenticator->AuthRequiresCode.AddDynamic(this, &ASequenceBackendManager::CallReadyToReceiveCode);
 this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
+this->Authenticator->FederateSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowFederationSuccess);
+this->Authenticator->FederateFailure.AddDynamic(this, &ASequenceBackendManager::CallShowFederationFailure);
+this->Authenticator->FederateOrForce.AddDynamic(this, &ASequenceBackendManager::CallShowFederateOrForce);
 ```
 
 Note: Replace the usage of the SequenceBackendManager.h/.cpp with you're own when building a custom GUI,
@@ -320,6 +404,38 @@ else
 
 ### Guest Login with CustomUI
 1) Start by calling GuestLogin, and that's it.
+
+### Account Federation
+
+In cases where users sign in & all is well, you can allow them to federate other login types so long as the Email matches.
+You can use the following calls to achieve this:
+"UAuthenticator::FederateEmail" , "UAuthenticator::FederateOIDCIdToken" , "UAuthenticator::InitiateMobileFederateOIDC" ,
+"UAuthenticator::FederatePlayFabNewAccount" , "UAuthenticator::FederatePlayFabLogin"
+
+In the case of FederateEmail you need to be bound to the AuthRequiresCode Delegate and you complete the call with
+"UAuthenticator::EmailLoginCode"
+
+### Account Federation & Force Create Account for EmailAlreadyInUse Cases
+
+In cases where users attempt to signin but are already logged into another session with the same Email, you'll need to do
+the following.
+
+First be sure the following delegates are bound: FederateSuccess , FederateFailure , FederateOrForce
+
+When a users attempts to Signin and it fails with email already in use, FederateOrForce will fire. This delegate
+will contain a few pieces of information to aid in Federation Or Force Create Account.
+FFederationSupportData contains 2 pieces of information, The email the user wishes to federate & a list of login
+types they are already signed in with. We have 2 options we can proceed with:
+
+1) With the ValidLoginTypes list, Present those options to the user as login methods to use, Being sure to specify that they
+   need to use the email that was also presented in FFederationSupportData. If they successfully login with one of those types,
+   the system will automatically federate their account and no further action will be required.
+
+2) You ask the user if they'd wish to force create a new account with the email address present in FFederationSupportData
+   & login type they initially tried.
+   This will assign a new wallet address to them & it will be treated like a entirely separate account.
+   To do this simply call "UAuthenticator::ForceOpenLastOpenSessionAttempt" This will ForceCreate a new account with the
+   last failed login attempt the user tried.
 
 ### Android SSO Requirements
 
