@@ -81,7 +81,7 @@ void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 
 void UAuthenticator::SetIsForcing(const bool IsForcingIn)
 {
-	this->IsForcing = IsForcing;
+	this->IsForcing = IsForcingIn;
 }
 
 void UAuthenticator::SetIsFederating(const bool IsFederatingIn)
