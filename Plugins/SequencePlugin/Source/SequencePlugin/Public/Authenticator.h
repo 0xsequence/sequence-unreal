@@ -14,14 +14,6 @@
 
 class USequenceRPCManager;
 
-enum ESeqAuthType
-{
-	Normal,//Normal Usage
-	Federation,//Normal Federation Usage
-	FederationInUse,//Federating an Account that's already logged in Usage
-	Force,//Force Create Account Usage
-};
-
 USTRUCT()
 struct SEQUENCEPLUGIN_API FSSOCredentials
 {
