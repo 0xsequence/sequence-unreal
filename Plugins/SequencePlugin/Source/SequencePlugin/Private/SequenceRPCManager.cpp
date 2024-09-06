@@ -34,7 +34,6 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Display, TEXT("Intent: %s"), *Content);
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -548,7 +547,6 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 				else
 				{
 					const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(OpenResponse);
-					UE_LOG(LogTemp, Display, TEXT("Error: %s"), *USequenceSupport::StructToString(ErrorResponse));
 					if (ErrorResponse.IsEmailInUseError())
 					{
 						this->Cached_OpenSessionData = OpenSessionData;
@@ -614,7 +612,6 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 				else
 				{
 					const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(OpenResponse);
-					UE_LOG(LogTemp, Display, TEXT("Error: %s"), *USequenceSupport::StructToString(ErrorResponse));
 					if (ErrorResponse.IsEmailInUseError())
 					{
 						this->Cached_OpenSessionData = OpenSessionData;
@@ -793,8 +790,6 @@ void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TF
 		{
 			OnFailure(FSequenceError(EErrorType::RequestFail, FederateResponse));
 		}
-		
-		UE_LOG(LogTemp,Display,TEXT("Response: %s"), *FederateResponse);
 	};
 	
 	FFederateAccountData FederateAccountData;
