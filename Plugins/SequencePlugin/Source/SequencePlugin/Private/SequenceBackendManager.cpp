@@ -20,10 +20,10 @@ void ASequenceBackendManager::CallReadyToReceiveCode()
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ReadyToReceiveCodeDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowAuthFailureScreen()
+void ASequenceBackendManager::CallShowAuthFailureScreen(const FString& ErrorIn)
 {
 	if (this->ShowAuthFailureDelegate.IsBound())
-		this->ShowAuthFailureDelegate.Broadcast();
+		this->ShowAuthFailureDelegate.Broadcast(ErrorIn);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }

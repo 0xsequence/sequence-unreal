@@ -24,7 +24,7 @@ public:
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthIFailure, const FString&, Error);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthISuccess);
 
@@ -60,7 +60,7 @@ private:
 	UFUNCTION()
 		void CallReadyToReceiveCode();
 	UFUNCTION()
-		void CallShowAuthFailureScreen();
+		void CallShowAuthFailureScreen(const FString& ErrorIn);
 	UFUNCTION()
 		void CallShowAuthSuccessScreen();
 	UFUNCTION()

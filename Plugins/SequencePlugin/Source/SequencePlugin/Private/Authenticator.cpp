@@ -231,10 +231,10 @@ void UAuthenticator::CallAuthRequiresCode() const
 		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
 }
 
-void UAuthenticator::CallAuthFailure() const
+void UAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
 {
 	if (this->AuthFailure.IsBound())
-		this->AuthFailure.Broadcast();
+		this->AuthFailure.Broadcast(ErrorMessageIn);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
@@ -374,7 +374,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 	{
 		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->ResetFederateSessionInUse();
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
@@ -400,7 +400,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 	
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
@@ -416,7 +416,7 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 	
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
@@ -436,7 +436,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
-			this->CallAuthFailure();
+			this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
@@ -452,7 +452,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 	
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
@@ -472,7 +472,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
-			this->CallAuthFailure();
+			this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
@@ -488,7 +488,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 	
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
@@ -542,7 +542,7 @@ void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) cons
 	}
 	else
 	{
-		this->CallAuthFailure();
+		this->CallAuthFailure(TEXT("Failed to Initialize SequenceWallet"));
 	}
 }
 
@@ -648,7 +648,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
-			this->CallAuthFailure();
+			this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
@@ -796,7 +796,7 @@ void UAuthenticator::ForceOpenLastOpenSessionAttempt() const
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
-		this->CallAuthFailure();
+		this->CallAuthFailure(Error.Message);
 	};
 	
 	this->SequenceRPCManager->ForceOpenSessionInUse(OnSuccess, OnFailure);

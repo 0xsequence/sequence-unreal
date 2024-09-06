@@ -30,7 +30,7 @@ struct SEQUENCEPLUGIN_API FSSOCredentials
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthFailure, const FString&, Error);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
 
@@ -63,7 +63,7 @@ public:
 	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
-	void CallAuthFailure() const;
+	void CallAuthFailure(const FString& ErrorMessageIn) const;
 	void CallAuthSuccess() const;
 	void CallFederateSuccess() const;
 	void CallFederateFailure(const FString& ErrorMessageIn) const;
