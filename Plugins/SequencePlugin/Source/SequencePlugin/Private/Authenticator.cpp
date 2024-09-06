@@ -364,6 +364,11 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 
 void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn)
 {
+	if (ForceCreateAccountIn)
+	{
+		this->ResetFederateSessionInUse();
+	}
+	
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		this->InitializeSequence(Credentials);
@@ -391,6 +396,11 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 {
 	this->SetIsForcing(ForceCreateAccountIn);
 	this->SetIsFederating(false);
+
+	if (ForceCreateAccountIn)
+	{
+		this->ResetFederateSessionInUse();
+	}
 	
 	const TFunction<void()> OnSuccess = [this]
 	{
@@ -406,8 +416,13 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
+void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 {
+	if (ForceCreateAccountIn)
+	{
+		this->ResetFederateSessionInUse();
+	}
+	
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
 		this->InitializeSequence(Credentials);
@@ -424,6 +439,11 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn) const
 
 void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
+	if (ForceCreateAccountIn)
+	{
+		this->ResetFederateSessionInUse();
+	}
+	
 	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
@@ -460,6 +480,11 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 
 void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
+	if (ForceCreateAccountIn)
+	{
+		this->ResetFederateSessionInUse();
+	}
+	
 	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
@@ -786,7 +811,7 @@ void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FStri
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::ForceOpenLastOpenSessionAttempt() const
+void UAuthenticator::ForceOpenLastOpenSessionAttempt()
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -798,7 +823,8 @@ void UAuthenticator::ForceOpenLastOpenSessionAttempt() const
 		UE_LOG(LogTemp, Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
-	
+
+	this->ResetFederateSessionInUse();
 	this->SequenceRPCManager->ForceOpenSessionInUse(OnSuccess, OnFailure);
 }
 

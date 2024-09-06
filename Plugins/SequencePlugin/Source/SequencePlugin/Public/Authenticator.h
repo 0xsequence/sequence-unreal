@@ -238,7 +238,7 @@ public:
 	 * Used to login as a Guest into Sequence
 	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void GuestLogin(const bool ForceCreateAccountIn) const;
+	void GuestLogin(const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
@@ -299,7 +299,7 @@ public:
 	/**
 	 * Used to force open the last failed OpenSession Attempt
 	 */
-	void ForceOpenLastOpenSessionAttempt() const;
+	void ForceOpenLastOpenSessionAttempt();
 
 	/**
 	 * Used to get stored credentials from Disk
