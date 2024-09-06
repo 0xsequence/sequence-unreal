@@ -1,10 +1,12 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceRPCManager.h"
+#include "Authenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
+#include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
@@ -143,6 +145,50 @@ FString USequenceRPCManager::BuildUrl() const
 FString USequenceRPCManager::BuildRegisterUrl() const
 {
 	return this->WaaSSettings.GetRPCServer() + this->UrlRegisterPath;
+}
+
+void USequenceRPCManager::CheckAndUpdateSessionFromPreserveSessionWallet()
+{
+	//We need to know if we are using a random session wallet or the current one!
+	if (this->PreserveSessionWallet)
+	{
+		this->PreserveSessionWallet = false;
+	}
+	else
+	{
+		this->UpdateWithRandomSessionWallet();
+	}
+}
+
+void USequenceRPCManager::UpdateWithRandomSessionWallet()
+{	
+	this->SessionWallet = UWallet::Make();
+}
+
+void USequenceRPCManager::UpdateWithStoredSessionWallet()
+{
+	const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+	{
+		this->SessionWallet = StoredCredentials.GetCredentials().GetSessionWallet();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Stored Credentials are Invalid, Please Login"));
+	}
+}
+
+USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
+{
+	if (UseStoredSessionId)
+	{
+		const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+		if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+		{
+			return Make(StoredCredentials.GetCredentials().GetSessionWallet());
+		}
+	}
+	return Make(UWallet::Make());
 }
 
 USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
@@ -316,6 +362,34 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 
 void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
+	{
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
+		
+		if (ParsedInitResponse.IsValid())
+		{
+			this->Cached_Challenge = ParsedInitResponse.Response.Data.Challenge;
+			OnSuccess();
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate Email Auth: %s"), *Response);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+	
+	FInitiateAuthData InitiateAuthData;
+	InitiateAuthData.InitForEmail(this->SessionWallet->GetSessionId(), EmailIn);
+	this->Cached_Verifier = InitiateAuthData.verifier;
+	this->Cached_Email = EmailIn;
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
+}
+
+void USequenceRPCManager::InitEmailFederation(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->UpdateWithStoredSessionWallet();
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(Response);
@@ -341,6 +415,7 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 
 void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	this->UpdateWithRandomSessionWallet();
 	const TSuccessCallback<FString> OnInitResponse = [this, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
@@ -391,9 +466,12 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
+	FOpenSessionData OpenSessionData;
+	OpenSessionData.InitForEmail(this->Cached_Challenge, CodeIn, this->SessionWallet->GetSessionId(), this->Cached_Verifier, ForceCreateAccountIn);
+	
+	const TSuccessCallback<FString> OnResponse = [this, OpenSessionData, OnSuccess, OnFailure, OnFederationRequired](const FString& Response)
 	{
 		const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(Response);
 
@@ -414,25 +492,39 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 		}
 		else
 		{
-			const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Response);
-			OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+			const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Response);
+			if (ErrorResponse.IsEmailInUseError())
+			{
+				this->Cached_OpenSessionData = OpenSessionData;
+				const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+				this->PreserveSessionWallet = true;
+				OnFederationRequired(FederationData);
+			}
+			else
+			{
+				const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Response);
+				OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+			}
 		}
 	};
-
-	FOpenSessionData OpenSessionData;
-	OpenSessionData.InitForEmail(this->Cached_Challenge, CodeIn, this->SessionWallet->GetSessionId(), this->Cached_Verifier, ForceCreateAccountIn);
+	
 	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure](const FString& InitResponse)
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	
+	const TSuccessCallback<FString> OnInitResponse = [this, IdTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired](const FString& InitResponse)
 	{		
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
 		if (ParsedInitResponse.IsValid())
 		{
-			const TSuccessCallback<FString> OnOpenResponse = [this, IdTokenIn, OnSuccess, OnFailure](const FString& OpenResponse)
+			FOpenSessionData OpenSessionData;
+			OpenSessionData.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
+			
+			const TSuccessCallback<FString> OnOpenResponse = [this, OpenSessionData, IdTokenIn, OnSuccess, OnFailure, OnFederationRequired](const FString& OpenResponse)
 			{		
 				const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 				const FCredentials_BE Credentials(
@@ -454,13 +546,22 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 				}
 				else
 				{
-					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
-					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+					const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(OpenResponse);
+					if (ErrorResponse.IsEmailInUseError())
+					{
+						this->Cached_OpenSessionData = OpenSessionData;
+						const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+						this->PreserveSessionWallet = true;
+						OnFederationRequired(FederationData);
+					}
+					else
+					{
+						const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
+						OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+					}
 				}
 			};
-
-			FOpenSessionData OpenSessionData;
-			OpenSessionData.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
+			
 			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
 		}
 		else
@@ -475,15 +576,20 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure] (const FString& InitResponse)
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+	
+	const TSuccessCallback<FString> OnInitResponse = [this, SessionTicketIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired] (const FString& InitResponse)
 	{
 		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
 
 		if (ParsedInitResponse.IsValid())
 		{
-			const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure] (const FString& OpenResponse)
+			FOpenSessionData OpenSessionData;
+			OpenSessionData.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
+			
+			const TSuccessCallback<FString> OnOpenResponse = [this, OpenSessionData, OnSuccess, OnFailure, OnFederationRequired] (const FString& OpenResponse)
 			{
 				const FSeqOpenSessionResponse ParsedOpenResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OpenResponse);
 
@@ -505,13 +611,22 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 				}
 				else
 				{
-					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
-					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+					const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(OpenResponse);
+					if (ErrorResponse.IsEmailInUseError())
+					{
+						this->Cached_OpenSessionData = OpenSessionData;
+						const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+						this->PreserveSessionWallet = true;
+						OnFederationRequired(FederationData);
+					}
+					else
+					{
+						const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *OpenResponse);
+						OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+					}
 				}
 			};
 			
-			FOpenSessionData OpenSessionData;
-			OpenSessionData.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId(),ForceCreateAccountIn);
 			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
 		}
 		else
@@ -526,38 +641,158 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	this->CheckAndUpdateSessionFromPreserveSessionWallet();
+
+	const TSuccessCallback<FString> OnOpenResponse = [this, OnSuccess, OnFailure](const FString& OnResponse)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		const FSeqOpenSessionResponse OpenSessionResponse = USequenceSupport::JSONStringToStruct<FSeqOpenSessionResponse>(OnResponse);
+		if (OpenSessionResponse.IsValid())
+		{
+			const FCredentials_BE Credentials(
+				this->SessionWallet->GetWalletPrivateKeyString(),TEXT(""),
+				OpenSessionResponse.Session.Identity.Email,
+				OpenSessionResponse.Response.Data.Wallet,
+				OpenSessionResponse.Session.Identity.Iss,
+				OpenSessionResponse.Session.Identity.Type,
+				OpenSessionResponse.Session.Identity.Sub,
+				OpenSessionResponse.Session.UserId,
+				OpenSessionResponse.GetCreatedAt(),
+				OpenSessionResponse.GetRefreshedAt(),
+				OpenSessionResponse.GetExpiresAt());
+			OnSuccess(Credentials);
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail,OnResponse));
+		}
 	};
-	
-	FFederateAccountData FederateAccount;
-	FederateAccount.InitForEmail(this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
+
+	this->Cached_OpenSessionData.forceCreateAccount = true;
+	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(this->Cached_OpenSessionData), OnOpenResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	this->UpdateWithStoredSessionWallet();
+	const TSuccessCallback<FString> OnFederateResponse = [OnSuccess, OnFailure](const FString& FederateResponse)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+		if (ParsedFederateResponse.IsValid())
+		{
+			OnSuccess();
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate PlayFab Auth: %s"), *FederateResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
 	};
 	
 	FFederateAccountData FederateAccount;
-	FederateAccount.InitForOIDC(IdTokenIn,this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
+	FederateAccount.InitForEmail(WalletIn, this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
+	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
 }
 
-void USequenceRPCManager::FederatePlayFabSession(const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+	this->UpdateWithStoredSessionWallet();
+	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, IdTokenIn, OnSuccess, OnFailure](const FString& InitResponse)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Response %s"), *Response);
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+
+		if (ParsedInitResponse.IsValid())
+		{
+			const TSuccessCallback<FString> OnFederateResponse = [OnSuccess, OnFailure](const FString& FederateResponse)
+			{
+				const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+				if (ParsedFederateResponse.IsValid())
+				{
+					OnSuccess();
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate OIDC Auth: %s"), *FederateResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+				}
+			};
+	
+			FFederateAccountData FederateAccount;
+			FederateAccount.InitForOIDC(WalletIn, IdTokenIn,this->SessionWallet->GetSessionId());
+			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate OIDC Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+
+	FInitiateAuthData AuthData;
+	AuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
+}
+
+void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->UpdateWithStoredSessionWallet();
+	const TSuccessCallback<FString> OnInitiateResponse = [this, WalletIn, SessionTicketIn, OnSuccess, OnFailure](const FString& InitResponse)
+	{
+		const FSeqInitiateAuthResponse ParsedInitResponse = USequenceSupport::JSONStringToStruct<FSeqInitiateAuthResponse>(InitResponse);
+
+		if (ParsedInitResponse.IsValid())
+		{		
+			const TSuccessCallback<FString> OnFederateResponse = [this, SessionTicketIn, OnSuccess, OnFailure](const FString& FederateResponse)
+			{
+				const FFederateAccountResponse ParsedFederateResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+				if (ParsedFederateResponse.IsValid())
+				{
+					OnSuccess();
+				}
+				else
+				{
+					const FString ErrorMessage = FString::Printf(TEXT("Failed to Federate PlayFab Auth: %s"), *FederateResponse);
+					OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+				}
+			};
+	
+			FFederateAccountData FederateAccount;
+			FederateAccount.InitForPlayFab(WalletIn, SessionTicketIn,this->SessionWallet->GetSessionId());
+			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = FString::Printf(TEXT("Failed to Initiate PlayFab Auth: %s"), *InitResponse);
+			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
+		}
+	};
+
+	FInitiateAuthData AuthData;
+	AuthData.InitForPlayFab(SessionTicketIn, this->SessionWallet->GetSessionId());
+	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
+}
+
+void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const TSuccessCallback<FString> OnFederateResponse = [this, OnSuccess, OnFailure](const FString& FederateResponse)
+	{
+		const FFederateAccountResponse FederateAccountResponse = USequenceSupport::JSONStringToStruct<FFederateAccountResponse>(FederateResponse);
+
+		if (FederateAccountResponse.IsValid())
+		{
+			OnSuccess();
+		}
+		else
+		{
+			OnFailure(FSequenceError(EErrorType::RequestFail, FederateResponse));
+		}
 	};
 	
-	FFederateAccountData FederateAccount;
-	FederateAccount.InitForPlayFab(SessionTicketIn,this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildFederateAccountIntent(FederateAccount), OnResponse, OnFailure);
+	FFederateAccountData FederateAccountData;
+	FederateAccountData.InitForFederation(this->Cached_OpenSessionData, WalletIn);
+	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccountData),OnFederateResponse, OnFailure);
 }

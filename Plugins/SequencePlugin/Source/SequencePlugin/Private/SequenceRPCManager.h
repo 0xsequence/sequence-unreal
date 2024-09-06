@@ -11,6 +11,7 @@
 #include "Types/Types.h"
 #include "Types/Wallet.h"
 #include "Util/Async.h"
+#include "Sequence/SequenceFederationSupport.h"
 #include "SequenceRPCManager.generated.h"
 
 /**
@@ -26,6 +27,11 @@ private:
 
 	FWaasJWT WaaSSettings;
 
+	/**
+	 * Updated ONLY on Auth Failure States
+	 */
+	FOpenSessionData Cached_OpenSessionData;
+
 	UPROPERTY()
 	UWallet * SessionWallet = nullptr;
 
@@ -35,7 +41,12 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
-	inline const static FString WaaSVersion = "1.0.0";//Still need to address this properly
+	/**
+	 * If this flag is enabled, we will preserve the SessionWallet for the next request
+	 */
+	bool PreserveSessionWallet = false;
+	
+	inline const static FString WaaSVersion = "1.0.0";
 	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
 	
@@ -70,14 +81,44 @@ private:
 	FString BuildRegisterUrl() const;
 	
 	//Url Builder//
+
+	//Session Wallet Management Code//
+
+	void CheckAndUpdateSessionFromPreserveSessionWallet();
+	
+	//Session Wallet Management Code//
 	
 	//RPC Caller//
 
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//RPC Caller//
+
+	/**
+	 * Updates the SessionWallet with a random one
+	 */
+	void UpdateWithRandomSessionWallet();
+
+	/**
+	 * Updates the SessionWallet with one stored on disk if possible,
+	 * does nothing if credentials on disk are invalid
+	 */
+	void UpdateWithStoredSessionWallet();
 	
 public:
+
+	/**
+	 * Allows you to create a new Manager with a session wallet that's either random or set by on disk credentials
+	 * @param UseStoredSessionId If True set sessionWallet to on disk credentials, If False use random session wallet
+	 * @return Returns the USequenceRPCManager with the SessionWallet initialized accordingly
+	 */
+	static USequenceRPCManager * Make(const bool UseStoredSessionId);
+
+	/**
+	 * Creates a USequenceRPCManager and sets the SessionWallet to the given one
+	 * @param SessionWalletIn The SessionWallet to Initialize with
+	 * @return The Initialized USequenceRPCManager
+	 */
 	static USequenceRPCManager * Make(UWallet * SessionWalletIn);
 	
 	//RPC Calls//
@@ -146,6 +187,14 @@ public:
 	void InitEmailAuth(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
+	 * Used to Initiate Email Base Federation
+	 * @param EmailIn The Email we are Federating with
+	 * @param OnSuccess If InitiateAuth Succeeds, this will fire and indicate we need a Code to finish Email Login
+	 * @param OnFailure If something went wrong
+	 */
+	void InitEmailFederation(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	
+	/**
 	 * Used to open a guest session with the SequenceApi
 	 * @param ForceCreateAccountIn Used to Force Account Creation
 	 * @param OnSuccess Fires with Credentials on a Successful Login
@@ -160,7 +209,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 
 	/**
 	 * Used to Login with OIDC (Social Signin)
@@ -169,7 +218,7 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
 
 	/**
 	 * Used to Authenticate a User via PlayFab
@@ -178,17 +227,26 @@ public:
 	 * @param OnSuccess Fires with Credentials on a Successful Login
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
-	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
+
+	/**
+	 * Uses cached OpenSession Intent from last failed login attempt to force open a session
+	 * @param OnSuccess Fires If the session was successfully forced open
+	 * @param OnFailure Fires if there's an Authentication Issue
+	 */
+	void ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	//Auth Calls//
 
 	//Federation Calls//
 
-	void FederateEmailSession(const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void FederateOIDCSession(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
 
-	void FederatePlayFabSession(const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+
+	void FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Federation Calls//
 	

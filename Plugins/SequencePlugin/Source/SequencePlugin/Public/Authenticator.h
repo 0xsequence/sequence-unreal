@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Util/Structs/BE_Enums.h"
-#include "Types/Wallet.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
+#include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
 #include "Authenticator.generated.h"
 
@@ -30,13 +30,15 @@ struct SEQUENCEPLUGIN_API FSSOCredentials
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthFailure, const FString&, Error);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederationSupportData&, FederationData);
 
 /**
  * 
@@ -56,13 +58,16 @@ public:
 	FOnFederateSuccess FederateSuccess;
 	UPROPERTY()
 	FOnFederateFailure FederateFailure;
+	UPROPERTY()
+	FOnFederateOrForce FederateOrForce;
 	
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
-	void CallAuthFailure() const;
+	void CallAuthFailure(const FString& ErrorMessageIn) const;
 	void CallAuthSuccess() const;
 	void CallFederateSuccess() const;
 	void CallFederateFailure(const FString& ErrorMessageIn) const;
+	void CallFederateOrForce(const FFederationSupportData& FederationData) const;
 //vars
 private:
 	UPROPERTY()
@@ -73,12 +78,34 @@ private:
 	FString StateToken = "";
 
 	/**
-	 * Used to change behaviour
-	 * if the user is federating accounts
-	 * OR
-	 * if the user is logging in normally
+	 * Used to track async behaviour for account federation
+	 * 2 Cases where we have to use this:
+	 * 1) Initiate mobile OIDC Auth
+	 * 2) Email Auth
+	 * These 2 calls both are done in an Async manner where we cannot directly hand state from the initial call
+	 * to the final call.
 	 */
 	bool IsFederating = false;
+
+	/**
+	 * Used to change behaviour
+	 * If the user is federating an account in Use (True)
+	 * OR
+	 * if the user is logging in normally (False)
+	 *
+	 * Only works with Non Guest Login.
+	 */
+	bool IsFederatingSessionInUse = false;
+
+	/**
+	 * Used to track async behaviour for account forcing
+	 * 2 Cases where we have to use this:
+	 * 1) Initiate mobile OIDC Auth
+	 * 2) Email Auth
+	 * These 2 calls both are done in an Async manner where we cannot directly hand state from the initial call
+	 * to the final call.
+	 */
+	bool IsForcing = false;
 	
 	TMap<ESocialSigninType, FSSOCredentials> SSOProviderMap ={
 		{ESocialSigninType::Google,FSSOCredentials(GoogleAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID))},
@@ -86,8 +113,6 @@ private:
 		{ESocialSigninType::Discord,FSSOCredentials(DiscordAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::DiscordClientID))},
 		{ESocialSigninType::FaceBook,FSSOCredentials(FacebookAuthURL,UConfigFetcher::GetConfigVar(UConfigFetcher::FacebookClientID))}};
 	
-	UPROPERTY()
-	UWallet* SessionWallet;
 	UPROPERTY()
 	USequenceRPCManager * SequenceRPCManager = nullptr;
 	UPROPERTY()
@@ -103,9 +128,65 @@ private:
 	
 private:
 	UAuthenticator();
+	
+	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
 
-	void InitiateMobleSSO_Internal(const ESocialSigninType& Type);
+	/**
+	 * Used to aid in the state management of IsForcing
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @param IsForcingIn Is what we set this->IsForcing to
+	 */
+	void SetIsForcing(const bool IsForcingIn);
+
+	/**
+	 * Used to aid in state management of IsFederating
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @param IsFederatingIn what we set this->IsFederating to
+	 */
+	void SetIsFederating(const bool IsFederatingIn);
+
+	/**
+	 * Used to aid in state management of IsFederatingSessionInUse, Sets it to true
+	 */
+	void SetIsFederatingSessionInUse();
+	
+	/**
+	 * Reads from the IsForcing State and resets it returning the
+	 * UAuthenticator back to its default state
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @return the state read from IsForcing prior to resetting it
+	 */
+	bool ReadAndResetIsForcing();
+
+	/**
+	 * Reads from the IsFederating State and resets it returning the
+	 * UAuthenticator back to its default state.
+	 * NOTE: Specific for InitiateMobileLogin & EmailLogin as these are multi-step processes with no direct call chain
+	 * @return the state read from IsFederating prior to resetting it
+	 */
+	bool ReadAndResetIsFederating();
+
+	/**
+	 * Reads from IsFederatingSessionInUse State and resets it returning the
+	 * UAuthenticator back to its default state
+	 * @return the state read from IsFederatingSessionInUse prior to resetting it
+	 */
+	bool ReadAndResetIsFederatingSessionInUse();
+
+	/**
+	 * Used to check if we are trying to federate a session in use or not,
+	 * If IsFederatingSessionInUse = true, we will attempt to federate it
+	 * If IsFederatingSessionInUse = false, we operate as normal
+	 */
+	void CheckAndFederateSessionInUse();
 public:
+	
+	/**
+	 * Resets the IsFederatingSessionInUse State to false
+	 * For cases where you don't want to Federate a session in use if the error
+	 * occurs for "EmailAlreadyInUse"
+	 */
+	void ResetFederateSessionInUse();
 	
 	/**
 	 * Sets a custom encryptor
@@ -123,53 +204,64 @@ public:
 	/**
 	 * Used to initiate mobile Login
 	 * @param Type Type of OIDC to conduct on Mobile
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void InitiateMobileSSO(const ESocialSigninType& Type);
+	void InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn);
 
 	/**
 	 * Internal Mobile Login call. Used to complete mobile login once a tokenized URL is received
 	 * @param TokenizedUrl The URL containing an IdToken
 	 */
-	void UpdateMobileLogin(const FString& TokenizedUrl) const;
+	void UpdateMobileLogin(const FString& TokenizedUrl);
+
+	/**
+	 * Internal Mobile Login Call. Used to complete mobile Login once an IdToken has been received
+	 * @param IdTokenIn IdToken Received from mobile login
+	 */
+	void UpdateMobileLogin_IdToken(const FString& IdTokenIn);
 
 	/**
 	 * Used to initiate OIDC login
 	 * @param IDTokenIn OIDC Token granted from login
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void SocialLogin(const FString& IDTokenIn) const;
+	void SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to initiate email login
 	 * @param EmailIn Email
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void EmailLogin(const FString& EmailIn);
+	void EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to login as a Guest into Sequence
 	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void GuestLogin(const bool ForceCreateAccountIn) const;
+	void GuestLogin(const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to create & login a new account with PlayFab, Then OpenSession with Sequence
 	 * @param UsernameIn Username
 	 * @param EmailIn Email
 	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+	void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to login with PlayFab, Then OpenSession with Sequence
 	 * @param UsernameIn Username
 	 * @param PasswordIn Password
+	 * @param ForceCreateAccountIn Force create account if it already exists
 	 */
-	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
 	 */
-	void EmailLoginCode(const FString& CodeIn) const;
+	void EmailLoginCode(const FString& CodeIn);
 
 	/**
 	 * Used To Federate an Email (WIP)
@@ -181,7 +273,7 @@ public:
 	 * Used to Federate an OIDC Login
 	 * @param IdTokenIn OIDC Token To federate
 	 */
-	void FederateOIDCIdToken(const FString& IdTokenIn) const;
+	void FederateOIDCIdToken(const FString& IdTokenIn);
 
 	/**
 	 * Used to initiate OIDC account federation on mobile
@@ -203,6 +295,11 @@ public:
 	 * @param PasswordIn PlayFab Password
 	 */
 	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+
+	/**
+	 * Used to force open the last failed OpenSession Attempt
+	 */
+	void ForceOpenLastOpenSessionAttempt();
 
 	/**
 	 * Used to get stored credentials from Disk

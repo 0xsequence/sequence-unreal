@@ -20,10 +20,10 @@ void ASequenceBackendManager::CallReadyToReceiveCode()
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ReadyToReceiveCodeDelegate]"));
 }
 
-void ASequenceBackendManager::CallShowAuthFailureScreen()
+void ASequenceBackendManager::CallShowAuthFailureScreen(const FString& ErrorIn)
 {
 	if (this->ShowAuthFailureDelegate.IsBound())
-		this->ShowAuthFailureDelegate.Broadcast();
+		this->ShowAuthFailureDelegate.Broadcast(ErrorIn);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }
@@ -60,6 +60,18 @@ void ASequenceBackendManager::CallShowFederationFailure(const FString& Error)
 	}
 }
 
+void ASequenceBackendManager::CallShowFederateOrForce(const FFederationSupportData& FederationData)
+{
+	if (this->ShowFederateOrForceDelegate.IsBound())
+	{
+		this->ShowFederateOrForceDelegate.Broadcast(FederationData);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederateOrForceDelegate]"));
+	}
+}
+
 // Sets default values
 ASequenceBackendManager::ASequenceBackendManager()
 {
@@ -80,6 +92,7 @@ void ASequenceBackendManager::BeginPlay()
 	this->Authenticator->AuthFailure.AddDynamic(this, &ASequenceBackendManager::CallShowAuthFailureScreen);
 	this->Authenticator->FederateSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowFederationSuccess);
 	this->Authenticator->FederateFailure.AddDynamic(this, &ASequenceBackendManager::CallShowFederationFailure);
+	this->Authenticator->FederateOrForce.AddDynamic(this, &ASequenceBackendManager::CallShowFederateOrForce);
 }
 
 //SYNC FUNCTIONAL CALLS// [THESE ARE BLOCKING CALLS AND WILL RETURN DATA IMMEDIATELY]
@@ -113,11 +126,11 @@ FString ASequenceBackendManager::GetTransactionHash(FTransaction_FE Transaction)
 	return Transaction.ID();
 }
 
-void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type)
+void ASequenceBackendManager::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->InitiateMobileSSO(Type);
+		this->Authenticator->InitiateMobileSSO(Type, ForceCreateAccountIn);
 	}
 }
 
@@ -133,19 +146,19 @@ FString ASequenceBackendManager::GetLoginURL(const ESocialSigninType& Type)
 	}
 }
 
-void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn)
+void ASequenceBackendManager::SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->SocialLogin(IDTokenIn);
+		this->Authenticator->SocialLogin(IDTokenIn, ForceCreateAccountIn);
 	}
 }
 
-void ASequenceBackendManager::EmailLogin(const FString& EmailIn)
+void ASequenceBackendManager::EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->EmailLogin(EmailIn);
+		this->Authenticator->EmailLogin(EmailIn, ForceCreateAccountIn);
 	}
 }
 
@@ -157,27 +170,27 @@ void ASequenceBackendManager::EmailCode(const FString& CodeIn)
 	}
 }
 
-void ASequenceBackendManager::GuestLogin()
+void ASequenceBackendManager::GuestLogin(const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->GuestLogin(false);
+		this->Authenticator->GuestLogin(ForceCreateAccountIn);
 	}
 }
 
-void ASequenceBackendManager::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn)
+void ASequenceBackendManager::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->PlayFabLogin(UsernameIn, PasswordIn);
+		this->Authenticator->PlayFabLogin(UsernameIn, PasswordIn, ForceCreateAccountIn);
 	}
 }
 
-void ASequenceBackendManager::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn)
+void ASequenceBackendManager::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
 	if (this->Authenticator)
 	{
-		this->Authenticator->PlayFabRegisterAndLogin(UsernameIn, EmailIn, PasswordIn);
+		this->Authenticator->PlayFabRegisterAndLogin(UsernameIn, EmailIn, PasswordIn, ForceCreateAccountIn);
 	}
 }
 
@@ -229,6 +242,14 @@ FCredentials_BE ASequenceBackendManager::GetStoredCredentials()
 		return PCred.GetCredentials();
 	}
 	return FCredentials_BE();
+}
+
+void ASequenceBackendManager::ForceOpenLastOpenSessionAttempt()
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->ForceOpenLastOpenSessionAttempt();
+	}
 }
 
 bool ASequenceBackendManager::StoredCredentialsValid()
