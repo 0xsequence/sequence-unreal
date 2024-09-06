@@ -399,7 +399,7 @@ else
    This function call is all that's required for Mobile SSO.
 
 ### PlayFab Social Signin based Authentication with CustomUI
-1) Start by calling either PlayFabLogin (Login With Existing) 
+1) Start by calling either PlayFabLogin (Login With Existing)
    or PlayFabRegisterAndLogin (Create a new PlayFab account & Login with it) that's it.
 
 ### Guest Login with CustomUI
@@ -407,13 +407,15 @@ else
 
 ### Account Federation
 
-In cases where users sign in & all is well, you can allow them to federate other login types so long as the Email matches.
-You can use the following calls to achieve this:
- "UAuthenticator::FederateEmail" , "UAuthenticator::FederateOIDCIdToken" , "UAuthenticator::InitiateMobileFederateOIDC" ,
- "UAuthenticator::FederatePlayFabNewAccount" , "UAuthenticator::FederatePlayFabLogin"
+In cases where users sign in & all is well, you can allow users to federate other login types so long as the Email matches.
+Doing this allows users to login with Email, OIDC & Playfab login types such that they all access the same wallet address.
 
- In the case of FederateEmail you need to be bound to the AuthRequiresCode Delegate and you complete the call with
- "UAuthenticator::EmailLoginCode"
+You can use the following calls to achieve this:
+"UAuthenticator::FederateEmail" , "UAuthenticator::FederateOIDCIdToken" , "UAuthenticator::InitiateMobileFederateOIDC" ,
+"UAuthenticator::FederatePlayFabNewAccount" , "UAuthenticator::FederatePlayFabLogin"
+
+In the case of FederateEmail you need to be bound to the AuthRequiresCode Delegate and you complete the call with
+"UAuthenticator::EmailLoginCode"
 
 ### Account Federation & Force Create Account for EmailAlreadyInUse Cases
 
@@ -422,20 +424,26 @@ the following.
 
 First be sure the following delegates are bound: FederateSuccess , FederateFailure , FederateOrForce
 
-When a users attempts to Signin and it fails with email already in use, FederateOrForce will fire. This delegate
-will contain a few pieces of information to aid in Federation Or Force Create Account.
-FFederationSupportData contains 2 pieces of information, The email the user wishes to federate & a list of login
-types they are already signed in with. We have 2 options we can proceed with:
+FederateSuccess Fires when the Federation Operation Is Successful.
 
-1) With the ValidLoginTypes list, Present those options to the user as login methods to use, Being sure to specify that they
-need to use the email that was also presented in FFederationSupportData. If they successfully login with one of those types,
-the system will automatically federate their account and no further action will be required.
+FederateFailure Fires when the Federation Operation Fails, It also includes the string Error of what went wrong.
 
-2) You ask the user if they'd wish to force create a new account with the email address present in FFederationSupportData 
-& login type they initially tried. 
-This will assign a new wallet address to them & it will be treated like a entirely separate account.
-To do this simply call "UAuthenticator::ForceOpenLastOpenSessionAttempt" This will ForceCreate a new account with the
-last failed login attempt the user tried.
+FederateOrForce Fires when an Authentication attempt fails with EmailAlreadyInUse error.
+
+When a user attempts to Signin and it fails with email already in use, FederateOrForce will fire. This delegate
+will include *[FFederationSupportData]*, which contains 2 pieces of information,
+The email the user wishes to federate & a list of login types they are already signed in with.
+We have 2 options we can choose between:
+
+1) Federate: With the ValidLoginTypes list, Present those options to the user as login methods to use, Being sure to specify that they
+   must use the email that was also presented in *[FFederationSupportData]*. If they successfully login with one of those types,
+   the system will automatically federate their account and no further action will be required.
+
+2) ForceCreate: Ask the user if they'd wish to force create a new account with the email address present in *[FFederationSupportData]*
+   & login type they initially tried.
+   This will assign a new wallet address to them & it will be treated like a entirely separate account.
+   To do this simply call "UAuthenticator::ForceOpenLastOpenSessionAttempt" This will ForceCreate a new account with the
+   last login attempt that resulted in an EmailAlreadyInUse error.
 
 ### Android SSO Requirements
 
