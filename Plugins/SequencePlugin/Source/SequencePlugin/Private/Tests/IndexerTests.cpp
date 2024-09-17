@@ -706,12 +706,11 @@ void TokenSuppliesArgsTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 	UE_LOG(LogTemp, Display, TEXT("Token Supplies Args Parsing Test"));
 	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":\""+GTestingContractAddress+"\",\"includeMetaData\":true,\"page\":"+GTestingPage+"}";
+	FString testArgs = "{\"contractAddress\":\""+GTestingContractAddress+"\",\"includeMetaData\":true}";
 
 	FSeqGetTokenSuppliesArgs args;
 	args.contractAddress = GTestingContractAddress;
 	args.includeMetaData = true;
-	args.page = BuildTestPage();
 
 	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FSeqGetTokenSuppliesArgs>(args));
 	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
