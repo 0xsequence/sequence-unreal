@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SequencePlugin/Private/Indexer/Indexer.h"
 #include "IndexerPingTestData.generated.h"
-
-class UIndexer;
 
 /**
  * Used to track Async data for UIndexerPingTest

@@ -6,7 +6,6 @@
 #include "Util/SequenceSupport.h"
 #include "Engine/World.h"
 #include "IndexerPingTestData.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
