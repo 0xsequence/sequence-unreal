@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "Tests/AutomationCommon.h"
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
 #include "Engine/World.h"
@@ -10,6 +9,40 @@
 #include "SequencePlugin/Private/Indexer/Indexer.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/* Latent command used to poll off main thread to see if our pings are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FIsDone, const UIndexerPingTestData *, IndexerPingTestData);
+
+/* Latent command used to batch process pings w/o exceeding network threading limits */
+DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessPingBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerPingTestData *, IndexerPingTestData, const TSuccessCallback<bool>, SuccessCallback, const FFailureCallback, FailureCallback);
+
+bool FProcessPingBatch::Update()
+{
+    while(IndexerPingTestData->GetPingsComplete() < WatchIndex)
+    {
+        return false;
+    }
+
+    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    
+    for (int i = WatchIndex; i <= FinishIndex; i++)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Index: %d, Pinging Network: %lld"), i, Networks[i]);
+        IndexerPingTestData->GetIndexer()->Ping(Networks[i], SuccessCallback, FailureCallback);
+    }
+    
+    return true;
+}
+
+bool FIsDone::Update()
+{
+    while(this->IndexerPingTestData->GetPendingPings() > 0)
+    {
+        return false;
+    }
+    
+    return true;
+}
 
 void FIndexerPingTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -19,23 +52,8 @@ void FIndexerPingTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FStr
 
 bool FIndexerPingTest::RunTest(const FString& Parameters)
 {
-    UIndexer* Indexer = NewObject<UIndexer>();
     const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
     UIndexerPingTestData * IndexerPingTestData = UIndexerPingTestData::Make(Networks.Num());
-
-    const TFunction<bool(void)> OnDone = [this, IndexerPingTestData]()
-    {
-        if (IndexerPingTestData->GetPendingPings() == 0)
-        {
-            AddInfo(TEXT("All pings completed"));
-            return true;
-        }
-        else
-        {
-            AddError(FString::Printf(TEXT("Test timed out. %d pings did not complete."), IndexerPingTestData->GetPendingPings()));
-            return true;
-        }
-    };
 
     const TSuccessCallback<bool> GenericSuccess = [this, IndexerPingTestData](const bool bSuccess)
     {
@@ -51,30 +69,18 @@ bool FIndexerPingTest::RunTest(const FString& Parameters)
     };
 
     AddInfo(FString::Printf(TEXT("Starting %d pings"), IndexerPingTestData->GetPendingPings()));
-    
-    for (const int64& Id : Networks)
+
+    constexpr int32 BatchSize = 5;
+    int32 StartIndex = 0;
+    int32 EndIndex = FMath::Min(BatchSize-1, Networks.Num() - 1);
+
+    while (StartIndex < Networks.Num() - 1)
     {
-        Indexer->Ping(Id, GenericSuccess, GenericFailure);
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessPingBatch(StartIndex, EndIndex, IndexerPingTestData, GenericSuccess, GenericFailure));
+        StartIndex += BatchSize;
+        EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
     }
     
-    ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(10.0f));
-    
-    // Add a latent command to wait for all pings to complete or timeout
-    ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(30.0f));
-    
-    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this, IndexerPingTestData]()
-    {
-        if (IndexerPingTestData->GetPendingPings() == 0)
-        {
-            AddInfo(TEXT("All pings completed"));
-            return true;
-        }
-        else
-        {
-            AddError(FString::Printf(TEXT("Test timed out. %d pings did not complete."), IndexerPingTestData->GetPendingPings()));
-            return true;
-        }
-    }));
-
+    ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerPingTestData));
     return true;
 }
