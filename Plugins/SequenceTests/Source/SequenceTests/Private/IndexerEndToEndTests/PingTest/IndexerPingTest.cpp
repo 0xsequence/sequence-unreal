@@ -10,7 +10,7 @@
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /* Latent command used to poll off main thread to see if our pings are done */
-DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FIsDone, const UIndexerPingTestData *, IndexerPingTestData);
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDone, const UIndexerPingTestData *, IndexerPingTestData, FAutomationTestBase *, PingTest);
 
 /* Latent command used to batch process pings w/o exceeding network threading limits */
 DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessPingBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerPingTestData *, IndexerPingTestData, const TSuccessCallback<bool>, SuccessCallback, const FFailureCallback, FailureCallback);
@@ -38,6 +38,15 @@ bool FIsDone::Update()
     while(this->IndexerPingTestData->GetPendingPings() > 0)
     {
         return false;
+    }
+
+    if (this->IndexerPingTestData->GetAllPingsSuccessful())
+    {
+        PingTest->AddInfo(TEXT("All pings completed"));
+    }
+    else
+    {
+        PingTest->AddError(FString::Printf(TEXT("Not all pings returned successfully")));
     }
     
     return true;
@@ -80,6 +89,6 @@ bool FIndexerPingTest::RunTest(const FString& Parameters)
         EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
     }
     
-    ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerPingTestData));
+    ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerPingTestData, this));
     return true;
 }

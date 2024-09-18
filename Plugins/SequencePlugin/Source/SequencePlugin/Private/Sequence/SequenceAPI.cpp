@@ -125,7 +125,7 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 		}
 		else
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
+			UE_LOG(LogTemp,Display,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
 			const UAuthenticator * Auth = NewObject<UAuthenticator>();
 			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
 

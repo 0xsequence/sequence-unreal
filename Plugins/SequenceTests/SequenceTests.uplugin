@@ -25,6 +25,10 @@
 		{
 			"Name": "SequencePlugin",
 			"Enabled": true
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
 		}
 	]
 }

@@ -39,6 +39,8 @@ public class SequenceTests : ModuleRules
 				"Slate",
 				"SlateCore", 
 				"SequencePlugin",
+				"EditorScriptingUtilities",
+				"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
