@@ -130,7 +130,7 @@ namespace NativeOAuth
     {
 	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->SocialLogin(idToken);
+    	Callback->UpdateMobileLogin_IdToken(idToken);
 		jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 	
@@ -138,7 +138,7 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogl
     {
     	const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->SocialLogin(idToken);
+    	Callback->UpdateMobileLogin_IdToken(idToken);
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 
