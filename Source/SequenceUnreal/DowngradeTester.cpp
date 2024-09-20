@@ -32,7 +32,8 @@ void ADowngradeTester::Authenticate()
 	const FStoredCredentials_BE Credentials = Authenticator->GetStoredCredentials();
 	if (!Credentials.GetValid())
 	{
-		Authenticator->PlayFabRegisterAndLogin(TEXT("NewUsername"), TEXT("NewEmail"), TEXT("NewPassword"));
+		Authenticator->GuestLogin(false);
+		UE_LOG(LogTemp, Display, TEXT("Logged in!"))
 	}
 }
 
