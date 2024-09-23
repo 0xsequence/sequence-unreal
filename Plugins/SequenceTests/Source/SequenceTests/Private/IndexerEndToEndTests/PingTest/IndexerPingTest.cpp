@@ -4,7 +4,6 @@
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
-#include "Engine/World.h"
 #include "IndexerPingTestData.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
