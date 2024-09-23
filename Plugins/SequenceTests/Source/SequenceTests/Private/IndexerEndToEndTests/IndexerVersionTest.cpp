@@ -65,10 +65,10 @@ bool FIndexerVersionTest::RunTest(const FString& Parameters)
     const TSuccessCallback<FSeqVersion> GenericSuccess = [this, IndexerRequestTestData](const FSeqVersion version)
     {
         TestNotNull(TEXT("Version"), &version);
-        TestFalse(TEXT("AppVersion should not be empty"), version.appVersion.IsEmpty());
-        TestFalse(TEXT("SchemaVersion should not be empty"), version.schemaVersion.IsEmpty());
-        TestFalse(TEXT("WebRPCVersion should not be empty"), version.webrpcVersion.IsEmpty());
-        TestFalse(TEXT("SchemaHash should not be empty"), version.schemaHash.IsEmpty());
+        TestFalse(TEXT("AppVersion should not be empty, given " + version.appVersion), version.appVersion.IsEmpty());
+        TestFalse(TEXT("SchemaVersion should not be empty, given " + version.schemaVersion), version.schemaVersion.IsEmpty());
+        TestFalse(TEXT("WebRPCVersion should not be empty, given " + version.webrpcVersion), version.webrpcVersion.IsEmpty());
+        TestFalse(TEXT("SchemaHash should not be empty, given " + version.schemaHash), version.schemaHash.IsEmpty());
         
         const FString Message = "Version request succeeded";
         AddInfo(FString::Printf(TEXT("%s. Remaining Requests: %d"), *Message, IndexerRequestTestData->DecrementPendingRequests()));
