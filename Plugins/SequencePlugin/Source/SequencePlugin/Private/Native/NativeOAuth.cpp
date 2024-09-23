@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "NativeOAuth.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "AppleBridge.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Async/Async.h"
@@ -8,7 +8,7 @@
 
 namespace NativeOAuth
 {
-	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, UAuthenticator * AuthCallback)
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, USequenceAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -16,7 +16,7 @@ namespace NativeOAuth
 #endif
 	}
 	
-	void SignInWithGoogle(const FString& clientId, UAuthenticator * AuthCallback)
+	void SignInWithGoogle(const FString& clientId, USequenceAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -24,7 +24,7 @@ namespace NativeOAuth
 #endif // PLATFORM_ANDROID
 	}
 
-	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, UAuthenticator * AuthCallback)
+	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, USequenceAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;
 		UAppleBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
@@ -33,7 +33,7 @@ namespace NativeOAuth
 	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(tokenizedUrl));
-		UAuthenticator * CallbackLcl = Callback;
+		USequenceAuthenticator * CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
 			CallbackLcl->UpdateMobileLogin(token);
 		});
@@ -42,13 +42,13 @@ namespace NativeOAuth
 	void ProcessIosCallback(char * idToken)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
-		UAuthenticator * CallbackLcl = Callback;
+		USequenceAuthenticator * CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
 			CallbackLcl->UpdateMobileLogin_IdToken(token);
 		});
 	}
 	
-	void SignInWithApple(const FString& clientID, UAuthenticator * AuthCallback)
+	void SignInWithApple(const FString& clientID, USequenceAuthenticator * AuthCallback)
 	{
 		Callback = AuthCallback;		
 		UAppleBridge::InitiateIosSSO(clientID, ProcessIosCallback);

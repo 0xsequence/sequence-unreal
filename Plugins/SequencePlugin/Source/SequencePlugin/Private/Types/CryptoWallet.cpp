@@ -1,5 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "Types/Wallet.h"
+#include "Types/CryptoWallet.h"
 #include "Eth/EthTransaction.h"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
@@ -9,11 +9,11 @@
 #include "Eth/Crypto.h"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 
-UWallet::UWallet(){}
+UCryptoWallet::UCryptoWallet(){}
 
-UWallet* UWallet::Make()
+UCryptoWallet* UCryptoWallet::Make()
 {
-	UWallet * Wallet = NewObject<UWallet>();
+	UCryptoWallet * Wallet = NewObject<UCryptoWallet>();
 	Wallet->PrivateKey = FPrivateKey::New();
 	for (int i = 0; i < 32; i++)
 	{
@@ -24,18 +24,18 @@ UWallet* UWallet::Make()
 	return Wallet;
 }
 
-UWallet* UWallet::Make(FPrivateKey PrivateKey)
+UCryptoWallet* UCryptoWallet::Make(FPrivateKey PrivateKey)
 {
-	UWallet * Wallet = NewObject<UWallet>();
+	UCryptoWallet * Wallet = NewObject<UCryptoWallet>();
 	Wallet->PrivateKey = PrivateKey;
 	Wallet->PublicKey = GetPublicKey(Wallet->PrivateKey);
 	Wallet->Address = GetAddress(Wallet->PublicKey);
 	return Wallet;
 }
 
-UWallet* UWallet::Make(const FString& PrivateKey)
+UCryptoWallet* UCryptoWallet::Make(const FString& PrivateKey)
 {
-	UWallet * Wallet = NewObject<UWallet>();
+	UCryptoWallet * Wallet = NewObject<UCryptoWallet>();
 	if (PrivateKey.Len() == 64)
 	{
 		Wallet->PrivateKey = FPrivateKey::From(PrivateKey);
@@ -49,7 +49,7 @@ UWallet* UWallet::Make(const FString& PrivateKey)
 	return Wallet;
 }
 
-TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* MessageHash, int32 Size)
+TArray<uint8_t> UCryptoWallet::BuildSigningNonce(uint8_t* MessageHash, int32 Size)
 {
 	TArray<uint8_t> nonce;
 	FString v_0_str = "010101010101010101010101010101010101010101010101010101010101010100";
@@ -88,7 +88,7 @@ TArray<uint8_t> UWallet::BuildSigningNonce(uint8_t* MessageHash, int32 Size)
 	return nonce;
 }
 
-TArray<uint8> UWallet::SignMessage(TArray<uint8> MessageBytes, int32 MessageLength)
+TArray<uint8> UCryptoWallet::SignMessage(TArray<uint8> MessageBytes, int32 MessageLength)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
@@ -132,7 +132,7 @@ TArray<uint8> UWallet::SignMessage(TArray<uint8> MessageBytes, int32 MessageLeng
 	return sig;
 }
 
-TArray<uint8> UWallet::SignMessage(FString Message)
+TArray<uint8> UCryptoWallet::SignMessage(FString Message)
 {
 	TArray<uint8> sig;
 	Uint256 BigR, BigS;
@@ -177,40 +177,40 @@ TArray<uint8> UWallet::SignMessage(FString Message)
 	return sig;
 }
 
-FString UWallet::SignMessageWithoutPrefix(const FString& Message)
+FString UCryptoWallet::SignMessageWithoutPrefix(const FString& Message)
 {
 	TArray<uint8> SigBytes = SignMessage(Message);
 	FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 	return Signature;
 }
 
-FString UWallet::SignMessageWithoutPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
+FString UCryptoWallet::SignMessageWithoutPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
 {
 	TArray<uint8> SigBytes = SignMessage(MessageBytes, MessageLength);
 	FString Signature = BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 	return Signature;
 }
 
-FString UWallet::SignMessageWithPrefix(const FString& Message)
+FString UCryptoWallet::SignMessageWithPrefix(const FString& Message)
 {
 	TArray<uint8> SigBytes = SignMessage(Message);
 	FString Signature = "0x" + BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 	return Signature;
 }
 
-FString UWallet::SignMessageWithPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
+FString UCryptoWallet::SignMessageWithPrefix(const TArray<uint8>& MessageBytes, const int32 MessageLength)
 {
 	TArray<uint8> SigBytes = SignMessage(MessageBytes, MessageLength);
 	FString Signature = "0x" + BytesToHex(SigBytes.GetData(), SigBytes.Num()).ToLower();
 	return Signature;
 }
 
-FString UWallet::GetSessionId()
+FString UCryptoWallet::GetSessionId()
 {
 	return "0x00" + GetWalletAddress().ToHex().ToLower();
 }
 
-FString UWallet::GetSessionHash()
+FString UCryptoWallet::GetSessionHash()
 {
 	const FHash256 SessionHashBytes = FHash256::New();
 	const FUnsizedData EncodedSigningData = StringToUTF8(GetSessionId());
@@ -218,22 +218,22 @@ FString UWallet::GetSessionHash()
 	return "0x" + SessionHashBytes.ToHex().ToLower();
 }
 
-FPrivateKey UWallet::GetWalletPrivateKey()
+FPrivateKey UCryptoWallet::GetWalletPrivateKey()
 {
 	return this->PrivateKey;
 }
 
-FPublicKey UWallet::GetWalletPublicKey()
+FPublicKey UCryptoWallet::GetWalletPublicKey()
 {
 	return this->PublicKey;
 }
 
-FAddress UWallet::GetWalletAddress()
+FAddress UCryptoWallet::GetWalletAddress()
 {
 	return this->Address;
 }
 
-FString UWallet::GetWalletPrivateKeyString()
+FString UCryptoWallet::GetWalletPrivateKeyString()
 {
 	return BytesToHex(GetWalletPrivateKey().Ptr(), GetWalletPrivateKey().GetLength()).ToLower();
 }

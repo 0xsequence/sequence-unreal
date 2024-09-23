@@ -10,7 +10,7 @@
 #include "Credentials.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
-#include "Authenticator.generated.h"
+#include "SequenceAuthenticator.generated.h"
 
 class USequenceRPCManager;
 
@@ -44,7 +44,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederatio
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API UAuthenticator : public UObject
+class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject
 {
 	GENERATED_BODY()
 public:
@@ -127,7 +127,7 @@ private:
 	inline static FString RedirectPrefixTrailer = "oauth/callback";
 	
 private:
-	UAuthenticator();
+	USequenceAuthenticator();
 	
 	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
 

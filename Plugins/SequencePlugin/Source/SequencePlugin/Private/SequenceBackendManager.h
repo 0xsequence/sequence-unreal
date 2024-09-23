@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/AES.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
@@ -71,7 +71,7 @@ private:
 		void CallShowFederateOrForce(const FFederationSupportData& FederationData);
 private:	
 	UPROPERTY()
-	UAuthenticator* Authenticator;
+	USequenceAuthenticator* Authenticator;
 
 	//testing variables//
 	bool bEnableTesting = true;

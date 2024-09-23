@@ -1,10 +1,10 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "BinaryData.h"
-#include "Wallet.generated.h"
+#include "CryptoWallet.generated.h"
 
 UCLASS()
-class SEQUENCEPLUGIN_API UWallet : public UObject
+class SEQUENCEPLUGIN_API UCryptoWallet : public UObject
 {
 	GENERATED_BODY()
 private:
@@ -15,11 +15,11 @@ public:
 	/*
 	* Generates a random wallet
 	*/
-	UWallet();
+	UCryptoWallet();
 
-	static UWallet* Make();
-	static UWallet* Make(FPrivateKey PrivateKey);
-	static UWallet* Make(const FString& PrivateKey);
+	static UCryptoWallet* Make();
+	static UCryptoWallet* Make(FPrivateKey PrivateKey);
+	static UCryptoWallet* Make(const FString& PrivateKey);
 
 	TArray<uint8> SignMessage(TArray<uint8> MessageBytes,int32 MessageLength);
 	
