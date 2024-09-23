@@ -4,19 +4,19 @@
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
-#include "IndexerPingTestData.h"
+#include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /* Latent command used to poll off main thread to see if our pings are done */
-DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDone, const UIndexerPingTestData *, IndexerPingTestData, FAutomationTestBase *, PingTest);
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDone, const UIndexerRequestsTestData *, IndexerRequestsTestData, FAutomationTestBase *, PingTest);
 
 /* Latent command used to batch process pings w/o exceeding network threading limits */
-DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessPingBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerPingTestData *, IndexerPingTestData, const TSuccessCallback<bool>, SuccessCallback, const FFailureCallback, FailureCallback);
+DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessPingBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerRequestsTestData *, IndexerRequestsTestData, const TSuccessCallback<bool>, SuccessCallback, const FFailureCallback, FailureCallback);
 
 bool FProcessPingBatch::Update()
 {
-    while(IndexerPingTestData->GetPingsComplete() < WatchIndex)
+    while(IndexerRequestsTestData->GetRequestsComplete() < WatchIndex)
     {
         return false;
     }
@@ -26,7 +26,7 @@ bool FProcessPingBatch::Update()
     for (int i = WatchIndex; i <= FinishIndex; i++)
     {
         UE_LOG(LogTemp, Display, TEXT("Index: %d, Pinging Network: %lld"), i, Networks[i]);
-        IndexerPingTestData->GetIndexer()->Ping(Networks[i], SuccessCallback, FailureCallback);
+        IndexerRequestsTestData->GetIndexer()->Ping(Networks[i], SuccessCallback, FailureCallback);
     }
     
     return true;
@@ -34,12 +34,12 @@ bool FProcessPingBatch::Update()
 
 bool FIsDone::Update()
 {
-    while(this->IndexerPingTestData->GetPendingPings() > 0)
+    while(this->IndexerRequestsTestData->GetPendingRequests() > 0)
     {
         return false;
     }
 
-    if (this->IndexerPingTestData->GetAllPingsSuccessful())
+    if (this->IndexerRequestsTestData->GetAllRequestsSuccessful())
     {
         PingTest->AddInfo(TEXT("All pings completed"));
     }
@@ -60,22 +60,22 @@ void FIndexerPingTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FStr
 bool FIndexerPingTest::RunTest(const FString& Parameters)
 {
     const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
-    UIndexerPingTestData * IndexerPingTestData = UIndexerPingTestData::Make(Networks.Num());
+    UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(Networks.Num());
 
-    const TSuccessCallback<bool> GenericSuccess = [this, IndexerPingTestData](const bool bSuccess)
+    const TSuccessCallback<bool> GenericSuccess = [this, IndexerRequestsTestData](const bool bSuccess)
     {
         const FString Message = (bSuccess) ? "Ping Success" : "Ping Failure";
-        AddInfo(FString::Printf(TEXT("%s. Remaining pings: %d"), *Message, IndexerPingTestData->DecrementPendingPings()));
+        AddInfo(FString::Printf(TEXT("%s. Remaining pings: %d"), *Message, IndexerRequestsTestData->DecrementPendingRequests()));
     };
 
-    const FFailureCallback GenericFailure = [this, IndexerPingTestData](const FSequenceError& Error)
+    const FFailureCallback GenericFailure = [this, IndexerRequestsTestData](const FSequenceError& Error)
     {
         const FString Message = "Ping Failure";
-        AddError(FString::Printf(TEXT("%s: %s. Remaining pings: %d"), *Message, *Error.Message, IndexerPingTestData->DecrementPendingPings()));
-        IndexerPingTestData->PingFailed();
+        AddError(FString::Printf(TEXT("%s: %s. Remaining pings: %d"), *Message, *Error.Message, IndexerRequestsTestData->DecrementPendingRequests()));
+        IndexerRequestsTestData->RequestFailed();
     };
 
-    AddInfo(FString::Printf(TEXT("Starting %d pings"), IndexerPingTestData->GetPendingPings()));
+    AddInfo(FString::Printf(TEXT("Starting %d pings"), IndexerRequestsTestData->GetPendingRequests()));
 
     constexpr int32 BatchSize = 5;
     int32 StartIndex = 0;
@@ -83,11 +83,11 @@ bool FIndexerPingTest::RunTest(const FString& Parameters)
 
     while (StartIndex < Networks.Num() - 1)
     {
-        ADD_LATENT_AUTOMATION_COMMAND(FProcessPingBatch(StartIndex, EndIndex, IndexerPingTestData, GenericSuccess, GenericFailure));
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessPingBatch(StartIndex, EndIndex, IndexerRequestsTestData, GenericSuccess, GenericFailure));
         StartIndex += BatchSize;
         EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
     }
     
-    ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerPingTestData, this));
+    ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerRequestsTestData, this));
     return true;
 }

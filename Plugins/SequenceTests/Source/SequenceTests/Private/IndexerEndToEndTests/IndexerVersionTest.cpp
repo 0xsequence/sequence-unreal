@@ -4,7 +4,7 @@
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
-#include "IndexerRequestsTestData.h"
+#include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerVersionTest, "SequencePlugin.EndToEnd.IndexerTests.VersionTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
