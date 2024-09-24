@@ -205,20 +205,28 @@ FString USequenceAuthenticator::BuildRedirectPrefix() const
 bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
-	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
-	{
-		FString CTR_Json = "";
-		if (Encryptor)
-		{//Use set encryptor
-			CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
-		}
-		else
-		{//Use the fallback
-			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
-		}
 
-		ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
-		ret &= Credentials->RegisteredValid();
+	//This line crashes the engine if Cr.sav is modified externally in anyway
+	
+	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
+
+	if (SaveGame != nullptr)
+	{
+		if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(SaveGame))
+		{
+			FString CTR_Json = "";
+			if (Encryptor)
+			{//Use set encryptor
+				CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
+			}
+			else
+			{//Use the fallback
+				CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+			}
+
+			ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+			ret &= Credentials->RegisteredValid();
+		}
 	}
 	return ret;
 }
