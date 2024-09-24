@@ -9,12 +9,12 @@
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerVersionTest, "SequencePlugin.EndToEnd.IndexerTests.VersionTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /* Latent command used to poll off main thread to see if our requests are done */
-DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDoneRequests, const UIndexerRequestsTestData *, IndexerRequestsTestData, FAutomationTestBase *, VersionTest);
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDoneVersionTests, const UIndexerRequestsTestData *, IndexerRequestsTestData, FAutomationTestBase *, VersionTest);
 
 /* Latent command used to batch process requests w/o exceeding network threading limits */
-DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessRequestBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerRequestsTestData *, IndexerRequestsTestData, const TSuccessCallback<FSeqVersion>, SuccessCallback, const FFailureCallback, FailureCallback);
+DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessVersionRequestBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerRequestsTestData *, IndexerRequestsTestData, const TSuccessCallback<FSeqVersion>, SuccessCallback, const FFailureCallback, FailureCallback);
 
-bool FProcessRequestBatch::Update()
+bool FProcessVersionRequestBatch::Update()
 {
     while(IndexerRequestsTestData->GetRequestsComplete() < WatchIndex)
     {
@@ -32,7 +32,7 @@ bool FProcessRequestBatch::Update()
     return true;
 }
 
-bool FIsDoneRequests::Update()
+bool FIsDoneVersionTests::Update()
 {
     while(this->IndexerRequestsTestData->GetPendingRequests() > 0)
     {
@@ -89,11 +89,11 @@ bool FIndexerVersionTest::RunTest(const FString& Parameters)
 
     while (StartIndex < Networks.Num() - 1)
     {
-        ADD_LATENT_AUTOMATION_COMMAND(FProcessRequestBatch(StartIndex, EndIndex, IndexerRequestTestData, GenericSuccess, GenericFailure));
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessVersionRequestBatch(StartIndex, EndIndex, IndexerRequestTestData, GenericSuccess, GenericFailure));
         StartIndex += BatchSize;
         EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
     }
     
-    ADD_LATENT_AUTOMATION_COMMAND(FIsDoneRequests(IndexerRequestTestData, this));
+    ADD_LATENT_AUTOMATION_COMMAND(FIsDoneVersionTests(IndexerRequestTestData, this));
     return true;
 }
