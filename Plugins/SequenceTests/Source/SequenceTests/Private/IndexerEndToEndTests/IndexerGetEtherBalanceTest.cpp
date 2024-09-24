@@ -5,6 +5,7 @@
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
 #include "Helpers/IndexerRequestsTestData.h"
+#include "Helpers/IndexerEndToEndTestsCommon.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerGetEtherBalanceTest, "SequencePlugin.EndToEnd.IndexerTests.GetEtherBalanceTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -38,8 +39,8 @@ void FIndexerGetEtherBalanceTest::GetTests(TArray<FString>& OutBeautifiedNames, 
 
 bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = 137; // Polygon network ID
-    const FString TestAddress = TEXT("0x8e3E38fe7367dd3b52D1e281E4e8400447C8d8B9");
+    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString& TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
     const TSuccessCallback<FSeqEtherBalance> GenericSuccess = [this, IndexerRequestsTestData, TestAddress](const FSeqEtherBalance& Balance)
