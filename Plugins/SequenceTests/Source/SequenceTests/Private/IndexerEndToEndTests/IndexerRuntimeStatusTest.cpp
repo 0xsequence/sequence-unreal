@@ -5,6 +5,7 @@
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
 #include "Helpers/IndexerRequestsTestData.h"
+#include "Helpers/BatchTestBuilder.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerRuntimeStatusTest, "SequencePlugin.EndToEnd.IndexerTests.RuntimeStatusTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -92,14 +93,12 @@ bool FIndexerRuntimeStatusTest::RunTest(const FString& Parameters)
     AddInfo(FString::Printf(TEXT("Starting %d requests"), IndexerRequestsTestData->GetPendingRequests()));
 
     constexpr int32 BatchSize = 5;
-    int32 StartIndex = 0;
-    int32 EndIndex = FMath::Min(BatchSize-1, Networks.Num() - 1);
+    FBatchTestBuilder BatchTestBuilder(BatchSize, Networks.Num());
 
-    while (StartIndex < Networks.Num() - 1)
+    while (BatchTestBuilder.CanBuildBatch())
     {
-        ADD_LATENT_AUTOMATION_COMMAND(FProcessRuntimeRequests(StartIndex, EndIndex, IndexerRequestsTestData, GenericSuccess, GenericFailure));
-        StartIndex += BatchSize;
-        EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessRuntimeRequests(BatchTestBuilder.GetStartIndex(), BatchTestBuilder.GetEndIndex(), IndexerRequestsTestData, GenericSuccess, GenericFailure));
+        BatchTestBuilder.BuildNextBatch();
     }
     
     ADD_LATENT_AUTOMATION_COMMAND(FIsDoneRuntimeStatusTests(IndexerRequestsTestData, this));

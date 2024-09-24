@@ -5,6 +5,7 @@
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
 #include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
+#include "Helpers/BatchTestBuilder.h" // Include the BatchTestBuilder header
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -78,14 +79,12 @@ bool FIndexerPingTest::RunTest(const FString& Parameters)
     AddInfo(FString::Printf(TEXT("Starting %d pings"), IndexerRequestsTestData->GetPendingRequests()));
 
     constexpr int32 BatchSize = 5;
-    int32 StartIndex = 0;
-    int32 EndIndex = FMath::Min(BatchSize-1, Networks.Num() - 1);
+    FBatchTestBuilder BatchTestBuilder(BatchSize, Networks.Num());
 
-    while (StartIndex < Networks.Num() - 1)
+    while (BatchTestBuilder.CanBuildBatch())
     {
-        ADD_LATENT_AUTOMATION_COMMAND(FProcessPingBatch(StartIndex, EndIndex, IndexerRequestsTestData, GenericSuccess, GenericFailure));
-        StartIndex += BatchSize;
-        EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessPingBatch(BatchTestBuilder.GetStartIndex(), BatchTestBuilder.GetEndIndex(), IndexerRequestsTestData, GenericSuccess, GenericFailure));
+        BatchTestBuilder.BuildNextBatch();
     }
     
     ADD_LATENT_AUTOMATION_COMMAND(FIsDone(IndexerRequestsTestData, this));

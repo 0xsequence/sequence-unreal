@@ -5,6 +5,7 @@
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
 #include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
+#include "Helpers/BatchTestBuilder.h" // Include the BatchTestBuilder header
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerVersionTest, "SequencePlugin.EndToEnd.IndexerTests.VersionTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -41,11 +42,11 @@ bool FIsDoneVersionTests::Update()
 
     if (this->IndexerRequestsTestData->GetAllRequestsSuccessful())
     {
-        VersionTest->AddInfo(TEXT("All pings completed"));
+        VersionTest->AddInfo(TEXT("All version requests completed"));
     }
     else
     {
-        VersionTest->AddError(FString::Printf(TEXT("Not all pings returned successfully")));
+        VersionTest->AddError(FString::Printf(TEXT("Not all version requests returned successfully")));
     }
     
     return true;
@@ -53,47 +54,45 @@ bool FIsDoneVersionTests::Update()
 
 void FIndexerVersionTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
-    OutBeautifiedNames.Add(TEXT("Indexer Ping Test"));
+    OutBeautifiedNames.Add(TEXT("Indexer Version Test"));
     OutTestCommands.Add(TEXT(""));
 }
 
 bool FIndexerVersionTest::RunTest(const FString& Parameters)
 {
     const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
-    UIndexerRequestsTestData * IndexerRequestTestData = UIndexerRequestsTestData::Make(Networks.Num());
+    UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(Networks.Num());
 
-    const TSuccessCallback<FSeqVersion> GenericSuccess = [this, IndexerRequestTestData](const FSeqVersion version)
+    const TSuccessCallback<FSeqVersion> GenericSuccess = [this, IndexerRequestsTestData](const FSeqVersion& Version)
     {
-        TestNotNull(TEXT("Version"), &version);
-        TestFalse(TEXT("AppVersion should not be empty, given " + version.appVersion), version.appVersion.IsEmpty());
-        TestFalse(TEXT("SchemaVersion should not be empty, given " + version.schemaVersion), version.schemaVersion.IsEmpty());
-        TestFalse(TEXT("WebRPCVersion should not be empty, given " + version.webrpcVersion), version.webrpcVersion.IsEmpty());
-        TestFalse(TEXT("SchemaHash should not be empty, given " + version.schemaHash), version.schemaHash.IsEmpty());
+        TestNotNull(TEXT("Version"), &Version);
+        TestFalse(TEXT("AppVersion should not be empty"), Version.appVersion.IsEmpty());
+        TestFalse(TEXT("SchemaVersion should not be empty"), Version.schemaVersion.IsEmpty());
+        TestFalse(TEXT("WebRPCVersion should not be empty"), Version.webrpcVersion.IsEmpty());
+        TestFalse(TEXT("SchemaHash should not be empty"), Version.schemaHash.IsEmpty());
         
         const FString Message = "Version request succeeded";
-        AddInfo(FString::Printf(TEXT("%s. Remaining Requests: %d"), *Message, IndexerRequestTestData->DecrementPendingRequests()));
+        AddInfo(FString::Printf(TEXT("%s. Remaining Requests: %d"), *Message, IndexerRequestsTestData->DecrementPendingRequests()));
     };
 
-    const FFailureCallback GenericFailure = [this, IndexerRequestTestData](const FSequenceError& Error)
+    const FFailureCallback GenericFailure = [this, IndexerRequestsTestData](const FSequenceError& Error)
     {
         const FString Message = "Request Failure";
-        AddError(FString::Printf(TEXT("%s: %s. Remaining requests: %d"), *Message, *Error.Message, IndexerRequestTestData->DecrementPendingRequests()));
-        IndexerRequestTestData->RequestFailed();
+        AddError(FString::Printf(TEXT("%s: %s. Remaining requests: %d"), *Message, *Error.Message, IndexerRequestsTestData->DecrementPendingRequests()));
+        IndexerRequestsTestData->RequestFailed();
     };
 
-    AddInfo(FString::Printf(TEXT("Starting %d requests"), IndexerRequestTestData->GetPendingRequests()));
+    AddInfo(FString::Printf(TEXT("Starting %d requests"), IndexerRequestsTestData->GetPendingRequests()));
 
     constexpr int32 BatchSize = 5;
-    int32 StartIndex = 0;
-    int32 EndIndex = FMath::Min(BatchSize-1, Networks.Num() - 1);
+    FBatchTestBuilder BatchTestBuilder(BatchSize, Networks.Num());
 
-    while (StartIndex < Networks.Num() - 1)
+    while (BatchTestBuilder.CanBuildBatch())
     {
-        ADD_LATENT_AUTOMATION_COMMAND(FProcessVersionRequestBatch(StartIndex, EndIndex, IndexerRequestTestData, GenericSuccess, GenericFailure));
-        StartIndex += BatchSize;
-        EndIndex = FMath::Min((StartIndex + BatchSize - 1), Networks.Num() - 1);
+        ADD_LATENT_AUTOMATION_COMMAND(FProcessVersionRequestBatch(BatchTestBuilder.GetStartIndex(), BatchTestBuilder.GetEndIndex(), IndexerRequestsTestData, GenericSuccess, GenericFailure));
+        BatchTestBuilder.BuildNextBatch();
     }
     
-    ADD_LATENT_AUTOMATION_COMMAND(FIsDoneVersionTests(IndexerRequestTestData, this));
+    ADD_LATENT_AUTOMATION_COMMAND(FIsDoneVersionTests(IndexerRequestsTestData, this));
     return true;
 }
