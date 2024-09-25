@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/Wallet.h"
+#include "Types/CryptoWallet.h"
 #include "Credentials.generated.h"
 
 USTRUCT()
@@ -111,9 +111,9 @@ public:
 		return Network;
 	}
 
-	UWallet * GetSessionWallet() const
+	UCryptoWallet * GetSessionWallet() const
 	{
-		return UWallet::Make(SessionPrivateKey);
+		return UCryptoWallet::Make(SessionPrivateKey);
 	}
 
 	FString GetWalletAddress() const

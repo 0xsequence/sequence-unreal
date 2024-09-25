@@ -5,6 +5,8 @@
 #include "SeqPage.h"
 #include "Util/SequenceSupport.h"
 #include "SeqTokenBalance.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqGetTokenBalancesReturn.generated.h"
 
 USTRUCT(BlueprintType)

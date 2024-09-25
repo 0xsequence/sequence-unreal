@@ -2,9 +2,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SeqTokenSupply.h"
 #include "SeqTokenSupplyList.h"
 #include "JsonObjectConverter.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqGetTokenSuppliesMapReturn.generated.h"
 
 USTRUCT(BlueprintType)

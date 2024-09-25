@@ -84,7 +84,7 @@ ASequenceBackendManager::ASequenceBackendManager()
 void ASequenceBackendManager::BeginPlay()
 {
 	Super::BeginPlay();
-	this->Authenticator = NewObject<UAuthenticator>();
+	this->Authenticator = NewObject<USequenceAuthenticator>();
 
 	//setup up delegate bindings
 	this->Authenticator->AuthSuccess.AddDynamic(this, &ASequenceBackendManager::CallShowAuthSuccessScreen);

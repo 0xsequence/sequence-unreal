@@ -126,7 +126,7 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 		else
 		{
 			UE_LOG(LogTemp,Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
-			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
 
 			if (StoredCredentials.GetValid())
@@ -254,7 +254,7 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSession
 
 void USequenceWallet::SignOut() const
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	if (this->Credentials.IsRegistered())
 	{
 		const TFunction<void()> OnSuccess = [Auth]
@@ -309,7 +309,7 @@ int64 USequenceWallet::GetNetworkId() const
 void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
 {
 	this->Credentials.UpdateNetwork(NewNetwork);
-	const UAuthenticator * auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * auth = NewObject<USequenceAuthenticator>();
 	auth->StoreCredentials(this->Credentials);
 }
 

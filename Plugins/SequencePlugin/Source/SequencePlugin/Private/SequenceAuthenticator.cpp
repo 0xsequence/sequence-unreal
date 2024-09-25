@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "Misc/Guid.h"
 #include "Misc/Base64.h"
 #include "StorableCredentials.h"
@@ -20,7 +20,7 @@
 #include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
 
-UAuthenticator::UAuthenticator()
+USequenceAuthenticator::USequenceAuthenticator()
 {
 	this->StateToken = FGuid::NewGuid().ToString();
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
@@ -43,7 +43,7 @@ UAuthenticator::UAuthenticator()
 	}
 }
 
-void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
+void USequenceAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 {
 #if PLATFORM_ANDROID
 	switch (Type)
@@ -79,43 +79,43 @@ void UAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 #endif
 }
 
-void UAuthenticator::SetIsForcing(const bool IsForcingIn)
+void USequenceAuthenticator::SetIsForcing(const bool IsForcingIn)
 {
 	this->IsForcing = IsForcingIn;
 }
 
-void UAuthenticator::SetIsFederating(const bool IsFederatingIn)
+void USequenceAuthenticator::SetIsFederating(const bool IsFederatingIn)
 {
 	this->IsFederating = IsFederatingIn;
 }
 
-void UAuthenticator::SetIsFederatingSessionInUse()
+void USequenceAuthenticator::SetIsFederatingSessionInUse()
 {
 	this->IsFederatingSessionInUse = true;
 }
 
-bool UAuthenticator::ReadAndResetIsForcing()
+bool USequenceAuthenticator::ReadAndResetIsForcing()
 {
 	const bool Cached_Force_State = this->IsForcing;
 	this->IsForcing = false;
 	return Cached_Force_State;
 }
 
-bool UAuthenticator::ReadAndResetIsFederating()
+bool USequenceAuthenticator::ReadAndResetIsFederating()
 {
 	const bool Cached_Federate_State = this->IsFederating;
 	this->IsFederating = false;
 	return Cached_Federate_State;
 }
 
-bool UAuthenticator::ReadAndResetIsFederatingSessionInUse()
+bool USequenceAuthenticator::ReadAndResetIsFederatingSessionInUse()
 {
 	const bool Cached_FederateSessionInUse_State = this->IsFederatingSessionInUse;
 	this->IsFederatingSessionInUse = false;
 	return Cached_FederateSessionInUse_State;
 }
 
-void UAuthenticator::CheckAndFederateSessionInUse()
+void USequenceAuthenticator::CheckAndFederateSessionInUse()
 {
 	if (this->ReadAndResetIsFederatingSessionInUse())
 	{
@@ -143,12 +143,12 @@ void UAuthenticator::CheckAndFederateSessionInUse()
 	}
 }
 
-void UAuthenticator::ResetFederateSessionInUse()
+void USequenceAuthenticator::ResetFederateSessionInUse()
 {
 	this->IsFederatingSessionInUse = false;
 }
 
-void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
+void USequenceAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 {
 	this->Encryptor = EncryptorIn;
 	if (this->Encryptor)
@@ -162,13 +162,13 @@ void UAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
 	}
 }
 
-void UAuthenticator::ClearStoredCredentials() const
+void USequenceAuthenticator::ClearStoredCredentials() const
 {
 	const FCredentials_BE BlankCredentials;
 	this->StoreCredentials(BlankCredentials);
 }
 
-void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
+void USequenceAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 {
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
@@ -193,7 +193,7 @@ void UAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
 	}
 }
 
-FString UAuthenticator::BuildRedirectPrefix() const
+FString USequenceAuthenticator::BuildRedirectPrefix() const
 {
 	const FString Redirect = UConfigFetcher::GetConfigVar(UConfigFetcher::RedirectUrl);
 	if (Redirect.EndsWith(TEXT("/"),ESearchCase::IgnoreCase))
@@ -202,28 +202,36 @@ FString UAuthenticator::BuildRedirectPrefix() const
 		return Redirect + "/" + this->RedirectPrefixTrailer;
 }
 
-bool UAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
+bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
 {
 	bool ret = false;
-	if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex)))
-	{
-		FString CTR_Json = "";
-		if (Encryptor)
-		{//Use set encryptor
-			CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
-		}
-		else
-		{//Use the fallback
-			CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
-		}
 
-		ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
-		ret &= Credentials->RegisteredValid();
+	//This line crashes the engine if Cr.sav is modified externally in anyway
+	
+	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
+
+	if (SaveGame != nullptr)
+	{
+		if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(SaveGame))
+		{
+			FString CTR_Json = "";
+			if (Encryptor)
+			{//Use set encryptor
+				CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
+			}
+			else
+			{//Use the fallback
+				CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
+			}
+
+			ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
+			ret &= Credentials->RegisteredValid();
+		}
 	}
 	return ret;
 }
 
-void UAuthenticator::CallAuthRequiresCode() const
+void USequenceAuthenticator::CallAuthRequiresCode() const
 {
 	if (this->AuthRequiresCode.IsBound())
 		this->AuthRequiresCode.Broadcast();
@@ -231,7 +239,7 @@ void UAuthenticator::CallAuthRequiresCode() const
 		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
 }
 
-void UAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
+void USequenceAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
 {
 	if (this->AuthFailure.IsBound())
 		this->AuthFailure.Broadcast(ErrorMessageIn);
@@ -239,7 +247,7 @@ void UAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
 
-void UAuthenticator::CallAuthSuccess() const
+void USequenceAuthenticator::CallAuthSuccess() const
 {
 	if (this->AuthSuccess.IsBound())
 		this->AuthSuccess.Broadcast();
@@ -247,7 +255,7 @@ void UAuthenticator::CallAuthSuccess() const
 		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
-void UAuthenticator::CallFederateSuccess() const
+void USequenceAuthenticator::CallFederateSuccess() const
 {
 	if (this->FederateSuccess.IsBound())
 	{
@@ -259,7 +267,7 @@ void UAuthenticator::CallFederateSuccess() const
 	}
 }
 
-void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
+void USequenceAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
 {
 	if (this->FederateFailure.IsBound())
 	{
@@ -271,7 +279,7 @@ void UAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
 	}
 }
 
-void UAuthenticator::CallFederateOrForce(const FFederationSupportData& FederationData) const
+void USequenceAuthenticator::CallFederateOrForce(const FFederationSupportData& FederationData) const
 {
 	if (this->FederateOrForce.IsBound())
 	{
@@ -283,7 +291,7 @@ void UAuthenticator::CallFederateOrForce(const FFederationSupportData& Federatio
 	}
 }
 
-void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
+void USequenceAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 {
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
@@ -314,7 +322,7 @@ void UAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 	}//parse out ?
 }
 
-void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
+void USequenceAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
 {
 	if (this->ReadAndResetIsFederating())
 	{
@@ -326,14 +334,14 @@ void UAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
 	}
 }
 
-void UAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
+void USequenceAuthenticator::InitiateMobileSSO(const ESocialSigninType& Type, const bool ForceCreateAccountIn)
 {
 	this->SetIsForcing(ForceCreateAccountIn);
 	this->SetIsFederating(false);
 	this->InitiateMobileSSO_Internal(Type);
 }
 
-FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
+FString USequenceAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 {
 	FString SigninURL = "";
 	
@@ -362,7 +370,7 @@ FString UAuthenticator::GetSigninURL(const ESocialSigninType& Type) const
 	return SigninURL;
 }
 
-void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn)
+void USequenceAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreateAccountIn)
 {
 	if (ForceCreateAccountIn)
 	{
@@ -392,7 +400,7 @@ void UAuthenticator::SocialLogin(const FString& IDTokenIn, const bool ForceCreat
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired);
 }
 
-void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn)
+void USequenceAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAccountIn)
 {
 	this->SetIsForcing(ForceCreateAccountIn);
 	this->SetIsFederating(false);
@@ -416,7 +424,7 @@ void UAuthenticator::EmailLogin(const FString& EmailIn, const bool ForceCreateAc
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
+void USequenceAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 {
 	if (ForceCreateAccountIn)
 	{
@@ -437,7 +445,7 @@ void UAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
 }
 
-void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
+void USequenceAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
 	if (ForceCreateAccountIn)
 	{
@@ -478,7 +486,7 @@ void UAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, const FS
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
+void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn)
 {
 	if (ForceCreateAccountIn)
 	{
@@ -519,7 +527,7 @@ void UAuthenticator::PlayFabLogin(const FString& UsernameIn, const FString& Pass
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
+FString USequenceAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 {
 	FString RedirectUrl = this->BuildRedirectPrefix() + "&scope=openid+email&state=" + UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type);
 	switch (Type)
@@ -537,7 +545,7 @@ FString UAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
 	return RedirectUrl;
 }
 
-FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
+FString USequenceAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 {
 	const FString AuthClientId = SSOProviderMap[Type].ClientID;
 	const FString AuthUrl = SSOProviderMap[Type].URL;
@@ -558,7 +566,7 @@ FString UAuthenticator::GenerateSigninURL(const ESocialSigninType& Type) const
 	return SigninUrl;
 }
 
-void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
+void USequenceAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
 {
 	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -571,7 +579,7 @@ void UAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) cons
 	}
 }
 
-void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -592,7 +600,7 @@ void UAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& P
 	PlayFabRPC(GeneratePlayFabUrl(), RequestBody, OnSuccessResponse, OnFailure);
 }
 
-void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
@@ -613,19 +621,19 @@ void UAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const 
 	PlayFabRPC(GeneratePlayFabRegisterUrl(), RequestBody, OnSuccessResponse, OnFailure);
 }
 
-FString UAuthenticator::GeneratePlayFabUrl()
+FString USequenceAuthenticator::GeneratePlayFabUrl()
 {
 	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
 	return "https://" + TitleId + ".playfabapi.com/Client/LoginWithPlayFab";
 }
 
-FString UAuthenticator::GeneratePlayFabRegisterUrl()
+FString USequenceAuthenticator::GeneratePlayFabRegisterUrl()
 {
 	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
 	return "https://" + TitleId + ".playfabapi.com/Client/RegisterPlayFabUser";
 }
 
-void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -636,7 +644,7 @@ void UAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, cons
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-void UAuthenticator::EmailLoginCode(const FString& CodeIn)
+void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
 {	
 	if (this->ReadAndResetIsFederating())
 	{
@@ -687,7 +695,7 @@ void UAuthenticator::EmailLoginCode(const FString& CodeIn)
 	}
 }
 
-void UAuthenticator::FederateEmail(const FString& EmailIn)
+void USequenceAuthenticator::FederateEmail(const FString& EmailIn)
 {
 	this->SetIsFederating(true);
 
@@ -705,7 +713,7 @@ void UAuthenticator::FederateEmail(const FString& EmailIn)
 	this->SequenceRPCManager->InitEmailFederation(EmailIn.ToLower(),OnSuccess,OnFailure);
 }
 
-void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
+void USequenceAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 {
 	const TFunction<void()> OnSuccess = [this]()
 	{
@@ -729,13 +737,13 @@ void UAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 	}
 }
 
-void UAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
+void USequenceAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType& Type)
 {
 	this->SetIsFederating(true);
 	this->InitiateMobileSSO_Internal(Type);
 }
 
-void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
@@ -773,7 +781,7 @@ void UAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const 
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
@@ -811,7 +819,7 @@ void UAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FStri
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void UAuthenticator::ForceOpenLastOpenSessionAttempt()
+void USequenceAuthenticator::ForceOpenLastOpenSessionAttempt()
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)
 	{
@@ -828,7 +836,7 @@ void UAuthenticator::ForceOpenLastOpenSessionAttempt()
 	this->SequenceRPCManager->ForceOpenSessionInUse(OnSuccess, OnFailure);
 }
 
-FStoredCredentials_BE UAuthenticator::GetStoredCredentials() const
+FStoredCredentials_BE USequenceAuthenticator::GetStoredCredentials() const
 {	
 	FCredentials_BE CredData;
 	FCredentials_BE* Credentials = &CredData;

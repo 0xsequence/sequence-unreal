@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Indexer/Indexer.h"
+#include "ConfigFetcher.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
@@ -49,6 +50,7 @@ void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FStri
 	HTTP_Post_Req->SetVerb("POST");
 	HTTP_Post_Req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	HTTP_Post_Req->SetHeader("Accept", "application/json");
+	HTTP_Post_Req->SetHeader("X-Access-Key",UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey));
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(Url);
 	HTTP_Post_Req->SetContentAsString(Args);

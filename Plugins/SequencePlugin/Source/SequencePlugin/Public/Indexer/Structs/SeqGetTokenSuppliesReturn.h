@@ -5,6 +5,8 @@
 #include "SeqPage.h"
 #include "Indexer/Indexer_Enums.h"
 #include "SeqTokenSupply.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqGetTokenSuppliesReturn.generated.h"
 
 USTRUCT(BlueprintType)
