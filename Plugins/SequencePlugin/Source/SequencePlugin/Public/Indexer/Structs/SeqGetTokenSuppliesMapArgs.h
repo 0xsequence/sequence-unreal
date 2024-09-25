@@ -57,8 +57,9 @@ public:
 
 		for (FString key : keys)
 		{
-			ret += "\"" + key + "\":" + USequenceSupport::StringListToParsableString(tokenMap.Find(key)->token_list);
+			ret += "\"" + key + "\":" + USequenceSupport::StringListToParsableString(tokenMap.Find(key)->token_list) + ",";
 		}
+		ret = ret.LeftChop(1); //remove the last comma
 		ret += "},";//close off tokenMap subObject
 		ret += "\"includeMetaData\":";
 		ret += includeMetaData ? "true" : "false";
