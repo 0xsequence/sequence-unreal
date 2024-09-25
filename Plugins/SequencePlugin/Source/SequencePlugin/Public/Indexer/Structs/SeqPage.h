@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Util/SequenceSupport.h"
 #include "SeqSortBy.h"
+#include "Dom/JsonObject.h"
 #include "SeqPage.generated.h"
 
 USTRUCT(BlueprintType)

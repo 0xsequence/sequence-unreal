@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "SeqContractInfo.h"
 #include "SeqTokenMetaData.h"
+#include "Dom/JsonObject.h"
 #include "SeqTokenSupply.generated.h"
 
 USTRUCT(BlueprintType)

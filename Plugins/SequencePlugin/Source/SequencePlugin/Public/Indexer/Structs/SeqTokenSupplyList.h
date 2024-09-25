@@ -3,6 +3,8 @@
 
 #include "CoreMinimal.h"
 #include "SeqTokenSupply.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqTokenSupplyList.generated.h"
 
 
