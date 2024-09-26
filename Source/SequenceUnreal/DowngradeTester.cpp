@@ -2,7 +2,7 @@
 
 
 #include "DowngradeTester.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 
 
 // Sets default values
@@ -27,7 +27,7 @@ void ADowngradeTester::Tick(float DeltaTime)
 
 void ADowngradeTester::Authenticate()
 {
-	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
 	const FStoredCredentials_BE Credentials = Authenticator->GetStoredCredentials();
 	if (!Credentials.GetValid())
 	{
