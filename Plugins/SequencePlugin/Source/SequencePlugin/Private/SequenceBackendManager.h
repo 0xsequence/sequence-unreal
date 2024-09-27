@@ -3,23 +3,11 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Misc/AES.h"
 #include "SequenceAuthenticator.h"
 #include "SequenceBackendManager.generated.h"
 
 class UIndexer;
-
-USTRUCT(BlueprintType)
-struct FUserDetails
-{
-	GENERATED_USTRUCT_BODY()
-public:
-	FString Username = "";
-	FString Email = "";
-	FString EmailService = "";
-	int32 AccountID = -1;
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthIRequiresCode);
 
@@ -72,15 +60,7 @@ private:
 	UPROPERTY()
 	USequenceAuthenticator* Authenticator;
 
-	//testing variables//
-	bool bEnableTesting = true;
-	TArray<FCoin_BE> TestCoins;
-	TArray<FNFT_Master_BE> TestNfTs;
-	//testing variables//
-
-public:
-	FUserDetails GetUserDetails();
-	
+public:	
 	ASequenceBackendManager();
 
 protected:

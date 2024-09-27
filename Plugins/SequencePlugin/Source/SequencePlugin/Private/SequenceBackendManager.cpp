@@ -4,12 +4,6 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 
-FUserDetails ASequenceBackendManager::GetUserDetails()
-{
-	FUserDetails ret;
-	return ret;
-}
-
 void ASequenceBackendManager::CallReadyToReceiveCode()
 {
 	if (this->ReadyToReceiveCodeDelegate.IsBound())

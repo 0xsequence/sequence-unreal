@@ -4,7 +4,6 @@
 #include "SequenceAuthenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Containers/Union.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -18,9 +17,6 @@
 #include "TransakDataTypes.h"
 #include "Util/SequenceSupport.h"
 #include "SequenceAPI.generated.h"
-
-using FSignature = FUnsizedData;
-using TransactionID = FString;
 
 class UIndexer;
 class UProvider;
@@ -47,23 +43,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 
-	//this will be removed
-	const FString Hostname = "https://next-api.sequence.app";
-	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
-	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
-	const FString Path = "/rpc/Wallet/";
-	
-	//URL fetchers for sequence services
-	FString Url(const FString& Name) const;
-	FString getSequenceURL(const FString& endpoint) const;
-	static FString encodeB64_URL(const FString& data);
-
-	//Raw request functions
-	void SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	//Response helper functions
-	static TArray<FContact_BE> BuildFriendListFromJson(const FString& JSON);
-	static TArray<FItemPrice_BE> BuildItemUpdateListFromJson(const FString& JSON);
 public:
 	USequenceWallet();
 

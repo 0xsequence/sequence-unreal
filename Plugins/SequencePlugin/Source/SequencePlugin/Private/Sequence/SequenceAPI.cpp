@@ -1,10 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Sequence/SequenceAPI.h"
-#include "RequestHandler.h"
 #include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
-#include "JsonObjectConverter.h"
-#include "Eth/Crypto.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
@@ -12,27 +9,9 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Indexer/Indexer.h"
-#include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "Transak.h"
 #include "SequenceRPCManager.h"
-
-FString USequenceWallet::Url(const FString& Name) const
-{
-	return this->Hostname + this->Path + Name;
-}
-
-void USequenceWallet::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	NewObject<URequestHandler>()
-			->PrepareRequest()
-			->WithUrl(Url)
-			->WithHeader("Content-type", "application/json")
-			->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
-			->WithVerb("POST")
-			->WithContentAsString(Content)
-			->ProcessAndThen(OnSuccess, OnFailure);
-}
 
 USequenceWallet::USequenceWallet()
 {
@@ -430,85 +409,6 @@ void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactio
 	{
 		this->SequenceRPCManager->SendTransaction(this->Credentials, Transactions, OnSuccess, OnFailure);
 	}
-}
-
-FString USequenceWallet::getSequenceURL(const FString& endpoint) const
-{
-	return this->SequenceURL + endpoint;
-}
-
-TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(const FString& JSON)
-{
-	TArray<FContact_BE> friendList;
-	TSharedPtr<FJsonObject> jsonObj;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		const TArray<TSharedPtr<FJsonValue>>* storedFriends;
-		if (jsonObj.Get()->TryGetArrayField(TEXT("friends"), storedFriends))
-		{
-			for (TSharedPtr<FJsonValue> friendData : *storedFriends)
-			{
-				const TSharedPtr<FJsonObject>* fJsonObj;
-				if (friendData.Get()->TryGetObject(fJsonObj))//need it as an object
-				{
-					FContact_BE newFriend;
-					newFriend.Public_Address = fJsonObj->Get()->GetStringField(TEXT("userAddress"));
-					newFriend.Nickname = fJsonObj->Get()->GetStringField(TEXT("nickname"));
-					friendList.Add(newFriend);
-				}
-			}
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	return friendList;
-}
-
-TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
-{
-	TSharedPtr<FJsonObject> jsonObj;
-	FUpdatedPriceReturn updatedPrices;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		if (FJsonObjectConverter::JsonObjectToUStruct<FUpdatedPriceReturn>(jsonObj.ToSharedRef(), &updatedPrices))
-		{
-			return updatedPrices.tokenPrices;
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	TArray<FItemPrice_BE> updatedItems;
-	return updatedItems;
-}
-
-//we only need to encode base64URL we don't decode them as we receive the QR code
-FString USequenceWallet::encodeB64_URL(const FString& data)
-{
-	FString ret = FBase64::Encode(data);
-	//now we just gotta do some swaps to make it base64 URL compliant
-	// + -> -
-	// / -> _ 
-
-	const FString srch_plus = TEXT("+");
-	const FString rep_plus = TEXT("-");
-	const FString srch_slash = TEXT("/");
-	const FString rep_slash = TEXT("_");
-
-	const TCHAR* srch_ptr_plus = *srch_plus;
-	const TCHAR* rep_ptr_plus = *rep_plus;
-	const TCHAR* srch_ptr_slash = *srch_slash;
-	const TCHAR* rep_ptr_slash = *rep_slash;
-
-	ret.ReplaceInline(srch_ptr_plus, rep_ptr_plus, ESearchCase::IgnoreCase);//remove + and replace with -
-	ret.ReplaceInline(srch_ptr_slash, rep_ptr_slash, ESearchCase::IgnoreCase);//remove / and replace with _
-
-	return ret;
 }
 
 //Indexer Calls
