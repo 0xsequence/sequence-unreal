@@ -259,15 +259,6 @@ private:
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
-	
-private:
-	//these functions are meant for the UI Only and have been removed for this version
-	void GetFriends(FString PublicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	FString BuildQr_Request_URL(const FString& Data, int32 Size) const;
 
 public:
 	//Indexer Specific Calls

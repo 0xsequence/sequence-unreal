@@ -503,21 +503,6 @@ TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(const FString& JSON
 	return friendList;
 }
 
-/*
-* Gets the friend data from the given username!
-* This function appears to require some form of authentication (perhaps all of the sequence api does)
-* @Deprecated
-*/
-void USequenceWallet::GetFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	const FString json_arg = "{}";
-	
-	SendRPC(getSequenceURL("friendList"), json_arg, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildFriendListFromJson(Content));
-		}, OnFailure);
-}
-
 TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
 {
 	TSharedPtr<FJsonObject> jsonObj;
@@ -536,65 +521,6 @@ TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString
 	}
 	TArray<FItemPrice_BE> updatedItems;
 	return updatedItems;
-}
-
-void USequenceWallet::GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCoinPrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCoinPrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCollectiblePrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCollectiblePrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-FString USequenceWallet::BuildQr_Request_URL(const FString& walletAddress,int32 Size) const
-{
-	FString urlSize = "/";
-	urlSize.AppendInt(Size);
-	return SequenceURL_Qr + encodeB64_URL(walletAddress) + urlSize;
 }
 
 //we only need to encode base64URL we don't decode them as we receive the QR code
