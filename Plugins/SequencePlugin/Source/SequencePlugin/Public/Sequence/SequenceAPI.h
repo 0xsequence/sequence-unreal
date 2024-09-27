@@ -26,26 +26,6 @@ class UIndexer;
 class UProvider;
 class USequenceRPCManager;
 
-//Sequence Specific Version of Transaction
-struct SEQUENCEPLUGIN_API FTransaction_Sequence
-{
-	uint64 ChainId;
-	FAddress From;
-	FAddress To;
-	TOptional<FString> AutoGas;
-	TOptional<uint64> Nonce;
-	TOptional<FString> Value;
-	TOptional<FString> CallData;
-	TOptional<FString> TokenAddress;
-	TOptional<FString> TokenAmount;
-	TOptional<TArray<FString>> TokenIds;
-	TOptional<TArray<FString>> TokenAmounts;
-
-	static FTransaction_Sequence Convert(const FTransaction_FE& Transaction_Fe);
-	FString ToJson();
-	TransactionID ID();
-};
-
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
 {

@@ -946,5 +946,8 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="BE")
     TArray<FString> TokenAmounts;
 
-    FString ID() const;
+    FString ID() const
+    {
+        return "";
+    };
 };
