@@ -12,6 +12,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Indexer/Indexer.h"
+#include "Marketplace/Marketplace.h"
 #include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "Transak.h"
@@ -206,6 +207,7 @@ void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
 	this->Indexer = NewObject<UIndexer>();
+	this->Marketplace = NewObject<UMarketplace>();
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->Credentials.GetSessionWallet());
 	if (!this->Provider)
 	{
@@ -681,6 +683,12 @@ void USequenceWallet::GetTransactionHistory(const FSeqGetTransactionHistoryArgs&
 {
 	if (this->Indexer)
 		this->Indexer->GetTransactionHistory(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
+}
+
+void USequenceWallet::GetCollectibleListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->Marketplace)
+		this->Marketplace->GetCollectibleListings(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::BlockByNumber(uint64 Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure) const

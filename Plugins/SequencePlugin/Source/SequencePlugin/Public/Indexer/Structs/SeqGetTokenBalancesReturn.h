@@ -50,7 +50,7 @@ public:
                 const TSharedPtr<FJsonObject>* itemObj;
                 if ((*lst)[i].Get()->TryGetObject(itemObj))
                 {
-                    balances[i].setup(*itemObj->Get());
+                    balances[i].Setup(*itemObj->Get());
                 }
             }
         }

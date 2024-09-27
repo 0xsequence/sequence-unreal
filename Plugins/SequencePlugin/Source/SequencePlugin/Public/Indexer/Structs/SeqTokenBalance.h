@@ -62,12 +62,12 @@ public:
     /*
     * Used for handling edge cases with unreal's parsing
     */
-    void setup(FJsonObject json_in)
+    void Setup(FJsonObject json_in)
     {
         const TSharedPtr<FJsonObject> *item;
         if (json_in.TryGetObjectField(TEXT("tokenMetaData"), item))
         {
-            tokenMetaData.setup(*item->Get());
+            tokenMetaData.Setup(*item->Get());
         }
     }//setup
 };

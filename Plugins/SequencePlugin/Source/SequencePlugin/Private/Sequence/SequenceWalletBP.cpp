@@ -143,6 +143,14 @@ void USequenceWalletBP::CallOnIndexerGetTransactionHistory(const FSequenceRespon
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnIndexerGetTransactionHistory]"));
 }
 
+void USequenceWalletBP::CallOnMarketplaceGetCollectiblesWithLowestListings(const FSequenceResponseStatus& Status, const FSeqGetCollectiblesWithLowestListingsReturn& CollectibleWithLowestListings) const
+{
+	if (this->OnMarketplaceGetCollectiblesWithLowestListings.IsBound())
+		this->OnMarketplaceGetCollectiblesWithLowestListings.Broadcast(Status, CollectibleWithLowestListings);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnMarketplaceGetCollectiblesWithLowestListings]"));
+}
+
 float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
 {
 	return USequenceSupport::GetUserReadableAmount(Amount,Decimals);
@@ -595,4 +603,26 @@ void USequenceWalletBP::IndexerGetTransactionHistory(const FSeqGetTransactionHis
 		
 		Wallet->GetTransactionHistory(Args, OnSuccess, OnFailure);
 	}
+}
+
+void USequenceWalletBP::MarketplaceGetCollectiblesWithLowestListings(const FSeqGetCollectiblesWithLowestListingsArgs& Args)
+{
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+
+		const TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess = [this](const FSeqGetCollectiblesWithLowestListingsReturn& CollectiblesWithLowestListings)
+			{
+				this->CallOnMarketplaceGetCollectiblesWithLowestListings(FSequenceResponseStatus(true, GetCollectiblesWithLowestListingsTrt), CollectiblesWithLowestListings);
+			};
+
+		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+			{
+				this->CallOnMarketplaceGetCollectiblesWithLowestListings(FSequenceResponseStatus(false, Error.Message, GetCollectiblesWithLowestListingsTrt), FSeqGetCollectiblesWithLowestListingsReturn());
+			};
+
+		Wallet->GetCollectibleListings(Wallet->GetNetworkId(),Args, OnSuccess, OnFailure);
+	}
+
 }
