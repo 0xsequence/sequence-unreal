@@ -284,8 +284,8 @@ void AGeneralTesting::TestHistory() const
 		FSeqGetTransactionHistoryArgs args;
 		args.filter.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
-		args.page.page = 0;
-		args.page.more = true;
+		args.page->page = 0;
+		args.page->more = true;
 		Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
 	}
 }
