@@ -29,10 +29,11 @@ public:
 
         ret += "\"contractAddress\":\"" + ContractAddress + "\"";
 
-        // Check if the Filter has data and append its args if it does
-        ret.Append(",\"filter\":");
-        ret.Append(Filter.GetArgs());
-            
+        if (Filter.ContainsData())
+        {// Check if the Filter has data and append its args if it does
+            ret.Append(",\"filter\":");
+            ret.Append(Filter.GetArgs());
+        }
 
         // Check if the Page has data and append its args if it does
         if (Page.ContainsData())

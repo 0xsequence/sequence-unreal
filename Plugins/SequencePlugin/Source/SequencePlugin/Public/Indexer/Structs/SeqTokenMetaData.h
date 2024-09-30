@@ -96,7 +96,6 @@ public:
     void Setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
 
-    //ADDED BY TOMAS
         FString tokenIdString;
         if (json_in.TryGetStringField(TEXT("tokenId"), tokenIdString))
         {
@@ -117,20 +116,6 @@ public:
         json_in.TryGetStringField(TEXT("background_color"), background_color);
         json_in.TryGetStringField(TEXT("animation_url"), animation_url);
         json_in.TryGetStringField(TEXT("external_url"), external_url);
-
-
-    //ADDED BY TOMAS
-
-        FString jsonString;
-        TSharedRef<TJsonWriter<>> writer = TJsonWriterFactory<>::Create(&jsonString);
-        if (FJsonSerializer::Serialize(MakeShared<FJsonObject>(json_in), writer))
-        {
-            UE_LOG(LogTemp, Log, TEXT("Full JSON Input: %s"), *jsonString);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Failed to serialize JSON input."));
-        }
 
         attributes.Empty();
         properties.Empty();

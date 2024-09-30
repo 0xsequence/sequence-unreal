@@ -57,7 +57,7 @@ public:
     int64 PriceDecimals;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
-    double PriceUSD;
+    int64 PriceUSD;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
     FString QuantityInitial;
@@ -112,29 +112,29 @@ public:
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable(new FJsonObject);
-        ret->SetStringField("orderId", OrderId);
-        ret->SetStringField("marketplace", UEnum::GetValueAsString(Marketplace.GetValue()));
-        ret->SetStringField("side", UEnum::GetValueAsString(Side.GetValue()));
-        ret->SetStringField("status", UEnum::GetValueAsString(Status.GetValue()));
-        ret->SetNumberField("chainId", ChainId);
-        ret->SetStringField("collectionContractAddress", CollectionContractAddress);
-        ret->SetStringField("tokenId", TokenId);
-        ret->SetStringField("createdBy", CreatedBy);
-        ret->SetStringField("priceAmount", PriceAmount);
-        ret->SetStringField("priceAmountFormatted", PriceAmountFormatted);
-        ret->SetStringField("priceAmountNet", PriceAmountNet);
-        ret->SetStringField("priceAmountNetFormatted", PriceAmountNetFormatted);
-        ret->SetStringField("priceCurrencyAddress", PriceCurrencyAddress);
-        ret->SetNumberField("priceDecimals", PriceDecimals);
-        ret->SetNumberField("priceUSD", PriceUSD);
-        ret->SetStringField("quantityInitial", QuantityInitial);
-        ret->SetStringField("quantityInitialFormatted", QuantityInitialFormatted);
-        ret->SetStringField("quantityRemaining", QuantityRemaining);
-        ret->SetStringField("quantityRemainingFormatted", QuantityRemainingFormatted);
-        ret->SetStringField("quantityAvailable", QuantityAvailable);
-        ret->SetStringField("quantityAvailableFormatted", QuantityAvailableFormatted);
-        ret->SetNumberField("quantityDecimals", QuantityDecimals);
-        ret->SetNumberField("feeBps", FeeBps);
+        ret.Get()->SetStringField("orderId", OrderId);
+        ret.Get()->SetStringField("marketplace", UEnum::GetValueAsString(Marketplace.GetValue()));
+        ret.Get()->SetStringField("side", UEnum::GetValueAsString(Side.GetValue()));
+        ret.Get()->SetStringField("status", UEnum::GetValueAsString(Status.GetValue()));
+        ret.Get()->SetNumberField("chainId", ChainId);
+        ret.Get()->SetStringField("collectionContractAddress", CollectionContractAddress);
+        ret.Get()->SetStringField("tokenId", TokenId);
+        ret.Get()->SetStringField("createdBy", CreatedBy);
+        ret.Get()->SetStringField("priceAmount", PriceAmount);
+        ret.Get()->SetStringField("priceAmountFormatted", PriceAmountFormatted);
+        ret.Get()->SetStringField("priceAmountNet", PriceAmountNet);
+        ret.Get()->SetStringField("priceAmountNetFormatted", PriceAmountNetFormatted);
+        ret.Get()->SetStringField("priceCurrencyAddress", PriceCurrencyAddress);
+        ret.Get()->SetNumberField("priceDecimals", PriceDecimals);
+        ret.Get()->SetNumberField("priceUSD", PriceUSD);
+        ret.Get()->SetStringField("quantityInitial", QuantityInitial);
+        ret.Get()->SetStringField("quantityInitialFormatted", QuantityInitialFormatted);
+        ret.Get()->SetStringField("quantityRemaining", QuantityRemaining);
+        ret.Get()->SetStringField("quantityRemainingFormatted", QuantityRemainingFormatted);
+        ret.Get()->SetStringField("quantityAvailable", QuantityAvailable);
+        ret.Get()->SetStringField("quantityAvailableFormatted", QuantityAvailableFormatted);
+        ret.Get()->SetNumberField("quantityDecimals", QuantityDecimals);
+        ret.Get()->SetNumberField("feeBps", FeeBps);
 
         // Serialize FeeBreakdown array
         TArray<TSharedPtr<FJsonValue>> feeBreakdownArray;
@@ -142,15 +142,15 @@ public:
         {
             feeBreakdownArray.Add(MakeShareable(new FJsonValueObject(fee.GetJson())));
         }
-        ret->SetArrayField("feeBreakdown", feeBreakdownArray);
+        ret.Get()->SetArrayField("feeBreakdown", feeBreakdownArray);
 
-        ret->SetStringField("validFrom", ValidFrom);
-        ret->SetStringField("validUntil", ValidUntil);
-        ret->SetStringField("orderCreatedAt", OrderCreatedAt);
-        ret->SetStringField("orderUpdatedAt", OrderUpdatedAt);
-        ret->SetStringField("createdAt", CreatedAt);
-        ret->SetStringField("updatedAt", UpdatedAt);
-        ret->SetStringField("deletedAt", DeletedAt);
+        ret.Get()->SetStringField("validFrom", ValidFrom);
+        ret.Get()->SetStringField("validUntil", ValidUntil);
+        ret.Get()->SetStringField("orderCreatedAt", OrderCreatedAt);
+        ret.Get()->SetStringField("orderUpdatedAt", OrderUpdatedAt);
+        ret.Get()->SetStringField("createdAt", CreatedAt);
+        ret.Get()->SetStringField("updatedAt", UpdatedAt);
+        ret.Get()->SetStringField("deletedAt", DeletedAt);
         return ret;
     }
 

@@ -53,6 +53,7 @@ public:
     FString GetArgs()
     {
         FString ret = "";
+
         if (ContainsData())
         {
             ret.Append("{");
