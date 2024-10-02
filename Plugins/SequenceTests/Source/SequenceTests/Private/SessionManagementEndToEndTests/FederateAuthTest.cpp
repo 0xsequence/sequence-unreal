@@ -3,7 +3,7 @@
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FWaaSFederatedAuthTests, "SequencePlugin.EndToEnd.WaaSFederatedAuthTests.FederateAuthTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FWaaSFederatedAuthTests, "SequencePlugin.EndToEnd.SessionManagement.FederateAuthTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
 void FWaaSFederatedAuthTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
