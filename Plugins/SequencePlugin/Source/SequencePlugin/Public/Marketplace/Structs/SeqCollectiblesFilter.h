@@ -72,7 +72,7 @@ public:
                 TArray<FString> propertiesList;
                 for (const FSeqPropertyFilter& property : Properties)
                 {
-                    propertiesList.Add(property.GetArgs()); // Assuming GetArgs() exists in FSeqPropertyFilter
+                    propertiesList.Add(property.GetArgs());
                 }
                 ret.Append(USequenceSupport::StringListToSimpleString(propertiesList));
             }
