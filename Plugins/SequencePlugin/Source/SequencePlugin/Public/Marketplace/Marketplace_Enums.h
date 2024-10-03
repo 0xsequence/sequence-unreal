@@ -66,66 +66,89 @@ enum EOrderStatus
     CANCELLED  UMETA(DisplayName = "Cancelled"),
     FILLED  UMETA(DisplayName = "Filled"),
 };
-//
-//
-//// PropertyType Extensions
-//UCLASS()
-//class UPropertyTypeExtensions : public UObject
-//{
-//    GENERATED_BODY()
-//
-//public:
-//    UFUNCTION(BlueprintCallable, Category = "PropertyType")
-//    static FString AsString(EPropertyType PropertyType)
-//    {
-//        switch (PropertyType)
-//        {
-//        case EPropertyType::INT:     return "INT";
-//        case EPropertyType::STRING:  return "STRING";
-//        case EPropertyType::ARRAY:   return "ARRAY";
-//        case EPropertyType::GENERIC: return "GENERIC";
-//        default: return "Unknown";
-//        }
-//    }
-//};
-//
-//
-//// MarketplaceKind Extensions
-//UCLASS()
-//class UMarketplaceKindExtensions : public UObject
-//{
-//    GENERATED_BODY()
-//
-//public:
-//    UFUNCTION(BlueprintCallable, Category = "MarketplaceKind")
-//    static FString AsString(EMarketplaceKind MarketplaceKind)
-//    {
-//        switch (MarketplaceKind)
-//        {
-//        case EMarketplaceKind::UNKNOWN:                return "unknown";
-//        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V1: return "sequence_marketplace_v1";
-//        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2: return "sequence_marketplace_v2";
-//        case EMarketplaceKind::OPENSEA:                return "opensea";
-//        case EMarketplaceKind::MAGIC_EDEN:             return "magic_eden";
-//        case EMarketplaceKind::MINTIFY:                return "mintify";
-//        case EMarketplaceKind::LOOKS_RARE:             return "looks_rare";
-//        case EMarketplaceKind::X2Y2:                   return "x2y2";
-//        case EMarketplaceKind::SUDO_SWAP:              return "sudo_swap";
-//        case EMarketplaceKind::COINBASE:               return "coinbase";
-//        case EMarketplaceKind::RARIBLE:                return "rarible";
-//        case EMarketplaceKind::NFTX:                   return "nftx";
-//        case EMarketplaceKind::FOUNDATION:             return "foundation";
-//        case EMarketplaceKind::MANIFOLD:               return "manifold";
-//        case EMarketplaceKind::ZORA:                   return "zora";
-//        case EMarketplaceKind::BLUR:                   return "blur";
-//        case EMarketplaceKind::SUPER_RARE:             return "super_rare";
-//        case EMarketplaceKind::OKX:                    return "okx";
-//        case EMarketplaceKind::ELEMENT:                return "element";
-//        case EMarketplaceKind::AQUA_XYZ:               return "aqua_xyz";
-//        case EMarketplaceKind::AURANFT_CO:             return "auranft_co";
-//
-//        default: return "Unknown";
-//
-//        }
-//    }
-//};
+
+
+// PropertyType Extensions
+UCLASS()
+class UMarketplaceEnumsExtensions : public UObject
+{
+    GENERATED_BODY()
+
+public:
+
+    template<typename EnumType>
+    static FString AsString(TEnumAsByte<EnumType> EnumValue);
+
+    template<>
+    FString AsString<EMarketplacePropertyType>(const TEnumAsByte<EMarketplacePropertyType> PropertyType)
+    {
+   
+        switch (PropertyType)
+        {
+        case EMarketplacePropertyType::INT_M:     return "INT";
+        case EMarketplacePropertyType::STRING_M:  return "STRING";
+        case EMarketplacePropertyType::ARRAY_M:   return "ARRAY";
+        case EMarketplacePropertyType::GENERIC_M: return "GENERIC";
+        default: return "Unknown";
+        }
+    }
+
+    template<>
+    FString AsString<EMarketplaceKind>(TEnumAsByte<EMarketplaceKind> MarketplaceKind)
+    {
+        switch (MarketplaceKind)
+        {
+
+        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V1: return "sequence_marketplace_v1";
+        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2: return "sequence_marketplace_v2";
+        case EMarketplaceKind::OPENSEA:                return "opensea";
+        case EMarketplaceKind::MAGIC_EDEN:             return "magic_eden";
+        case EMarketplaceKind::MINTIFY:                return "mintify";
+        case EMarketplaceKind::LOOKS_RARE:             return "looks_rare";
+        case EMarketplaceKind::X2Y2:                   return "x2y2";
+        case EMarketplaceKind::SUDO_SWAP:              return "sudo_swap";
+        case EMarketplaceKind::COINBASE:               return "coinbase";
+        case EMarketplaceKind::RARIBLE:                return "rarible";
+        case EMarketplaceKind::NFTX:                   return "nftx";
+        case EMarketplaceKind::FOUNDATION:             return "foundation";
+        case EMarketplaceKind::MANIFOLD:               return "manifold";
+        case EMarketplaceKind::ZORA:                   return "zora";
+        case EMarketplaceKind::BLUR:                   return "blur";
+        case EMarketplaceKind::SUPER_RARE:             return "super_rare";
+        case EMarketplaceKind::OKX:                    return "okx";
+        case EMarketplaceKind::ELEMENT:                return "element";
+        case EMarketplaceKind::AQUA_XYZ:               return "aqua_xyz";
+        case EMarketplaceKind::AURANFT_CO:             return "auranft_co";
+
+        default: return "Unknown";
+
+        }
+    }
+
+    template<typename EnumType>
+    static TArray<FString> EnumArrayToStringList(const TArray<TEnumAsByte<EnumType>>& EnumArray);
+
+    // Specialization for EMarketplaceKind
+    template<>
+    TArray<FString> EnumArrayToStringList<EMarketplaceKind>(const TArray<TEnumAsByte<EMarketplaceKind>>& MarketplaceKinds)
+    {
+        TArray<FString> StringArray;
+        for (const TEnumAsByte<EMarketplaceKind>& Kind : MarketplaceKinds)
+        {
+            StringArray.Add(UMarketplaceEnumsExtensions::AsString(Kind));
+        }
+        return StringArray;
+    }
+
+    // Specialization for EMarketplacePropertyType
+    template<>
+    TArray<FString> EnumArrayToStringList<EMarketplacePropertyType>(const TArray<TEnumAsByte<EMarketplacePropertyType>>& PropertyTypes)
+    {
+        TArray<FString> StringArray;
+        for (const TEnumAsByte<EMarketplacePropertyType>& Type : PropertyTypes)
+        {
+            StringArray.Add(UMarketplaceEnumsExtensions::AsString(Type));
+        }
+        return StringArray;
+    }
+};

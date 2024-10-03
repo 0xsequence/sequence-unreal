@@ -64,7 +64,7 @@ public:
 
         if (Type != EMarketplacePropertyType()) // Assuming you have an Unknown enum value
         {
-            Args.Append("\"type\":" + FString::Printf(TEXT("%d"), (int32)Type) + ",");
+            Args.Append("\"type\":" + UMarketplaceEnumsExtensions::AsString(Type) + ",");
         }
 
         Args.Append("\"min\":" + FString::Printf(TEXT("%lld"), Min) + ",");

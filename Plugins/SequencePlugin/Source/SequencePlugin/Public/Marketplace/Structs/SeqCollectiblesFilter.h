@@ -23,7 +23,7 @@ public:
     TArray<FSeqPropertyFilter> Properties;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
-    TArray<FString> Marketplaces; 
+    TArray<TEnumAsByte<EMarketplaceKind>> MarketplaceKinds;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     TArray<FString> InAccounts;
@@ -43,7 +43,7 @@ public:
         return bIncludeEmpty ||
             !SearchText.IsEmpty() ||
             Properties.Num() > 0 ||
-            Marketplaces.Num() > 0 ||
+            MarketplaceKinds.Num() > 0 ||
             InAccounts.Num() > 0 ||
             NotInAccounts.Num() > 0 ||
             OrdersCreatedBy.Num() > 0 ||
@@ -77,35 +77,43 @@ public:
                 ret.Append(USequenceSupport::StringListToSimpleString(propertiesList));
             }
 
-            // Add marketplaces
-            if (Marketplaces.Num() > 0)
+            if (MarketplaceKinds.Num() > 0)
             {
-                ret.Append(",\"marketplaces\":");
-                ret.Append(USequenceSupport::StringListToSimpleString(Marketplaces));
+                ret.Append(",\"marketplaces\":[");
+
+                for (int32 i = 0; i < MarketplaceKinds.Num(); i++)
+                {
+                    ret.Append("\"");
+                    ret.Append(UMarketplaceEnumsExtensions::AsString(MarketplaceKinds[i]));
+                    ret.Append("\"");
+
+                    if (i < MarketplaceKinds.Num() - 1)
+                    {
+                        ret.Append(",");
+                    }
+                }
+
+                ret.Append("]");
             }
 
-            // Add in accounts
             if (InAccounts.Num() > 0)
             {
                 ret.Append(",\"inAccounts\":");
                 ret.Append(USequenceSupport::StringListToSimpleString(InAccounts));
             }
 
-            // Add not in accounts
             if (NotInAccounts.Num() > 0)
             {
                 ret.Append(",\"notInAccounts\":");
                 ret.Append(USequenceSupport::StringListToSimpleString(NotInAccounts));
             }
 
-            // Add orders created by
             if (OrdersCreatedBy.Num() > 0)
             {
                 ret.Append(",\"ordersCreatedBy\":");
                 ret.Append(USequenceSupport::StringListToSimpleString(OrdersCreatedBy));
             }
 
-            // Add orders not created by
             if (OrdersNotCreatedBy.Num() > 0)
             {
                 ret.Append(",\"ordersNotCreatedBy\":");
@@ -129,17 +137,13 @@ public:
             for (const FSeqPropertyFilter& property : Properties)
             {
                 TSharedPtr<FJsonObject> propertyJson = MakeShareable<FJsonObject>(new FJsonObject);
-                // Assuming FSeqPropertyFilter has a method to convert to JSON
-                propertyJson = property.GetJson(); // Assuming GetJson() exists
+                propertyJson = property.GetJson();
                 propertiesJsonArray.Add(MakeShareable(new FJsonValueObject(propertyJson)));
             }
             ret->SetArrayField("properties", propertiesJsonArray);
         }
 
-        if (Marketplaces.Num() > 0)
-        {
-            ret->SetArrayField("marketplaces", USequenceSupport::StringListToJsonArray(Marketplaces));
-        }
+        ret->SetArrayField("marketplaces", USequenceSupport::StringListToJsonArray(UMarketplaceEnumsExtensions::EnumArrayToStringList<EMarketplaceKind>(MarketplaceKinds)));
 
         if (InAccounts.Num() > 0)
         {
