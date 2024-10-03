@@ -53,7 +53,7 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	
 
-	HTTP_Post_Req->SetHeader(TEXT("x-access-key"), *AccessKey);	
+	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
