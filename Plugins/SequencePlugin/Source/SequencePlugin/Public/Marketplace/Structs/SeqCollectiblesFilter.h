@@ -168,9 +168,4 @@ public:
         return ret;
     }
 
-    void Setup(FJsonObject json_in)
-    {
-        // Implement parsing from JSON here if needed
-        // Example: bIncludeEmpty = json_in->GetBoolField("includeEmpty");
-    }
 };
