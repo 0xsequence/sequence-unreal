@@ -1,30 +1,30 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "ABI/ABI.h"
-#include "ABI/ABIEncodeable.h"
+#include "ABI/ABIElement.h"
 #include "Eth/Crypto.h"
 #include "Types/BinaryData.h"
 
 TFixedABIData ABI::UInt32(uint32 Input)
 {
 	TArray<uint8> Arr;
-	ABIEncodeable::PushEmptyBlock(Arr);
-	ABIEncodeable::CopyInUInt32(Arr, Input, 0);
+	ABIElement::PushEmptyBlock(Arr);
+	ABIElement::CopyInUInt32(Arr, Input, 0);
 	return TFixedABIData(Arr);
 }
 
 TFixedABIData ABI::Int32(int32 Input)
 {
 	TArray<uint8> Arr;
-	ABIEncodeable::PushEmptyBlock(Arr);
-	ABIEncodeable::CopyInInt32(Arr, Input, 0);
+	ABIElement::PushEmptyBlock(Arr);
+	ABIElement::CopyInInt32(Arr, Input, 0);
 	return TFixedABIData(Arr);
 }
 
 TFixedABIData ABI::Bool(bool Input)
 {
 	TArray<uint8> Arr;
-	ABIEncodeable::PushEmptyBlock(Arr);
+	ABIElement::PushEmptyBlock(Arr);
 	if(Input)
 	{
 		Arr[GBlockByteLength - 1] = 0x00;
@@ -51,7 +51,7 @@ TDynamicABIData ABI::String(FString Input)
 	return TDynamicABIData(Arr);
 }
 
-FUnsizedData ABI::Encode(FString Signature, TArray<ABIEncodeable*> Arr)
+FUnsizedData ABI::Encode(FString Signature, TArray<ABIElement*> Arr)
 {
 	TFixedABIArray FixedArr(Arr);
 	FUnsizedData Data {
@@ -63,7 +63,7 @@ FUnsizedData ABI::Encode(FString Signature, TArray<ABIEncodeable*> Arr)
 	return Data;
 }
 
-FString ABI::Display(FString Signature, TArray<ABIEncodeable*> Arr)
+FString ABI::Display(FString Signature, TArray<ABIElement*> Arr)
 {
 	FString Str = "";
 	FString Reference = Encode(Signature, Arr).ToHex();
