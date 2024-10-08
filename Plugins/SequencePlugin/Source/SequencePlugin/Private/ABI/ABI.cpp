@@ -25,10 +25,7 @@ TFixedABIData ABI::Bool(bool Input)
 {
 	TArray<uint8> Arr;
 	ABIElement::PushEmptyBlock(Arr);
-	if(Input)
-	{
-		Arr[GBlockByteLength - 1] = 0x00;
-	}
+	Arr[GBlockByteLength - 1] = Input ? 0x01 : 0x00;
 	return TFixedABIData(Arr);
 }
 
@@ -51,19 +48,25 @@ TDynamicABIData ABI::String(FString Input)
 	return TDynamicABIData(Arr);
 }
 
-FUnsizedData ABI::Encode(FString Signature, TArray<ABIElement*> Arr)
+FUnsizedData ABI::Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
 {
-	TFixedABIArray FixedArr(Arr);
+	TFixedABIArray FixedArr(Args);
 	FUnsizedData Data {
 		FixedArr.Encode()
 	};
 	FUnsizedData SignatureData = StringToUTF8(Signature);
 	FHash256 Hash = GetKeccakHash(SignatureData);
-	Data.Arr->Insert(Hash.Ptr(), 4, 0);
+	Data.Arr->Insert(Hash.Ptr(), GSignatureLength, 0);
 	return Data;
 }
 
-FString ABI::Display(FString Signature, TArray<ABIElement*> Arr)
+void ABI::Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args)
+{
+	TFixedABIArray FixedArr(Args);
+	FixedArr.Decode(Data, GSignatureLength, GSignatureLength);
+}
+
+FString ABI::Display(FString Signature, TArray<TSharedPtr<ABIElement>> Arr)
 {
 	FString Str = "";
 	FString Reference = Encode(Signature, Arr).ToHex();
