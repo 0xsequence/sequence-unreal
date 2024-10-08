@@ -11,20 +11,19 @@ class SEQUENCEPLUGIN_API UERC721SaleContract : public UObject
     GENERATED_BODY()
 
 public:
-    // This function creates the purchase transaction, similar to the Mint method for ERC721
-    UFUNCTION(BlueprintCallable, Category = "ERC721 Sale Contract")
+
+    UFUNCTION(BlueprintCallable, Category = "ERC721 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
 
-    // Expose these properties at construction (without the need for Initialize)
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale Contract")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString ContractAddress;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale Contract")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString PaymentToken;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale Contract")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     int32 MaxTotal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale Contract")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString Data;
 };

@@ -12,16 +12,16 @@ class SEQUENCEPLUGIN_API UERC20 : public UObject
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC20 Sale Contract")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC20")
 	FString ContractAddress;
 
-	UFUNCTION(BlueprintCallable, Category = "ERC20 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC20")
 	FRawTransaction MakeGrantRoleTransaction(const FString& role, const FString& ToAddress);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC20 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC20")
 	FRawTransaction MakeMintTransaction(const FString& ToAddress, const int32 Amount);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC20 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC20")
 	FRawTransaction MakeBurnTransaction(const int32 Amount);
 };
  

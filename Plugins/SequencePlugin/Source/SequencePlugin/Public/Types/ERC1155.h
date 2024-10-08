@@ -12,25 +12,25 @@ class SEQUENCEPLUGIN_API UERC1155 : public UObject
 
 public: 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale Contract")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155")
 	FString ContractAddress;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale Contract")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155")
 	FString Data;
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeGrantRoleTransaction(const FString& role, const FString& ToAddress);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeMintTransaction(const FString& ToAddress, const int32 TokenId, const int32 Amount);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeBatchMintTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeBurnTransaction(const int32 TokenId, const int32 Amount);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale Contract")
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeBatchBurnTransaction(const TArray<int32>& TokenIds, const TArray<int32>& Amounts);
 	
 };
