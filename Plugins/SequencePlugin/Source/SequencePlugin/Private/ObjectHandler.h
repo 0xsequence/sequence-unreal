@@ -26,7 +26,7 @@ public:
 };
 
 /**
- * 
+ * TODO Refactor this code to be more inline with how we do Async processing in other C++ Code in Unreal!
  */
 UCLASS()
 class UObjectHandler : public UObject
