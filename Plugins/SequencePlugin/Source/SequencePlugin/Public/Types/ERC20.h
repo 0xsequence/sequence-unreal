@@ -12,6 +12,8 @@ class SEQUENCEPLUGIN_API UERC20 : public UObject
 
 public:
 
+	UERC20(FString in_ContractAddress);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC20")
 	FString ContractAddress;
 

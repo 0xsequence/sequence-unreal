@@ -1,6 +1,12 @@
 #include "Types/ERC1155.h"
 #include "ABI/ABI.h"
 
+UERC1155::UERC1155(FString in_ContractAddress, FString in_Data)
+{
+	ContractAddress = in_ContractAddress;
+	Data = in_Data;
+}
+
 FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)
 {
 	FString FunctionSignature = "grantRole(bytes32,address)";
@@ -36,7 +42,7 @@ FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FS
 
 FRawTransaction UERC1155::MakeMintTransaction(const FString& ToAddress, const int32 TokenId, const int32 Amount)
 {
-	FString FunctionSignature = "mint(address,uint256,bytes)";
+	FString FunctionSignature = "mint(address,uint256,unit256,bytes)";
 
 	FString WalletAddress = ToAddress;
 	FString WalletAddressNoPrefix = WalletAddress.Mid(2, WalletAddress.Len());

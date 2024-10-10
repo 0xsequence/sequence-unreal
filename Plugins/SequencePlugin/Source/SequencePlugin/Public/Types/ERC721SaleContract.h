@@ -12,8 +12,7 @@ class SEQUENCEPLUGIN_API UERC721SaleContract : public UObject
 
 public:
 
-    UFUNCTION(BlueprintCallable, Category = "ERC721 Sale")
-    FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
+    UERC721SaleContract(FString in_ContractAddress, FString in_PaymentToken, int32 in_MaxTotal, FString in_Data);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString ContractAddress;
@@ -26,4 +25,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString Data;
+
+    UFUNCTION(BlueprintCallable, Category = "ERC721 Sale")
+    FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
 };

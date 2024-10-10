@@ -1,6 +1,11 @@
 #include "Types/ERC20.h"
 #include "ABI/ABI.h"
 
+UERC20::UERC20(FString in_ContractAddress)
+{
+	ContractAddress = in_ContractAddress;
+}
+
 FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FString& ToAddress)
 {
 	FString FunctionSignature = "grantRole(bytes32,address)";

@@ -1,6 +1,11 @@
 #include "Types/ERC721.h"
 #include "ABI/ABI.h"
 
+UERC721::UERC721(FString in_ContractAddress)
+{
+	ContractAddress = in_ContractAddress;
+}
+
 FRawTransaction UERC721::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)
 {
 	FString FunctionSignature = "grantRole(bytes32,address)";

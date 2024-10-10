@@ -1,6 +1,14 @@
 #include "Types/ERC721SaleContract.h"
 #include "ABI/ABI.h"
 
+UERC721SaleContract::UERC721SaleContract(FString in_ContractAddress, FString in_PaymentToken, int32 in_MaxTotal, FString in_Data)
+{
+    ContractAddress = in_ContractAddress;
+    PaymentToken = in_PaymentToken;
+    MaxTotal = in_MaxTotal;
+    Data = in_Data;
+}
+
 FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof)
 {
     FString FunctionSignature = "mint(address,uint256,address,uint256,bytes32[])";
