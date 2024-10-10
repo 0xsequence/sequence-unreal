@@ -134,7 +134,21 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 	{		
 		if(bWasSuccessful)
 		{
-			OnSuccess(Response.Get()->GetContentAsString());
+			UResponseSignatureValidator * Validator = NewObject<UResponseSignatureValidator>();
+
+			if (Validator->ValidateResponseSignature(Response))
+			{
+				UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
+
+				OnSuccess(Response.Get()->GetContentAsString());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
+
+				OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+			}
+
 		}
 		else
 		{
