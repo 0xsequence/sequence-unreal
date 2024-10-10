@@ -71,13 +71,15 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
     if (!Response.IsValid())
     {
         tamperedResponseSignatureFound = true;
-        return false;
+        return false; // Invalid response
     }
 
+    // Extract headers
     const FString ContentDigestHeader = Response->GetHeader(TEXT("content-digest"));
     const FString SignatureHeader = Response->GetHeader(TEXT("signature"));
     const FString SignatureInputHeader = Response->GetHeader(TEXT("signature-input"));
-
+    
+    // Validate that headers are present
     if (ContentDigestHeader.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("ContentDigestHeader is empty."));
@@ -103,11 +105,14 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
     FString CleanContentDigestHeader = ContentDigestHeader;
     const FString Prefix = TEXT("sha-256=");
     if (CleanContentDigestHeader.StartsWith(Prefix))
+    {
         CleanContentDigestHeader = CleanContentDigestHeader.RightChop(Prefix.Len());
+    }
 
     CleanContentDigestHeader.RemoveAt(0);
     CleanContentDigestHeader.RemoveAt(CleanContentDigestHeader.Len() - 1);
 
+    // Decode the Content-Digest header from Base64
     TArray<uint8_t> DecodedDigest;
 
     if (!FBase64::Decode(CleanContentDigestHeader, DecodedDigest))
@@ -117,8 +122,10 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
         return false;
     }
 
+    // Compute the SHA-256 hash of the response content
     Sha256Hash ComputedHash = Sha256().getHash(ResponseContent.GetData(), ResponseContent.Num());
 
+    // Convert the computed hash to a Base64 string
     TArray<uint8_t> HashBytes = TArray<uint8_t>(ComputedHash.value, ComputedHash.HASH_LEN);
     FString ExpectedDigestBase64 = FBase64::Encode(HashBytes);
 

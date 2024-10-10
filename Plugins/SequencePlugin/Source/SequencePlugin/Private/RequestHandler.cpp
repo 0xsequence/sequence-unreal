@@ -194,3 +194,69 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSucc
 		OnFailure(FSequenceError(RequestFail, "Failed to build QR Image data"));
 	});//lambda
 }
+
+void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	{
+		FString CurlCommand = FString::Printf(
+			TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
+			*Req->GetVerb(),                
+			*Req->GetURL(),                 
+			*Req->GetHeader("X-Access-Key"),
+			*FString::Printf(TEXT("%s"),*FString(UTF8_TO_TCHAR(Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\"")))
+		);
+
+		SEQ_LOG_EDITOR(Log,TEXT("%s"), *CurlCommand);
+		SEQ_LOG_EDITOR(Log,TEXT("%s"), *Response->GetContentAsString());
+
+		if (bWasSuccessful)
+		{
+			UResponseSignatureValidator * Validator = NewObject<UResponseSignatureValidator>();
+
+			if (Validator->ValidateResponseSignature(Response))
+			{
+				UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
+
+				OnSuccess(Response.Get()->GetContentAsString());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
+
+				OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+			}
+
+		}
+		else
+		{
+			if(Response.IsValid())
+			{
+				OnFailure(FSequenceError(RequestFail, "Request is invalid" + Response->GetContentAsString()));
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
+			}
+		}
+	});
+}
+
+void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess,
+                                     const FFailureCallback& OnFailure) const
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	{		
+		if(bWasSuccessful)
+		{
+			OnSuccess(Response);
+		}
+		else
+		{
+			if(!Response.IsValid())
+				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+			else
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+		}
+	});
+}
