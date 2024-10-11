@@ -1,9 +1,13 @@
 #include "Types/ERC20.h"
 #include "ABI/ABI.h"
 
-UERC20::UERC20(FString in_ContractAddress)
+UERC20::UERC20()
 {
-	ContractAddress = in_ContractAddress;
+}
+
+UERC20::UERC20(FString ContractAddress)
+{
+	this->ContractAddress = ContractAddress;
 }
 
 FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FString& ToAddress)
@@ -32,8 +36,9 @@ FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FStri
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FRawTransaction T;
-	T.data = "0x" + EncodedData.ToHex();
+
 	T.to = ContractAddress;
+	T.data = "0x" + EncodedData.ToHex();
 	T.value = "0";
 
 	return T;
@@ -58,8 +63,9 @@ FRawTransaction UERC20::MakeMintTransaction(const FString& ToAddress, const int3
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FRawTransaction T;
-	T.data = "0x" + EncodedData.ToHex();
+
 	T.to = ContractAddress;
+	T.data = "0x" + EncodedData.ToHex();
 	T.value = "0";
 
 	return T;
@@ -77,8 +83,9 @@ FRawTransaction UERC20::MakeBurnTransaction(const int32 Amount)
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FRawTransaction T;
-	T.data = "0x" + EncodedData.ToHex();
+
 	T.to = ContractAddress;
+	T.data = "0x" + EncodedData.ToHex();
 	T.value = "0";
 
 	return T;

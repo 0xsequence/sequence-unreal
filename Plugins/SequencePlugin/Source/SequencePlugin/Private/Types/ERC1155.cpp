@@ -1,10 +1,14 @@
 #include "Types/ERC1155.h"
 #include "ABI/ABI.h"
 
-UERC1155::UERC1155(FString in_ContractAddress, FString in_Data)
+UERC1155::UERC1155()
 {
-	ContractAddress = in_ContractAddress;
-	Data = in_Data;
+}
+
+UERC1155::UERC1155(FString ContractAddress, FString Data)
+{
+	this->ContractAddress = ContractAddress;
+	this->Data = Data;
 }
 
 FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)

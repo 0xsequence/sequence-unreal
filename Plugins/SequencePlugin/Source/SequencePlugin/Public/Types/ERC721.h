@@ -10,7 +10,10 @@ class SEQUENCEPLUGIN_API UERC721 : public UObject
 	GENERATED_BODY()
 
 public:
-	UERC721(FString in_ContractAddress);
+
+	UERC721();
+
+	UERC721(FString ContractAddress);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721")
 	FString ContractAddress;

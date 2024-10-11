@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Sequence/Transactions.h" 
+#include "Sequence/Transactions.h"
 #include "ERC721SaleContract.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
@@ -12,7 +12,9 @@ class SEQUENCEPLUGIN_API UERC721SaleContract : public UObject
 
 public:
 
-    UERC721SaleContract(FString in_ContractAddress, FString in_PaymentToken, int32 in_MaxTotal, FString in_Data);
+    UERC721SaleContract();
+
+    UERC721SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal, FString Data);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721 Sale")
     FString ContractAddress;
@@ -28,4 +30,5 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "ERC721 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
+
 };

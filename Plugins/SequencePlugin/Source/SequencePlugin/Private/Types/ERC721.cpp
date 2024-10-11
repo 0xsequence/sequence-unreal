@@ -1,9 +1,13 @@
 #include "Types/ERC721.h"
 #include "ABI/ABI.h"
 
-UERC721::UERC721(FString in_ContractAddress)
+UERC721::UERC721()
 {
-	ContractAddress = in_ContractAddress;
+}
+
+UERC721::UERC721(FString ContractAddress)
+{
+	this->ContractAddress = ContractAddress;
 }
 
 FRawTransaction UERC721::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)
@@ -75,6 +79,7 @@ FRawTransaction UERC721::MakeBurnTransaction(const int32 TokenId)
 	Arr.Add(&ABITokenId);
 
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
 
 	FRawTransaction T;
 	T.data = "0x" + EncodedData.ToHex();

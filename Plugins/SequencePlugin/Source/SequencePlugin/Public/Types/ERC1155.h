@@ -12,7 +12,9 @@ class SEQUENCEPLUGIN_API UERC1155 : public UObject
 
 public: 
 
-	UERC1155(FString in_ContractAddress, FString in_Data);
+	UERC1155();
+
+	UERC1155(FString ContractAddress, FString Data);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155")
 	FString ContractAddress;

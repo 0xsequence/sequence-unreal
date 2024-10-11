@@ -1,12 +1,16 @@
 #include "Types/ERC721SaleContract.h"
 #include "ABI/ABI.h"
 
-UERC721SaleContract::UERC721SaleContract(FString in_ContractAddress, FString in_PaymentToken, int32 in_MaxTotal, FString in_Data)
+UERC721SaleContract::UERC721SaleContract()
 {
-    ContractAddress = in_ContractAddress;
-    PaymentToken = in_PaymentToken;
-    MaxTotal = in_MaxTotal;
-    Data = in_Data;
+}
+
+UERC721SaleContract::UERC721SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal, FString Data)
+{
+    this->ContractAddress = ContractAddress;
+    this->PaymentToken = PaymentToken;
+    this->MaxTotal = MaxTotal;
+    this->Data = Data;
 }
 
 FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof)
@@ -17,7 +21,7 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
     FAddress ToAddressBytes = FAddress::From(ToAddressNoPrefix);
     TFixedABIData ABIAccountTo = ABI::Address(ToAddressBytes);
 
-    TFixedABIData ABIAmount = ABI::Int32(Amount);
+    TFixedABIData ABIAmount = ABI::Int32(Amount); 
 
     FString PaymentTokenNoPrefix = PaymentToken.Mid(2, PaymentToken.Len());
     FAddress PaymentTokenBytes = FAddress::From(PaymentTokenNoPrefix);
@@ -51,3 +55,29 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
    
     return T; 
 }
+
+//FRawTransaction UERC721SaleContract::GetPaymentToken()
+//{
+//    FString FunctionSignature = "paymentToken()";
+//    TArray<ABIEncodeable*> Arr;
+//    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+//
+//    FContractCall CallData;
+//    CallData.To = ContractAddress;
+//    CallData.Data = TOptional(EncodedData.ToHex());
+//
+//    return CallData;
+//}
+//
+//FRawTransaction UERC721SaleContract::GetSaleDetails()
+//{
+//    FString FunctionSignature = "globalSaleDetails()";
+//    TArray<ABIEncodeable*> Arr;
+//    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+//
+//    FContractCall CallData;
+//    CallData.To = ContractAddress;
+//    CallData.Data = TOptional(EncodedData.ToHex());
+//
+//    return CallData;
+//}
