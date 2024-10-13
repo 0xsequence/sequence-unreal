@@ -56,7 +56,7 @@ public class SequencePlugin : ModuleRules
 				"Projects",
                 "Json",
                 "JsonUtilities",
-				"ApplicationCore", "WebBrowser", "EngineSettings", "CADKernel"
+				"ApplicationCore", "WebBrowser", "EngineSettings"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

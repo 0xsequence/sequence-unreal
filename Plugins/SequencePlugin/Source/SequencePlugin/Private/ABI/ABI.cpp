@@ -48,6 +48,19 @@ TDynamicABIData ABI::String(FString Input)
 	return TDynamicABIData(Arr);
 }
 
+
+// DEPRECATED
+FUnsizedData ABI::Encode(FString Signature, TArray<ABIElement*> Args)
+{
+	TArray<TSharedPtr<ABIElement>> NewArgs;
+	for(auto i = 0; i < Args.Num(); i++)
+	{
+		NewArgs.Push(Args[i]->Clone());
+	}
+	
+	return Encode(Signature, NewArgs);
+}
+
 FUnsizedData ABI::Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
 {
 	TFixedABIArray FixedArr(Args);
@@ -66,10 +79,10 @@ void ABI::Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args)
 	FixedArr.Decode(Data, GSignatureLength, GSignatureLength);
 }
 
-FString ABI::Display(FString Signature, TArray<TSharedPtr<ABIElement>> Arr)
+FString ABI::Display(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
 {
 	FString Str = "";
-	FString Reference = Encode(Signature, Arr).ToHex();
+	FString Reference = Encode(Signature, Args).ToHex();
 
 	for(int i = 0; i < Reference.Len(); i++)
 	{

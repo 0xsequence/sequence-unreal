@@ -18,4 +18,7 @@ public:
 	static TFixedABIData Address(FAddress Address = FAddress::New());
 	static TDynamicABIData String(FString Input = "");
 	static FString Display(FString Signature, TArray<TSharedPtr<ABIElement>> Arr);
+
+	// Deprecated functions
+	static FUnsizedData Encode(FString Signature, TArray<ABIElement*> Args);
 };
