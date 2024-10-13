@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "SystemDataBuilder.h"
 #include "Engine/World.h"
+#include "Util/Log.h"
 
 FUserDetails ASequenceBackendManager::GetUserDetails()
 {
@@ -280,10 +281,17 @@ void ASequenceBackendManager::UpdateSystemTestableData(const FSystemData_BE& sys
 
 void ASequenceBackendManager::InitSystemData()
 {
-	UE_LOG(LogTemp, Display, TEXT("[System Data Fetch INITIATED]"));
-	//USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
-	//Note we still need Auth prior to this but the idea is all of this is already setup and ready to go for this call
-	//builder->initBuildSystemData(this->sequenceWallet, this->chainID, this->publicAddress, this);
+	SEQ_LOG(Display, TEXT("System Data Fetch Initiated."));
+	TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (!WalletOptional.IsSet() || !WalletOptional.GetValue())
+	{
+		SEQ_LOG(Display, TEXT("InitSystemData failed. Sequence Wallet not found."));
+		return;
+	}
+
+	USequenceWallet* Wallet = WalletOptional.GetValue();
+	USystemDataBuilder * builder = NewObject<USystemDataBuilder>();
+	builder->InitBuildSystemData(Wallet, this);
 }
 
 void ASequenceBackendManager::InitCoinSendTxn(FTransaction_FE TransactionData)

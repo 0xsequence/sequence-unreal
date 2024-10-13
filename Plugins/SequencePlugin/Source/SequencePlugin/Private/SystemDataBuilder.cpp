@@ -4,6 +4,7 @@
 #include "Syncer.h"
 #include "Errors.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Log.h"
 
 USystemDataBuilder::USystemDataBuilder()
 {
@@ -233,49 +234,33 @@ void USystemDataBuilder::InitGetTokenData()
 		this->DecMasterSyncer();
 	};
 	FSeqGetTokenBalancesArgs args;
-	args.accountAddress = this->GPublicAddress;
+	args.accountAddress = this->GWallet->GetWalletAddress();
 	args.includeMetaData = true;
-	this->TIndexer->GetTokenBalances(this->GChainId, args, GenericSuccess, GenericFailure);
+	this->TIndexer->GetTokenBalances(this->GWallet->GetNetworkId(), args, GenericSuccess, GenericFailure);
 }
 
-//[[[ Currently non functional and will result in a soft-lock ]]]
+// TODO: Remove this
 void USystemDataBuilder::InitGetQrCode()
 {
-	//GO Level
-	this->QRImageHandler->FOnDoneImageProcessingDelegate.BindLambda(
-		[this]()
-		{
-			TMap<FString, UTexture2D*> images = this->QRImageHandler->GetProcessedImages();
-			if (images.Contains(this->QrURL))
-			{
-				this->SystemDataGuard.Lock();
-				this->SystemData.user_data.public_qr_address = *images.Find(this->QrURL);//here we assign the QRCode we received!
-				this->SystemDataGuard.Unlock();
-			}
-			else
-			{//log error with getting QR code
-				UE_LOG(LogTemp, Error, TEXT("Failed to fetch QR Code"));
-			}
-			this->DecMasterSyncer();
-		});
+	SEQ_LOG_EDITOR(Display, TEXT("Starting to request QR Code"));
 
-	const TSuccessCallback<FAddress> GenericSuccess = [&, this](const FAddress address)
-	{//once wallet responds with the wallet address
-		FString walletAddress = address.ToHex();
-		UE_LOG(LogTemp, Display, TEXT("Received wallet address: [%s]"), *walletAddress);
-		//now we can request the QR code!
-		//this->qr_url = SequenceAPI::USequenceWallet::buildQR_Request_URL(walletAddress, 512);
-		this->QRImageHandler->RequestImage(this->QrURL);
-	};
-
-	//GO Level
-	const FFailureCallback GenericFailure = [this](const FSequenceError Error)
+	FString QrCodeUrl = "{0}";
+	this->QRImageHandler->FOnDoneImageProcessingDelegate.BindLambda([this, QrCodeUrl]()
 	{
+		TMap<FString, UTexture2D*> images = this->QRImageHandler->GetProcessedImages();
+		if (images.Contains(QrCodeUrl))
+		{
+			this->SystemData.user_data.public_qr_address = *images.Find(QrCodeUrl);
+		}
+		else
+		{
+			SEQ_LOG_EDITOR(Error, TEXT("Failed to fetch QR Code"));
+		}
+
 		this->DecMasterSyncer();
-	};
-	this->WalletGuard.Lock();
-	//this->GWallet->GetWalletAddress(GenericSuccess,GenericFailure);
-	this->WalletGuard.Unlock();
+	});
+
+	this->QRImageHandler->RequestImage(QrCodeUrl);
 }
 
 //[[[ Currently non functional and will result in a soft-lock ]]]
@@ -302,33 +287,32 @@ void USystemDataBuilder::InitGetContactData()
 /*
 * We expect to receive an authable wallet, a proper chainId, and PublicAddress and a valid indexer
 */
-void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, int64 ChainId, FString PublicAddress, ASequenceBackendManager* Manager)
+void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, ASequenceBackendManager* Manager)
 {
 	this->GWallet = Wallet;
-	this->GChainId = ChainId;
-	this->GPublicAddress = PublicAddress;
 	this->SqncMngr = Manager;
 	this->MasterSyncer->OnDoneDelegate.BindUFunction(this, "OnDone");
 
 	//sync operations FIRST
 	//all of this we get from auth!
 	this->SystemDataGuard.Lock();
-	this->SystemData.user_data.public_address = PublicAddress;
+	this->SystemData.user_data.public_address = Wallet->GetWalletAddress();
 	this->SystemData.user_data.account_id = this->SqncMngr->GetUserDetails().AccountID;
 	this->SystemData.user_data.email = this->SqncMngr->GetUserDetails().Email;
 	this->SystemData.user_data.email_service = this->SqncMngr->GetUserDetails().EmailService;
 	this->SystemData.user_data.username = this->SqncMngr->GetUserDetails().Username;
 	FNetwork_BE default_network;
 	default_network.is_default = true;
-	default_network.network_name = USequenceSupport::GetNetworkName(this->GChainId);
+	default_network.network_name = USequenceSupport::GetNetworkName(Wallet->GetNetworkId());
 	this->SystemData.user_data.networks.Add(default_network);
 	this->SystemDataGuard.Unlock();
+	
 	//ASYNC Operations next!
-	this->MasterSyncer->Increase(4);//+1 for each General Operation you have here!
+	this->MasterSyncer->Increase(1); //+1 for each General Operation you have here!
 	this->InitGetQrCode();
-	this->InitGetTokenData();
-	this->InitGetTxnHistory();
-	this->InitGetContactData();
+	//this->InitGetTokenData();
+	//this->InitGetTxnHistory();
+	//this->InitGetContactData();
 }
 
 void USystemDataBuilder::OnDoneTesting()
@@ -338,11 +322,9 @@ void USystemDataBuilder::OnDoneTesting()
 	UE_LOG(LogTemp, Display, TEXT("Parsed system data from getting token\n[%s]"), *result);
 }
 
-void USystemDataBuilder::TestGoTokenData(USequenceWallet* Wallet, int64 ChainId, FString PublicAddress)
+void USystemDataBuilder::TestGoTokenData(USequenceWallet* Wallet)
 {
 	this->GWallet = Wallet;
-	this->GChainId = ChainId;
-	this->GPublicAddress = PublicAddress;
 	this->MasterSyncer->OnDoneDelegate.BindUFunction(this, "OnDoneTesting");
 	//ASYNC Operations next!
 	this->MasterSyncer->Increase(3);//we increment outside inorder to ensure correctness in case 1 General operation finishes before the others can start
@@ -501,7 +483,7 @@ void USystemDataBuilder::InitGetTxnHistory()
 	this->GetTxnHistorySyncer->OnDoneDelegate.BindUFunction(this, "OnGetTxnHistoryDone");
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [&, this](const FSeqGetTransactionHistoryReturn history)
 	{//once indexer responds!
-		FUpdatableHistoryArgs semiParsedHistory = USequenceSupport::ExtractFromTransactionHistory(this->GPublicAddress,history);
+		FUpdatableHistoryArgs semiParsedHistory = USequenceSupport::ExtractFromTransactionHistory(this->GWallet->GetWalletAddress(),history);
 		this->SystemDataGuard.Lock();
 		this->SystemData.user_data.transaction_history = semiParsedHistory.semiParsedHistory;//assign what we have so far!
 		this->SystemDataGuard.Unlock();
@@ -516,9 +498,9 @@ void USystemDataBuilder::InitGetTxnHistory()
 
 	FSeqGetTransactionHistoryArgs args;
 	args.includeMetaData = true;
-	args.filter.accountAddress = this->GPublicAddress;
+	args.filter.accountAddress = this->GWallet->GetWalletAddress();
 
-	this->HIndexer->GetTransactionHistory(this->GChainId,args, GenericSuccess, GenericFailure);
+	this->HIndexer->GetTransactionHistory(this->GWallet->GetNetworkId(),args, GenericSuccess, GenericFailure);
 }
 
 UFUNCTION()

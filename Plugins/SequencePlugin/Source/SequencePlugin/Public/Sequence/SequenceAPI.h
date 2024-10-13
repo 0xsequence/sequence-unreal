@@ -69,14 +69,12 @@ private:
 
 	//this will be removed
 	const FString Hostname = "https://next-api.sequence.app";
-	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
 	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
 	const FString Path = "/rpc/Wallet/";
 	
 	//URL fetchers for sequence services
 	FString Url(const FString& Name) const;
 	FString getSequenceURL(const FString& endpoint) const;
-	static FString encodeB64_URL(const FString& data);
 
 	//Raw request functions
 	void SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
@@ -267,7 +265,6 @@ private:
 	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
 	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	FString BuildQr_Request_URL(const FString& Data, int32 Size) const;
 
 public:
 	//Indexer Specific Calls

@@ -590,37 +590,6 @@ void USequenceWallet::GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, 
 		}, OnFailure);
 }
 
-FString USequenceWallet::BuildQr_Request_URL(const FString& walletAddress,int32 Size) const
-{
-	FString urlSize = "/";
-	urlSize.AppendInt(Size);
-	return SequenceURL_Qr + encodeB64_URL(walletAddress) + urlSize;
-}
-
-//we only need to encode base64URL we don't decode them as we receive the QR code
-FString USequenceWallet::encodeB64_URL(const FString& data)
-{
-	FString ret = FBase64::Encode(data);
-	//now we just gotta do some swaps to make it base64 URL compliant
-	// + -> -
-	// / -> _ 
-
-	const FString srch_plus = TEXT("+");
-	const FString rep_plus = TEXT("-");
-	const FString srch_slash = TEXT("/");
-	const FString rep_slash = TEXT("_");
-
-	const TCHAR* srch_ptr_plus = *srch_plus;
-	const TCHAR* rep_ptr_plus = *rep_plus;
-	const TCHAR* srch_ptr_slash = *srch_slash;
-	const TCHAR* rep_ptr_slash = *rep_slash;
-
-	ret.ReplaceInline(srch_ptr_plus, rep_ptr_plus, ESearchCase::IgnoreCase);//remove + and replace with -
-	ret.ReplaceInline(srch_ptr_slash, rep_ptr_slash, ESearchCase::IgnoreCase);//remove / and replace with _
-
-	return ret;
-}
-
 //Indexer Calls
 
 void USequenceWallet::Ping(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure) const
