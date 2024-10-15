@@ -243,6 +243,11 @@ TFixedABIData::TFixedABIData(TArray<uint8> MyData) : MyData(MyData)
 	
 }
 
+TFixedABIData::TFixedABIData(const int Size) : MyData(TArray<uint8>())
+{
+	for(int i = 0; i < Size; i++) MyData.Push(0x00);
+}
+
 TArray<uint8> TFixedABIData::AsRawBinary()
 {
 	return MyData;

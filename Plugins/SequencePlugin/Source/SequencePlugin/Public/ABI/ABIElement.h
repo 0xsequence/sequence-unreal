@@ -79,6 +79,7 @@ class SEQUENCEPLUGIN_API TFixedABIData : public ABIElement
 	TArray<uint8> MyData;
 public:
 	TFixedABIData(TArray<uint8> MyData);
+	TFixedABIData(int Size);
 
 	virtual TArray<uint8> AsRawBinary() override;
 	virtual uint32 AsUInt32() override;
