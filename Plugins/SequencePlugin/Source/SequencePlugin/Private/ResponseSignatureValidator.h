@@ -49,3 +49,7 @@ private:
     FString GetValue(const FString& HeaderItem);
    
 };
+
+
+//UResponseSignatureValidator
+
