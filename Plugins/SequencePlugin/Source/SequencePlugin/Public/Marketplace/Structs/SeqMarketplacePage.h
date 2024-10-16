@@ -12,7 +12,7 @@ struct SEQUENCEPLUGIN_API FSeqMarketplacePage
 public:
     // Properties
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Page")
-    int32 PageNumber = 1;
+    int32 PageNumber =-1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Page")
     FString Column;
@@ -27,7 +27,7 @@ public:
     TArray<FSeqMarketplaceSortBy> Sort;  // Assuming you have a SortBy struct or enum
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Page")
-    int32 PageSize = 30;
+    int32 PageSize =-1 ;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Page")
     bool More;
