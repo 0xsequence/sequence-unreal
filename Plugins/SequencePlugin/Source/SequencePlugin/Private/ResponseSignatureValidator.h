@@ -44,11 +44,5 @@ private:
     TArray<uint8> Base64UrlDecode(const FString& Input);
 
     FString GetValue(const FString& HeaderItem);
-
-
    
 };
-
-
-//UResponseSignatureValidator
-
