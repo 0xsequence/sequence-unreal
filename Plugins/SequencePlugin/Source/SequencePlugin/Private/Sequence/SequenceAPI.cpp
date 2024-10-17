@@ -187,6 +187,12 @@ FString USequenceWallet::GetWalletAddress() const
 	return Addr;
 }
 
+FString USequenceWallet::GetSessionId() const
+{
+	return this->Credentials.GetSessionWallet()->GetSessionId();
+}
+
+
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
