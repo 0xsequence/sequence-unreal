@@ -123,6 +123,12 @@ public:
 	FString GetWalletAddress() const;
 
 	/**
+	 * Get the current/active session id associated with this wallet
+	 * @return the current/active session id associated with this wallet
+	 */
+	FString GetSessionId() const;
+
+	/**
 	 * Allows you to update the provider URL set for the SequenceWallet
 	 * @param Url New provider Url you wish to use
 	 */
