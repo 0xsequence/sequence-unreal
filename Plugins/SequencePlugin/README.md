@@ -1440,3 +1440,9 @@ During the Unreal Package process in the event a code signing error occurs you c
 12) Click on Mac and Applevision Pro under supported destinations and hit the delete key
 13) Now the project can be built (if the build fails at first, wait a few moments then try again. It can sometimes take a bit before the build registers the run script)
 14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again._
+
+## TroubleShooting
+
+In events where the editor crashes on launch, try deleting the following file, Saved/SaveGames/Cr.sav
+This file contains the savegame data for credentials and if modified can result in an engine crash.
+Deleting this file deletes local credentials, so you'll need to log back in.

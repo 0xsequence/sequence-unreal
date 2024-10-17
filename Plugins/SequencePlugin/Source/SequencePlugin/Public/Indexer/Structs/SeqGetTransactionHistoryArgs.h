@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "SeqPage.h"
 #include "SeqTransactionHistoryFilter.h"
+#include "Dom/JsonObject.h"
 #include "SeqGetTransactionHistoryArgs.generated.h"
 
 USTRUCT(BlueprintType)

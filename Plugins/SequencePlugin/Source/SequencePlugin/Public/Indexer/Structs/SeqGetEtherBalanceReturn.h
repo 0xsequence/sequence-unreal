@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqEtherBalance.h"
+#include "Dom/JsonObject.h"
 #include "SeqGetEtherBalanceReturn.generated.h"
 
 USTRUCT(BlueprintType)

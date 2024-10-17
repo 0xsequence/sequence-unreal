@@ -4,6 +4,8 @@
 #include "CoreMinimal.h"
 #include "SeqPage.h"
 #include "SeqTokenBalance.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqGetBalanceUpdatesReturn.generated.h"
 
 USTRUCT(BlueprintType)

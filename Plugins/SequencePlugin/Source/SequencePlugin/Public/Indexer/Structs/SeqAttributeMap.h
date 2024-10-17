@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Util/SequenceSupport.h"
+#include "Dom/JsonObject.h"
 #include "SeqAttributeMap.generated.h"
 
 /*

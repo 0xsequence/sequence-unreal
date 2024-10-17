@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceRPCManager.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
@@ -162,12 +162,12 @@ void USequenceRPCManager::CheckAndUpdateSessionFromPreserveSessionWallet()
 
 void USequenceRPCManager::UpdateWithRandomSessionWallet()
 {	
-	this->SessionWallet = UWallet::Make();
+	this->SessionWallet = UCryptoWallet::Make();
 }
 
 void USequenceRPCManager::UpdateWithStoredSessionWallet()
 {
-	const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
 	if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
 		this->SessionWallet = StoredCredentials.GetCredentials().GetSessionWallet();
@@ -182,16 +182,16 @@ USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
 {
 	if (UseStoredSessionId)
 	{
-		const UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+		const USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
 		if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
 			return Make(StoredCredentials.GetCredentials().GetSessionWallet());
 		}
 	}
-	return Make(UWallet::Make());
+	return Make(UCryptoWallet::Make());
 }
 
-USequenceRPCManager* USequenceRPCManager::Make(UWallet* SessionWalletIn)
+USequenceRPCManager* USequenceRPCManager::Make(UCryptoWallet* SessionWalletIn)
 {
 	USequenceRPCManager * SequenceRPCManager = NewObject<USequenceRPCManager>();
 	SequenceRPCManager->SessionWallet = SessionWalletIn;

@@ -1,11 +1,13 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Indexer/Indexer.h"
+#include "ConfigFetcher.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
 #include "Util/SequenceSupport.h"
 #include "HttpManager.h"
+#include "Util/Log.h"
 
 UIndexer::UIndexer(){}
 
@@ -40,27 +42,35 @@ FString UIndexer::HostName(const int64 ChainID)
 */
 void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Display, TEXT("Url: %s"), *this->Url(ChainID,Endpoint));
+	const FString Url = *this->Url(ChainID,Endpoint);
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
+
+	SEQ_LOG_EDITOR(Display, TEXT("POST >> %s with payload %s"), *Url, *Args);
 	
 	HTTP_Post_Req->SetVerb("POST");
 	HTTP_Post_Req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
 	HTTP_Post_Req->SetHeader("Accept", "application/json");
+	HTTP_Post_Req->SetHeader("X-Access-Key",UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey));
 	HTTP_Post_Req->SetTimeout(30);
-	HTTP_Post_Req->SetURL(this->Url(ChainID, Endpoint));
+	HTTP_Post_Req->SetURL(Url);
 	HTTP_Post_Req->SetContentAsString(Args);
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 	{ 
 		if(bWasSuccessful)
 		{
 			const FString Content = Request->GetResponse()->GetContentAsString();
+			SEQ_LOG_EDITOR(Display, TEXT("POST << %d %s (from %s)"), Request->GetResponse()->GetResponseCode(), *Content, *Request->GetURL());
+			
 			OnSuccess(Content);
 		}
 		else
 		{
 			if(Request.IsValid() && Request->GetResponse().IsValid())
 			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+				const FString Content = Request->GetResponse()->GetContentAsString();
+				SEQ_LOG_EDITOR(Error, TEXT("POST << %d %s (from %s)"), Request->GetResponse()->GetResponseCode(), *Content, *Request->GetURL());
+				
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Content));
 			}
 			else
 			{

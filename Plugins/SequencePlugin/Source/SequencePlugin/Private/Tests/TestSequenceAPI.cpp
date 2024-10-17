@@ -2,7 +2,7 @@
 
 #include "TestSequenceAPI.h"
 #include "Sequence/SequenceAPI.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "ABI/ABI.h"
 #include "Native/NativeOAuth.h"
 
@@ -21,7 +21,7 @@ void SequenceAPITest::BasicProviderTests()
 		UE_LOG(LogTemp,Display,TEXT("Error"));
 	};
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials(),"https://cognito-idp.us-east-2.amazonaws.com");
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -54,7 +54,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignMessage Test]========================"));
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -81,7 +81,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 	};
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -107,7 +107,7 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 	
 	Txn.Push(TransactionUnion(T));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -161,7 +161,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	
 	Txn.Push(TransactionUnion(T));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -197,7 +197,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 	Txn.Push(TransactionUnion(T20));
 	Txn.Push(TransactionUnion(T20));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -232,7 +232,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 	
 	Txn.Push(TransactionUnion(T721));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -269,7 +269,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 
 	Txn.Push(TransactionUnion(T1155));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -299,7 +299,7 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 	
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignOut Test]========================"));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -327,7 +327,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -368,7 +368,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 				OnFailure("Transaction failure", Error);
 			};
 
-			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 			const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 			if (WalletOptional.IsSet() && WalletOptional.GetValue())
 			{
@@ -393,7 +393,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 		OnFailure("Get Fee Option Response failure", Error);
 	};
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -423,7 +423,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 
 	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetUnfilteredFeeOptions Test]========================"));
 
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -443,7 +443,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 
 void SequenceAPITest::GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -454,7 +454,7 @@ void SequenceAPITest::GetSupportedCountries(const TSuccessCallback<TArray<FSuppo
 
 void SequenceAPITest::TestLoadTransakUrl()
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{

@@ -19,6 +19,8 @@ import androidx.credentials.exceptions.GetCredentialCustomException;
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.concurrent.Executors;
 
 import com.epicgames.unreal.GameActivity;
@@ -33,7 +35,10 @@ public class SequenceGoogleSignInHelper {
 
     private static void getCredentialAsync(Context context, String clientId)
     {
-        GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption.Builder(clientId).build();
+        GetSignInWithGoogleOption googleIdOption = new GetSignInWithGoogleOption
+            .Builder(clientId)
+            .setNonce(generateNonce())
+            .build();
 
         GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
 
@@ -75,9 +80,16 @@ public class SequenceGoogleSignInHelper {
         } else {
             // Log.e(TAG, "Unexpected credential type");
         }
-    } 
+    }
+    
+    private static String generateNonce() {
+        SecureRandom random = new SecureRandom();
+        byte[] nonce = new byte[32];
+        random.nextBytes(nonce);
+        return Base64.getEncoder().encodeToString(nonce);
+    }
 
      public static void log(String message) {
          Log.e(TAG, message);
-     }   
+     }
 }
