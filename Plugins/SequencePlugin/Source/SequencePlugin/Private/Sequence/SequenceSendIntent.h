@@ -5,6 +5,7 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Containers/Union.h"
 #include "Util/SequenceSupport.h"
+#include "Types/BinaryData.h"
 #include "SequenceSendIntent.generated.h"
 
 //Operations Constants//

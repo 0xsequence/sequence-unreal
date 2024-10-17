@@ -306,13 +306,6 @@ void USystemDataBuilder::InitBuildSystemData(USequenceWallet* Wallet, ASequenceB
 	default_network.network_name = USequenceSupport::GetNetworkName(Wallet->GetNetworkId());
 	this->SystemData.user_data.networks.Add(default_network);
 	this->SystemDataGuard.Unlock();
-	
-	//ASYNC Operations next!
-	this->MasterSyncer->Increase(1); //+1 for each General Operation you have here!
-	this->InitGetQrCode();
-	//this->InitGetTokenData();
-	//this->InitGetTxnHistory();
-	//this->InitGetContactData();
 }
 
 void USystemDataBuilder::OnDoneTesting()
