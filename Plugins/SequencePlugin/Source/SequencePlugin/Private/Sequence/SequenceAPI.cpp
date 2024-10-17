@@ -1,10 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Sequence/SequenceAPI.h"
-#include "RequestHandler.h"
 #include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
-#include "JsonObjectConverter.h"
-#include "Eth/Crypto.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
@@ -12,63 +9,9 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Indexer/Indexer.h"
-#include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "Transak.h"
 #include "SequenceRPCManager.h"
-
-FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
-{
-	return FTransaction_Sequence{
-		static_cast<uint64>(Transaction_Fe.chainId),
-		FAddress::From(Transaction_Fe.From),
-		FAddress::From(Transaction_Fe.To),
-		Transaction_Fe.AutoGas == "" ? TOptional<FString>() : TOptional(Transaction_Fe.AutoGas),
-		Transaction_Fe.Nonce < 0 ? TOptional<uint64>() : TOptional(static_cast<uint64>(Transaction_Fe.Nonce)),
-		Transaction_Fe.Value == "" ? TOptional<FString>() : TOptional(Transaction_Fe.Value),
-		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
-		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
-		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
-		Transaction_Fe.TokenIds.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
-		Transaction_Fe.TokenAmounts.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
-	};
-}
-
-FString FTransaction_Sequence::ToJson()
-{
-	FJsonBuilder Json = FJsonBuilder();
-
-	Json.AddInt("chainId", ChainId);
-	Json.AddString("from", "0x" + From.ToHex());
-	Json.AddString("to", "0x" + To.ToHex());
-
-	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
-
-	return Json.ToString();
-}
-
-TransactionID FTransaction_Sequence::ID()
-{
-	FUnsizedData Data = StringToUTF8(ToJson());
-	return GetKeccakHash(Data).ToHex();
-}
-
-FString USequenceWallet::Url(const FString& Name) const
-{
-	return this->Hostname + this->Path + Name;
-}
-
-void USequenceWallet::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	NewObject<URequestHandler>()
-			->PrepareRequest()
-			->WithUrl(Url)
-			->WithHeader("Content-type", "application/json")
-			->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
-			->WithVerb("POST")
-			->WithContentAsString(Content)
-			->ProcessAndThen(OnSuccess, OnFailure);
-}
 
 USequenceWallet::USequenceWallet()
 {
@@ -466,128 +409,6 @@ void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactio
 	{
 		this->SequenceRPCManager->SendTransaction(this->Credentials, Transactions, OnSuccess, OnFailure);
 	}
-}
-
-FString USequenceWallet::getSequenceURL(const FString& endpoint) const
-{
-	return this->SequenceURL + endpoint;
-}
-
-TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(const FString& JSON)
-{
-	TArray<FContact_BE> friendList;
-	TSharedPtr<FJsonObject> jsonObj;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		const TArray<TSharedPtr<FJsonValue>>* storedFriends;
-		if (jsonObj.Get()->TryGetArrayField(TEXT("friends"), storedFriends))
-		{
-			for (TSharedPtr<FJsonValue> friendData : *storedFriends)
-			{
-				const TSharedPtr<FJsonObject>* fJsonObj;
-				if (friendData.Get()->TryGetObject(fJsonObj))//need it as an object
-				{
-					FContact_BE newFriend;
-					newFriend.Public_Address = fJsonObj->Get()->GetStringField(TEXT("userAddress"));
-					newFriend.Nickname = fJsonObj->Get()->GetStringField(TEXT("nickname"));
-					friendList.Add(newFriend);
-				}
-			}
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	return friendList;
-}
-
-/*
-* Gets the friend data from the given username!
-* This function appears to require some form of authentication (perhaps all of the sequence api does)
-* @Deprecated
-*/
-void USequenceWallet::GetFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	const FString json_arg = "{}";
-	
-	SendRPC(getSequenceURL("friendList"), json_arg, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildFriendListFromJson(Content));
-		}, OnFailure);
-}
-
-TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
-{
-	TSharedPtr<FJsonObject> jsonObj;
-	FUpdatedPriceReturn updatedPrices;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		if (FJsonObjectConverter::JsonObjectToUStruct<FUpdatedPriceReturn>(jsonObj.ToSharedRef(), &updatedPrices))
-		{
-			return updatedPrices.tokenPrices;
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	TArray<FItemPrice_BE> updatedItems;
-	return updatedItems;
-}
-
-void USequenceWallet::GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCoinPrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCoinPrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCollectiblePrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCollectiblePrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
 }
 
 //Indexer Calls

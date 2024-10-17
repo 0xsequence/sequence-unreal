@@ -4,7 +4,6 @@
 #include "SequenceAuthenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Containers/Union.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -19,32 +18,9 @@
 #include "Util/SequenceSupport.h"
 #include "SequenceAPI.generated.h"
 
-using FSignature = FUnsizedData;
-using TransactionID = FString;
-
 class UIndexer;
 class UProvider;
 class USequenceRPCManager;
-
-//Sequence Specific Version of Transaction
-struct SEQUENCEPLUGIN_API FTransaction_Sequence
-{
-	uint64 ChainId;
-	FAddress From;
-	FAddress To;
-	TOptional<FString> AutoGas;
-	TOptional<uint64> Nonce;
-	TOptional<FString> Value;
-	TOptional<FString> CallData;
-	TOptional<FString> TokenAddress;
-	TOptional<FString> TokenAmount;
-	TOptional<TArray<FString>> TokenIds;
-	TOptional<TArray<FString>> TokenAmounts;
-
-	static FTransaction_Sequence Convert(const FTransaction_FE& Transaction_Fe);
-	FString ToJson();
-	TransactionID ID();
-};
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
@@ -67,21 +43,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 
-	//this will be removed
-	const FString Hostname = "https://next-api.sequence.app";
-	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
-	const FString Path = "/rpc/Wallet/";
-	
-	//URL fetchers for sequence services
-	FString Url(const FString& Name) const;
-	FString getSequenceURL(const FString& endpoint) const;
-
-	//Raw request functions
-	void SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	//Response helper functions
-	static TArray<FContact_BE> BuildFriendListFromJson(const FString& JSON);
-	static TArray<FItemPrice_BE> BuildItemUpdateListFromJson(const FString& JSON);
 public:
 	USequenceWallet();
 
@@ -257,14 +218,6 @@ private:
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
-	
-private:
-	//these functions are meant for the UI Only and have been removed for this version
-	void GetFriends(FString PublicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
 
 public:
 	//Indexer Specific Calls
