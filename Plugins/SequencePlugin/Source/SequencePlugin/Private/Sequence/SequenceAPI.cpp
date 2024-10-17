@@ -256,6 +256,20 @@ void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
 	auth->StoreCredentials(this->Credentials);
 }
 
+void USequenceWallet::UpdateNetworkId(FString NewNetworkName)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetworkName));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
+void USequenceWallet::UpdateNetworkId(ENetwork NewNetwork)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetwork));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
 void USequenceWallet::UpdateProviderURL(const FString& Url) const
 {
 	if (this->Provider)
