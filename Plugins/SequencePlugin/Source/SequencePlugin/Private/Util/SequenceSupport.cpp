@@ -18,6 +18,17 @@ FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
 	return TEXT("");
 }
 
+FString USequenceSupport::GetNetworkName(const ENetwork NetworkIn)
+{
+	if (NetworkIdToNameMap.Contains(NetworkIn))
+	{
+		return *NetworkEnumToNameMap.Find(NetworkIn);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
+	return TEXT("");
+}
+
 FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 {
 	if (NetworkIdToUrlMap.Contains(NetworkIdIn))
@@ -43,6 +54,17 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
 	return -1;
+}
+
+int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
+{
+	if (NetworkIdToNameMap.Contains(Network))
+	{
+		return *NetworkEnumToIdMap.Find(Network);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), Network);
+	return 0;
 }
 
 TArray<FIdNamePair> USequenceSupport::GetAllNetworks()

@@ -175,8 +175,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static int64 GetNetworkIdFromName(const FString& NetworkNameIn);
 
+	UFUNCTION(BlueprintCallable, Category = "Networks Utility")
+	static int64 GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn);
+
 	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static FString GetNetworkNameFromId(const int64 NetworkIdIn);
+
+	UFUNCTION(BlueprintCallable, Category = "Networks Utility")
+	static FString GetNetworkNameFromEnum(const ENetwork NetworkIdIn);
 
 	UFUNCTION(BlueprintCallable, Category="Networks Utility")
 	static TArray<FIdNamePair> GetAllNetworks();
@@ -199,6 +205,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiUpdateNetworkId(int64 NewNetworkId);
+
+	UFUNCTION(BlueprintCallable, Category = "Sync Api")
+	void ApiUpdateNetworkIdFromName(FString NewNetworkName);
+
+	UFUNCTION(BlueprintCallable, Category = "Sync Api")
+	void ApiUpdateNetworkIdFromEnum(ENetwork NewNetwork);
 
 	UFUNCTION(BlueprintCallable, Category="Sync Api")
 	void ApiUpdateProviderUrl(const FString& NewProviderUrl);
