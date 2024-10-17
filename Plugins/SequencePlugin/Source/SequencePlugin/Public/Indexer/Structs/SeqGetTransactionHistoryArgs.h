@@ -15,24 +15,23 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FSeqTransactionHistoryFilter filter;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-        FSeqPage page;
+        TOptional<FSeqPage> page;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool includeMetaData = false;
 
     bool customGetter = true;
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns>The jsonString from this UStruct formatted proper!</returns>
     FString GetArgs()
     {
         FString ret = "{";
         ret.Append("\"filter\":");
         ret.Append(filter.GetArgs());//get the args! MUST Have this!
-        if (page.containsData())
+        if (page.IsSet())
         {
-            ret.Append(",\"page\":");
-            ret.Append(page.GetArgs());
+            ret.Append(".\"page\":");
+            ret.Append(page.GetValue().GetArgs());
+            TSharedPtr<FJsonObject> PageObject = MakeShared<FJsonObject>();
+            FJsonObjectConverter::UStructToJsonObject(FSeqPage::StaticStruct(), &(page.GetValue()), PageObject.ToSharedRef(), 0, 0);
+            
         }
 
         ret.Append(",\"includeMetaData\":");

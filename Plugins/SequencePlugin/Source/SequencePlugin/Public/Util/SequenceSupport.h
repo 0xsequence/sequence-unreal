@@ -150,6 +150,8 @@ public:
 
 	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
 
+	static bool IsNetworkIdSupported(const int64 NetworkIdIn);
+
 	/**
 	 * Gets the associated Network Id with the given Network Name
 	 * @param NetworkNameIn The network's name

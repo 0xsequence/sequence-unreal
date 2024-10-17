@@ -28,6 +28,11 @@ FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 	return TEXT("");
 }
 
+bool USequenceSupport::IsNetworkIdSupported(const int64 NetworkIdIn)
+{
+	return NetworkIdToNameMap.Contains(NetworkIdIn);
+}
+
 int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 {
 	FString SearchKey = NetworkNameIn.ToLower();
