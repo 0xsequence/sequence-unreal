@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "SeqGetChainIDReturn.generated.h"
 
 USTRUCT(BlueprintType)

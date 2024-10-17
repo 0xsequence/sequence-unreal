@@ -9,7 +9,7 @@
 #include "Sequence/SequenceResponseIntent.h"
 #include "UObject/Object.h"
 #include "Types/Types.h"
-#include "Types/Wallet.h"
+#include "Types/CryptoWallet.h"
 #include "Util/Async.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "SequenceRPCManager.generated.h"
@@ -33,7 +33,7 @@ private:
 	FOpenSessionData Cached_OpenSessionData;
 
 	UPROPERTY()
-	UWallet * SessionWallet = nullptr;
+	UCryptoWallet * SessionWallet = nullptr;
 
 	FString Cached_ProjectAccessKey = "";
 	FString Cached_FeeQuote = "";
@@ -119,7 +119,7 @@ public:
 	 * @param SessionWalletIn The SessionWallet to Initialize with
 	 * @return The Initialized USequenceRPCManager
 	 */
-	static USequenceRPCManager * Make(UWallet * SessionWalletIn);
+	static USequenceRPCManager * Make(UCryptoWallet * SessionWalletIn);
 	
 	//RPC Calls//
 

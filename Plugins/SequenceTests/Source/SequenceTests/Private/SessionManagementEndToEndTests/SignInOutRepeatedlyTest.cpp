@@ -35,7 +35,7 @@ bool FSignInOutRepeatedlyTest::RunTest(const FString& Parameters)
 void USignInOutRepeatedlyTestHelper::RunTest()
 {
     
-    Authenticator = NewObject<UAuthenticator>();
+    Authenticator = NewObject<USequenceAuthenticator>();
     if (!Authenticator)
     {
         ParentTest->AddError(TEXT("Error creating authenticator"));

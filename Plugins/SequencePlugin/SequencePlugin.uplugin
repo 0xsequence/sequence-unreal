@@ -1,8 +1,8 @@
 {
 	"EngineVersion":"5.4",
 	"FileVersion": 3,
-	"Version": 2,
-	"VersionName": "1.1",
+	"Version": 3,
+	"VersionName": "1.3",
 	"FriendlyName": "SequencePlugin",
 	"Description": "",
 	"Category": "Sequence",

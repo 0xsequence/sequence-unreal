@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqVersion.h"
+#include "Dom/JsonObject.h"
 #include "SeqVersionReturn.generated.h"
 
 USTRUCT(BlueprintType)

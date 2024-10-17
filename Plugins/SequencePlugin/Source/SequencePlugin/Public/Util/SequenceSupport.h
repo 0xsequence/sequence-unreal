@@ -337,10 +337,6 @@ public:
 
 	static FString JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData);
 
-	//indexer response extraction functions used to parse response into a frontend usable form!
-	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FSeqGetTransactionHistoryReturn TransactionHistory);
-	static FUpdatableItemDataArgs ExtractFromTokenBalances(FSeqGetTokenBalancesReturn TokenBalances);
-
 	static int64 StringDateToUnixDate(const FString& Iso8601);
 	
 private:
@@ -349,6 +345,4 @@ private:
 	* some special edge cases from json responses / parsing as well!
 	*/
 	static FString StringCleanup(FString String);
-
-	static FMonthDayYear_BE TimestampToMonthDayYear_Be(const FString& Timestamp);
 };

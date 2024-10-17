@@ -5,6 +5,7 @@
 #include "Indexer/Indexer_Enums.h"
 #include "SeqContractInfo.h"
 #include "SeqTokenMetaData.h"
+#include "Dom/JsonObject.h"
 #include "SeqTokenBalance.generated.h"
 
 USTRUCT(BlueprintType)

@@ -37,7 +37,7 @@ bool FWaaSFederatedAuthTests::RunTest(const FString& Parameters)
 
 void UWaaSFederatedAuthTestsHelper::RunTest()
 {
-    Authenticator = NewObject<UAuthenticator>();
+    Authenticator = NewObject<USequenceAuthenticator>();
     Email = FString::Printf(TEXT("test-%lld@example.com"), FDateTime::UtcNow().ToUnixTimestamp());
     Username = FString::Printf(TEXT("testuser%lld"), FDateTime::UtcNow().ToUnixTimestamp());
     Password = "testpassword";

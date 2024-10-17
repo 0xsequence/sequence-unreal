@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "SequencePlugin/Public/Sequence/SequenceAPI.h"
-#include "SequencePlugin/Public/Authenticator.h"
+#include "SequencePlugin/Public/SequenceAuthenticator.h"
 #include "FederateAuthTest.generated.h"
 
 class FWaaSFederatedAuthTests;
@@ -34,7 +34,7 @@ public:
 
 private:
 	bool bTestComplete = false;
-	UAuthenticator* Authenticator = nullptr;
+	USequenceAuthenticator* Authenticator = nullptr;
 	FString Username;
 	FString Email;
 	FString Password;
