@@ -40,6 +40,7 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 	->WithHeader("Content-type", "application/json")
 	->WithHeader("Accept", "application/json")
 	->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
+	->WithHeader("Accept-Signature", "sig=()")
 	->WithVerb("POST")
 	->WithContentAsString(Content)
 	->ProcessAndThen(OnSuccess, OnFailure);
