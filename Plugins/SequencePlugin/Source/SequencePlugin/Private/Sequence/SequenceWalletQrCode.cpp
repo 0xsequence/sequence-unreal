@@ -62,11 +62,11 @@ UTexture2D* USequenceWalletQrCode::GetTexture()
 
 FString USequenceWalletQrCode::ConstructUrl(FString WalletAddress) const
 {
-	FString SizePart = "/";
-	SizePart.AppendInt(this->TextureSize);  
+	FString Size = "/";
+	Size.AppendInt(this->TextureSize);  
 
 	const FString Data = FString::Format(*this->UrlFormat, { WalletAddress });  
-	return this->GeneratorUrl + EncodeBase64Url(Data) + SizePart;
+	return this->GeneratorUrl + EncodeBase64Url(Data) + Size;
 }
 
 FString USequenceWalletQrCode::EncodeBase64Url(const FString& Data)
