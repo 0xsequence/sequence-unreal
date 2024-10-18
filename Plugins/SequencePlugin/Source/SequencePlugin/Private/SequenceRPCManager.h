@@ -41,12 +41,16 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
+	//Get Plugin Version
+
+	static FString GetPluginVersion();
+
 	/**
 	 * If this flag is enabled, we will preserve the SessionWallet for the next request
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = "1.0.0 (Unreal 1.4)";
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(USequenceRPCManager::GetPluginVersion()).Append(TEXT(")"));
 	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
 	
@@ -81,6 +85,8 @@ private:
 	FString BuildRegisterUrl() const;
 	
 	//Url Builder//
+
+	
 
 	//Session Wallet Management Code//
 
