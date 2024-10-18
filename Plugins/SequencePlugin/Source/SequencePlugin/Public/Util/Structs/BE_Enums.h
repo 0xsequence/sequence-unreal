@@ -12,3 +12,37 @@ enum ESocialSigninType
 	Discord UMETA(DisplayName = "Discord"),
 	Apple UMETA(DisplayName = "Apple"),
 };
+
+UENUM(BlueprintType)
+enum ENetwork
+{
+    Ethereum           UMETA(DisplayName = "Ethereum"),
+    Optimism           UMETA(DisplayName = "Optimism"),
+    BNBSmartChain      UMETA(DisplayName = "BNB Smart Chain"),
+    GnosisChain        UMETA(DisplayName = "Gnosis Chain"),
+    PolygonNetwork     UMETA(DisplayName = "Polygon Network"),
+    PolygonZkEVM       UMETA(DisplayName = "Polygon zkEVM"),
+    AstarZkEVM         UMETA(DisplayName = "Astar zkEVM"),
+    BaseCoinbase       UMETA(DisplayName = "Base (Coinbase)"),
+    Base               UMETA(DisplayName = "Base"),
+    OasysHomeverse     UMETA(DisplayName = "Oasys Homeverse"),
+    ArbitrumOne        UMETA(DisplayName = "Arbitrum One"),
+    ArbitrumNova       UMETA(DisplayName = "Arbitrum Nova"),
+    Avalanche          UMETA(DisplayName = "Avalanche"),
+    Blast              UMETA(DisplayName = "Blast"),
+    XAI                UMETA(DisplayName = "XAI"),
+    BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
+    B3Sepolia          UMETA(DisplayName = "B3 Sepolia"),
+    XrSepolia          UMETA(DisplayName = "XR Sepolia"),
+    ApeChainTestnet    UMETA(DisplayName = "ApeChain Testnet"),
+    OasysHomeverseTestnet UMETA(DisplayName = "Oasys Homeverse Testnet"),
+    AvalancheTestnet    UMETA(DisplayName = "Avalanche Testnet"),
+    PolygonAmoy        UMETA(DisplayName = "Polygon Amoy"),
+    BaseSepolia        UMETA(DisplayName = "Base Sepolia"),
+    ArbitrumSepolia    UMETA(DisplayName = "Arbitrum Sepolia"),
+    AstarZkYotoTestnet UMETA(DisplayName = "Astar ZkYoto Testnet"),
+    Sepolia            UMETA(DisplayName = "Sepolia"),
+    OptimismSepolia    UMETA(DisplayName = "Optimism Sepolia"),
+    BlastSepolia       UMETA(DisplayName = "Blast Sepolia"),
+    XaiSepolia         UMETA(DisplayName = "XAI Sepolia")
+};
