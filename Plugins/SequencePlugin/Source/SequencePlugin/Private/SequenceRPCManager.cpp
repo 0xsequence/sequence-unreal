@@ -4,15 +4,16 @@
 #include "SequenceAuthenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
+#include "Interfaces/IHttpResponse.h"
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
 #include "Interfaces/IPluginManager.h"
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 
-template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
+template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {
-	const int64 Issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 Issued = CurrentTime.IsSet() ? CurrentTime.GetValue() : FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 Expires = Issued + 86400;
 	FGenericData * LocalDataPtr = &Data;
 	const FString Operation = LocalDataPtr->Operation;
@@ -46,6 +47,47 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
+void USequenceRPCManager::SequenceRPC2(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	NewObject<URequestHandler>()
+	->PrepareRequest()
+	->WithUrl(Url)
+	->WithHeader("Content-type", "application/json")
+	->WithHeader("Accept", "application/json")
+	->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
+	->WithVerb("POST")
+	->WithContentAsString(Content)
+	->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOptional<int64>)> ContentGenerator,
+	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	this->SequenceRPC2(Url, ContentGenerator(TOptional<int64>(1)), [OnSuccess](FHttpResponsePtr Response)
+	{
+	   UE_LOG(LogTemp, Display, TEXT("SUCCESS"));
+	   UE_LOG(LogTemp, Display, TEXT("CONTENT"));
+	   FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
+	   UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
+
+		if(Content.Contains("intent is invalid: intent expired"))
+		{
+			FString Date = Response->GetHeader("Date");
+			UE_LOG(LogTemp, Display, TEXT("Date is %s"), *Date);
+			// Process date here
+			
+			for (auto Header : Response->GetAllHeaders())
+			{
+				UE_LOG(LogTemp, Display, TEXT("%s"), *Header);
+			}
+		}
+		else
+		{
+			OnSuccess(Content);
+		}
+	}, OnFailure);
+}
+
 FString USequenceRPCManager::GetPluginVersion()
 {
 	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("SequencePlugin"));
@@ -60,14 +102,14 @@ FString USequenceRPCManager::GetPluginVersion()
 	}
 }
 
-FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
+FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
 {
 	const FGetFeeOptionsData GetFeeOptionsData(Credentials.GetNetworkString(),Transactions,Credentials.GetWalletAddress());
-	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData);
+	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData, CurrentTime);
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message) const
+FString USequenceRPCManager::BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message, TOptional<int64> CurrentTime) const
 {
 	const int64 issued = FDateTime::UtcNow().ToUnixTimestamp() - 30;
 	const int64 expires = issued + 86400;
@@ -84,38 +126,38 @@ FString USequenceRPCManager::BuildSignMessageIntent(const FCredentials_BE& Crede
 	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
 	
 	const FSignMessageData SignMessageData(EIP_Message,Credentials.GetNetworkString(),Credentials.GetWalletAddress());
-	const FString Intent = this->GenerateIntent<FSignMessageData>(SignMessageData);
+	const FString Intent = this->GenerateIntent<FSignMessageData>(SignMessageData, CurrentTime);
 
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
+FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
 	const FSendTransactionData SendTransactionData(Identifier,Credentials.GetNetworkString(),Transactions,Credentials.GetWalletAddress());
-	const FString Intent = this->GenerateIntent<FSendTransactionData>(SendTransactionData);
+	const FString Intent = this->GenerateIntent<FSendTransactionData>(SendTransactionData, CurrentTime);
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote) const
+FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote, TOptional<int64> CurrentTime) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
 	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,Credentials.GetNetworkString(),Transactions,FeeQuote,Credentials.GetWalletAddress());
-	const FString Intent = this->GenerateIntent<FSendTransactionWithFeeOptionData>(SendTransactionWithFeeOptionData);
+	const FString Intent = this->GenerateIntent<FSendTransactionWithFeeOptionData>(SendTransactionWithFeeOptionData, CurrentTime);
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildListSessionIntent(const FCredentials_BE& Credentials) const
+FString USequenceRPCManager::BuildListSessionIntent(const FCredentials_BE& Credentials, TOptional<int64> CurrentTime) const
 {
 	const FListSessionsData ListSessionsData(Credentials.GetWalletAddress());
-	const FString Intent = this->GenerateIntent<FListSessionsData>(ListSessionsData);
+	const FString Intent = this->GenerateIntent<FListSessionsData>(ListSessionsData, CurrentTime);
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildCloseSessionIntent() const
+FString USequenceRPCManager::BuildCloseSessionIntent(TOptional<int64> CurrentTime) const
 {
 	const FCloseSessionData CloseSessionData(this->SessionWallet->GetSessionId());
-	const FString Intent = this->GenerateIntent(CloseSessionData);
+	const FString Intent = this->GenerateIntent(CloseSessionData, CurrentTime);
 	return Intent;
 }
 
@@ -125,19 +167,19 @@ FString USequenceRPCManager::BuildSessionValidationIntent() const
 	return Intent;
 }
 
-FString USequenceRPCManager::BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const
+FString USequenceRPCManager::BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent, TOptional<int64> CurrentTime) const
 {
-	return this->GenerateIntent<FFederateAccountData>(FederateAccountIntent);
+	return this->GenerateIntent<FFederateAccountData>(FederateAccountIntent, CurrentTime);
 }
 
-FString USequenceRPCManager::BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData) const
+FString USequenceRPCManager::BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData, TOptional<int64> CurrentTime) const
 {
-	return this->GenerateIntent<FOpenSessionData>(OpenSessionData);
+	return this->GenerateIntent<FOpenSessionData>(OpenSessionData, CurrentTime);
 }
 
-FString USequenceRPCManager::BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData) const
+FString USequenceRPCManager::BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData, TOptional<int64> CurrentTime) const
 {
-	return this->GenerateIntent<FInitiateAuthData>(InitiateAuthData);
+	return this->GenerateIntent<FInitiateAuthData>(InitiateAuthData, CurrentTime);
 }
 
 FString USequenceRPCManager::GeneratePacketSignature(const FString& Packet) const
@@ -236,7 +278,10 @@ void USequenceRPCManager::SignMessage(const FCredentials_BE& Credentials, const 
 
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),this->BuildSignMessageIntent(Credentials, Message),OnResponse,OnFailure);
+		this->SendIntent(this->BuildUrl(),[this, Credentials, Message](const TOptional<int64>& CurrentTime)
+		{
+			return this->BuildSignMessageIntent(Credentials, Message, CurrentTime);
+		},OnResponse,OnFailure);
 	}
 	else
 	{
@@ -262,7 +307,10 @@ void USequenceRPCManager::SendTransaction(const FCredentials_BE& Credentials, co
 	
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),BuildSendTransactionIntent(Credentials, Transactions),OnResponse,OnFailure);
+		this->SendIntent(this->BuildUrl(),[this, Credentials, Transactions](TOptional<int64> CurrentTime)
+		{
+			return BuildSendTransactionIntent(Credentials, Transactions, CurrentTime);
+		},OnResponse,OnFailure);
 	}
 	else
 	{
@@ -289,7 +337,10 @@ void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Cr
 	
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),BuildSendTransactionWithFeeIntent(Credentials, Transactions,this->Cached_FeeQuote),OnResponse,OnFailure);
+		this->SendIntent(this->BuildUrl(),[this, Credentials, Transactions](TOptional<int64> CurrentTime)
+		{
+			return BuildSendTransactionWithFeeIntent(Credentials, Transactions,this->Cached_FeeQuote, CurrentTime);
+		}, OnResponse, OnFailure);
 	}
 	else
 	{
@@ -316,7 +367,10 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 	
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),BuildGetFeeOptionsIntent(Credentials, Transactions),OnResponse,OnFailure);
+		this->SendIntent(this->BuildUrl(),[this, Credentials, Transactions](TOptional<int64> CurrentTime)
+		{
+			return BuildGetFeeOptionsIntent(Credentials, Transactions, CurrentTime);
+		},OnResponse,OnFailure);
 	}
 	else
 	{
@@ -342,7 +396,10 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 	
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),this->BuildListSessionIntent(Credentials),OnResponse,OnFailure);
+		this->SendIntent(this->BuildUrl(),[this, Credentials](TOptional<int64> CurrentTime)
+		{
+			return this->BuildListSessionIntent(Credentials, CurrentTime);
+		},OnResponse,OnFailure);
 	}
 	else
 	{
@@ -367,7 +424,11 @@ void USequenceRPCManager::CloseSession(const FCredentials_BE& Credentials, const
 	};
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(),this->BuildCloseSessionIntent(),OnResponse,OnFailure);
+		TFunction<FString (TOptional<int64>)> func = [this](TOptional<int64> Time)
+		{
+			return this->BuildCloseSessionIntent(Time);
+		};
+		this->SendIntent(this->BuildUrl(), func,OnResponse,OnFailure);
 	}
 	else
 	{
@@ -399,7 +460,10 @@ void USequenceRPCManager::InitEmailAuth(const FString& EmailIn, const TFunction<
 	InitiateAuthData.InitForEmail(this->SessionWallet->GetSessionId(), EmailIn);
 	this->Cached_Verifier = InitiateAuthData.verifier;
 	this->Cached_Email = EmailIn;
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, InitiateAuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(InitiateAuthData, CurrentTime);
+	}, OnResponse, OnFailure);
 }
 
 void USequenceRPCManager::InitEmailFederation(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
@@ -425,7 +489,10 @@ void USequenceRPCManager::InitEmailFederation(const FString& EmailIn, const TFun
 	InitiateAuthData.InitForEmail(this->SessionWallet->GetSessionId(), EmailIn);
 	this->Cached_Verifier = InitiateAuthData.verifier;
 	this->Cached_Email = EmailIn;
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, InitiateAuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(InitiateAuthData, CurrentTime);
+	}, OnResponse, OnFailure);
 }
 
 void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
@@ -466,7 +533,10 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 			this->Cached_Challenge = ParsedInitResponse.Response.Data.Challenge;
 			FOpenSessionData OpenSessionData;
 			OpenSessionData.InitForGuest(this->Cached_Challenge, this->SessionWallet->GetSessionId(), ForceCreateAccountIn);
-			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+			this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
+			{
+				return this->BuildOpenSessionIntent(OpenSessionData, CurrentTime);
+			}, OnOpenResponse, OnFailure);
 		}
 		else
 		{
@@ -478,7 +548,10 @@ void USequenceRPCManager::OpenGuestSession(const bool ForceCreateAccountIn, cons
 	FInitiateAuthData InitiateAuthData;
 	InitiateAuthData.InitForGuest(this->SessionWallet->GetSessionId());
 	this->Cached_Verifier = this->SessionWallet->GetSessionId();
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, InitiateAuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(InitiateAuthData, CurrentTime);
+	}, OnInitResponse, OnFailure);
 }
 
 void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
@@ -523,7 +596,10 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 		}
 	};
 	
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnResponse, OnFailure);
+	this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildOpenSessionIntent(OpenSessionData, CurrentTime);
+	}, OnResponse, OnFailure);
 }
 
 void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
@@ -577,7 +653,10 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 				}
 			};
 			
-			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+			this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
+			{
+				return this->BuildOpenSessionIntent(OpenSessionData, CurrentTime);
+			}, OnOpenResponse, OnFailure);
 		}
 		else
 		{
@@ -588,7 +667,10 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 	
 	FInitiateAuthData InitiateAuthData;
 	InitiateAuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, InitiateAuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(InitiateAuthData, CurrentTime);
+	}, OnInitResponse, OnFailure);
 }
 
 void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, const bool ForceCreateAccountIn, const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
@@ -641,8 +723,11 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 					}
 				}
 			};
-			
-			this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(OpenSessionData), OnOpenResponse, OnFailure);
+
+			this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
+			{
+				return this->BuildOpenSessionIntent(OpenSessionData, CurrentTime);
+			}, OnOpenResponse, OnFailure);
 		}
 		else
 		{
@@ -653,7 +738,10 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 	
 	FInitiateAuthData InitiateAuthData;
 	InitiateAuthData.InitForPlayFab(SessionTicketIn, this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(InitiateAuthData), OnInitResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, InitiateAuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(InitiateAuthData, CurrentTime);
+	}, OnInitResponse, OnFailure);
 }
 
 void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure)
@@ -685,7 +773,10 @@ void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredenti
 	};
 
 	this->Cached_OpenSessionData.forceCreateAccount = true;
-	this->SequenceRPC(this->BuildRegisterUrl(), this->BuildOpenSessionIntent(this->Cached_OpenSessionData), OnOpenResponse, OnFailure);
+	this->SendIntent(this->BuildRegisterUrl(), [this](TOptional<int64> CurrentTime)
+	{
+		return this->BuildOpenSessionIntent(this->Cached_OpenSessionData, CurrentTime);
+	}, OnOpenResponse, OnFailure);
 }
 
 void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
@@ -708,7 +799,10 @@ void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FS
 	
 	FFederateAccountData FederateAccount;
 	FederateAccount.InitForEmail(WalletIn, this->Cached_Challenge, CodeIn,this->SessionWallet->GetSessionId(), this->Cached_Verifier);
-	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, FederateAccount](TOptional<int64> CurrentTime)
+	{
+		return this->BuildFederateAccountIntent(FederateAccount, CurrentTime);
+	}, OnFederateResponse, OnFailure);
 }
 
 void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
@@ -737,7 +831,10 @@ void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FSt
 	
 			FFederateAccountData FederateAccount;
 			FederateAccount.InitForOIDC(WalletIn, IdTokenIn,this->SessionWallet->GetSessionId());
-			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+			this->SendIntent(this->BuildUrl(), [this, FederateAccount](TOptional<int64> CurrentTime)
+			{
+				return this->BuildFederateAccountIntent(FederateAccount, CurrentTime);
+			}, OnFederateResponse, OnFailure);
 		}
 		else
 		{
@@ -748,7 +845,10 @@ void USequenceRPCManager::FederateOIDCSession(const FString& WalletIn, const FSt
 
 	FInitiateAuthData AuthData;
 	AuthData.InitForOIDC(IdTokenIn, this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, AuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(AuthData, CurrentTime);
+	}, OnInitiateResponse, OnFailure);
 }
 
 void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const FString& SessionTicketIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
@@ -777,7 +877,10 @@ void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const 
 	
 			FFederateAccountData FederateAccount;
 			FederateAccount.InitForPlayFab(WalletIn, SessionTicketIn,this->SessionWallet->GetSessionId());
-			this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccount), OnFederateResponse, OnFailure);
+			this->SendIntent(this->BuildUrl(), [this, FederateAccount](TOptional<int64> CurrentTime)
+			{
+				return this->BuildFederateAccountIntent(FederateAccount, CurrentTime);
+			}, OnFederateResponse, OnFailure);
 		}
 		else
 		{
@@ -788,7 +891,10 @@ void USequenceRPCManager::FederatePlayFabSession(const FString& WalletIn, const 
 
 	FInitiateAuthData AuthData;
 	AuthData.InitForPlayFab(SessionTicketIn, this->SessionWallet->GetSessionId());
-	this->SequenceRPC(this->BuildUrl(), this->BuildInitiateAuthIntent(AuthData), OnInitiateResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, AuthData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildInitiateAuthIntent(AuthData, CurrentTime);
+	}, OnInitiateResponse, OnFailure);
 }
 
 void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -809,5 +915,8 @@ void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TF
 	
 	FFederateAccountData FederateAccountData;
 	FederateAccountData.InitForFederation(this->Cached_OpenSessionData, WalletIn);
-	this->SequenceRPC(this->BuildUrl(), this->BuildFederateAccountIntent(FederateAccountData),OnFederateResponse, OnFailure);
+	this->SendIntent(this->BuildUrl(), [this, FederateAccountData](TOptional<int64> CurrentTime)
+	{
+		return this->BuildFederateAccountIntent(FederateAccountData, CurrentTime);
+	}, OnFederateResponse, OnFailure);
 }

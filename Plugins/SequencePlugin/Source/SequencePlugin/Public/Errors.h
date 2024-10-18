@@ -12,6 +12,7 @@ enum EErrorType
 	RequestFail,
 	RequestTimeExceeded,
 	TestFail,
+	TimeMismatch
 };
 
 class SEQUENCEPLUGIN_API FSequenceError
