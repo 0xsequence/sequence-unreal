@@ -33,8 +33,8 @@ public:
 
 private:
 	FString GeneratorUrl = "https://api.sequence.app/qr/";
-	FString Format = "{0}";
-	uint Size = 256;
+	FString UrlFormat = "{0}";
+	int32 TextureSize = 256;
 	UTexture2D* Texture;
 
 	FString ConstructUrl(FString WalletAddress) const;
