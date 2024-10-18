@@ -39,20 +39,20 @@ void USequenceWalletQrCode::LoadQrImage()
 	ObjectHandler->RequestImage(QrCodeUrl);
 }
 
-void USequenceWalletQrCode::SetGeneratorUrl(FString GeneratorUrl)
+void USequenceWalletQrCode::SetGeneratorUrl(FString Url)
 {
-	this->GeneratorUrl = GeneratorUrl;
+	this->GeneratorUrl = Url;
 }
 
 
 void USequenceWalletQrCode::SetFormat(FString Format)
 {
-	this->Format = Format;
+	this->UrlFormat = Format;
 }
 
 void USequenceWalletQrCode::SetTextureSize(int32 Size)
 {
-	this->Size = Size;
+	this->TextureSize = Size;
 }
 
 UTexture2D* USequenceWalletQrCode::GetTexture()
@@ -63,9 +63,9 @@ UTexture2D* USequenceWalletQrCode::GetTexture()
 FString USequenceWalletQrCode::ConstructUrl(FString WalletAddress) const
 {
 	FString Size = "/";
-	Size.AppendInt(this->Size);
+	Size.AppendInt(this->TextureSize);  
 
-	const FString Data = FString::Format(*Format, {WalletAddress});
+	const FString Data = FString::Format(*this->UrlFormat, { WalletAddress });  
 	return this->GeneratorUrl + EncodeBase64Url(Data) + Size;
 }
 
