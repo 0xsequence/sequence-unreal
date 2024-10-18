@@ -6,6 +6,7 @@
 #include "ConfigFetcher.h"
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
+#include "Interfaces/IPluginManager.h"
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 
@@ -43,6 +44,16 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 	->WithVerb("POST")
 	->WithContentAsString(Content)
 	->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+FString USequenceRPCManager::GetPluginVersion()
+{
+	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("SequencePlugin"));
+	if (Plugin.IsValid())
+	{
+		return Plugin->GetDescriptor().VersionName;
+	}
+	return FString();
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
