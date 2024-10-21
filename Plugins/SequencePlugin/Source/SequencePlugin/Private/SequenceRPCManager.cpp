@@ -53,7 +53,11 @@ FString USequenceRPCManager::GetPluginVersion()
 	{
 		return Plugin->GetDescriptor().VersionName;
 	}
-	return FString();
+	else 
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Failed to find Sequence Plugin, Unknown version]"));
+		return FString("UNKNOWN");
+	}
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
