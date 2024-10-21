@@ -47,6 +47,15 @@ void USequenceWalletBP::CallOnApiSendTransaction(const FSequenceResponseStatus& 
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSendTransaction]"));
 }
 
+void USequenceWalletBP::CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const
+{
+	if (this->OnApiGetIdToken.IsBound())
+		this->OnApiGetIdToken.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetIdToken]"));
+
+}
+
 void USequenceWalletBP::CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const
 {
 	if (this->OnApiListSessions.IsBound())
@@ -344,6 +353,26 @@ void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SendTransaction(Transactions->GetTransactions(), OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiGetIdToken(FString& Nonce)
+{
+	const TFunction<void (FSeqIdTokenResponse_Data)> OnSuccess = [this](const FSeqIdTokenResponse_Data& Data)
+		{
+			this->CallOnApiGetIdToken(FSequenceResponseStatus(true, GetIdTokenTrt), Data);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiGetIdToken(FSequenceResponseStatus(false, Err.Message, GetIdTokenTrt), {});
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->GetIdToken(Nonce, OnSuccess, OnFailure);
 	}
 }
 

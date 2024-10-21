@@ -486,6 +486,59 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
 
 //SignMessage//
 
+
+//GetIdToken//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString IdToken;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	int32 ExpiresIn;
+};
+
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Response
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Code = "";
+
+	UPROPERTY()
+	FSeqIdTokenResponse_Data Data;
+
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("idToken"), ESearchCase::IgnoreCase);
+
+	}
+};
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
+{
+	GENERATED_BODY()
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FSeqIdTokenResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+
 //ListSessions//
 
 USTRUCT(Blueprintable)

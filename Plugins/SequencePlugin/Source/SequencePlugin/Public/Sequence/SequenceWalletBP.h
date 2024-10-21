@@ -19,6 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequ
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
 
@@ -72,6 +73,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiSendTransaction OnApiSendTransaction;
+
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiGetIdToken OnApiGetIdToken;
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiListSessions OnApiListSessions;
@@ -127,6 +131,7 @@ private:
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
+	void CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const;
 	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
@@ -231,6 +236,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSendTransaction(UTransactions * Transactions);
+
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiGetIdToken(FString& Nonce);
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiListSessions();
