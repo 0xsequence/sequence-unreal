@@ -15,6 +15,7 @@ static const FString InitiateAuthOP = "initiateAuth";
 static const FString CloseSessionOP = "closeSession";
 static const FString SendTransactionOP = "sendTransaction";
 static const FString FeeOptionsOP = "feeOptions";
+static const FString GetIdTokenOP = "getIdToken";
 static const FString ListSessionsOP = "listSessions";
 static const FString SignMessageOP = "signMessage";
 static const FString FederateSessionOP = "federateAccount";
@@ -378,27 +379,70 @@ struct SEQUENCEPLUGIN_API FSendTransactionWithFeeOptionData : public FGenericDat
 };
 
 USTRUCT()
+struct SEQUENCEPLUGIN_API FGetIdTokenData : public FGenericData
+{
+    GENERATED_USTRUCT_BODY()
+
+    FGetIdTokenData()
+    {
+        UseCustomParser = true;
+        Operation = GetIdTokenOP;
+    };
+
+    FGetIdTokenData(const FString& SessionId, const FString& WalletAddress, const FString& Nonce)
+    {
+        UseCustomParser = true;
+        Operation = GetIdTokenOP;
+        this->SessionId = SessionId;
+        this->WalletAddress = WalletAddress;
+        //this->Nonce = Nonce;
+    }
+    UPROPERTY()
+    FString SessionId;
+
+    UPROPERTY()
+    FString WalletAddress;
+
+    UPROPERTY()
+    FString Nonce;
+
+    virtual FString GetJson() const override
+    {
+        FString JsonString = "{\"sessionId\":\"" + SessionId + "\",\"walletAddress\":\"" + WalletAddress + "\"";
+
+        if (!Nonce.IsEmpty())
+            JsonString += ",\"nonce\":\"" + Nonce + "\""; 
+        else
+            JsonString += "}";
+
+        return JsonString;
+    }
+};
+
+
+USTRUCT()
 struct SEQUENCEPLUGIN_API FListSessionsData : public FGenericData
 {
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString wallet = "";
+    GENERATED_USTRUCT_BODY()
 
- FListSessionsData()
- {
-  Operation = ListSessionsOP;
- }
- 
- FListSessionsData(const FString& WalletIn)
- {
-  Operation = ListSessionsOP;
-  wallet = WalletIn;
- }
+    UPROPERTY()
+    FString wallet = "";
 
- virtual FString GetJson() const override
- {
-  return "";
- }
+    FListSessionsData()
+    {
+        Operation = ListSessionsOP;
+    }
+
+    FListSessionsData(const FString& WalletIn)
+    {
+        Operation = ListSessionsOP;
+        wallet = WalletIn;
+    }
+
+    virtual FString GetJson() const override
+    {
+        return "";
+    }
 };
 
 USTRUCT()
