@@ -13,6 +13,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
+#include "Misc/DateTime.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {
@@ -54,7 +55,7 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 	->ProcessAndThen(OnSuccess, OnFailure);
 }
 
-void USequenceRPCManager::SequenceRPC2(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -70,23 +71,20 @@ void USequenceRPCManager::SequenceRPC2(const FString& Url, const FString& Conten
 void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOptional<int64>)> ContentGenerator,
 	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	this->SequenceRPC2(Url, ContentGenerator(TOptional<int64>(1)), [OnSuccess](FHttpResponsePtr Response)
+	this->SequenceRPC(Url, ContentGenerator(TOptional<int64>()), [this, Url, ContentGenerator, OnSuccess, OnFailure](FHttpResponsePtr Response)
 	{
-	   UE_LOG(LogTemp, Display, TEXT("SUCCESS"));
-	   UE_LOG(LogTemp, Display, TEXT("CONTENT"));
-	   FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
-	   UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
+		UE_LOG(LogTemp, Display, TEXT("SUCCESS"));
+		UE_LOG(LogTemp, Display, TEXT("CONTENT"));
+		FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
+		UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
 
 		if(Content.Contains("intent is invalid: intent expired"))
 		{
 			FString Date = Response->GetHeader("Date");
-			UE_LOG(LogTemp, Display, TEXT("Date is %s"), *Date);
-			// Process date here
-			
-			for (auto Header : Response->GetAllHeaders())
-			{
-				UE_LOG(LogTemp, Display, TEXT("%s"), *Header);
-			}
+			FDateTime Time;
+			FDateTime::ParseHttpDate(Date, Time);
+			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
+			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
 		}
 		else
 		{
