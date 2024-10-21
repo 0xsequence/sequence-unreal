@@ -97,7 +97,7 @@ private:
 
 	//RPC Caller//
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void SequenceRPC2(const ::FString& Url, const ::FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const
+	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const
 	                  FFailureCallback& OnFailure) const;
 	void SendIntent(const FString& Url, TFunction<FString (TOptional<int64>)> ContentGenerator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
