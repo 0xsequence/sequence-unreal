@@ -395,7 +395,7 @@ struct SEQUENCEPLUGIN_API FGetIdTokenData : public FGenericData
         Operation = GetIdTokenOP;
         this->SessionId = SessionId;
         this->WalletAddress = WalletAddress;
-        //this->Nonce = Nonce;
+        this->Nonce = Nonce;
     }
     UPROPERTY()
     FString SessionId;
