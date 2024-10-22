@@ -48,7 +48,7 @@ FString UTransakOnRamp::GetTransakLink(const FString& FiatCurrencyIn, const FStr
 {
 	const FAddFundsSettings AddFundsSettings(WalletAddress,FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn);
 	const FOnOffQueryParameters QueryParameters(WalletAddress,AddFundsSettings,DisableWalletAddressFormIn);
-	return "https://global.transak.com?" + QueryParameters.AsQueryParameters();
+	return ("https://global.transak.com?" + QueryParameters.AsQueryParameters()).Replace(TEXT(" "), TEXT(""));
 }
 
 void UTransakOnRamp::OpenTransakLink(const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)

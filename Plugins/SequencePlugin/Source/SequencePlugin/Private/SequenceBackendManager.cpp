@@ -3,6 +3,7 @@
 #include "SequenceBackendManager.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Util/Log.h"
 
 void ASequenceBackendManager::CallReadyToReceiveCode()
 {
