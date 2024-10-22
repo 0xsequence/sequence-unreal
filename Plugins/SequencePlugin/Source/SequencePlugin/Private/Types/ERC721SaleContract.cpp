@@ -56,28 +56,16 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
     return T; 
 }
 
-//FRawTransaction UERC721SaleContract::GetPaymentToken()
-//{
-//    FString FunctionSignature = "paymentToken()";
-//    TArray<ABIEncodeable*> Arr;
-//    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-//
-//    FContractCall CallData;
-//    CallData.To = ContractAddress;
-//    CallData.Data = TOptional(EncodedData.ToHex());
-//
-//    return CallData;
-//}
-//
-//FRawTransaction UERC721SaleContract::GetSaleDetails()
-//{
-//    FString FunctionSignature = "globalSaleDetails()";
-//    TArray<ABIEncodeable*> Arr;
-//    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-//
-//    FContractCall CallData;
-//    CallData.To = ContractAddress;
-//    CallData.Data = TOptional(EncodedData.ToHex());
-//
-//    return CallData;
-//}
+
+FContractCall UERC721SaleContract::GetSaleDetails()
+{
+    FString FunctionSignature = "saleDetails()";
+    TArray<ABIEncodeable*> Arr;
+    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+    FContractCall CallData;
+    CallData.Data = TOptional(EncodedData.ToHex());
+    CallData.To = FAddress::From(ContractAddress);
+
+    return CallData;
+}

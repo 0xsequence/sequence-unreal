@@ -70,29 +70,29 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 	T.value = "0";
     return T;
 }
-//
-//FRawTransaction UERC1155SaleContract::GetPaymentToken()
-//{
-//	FString FunctionSignature = "paymentToken()";
-//	TArray<ABIEncodeable*> Arr;
-//	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-//
-//	FContractCall CallData;
-//	CallData.To = ContractAddress;
-//	CallData.Data = TOptional(EncodedData.ToHex());
-//
-//	return CallData;
-//}
-//
-//FContractCall UERC1155SaleContract::GetSaleDetails()
-//{
-//	FString FunctionSignature = "globalSaleDetails()";
-//	TArray<ABIEncodeable*> Arr;
-//	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-//
-//	FContractCall CallData;
-//	CallData.Data = TOptional(EncodedData.ToHex());
-//	CallData.To = ContractAddress;
-//
-//	return CallData;
-//}
+
+FContractCall UERC1155SaleContract::GetPaymentToken()
+{
+	FString FunctionSignature = "paymentToken()";
+	TArray<ABIEncodeable*> Arr;
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FContractCall CallData;
+	CallData.Data = TOptional(EncodedData.ToHex());
+	CallData.To = FAddress::From(ContractAddress);
+
+	return CallData;
+}
+
+FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
+{
+	FString FunctionSignature = "globalSaleDetails()";
+	TArray<ABIEncodeable*> Arr;
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FContractCall CallData;
+	CallData.Data = TOptional(EncodedData.ToHex());
+	CallData.To = FAddress::From(ContractAddress);
+
+	return CallData;
+}

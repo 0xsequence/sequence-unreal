@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "Sequence/Transactions.h"
+#include "ContractCall.h"
 #include "ERC1155SaleContract.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
@@ -30,9 +31,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof);
 
-   /* UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
+
     FContractCall GetPaymentToken();
 
-    UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
-    FContractCall GetSaleDetails();*/
+    FContractCall GetGlobalSaleDetails();
+
+
 };
