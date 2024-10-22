@@ -94,6 +94,7 @@ private:
 		FIdName(81457,TEXT("Blast")),
 		FIdName(660279,TEXT("Xai")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
+		FIdName(1946,TEXT("Soneium Minato (Testnet)")),
 		FIdName(1993,TEXT("B3 Sepolia")),
 		FIdName(2730,TEXT("XR Sepolia")),
 		FIdName(33111,TEXT("APE Chain Testnet")),
@@ -101,10 +102,12 @@ private:
 		FIdName(43113,TEXT("Avalanche Testnet")),
 		FIdName(80002,TEXT("Polygon Amoy")),
 		FIdName(84532,TEXT("Base Sepolia")),
+		FIdName(94984,TEXT("Borne Testnet")),
 		FIdName(421614,TEXT("Arbitrum Sepolia")),
 		FIdName(6038361,TEXT("Astar zKyoto Testnet")),
 		FIdName(11155111,TEXT("Sepolia")),
 		FIdName(11155420,TEXT("Optimism Sepolia")),
+		FIdName(37084624,TEXT("SKALE Nebula Gaming Hub Testnet")),
 		FIdName(168587773,TEXT("Blast Sepolia")),
 		FIdName(37714555429,TEXT("Xai Sepolia"))};
 
