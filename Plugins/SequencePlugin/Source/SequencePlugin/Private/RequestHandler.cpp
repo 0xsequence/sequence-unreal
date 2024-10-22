@@ -195,68 +195,37 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSucc
 	});//lambda
 }
 
-void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const
+void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)> OnSuccess, FFailureCallback OnFailure) const
 {
-	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	if (Validator.HasFoundTamperedResponse())
 	{
-		FString CurlCommand = FString::Printf(
-			TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
-			*Req->GetVerb(),                
-			*Req->GetURL(),                 
-			*Req->GetHeader("X-Access-Key"),
-			*FString::Printf(TEXT("%s"),*FString(UTF8_TO_TCHAR(Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\"")))
-		);
+		UE_LOG(LogTemp, Error, TEXT("Validator is null!"));
+		OnFailure(FSequenceError(RequestFail, "Validator is null."));
+		return;
+	}
 
-		SEQ_LOG_EDITOR(Log,TEXT("%s"), *CurlCommand);
-		SEQ_LOG_EDITOR(Log,TEXT("%s"), *Response->GetContentAsString());
-
-		if (bWasSuccessful)
+	Process().BindLambda([&Validator,OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 		{
-			UResponseSignatureValidator * Validator = NewObject<UResponseSignatureValidator>();
-
-			if (Validator->ValidateResponseSignature(Response))
+			if (bWasSuccessful)
 			{
-				UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
-
-				OnSuccess(Response.Get()->GetContentAsString());
+				if (Validator.ValidateResponseSignature(Response))
+				{
+					UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
+					OnSuccess(Response->GetContentAsString());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
+					OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
-
-				OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+				if (Response.IsValid())
+					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+				else
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 			}
-
-		}
-		else
-		{
-			if(Response.IsValid())
-			{
-				OnFailure(FSequenceError(RequestFail, "Request is invalid" + Response->GetContentAsString()));
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
-			}
-		}
-	});
-}
-
-void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess,
-                                     const FFailureCallback& OnFailure) const
-{
-	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
-	{		
-		if(bWasSuccessful)
-		{
-			OnSuccess(Response);
-		}
-		else
-		{
-			if(!Response.IsValid())
-				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-			else
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
-		}
-	});
+		});
+	}
 }
