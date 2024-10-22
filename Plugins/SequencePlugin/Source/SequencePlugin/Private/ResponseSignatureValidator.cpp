@@ -66,11 +66,13 @@ FString UResponseSignatureValidator::GetValue(const FString& HeaderItem)
     }
     return FString(); 
 }
-
 bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponsePtr& Response)
 {
     if (!Response.IsValid())
-        return false; 
+    {
+        tamperedResponseSignatureFound = true;
+        return false;
+    }
 
     const FString ContentDigestHeader = Response->GetHeader(TEXT("content-digest"));
     const FString SignatureHeader = Response->GetHeader(TEXT("signature"));
@@ -79,18 +81,21 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
     if (ContentDigestHeader.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("ContentDigestHeader is empty."));
+        tamperedResponseSignatureFound = true;
         return false;
     }
 
     if (SignatureHeader.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("SignatureHeader is empty."));
+        tamperedResponseSignatureFound = true;
         return false;
     }
 
     if (SignatureInputHeader.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("SignatureInputHeader is empty."));
+        tamperedResponseSignatureFound = true;
         return false;
     }
 
@@ -108,6 +113,7 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
     if (!FBase64::Decode(CleanContentDigestHeader, DecodedDigest))
     {
         UE_LOG(LogTemp, Error, TEXT("Failed to decode Base64 content digest: %s"), *CleanContentDigestHeader);
+        tamperedResponseSignatureFound = true;
         return false;
     }
 
@@ -118,14 +124,16 @@ bool UResponseSignatureValidator::ValidateResponseSignature(const FHttpResponseP
 
     if (ExpectedDigestBase64 != CleanContentDigestHeader)
     {
-        UE_LOG(LogTemp, Error, TEXT("Content-Digest header does not match response content: %s != %s"), *CleanContentDigestHeader, *ExpectedDigestBase64);  
-        return false; 
+        UE_LOG(LogTemp, Error, TEXT("Content-Digest header does not match response content: %s != %s"), *CleanContentDigestHeader, *ExpectedDigestBase64);
+        tamperedResponseSignatureFound = true;
+        return false;
     }
 
     FString Signature = GetValue(SignatureHeader);
     if (Signature.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("Failed to parse Signature header."));
+        tamperedResponseSignatureFound = true;
         return false;
     }
 
@@ -145,7 +153,8 @@ bool UResponseSignatureValidator::VerifySignature(const FString& SignatureBase, 
     if (!FBase64::Decode(Signature, SignatureBytes))
     {
         UE_LOG(LogTemp, Error, TEXT("Failed to decode signature from Base64"));
-        return false;  
+        tamperedResponseSignatureFound = true;
+        return false;
     }
 
     TArray<uint8> DataBytes;
@@ -153,7 +162,7 @@ bool UResponseSignatureValidator::VerifySignature(const FString& SignatureBase, 
     DataBytes.Append((uint8*)Converter.Get(), Converter.Length());
 
     EVP_PKEY* PublicKey = EVP_PKEY_new();
-    EVP_PKEY_assign_RSA(PublicKey, WaasPublicKey); 
+    EVP_PKEY_assign_RSA(PublicKey, WaasPublicKey);
 
     EVP_MD_CTX* mdCtx = EVP_MD_CTX_new();
     EVP_PKEY_CTX* pkeyCtx = nullptr;
@@ -163,7 +172,8 @@ bool UResponseSignatureValidator::VerifySignature(const FString& SignatureBase, 
         UE_LOG(LogTemp, Error, TEXT("Failed to initialize signature verification"));
         EVP_MD_CTX_free(mdCtx);
         EVP_PKEY_free(PublicKey);
-        return false;  
+        tamperedResponseSignatureFound = true;
+        return false;
     }
 
     if (EVP_DigestVerifyUpdate(mdCtx, DataBytes.GetData(), DataBytes.Num()) <= 0)
@@ -171,7 +181,8 @@ bool UResponseSignatureValidator::VerifySignature(const FString& SignatureBase, 
         UE_LOG(LogTemp, Error, TEXT("Failed to update signature verification with data"));
         EVP_MD_CTX_free(mdCtx);
         EVP_PKEY_free(PublicKey);
-        return false;  
+        tamperedResponseSignatureFound = true;
+        return false;
     }
 
     int result = EVP_DigestVerifyFinal(mdCtx, SignatureBytes.GetData(), SignatureBytes.Num());
@@ -182,9 +193,15 @@ bool UResponseSignatureValidator::VerifySignature(const FString& SignatureBase, 
     if (result != 1)
     {
         UE_LOG(LogTemp, Error, TEXT("Signature is invalid"));
-        return false; 
+        tamperedResponseSignatureFound = true;
+        return false;
     }
 
     UE_LOG(LogTemp, Log, TEXT("Signature is valid"));
-    return true; 
+    return true;
+}
+
+bool UResponseSignatureValidator::HasFoundTamperedResponse()
+{
+    return tamperedResponseSignatureFound;
 }

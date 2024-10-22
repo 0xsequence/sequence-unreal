@@ -31,8 +31,11 @@ public:
 
     bool VerifySignature(const FString& SignatureBase, const FString& Signature);
 
+    bool HasFoundTamperedResponse();
 
 private:
+
+    bool tamperedResponseSignatureFound = false;
 
     RSA* WaasPublicKey;
 

@@ -22,6 +22,7 @@ class SEQUENCEPLUGIN_API URequestHandler : public UObject
 	
 public:
 	URequestHandler* PrepareRequest();
+
 	
 	// Setters
 	void SetUrl(FString Url) const;
@@ -38,5 +39,5 @@ public:
 	// Process
 	FHttpRequestCompleteDelegate& Process() const;
 	void ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFailureCallback OnFailure);
-	void ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const;
+	void ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const;
 };

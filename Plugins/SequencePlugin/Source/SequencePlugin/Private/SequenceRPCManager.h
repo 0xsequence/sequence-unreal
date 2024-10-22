@@ -12,6 +12,7 @@
 #include "Types/CryptoWallet.h"
 #include "Util/Async.h"
 #include "Sequence/SequenceFederationSupport.h"
+#include "ResponseSignatureValidator.h"
 #include "SequenceRPCManager.generated.h"
 
 /**
@@ -21,6 +22,7 @@ UCLASS()
 class SEQUENCEPLUGIN_API USequenceRPCManager : public UObject
 {
 	GENERATED_BODY()
+
 private:
 
 	//Vars//
@@ -106,6 +108,8 @@ private:
 	void UpdateWithStoredSessionWallet();
 	
 public:
+
+	UResponseSignatureValidator* Validator;
 
 	/**
 	 * Allows you to create a new Manager with a session wallet that's either random or set by on disk credentials

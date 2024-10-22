@@ -60,14 +60,16 @@ FString USequenceWallet::Url(const FString& Name) const
 
 void USequenceWallet::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	NewObject<URequestHandler>()
-			->PrepareRequest()
-			->WithUrl(Url)
-			->WithHeader("Content-type", "application/json")
-			->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
-			->WithVerb("POST")
-			->WithContentAsString(Content)
-			->ProcessAndThen(OnSuccess, OnFailure);
+	URequestHandler* RequestHandler = NewObject<URequestHandler>();
+
+	RequestHandler->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
+		->WithVerb("POST")
+		->WithContentAsString(Content);
+
+	RequestHandler->ProcessAndThen(*SequenceRPCManager->Validator, OnSuccess, OnFailure);
 }
 
 USequenceWallet::USequenceWallet()

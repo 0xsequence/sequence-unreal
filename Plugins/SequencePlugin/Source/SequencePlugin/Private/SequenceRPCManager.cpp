@@ -34,16 +34,18 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	UResponseSignatureValidator& RPCValidator = *Validator;
+
 	NewObject<URequestHandler>()
-	->PrepareRequest()
-	->WithUrl(Url)
-	->WithHeader("Content-type", "application/json")
-	->WithHeader("Accept", "application/json")
-	->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
-	->WithHeader("Accept-Signature", "sig=()")
-	->WithVerb("POST")
-	->WithContentAsString(Content)
-	->ProcessAndThen(OnSuccess, OnFailure);
+		->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept", "application/json")
+		->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
+		->WithHeader("Accept-Signature", "sig=()")
+		->WithVerb("POST")
+		->WithContentAsString(Content)
+		->ProcessAndThen(RPCValidator,OnSuccess, OnFailure);
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const
@@ -196,7 +198,7 @@ USequenceRPCManager* USequenceRPCManager::Make(UCryptoWallet* SessionWalletIn)
 {
 	USequenceRPCManager * SequenceRPCManager = NewObject<USequenceRPCManager>();
 	SequenceRPCManager->SessionWallet = SessionWalletIn;
-
+	SequenceRPCManager->Validator = NewObject<UResponseSignatureValidator>();
 	FString ParsedJwt;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJwt);
 	SequenceRPCManager->WaaSSettings = USequenceSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);

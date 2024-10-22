@@ -128,34 +128,36 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 	});//lambda
 }
 
-void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const
+void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)> OnSuccess, FFailureCallback OnFailure) const
 {
-	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
-	{		
-		if(bWasSuccessful)
+	if (Validator.HasFoundTamperedResponse())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Validator is null!"));
+		OnFailure(FSequenceError(RequestFail, "Validator is null."));
+		return;
+	}
+
+	Process().BindLambda([&Validator,OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 		{
-			UResponseSignatureValidator * Validator = NewObject<UResponseSignatureValidator>();
-
-			if (Validator->ValidateResponseSignature(Response))
+			if (bWasSuccessful)
 			{
-				UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
-
-				OnSuccess(Response.Get()->GetContentAsString());
+				if (Validator.ValidateResponseSignature(Response))
+				{
+					UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
+					OnSuccess(Response->GetContentAsString());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
+					OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+				}
 			}
 			else
 			{
-				UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
-
-				OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+				if (Response.IsValid())
+					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+				else
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 			}
-
-		}
-		else
-		{
-			if(Response.IsValid())
-				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-			else
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
-		}
-	});
+		});
 }
