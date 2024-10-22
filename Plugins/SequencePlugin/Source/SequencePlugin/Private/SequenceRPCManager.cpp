@@ -78,7 +78,7 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 		FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
 		UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
 
-		if(Content.Contains("intent is invalid: intent expired"))
+		if(Content.Contains("intent is invalid: intent expired") || Content.Contains("intent is invalid: intent issued in the future"))
 		{
 			FString Date = Response->GetHeader("Date");
 			FDateTime Time;
