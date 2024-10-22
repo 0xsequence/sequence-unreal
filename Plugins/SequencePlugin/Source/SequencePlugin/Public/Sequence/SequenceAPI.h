@@ -16,6 +16,7 @@
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
 #include "Util/SequenceSupport.h"
+#include "Util/Structs/BE_Enums.h"
 #include "SequenceAPI.generated.h"
 
 class UIndexer;
@@ -133,6 +134,10 @@ public:
 	 * @param NewNetwork New network you wish to use
 	 */
 	void UpdateNetworkId(int64 NewNetwork);
+
+	void UpdateNetworkId(FString NewNetworkName);
+
+	void UpdateNetworkId(ENetwork NewNetwork);
 
 	/**
 	 * Allows to get the currently set network for the SequenceWallet
