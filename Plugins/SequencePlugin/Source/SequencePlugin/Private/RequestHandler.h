@@ -7,6 +7,7 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Engine/Texture2D.h"
 #include "UObject/Object.h"
+#include "ResponseSignatureValidator.h"
 #include "RequestHandler.generated.h"
 
 /**
@@ -16,6 +17,7 @@ UCLASS()
 class SEQUENCEPLUGIN_API URequestHandler : public UObject
 {
 	GENERATED_BODY()
+
 	FHttpRequestPtr Request;
 	
 public:
