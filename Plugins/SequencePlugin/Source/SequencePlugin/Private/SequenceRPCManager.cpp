@@ -82,7 +82,14 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 		{
 			FString Date = Response->GetHeader("Date");
 			FDateTime Time;
-			FDateTime::ParseHttpDate(Date, Time);
+			bool IsParsed = FDateTime::ParseHttpDate(Date, Time);
+
+			if(!IsParsed)
+			{
+				OnFailure(FSequenceError(FailedToParseIntentTime, "Failed to parse intent time " + Date));
+				return;
+			}
+			
 			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
 			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
 		}
