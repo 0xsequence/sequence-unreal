@@ -278,7 +278,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
 
-	UFUNCTION(BlueprintCallable, Category="Async Indexer")
+	UFUNCTION(BlueprintCallable, Category = "Async Indexer", meta = (DeprecatedFunction, DeprecationMessage = "IndexerGetBalanceUpdates is obsolete."))
 	void IndexerGetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")

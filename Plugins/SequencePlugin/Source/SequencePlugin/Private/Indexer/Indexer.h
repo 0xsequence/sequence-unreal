@@ -106,6 +106,7 @@ public:
 	/*
 		Get the balance updates from the Chain
 	*/
+	UE_DEPRECATED(5.4, "GetBalanceUpdates is obsolete.")
 	void GetBalanceUpdates(int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
