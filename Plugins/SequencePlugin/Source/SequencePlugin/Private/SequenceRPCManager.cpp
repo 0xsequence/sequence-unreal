@@ -35,10 +35,6 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data) const
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Log, TEXT("URL set to: %s"), *Url);
-	UE_LOG(LogTemp, Log, TEXT("Request content set to: %s"), *Content);
-
-
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
