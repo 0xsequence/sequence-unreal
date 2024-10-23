@@ -127,14 +127,6 @@ void USequenceWalletBP::CallOnIndexerGetTokenSuppliesMap(const FSequenceResponse
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnIndexerGetTokenSuppliesMap]"));
 }
 
-void USequenceWalletBP::CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const
-{
-	if (this->OnIndexerGetBalanceUpdates.IsBound())
-		this->OnIndexerGetBalanceUpdates.Broadcast(Status,BalanceUpdates);
-	else
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnIndexerGetBalanceUpdates]"));
-}
-
 void USequenceWalletBP::CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const
 {
 	if (this->OnIndexerGetTransactionHistory.IsBound())
@@ -582,27 +574,6 @@ void USequenceWalletBP::IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMap
 		};
 		
 		Wallet->GetTokenSuppliesMap(Args, OnSuccess, OnFailure);
-	}
-}
-
-void USequenceWalletBP::IndexerGetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args)
-{
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-
-		const TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess = [this](const FSeqGetBalanceUpdatesReturn& BalanceUpdates)
-		{
-			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(true, GetBalanceUpdatesTrt), BalanceUpdates);
-		};
-
-		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
-		{
-			this->CallOnIndexerGetBalanceUpdates(FSequenceResponseStatus(false, Error.Message, GetBalanceUpdatesTrt), FSeqGetBalanceUpdatesReturn());
-		};
-		
-		Wallet->GetBalanceUpdates(Args, OnSuccess, OnFailure);
 	}
 }
 

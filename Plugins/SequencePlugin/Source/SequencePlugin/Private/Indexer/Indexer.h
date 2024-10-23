@@ -104,12 +104,6 @@ public:
 	void GetTokenSuppliesMap(int64 ChainID, const FSeqGetTokenSuppliesMapArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure);
 	
 	/*
-		Get the balance updates from the Chain
-	*/
-	UE_DEPRECATED(5.4, "GetBalanceUpdates is obsolete.")
-	void GetBalanceUpdates(int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure);
-
-	/*
 		get transaction history from the Chain
 	*/
 	void GetTransactionHistory(int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure);

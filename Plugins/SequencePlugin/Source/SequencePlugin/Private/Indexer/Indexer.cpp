@@ -221,14 +221,6 @@ void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppli
 	}, OnFailure);
 }
 
-void UIndexer::GetBalanceUpdates(const int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure)
-{
-	HTTPPost(ChainID, "GetBalanceUpdates", BuildArgs<FSeqGetBalanceUpdatesArgs>(Args), [this,OnSuccess](const FString& Content)
-	{
-		OnSuccess(this->BuildResponse<FSeqGetBalanceUpdatesReturn>(Content));
-	}, OnFailure);
-}
-
 void UIndexer::GetTransactionHistory(const int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "GetTransactionHistory", BuildArgs<FSeqGetTransactionHistoryArgs>(Args), [this,OnSuccess](const FString& Content)
