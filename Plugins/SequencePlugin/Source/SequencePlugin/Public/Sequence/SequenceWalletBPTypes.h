@@ -34,6 +34,7 @@ UENUM(BlueprintType)
 enum ETransactionResponseType
 {
 	SignMessageTrt UMETA(DisplayName = "SignMessage"),
+	ValidateMessageSignatureTrt  UMETA(DisplayName = "ValidateMessageSignature"),
 	GetFilteredFeeTrt UMETA(DisplayName = "GetFilteredFeeOptions"),
 	GetUnFilteredFeeOptionsTrt UMETA(DisplayName = "GetUnFilteredFeeOptions"),
 	SendTransactionWithFeeTrt UMETA(DisplayName = "SendTransactionWithFee"),

@@ -486,6 +486,39 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
 
 //SignMessage//
 
+//Validate Signature//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	bool isValid;
+
+	bool IsValid() const
+	{
+		return isValid;
+	}
+};
+
+
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqValidateMessageSignatureResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Data.IsValid();
+	}
+};
+ 
+// 
 //ListSessions//
 
 USTRUCT(Blueprintable)
