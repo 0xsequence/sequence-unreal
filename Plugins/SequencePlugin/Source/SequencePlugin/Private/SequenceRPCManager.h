@@ -58,23 +58,24 @@ private:
 
 	//Requires Credentials//
 	
-	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
-	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message) const;
-	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
-	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
-	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
-	FString BuildCloseSessionIntent() const;
+	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const;
+	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message, TOptional<int64> CurrentTime) const;
+	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const;
+	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote, TOptional<
+	                                          int64> CurrentTime) const;	
+	FString BuildListSessionIntent(const FCredentials_BE& Credentials, TOptional<int64> CurrentTime) const;
+	FString BuildCloseSessionIntent(TOptional<int64> CurrentTime) const;
 	FString BuildSessionValidationIntent() const;
-	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const;
+	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent, TOptional<int64> CurrentTime) const;
 
 	//Requires Credentials//
 
 	//Requires Bootstrap//
 	
-	FString BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData) const;
-	FString BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData) const;	
+	FString BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData, TOptional<int64> CurrentTime) const;
+	FString BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData, TOptional<int64> CurrentTime) const;	
 	FString GeneratePacketSignature(const FString& Packet) const;
-	template<typename T> FString GenerateIntent(T Data) const;
+	template<typename T> FString GenerateIntent(T Data, TOptional<int64> CurrentTime) const;
 
 	//Requires Bootstrap//
 
@@ -93,13 +94,13 @@ private:
 	void CheckAndUpdateSessionFromPreserveSessionWallet();
 	
 	//Session Wallet Management Code//
-	
-	//RPC Caller//
 
+	//RPC Caller//
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const
+	                  FFailureCallback& OnFailure) const;
+	void SendIntent(const FString& Url, TFunction<FString (TOptional<int64>)> ContentGenerator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
-	//RPC Caller//
-
 	/**
 	 * Updates the SessionWallet with a random one
 	 */
