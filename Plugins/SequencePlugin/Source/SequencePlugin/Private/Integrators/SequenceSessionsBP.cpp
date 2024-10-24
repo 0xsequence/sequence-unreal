@@ -35,7 +35,7 @@ USequenceSessionsBP* USequenceSessionsBP::GetSubSystem()
 	return nullptr;
 }
 
-USequenceSessionsBP::USequenceSessions()
+USequenceSessionsBP::USequenceSessionsBP()
 {
 	this->RPCManager = USequenceRPCManager::Make(false);
 }
