@@ -120,8 +120,10 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 			if (!Response.IsValid())
 			{
 				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+			} else
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 			}
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}//if wasn't successful
 		//catch all error case!
 		OnFailure(FSequenceError(RequestFail, "Failed to build QR Image data"));
@@ -138,7 +140,7 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 		}
 		else
 		{
-			if(Response.IsValid())
+			if(!Response.IsValid())
 				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 			else
 				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
@@ -157,7 +159,7 @@ void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSucces
 		}
 		else
 		{
-			if(Response.IsValid())
+			if(!Response.IsValid())
 				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 			else
 				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
