@@ -1,10 +1,43 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/SequenceWalletBP.h"
+
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Log.h"
 
 USequenceWalletBP::USequenceWalletBP()
 {
+}
+
+USequenceWalletBP* USequenceWalletBP::GetSubSystem()
+{
+	if (GEngine)
+	{
+		const TIndirectArray<FWorldContext> Contexts = GEngine->GetWorldContexts();
+		for (FWorldContext Context : Contexts)
+		{
+			if (const UWorld* World = Context.World())
+			{
+				if (const UGameInstance* GI = UGameplayStatics::GetGameInstance(World))
+				{
+					if (USequenceWalletBP* Subsystem = GI->GetSubsystem<USequenceWalletBP>())
+					{
+						return Subsystem;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		SEQ_LOG(Error,TEXT("Error Accessing GEngine"));
+	}
+	
+	SEQ_LOG(Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
+	return nullptr;
 }
 
 void USequenceWalletBP::CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const

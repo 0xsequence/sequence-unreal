@@ -8,6 +8,7 @@
 #include "SequenceWalletBPTypes.h"
 #include "Transactions.h"
 #include "SequenceResponseIntent.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceWalletBP.generated.h"
 
 //ASYNC Response Delegates//
@@ -46,10 +47,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, F
  * to Blueprints for ease of use.
  */
 UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API USequenceWalletBP : public UObject
+class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 private:
+	static USequenceWalletBP* GetSubSystem();
 	
 public:
 	USequenceWalletBP();
