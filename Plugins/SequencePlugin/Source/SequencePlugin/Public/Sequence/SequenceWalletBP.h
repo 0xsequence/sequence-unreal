@@ -34,7 +34,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetEtherBalance, FSequen
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenBalances, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenBalancesReturn, TokenBalances);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesReturn, TokenSupplies);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesMapReturn, TokenSuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetBalanceUpdates, FSequenceResponseStatus, ResponseStatus, FSeqGetBalanceUpdatesReturn, BalanceUpdates);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FSeqGetTransactionHistoryReturn, TransactionHistory);
 
 //Indexer//
@@ -106,9 +105,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerGetTokenSuppliesMap OnIndexerGetTokenSuppliesMap;
-
-	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
-	FOnIIndexerGetBalanceUpdates OnIndexerGetBalanceUpdates;
 	
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
@@ -142,7 +138,6 @@ private:
 	void CallOnIndexerGetTokenBalances(const FSequenceResponseStatus& Status, const FSeqGetTokenBalancesReturn& TokenBalances) const;
 	void CallOnIndexerGetTokenSupplies(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesReturn& TokenSupplies) const;
 	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
-	void CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const;
 	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 
 	//Indexer//
@@ -277,9 +272,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args);

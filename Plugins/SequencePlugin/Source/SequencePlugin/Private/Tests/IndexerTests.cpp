@@ -174,30 +174,6 @@ void GetTokenSuppliesMapTest(UIndexer* Indexer, TFunction<void(FString)> OnSucce
 	Indexer->GetTokenSuppliesMap(GTestingChainID, Args, GenericSuccess, GenericFailure);
 }
 
-void GetBalanceUpdatesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
-{
-	const TSuccessCallback<FSeqGetBalanceUpdatesReturn> GenericSuccess = [OnSuccess](const FSeqGetBalanceUpdatesReturn& BalanceUpdates)
-	{
-		OnSuccess("Received balance Updates Data");
-		if (GPrintAll)
-		{
-			const FString ret = USequenceSupport::StructToString<FSeqGetBalanceUpdatesReturn>(BalanceUpdates);
-			UE_LOG(LogTemp, Display, TEXT("Parsed balanceUpdatesReturn Struct:\n%s\n"), *ret);
-		}
-	};
-
-	const FFailureCallback GenericFailure = [OnFailure](const FSequenceError& Error)
-	{
-		OnFailure("balanceUpdates Failure", Error);
-	};
-
-	FSeqGetBalanceUpdatesArgs Args;
-	Args.contractAddress = "0x0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2";
-	Args.page.page = 10;
-	Args.page.more = true;
-	Indexer->GetBalanceUpdates(GTestingChainID, Args, GenericSuccess, GenericFailure);
-}
-
 void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
@@ -526,36 +502,6 @@ void GetTokenSuppliesMapParsingTest(UIndexer* Indexer)
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
 
-void GetBalanceUpdatesParsingTest(UIndexer* Indexer)
-{
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("get Balance Updates Parsing Test"));
-	FString args = "{\"page\":"+GTestingPage+",\"balances\":["+GTestingBalanceData+"]}";
-	FSeqGetBalanceUpdatesReturn rep = Indexer->BuildResponse<FSeqGetBalanceUpdatesReturn>(args);
-	args = USequenceSupport::SimplifyString(args);
-
-	//convert response to string testable string format
-	//because this objects uses custom setup and parsing we must use custom getting to test with it! unreal won't be able 
-	//to parse it completely
-	const FString repString = USequenceSupport::JsonToSimpleString(rep.GetJson());
-
-	if (GPrintAll)
-	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
-	}
-
-	if (args.ToLower().Compare(repString.ToLower()) == 0)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
-	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-}
-
 void GetTransactionHistoryParsingTest(UIndexer* Indexer)
 {
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
@@ -760,67 +706,6 @@ void TokenSuppliesMapArgsTest(UIndexer* Indexer)
 	}
 	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
 }
-
-void BalanceUpdatesMaxArgsTest(UIndexer* Indexer)
-{
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("balance Updates [MAX] Args Parsing Test"));
-	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":\""+GTestingContractAddress+"\",\"lastUpdateID\":10,\"page\":"+GTestingPage+"}";
-	FSeqGetBalanceUpdatesArgs args;
-	args.contractAddress = GTestingContractAddress;
-	args.lastUpdateID = 10;
-	args.page = BuildTestPage();
-
-	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FSeqGetBalanceUpdatesArgs>(args));
-	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
-
-	if (GPrintAll)
-	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
-	}
-
-	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
-	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-}
-
-void BalanceUpdatesMinArgsTest(UIndexer * Indexer)
-{
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("balance Updates [MIN] Args Parsing Test"));
-	//this will mirror args!
-	FString testArgs = "{\"contractAddress\":\"" + GTestingContractAddress + "\"}";
-	FSeqGetBalanceUpdatesArgs args;
-	args.contractAddress = GTestingContractAddress;
-
-	const FString stringArgs = USequenceSupport::SimplifyStringParsable(Indexer->BuildArgs<FSeqGetBalanceUpdatesArgs>(args));
-	testArgs = USequenceSupport::SimplifyStringParsable(testArgs);
-
-	if (GPrintAll)
-	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
-	}
-
-	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
-	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-}
-
 //set of args testing for transaction history filter as there can be many types of calls made!
 
 void TransactionHistoryArgsMaxTest(UIndexer* Indexer)
@@ -911,7 +796,6 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	GetTokenBalanceParsingTest(indexer);
 	GetTokenSuppliesParsingTest(indexer);
 	GetTokenSuppliesMapParsingTest(indexer);
-	GetBalanceUpdatesParsingTest(indexer);
 	GetTransactionHistoryParsingTest(indexer);
 	//buildResponse parsing tests//
 	UE_LOG(LogTemp, Display, TEXT("End of Response Tests"));
@@ -924,8 +808,6 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	TokenBalanceMinArgsTest(indexer);
 	TokenSuppliesArgsTest(indexer);
 	TokenSuppliesMapArgsTest(indexer);
-	BalanceUpdatesMaxArgsTest(indexer);
-	BalanceUpdatesMinArgsTest(indexer);
 	TransactionHistoryArgsMaxTest(indexer);
 	TransactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
@@ -943,7 +825,6 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	GetTokenBalanceTest(indexer, OnSuccess, OnFailure);
 	GetTokenSuppliesTest(indexer,OnSuccess, OnFailure);
 	GetTokenSuppliesMapTest(indexer, OnSuccess, OnFailure);
-	GetBalanceUpdatesTest(indexer, OnSuccess, OnFailure);
 	GetTransactionHistoryTest(indexer, OnSuccess, OnFailure);
 	return;//done
 }
