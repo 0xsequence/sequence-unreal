@@ -9,6 +9,7 @@ static constexpr int GSignatureLength = 4;
 class SEQUENCEPLUGIN_API ABI
 {
 public:
+	// Returns a non-set value if there is an error
 	static TOptional<FUnsizedData> Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args);
 	static void Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args);
 	
