@@ -195,6 +195,14 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSession
 	}
 }
 
+void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetSessionAuthProof(this->Credentials, Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::SignOut() const
 {
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
