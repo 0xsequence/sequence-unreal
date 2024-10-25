@@ -40,5 +40,5 @@ USequenceSdkBP* USequenceSdkBP::GetSubSystem()
 
 void USequenceSdkBP::SetupAsync()
 {
-	
+	// TODO: Integrate async setup process like querying remote chain configs
 }
