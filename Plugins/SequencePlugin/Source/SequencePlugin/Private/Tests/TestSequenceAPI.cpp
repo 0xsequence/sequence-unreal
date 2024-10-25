@@ -149,7 +149,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	TArray<TSharedPtr<ABIElement>> Arr;
 	Arr.Add(MakeShared<TFixedABIData>(Account));
 	Arr.Add(MakeShared<TFixedABIData>(Id));
-	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr).GetValue();
 	
 	
 	TArray<TransactionUnion> Txn;

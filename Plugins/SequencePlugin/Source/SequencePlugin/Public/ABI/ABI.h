@@ -9,8 +9,10 @@ static constexpr int GSignatureLength = 4;
 class SEQUENCEPLUGIN_API ABI
 {
 public:
-	static FUnsizedData Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args);
+	static TOptional<FUnsizedData> Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args);
 	static void Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args);
+	
+	static bool IsValidSignature(FString Signature);
 	
 	static TFixedABIData UInt32(uint32 Input = 0);
 	static TFixedABIData Int32(int32 Input = 0);

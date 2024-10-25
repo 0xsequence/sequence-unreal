@@ -9,6 +9,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.Tests.TestABI",
 
 bool TestABI::RunTest(const FString& Parameters)
 {
+	
 	// This example encodes a function call to a function with signature g(uint256[][],string[])
 	// and values ([[1, 2], [3]], ["one", "two", "three"])
 
@@ -41,7 +42,9 @@ bool TestABI::RunTest(const FString& Parameters)
 	
 	UE_LOG(LogTemp, Display, TEXT("%s"), *ABI::Display("g(uint256[][],string[])", Arr));
 
-	FUnsizedData Encoded = ABI::Encode("g(uint256[][],string[])", Arr);
+	TOptional<FUnsizedData> Encoded = ABI::Encode("g(uint256[][],string[])", Arr);
+
+	if(!Encoded.IsSet()) return false;
 
 	FString Correct = "2289b18c"
 					"0000000000000000000000000000000000000000000000000000000000000040"
@@ -65,7 +68,7 @@ bool TestABI::RunTest(const FString& Parameters)
 					"0000000000000000000000000000000000000000000000000000000000000005"
 					"7468726565000000000000000000000000000000000000000000000000000000";
 	
-	if(Correct != Encoded.ToHex())
+	if(Correct != Encoded.GetValue().ToHex())
 	{
 		return false;
 	}
@@ -79,7 +82,7 @@ bool TestABI::RunTest(const FString& Parameters)
 	TSharedPtr<TDynamicABIArray> DecodeStringArray = MakeShared<TDynamicABIArray>(TDynamicABIArray());
 	DecodeStringArray->Push(MakeShared<TDynamicABIData>(ABI::String()));
 
-	ABI::Decode(*Encoded.Arr, TArray<TSharedPtr<ABIElement>>{DecodeIntArrayArray, DecodeStringArray});
+	ABI::Decode(*Encoded.GetValue().Arr, TArray<TSharedPtr<ABIElement>>{DecodeIntArrayArray, DecodeStringArray});
 
 	// Loop through array of integer arrays
 	for(auto Element : DecodeIntArrayArray->AsArray())

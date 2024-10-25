@@ -57,12 +57,27 @@ FUnsizedData ABI::Encode(FString Signature, TArray<ABIElement*> Args)
 	{
 		NewArgs.Push(Args[i]->Clone());
 	}
-	
-	return Encode(Signature, NewArgs);
+
+	TOptional<FUnsizedData> Encoded = Encode(Signature, NewArgs);
+
+	if(Encoded.IsSet())
+	{
+		return Encoded.GetValue();
+	}
+	else
+	{
+		return FUnsizedData { TArray<uint8>() };
+	}
 }
 
-FUnsizedData ABI::Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
+TOptional<FUnsizedData> ABI::Encode(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
 {
+	if(!IsValidSignature(Signature))
+	{
+		UE_LOG(LogTemp, Display, TEXT("Invalid signature! Remember that ABI signatures should only contain argument types without spaces and NOT names."));
+		return TOptional<FUnsizedData>();
+	}
+	
 	TFixedABIArray FixedArr(Args);
 	FUnsizedData Data {
 		FixedArr.Encode()
@@ -79,10 +94,24 @@ void ABI::Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args)
 	FixedArr.Decode(Data, GSignatureLength, GSignatureLength);
 }
 
+bool ABI::IsValidSignature(FString Signature)
+{
+	const FRegexPattern FunctionABIRegex(TEXT("^[A-Z|a-z|,-|0-9]+(([A-Z|a-z|0-9]+(, [A-Z|a-z|0-9]+))?)$"));
+	FRegexMatcher MyMatcher(FunctionABIRegex, Signature);
+	return MyMatcher.FindNext();
+}
+
 FString ABI::Display(FString Signature, TArray<TSharedPtr<ABIElement>> Args)
 {
 	FString Str = "";
-	FString Reference = Encode(Signature, Args).ToHex();
+	TOptional<FUnsizedData> Encoded = Encode(Signature, Args);
+
+	if(!Encoded.IsSet())
+	{
+		return "Signature not valid!";
+	}
+	
+	FString Reference = Encoded.GetValue().ToHex();
 
 	for(int i = 0; i < Reference.Len(); i++)
 	{
