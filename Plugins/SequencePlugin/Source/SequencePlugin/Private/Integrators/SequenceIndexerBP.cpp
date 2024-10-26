@@ -39,7 +39,12 @@ USequenceIndexerBP* USequenceIndexerBP::GetSubSystem()
 	return nullptr;
 }
 
-void USequenceIndexerBP::GetEtherBalanceAsync(int64 ChainId, FString WalletAddress)
+void USequenceIndexerBP::SetChainId(int64 ChainId)
+{
+	this->ChainId = ChainId;
+}
+
+void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress)
 {
 	const TSuccessCallback<FSeqEtherBalance> OnSuccess = [this](const FSeqEtherBalance& EtherBalance)
 	{
@@ -52,12 +57,12 @@ void USequenceIndexerBP::GetEtherBalanceAsync(int64 ChainId, FString WalletAddre
 		this->CallEtherBalanceReceived(false, 0);
 	};
 	
-	this->Indexer->GetEtherBalance(ChainId, WalletAddress, OnSuccess, OnFailure);
+	this->Indexer->GetEtherBalance(this->ChainId, WalletAddress, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetTokenBalancesAsync(const int64 ChainId, const FSeqGetTokenBalancesArgs& Args)
+void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata)
 {
-	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess = [this](const FSeqGetTokenBalancesReturn TokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess = [this](const FSeqGetTokenBalancesReturn& TokenBalances)
 	{
 		this->CallTokenBalancesReceived(true, TokenBalances);
 	};
@@ -69,11 +74,16 @@ void USequenceIndexerBP::GetTokenBalancesAsync(const int64 ChainId, const FSeqGe
 		const FSeqGetTokenBalancesReturn Balances;
 		this->CallTokenBalancesReceived(false, Balances);
 	};
+
+	FSeqGetTokenBalancesArgs Args;
+	Args.accountAddress = WalletAddress;
+	Args.contractAddress = ContractAddress;
+	Args.includeMetaData = IncludeMetadata;
 	
-	this->Indexer->GetTokenBalances(ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTokenBalances(this->ChainId, Args, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetBalanceUpdatesAsync(int64 ChainId, const FSeqGetBalanceUpdatesArgs& Args)
+void USequenceIndexerBP::GetBalanceUpdatesAsync(const FString& ContractAddress)
 {
 	const TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess = [this](const FSeqGetBalanceUpdatesReturn& Updates)
 	{
@@ -87,11 +97,14 @@ void USequenceIndexerBP::GetBalanceUpdatesAsync(int64 ChainId, const FSeqGetBala
 		const FSeqGetBalanceUpdatesReturn Updates;
 		this->CallBalanceUpdatesReceived(false, Updates);
 	};
-		
-	this->Indexer->GetBalanceUpdates(ChainId, Args, OnSuccess, OnFailure);
+
+	FSeqGetBalanceUpdatesArgs Args;
+	Args.contractAddress = ContractAddress;
+	
+	this->Indexer->GetBalanceUpdates(this->ChainId, Args, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesAsync(int64 ChainId, const FSeqGetTokenSuppliesArgs& Args)
+void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess = [this](const FSeqGetTokenSuppliesReturn& Supplies)
 	{
@@ -105,11 +118,15 @@ void USequenceIndexerBP::GetTokenSuppliesAsync(int64 ChainId, const FSeqGetToken
 		const FSeqGetTokenSuppliesReturn Supplies;
 		this->CallTokenSuppliesReceived(false, Supplies);
 	};
+
+	FSeqGetTokenSuppliesArgs Args;
+	Args.contractAddress = ContractAddress;
+	Args.includeMetaData = IncludeMetadata;
 		
-	this->Indexer->GetTokenSupplies(ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTokenSupplies(this->ChainId, Args, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesMapAsync(int64 ChainId, const FSeqGetTokenSuppliesMapArgs& Args)
+void USequenceIndexerBP::GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess = [this](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
 	{
@@ -127,7 +144,7 @@ void USequenceIndexerBP::GetTokenSuppliesMapAsync(int64 ChainId, const FSeqGetTo
 	this->Indexer->GetTokenSuppliesMap(ChainId, Args, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetTransactionHistoryAsync(int64 ChainId, const FSeqGetTransactionHistoryArgs& Args)
+void USequenceIndexerBP::GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args)
 {
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess = [this](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{
@@ -142,7 +159,7 @@ void USequenceIndexerBP::GetTransactionHistoryAsync(int64 ChainId, const FSeqGet
 		this->CallTransactionHistoryReceived(true, TransactionHistory);
 	};
 		
-	this->Indexer->GetTransactionHistory(ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTransactionHistory(this->ChainId, Args, OnSuccess, OnFailure);
 }
 
 void USequenceIndexerBP::CallEtherBalanceReceived(const bool Status, const int64 Balance) const

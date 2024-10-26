@@ -5,10 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Util/Log.h"
 
-USequenceSdkBP::USequenceSdkBP()
-{
-	
-}
+USequenceSdkBP::USequenceSdkBP() { }
 
 USequenceSdkBP* USequenceSdkBP::GetSubSystem()
 {
@@ -41,4 +38,13 @@ USequenceSdkBP* USequenceSdkBP::GetSubSystem()
 void USequenceSdkBP::SetupAsync()
 {
 	// TODO: Integrate async setup process like querying remote chain configs
+	this->CallSetupFinished();
+}
+
+void USequenceSdkBP::CallSetupFinished() const
+{
+	if (this->SetupFinished.IsBound())
+		this->SetupFinished.Broadcast();
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: SetupFinished"));
 }

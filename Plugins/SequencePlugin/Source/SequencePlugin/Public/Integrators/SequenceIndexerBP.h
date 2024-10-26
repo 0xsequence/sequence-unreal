@@ -6,7 +6,6 @@
 #include "SequenceRPCManager.h"
 #include "Indexer/Indexer.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Indexer/Structs/SeqGetTokenBalancesArgs.h"
 #include "SequenceIndexerBP.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetEtherBalance, bool, Status, int64, Balance);
@@ -24,45 +23,49 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 public:
 	USequenceIndexerBP();
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetEtherBalance EtherBalanceReceived;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetTokenBalances TokenBalancesReceived;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetTokenSupplies TokenSuppliesReceived;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetTokenSuppliesMap TokenSuppliesMapReceived;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetBalanceUpdates BalanceUpdatesReceived;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetTransactionHistory TransactionHistoryReceived;
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetEtherBalanceAsync(int64 ChainId, FString WalletAddress);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SetChainId(int64 ChainId);
 	
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetTokenBalancesAsync(const int64 ChainId, const FSeqGetTokenBalancesArgs& Args);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetEtherBalanceAsync(const FString& WalletAddress);
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetTokenSuppliesAsync(int64 ChainId, const FSeqGetTokenSuppliesArgs& Args);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetBalanceUpdatesAsync(const FString& ContractAddress);
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetTokenSuppliesMapAsync(int64 ChainId, const FSeqGetTokenSuppliesMapArgs& Args);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetBalanceUpdatesAsync(int64 ChainId, const FSeqGetBalanceUpdatesArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="Sequence")
-	void GetTransactionHistoryAsync(int64 ChainId, const FSeqGetTransactionHistoryArgs& Args);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args);
 	
 private:
 	UPROPERTY()
 	UIndexer* Indexer;
+	int64 ChainId = 137;
 	
 	static USequenceIndexerBP* GetSubSystem();
 

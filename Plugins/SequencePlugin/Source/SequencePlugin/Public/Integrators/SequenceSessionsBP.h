@@ -20,40 +20,40 @@ class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem
 public:
 	USequenceSessionsBP();
 	
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnEmailLoginRequiresCode EmailLoginRequiresCode;
 
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionEstablished SessionEstablished;
 	
-	UPROPERTY(BlueprintAssignable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionCreationFailure SessionCreationFailure;
 	
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartEmailLoginAsync(const FString& Email);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ConfirmEmailLoginWithCodeAsync(const FString& Code);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetGoogleTokenIdAsync();
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetAppleTokenIdAsync();
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartOidcSessionAsync(const FString& IdToken);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void PlayFabRegistrationAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void PlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn);
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartGuestSessionAsync();
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ClearSession();
 
 private:

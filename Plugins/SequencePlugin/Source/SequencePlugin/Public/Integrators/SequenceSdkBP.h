@@ -7,6 +7,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceSdkBP.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSetupFinished);
+
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceSdkBP : public UGameInstanceSubsystem
 {
@@ -15,9 +17,14 @@ class SEQUENCEPLUGIN_API USequenceSdkBP : public UGameInstanceSubsystem
 public:
 	USequenceSdkBP();
 
-	UFUNCTION(BlueprintCallable, Category="Sequence")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnSetupFinished SetupFinished;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void SetupAsync();
 	
 private:
 	static USequenceSdkBP* GetSubSystem();
+
+	void CallSetupFinished() const;
 };
