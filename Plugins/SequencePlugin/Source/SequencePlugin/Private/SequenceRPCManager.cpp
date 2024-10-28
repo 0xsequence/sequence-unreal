@@ -345,6 +345,7 @@ void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Cr
 
 void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	
 	const TSuccessCallback<FString> OnResponse = [this, OnSuccess, OnFailure](const FString& Response)
 	{
 		const FSeqGetFeeOptionsResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqGetFeeOptionsResponse>(Response);
@@ -352,7 +353,17 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 		if (ParsedResponse.IsValid())
 		{
 			this->Cached_FeeQuote = ParsedResponse.Response.FeeQuote;
-			OnSuccess(ParsedResponse.Response.Data.FeeOptions);
+
+			if (ParsedResponse.Response.Data.FeeOptions.Num()>0)
+			{
+				OnSuccess(ParsedResponse.Response.Data.FeeOptions);
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "No fee options recieved, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
+
+			}
+			
 		}
 		else
 		{
