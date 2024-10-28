@@ -74,9 +74,9 @@ FString UIndexer::HostName(const int64 ChainID)
 				if (ResponseCode >= 200 && ResponseCode < 300 )
 				{
 					TSharedPtr<FJsonObject> JsonResponse;
-					if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), JsonResponse) && JsonResponse->HasField("error"))
+					if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), JsonResponse) && JsonResponse->HasField(TEXT("error")))
 					{
-						FString ErrorMessage = JsonResponse->GetStringField("error");
+						const FString ErrorMessage = JsonResponse->GetStringField(TEXT("error"));
 						OnFailure(FSequenceError(RequestFail, "API Error: " + ErrorMessage));
 					}
 					else

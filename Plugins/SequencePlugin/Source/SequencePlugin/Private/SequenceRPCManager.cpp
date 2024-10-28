@@ -406,7 +406,7 @@ void USequenceRPCManager::GetIdToken(const FCredentials_BE& Credentials, const F
 
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(), this->BuildGetIdTokenIntent(Credentials, Nonce), OnResponse, OnFailure);
+		this->SequenceRPC(this->BuildAuthenticatorIntentsUrl(), this->BuildGetIdTokenIntent(Credentials, Nonce), OnResponse, OnFailure);
 	}
 	else
 	{
@@ -459,7 +459,7 @@ void USequenceRPCManager::GetSessionAuthProof(const FCredentials_BE& Credentials
 
 	if (Credentials.RegisteredValid())
 	{
-		this->SequenceRPC(this->BuildUrl(), this->BuildGetSessionAuthProofIntent(Credentials, Nonce), OnResponse, OnFailure);
+		this->SequenceRPC(this->BuildAuthenticatorIntentsUrl(), this->BuildGetSessionAuthProofIntent(Credentials, Nonce), OnResponse, OnFailure);
 	}
 	else
 	{
