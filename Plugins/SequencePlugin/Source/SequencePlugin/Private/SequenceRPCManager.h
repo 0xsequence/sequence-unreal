@@ -67,6 +67,7 @@ private:
 	FString BuildValidateMessageSignatureIntent(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature) const;
 	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
 	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
+	FString BuildGetIdTokenIntent(const FCredentials_BE& Credentials, const FString& nonce) const;
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
 	FString BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce) const;
 	FString BuildCloseSessionIntent() const;
@@ -192,6 +193,10 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with your Sessions
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
+
+	void GetIdToken(const FCredentials_BE& Credentials, const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const;
+
+
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 

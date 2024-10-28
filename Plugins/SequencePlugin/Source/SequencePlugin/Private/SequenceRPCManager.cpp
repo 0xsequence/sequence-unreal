@@ -117,6 +117,13 @@ FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredential
 	return Intent;
 }
 
+FString USequenceRPCManager::BuildGetIdTokenIntent(const FCredentials_BE& Credentials, const FString& Nonce) const
+{
+	const FGetIdTokenData GetIdTokenData(Credentials.GetSessionWallet()->GetSessionId(), Credentials.GetWalletAddress(), Nonce);
+	const FString Intent = this->GenerateIntent<FGetIdTokenData>(GetIdTokenData);
+	return Intent;
+}
+
 FString USequenceRPCManager::BuildListSessionIntent(const FCredentials_BE& Credentials) const
 {
 	const FListSessionsData ListSessionsData(Credentials.GetWalletAddress());
@@ -379,6 +386,33 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 	{
 		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
 	}
+}
+
+void USequenceRPCManager::GetIdToken(const FCredentials_BE& Credentials, const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+		{
+			const FSeqIdTokenResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqIdTokenResponse>(Response);
+
+			if (ParsedResponse.IsValid())
+			{
+				OnSuccess(ParsedResponse.Response.Data);
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
+			}
+		};
+
+	if (Credentials.RegisteredValid())
+	{
+		this->SequenceRPC(this->BuildUrl(), this->BuildGetIdTokenIntent(Credentials, Nonce), OnResponse, OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+	
 }
 
 void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const

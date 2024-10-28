@@ -39,6 +39,7 @@ enum ETransactionResponseType
 	GetUnFilteredFeeOptionsTrt UMETA(DisplayName = "GetUnFilteredFeeOptions"),
 	SendTransactionWithFeeTrt UMETA(DisplayName = "SendTransactionWithFee"),
 	SendTransactionTrt UMETA(DisplayName = "SendTransaction"),
+	GetIdTokenTrt  UMETA(DisplayName = "GetIdToken"),
 	ListSessionsTrt UMETA(DisplayName = "ListSessions"),
 	GetSessionAuthProofTrt UMETA(DisplayName = "GetSessionAuthProof"),
 	GetSupportedTransakCountriesTrt UMETA(DisplayName = "GetSupportedTransakCountries"),

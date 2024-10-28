@@ -201,6 +201,9 @@ public:
 	 * @param OnSuccess A list of all active sessions
 	 * @param OnFailure An error occured
 	 */
+	 
+	void GetIdToken(const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const;
+
 	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 
