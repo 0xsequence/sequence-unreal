@@ -21,7 +21,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSe
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
+
 
 //Api//
 
@@ -35,7 +37,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetEtherBalance, FSequen
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenBalances, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenBalancesReturn, TokenBalances);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesReturn, TokenSupplies);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesMapReturn, TokenSuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetBalanceUpdates, FSequenceResponseStatus, ResponseStatus, FSeqGetBalanceUpdatesReturn, BalanceUpdates);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FSeqGetTransactionHistoryReturn, TransactionHistory);
 
 //Indexer//
@@ -80,6 +81,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiListSessions OnApiListSessions;
 
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
+
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
 	
@@ -110,9 +114,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerGetTokenSuppliesMap OnIndexerGetTokenSuppliesMap;
-
-	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
-	FOnIIndexerGetBalanceUpdates OnIndexerGetBalanceUpdates;
 	
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
@@ -133,6 +134,7 @@ private:
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
+	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
 	//Api//
@@ -147,7 +149,6 @@ private:
 	void CallOnIndexerGetTokenBalances(const FSequenceResponseStatus& Status, const FSeqGetTokenBalancesReturn& TokenBalances) const;
 	void CallOnIndexerGetTokenSupplies(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesReturn& TokenSupplies) const;
 	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
-	void CallOnIndexerGetBalanceUpdates(const FSequenceResponseStatus& Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const;
 	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 
 	//Indexer//
@@ -255,6 +256,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiListSessions();
 
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiGetSessionAuthProof(const FString& Nonce);
+
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetSupportedTransakCountries();
 	
@@ -285,9 +289,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="Async Indexer")
-	void IndexerGetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args);
 
 	UFUNCTION(BlueprintCallable, Category="Async Indexer")
 	void IndexerGetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args);

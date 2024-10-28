@@ -16,6 +16,7 @@ static const FString CloseSessionOP = "closeSession";
 static const FString SendTransactionOP = "sendTransaction";
 static const FString FeeOptionsOP = "feeOptions";
 static const FString ListSessionsOP = "listSessions";
+static const FString GetSessionAuthProofOP = "sessionAuthProof";
 static const FString SignMessageOP = "signMessage";
 static const FString FederateSessionOP = "federateAccount";
 
@@ -380,56 +381,98 @@ struct SEQUENCEPLUGIN_API FSendTransactionWithFeeOptionData : public FGenericDat
 USTRUCT()
 struct SEQUENCEPLUGIN_API FListSessionsData : public FGenericData
 {
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString wallet = "";
+    GENERATED_USTRUCT_BODY()
+    UPROPERTY()
+    FString wallet = "";
 
- FListSessionsData()
- {
-  Operation = ListSessionsOP;
- }
- 
- FListSessionsData(const FString& WalletIn)
- {
-  Operation = ListSessionsOP;
-  wallet = WalletIn;
- }
+    FListSessionsData()
+    {
+        Operation = ListSessionsOP;
+    }
 
- virtual FString GetJson() const override
- {
-  return "";
- }
+    FListSessionsData(const FString& WalletIn)
+    {
+        Operation = ListSessionsOP;
+        wallet = WalletIn;
+    }
+
+    virtual FString GetJson() const override
+    {
+        return "";
+    }
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FGetSessionAuthProofData : public FGenericData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FString Network = "";
+
+    UPROPERTY()
+    FString Wallet = "";
+
+    UPROPERTY()
+    FString Nonce = "";
+
+    FGetSessionAuthProofData()
+    {
+        UseCustomParser = true;
+        Operation = GetSessionAuthProofOP;
+    }
+    FGetSessionAuthProofData(const FString& NetworkIn, const FString& WalletIn, const FString& NonceIn)
+    {
+        UseCustomParser = true;
+        Operation = GetSessionAuthProofOP;
+        Network = NetworkIn;
+        Wallet = WalletIn;
+        Nonce = NonceIn;
+    }
+
+    virtual FString GetJson() const override
+    {
+        FString JsonString = "{\"network\":\"" + Network + "\",\"wallet\":\"" + Wallet + "\"";
+
+        if (!Nonce.IsEmpty())
+            JsonString += ",\"nonce\":\"" + Nonce + "\"";
+        else
+            JsonString += "}";
+        return JsonString;
+    }
 };
 
 USTRUCT()
 struct SEQUENCEPLUGIN_API FSignMessageData : public FGenericData
 {
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString message = "";
- UPROPERTY()
- FString network = "";
- UPROPERTY()
- FString wallet = "";
+    GENERATED_USTRUCT_BODY()
+    UPROPERTY()
+    FString message = "";
+    UPROPERTY()
+    FString network = "";
+    UPROPERTY()
+    FString wallet = "";
 
- FSignMessageData()
- {
-  Operation = SignMessageOP;
- }
- 
- FSignMessageData(const FString& MessageIn, const FString& NetworkIn, const FString& WalletIn)
- {
-  Operation = SignMessageOP;
-  message = MessageIn;
-  network = NetworkIn;
-  wallet = WalletIn;
- }
+    FSignMessageData()
+    {
+        Operation = SignMessageOP;
+    }
 
- virtual FString GetJson() const override
- {
-  return "";
- }
+    FSignMessageData(const FString& MessageIn, const FString& NetworkIn, const FString& WalletIn)
+    {
+        Operation = SignMessageOP;
+        message = MessageIn;
+        network = NetworkIn;
+        wallet = WalletIn;
+    }
+
+    virtual FString GetJson() const override
+    {
+        return "";
+    }
 };
+
+
 
 
 USTRUCT()
@@ -469,132 +512,132 @@ struct SEQUENCEPLUGIN_API FValidateMessageSignatureData : public FGenericData
 };
 
 struct SEQUENCEPLUGIN_API FSignatureIntent
-{ 
- FGenericData * data = nullptr;
- int64 expiresAt = 0;
- int64 issuedAt = 0;
- FString name = "";
- FString version = "";
+{
+    FGenericData* data = nullptr;
+    int64 expiresAt = 0;
+    int64 issuedAt = 0;
+    FString name = "";
+    FString version = "";
 
- FSignatureIntent(){}
- 
- FSignatureIntent(FGenericData * DataIn, int64 ExpiresAtIn, int64 IssuedAtIn, const FString& NameIn, const FString& VersionIn)
- {
-  data = DataIn;
-  expiresAt = ExpiresAtIn;
-  issuedAt = IssuedAtIn;
-  name = NameIn;
-  version = VersionIn;
- }
- 
- template<typename T> FString GetJson() const
- {
-  T CData = *static_cast<T*>(data);
-  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
-  const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
-  const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
-  const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\""+name+"\",\"version\":\""+version+"\"}";
-  return Json;
+    FSignatureIntent() {}
+
+    FSignatureIntent(FGenericData* DataIn, int64 ExpiresAtIn, int64 IssuedAtIn, const FString& NameIn, const FString& VersionIn)
+    {
+        data = DataIn;
+        expiresAt = ExpiresAtIn;
+        issuedAt = IssuedAtIn;
+        name = NameIn;
+        version = VersionIn;
+    }
+
+    template<typename T> FString GetJson() const
+    {
+        T CData = *static_cast<T*>(data);
+        const FString DataJson = (CData.UseCustomParser) ? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
+        const FString IssuedString = FString::Printf(TEXT("%lld"), issuedAt);
+        const FString ExpiresString = FString::Printf(TEXT("%lld"), expiresAt);
+        const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\"" + name + "\",\"version\":\"" + version + "\"}";
+        return Json;
  }
 };
 
 USTRUCT()
 struct SEQUENCEPLUGIN_API FSignatureEntry
 {
- GENERATED_USTRUCT_BODY()
- UPROPERTY()
- FString sessionId = "";
- UPROPERTY()
- FString signature = "";
+    GENERATED_USTRUCT_BODY()
+    UPROPERTY()
+    FString sessionId = "";
+    UPROPERTY()
+    FString signature = "";
 
- FSignatureEntry(){}
- 
- FSignatureEntry(const FString& SessionIdIn, const FString& SignatureIn)
- {
-  sessionId = SessionIdIn;
-  signature = SignatureIn;
- }
+    FSignatureEntry() {}
+
+    FSignatureEntry(const FString& SessionIdIn, const FString& SignatureIn)
+    {
+        sessionId = SessionIdIn;
+        signature = SignatureIn;
+    }
 };
 
 struct SEQUENCEPLUGIN_API FSignedIntent
 {
- FGenericData * data = nullptr;
- int64 expiresAt = 0;
- int64 issuedAt = 0;
- FString name = "";
- TArray<FSignatureEntry> signatures;
- FString version = "";
+    FGenericData* data = nullptr;
+    int64 expiresAt = 0;
+    int64 issuedAt = 0;
+    FString name = "";
+    TArray<FSignatureEntry> signatures;
+    FString version = "";
 
- FSignedIntent(){}
- 
- FSignedIntent(FGenericData * DataIn, int64 ExpiresAtIn, int64 IssuedAtIn, const FString& Operation, const TArray<FSignatureEntry>& SignaturesIn, const FString& VersionIn)
- {
-  data = DataIn;
-  expiresAt = ExpiresAtIn;
-  issuedAt = IssuedAtIn;
-  name = Operation;
-  signatures = SignaturesIn;
-  version = VersionIn;
- }
+    FSignedIntent() {}
 
- template <typename T> FString GetJson() const
- {
-  T CData = *static_cast<T*>(data);
-  const FString DataJson = (CData.UseCustomParser)? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
-  const FString IssuedString = FString::Printf(TEXT("%lld"),issuedAt);
-  const FString ExpiresString = FString::Printf(TEXT("%lld"),expiresAt);
-  FString SigListJson = "[";
-  for (int i = 0; i < signatures.Num(); i++)
-  {
-   SigListJson += USequenceSupport::StructToPartialSimpleString(signatures[i]);
-   if (i+1 < signatures.Num())
-   {
-    SigListJson += ",";
-   }
-  }
-  SigListJson += "]";
+    FSignedIntent(FGenericData* DataIn, int64 ExpiresAtIn, int64 IssuedAtIn, const FString& Operation, const TArray<FSignatureEntry>& SignaturesIn, const FString& VersionIn)
+    {
+        data = DataIn;
+        expiresAt = ExpiresAtIn;
+        issuedAt = IssuedAtIn;
+        name = Operation;
+        signatures = SignaturesIn;
+        version = VersionIn;
+    }
 
-  const FString Json = "{\"data\":"+DataJson+",\"expiresAt\":"+ExpiresString+",\"issuedAt\":"+IssuedString+",\"name\":\""+name+"\",\"signatures\":"+SigListJson+",\"version\":\""+version+"\"}";
-  return Json;
- }
+    template <typename T> FString GetJson() const
+    {
+        T CData = *static_cast<T*>(data);
+        const FString DataJson = (CData.UseCustomParser) ? CData.GetJson() : USequenceSupport::StructToPartialSimpleString<T>(CData);
+        const FString IssuedString = FString::Printf(TEXT("%lld"), issuedAt);
+        const FString ExpiresString = FString::Printf(TEXT("%lld"), expiresAt);
+        FString SigListJson = "[";
+        for (int i = 0; i < signatures.Num(); i++)
+        {
+            SigListJson += USequenceSupport::StructToPartialSimpleString(signatures[i]);
+            if (i + 1 < signatures.Num())
+            {
+                SigListJson += ",";
+            }
+        }
+        SigListJson += "]";
+
+        const FString Json = "{\"data\":" + DataJson + ",\"expiresAt\":" + ExpiresString + ",\"issuedAt\":" + IssuedString + ",\"name\":\"" + name + "\",\"signatures\":" + SigListJson + ",\"version\":\"" + version + "\"}";
+        return Json;
+    }
 };
 
 struct SEQUENCEPLUGIN_API FGenericFinalIntent
 {
- FSignedIntent intent;
+    FSignedIntent intent;
 
- FGenericFinalIntent(){}
- 
- FGenericFinalIntent(const FSignedIntent& IntentIn)
- {
-  intent = IntentIn;
- }
+    FGenericFinalIntent() {}
 
- template <typename T> FString GetJson() const
- {
-  const FString IntentJson = intent.GetJson<T>();
-  const FString Json = "{\"intent\":"+IntentJson+"}";
-  return Json;
- }
+    FGenericFinalIntent(const FSignedIntent& IntentIn)
+    {
+        intent = IntentIn;
+    }
+
+    template <typename T> FString GetJson() const
+    {
+        const FString IntentJson = intent.GetJson<T>();
+        const FString Json = "{\"intent\":" + IntentJson + "}";
+        return Json;
+    }
 };
 
 struct SEQUENCEPLUGIN_API FRegisterFinalIntent
 {
- FSignedIntent intent;
- FString friendlyName = "";
+    FSignedIntent intent;
+    FString friendlyName = "";
 
- FRegisterFinalIntent(){}
+    FRegisterFinalIntent() {}
 
- FRegisterFinalIntent(const FSignedIntent& IntentIn, const FString& FriendlyName)
- {
-  intent = IntentIn;
-  friendlyName = FriendlyName;
- }
+    FRegisterFinalIntent(const FSignedIntent& IntentIn, const FString& FriendlyName)
+    {
+        intent = IntentIn;
+        friendlyName = FriendlyName;
+    }
 
- template <typename T> FString GetJson() const
- {
-  const FString IntentJson = intent.GetJson<T>();
-  const FString Json = "{\"intent\":"+IntentJson+",\"friendlyName\":\""+friendlyName+"\"}";
-  return Json;
- }
+    template <typename T> FString GetJson() const
+    {
+        const FString IntentJson = intent.GetJson<T>();
+        const FString Json = "{\"intent\":" + IntentJson + ",\"friendlyName\":\"" + friendlyName + "\"}";
+        return Json;
+    }
 };

@@ -195,6 +195,14 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSession
 	}
 }
 
+void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetSessionAuthProof(this->Credentials, Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::SignOut() const
 {
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
@@ -481,12 +489,6 @@ void USequenceWallet::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Arg
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenSuppliesMap(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetBalanceUpdates(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const

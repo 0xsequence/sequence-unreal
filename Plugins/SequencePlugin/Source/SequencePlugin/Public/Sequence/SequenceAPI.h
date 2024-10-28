@@ -203,6 +203,9 @@ public:
 	 */
 	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
+
+	void GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
 	/**
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
 	 */
@@ -279,11 +282,6 @@ public:
 		gets the token supplies map from the Chain
 	*/
 	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Get the balance updates from the Chain
-	*/
-	void GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		get transaction history from the Chain
