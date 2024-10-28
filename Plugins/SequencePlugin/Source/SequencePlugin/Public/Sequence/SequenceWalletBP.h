@@ -50,8 +50,6 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-private:
-	static USequenceWalletBP* GetSubSystem();
 	
 public:
 	USequenceWalletBP();

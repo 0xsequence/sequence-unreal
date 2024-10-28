@@ -24,7 +24,5 @@ public:
 	void SetupAsync();
 	
 private:
-	static USequenceSdkBP* GetSubSystem();
-
 	void CallSetupFinished() const;
 };

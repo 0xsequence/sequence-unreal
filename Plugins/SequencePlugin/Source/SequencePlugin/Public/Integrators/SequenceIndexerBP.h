@@ -67,8 +67,6 @@ private:
 	UIndexer* Indexer;
 	int64 ChainId = 137;
 	
-	static USequenceIndexerBP* GetSubSystem();
-
 	void CallEtherBalanceReceived(const bool Status, const int64 Balance) const;
 	void CallTokenBalancesReceived(const bool Status, const FSeqGetTokenBalancesReturn& Balances) const;
 	void CallTokenSuppliesReceived(const bool Status, const FSeqGetTokenSuppliesReturn& Supplies) const;

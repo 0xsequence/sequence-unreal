@@ -54,13 +54,18 @@ public:
 	void StartGuestSessionAsync();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ClearSession();
+	void ClearSession() const;
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	bool CheckExistingSession() const;
 
 private:
+	UPROPERTY()
 	USequenceRPCManager* RPCManager;
+	
+	UPROPERTY()
 	USequenceAuthenticator* Authenticator;
 	
-	static USequenceSessionsBP* GetSubSystem();
 	void StartSession(const FCredentials_BE& Credentials) const;
 	void PlayFabNewAccountLoginRpcAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void PlayFabLoginRpcAsync(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);

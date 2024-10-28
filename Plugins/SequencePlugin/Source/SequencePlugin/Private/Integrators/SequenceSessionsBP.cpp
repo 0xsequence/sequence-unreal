@@ -7,37 +7,8 @@
 #include "RequestHandler.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Kismet/GameplayStatics.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
-
-USequenceSessionsBP* USequenceSessionsBP::GetSubSystem()
-{
-	if (GEngine)
-	{
-		const TIndirectArray<FWorldContext> Contexts = GEngine->GetWorldContexts();
-		for (FWorldContext Context : Contexts)
-		{
-			if (const UWorld* World = Context.World())
-			{
-				if (const UGameInstance* GI = UGameplayStatics::GetGameInstance(World))
-				{
-					if (USequenceSessionsBP* Subsystem = GI->GetSubsystem<USequenceSessionsBP>())
-					{
-						return Subsystem;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Error Accessing GEngine"));
-	}
-	
-	UE_LOG(LogTemp, Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
-	return nullptr;
-}
 
 USequenceSessionsBP::USequenceSessionsBP()
 {
@@ -205,9 +176,15 @@ void USequenceSessionsBP::StartGuestSessionAsync()
 	this->RPCManager->OpenGuestSession(true, OnSuccess, OnFailure);
 }
 
-void USequenceSessionsBP::ClearSession()
+void USequenceSessionsBP::ClearSession() const
 {
 	this->Authenticator->ClearStoredCredentials();
+}
+
+bool USequenceSessionsBP::CheckExistingSession() const
+{
+	const FStoredCredentials_BE Credentials = this->Authenticator->GetStoredCredentials();
+	return Credentials.GetValid();
 }
 
 void USequenceSessionsBP::StartSession(const FCredentials_BE& Credentials) const
