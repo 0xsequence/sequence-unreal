@@ -55,27 +55,6 @@ void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, con
 	this->Indexer->GetTokenBalances(this->ChainId, Args, OnSuccess, OnFailure);
 }
 
-void USequenceIndexerBP::GetBalanceUpdatesAsync(const FString& ContractAddress)
-{
-	const TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess = [this](const FSeqGetBalanceUpdatesReturn& Updates)
-	{
-		this->CallBalanceUpdatesReceived(true, Updates);
-	};
-
-	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
-	{
-		SEQ_LOG(Error, TEXT("Error getting balance updates: %s"), *Error.Message);
-		
-		const FSeqGetBalanceUpdatesReturn Updates;
-		this->CallBalanceUpdatesReceived(false, Updates);
-	};
-
-	FSeqGetBalanceUpdatesArgs Args;
-	Args.contractAddress = ContractAddress;
-	
-	this->Indexer->GetBalanceUpdates(this->ChainId, Args, OnSuccess, OnFailure);
-}
-
 void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess = [this](const FSeqGetTokenSuppliesReturn& Supplies)
@@ -164,14 +143,6 @@ void USequenceIndexerBP::CallTokenSuppliesMapReceived(const bool Status, const F
 		this->TokenSuppliesMapReceived.Broadcast(Status, SuppliesMap);
 	else
 		SEQ_LOG(Error, TEXT("Nothing bound to delegate: TokenSuppliesMapReceived"));
-}
-
-void USequenceIndexerBP::CallBalanceUpdatesReceived(const bool Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const
-{
-	if (this->BalanceUpdatesReceived.IsBound())
-		this->BalanceUpdatesReceived.Broadcast(Status, BalanceUpdates);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: BalanceUpdatesReceived"));
 }
 
 void USequenceIndexerBP::CallTransactionHistoryReceived(const bool Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const

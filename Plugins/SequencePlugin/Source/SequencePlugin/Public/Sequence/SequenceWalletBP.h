@@ -63,10 +63,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiSignMessage OnApiSignMessage;
 
-	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIApiValidateMessageSignature OnApiValidateMessageSignature;
 
-	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiGetFilteredFeeOptions OnApiGetFilteredFeeOptions;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
@@ -81,10 +81,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiListSessions OnApiListSessions;
 
-	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
 
-	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
 	
 	//Api//
@@ -181,16 +181,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Static")
 	static int64 GetNetworkIdFromName(const FString& NetworkNameIn);
 
-	UFUNCTION(BlueprintCallable, Category = "Networks Utility")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Static")
 	static int64 GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn);
 
-	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Static")
 	static FString GetNetworkNameFromId(const int64 NetworkIdIn);
 
-	UFUNCTION(BlueprintCallable, Category = "Networks Utility")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Static")
 	static FString GetNetworkNameFromEnum(const ENetwork NetworkIdIn);
 
-	UFUNCTION(BlueprintCallable, Category="Networks Utility")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Static")
 	static TArray<FIdNamePair> GetAllNetworks();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Static")
@@ -212,13 +212,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiUpdateNetworkId(int64 NewNetworkId);
 
-	UFUNCTION(BlueprintCallable, Category = "Sync Api")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void ApiUpdateNetworkIdFromName(FString NewNetworkName);
 
-	UFUNCTION(BlueprintCallable, Category = "Sync Api")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void ApiUpdateNetworkIdFromEnum(ENetwork NewNetwork);
 
-	UFUNCTION(BlueprintCallable, Category="Sync Api")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiUpdateProviderUrl(const FString& NewProviderUrl);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
@@ -238,10 +238,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiSignMessage(const FString& Message);
 
-	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature);
 
-	UFUNCTION(BlueprintCallable, Category="ASync Api")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiGetFilteredFeeOptions(UTransactions * Transactions);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
@@ -256,10 +256,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiListSessions();
 
-	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void ApiGetSessionAuthProof(const FString& Nonce);
 
-	UFUNCTION(BlueprintCallable, Category="ASync Api")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiGetSupportedTransakCountries();
 	
 	//SequenceApi//
@@ -290,7 +290,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
 
-	UFUNCTION(BlueprintCallable, Category="Async Indexer")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void IndexerGetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args);
 
 	//Indexer//

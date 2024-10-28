@@ -12,7 +12,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetEtherBalance, bool, Status, i
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenBalances, bool, Status, FSeqGetTokenBalancesReturn, Balances);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenSupplies, bool, Status, FSeqGetTokenSuppliesReturn, Supplies);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenSuppliesMap, bool, Status, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetBalanceUpdates, bool, Status, FSeqGetBalanceUpdatesReturn, BalanceUpdates);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTransactionHistory, bool, Status, FSeqGetTransactionHistoryReturn, TransactionHistory);
 
 UCLASS(Blueprintable)
@@ -36,9 +35,6 @@ public:
 	FOnGetTokenSuppliesMap TokenSuppliesMapReceived;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnGetBalanceUpdates BalanceUpdatesReceived;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnGetTransactionHistory TransactionHistoryReceived;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
@@ -49,9 +45,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetBalanceUpdatesAsync(const FString& ContractAddress);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata);
@@ -71,6 +64,5 @@ private:
 	void CallTokenBalancesReceived(const bool Status, const FSeqGetTokenBalancesReturn& Balances) const;
 	void CallTokenSuppliesReceived(const bool Status, const FSeqGetTokenSuppliesReturn& Supplies) const;
 	void CallTokenSuppliesMapReceived(const bool Status, const FSeqGetTokenSuppliesMapReturn& SuppliesMap) const;
-	void CallBalanceUpdatesReceived(const bool Status, const FSeqGetBalanceUpdatesReturn& BalanceUpdates) const;
 	void CallTransactionHistoryReceived(const bool Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 };
