@@ -193,6 +193,7 @@ public:
 	 */
 	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
+	void ListAccounts(const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 	/**
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
 	 */

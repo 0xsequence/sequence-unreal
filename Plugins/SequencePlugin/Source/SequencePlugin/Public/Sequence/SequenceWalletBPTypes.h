@@ -39,6 +39,7 @@ enum ETransactionResponseType
 	SendTransactionWithFeeTrt UMETA(DisplayName = "SendTransactionWithFee"),
 	SendTransactionTrt UMETA(DisplayName = "SendTransaction"),
 	ListSessionsTrt UMETA(DisplayName = "ListSessions"),
+	ListAccountsTrt UMETA(DisplayName = "ListAccounts"),
 	GetSupportedTransakCountriesTrt UMETA(DisplayName = "GetSupportedTransakCountries"),
 	PingTrt UMETA(DisplayName = "Ping"),
 	VersionTrt UMETA(DisplayName = "Version"),

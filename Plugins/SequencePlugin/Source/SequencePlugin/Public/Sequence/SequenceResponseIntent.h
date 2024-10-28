@@ -553,4 +553,62 @@ struct SEQUENCEPLUGIN_API FSeqListSessionsResponse
 	}
 };
 
-//ListSessions//
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqAccount
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Id = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Type = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Issuer = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Email = "";
+
+
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse_Data
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	TArray<FSeqAccount> Accounts;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString CurrentAccountId = "";
+};
+
+
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqListAccountsResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("accountList"), ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqListAccountsResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+

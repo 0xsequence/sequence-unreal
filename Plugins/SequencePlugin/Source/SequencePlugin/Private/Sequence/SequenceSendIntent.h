@@ -16,6 +16,7 @@ static const FString CloseSessionOP = "closeSession";
 static const FString SendTransactionOP = "sendTransaction";
 static const FString FeeOptionsOP = "feeOptions";
 static const FString ListSessionsOP = "listSessions";
+static const FString ListAccountsOP = "listAccounts";
 static const FString SignMessageOP = "signMessage";
 static const FString FederateSessionOP = "federateAccount";
 
@@ -399,6 +400,30 @@ struct SEQUENCEPLUGIN_API FListSessionsData : public FGenericData
  {
   return "";
  }
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FListAccountsData : public FGenericData
+{
+    GENERATED_USTRUCT_BODY()
+    UPROPERTY()
+    FString wallet = "";
+
+    FListAccountsData()
+    {
+        Operation = ListAccountsOP;
+    }
+
+    FListAccountsData(const FString& WalletIn)
+    {
+        Operation = ListAccountsOP;
+        wallet = WalletIn;
+    }
+
+    virtual FString GetJson() const override
+    {
+        return "";
+    }
 };
 
 USTRUCT()

@@ -195,6 +195,14 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSession
 	}
 }
 
+void USequenceWallet::ListAccounts(const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->ListAccounts(this->Credentials, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::SignOut() const
 {
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
