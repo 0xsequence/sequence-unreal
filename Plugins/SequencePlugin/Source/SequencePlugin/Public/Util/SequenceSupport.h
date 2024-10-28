@@ -7,6 +7,7 @@
 #include "Containers/Union.h"
 #include "Types/Types.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"
 
 struct FSeqGetTokenBalancesReturn;
@@ -94,6 +95,7 @@ private:
 		FIdName(81457,TEXT("Blast")),
 		FIdName(660279,TEXT("Xai")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
+		FIdName(1946,TEXT("Soneium Minato (Testnet)")),
 		FIdName(1993,TEXT("B3 Sepolia")),
 		FIdName(2730,TEXT("XR Sepolia")),
 		FIdName(33111,TEXT("APE Chain Testnet")),
@@ -101,10 +103,12 @@ private:
 		FIdName(43113,TEXT("Avalanche Testnet")),
 		FIdName(80002,TEXT("Polygon Amoy")),
 		FIdName(84532,TEXT("Base Sepolia")),
+		FIdName(94984,TEXT("Borne Testnet")),
 		FIdName(421614,TEXT("Arbitrum Sepolia")),
 		FIdName(6038361,TEXT("Astar zKyoto Testnet")),
 		FIdName(11155111,TEXT("Sepolia")),
 		FIdName(11155420,TEXT("Optimism Sepolia")),
+		FIdName(37084624,TEXT("SKALE Nebula Gaming Hub Testnet")),
 		FIdName(168587773,TEXT("Blast Sepolia")),
 		FIdName(37714555429,TEXT("Xai Sepolia"))};
 
@@ -139,6 +143,70 @@ private:
 		FNameId(TEXT("blastsepolia"),168587773),
 		FNameId(TEXT("xaisepolia"),37714555429)};
 	
+	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
+		{ENetwork::Ethereum, 1},
+		{ENetwork::Optimism, 10},
+		{ENetwork::BNBSmartChain, 56},
+		{ENetwork::GnosisChain, 100},
+		{ENetwork::PolygonNetwork, 137},
+		{ENetwork::PolygonZkEVM, 1101},
+		{ENetwork::AstarZkEVM, 3776},
+		{ENetwork::BaseCoinbase, 8453},
+		{ENetwork::Base, 8453},
+		{ENetwork::OasysHomeverse, 19011},
+		{ENetwork::ArbitrumOne, 42161},
+		{ENetwork::ArbitrumNova, 42170},
+		{ENetwork::Avalanche, 43114},
+		{ENetwork::Blast, 81457},
+		{ENetwork::XAI, 660279},
+		{ENetwork::BNBSmartChainTestnet, 97},
+		{ENetwork::B3Sepolia, 1993},
+		{ENetwork::XrSepolia, 2730},
+		{ENetwork::ApeChainTestnet, 33111},
+		{ENetwork::OasysHomeverseTestnet, 40875},
+		{ENetwork::AvalancheTestnet, 43113},
+		{ENetwork::PolygonAmoy, 80002},
+		{ENetwork::BaseSepolia, 84532},
+		{ENetwork::ArbitrumSepolia, 421614},
+		{ENetwork::AstarZkYotoTestnet, 6038361},
+		{ENetwork::Sepolia, 11155111},
+		{ENetwork::OptimismSepolia, 11155420},
+		{ENetwork::BlastSepolia, 168587773},
+		{ENetwork::XaiSepolia, 37714555429}
+		};
+
+	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
+	{ENetwork::Ethereum, TEXT("ethereum")},
+	{ENetwork::Optimism, TEXT("optimism")},
+	{ENetwork::BNBSmartChain, TEXT("bnbsmartchain")},
+	{ENetwork::GnosisChain, TEXT("gnosischain")},
+	{ENetwork::PolygonNetwork, TEXT("polygon")},
+	{ENetwork::PolygonZkEVM, TEXT("polygonzkevm")},
+	{ENetwork::AstarZkEVM, TEXT("astarzkevm")},
+	{ENetwork::BaseCoinbase, TEXT("base(coinbase)")},
+	{ENetwork::Base, TEXT("base")},
+	{ENetwork::OasysHomeverse, TEXT("oasyshomeverse")},
+	{ENetwork::ArbitrumOne, TEXT("arbitrumone")},
+	{ENetwork::ArbitrumNova, TEXT("arbitrumnova")},
+	{ENetwork::Avalanche, TEXT("avalanche")},
+	{ENetwork::Blast, TEXT("blast")},
+	{ENetwork::XAI, TEXT("xai")},
+	{ENetwork::BNBSmartChainTestnet, TEXT("bnbsmartchaintestnet")},
+	{ENetwork::B3Sepolia, TEXT("b3sepolia")},
+	{ENetwork::XrSepolia, TEXT("xrsepolia")},
+	{ENetwork::ApeChainTestnet, TEXT("apechaintestnet")},
+	{ENetwork::OasysHomeverseTestnet, TEXT("oasyshomeversetestnet")},
+	{ENetwork::AvalancheTestnet, TEXT("avalanchetestnet")},
+	{ENetwork::PolygonAmoy, TEXT("polygonamoy")},
+	{ENetwork::BaseSepolia, TEXT("basesepolia")},
+	{ENetwork::ArbitrumSepolia, TEXT("arbitrumsepolia")},
+	{ENetwork::AstarZkYotoTestnet, TEXT("astarzkyototestnet")},
+	{ENetwork::Sepolia, TEXT("sepolia")},
+	{ENetwork::OptimismSepolia, TEXT("optimismsepolia")},
+	{ENetwork::BlastSepolia, TEXT("blastsepolia")},
+	{ENetwork::XaiSepolia, TEXT("xaisepolia")}
+	};
+
 public:
 	
 	/**
@@ -147,6 +215,9 @@ public:
 	 * @return The matching network name, OR an empty FString if nothing was found
 	 */
 	static FString GetNetworkName(const int64 NetworkIdIn);
+
+	static FString GetNetworkName(const ENetwork NetworkIn);
+
 
 	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
 
@@ -158,6 +229,8 @@ public:
 	 * @return The associated Id, if none was found returns -1
 	 */
 	static int64 GetNetworkId(const FString& NetworkNameIn);
+
+	static int64 GetNetworkId(const ENetwork& Network);
 
 	/**
 	 * Gets all networks in the system

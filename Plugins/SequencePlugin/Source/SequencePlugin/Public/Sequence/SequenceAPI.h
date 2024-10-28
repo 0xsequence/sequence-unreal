@@ -16,6 +16,7 @@
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
 #include "Util/SequenceSupport.h"
+#include "Util/Structs/BE_Enums.h"
 #include "SequenceAPI.generated.h"
 
 class UIndexer;
@@ -134,6 +135,10 @@ public:
 	 */
 	void UpdateNetworkId(int64 NewNetwork);
 
+	void UpdateNetworkId(FString NewNetworkName);
+
+	void UpdateNetworkId(ENetwork NewNetwork);
+
 	/**
 	 * Allows to get the currently set network for the SequenceWallet
 	 * @return currently set network for the SequenceWallet
@@ -147,6 +152,16 @@ public:
 	 * @param OnFailure If an error occurs
 	 */
 	void SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/**
+	 * Allows you to validate the signature of the given message with the SequenceWallet
+	 * @param Signature The signature you wish to validate
+	 * @param Message The message that has been signed
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
+	 */
+
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
@@ -191,6 +206,9 @@ public:
 
 	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
+
+	void GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
 	/**
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
 	 */
@@ -267,11 +285,6 @@ public:
 		gets the token supplies map from the Chain
 	*/
 	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Get the balance updates from the Chain
-	*/
-	void GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		get transaction history from the Chain
