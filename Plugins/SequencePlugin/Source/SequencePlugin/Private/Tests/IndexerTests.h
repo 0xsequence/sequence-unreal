@@ -65,8 +65,6 @@ void GetTokenSuppliesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess,
 
 void GetTokenSuppliesMapTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 
-void GetBalanceUpdatesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
-
 void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 
 void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString, FSequenceError)>& OnFailure);
@@ -96,8 +94,6 @@ void GetTokenSuppliesParsingTest(UIndexer* Indexer);
 
 void GetTokenSuppliesMapParsingTest(UIndexer* Indexer);
 
-void GetBalanceUpdatesParsingTest(UIndexer* Indexer);
-
 void GetTransactionHistoryParsingTest(UIndexer* Indexer);
 
 //argument parsing tests
@@ -108,10 +104,6 @@ void TokenBalanceMinArgsTest(UIndexer* Indexer);
 void TokenSuppliesArgsTest(UIndexer* Indexer);
 
 void TokenSuppliesMapArgsTest(UIndexer* Indexer);
-
-void BalanceUpdatesMaxArgsTest(UIndexer* Indexer);
-
-void BalanceUpdatesMinArgsTest(UIndexer* Indexer);
 
 void TransactionHistoryArgsMaxTest(UIndexer* Indexer);
 

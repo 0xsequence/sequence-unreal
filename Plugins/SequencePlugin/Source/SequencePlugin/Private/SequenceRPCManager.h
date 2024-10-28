@@ -17,6 +17,7 @@
 /**
  * Used to manage all of the Sequence RPC Calls
  */
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceRPCManager : public UObject
 {
@@ -41,24 +42,33 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
+	//Get Plugin Version
+
+	static FString GetPluginVersion();
+
 	/**
 	 * If this flag is enabled, we will preserve the SessionWallet for the next request
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = "1.0.0";
-	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
-	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
-	
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(USequenceRPCManager::GetPluginVersion()).Append(TEXT(")"));
+
+	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
+	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
+
+	inline const static FString WaaSSequenceApiUrlPath = TEXT("https://api.sequence.app/rpc/API/");
+
 	//Vars//
 
 	//Requires Credentials//
 	
 	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
 	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message) const;
+	FString BuildValidateMessageSignatureIntent(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature) const;
 	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
 	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
+	FString BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce) const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
 	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const;
@@ -76,11 +86,14 @@ private:
 
 	//Url Builder//
 
-	FString BuildUrl() const;
-
 	FString BuildRegisterUrl() const;
+	FString BuildAuthenticatorIntentsUrl() const;
+	FString BuildAPIUrl(const FString& Endpoint) const;
+
 	
 	//Url Builder//
+
+	
 
 	//Session Wallet Management Code//
 
@@ -133,12 +146,25 @@ public:
 	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
+	 * Allows you to send a signature for validation using the sequence rpc api
+	 * @param Signature The signature you wish to validate
+	 * @param Message The message that has been signed
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
+	 */
+
+
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Signature, const FString& Message, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+
+	/**
 	 * Used to send transactions via the sequence rpc api
 	 * @param Credentials Credentials Credentials used to build Intent
 	 * @param Transactions List of Transaction Items you wish to send
 	 * @param OnSuccess Called if the operation succeeds with Transaction Details
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
+
 	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
@@ -168,6 +194,8 @@ public:
 	 */
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
+
+	void GetSessionAuthProof(const FCredentials_BE& Credentials, const FString& Nonce,  const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 	/**
 	 * Used to close the Current Session
 	 * @param Credentials Credentials used to build Intent

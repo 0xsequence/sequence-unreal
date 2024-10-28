@@ -4,8 +4,6 @@
 #include "SeqContractInfo.h"
 #include "SeqContractInfoExtensions.h"
 #include "SeqEtherBalance.h"
-#include "SeqGetBalanceUpdatesArgs.h"
-#include "SeqGetBalanceUpdatesReturn.h"
 #include "SeqEventLog.h"
 #include "SeqGetChainIDArgs.h"
 #include "SeqGetChainIDReturn.h"

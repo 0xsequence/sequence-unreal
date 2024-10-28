@@ -486,6 +486,39 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
 
 //SignMessage//
 
+//Validate Signature//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	bool isValid;
+
+	bool IsValid() const
+	{
+		return isValid;
+	}
+};
+
+
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqValidateMessageSignatureResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Data.IsValid();
+	}
+};
+ 
+// 
 //ListSessions//
 
 USTRUCT(Blueprintable)
@@ -535,7 +568,7 @@ struct SEQUENCEPLUGIN_API FSeqListSessionResponse_Response
 
 	bool IsValid() const
 	{
-		return Code.Equals(TEXT("sessionList"),ESearchCase::IgnoreCase);
+		return Code.Equals(TEXT("session"),ESearchCase::IgnoreCase);
 	}
 };
 
@@ -554,3 +587,50 @@ struct SEQUENCEPLUGIN_API FSeqListSessionsResponse
 };
 
 //ListSessions//
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProof_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString SessionId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Network;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Wallet;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Message; 	//The message contents : “SessionAuthProof <sessionId> <wallet> <nonce ? >” hex encoded
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Signature;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProofResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqGetSessionAuthProof_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("sessionAuthProof"), ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProofResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqGetSessionAuthProofResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
