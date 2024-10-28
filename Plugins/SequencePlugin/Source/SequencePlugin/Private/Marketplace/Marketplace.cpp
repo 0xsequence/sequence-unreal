@@ -31,14 +31,10 @@ FString UMarketplace::HostName(const int64 ChainID)
 	return Hostname;
 }
 
-//curl 'https://marketplace-api.sequence.app/arbitrum-nova/rpc/Marketplace/ListCollectiblesWithLowestListing'
-
-
 void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = this->Url(ChainID, Endpoint);
 
-	// Create and configure the HTTP request
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
 
 	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
@@ -57,9 +53,9 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
-
-	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  // Log the response
-	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  // Log the response
+	 
+	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
+	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
 
 
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
@@ -67,7 +63,7 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 			if (bWasSuccessful)
 			{
 				const FString Content = Response->GetContentAsString();
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  // Log the response
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
 				OnSuccess(Content);
 			}
 			else
@@ -75,12 +71,12 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 				if (Request.IsValid() && Response.IsValid())
 				{
 					const FString ErrorMessage = Response->GetContentAsString();
-					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  // Log the failure message
+					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
 					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer"));  // Log the invalid pointer error
+					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
 					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
 				}
 			}

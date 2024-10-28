@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "Indexer/Structs/Struct_Data.h"
-#include "Marketplace/Structs/Struct_Data.h"
 #include "Authenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
@@ -24,7 +23,6 @@ using FSignature = FUnsizedData;
 using TransactionID = FString;
 
 class UIndexer;
-class UMarketplace;
 class UProvider;
 class USequenceRPCManager;
 
@@ -65,9 +63,6 @@ private:
 
 	UPROPERTY()
 	UProvider * Provider;
-
-	UPROPERTY()
-	UMarketplace * Marketplace;
 
 	UPROPERTY()
 	FCredentials_BE Credentials;
@@ -329,11 +324,6 @@ public:
 		get transaction history from the Chain
 	*/
 	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-	
-	//Marketplace Calls
-
-	void GetCollectibleListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure) const;
-
 
 	//Provider calls
 

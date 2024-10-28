@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Util/SequenceSupport.h"
 #include "Indexer/Structs/Struct_Data.h"
-#include "Marketplace/Structs/Struct_Data.h"
 #include "SequenceWalletBPTypes.h"
 #include "Transactions.h"
 #include "SequenceResponseIntent.h"
@@ -40,10 +39,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, F
 
 //Indexer//
 
-//Marketplace
-// 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMarketplaceGetCollectiblesWithLowestListings, FSequenceResponseStatus, ResponseStatus, FSeqGetCollectiblesWithLowestListingsReturn, CollectiblesWithLowestListings);
 //ASYNC Response Delegates//
 
 /**
@@ -119,12 +114,6 @@ public:
 	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
 
 	//Indexer//
-	
-
-	// Marketplace
-	
-	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
-	FOnMarketplaceGetCollectiblesWithLowestListings OnMarketplaceGetCollectiblesWithLowestListings;
 
 
 	//ASYNC Response Bindable Delegates//
@@ -158,11 +147,6 @@ private:
 	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 
 	//Indexer//
-	
-
-	//Markeplace
-	
-	void CallOnMarketplaceGetCollectiblesWithLowestListings(const FSequenceResponseStatus& Status, const FSeqGetCollectiblesWithLowestListingsReturn& CollectiblesWithLowestListings) const;
 	
 	//ASYNC Response Internal Calls//
 	
@@ -291,11 +275,6 @@ public:
 
 	//Indexer//
 	
-
-	//Marketplace
-	
-	UFUNCTION(BlueprintCallable, Category = "Async Marketplace")
-	void MarketplaceGetCollectiblesWithLowestListings(const FSeqGetCollectiblesWithLowestListingsArgs& Args);
 
 	//ASYNC//
 };
