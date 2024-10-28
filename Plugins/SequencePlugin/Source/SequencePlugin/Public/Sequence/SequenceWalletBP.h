@@ -15,6 +15,7 @@
 //Api//
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiValidateMessageSignature, FSequenceResponseStatus, ResponseStatus, FSeqValidateMessageSignatureResponse_Data, isValidMessageSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
@@ -61,6 +62,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiSignMessage OnApiSignMessage;
+
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiValidateMessageSignature OnApiValidateMessageSignature;
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiGetFilteredFeeOptions OnApiGetFilteredFeeOptions;
@@ -124,6 +128,7 @@ private:
 	//Api//
 
 	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const;
+	void CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const;
 	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
@@ -232,6 +237,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSignMessage(const FString& Message);
+
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature);
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetFilteredFeeOptions(UTransactions * Transactions);

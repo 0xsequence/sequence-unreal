@@ -154,6 +154,16 @@ public:
 	void SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
+	 * Allows you to validate the signature of the given message with the SequenceWallet
+	 * @param Signature The signature you wish to validate
+	 * @param Message The message that has been signed
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
+	 */
+
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/**
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
 	 * @param Transactions The transaction you wish to send
 	 * @param OnSuccess FSeqTransactionResponse_Data containing information about the Successful Transaction

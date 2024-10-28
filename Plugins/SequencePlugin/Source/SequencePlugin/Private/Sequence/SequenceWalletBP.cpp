@@ -15,6 +15,14 @@ void USequenceWalletBP::CallOnApiSignMessage(const FSequenceResponseStatus& Stat
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSignMessage]"));
 }
 
+void USequenceWalletBP::CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const
+{
+	if (this->OnApiValidateMessageSignature.IsBound())
+		this->OnApiValidateMessageSignature.Broadcast(Status, isValidMessageSignature);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiIsValidMessageSignature]"));
+}
+
 void USequenceWalletBP::CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const
 {
 	if (this->OnApiGetFilteredFeeOptions.IsBound())
@@ -287,6 +295,26 @@ void USequenceWalletBP::ApiSignMessage(const FString& Message)
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SignMessage(Message, OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature)
+{
+	const TFunction<void(FSeqValidateMessageSignatureResponse_Data)> OnSuccess = [this](const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature)
+		{
+			this->CallOnApiValidateMessageSignature(FSequenceResponseStatus(true, ValidateMessageSignatureTrt), isValidMessageSignature);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiValidateMessageSignature(FSequenceResponseStatus(false, Err.Message, ValidateMessageSignatureTrt), FSeqValidateMessageSignatureResponse_Data());
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
 	}
 }
 

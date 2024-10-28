@@ -474,6 +474,43 @@ struct SEQUENCEPLUGIN_API FSignMessageData : public FGenericData
 
 
 
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FValidateMessageSignatureData : public FGenericData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FString chainId = "";
+    UPROPERTY()
+    FString walletAddress = "";
+    UPROPERTY()
+    FString message = "";
+    UPROPERTY()
+    FString signature = "";
+
+
+    FValidateMessageSignatureData()
+    {
+        UseCustomParser = true;
+    }
+
+    FValidateMessageSignatureData(const FString& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature)
+    {
+        UseCustomParser = true;
+        chainId = ChainId;
+        walletAddress = WalletAddress;
+        message = Message;
+        signature = Signature;
+        
+    }
+
+    virtual FString GetJson() const override
+    {
+       return "{\"chainId\":\"" + chainId + "\",\"walletAddress\":\"" + walletAddress + "\",\"message\":\"" + message + "\",\"signature\":\"" + signature + "\"}";  
+    }
+};
+
 struct SEQUENCEPLUGIN_API FSignatureIntent
 {
     FGenericData* data = nullptr;
