@@ -149,7 +149,7 @@ void TFixedABIArray::Decode(TArray<uint8>& Data, int BlockPosition, int HeadPosi
 {
 	uint32 Count = MyData.Num();
 	
-	for(auto i = 0; i < Count; i++)
+	for(uint32 i = 0; i < Count; i++)
 	{
 		MyData[i]->Decode(Data, HeadPosition + GBlockByteLength * i, HeadPosition);
 	}
@@ -225,7 +225,7 @@ void TDynamicABIArray::Decode(TArray<uint8>& Data, int BlockPosition, int HeadPo
 
 	TSharedPtr<ABIElement> Prototype = MyData.Pop();
 	
-	for(auto i = 0; i < Count; i++)
+	for(uint32 i = 0; i < Count; i++)
 	{
 		TSharedPtr<ABIElement> Elem = Prototype->Clone();
 		Elem->Decode(Data, HeadPosition + Offset + GBlockByteLength * (i + 1), HeadPosition + Offset + GBlockByteLength);
@@ -367,7 +367,7 @@ void TDynamicABIData::Decode(TArray<uint8>& Data, int BlockPosition, int HeadPos
 	uint32 Offset = CopyOutUInt32(Data, BlockPosition);
 	uint32 Count = CopyOutUInt32(Data, HeadPosition + Offset);
 	
-	for(auto i = 0; i < Count; i++)
+	for(uint32 i = 0; i < Count; i++)
 	{
 		MyData.Push(Data[HeadPosition + Offset + GBlockByteLength + i]);
 	}
