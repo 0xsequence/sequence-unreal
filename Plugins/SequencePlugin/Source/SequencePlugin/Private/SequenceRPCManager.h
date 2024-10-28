@@ -63,6 +63,7 @@ private:
 	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
 	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
+	FString BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce) const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
 	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const;
@@ -174,6 +175,8 @@ public:
 	 */
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
+
+	void GetSessionAuthProof(const FCredentials_BE& Credentials, const FString& Nonce,  const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 	/**
 	 * Used to close the Current Session
 	 * @param Credentials Credentials used to build Intent

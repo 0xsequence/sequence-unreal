@@ -20,7 +20,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSe
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
+
 
 //Api//
 
@@ -75,6 +77,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiListSessions OnApiListSessions;
 
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
+
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
 	
@@ -124,6 +129,7 @@ private:
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
+	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
 	//Api//
@@ -241,6 +247,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiListSessions();
+
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiGetSessionAuthProof(const FString& Nonce);
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetSupportedTransakCountries();

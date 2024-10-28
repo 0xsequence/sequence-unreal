@@ -55,6 +55,14 @@ void USequenceWalletBP::CallOnApiListSessions(const FSequenceResponseStatus& Sta
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiListSessions]"));
 }
 
+void USequenceWalletBP::CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const
+{
+	if (this->OnApiGetSessionAuthProof.IsBound())
+		this->OnApiGetSessionAuthProof.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetSessionAuthProof]"));
+}
+
 void USequenceWalletBP::CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const
 {
 	if (this->OnApiGetSupportedTransakCountries.IsBound())
@@ -386,6 +394,27 @@ void USequenceWalletBP::ApiListSessions()
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->ListSessions(OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiGetSessionAuthProof(const FString& Nonce)
+{
+
+	const TFunction<void(FSeqGetSessionAuthProof_Data)> OnSuccess = [this](const FSeqGetSessionAuthProof_Data& Response)
+		{
+			this->CallOnApiGetSessionAuthProof(FSequenceResponseStatus(true, GetSessionAuthProofTrt), Response);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiGetSessionAuthProof(FSequenceResponseStatus(false, Err.Message, GetSessionAuthProofTrt), {});
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->GetSessionAuthProof(Nonce,OnSuccess, OnFailure);
 	}
 }
 
