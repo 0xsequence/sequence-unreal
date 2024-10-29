@@ -43,6 +43,32 @@ FRawTransaction UERC721::MakeGrantRoleTransaction(const FString& role, const FSt
 	return T;
 }
 
+FRawTransaction UERC721::MakeApproveTransaction(const FString& ToAddress, const int32 TokenId)
+{
+	FString FunctionSignature = "approve(address,uint256)";
+
+	FString WalletAddress = ToAddress;
+	FString WalletAddressNoPrefix = WalletAddress.Mid(2, WalletAddress.Len());
+	FAddress WalletAddressBytes = FAddress::From(WalletAddressNoPrefix);
+
+	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
+
+	TFixedABIData ABITokenId = ABI::Int32(TokenId);
+
+	TArray<ABIEncodeable*> Arr;
+	Arr.Add(&ABIAccount);
+	Arr.Add(&ABITokenId);
+
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FRawTransaction T;
+	T.data = "0x" + EncodedData.ToHex();
+	T.to = ContractAddress;
+	T.value = "0";
+
+	return T;
+}
+
 FRawTransaction UERC721::MakeMintTransaction(const FString& ToAddress, const int32 TokenId)
 {
 	FString FunctionSignature = "mint(address,uint256)";

@@ -44,6 +44,32 @@ FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FS
 	return T;
 }
 
+FRawTransaction UERC1155::MakeSetApprovalForAllTransaction(const FString& Opperator, bool Approved)
+{
+	FString FunctionSignature = "setApprovalForAll(address,bool)";
+
+	FString WalletAddress = Opperator;
+	FString WalletAddressNoPrefix = WalletAddress.Mid(2, WalletAddress.Len());
+	FAddress WalletAddressBytes = FAddress::From(WalletAddressNoPrefix);
+
+	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
+	TFixedABIData ABIApproval = ABI::Bool(Approved);
+
+
+	TArray<ABIEncodeable*> Arr;
+	Arr.Add(&ABIAccount);
+	Arr.Add(&ABIApproval);
+
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+	FRawTransaction T;
+	T.data = "0x" + EncodedData.ToHex();
+	T.to = ContractAddress;
+	T.value = "0";
+
+	return T;
+}
+
+
 FRawTransaction UERC1155::MakeMintTransaction(const FString& ToAddress, const int32 TokenId, const int32 Amount)
 {
 	FString FunctionSignature = "mint(address,uint256,unit256,bytes)";

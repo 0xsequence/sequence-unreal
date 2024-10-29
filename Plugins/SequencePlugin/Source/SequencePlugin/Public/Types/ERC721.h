@@ -22,6 +22,9 @@ public:
 	FRawTransaction MakeGrantRoleTransaction(const FString& role, const FString& ToAddress);
 
 	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	FRawTransaction MakeApproveTransaction(const FString& ToAddress, const int32 TokenId);
+
+	UFUNCTION(BlueprintCallable, Category = "ERC721")
 	FRawTransaction MakeMintTransaction(const FString& ToAddress, const int32 TokenId);
 
 	UFUNCTION(BlueprintCallable, Category = "ERC721")
