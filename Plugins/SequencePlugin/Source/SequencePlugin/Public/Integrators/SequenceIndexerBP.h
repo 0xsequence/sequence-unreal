@@ -38,7 +38,13 @@ public:
 	FOnGetTransactionHistory TransactionHistoryReceived;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SetChain(const FString& ChainName);
+	void SetChainById(const int64 NewChainId);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SetChainByName(const FString& NewChainName);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SetChainByType(const ENetwork& NewChainType);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetEtherBalanceAsync(const FString& WalletAddress);

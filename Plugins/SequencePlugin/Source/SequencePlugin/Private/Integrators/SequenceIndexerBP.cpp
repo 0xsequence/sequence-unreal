@@ -11,9 +11,19 @@ USequenceIndexerBP::USequenceIndexerBP()
 	this->Indexer = NewObject<UIndexer>();
 }
 
-void USequenceIndexerBP::SetChain(const FString& ChainName)
+void USequenceIndexerBP::SetChainById(const int64 NewChainId)
 {
-	ChainId = USequenceSupport::GetNetworkId(ChainName);
+	ChainId = NewChainId;
+}
+
+void USequenceIndexerBP::SetChainByName(const FString& NewChainName)
+{
+	ChainId = USequenceSupport::GetNetworkId(NewChainName);
+}
+
+void USequenceIndexerBP::SetChainByType(const ENetwork& NewChainType)
+{
+	ChainId = USequenceSupport::GetNetworkId(NewChainType);
 }
 
 void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress)
