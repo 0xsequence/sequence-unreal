@@ -1,11 +1,12 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Sequence/SequenceWalletBP.h"
+
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Sequence/SequenceAPI.h"
 
-USequenceWalletBP::USequenceWalletBP()
-{
-}
+USequenceWalletBP::USequenceWalletBP() { }
 
 void USequenceWalletBP::CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const
 {

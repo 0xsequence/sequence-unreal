@@ -58,7 +58,7 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 
 int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
 {
-	if (NetworkIdToNameMap.Contains(Network))
+	if (NetworkEnumToIdMap.Contains(Network))
 	{
 		return *NetworkEnumToIdMap.Find(Network);
 	}
