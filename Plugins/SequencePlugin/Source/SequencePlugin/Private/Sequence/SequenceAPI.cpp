@@ -1,10 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Sequence/SequenceAPI.h"
-#include "RequestHandler.h"
 #include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
-#include "JsonObjectConverter.h"
-#include "Eth/Crypto.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
@@ -12,63 +9,9 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Indexer/Indexer.h"
-#include "Util/JsonBuilder.h"
 #include "Provider.h"
 #include "Transak.h"
 #include "SequenceRPCManager.h"
-
-FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
-{
-	return FTransaction_Sequence{
-		static_cast<uint64>(Transaction_Fe.chainId),
-		FAddress::From(Transaction_Fe.From),
-		FAddress::From(Transaction_Fe.To),
-		Transaction_Fe.AutoGas == "" ? TOptional<FString>() : TOptional(Transaction_Fe.AutoGas),
-		Transaction_Fe.Nonce < 0 ? TOptional<uint64>() : TOptional(static_cast<uint64>(Transaction_Fe.Nonce)),
-		Transaction_Fe.Value == "" ? TOptional<FString>() : TOptional(Transaction_Fe.Value),
-		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
-		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
-		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
-		Transaction_Fe.TokenIds.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
-		Transaction_Fe.TokenAmounts.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
-	};
-}
-
-FString FTransaction_Sequence::ToJson()
-{
-	FJsonBuilder Json = FJsonBuilder();
-
-	Json.AddInt("chainId", ChainId);
-	Json.AddString("from", "0x" + From.ToHex());
-	Json.AddString("to", "0x" + To.ToHex());
-
-	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
-
-	return Json.ToString();
-}
-
-TransactionID FTransaction_Sequence::ID()
-{
-	FUnsizedData Data = StringToUTF8(ToJson());
-	return GetKeccakHash(Data).ToHex();
-}
-
-FString USequenceWallet::Url(const FString& Name) const
-{
-	return this->Hostname + this->Path + Name;
-}
-
-void USequenceWallet::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	NewObject<URequestHandler>()
-			->PrepareRequest()
-			->WithUrl(Url)
-			->WithHeader("Content-type", "application/json")
-			->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
-			->WithVerb("POST")
-			->WithContentAsString(Content)
-			->ProcessAndThen(OnSuccess, OnFailure);
-}
 
 USequenceWallet::USequenceWallet()
 {
@@ -126,7 +69,7 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 		else
 		{
 			UE_LOG(LogTemp,Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
-			const UAuthenticator * Auth = NewObject<UAuthenticator>();
+			const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
 
 			if (StoredCredentials.GetValid())
@@ -244,6 +187,14 @@ FString USequenceWallet::GetWalletAddress() const
 	return Addr;
 }
 
+void USequenceWallet::GetIdToken(const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetIdToken(this->Credentials, Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
@@ -252,9 +203,17 @@ void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSession
 	}
 }
 
+void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetSessionAuthProof(this->Credentials, Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::SignOut() const
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	if (this->Credentials.IsRegistered())
 	{
 		const TFunction<void()> OnSuccess = [Auth]
@@ -309,7 +268,21 @@ int64 USequenceWallet::GetNetworkId() const
 void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
 {
 	this->Credentials.UpdateNetwork(NewNetwork);
-	const UAuthenticator * auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
+void USequenceWallet::UpdateNetworkId(FString NewNetworkName)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetworkName));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
+void USequenceWallet::UpdateNetworkId(ENetwork NewNetwork)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetwork));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
 	auth->StoreCredentials(this->Credentials);
 }
 
@@ -329,6 +302,14 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
+
+void USequenceWallet::ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress,const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
+	}
+}
 void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
@@ -468,159 +449,6 @@ void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactio
 	}
 }
 
-FString USequenceWallet::getSequenceURL(const FString& endpoint) const
-{
-	return this->SequenceURL + endpoint;
-}
-
-TArray<FContact_BE> USequenceWallet::BuildFriendListFromJson(const FString& JSON)
-{
-	TArray<FContact_BE> friendList;
-	TSharedPtr<FJsonObject> jsonObj;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		const TArray<TSharedPtr<FJsonValue>>* storedFriends;
-		if (jsonObj.Get()->TryGetArrayField(TEXT("friends"), storedFriends))
-		{
-			for (TSharedPtr<FJsonValue> friendData : *storedFriends)
-			{
-				const TSharedPtr<FJsonObject>* fJsonObj;
-				if (friendData.Get()->TryGetObject(fJsonObj))//need it as an object
-				{
-					FContact_BE newFriend;
-					newFriend.Public_Address = fJsonObj->Get()->GetStringField(TEXT("userAddress"));
-					newFriend.Nickname = fJsonObj->Get()->GetStringField(TEXT("nickname"));
-					friendList.Add(newFriend);
-				}
-			}
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	return friendList;
-}
-
-/*
-* Gets the friend data from the given username!
-* This function appears to require some form of authentication (perhaps all of the sequence api does)
-* @Deprecated
-*/
-void USequenceWallet::GetFriends(FString username, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	const FString json_arg = "{}";
-	
-	SendRPC(getSequenceURL("friendList"), json_arg, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildFriendListFromJson(Content));
-		}, OnFailure);
-}
-
-TArray<FItemPrice_BE> USequenceWallet::BuildItemUpdateListFromJson(const FString& JSON)
-{
-	TSharedPtr<FJsonObject> jsonObj;
-	FUpdatedPriceReturn updatedPrices;
-
-	if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), jsonObj))
-	{
-		if (FJsonObjectConverter::JsonObjectToUStruct<FUpdatedPriceReturn>(jsonObj.ToSharedRef(), &updatedPrices))
-		{
-			return updatedPrices.tokenPrices;
-		}
-	}
-	else
-	{//failure
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert String: %s to Json object"), *JSON);
-	}
-	TArray<FItemPrice_BE> updatedItems;
-	return updatedItems;
-}
-
-void USequenceWallet::GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCoinPrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCoinPrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	TArray<FID_BE> items;
-	items.Add(ItemToUpdate);
-	GetUpdatedCollectiblePrices(items, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const
-{
-	FString args = "{\"tokens\":";
-	FString jsonObjString = "";
-	TArray<FString> parsedItems;
-	for (FID_BE item : ItemsToUpdate)
-	{
-		if (FJsonObjectConverter::UStructToJsonObjectString<FID_BE>(item, jsonObjString))
-			parsedItems.Add(jsonObjString);
-	}
-	args += USequenceSupport::StringListToSimpleString(parsedItems);
-	args += "}";
-
-	SendRPC(getSequenceURL("getCollectiblePrices"), args, [this,OnSuccess](const FString& Content)
-		{
-			OnSuccess(this->BuildItemUpdateListFromJson(Content));
-		}, OnFailure);
-}
-
-FString USequenceWallet::BuildQr_Request_URL(const FString& walletAddress,int32 Size) const
-{
-	FString urlSize = "/";
-	urlSize.AppendInt(Size);
-	return SequenceURL_Qr + encodeB64_URL(walletAddress) + urlSize;
-}
-
-//we only need to encode base64URL we don't decode them as we receive the QR code
-FString USequenceWallet::encodeB64_URL(const FString& data)
-{
-	FString ret = FBase64::Encode(data);
-	//now we just gotta do some swaps to make it base64 URL compliant
-	// + -> -
-	// / -> _ 
-
-	const FString srch_plus = TEXT("+");
-	const FString rep_plus = TEXT("-");
-	const FString srch_slash = TEXT("/");
-	const FString rep_slash = TEXT("_");
-
-	const TCHAR* srch_ptr_plus = *srch_plus;
-	const TCHAR* rep_ptr_plus = *rep_plus;
-	const TCHAR* srch_ptr_slash = *srch_slash;
-	const TCHAR* rep_ptr_slash = *rep_slash;
-
-	ret.ReplaceInline(srch_ptr_plus, rep_ptr_plus, ESearchCase::IgnoreCase);//remove + and replace with -
-	ret.ReplaceInline(srch_ptr_slash, rep_ptr_slash, ESearchCase::IgnoreCase);//remove / and replace with _
-
-	return ret;
-}
-
 //Indexer Calls
 
 void USequenceWallet::Ping(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -669,12 +497,6 @@ void USequenceWallet::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Arg
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenSuppliesMap(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetBalanceUpdates(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const

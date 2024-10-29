@@ -7,6 +7,7 @@
 #include "Containers/Union.h"
 #include "Types/Types.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"
 
 struct FSeqGetTokenBalancesReturn;
@@ -49,21 +50,24 @@ private:
 	//when indexing on names compress spaces and to lower
 
 	static inline TMap<int64, FString> NetworkIdToUrlMap = {
-		FIdName(1,TEXT("mainnet")),//good
-		FIdName(10,TEXT("optimism")),//good
-		FIdName(56,TEXT("bsc")),//good
-		FIdName(100,TEXT("gnosis")),//good
-		FIdName(137,TEXT("polygon")),//good
-		FIdName(1101,TEXT("polygon-zkevm")),//good
-		FIdName(3776,TEXT("astar-zkevm")),//good
-		FIdName(8453,TEXT("base")),//good
-		FIdName(19011,TEXT("homeverse")),//good
-		FIdName(42161,TEXT("arbitrum")),//good
+		FIdName(1,TEXT("mainnet")),
+		FIdName(10,TEXT("optimism")),
+		FIdName(56,TEXT("bsc")),
+		FIdName(100,TEXT("gnosis")),
+		FIdName(137,TEXT("polygon")),
+		FIdName(1101,TEXT("polygon-zkevm")),
+		FIdName(8333,TEXT("b3")),
+		FIdName(8453,TEXT("base")),
+		FIdName(19011,TEXT("homeverse")),
+		FIdName(33139,TEXT("apechain")),
+		FIdName(42161,TEXT("arbitrum")),
 		FIdName(42170,TEXT("arbitrum-nova")),
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
+		
 		FIdName(97,TEXT("bsc-testnet")),
+		FIdName(1946,TEXT("soneium-minato")),
 		FIdName(1993,TEXT("b3-sepolia")),
 		FIdName(2730,TEXT("xr-sepolia")),
 		FIdName(33111,TEXT("apechain-testnet")),
@@ -71,10 +75,12 @@ private:
 		FIdName(43113,TEXT("avalanche-testnet")),
 		FIdName(80002,TEXT("amoy")),
 		FIdName(84532,TEXT("base-sepolia")),
-		FIdName(421614,TEXT("arbitrum-sepolia")),//good
-		FIdName(6038361,TEXT("astar-zkyoto")),
+		FIdName(94984,TEXT("borne-testnet")),
+		FIdName(421614,TEXT("arbitrum-sepolia")),
 		FIdName(11155111,TEXT("sepolia")),
 		FIdName(11155420,TEXT("optimism-sepolia")),
+		FIdName(21000000,TEXT("toy-testnet")),
+		FIdName(37084624,TEXT("skale-nebula-testnet")),
 		FIdName(168587773,TEXT("blast-sepolia")),
 		FIdName(37714555429,TEXT("xai-sepolia"))};
 	
@@ -85,15 +91,18 @@ private:
 		FIdName(100,TEXT("Gnosis Chain")),
 		FIdName(137,TEXT("Polygon")),
 		FIdName(1101,TEXT("Polygon zkEVM")),
-		FIdName(3776,TEXT("Astar zkEVM")),
+		FIdName(8333,TEXT("B3")),
 		FIdName(8453,TEXT("Base (Coinbase)")),
 		FIdName(19011,TEXT("Oasys Homeverse")),
+		FIdName(33139,TEXT("APE Chain")),
 		FIdName(42161,TEXT("Arbitrum One")),
 		FIdName(42170,TEXT("Arbitrum Nova")),
 		FIdName(43114,TEXT("Avalanche")),
 		FIdName(81457,TEXT("Blast")),
 		FIdName(660279,TEXT("Xai")),
+		
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
+		FIdName(1946,TEXT("Soneium Minato Testnet")),
 		FIdName(1993,TEXT("B3 Sepolia")),
 		FIdName(2730,TEXT("XR Sepolia")),
 		FIdName(33111,TEXT("APE Chain Testnet")),
@@ -101,10 +110,12 @@ private:
 		FIdName(43113,TEXT("Avalanche Testnet")),
 		FIdName(80002,TEXT("Polygon Amoy")),
 		FIdName(84532,TEXT("Base Sepolia")),
+		FIdName(94984,TEXT("Borne Testnet")),
 		FIdName(421614,TEXT("Arbitrum Sepolia")),
-		FIdName(6038361,TEXT("Astar zKyoto Testnet")),
 		FIdName(11155111,TEXT("Sepolia")),
 		FIdName(11155420,TEXT("Optimism Sepolia")),
+		FIdName(21000000,TEXT("TOY Testnet")),
+		FIdName(37084624,TEXT("SKALE Nebula Gaming Hub Testnet")),
 		FIdName(168587773,TEXT("Blast Sepolia")),
 		FIdName(37714555429,TEXT("Xai Sepolia"))};
 
@@ -115,16 +126,18 @@ private:
 		FNameId(TEXT("gnosischain"),100),
 		FNameId(TEXT("polygon"),137),
 		FNameId(TEXT("polygonzkevm"),1101),
-		FNameId(TEXT("astarzkevm"),3776),
-		FNameId(TEXT("base(coinbase)"),8453),
+		FNameId(TEXT("b3"),8333),
 		FNameId(TEXT("base"),8453),
 		FNameId(TEXT("oasyshomeverse"),19011),
+		FNameId(TEXT("apechain"),33139),
 		FNameId(TEXT("arbitrumone"),42161),
 		FNameId(TEXT("arbitrumnova"),42170),
 		FNameId(TEXT("avalanche"),43114),
 		FNameId(TEXT("blast"),81457),
 		FNameId(TEXT("xai"),660279),
+		
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
+		FNameId(TEXT("soneiumminato"),1946),
 		FNameId(TEXT("b3sepolia"),1993),
 		FNameId(TEXT("xrsepolia"),2730),
 		FNameId(TEXT("apechaintestnet"),33111),
@@ -132,13 +145,87 @@ private:
 		FNameId(TEXT("avalanchetestnet"),43113),
 		FNameId(TEXT("polygonamoy"),80002),
 		FNameId(TEXT("basesepolia"),84532),
+		FNameId(TEXT("bornetestnet"),94984),
 		FNameId(TEXT("arbitrumsepolia"),421614),
-		FNameId(TEXT("astarzkyototestnet"),6038361),
 		FNameId(TEXT("sepolia"),11155111),
 		FNameId(TEXT("optimismsepolia"),11155420),
+		FNameId(TEXT("toytestnet"),21000000),
+		FNameId(TEXT("skalenebulagaminghubtestnet"),37084624),
 		FNameId(TEXT("blastsepolia"),168587773),
 		FNameId(TEXT("xaisepolia"),37714555429)};
 	
+	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
+		{ENetwork::Ethereum, 1},
+		{ENetwork::Optimism, 10},
+		{ENetwork::BNBSmartChain, 56},
+		{ENetwork::GnosisChain, 100},
+		{ENetwork::PolygonChain, 137},
+		{ENetwork::PolygonZkEVM, 1101},
+		{ENetwork::B3, 8333},
+		{ENetwork::Base, 8453},
+		{ENetwork::OasysHomeverse, 19011},
+		{ENetwork::APEChain, 33139},
+		{ENetwork::ArbitrumOne, 42161},
+		{ENetwork::ArbitrumNova, 42170},
+		{ENetwork::Avalanche, 43114},
+		{ENetwork::Blast, 81457},
+		{ENetwork::Xai, 660279},
+		
+		{ENetwork::BNBSmartChainTestnet, 97},
+		{ENetwork::SoneiumMinatoTestnet, 1946},
+		{ENetwork::B3Sepolia, 1993},
+		{ENetwork::XRSepolia, 2730},
+		{ENetwork::APEChainTestnet, 33111},
+		{ENetwork::OasysHomeverseTestnet, 40875},
+		{ENetwork::AvalancheTestnet, 43113},
+		{ENetwork::PolygonAmoy, 80002},
+		{ENetwork::BaseSepolia, 84532},
+		{ENetwork::BorneTestnet, 94984},
+		{ENetwork::ArbitrumSepolia, 421614},
+		{ENetwork::Sepolia, 11155111},
+		{ENetwork::OptimismSepolia, 11155420},
+		{ENetwork::TOYTestnet, 21000000},
+		{ENetwork::SKALENebulaGamingHubTestnet, 37084624},
+		{ENetwork::BlastSepolia, 168587773},
+		{ENetwork::XaiSepolia, 37714555429}
+		};
+
+	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
+		{ENetwork::Ethereum, TEXT("Ethereum")},
+		{ENetwork::Optimism, TEXT("Optimism")},
+		{ENetwork::BNBSmartChain, TEXT("BNB Smart Chain")},
+		{ENetwork::GnosisChain, TEXT("Gnosis Chain")},
+		{ENetwork::PolygonChain, TEXT("Polygon")},
+		{ENetwork::PolygonZkEVM, TEXT("Polygon zkEVM")},
+		{ENetwork::B3, TEXT("B3")},
+		{ENetwork::Base, TEXT("Base (Coinbase)")},
+		{ENetwork::OasysHomeverse, TEXT("Oasys Homeverse")},
+		{ENetwork::APEChain, TEXT("APE Chain")},
+		{ENetwork::ArbitrumOne, TEXT("Arbitrum One")},
+		{ENetwork::ArbitrumNova, TEXT("Arbitrum Nova")},
+		{ENetwork::Avalanche, TEXT("Avalanche")},
+		{ENetwork::Blast, TEXT("Blast")},
+		{ENetwork::Xai, TEXT("Xai")},
+		
+		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
+		{ENetwork::SoneiumMinatoTestnet, TEXT("Soneium Minato Testnet")},
+		{ENetwork::B3Sepolia, TEXT("B3 Sepolia")},
+		{ENetwork::XRSepolia, TEXT("XR Sepolia")},
+		{ENetwork::APEChainTestnet, TEXT("APE Chain Testnet")},
+		{ENetwork::OasysHomeverseTestnet, TEXT("Oasys Homeverse Testnet")},
+		{ENetwork::AvalancheTestnet, TEXT("Avalanche Testnet")},
+		{ENetwork::PolygonAmoy, TEXT("Polygon Amoy")},
+		{ENetwork::BaseSepolia, TEXT("Base Sepolia")},
+		{ENetwork::BorneTestnet, TEXT("Borne Testnet")},
+		{ENetwork::ArbitrumSepolia, TEXT("Arbitrum Sepolia")},
+		{ENetwork::Sepolia, TEXT("Sepolia")},
+		{ENetwork::OptimismSepolia, TEXT("Optimism Sepolia")},
+		{ENetwork::TOYTestnet, TEXT("TOY Testnet")},
+		{ENetwork::SKALENebulaGamingHubTestnet, TEXT("SKALE Nebula Gaming Hub Testnet")},
+		{ENetwork::BlastSepolia, TEXT("Blast Sepolia")},
+		{ENetwork::XaiSepolia, TEXT("Xai Sepolia")}
+	};
+
 public:
 	
 	/**
@@ -148,7 +235,12 @@ public:
 	 */
 	static FString GetNetworkName(const int64 NetworkIdIn);
 
+	static FString GetNetworkName(const ENetwork NetworkIn);
+
+
 	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
+
+	static bool IsNetworkIdSupported(const int64 NetworkIdIn);
 
 	/**
 	 * Gets the associated Network Id with the given Network Name
@@ -156,6 +248,8 @@ public:
 	 * @return The associated Id, if none was found returns -1
 	 */
 	static int64 GetNetworkId(const FString& NetworkNameIn);
+
+	static int64 GetNetworkId(const ENetwork& Network);
 
 	/**
 	 * Gets all networks in the system
@@ -337,10 +431,6 @@ public:
 
 	static FString JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData);
 
-	//indexer response extraction functions used to parse response into a frontend usable form!
-	static FUpdatableHistoryArgs ExtractFromTransactionHistory(FString MyAddress, FSeqGetTransactionHistoryReturn TransactionHistory);
-	static FUpdatableItemDataArgs ExtractFromTokenBalances(FSeqGetTokenBalancesReturn TokenBalances);
-
 	static int64 StringDateToUnixDate(const FString& Iso8601);
 	
 private:
@@ -349,6 +439,4 @@ private:
 	* some special edge cases from json responses / parsing as well!
 	*/
 	static FString StringCleanup(FString String);
-
-	static FMonthDayYear_BE TimestampToMonthDayYear_Be(const FString& Timestamp);
 };

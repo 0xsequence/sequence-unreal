@@ -4,6 +4,8 @@
 #include "CoreMinimal.h"
 #include "Indexer/Structs/SeqAttributeMap.h"
 #include "Util/SequenceSupport.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqTokenMetaData.generated.h"
 
 USTRUCT(BlueprintType)

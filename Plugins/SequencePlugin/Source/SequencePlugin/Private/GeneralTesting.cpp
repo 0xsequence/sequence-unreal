@@ -9,7 +9,7 @@
 #include "SequenceEncryptor.h"
 #include "Sequence/SequenceAPI.h"
 #include "Tests/TestSequenceAPI.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 
 // Sets default values
 AGeneralTesting::AGeneralTesting()
@@ -216,7 +216,7 @@ void AGeneralTesting::TestLoadTransakUrl() const
 
 void AGeneralTesting::TestGuestLogin()
 {
-	UAuthenticator * Auth = NewObject<UAuthenticator>();
+	USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	Auth->GuestLogin(false);
 }
 
@@ -248,7 +248,7 @@ void AGeneralTesting::TestTokenBalances() const
 		UE_LOG(LogTemp, Display, TEXT("Error with getting balances"));
 	};
 	
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -276,7 +276,7 @@ void AGeneralTesting::TestHistory() const
 		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
 	};
 	
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -284,15 +284,15 @@ void AGeneralTesting::TestHistory() const
 		FSeqGetTransactionHistoryArgs args;
 		args.filter.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
-		args.page.page = 0;
-		args.page.more = true;
+		args.page->page = 0;
+		args.page->more = true;
 		Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
 	}
 }
 
 void AGeneralTesting::TestGetWalletAddress() const
 {
-	const UAuthenticator * Auth = NewObject<UAuthenticator>();
+	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
@@ -316,7 +316,7 @@ void AGeneralTesting::TestEncryption() const
 
 void AGeneralTesting::TestMisc()
 {//used for testing various things in the engine to verify behaviour
-	UAuthenticator * Authenticator = NewObject<UAuthenticator>();
+	USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
 	//Authenticator->PlayFabRegisterAndLogin(TEXT("TBPTest1"), TEXT("calvinvermeulen18@gmail.com"), TEXT("Ac-123Bd-456#!ef"));
 	Authenticator->PlayFabLogin(TEXT("TBPTest1"), TEXT("Ac-123Bd-456#!ef"), false);
 	//Authenticator->GuestLogin(false);

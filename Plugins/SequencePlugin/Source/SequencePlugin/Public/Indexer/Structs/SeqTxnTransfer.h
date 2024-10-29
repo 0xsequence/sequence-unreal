@@ -5,6 +5,8 @@
 #include "SeqTokenMetaData.h"
 #include "Indexer/Indexer_Enums.h"
 #include "SeqContractInfo.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqTxnTransfer.generated.h"
 
 

@@ -1,10 +1,9 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "Indexer/Structs/Struct_Data.h"
-#include "Authenticator.h"
+#include "SequenceAuthenticator.h"
 #include "Util/Async.h"
 #include "Eth/EthTransaction.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Types/BinaryData.h"
 #include "Containers/Union.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -17,6 +16,7 @@
 #include "Sequence/FeeOption.h"
 #include "TransakDataTypes.h"
 #include "Util/SequenceSupport.h"
+#include "Util/Structs/BE_Enums.h"
 #include "SequenceAPI.generated.h"
  
 using FSignature = FUnsizedData;
@@ -25,26 +25,6 @@ using TransactionID = FString;
 class UIndexer;
 class UProvider;
 class USequenceRPCManager;
-
-//Sequence Specific Version of Transaction
-struct SEQUENCEPLUGIN_API FTransaction_Sequence
-{
-	uint64 ChainId;
-	FAddress From;
-	FAddress To;
-	TOptional<FString> AutoGas;
-	TOptional<uint64> Nonce;
-	TOptional<FString> Value;
-	TOptional<FString> CallData;
-	TOptional<FString> TokenAddress;
-	TOptional<FString> TokenAmount;
-	TOptional<TArray<FString>> TokenIds;
-	TOptional<TArray<FString>> TokenAmounts;
-
-	static FTransaction_Sequence Convert(const FTransaction_FE& Transaction_Fe);
-	FString ToJson();
-	TransactionID ID();
-};
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
@@ -67,23 +47,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 
-	//this will be removed
-	const FString Hostname = "https://next-api.sequence.app";
-	const FString SequenceURL_Qr = "https://api.sequence.app/qr/";
-	const FString SequenceURL = "https://api.sequence.app/rpc/API/";
-	const FString Path = "/rpc/Wallet/";
-	
-	//URL fetchers for sequence services
-	FString Url(const FString& Name) const;
-	FString getSequenceURL(const FString& endpoint) const;
-	static FString encodeB64_URL(const FString& data);
-
-	//Raw request functions
-	void SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	//Response helper functions
-	static TArray<FContact_BE> BuildFriendListFromJson(const FString& JSON);
-	static TArray<FItemPrice_BE> BuildItemUpdateListFromJson(const FString& JSON);
 public:
 	USequenceWallet();
 
@@ -175,6 +138,10 @@ public:
 	 */
 	void UpdateNetworkId(int64 NewNetwork);
 
+	void UpdateNetworkId(FString NewNetworkName);
+
+	void UpdateNetworkId(ENetwork NewNetwork);
+
 	/**
 	 * Allows to get the currently set network for the SequenceWallet
 	 * @return currently set network for the SequenceWallet
@@ -188,6 +155,16 @@ public:
 	 * @param OnFailure If an error occurs
 	 */
 	void SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/**
+	 * Allows you to validate the signature of the given message with the SequenceWallet
+	 * @param Signature The signature you wish to validate
+	 * @param Message The message that has been signed
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
+	 */
+
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
@@ -227,8 +204,14 @@ public:
 	 * @param OnSuccess A list of all active sessions
 	 * @param OnFailure An error occured
 	 */
+	 
+	void GetIdToken(const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const;
+
 	void ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
+
+	void GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
 	/**
 	 * Used to close the current Session with Sequence & clears all locally stored credentials
 	 */
@@ -259,15 +242,6 @@ private:
 	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
-	
-private:
-	//these functions are meant for the UI Only and have been removed for this version
-	void GetFriends(FString PublicAddress, TSuccessCallback<TArray<FContact_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCoinPrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrice(const FID_BE& ItemToUpdate, const TSuccessCallback<TArray<FItemPrice_BE>>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void GetUpdatedCollectiblePrices(TArray<FID_BE> ItemsToUpdate, TSuccessCallback<TArray<FItemPrice_BE>> OnSuccess, const FFailureCallback& OnFailure) const;
-	FString BuildQr_Request_URL(const FString& Data, int32 Size) const;
 
 public:
 	//Indexer Specific Calls
@@ -314,11 +288,6 @@ public:
 		gets the token supplies map from the Chain
 	*/
 	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Get the balance updates from the Chain
-	*/
-	void GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/*
 		get transaction history from the Chain

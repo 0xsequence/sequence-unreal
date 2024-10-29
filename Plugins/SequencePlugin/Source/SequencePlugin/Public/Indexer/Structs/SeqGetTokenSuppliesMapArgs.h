@@ -5,6 +5,8 @@
 #include "SeqTokenList.h"
 #include "Util/SequenceSupport.h"
 #include "JsonObjectConverter.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqGetTokenSuppliesMapArgs.generated.h"
 
 USTRUCT(BlueprintType)
@@ -57,8 +59,9 @@ public:
 
 		for (FString key : keys)
 		{
-			ret += "\"" + key + "\":" + USequenceSupport::StringListToParsableString(tokenMap.Find(key)->token_list);
+			ret += "\"" + key + "\":" + USequenceSupport::StringListToParsableString(tokenMap.Find(key)->token_list) + ",";
 		}
+		ret = ret.LeftChop(1); //remove the last comma
 		ret += "},";//close off tokenMap subObject
 		ret += "\"includeMetaData\":";
 		ret += includeMetaData ? "true" : "false";

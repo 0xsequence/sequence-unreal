@@ -3,6 +3,8 @@
 
 #include "CoreMinimal.h"
 #include "SeqTxnTransfer.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "SeqTransaction.generated.h"
 
 USTRUCT(BlueprintType)
