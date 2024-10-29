@@ -10,11 +10,12 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailFederationRequiresCode);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionEstablished);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationSucceeded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionCreationFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSignInWebViewRequired, const FString&, SignInUrl);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 
 UCLASS(Blueprintable)
@@ -30,9 +31,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnEmailFederationRequiresCode EmailFederationRequiresCode;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIdTokenReceived IdTokenReceived;
 	
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionEstablished SessionEstablished;
@@ -41,13 +39,19 @@ public:
 	FOnFederationSucceeded FederationSucceeded;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnFederationRequired FederationRequired;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnFederationFailure FederationFailure;
 	
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionCreationFailure SessionCreationFailure;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnSignInWebViewRequired SignInWebViewRequired;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnIdTokenReceived IdTokenReceived;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnFederationRequired FederationRequired;
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartEmailLoginAsync(const FString& Email);
@@ -96,8 +100,6 @@ public:
 
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
 
-	virtual void HandleNativeTokenizedUrl(const FString& TokenizedUrl) override;
-
 private:
 	UPROPERTY()
 	USequenceRPCManager* RPCManager;
@@ -112,10 +114,11 @@ private:
 
 	void CallEmailLoginRequiresCode() const;
 	void CallEmailFederationRequiresCode() const;
-	void CallIdTokenReceived(const FString& IdToken) const;
 	void CallSessionEstablished() const;
 	void CallFederationSucceeded() const;
 	void CallFederationFailure() const;
 	void CallSessionCreationFailure() const;
+	void CallSignInWebViewRequired(const FString& SignInUrl) const;
+	void CallIdTokenReceived(const FString& IdToken) const;
 	void CallFederationRequired(const FFederationSupportData& FederationData) const;
 };

@@ -32,10 +32,11 @@ namespace NativeOAuth
 
 	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
 	{
-		const FString token = FString(UTF8_TO_TCHAR(tokenizedUrl));
+		const FString Token = FString(UTF8_TO_TCHAR(tokenizedUrl));
+		const FString TokenId = GetIdTokenFromTokenizedUrl(Token);
 		INativeAuthCallback* CallbackLcl = Callback;
-		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->HandleNativeTokenizedUrl(token);
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl, TokenId]() {
+			CallbackLcl->HandleNativeIdToken(TokenId);
 		});
 	}
 	
@@ -52,6 +53,31 @@ namespace NativeOAuth
 	{
 		Callback = AuthCallback;		
 		UAppleBridge::InitiateIosSSO(clientID, ProcessIosCallback);
+	}
+
+	FString GetIdTokenFromTokenizedUrl(const FString& TokenizedUrl)
+	{
+		//we need to parse out the id_token out of TokenizedUrl
+		TArray<FString> UrlParts;
+		TokenizedUrl.ParseIntoArray(UrlParts,TEXT("?"),true);
+		for (FString part: UrlParts)
+		{
+			if (part.Contains("id_token",ESearchCase::IgnoreCase))
+			{
+				TArray<FString> ParameterParts;
+				part.ParseIntoArray(ParameterParts,TEXT("&"),true);
+				for (FString parameter : ParameterParts)
+				{
+					if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
+					{
+						const FString Token = parameter.RightChop(9); //we chop off: id_token
+						return Token;
+					}//find id_token
+				}//parse out &
+			}//find id_token
+		}//parse out ?
+
+		return "";
 	}
 	
 #if PLATFORM_ANDROID
@@ -130,7 +156,7 @@ namespace NativeOAuth
     {
 	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->UpdateMobileLogin_IdToken(idToken);
+    	Callback->HandleNativeIdToken(idToken);
 		jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 	
@@ -138,7 +164,7 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogl
     {
     	const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->UpdateMobileLogin_IdToken(idToken);
+    	Callback->HandleNativeIdToken(idToken);
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 
@@ -147,9 +173,11 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
     {
     	const char* redirectUrlChars = jenv->GetStringUTFChars(jRedirectUrl, 0);
     	FString redirectUrl = FString(UTF8_TO_TCHAR(redirectUrlChars));
-		USequenceAuthenticator * CallbackLcl = Callback;
-		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,redirectUrl]() {
-			CallbackLcl->UpdateMobileLogin(redirectUrl);
+		FString TokenId = GetIdTokenFromTokenizedUrl(redirectUrl);
+		
+		INativeAuthCallback* CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl, TokenId]() {
+			CallbackLcl->HandleNativeIdToken(TokenId);
 		});
 		
 		jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);

@@ -319,27 +319,20 @@ public:
 	 */
 	void ClearStoredCredentials() const;
 
-	static FString GetIdTokenFromTokenizedUrl(const FString& TokenizedUrl);
-
 	/**
 	 * Sign-In with Google using native plugins
 	 */
-	void SignInWithGoogle(INativeAuthCallback* CallbackHandler);
+	void SignInWithGoogleMobile(INativeAuthCallback* CallbackHandler);
 
 	/**
 	 * Sign-In with Apple using native plugins
 	 */
-	void SignInWithApple(INativeAuthCallback* CallbackHandler);
+	void SignInWithAppleMobile(INativeAuthCallback* CallbackHandler);
 
 	/**
 	 * Override to handle Id Token received from NativeOAuth.h
 	 */
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
-
-	/**
-	 * Override to handle Tokenized Url received from NativeOAuth.h
-	 */
-	virtual void HandleNativeTokenizedUrl(const FString& TokenizedUrl) override;
 	
 private:
 	

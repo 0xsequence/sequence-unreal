@@ -58,22 +58,26 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCodeAsync(const FString& Code)
 
 void USequenceSessionsBP::GetGoogleTokenIdAsync()
 {
-	this->Authenticator->SignInWithGoogle(this);
+#if PLATFORM_ANDROID || PLATFORM_IOS
+	this->Authenticator->SignInWithGoogleMobile(this);
+#else
+	const FString SignInUrl = this->Authenticator->GetSigninURL(ESocialSigninType::Google);
+	this->CallSignInWebViewRequired(SignInUrl);
+#endif
 }
 
 void USequenceSessionsBP::GetAppleTokenIdAsync()
 {
-	this->Authenticator->SignInWithApple(this);
+#if PLATFORM_ANDROID || PLATFORM_IOS
+	this->Authenticator->SignInWithAppleMobile(this);
+#else
+	const FString SignInUrl = this->Authenticator->GetSigninURL(ESocialSigninType::Apple);
+	this->CallSignInWebViewRequired(SignInUrl);
+#endif
 }
 
 void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
 {
-	this->CallIdTokenReceived(IdToken);
-}
-
-void USequenceSessionsBP::HandleNativeTokenizedUrl(const FString& TokenizedUrl)
-{
-	const FString IdToken = USequenceAuthenticator::GetIdTokenFromTokenizedUrl(TokenizedUrl);
 	this->CallIdTokenReceived(IdToken);
 }
 
@@ -359,6 +363,14 @@ void USequenceSessionsBP::CallEmailFederationRequiresCode() const
 		this->EmailFederationRequiresCode.Broadcast();
 	else
 		SEQ_LOG(Error, TEXT("Nothing bound to delegate: EmailFederationRequiresCode"));
+}
+
+void USequenceSessionsBP::CallSignInWebViewRequired(const FString& SignInUrl) const
+{
+	if (this->SignInWebViewRequired.IsBound())
+		this->SignInWebViewRequired.Broadcast(SignInUrl);
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: IdTokenReceived"));
 }
 
 void USequenceSessionsBP::CallIdTokenReceived(const FString& IdToken) const

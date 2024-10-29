@@ -15,5 +15,4 @@ class INativeAuthCallback
 
 public:
 	virtual void HandleNativeIdToken(const FString& IdToken); 
-	virtual void HandleNativeTokenizedUrl(const FString& TokenizedUrl); 
 };
