@@ -8,11 +8,11 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceIndexerBP.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetEtherBalance, bool, Status, int64, Balance);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenBalances, bool, Status, FSeqGetTokenBalancesReturn, Balances);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenSupplies, bool, Status, FSeqGetTokenSuppliesReturn, Supplies);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTokenSuppliesMap, bool, Status, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetTransactionHistory, bool, Status, FSeqGetTransactionHistoryReturn, TransactionHistory);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetEtherBalance, bool, Status, const FString&, WalletAddress, int64, Balance);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGetTokenBalances, bool, Status, const FString&, WalletAddress, const FString&, ContractAddress, FSeqGetTokenBalancesReturn, Balances);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetTokenSupplies, bool, Status, const FString&, ContractAddress, FSeqGetTokenSuppliesReturn, Supplies);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetTokenSuppliesMap, bool, Status, const FSeqGetTokenSuppliesMapArgs&, Request, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetTransactionHistory, bool, Status, const FSeqGetTransactionHistoryArgs&, Request, FSeqGetTransactionHistoryReturn, TransactionHistory);
 
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
@@ -38,7 +38,7 @@ public:
 	FOnGetTransactionHistory TransactionHistoryReceived;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SetChainId(int64 NewChainId);
+	void SetChain(const FString& ChainName);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetEtherBalanceAsync(const FString& WalletAddress);
@@ -60,9 +60,9 @@ private:
 	UIndexer* Indexer;
 	int64 ChainId = 137;
 	
-	void CallEtherBalanceReceived(const bool Status, const int64 Balance) const;
-	void CallTokenBalancesReceived(const bool Status, const FSeqGetTokenBalancesReturn& Balances) const;
-	void CallTokenSuppliesReceived(const bool Status, const FSeqGetTokenSuppliesReturn& Supplies) const;
-	void CallTokenSuppliesMapReceived(const bool Status, const FSeqGetTokenSuppliesMapReturn& SuppliesMap) const;
-	void CallTransactionHistoryReceived(const bool Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
+	void CallEtherBalanceReceived(const bool Status, const FString& WalletAddress, const int64 Balance) const;
+	void CallTokenBalancesReceived(const bool Status, const FString& WalletAddress, const FString& ContractAddress, const FSeqGetTokenBalancesReturn& Balances) const;
+	void CallTokenSuppliesReceived(const bool Status, const FString& ContractAddress, const FSeqGetTokenSuppliesReturn& Supplies) const;
+	void CallTokenSuppliesMapReceived(const bool Status, const FSeqGetTokenSuppliesMapArgs& Request, const FSeqGetTokenSuppliesMapReturn& SuppliesMap) const;
+	void CallTransactionHistoryReceived(const bool Status, const FSeqGetTransactionHistoryArgs& Request, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
 };
