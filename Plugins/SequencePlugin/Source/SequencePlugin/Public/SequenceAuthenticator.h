@@ -8,6 +8,7 @@
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
+#include "INativeAuthCallback.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
 #include "SequenceAuthenticator.generated.h"
@@ -44,7 +45,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederatio
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject
+class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject, public INativeAuthCallback
 {
 	GENERATED_BODY()
 public:
@@ -317,6 +318,28 @@ public:
 	 * Clears stored credentials on disk with blanks
 	 */
 	void ClearStoredCredentials() const;
+
+	static FString GetIdTokenFromTokenizedUrl(const FString& TokenizedUrl);
+
+	/**
+	 * Sign-In with Google using native plugins
+	 */
+	void SignInWithGoogle(INativeAuthCallback* CallbackHandler);
+
+	/**
+	 * Sign-In with Apple using native plugins
+	 */
+	void SignInWithApple(INativeAuthCallback* CallbackHandler);
+
+	/**
+	 * Override to handle Id Token received from NativeOAuth.h
+	 */
+	virtual void HandleNativeIdToken(const FString& IdToken) override;
+
+	/**
+	 * Override to handle Tokenized Url received from NativeOAuth.h
+	 */
+	virtual void HandleNativeTokenizedUrl(const FString& TokenizedUrl) override;
 	
 private:
 	

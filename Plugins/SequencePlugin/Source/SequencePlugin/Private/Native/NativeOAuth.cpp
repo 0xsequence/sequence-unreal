@@ -8,7 +8,7 @@
 
 namespace NativeOAuth
 {
-	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, USequenceAuthenticator * AuthCallback)
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, INativeAuthCallback* AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -16,7 +16,7 @@ namespace NativeOAuth
 #endif
 	}
 	
-	void SignInWithGoogle(const FString& clientId, USequenceAuthenticator * AuthCallback)
+	void SignInWithGoogle(const FString& clientId, INativeAuthCallback * AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -24,7 +24,7 @@ namespace NativeOAuth
 #endif // PLATFORM_ANDROID
 	}
 
-	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, USequenceAuthenticator * AuthCallback)
+	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, INativeAuthCallback * AuthCallback)
 	{
 		Callback = AuthCallback;
 		UAppleBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
@@ -33,22 +33,22 @@ namespace NativeOAuth
 	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(tokenizedUrl));
-		USequenceAuthenticator * CallbackLcl = Callback;
+		INativeAuthCallback* CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->UpdateMobileLogin(token);
+			CallbackLcl->HandleNativeTokenizedUrl(token);
 		});
 	}
 	
 	void ProcessIosCallback(char * idToken)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
-		USequenceAuthenticator * CallbackLcl = Callback;
+		INativeAuthCallback* CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->UpdateMobileLogin_IdToken(token);
+			CallbackLcl->HandleNativeIdToken(token);
 		});
 	}
 	
-	void SignInWithApple(const FString& clientID, USequenceAuthenticator * AuthCallback)
+	void SignInWithApple(const FString& clientID, INativeAuthCallback* AuthCallback)
 	{
 		Callback = AuthCallback;		
 		UAppleBridge::InitiateIosSSO(clientID, ProcessIosCallback);

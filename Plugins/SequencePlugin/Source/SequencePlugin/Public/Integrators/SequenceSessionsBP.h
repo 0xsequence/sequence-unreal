@@ -10,6 +10,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailFederationRequiresCode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionEstablished);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationSucceeded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationFailure);
@@ -17,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionCreationFailure);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 
 UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem
+class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, public INativeAuthCallback
 {
 	GENERATED_BODY()
 	
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnEmailFederationRequiresCode EmailFederationRequiresCode;
 
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnIdTokenReceived IdTokenReceived;
+	
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionEstablished SessionEstablished;
 
@@ -90,6 +94,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	bool CheckExistingSession() const;
 
+	virtual void HandleNativeIdToken(const FString& IdToken) override;
+
+	virtual void HandleNativeTokenizedUrl(const FString& TokenizedUrl) override;
+
 private:
 	UPROPERTY()
 	USequenceRPCManager* RPCManager;
@@ -104,6 +112,7 @@ private:
 
 	void CallEmailLoginRequiresCode() const;
 	void CallEmailFederationRequiresCode() const;
+	void CallIdTokenReceived(const FString& IdToken) const;
 	void CallSessionEstablished() const;
 	void CallFederationSucceeded() const;
 	void CallFederationFailure() const;

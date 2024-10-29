@@ -19,6 +19,7 @@
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Log.h"
 
 USequenceAuthenticator::USequenceAuthenticator()
 {
@@ -45,38 +46,56 @@ USequenceAuthenticator::USequenceAuthenticator()
 
 void USequenceAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 {
+	switch (Type)
+	{
+		case ESocialSigninType::Apple:
+			this->SignInWithApple(this);
+			break;
+		case ESocialSigninType::Google:
+			this->SignInWithGoogle(this);
+			break;
+		case ESocialSigninType::FaceBook:
+			SEQ_LOG(Error, TEXT("Facebook Login is not supported yet."))
+			break;
+		case ESocialSigninType::Discord:
+			SEQ_LOG(Error, TEXT("Discord Login is not supported yet."))
+			break;
+	}
+}
+
+void USequenceAuthenticator::SignInWithGoogle(INativeAuthCallback* CallbackHandler)
+{
 #if PLATFORM_ANDROID
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
+	NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), CallbackHandler);
+#elif PLATFORM_IOS
+	NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(ESocialSigninType::Google),UrlScheme,CallbackHandler);
+#else
+	SEQ_LOG(Error, TEXT("Unsupported Platform: SignInWithGoogle"));
 #endif
-	
-#if PLATFORM_IOS
-	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::SignInWithApple(clientID, this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
+}
+
+void USequenceAuthenticator::SignInWithApple(INativeAuthCallback* CallbackHandler)
+{
+#if PLATFORM_ANDROID
+	const FString RequestUrl = GenerateSigninURL(ESocialSigninType::Apple);
+	const FString RedirectUrl = GenerateRedirectURL(ESocialSigninType::Apple);
+	NativeOAuth::RequestAuthWebView(RequestUrl, RedirectUrl, CallbackHandler);
+#elif PLATFORM_IOS
+	const FString ClientId = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(ESocialSigninType::Apple) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
+	NativeOAuth::SignInWithApple(ClientId, CallbackHandler);
+#else
+	SEQ_LOG(Error, TEXT("Unsupported Platform: SignInWithApple"));
 #endif
+}
+
+void USequenceAuthenticator::HandleNativeIdToken(const FString& IdToken)
+{
+	this->UpdateMobileLogin_IdToken(IdToken);
+}
+
+void USequenceAuthenticator::HandleNativeTokenizedUrl(const FString& TokenizedUrl)
+{
+	this->UpdateMobileLogin(TokenizedUrl);
 }
 
 void USequenceAuthenticator::SetIsForcing(const bool IsForcingIn)
@@ -293,6 +312,12 @@ void USequenceAuthenticator::CallFederateOrForce(const FFederationSupportData& F
 
 void USequenceAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 {
+	const FString IdToken = GetIdTokenFromTokenizedUrl(TokenizedUrl);
+	UpdateMobileLogin_IdToken(IdToken);
+}
+
+FString USequenceAuthenticator::GetIdTokenFromTokenizedUrl(const FString& TokenizedUrl)
+{
 	//we need to parse out the id_token out of TokenizedUrl
 	TArray<FString> UrlParts;
 	TokenizedUrl.ParseIntoArray(UrlParts,TEXT("?"),true);
@@ -306,20 +331,14 @@ void USequenceAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 			{
 				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
 				{
-					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					if (this->ReadAndResetIsFederating())
-					{
-						FederateOIDCIdToken(Token);
-					}
-					else
-					{
-						SocialLogin(Token, this->ReadAndResetIsForcing());
-					}
-					return;
+					const FString Token = parameter.RightChop(9); //we chop off: id_token
+					return Token;
 				}//find id_token
 			}//parse out &
 		}//find id_token
 	}//parse out ?
+
+	return "";
 }
 
 void USequenceAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)

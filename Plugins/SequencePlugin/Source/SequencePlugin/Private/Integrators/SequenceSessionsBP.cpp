@@ -7,6 +7,7 @@
 #include "RequestHandler.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Native/NativeOAuth.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -25,7 +26,7 @@ void USequenceSessionsBP::StartEmailLoginAsync(const FString& Email)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
@@ -41,13 +42,13 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCodeAsync(const FString& Code)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
 		this->CallFederationRequired(FederationData);
 	};
 
@@ -57,12 +58,23 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCodeAsync(const FString& Code)
 
 void USequenceSessionsBP::GetGoogleTokenIdAsync()
 {
-	
+	this->Authenticator->SignInWithGoogle(this);
 }
 
 void USequenceSessionsBP::GetAppleTokenIdAsync()
 {
-	
+	this->Authenticator->SignInWithApple(this);
+}
+
+void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
+{
+	this->CallIdTokenReceived(IdToken);
+}
+
+void USequenceSessionsBP::HandleNativeTokenizedUrl(const FString& TokenizedUrl)
+{
+	const FString IdToken = USequenceAuthenticator::GetIdTokenFromTokenizedUrl(TokenizedUrl);
+	this->CallIdTokenReceived(IdToken);
 }
 
 void USequenceSessionsBP::StartOidcSessionAsync(const FString& IdToken)
@@ -74,13 +86,13 @@ void USequenceSessionsBP::StartOidcSessionAsync(const FString& IdToken)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
 		this->CallFederationRequired(FederationData);
 	};
 
@@ -99,13 +111,13 @@ void USequenceSessionsBP::PlayFabRegistrationAsync(const FString& UsernameIn, co
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			SEQ_LOG(Error, TEXT("Error: %s"), *Error.Message);
 			this->CallSessionCreationFailure();
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
 			this->CallFederationRequired(FederationData);
 		};
 		
@@ -114,7 +126,7 @@ void USequenceSessionsBP::PlayFabRegistrationAsync(const FString& UsernameIn, co
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error Response: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
@@ -133,13 +145,13 @@ void USequenceSessionsBP::PlayFabLoginAsync(const FString& UsernameIn, const FSt
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			SEQ_LOG(Error, TEXT("Error: %s"), *Error.Message);
 			this->CallSessionCreationFailure();
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
 			this->CallFederationRequired(FederationData);
 		};
 
@@ -149,7 +161,7 @@ void USequenceSessionsBP::PlayFabLoginAsync(const FString& UsernameIn, const FSt
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error Response: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
@@ -178,7 +190,7 @@ void USequenceSessionsBP::StartGuestSessionAsync()
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Guest Auth Error: %s"), *Error.Message);
 		this->CallSessionCreationFailure();
 	};
 
@@ -250,13 +262,13 @@ void USequenceSessionsBP::FederateOidcTokenAsync(const FString& IdTokenIn)
 
 void USequenceSessionsBP::FederatePlayFabRegistrationAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
 {
-	SEQ_LOG(Error, TEXT("PlayFab Registration Federation is not yet supported."));
+	SEQ_LOG(Error, TEXT("PlayFab Registration Federation is not yet supported and will be included in v1.4.1"));
 	this->CallFederationFailure();
 }
 
 void USequenceSessionsBP::FederatePlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn) const
 {
-	SEQ_LOG(Error, TEXT("PlayFab Login Federation is not yet supported."));
+	SEQ_LOG(Error, TEXT("PlayFab Login Federation is not yet supported and will be included in v1.4.1"));
 	this->CallFederationFailure();
 }
 
@@ -347,6 +359,14 @@ void USequenceSessionsBP::CallEmailFederationRequiresCode() const
 		this->EmailFederationRequiresCode.Broadcast();
 	else
 		SEQ_LOG(Error, TEXT("Nothing bound to delegate: EmailFederationRequiresCode"));
+}
+
+void USequenceSessionsBP::CallIdTokenReceived(const FString& IdToken) const
+{
+	if (this->IdTokenReceived.IsBound())
+		this->IdTokenReceived.Broadcast(IdToken);
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: IdTokenReceived"));
 }
 
 void USequenceSessionsBP::CallSessionEstablished() const
