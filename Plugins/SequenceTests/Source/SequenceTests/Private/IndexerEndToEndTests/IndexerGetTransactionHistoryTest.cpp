@@ -44,8 +44,11 @@ bool FIndexerGetTransactionHistoryTest::RunTest(const FString& Parameters)
     {
         TestNotNull(TEXT("History"), &History);
         TestNotNull(TEXT("History.page"), &History.page);
+        TestNotEqual(TEXT("Page Size should not be -1"), History.page.pageSize, -1);
         TestNotNull(TEXT("History.transactions"), &History.transactions);
         TestTrue(TEXT("History.transactions should not be empty"), History.transactions.Num() > 0);
+        TestNotNull(TEXT("History.transactions transactions contains transaction hash"), &History.transactions[0].txnHash);
+
 
         const FString Message = "GetTransactionHistory request succeeded";
         AddInfo(FString::Printf(TEXT("%s. Remaining Requests: %d"), *Message, IndexerRequestsTestData->DecrementPendingRequests()));

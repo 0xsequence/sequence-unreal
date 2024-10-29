@@ -15,13 +15,17 @@
 //Api//
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiValidateMessageSignature, FSequenceResponseStatus, ResponseStatus, FSeqValidateMessageSignatureResponse_Data, isValidMessageSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
+
 
 //Api//
 
@@ -61,6 +65,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiSignMessage OnApiSignMessage;
 
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiValidateMessageSignature OnApiValidateMessageSignature;
+
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiGetFilteredFeeOptions OnApiGetFilteredFeeOptions;
 
@@ -73,11 +80,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiSendTransaction OnApiSendTransaction;
 
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiGetIdToken OnApiGetIdToken;
+
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiListSessions OnApiListSessions;
 
 	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
 	FOnIApiListAccounts OnApiListAccounts;
+
+	UPROPERTY(BlueprintAssignable, Category = "ASYNC_RESPONSE")
+	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
 
 	UPROPERTY(BlueprintAssignable, Category="ASYNC_RESPONSE")
 	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
@@ -123,12 +136,15 @@ private:
 	//Api//
 
 	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const;
+	void CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const;
 	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
+	void CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const;
 	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
 	void CallOnApiListAccounts(const FSequenceResponseStatus& Status, const FSeqListAccountsResponse_Data& Response) const;
+	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
 	//Api//
@@ -232,6 +248,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSignMessage(const FString& Message);
 
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature);
+
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetFilteredFeeOptions(UTransactions * Transactions);
 
@@ -244,11 +263,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiSendTransaction(UTransactions * Transactions);
 
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiGetIdToken(FString& Nonce);
+
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiListSessions();
 
 	UFUNCTION(BlueprintCallable, Category = "ASync Api")
 	void ApiListAccounts();
+
+	UFUNCTION(BlueprintCallable, Category = "ASync Api")
+	void ApiGetSessionAuthProof(const FString& Nonce);
 
 	UFUNCTION(BlueprintCallable, Category="ASync Api")
 	void ApiGetSupportedTransakCountries();

@@ -15,6 +15,14 @@ void USequenceWalletBP::CallOnApiSignMessage(const FSequenceResponseStatus& Stat
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSignMessage]"));
 }
 
+void USequenceWalletBP::CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const
+{
+	if (this->OnApiValidateMessageSignature.IsBound())
+		this->OnApiValidateMessageSignature.Broadcast(Status, isValidMessageSignature);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiIsValidMessageSignature]"));
+}
+
 void USequenceWalletBP::CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const
 {
 	if (this->OnApiGetFilteredFeeOptions.IsBound())
@@ -47,6 +55,15 @@ void USequenceWalletBP::CallOnApiSendTransaction(const FSequenceResponseStatus& 
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSendTransaction]"));
 }
 
+void USequenceWalletBP::CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const
+{
+	if (this->OnApiGetIdToken.IsBound())
+		this->OnApiGetIdToken.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetIdToken]"));
+
+}
+
 void USequenceWalletBP::CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const
 {
 	if (this->OnApiListSessions.IsBound())
@@ -61,6 +78,14 @@ void USequenceWalletBP::CallOnApiListAccounts(const FSequenceResponseStatus& Sta
 		this->OnApiListAccounts.Broadcast(Status, Response);
 	else
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiListAccounts]"));
+}
+
+void USequenceWalletBP::CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const
+{
+	if (this->OnApiGetSessionAuthProof.IsBound())
+		this->OnApiGetSessionAuthProof.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetSessionAuthProof]"));
 }
 
 void USequenceWalletBP::CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const
@@ -290,6 +315,26 @@ void USequenceWalletBP::ApiSignMessage(const FString& Message)
 	}
 }
 
+void USequenceWalletBP::ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature)
+{
+	const TFunction<void(FSeqValidateMessageSignatureResponse_Data)> OnSuccess = [this](const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature)
+		{
+			this->CallOnApiValidateMessageSignature(FSequenceResponseStatus(true, ValidateMessageSignatureTrt), isValidMessageSignature);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiValidateMessageSignature(FSequenceResponseStatus(false, Err.Message, ValidateMessageSignatureTrt), FSeqValidateMessageSignatureResponse_Data());
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWalletBP::ApiGetFilteredFeeOptions(UTransactions * Transactions)
 {
 	const TFunction<void (TArray<FFeeOption>)> OnSuccess = [this](const TArray<FFeeOption>& FeeOptions)
@@ -377,6 +422,26 @@ void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 	}
 }
 
+void USequenceWalletBP::ApiGetIdToken(FString& Nonce)
+{
+	const TFunction<void (FSeqIdTokenResponse_Data)> OnSuccess = [this](const FSeqIdTokenResponse_Data& Data)
+		{
+			this->CallOnApiGetIdToken(FSequenceResponseStatus(true, GetIdTokenTrt), Data);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiGetIdToken(FSequenceResponseStatus(false, Err.Message, GetIdTokenTrt), {});
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->GetIdToken(Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWalletBP::ApiListSessions()
 {
 	const TFunction<void (TArray<FSeqListSessions_Session>)> OnSuccess = [this](const TArray<FSeqListSessions_Session>& Sessions)
@@ -414,6 +479,27 @@ void USequenceWalletBP::ApiListAccounts()
 	{
 		const USequenceWallet* Wallet = WalletOptional.GetValue();
 		Wallet->ListAccounts(OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiGetSessionAuthProof(const FString& Nonce)
+{
+
+	const TFunction<void(FSeqGetSessionAuthProof_Data)> OnSuccess = [this](const FSeqGetSessionAuthProof_Data& Response)
+		{
+			this->CallOnApiGetSessionAuthProof(FSequenceResponseStatus(true, GetSessionAuthProofTrt), Response);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiGetSessionAuthProof(FSequenceResponseStatus(false, Err.Message, GetSessionAuthProofTrt), {});
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->GetSessionAuthProof(Nonce,OnSuccess, OnFailure);
 	}
 }
 

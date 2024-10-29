@@ -17,7 +17,7 @@ public:
     FSeqPage page;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         TArray<FSeqTransaction> transactions;
-    bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
+    bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating
 
     /*
@@ -43,17 +43,43 @@ public:
     */
     void Setup(FJsonObject json_in)
     {
+        const TSharedPtr<FJsonObject>* pageObj;
+
+        if (json_in.TryGetObjectField(TEXT("page"), pageObj))
+        {
+            if (!FJsonObjectConverter::JsonObjectToUStruct((*pageObj).ToSharedRef(), &page))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Failed to convert page object to FSeqPage"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("No page information found in the JSON."));
+        }
+
         const TArray<TSharedPtr<FJsonValue>>* lst;
         if (json_in.TryGetArrayField(TEXT("transactions"), lst))
         {
-            for (int i = 0; i < transactions.Num(); i++)
+            if (lst->Num() == 0)
             {
-                const TSharedPtr<FJsonObject>* itemObj;
-                if ((*lst)[i].Get()->TryGetObject(itemObj))
+                UE_LOG(LogTemp, Warning, TEXT("No transactions found."));
+            }
+            else
+            {
+                transactions.SetNum(lst->Num());
+
+                for (int i = 0; i < lst->Num(); i++)
                 {
-                    transactions[i].setup(*itemObj->Get());
-                }//if
-            }//for
-        }//if
-    }//setup
+                    const TSharedPtr<FJsonObject>* itemObj;
+                    if ((*lst)[i]->TryGetObject(itemObj))
+                    {
+                        if (itemObj && itemObj->IsValid())
+                        {
+                            transactions[i].setup(*itemObj->Get());
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
