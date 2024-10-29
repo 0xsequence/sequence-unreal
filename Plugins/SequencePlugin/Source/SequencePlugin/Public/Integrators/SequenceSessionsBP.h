@@ -9,8 +9,12 @@
 #include "SequenceSessionsBP.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailFederationRequiresCode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionEstablished);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionCreationFailure, const FString&, Error);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationSucceeded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionCreationFailure);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem
@@ -24,7 +28,19 @@ public:
 	FOnEmailLoginRequiresCode EmailLoginRequiresCode;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnEmailFederationRequiresCode EmailFederationRequiresCode;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionEstablished SessionEstablished;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnFederationSucceeded FederationSucceeded;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnFederationRequired FederationRequired;
+
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnFederationFailure FederationFailure;
 	
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnSessionCreationFailure SessionCreationFailure;
@@ -54,6 +70,21 @@ public:
 	void StartGuestSessionAsync();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederateEmailAsync(const FString& EmailIn);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void ConfirmEmailFederationWithCodeAsync(const FString& Code);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederateOidcTokenAsync(const FString& IdTokenIn);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederatePlayFabRegistrationAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederatePlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn) const;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ClearSession() const;
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
@@ -72,6 +103,10 @@ private:
 	void PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void CallEmailLoginRequiresCode() const;
+	void CallEmailFederationRequiresCode() const;
 	void CallSessionEstablished() const;
-	void CallSessionCreationFailure(const FString& Error) const;
+	void CallFederationSucceeded() const;
+	void CallFederationFailure() const;
+	void CallSessionCreationFailure() const;
+	void CallFederationRequired(const FFederationSupportData& FederationData) const;
 };
