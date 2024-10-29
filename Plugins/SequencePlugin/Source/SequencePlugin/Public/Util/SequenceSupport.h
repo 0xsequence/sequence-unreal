@@ -407,6 +407,8 @@ public:
 	//for maintaining valid json for args in RPC calls
 	static FString StringListToParsableString(TArray<FString> StringData);
 
+	static TArray<TSharedPtr<FJsonValue>> StringListToJsonArray(const TArray<FString>& StringData);
+
 	static FString Int64ListToSimpleString(TArray<int64> IntData);
 
 	static FString JsonObjListToString(TArray<TSharedPtr<FJsonObject>> JsonData);

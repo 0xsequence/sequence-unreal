@@ -416,6 +416,18 @@ FString USequenceSupport::StringListToParsableString(TArray<FString> StringData)
 	return Ret;
 }
 
+TArray<TSharedPtr<FJsonValue>> USequenceSupport::StringListToJsonArray(const TArray<FString>& StringData)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const FString& String : StringData)
+	{
+		// Add each string to the JSON array as a FJsonValueString
+		JsonArray.Add(MakeShareable(new FJsonValueString(String)));
+	}
+	return JsonArray;
+}
+
+
 FString USequenceSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {
 	FString Ret = "[";

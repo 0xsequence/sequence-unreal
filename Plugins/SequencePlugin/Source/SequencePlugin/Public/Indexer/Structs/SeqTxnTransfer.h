@@ -86,7 +86,7 @@ public:
                     const TSharedPtr<FJsonObject>* srcEntryPtr;
                     if (srcEntry->Get()->TryGetObject(srcEntryPtr))
                     {
-                        tokenMetaData.Find(i)->setup(*srcEntryPtr->Get());
+                        tokenMetaData.Find(i)->Setup(*srcEntryPtr->Get());
                     }//valid src Object
                 }//Matching Key!
             }//For loop through all source keys

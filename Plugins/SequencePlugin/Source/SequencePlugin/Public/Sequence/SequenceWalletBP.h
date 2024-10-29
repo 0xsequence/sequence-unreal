@@ -123,7 +123,8 @@ public:
 	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
 
 	//Indexer//
-	
+
+
 	//ASYNC Response Bindable Delegates//
 private:
 
@@ -303,5 +304,6 @@ public:
 
 	//Indexer//
 	
+
 	//ASYNC//
 };

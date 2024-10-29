@@ -15,7 +15,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString FiatCurrency = FDefaultTransak::FiatCurrency;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default") 
 	FString FiatAmount = FDefaultTransak::FiatAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
@@ -53,6 +53,7 @@ enum ETransactionResponseType
 	GetTokenSuppliesMapTrt UMETA(DisplayName = "GetTokenSuppliesMap"),
 	GetBalanceUpdatesTrt UMETA(DisplayName = "GetBalanceUpdates"),
 	GetTransactionHistoryTrt UMETA(DisplayName = "GetTransactionHistory"),	
+	GetCollectiblesWithLowestListingsTrt UMETA(DisplayName = "GetCollectiblesWithLowestListings")
 };
 
 USTRUCT(Blueprintable)
