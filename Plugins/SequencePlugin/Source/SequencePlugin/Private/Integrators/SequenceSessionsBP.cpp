@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Integrators/SequenceSessionsBP.h"
-
 #include "PlayFabResponseIntent.h"
 #include "PlayFabSendIntent.h"
 #include "RequestHandler.h"

@@ -14,5 +14,5 @@ class INativeAuthCallback
 	GENERATED_BODY()
 
 public:
-	virtual void HandleNativeIdToken(const FString& IdToken); 
+	virtual void HandleNativeIdToken(const FString& IdToken) = 0;
 };

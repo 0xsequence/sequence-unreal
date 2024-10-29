@@ -6,6 +6,7 @@
 #include "SequenceAuthenticator.h"
 #include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "INativeAuthCallback.h"
 #include "SequenceSessionsBP.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
