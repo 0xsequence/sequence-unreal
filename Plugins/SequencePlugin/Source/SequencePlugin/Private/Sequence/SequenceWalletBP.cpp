@@ -73,6 +73,14 @@ void USequenceWalletBP::CallOnApiListSessions(const FSequenceResponseStatus& Sta
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiListSessions]"));
 }
 
+void USequenceWalletBP::CallOnApiListAccounts(const FSequenceResponseStatus& Status, const FSeqListAccountsResponse_Data& Response) const
+{
+	if (this->OnApiListAccounts.IsBound())
+		this->OnApiListAccounts.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiListAccounts]"));
+}
+
 void USequenceWalletBP::CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const
 {
 	if (this->OnApiGetSessionAuthProof.IsBound())
@@ -452,6 +460,26 @@ void USequenceWalletBP::ApiListSessions()
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->ListSessions(OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiListAccounts()
+{
+	const TFunction<void(FSeqListAccountsResponse_Data)> OnSuccess = [this](const FSeqListAccountsResponse_Data& Response)
+		{
+			this->CallOnApiListAccounts(FSequenceResponseStatus(true, ListAccountsTrt), Response);
+		};
+
+	const TFunction<void(FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+		{
+			this->CallOnApiListAccounts(FSequenceResponseStatus(false, Err.Message, ListAccountsTrt), {});
+		};
+
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet* Wallet = WalletOptional.GetValue();
+		Wallet->ListAccounts(OnSuccess, OnFailure);
 	}
 }
 

@@ -69,6 +69,7 @@ private:
 	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
 	FString BuildGetIdTokenIntent(const FCredentials_BE& Credentials, const FString& nonce) const;
 	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
+	FString BuildListAccountsIntent(const FCredentials_BE& Credentials) const;
 	FString BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce) const;
 	FString BuildCloseSessionIntent() const;
 	FString BuildSessionValidationIntent() const;
@@ -199,6 +200,7 @@ public:
 
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
+	void ListAccounts(const FCredentials_BE& Credentials, const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	void GetSessionAuthProof(const FCredentials_BE& Credentials, const FString& Nonce,  const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 	/**

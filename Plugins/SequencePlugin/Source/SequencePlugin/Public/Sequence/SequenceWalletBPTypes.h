@@ -41,6 +41,7 @@ enum ETransactionResponseType
 	SendTransactionTrt UMETA(DisplayName = "SendTransaction"),
 	GetIdTokenTrt  UMETA(DisplayName = "GetIdToken"),
 	ListSessionsTrt UMETA(DisplayName = "ListSessions"),
+	ListAccountsTrt UMETA(DisplayName = "ListAccounts"),
 	GetSessionAuthProofTrt UMETA(DisplayName = "GetSessionAuthProof"),
 	GetSupportedTransakCountriesTrt UMETA(DisplayName = "GetSupportedTransakCountries"),
 	PingTrt UMETA(DisplayName = "Ping"),

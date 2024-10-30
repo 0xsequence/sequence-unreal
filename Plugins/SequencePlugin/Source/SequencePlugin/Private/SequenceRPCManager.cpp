@@ -131,6 +131,13 @@ FString USequenceRPCManager::BuildListSessionIntent(const FCredentials_BE& Crede
 	return Intent;
 }
 
+FString USequenceRPCManager::BuildListAccountsIntent(const FCredentials_BE& Credentials) const
+{
+	const FListAccountsData ListAccountsData(Credentials.GetWalletAddress());
+	const FString Intent = this->GenerateIntent<FListAccountsData>(ListAccountsData);
+	return Intent;
+}
+
 FString USequenceRPCManager::BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce) const
 {
 	const FGetSessionAuthProofData GetSessionAuthProofData(Credentials.GetNetworkString(), Credentials.GetWalletAddress(), Nonce);
@@ -434,6 +441,33 @@ void USequenceRPCManager::ListSessions(const FCredentials_BE& Credentials, const
 	if (Credentials.RegisteredValid())
 	{
 		this->SequenceRPC(this->BuildAuthenticatorIntentsUrl(),this->BuildListSessionIntent(Credentials),OnResponse,OnFailure);
+	}
+	else
+	{
+		OnFailure(FSequenceError(RequestFail, "[Session Not Registered Please Register Session First]"));
+	}
+}
+
+void USequenceRPCManager::ListAccounts(const FCredentials_BE& Credentials, const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
+		{
+			const FSeqListAccountsResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqListAccountsResponse>(Response);
+
+			UE_LOG(LogTemp, Log, TEXT("%s"), *Response);
+			if (ParsedResponse.IsValid())
+			{
+				OnSuccess(ParsedResponse.Response.Data);
+			}
+			else
+			{
+				OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Response));
+			}
+		};
+
+	if (Credentials.RegisteredValid())
+	{
+		this->SequenceRPC(this->BuildAuthenticatorIntentsUrl(), this->BuildListAccountsIntent(Credentials), OnResponse, OnFailure);
 	}
 	else
 	{

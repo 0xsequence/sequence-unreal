@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Marketplace/Marketplace_Enums.h"
+#include "Dom/JsonObject.h"
 #include "SeqMarketplaceSortBy.generated.h"
 
 USTRUCT(BlueprintType)

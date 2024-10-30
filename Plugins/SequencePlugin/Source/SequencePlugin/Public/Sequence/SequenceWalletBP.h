@@ -23,6 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
 
@@ -86,6 +87,9 @@ public:
 	FOnIApiListSessions OnApiListSessions;
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnIApiListAccounts OnApiListAccounts;
+
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
@@ -140,6 +144,7 @@ private:
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const;
 	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
+	void CallOnApiListAccounts(const FSequenceResponseStatus& Status, const FSeqListAccountsResponse_Data& Response) const;
 	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
 	
@@ -264,6 +269,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiListSessions();
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
+	void ApiListAccounts();
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void ApiGetSessionAuthProof(const FString& Nonce);
