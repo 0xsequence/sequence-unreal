@@ -18,6 +18,9 @@
 #include "Util/SequenceSupport.h"
 #include "Util/Structs/BE_Enums.h"
 #include "SequenceAPI.generated.h"
+ 
+using FSignature = FUnsizedData;
+using TransactionID = FString;
 
 class UIndexer;
 class UProvider;
@@ -291,7 +294,7 @@ public:
 		get transaction history from the Chain
 	*/
 	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-	
+
 	//Provider calls
 
 	void BlockByNumber(uint64 Number, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,

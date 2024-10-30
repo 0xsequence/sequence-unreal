@@ -46,7 +46,7 @@ public:
         const TSharedPtr<FJsonObject>* itemObj;
         if (json_in.TryGetObjectField(TEXT("tokenMetaData"), itemObj))
         {
-            tokenMetaData.setup(*itemObj->Get());
+            tokenMetaData.Setup(*itemObj->Get());
         }
     }
 };

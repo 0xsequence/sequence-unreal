@@ -3,6 +3,7 @@
 #include "../../Public/Sequence/SequenceWalletQrCode.h"
 
 #include "ObjectHandler.h"
+#include "Misc/Base64.h"
 #include "Util/Log.h"
 #include "Sequence/SequenceAPI.h"
 

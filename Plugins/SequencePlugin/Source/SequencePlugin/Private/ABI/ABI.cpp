@@ -3,6 +3,7 @@
 #include "ABI/ABI.h"
 #include "ABI/ABIElement.h"
 #include "Eth/Crypto.h"
+#include "Internationalization/Regex.h"
 #include "Types/BinaryData.h"
 
 TFixedABIData ABI::UInt32(uint32 Input)

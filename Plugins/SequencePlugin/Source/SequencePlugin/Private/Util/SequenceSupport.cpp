@@ -58,7 +58,7 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 
 int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
 {
-	if (NetworkIdToNameMap.Contains(Network))
+	if (NetworkEnumToIdMap.Contains(Network))
 	{
 		return *NetworkEnumToIdMap.Find(Network);
 	}
@@ -415,6 +415,18 @@ FString USequenceSupport::StringListToParsableString(TArray<FString> StringData)
 	Ret += "]";
 	return Ret;
 }
+
+TArray<TSharedPtr<FJsonValue>> USequenceSupport::StringListToJsonArray(const TArray<FString>& StringData)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const FString& String : StringData)
+	{
+		// Add each string to the JSON array as a FJsonValueString
+		JsonArray.Add(MakeShareable(new FJsonValueString(String)));
+	}
+	return JsonArray;
+}
+
 
 FString USequenceSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {

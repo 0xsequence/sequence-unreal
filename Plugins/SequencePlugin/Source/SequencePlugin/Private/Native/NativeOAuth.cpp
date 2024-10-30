@@ -8,7 +8,7 @@
 
 namespace NativeOAuth
 {
-	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, USequenceAuthenticator * AuthCallback)
+	void RequestAuthWebView(const FString& requestUrl, const FString& redirectUrl, INativeAuthCallback* AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -16,7 +16,7 @@ namespace NativeOAuth
 #endif
 	}
 	
-	void SignInWithGoogle(const FString& clientId, USequenceAuthenticator * AuthCallback)
+	void SignInWithGoogle(const FString& clientId, INativeAuthCallback * AuthCallback)
 	{
 		Callback = AuthCallback;
 #if PLATFORM_ANDROID
@@ -24,7 +24,7 @@ namespace NativeOAuth
 #endif // PLATFORM_ANDROID
 	}
 
-	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, USequenceAuthenticator * AuthCallback)
+	void SignInWithGoogle_IOS(const FString& Url, const FString& Scheme, INativeAuthCallback * AuthCallback)
 	{
 		Callback = AuthCallback;
 		UAppleBridge::InitiateGoogleSSO(Url,Scheme,ProcessIosTokenizedUrlCallback);
@@ -32,26 +32,52 @@ namespace NativeOAuth
 
 	void ProcessIosTokenizedUrlCallback(char * tokenizedUrl)
 	{
-		const FString token = FString(UTF8_TO_TCHAR(tokenizedUrl));
-		USequenceAuthenticator * CallbackLcl = Callback;
-		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->UpdateMobileLogin(token);
+		const FString Token = FString(UTF8_TO_TCHAR(tokenizedUrl));
+		const FString TokenId = GetIdTokenFromTokenizedUrl(Token);
+		INativeAuthCallback* CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl, TokenId]() {
+			CallbackLcl->HandleNativeIdToken(TokenId);
 		});
 	}
 	
 	void ProcessIosCallback(char * idToken)
 	{
 		const FString token = FString(UTF8_TO_TCHAR(idToken));
-		USequenceAuthenticator * CallbackLcl = Callback;
+		INativeAuthCallback* CallbackLcl = Callback;
 		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,token]() {
-			CallbackLcl->UpdateMobileLogin_IdToken(token);
+			CallbackLcl->HandleNativeIdToken(token);
 		});
 	}
 	
-	void SignInWithApple(const FString& clientID, USequenceAuthenticator * AuthCallback)
+	void SignInWithApple(const FString& clientID, INativeAuthCallback* AuthCallback)
 	{
 		Callback = AuthCallback;		
 		UAppleBridge::InitiateIosSSO(clientID, ProcessIosCallback);
+	}
+
+	FString GetIdTokenFromTokenizedUrl(const FString& TokenizedUrl)
+	{
+		//we need to parse out the id_token out of TokenizedUrl
+		TArray<FString> UrlParts;
+		TokenizedUrl.ParseIntoArray(UrlParts,TEXT("?"),true);
+		for (FString part: UrlParts)
+		{
+			if (part.Contains("id_token",ESearchCase::IgnoreCase))
+			{
+				TArray<FString> ParameterParts;
+				part.ParseIntoArray(ParameterParts,TEXT("&"),true);
+				for (FString parameter : ParameterParts)
+				{
+					if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
+					{
+						const FString Token = parameter.RightChop(9); //we chop off: id_token
+						return Token;
+					}//find id_token
+				}//parse out &
+			}//find id_token
+		}//parse out ?
+
+		return "";
 	}
 	
 #if PLATFORM_ANDROID
@@ -130,7 +156,7 @@ namespace NativeOAuth
     {
 	    const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->UpdateMobileLogin_IdToken(idToken);
+    	Callback->HandleNativeIdToken(idToken);
 		jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 	
@@ -138,7 +164,7 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleGoogl
     {
     	const char* idTokenChars = jenv->GetStringUTFChars(jIdToken, 0);
     	FString idToken = FString(UTF8_TO_TCHAR(idTokenChars));
-    	Callback->UpdateMobileLogin_IdToken(idToken);
+    	Callback->HandleNativeIdToken(idToken);
     	jenv->ReleaseStringUTFChars(jIdToken, idTokenChars);
     }
 
@@ -147,9 +173,11 @@ JNI_METHOD void Java_com_epicgames_unreal_GameActivity_nativeSequenceHandleRedir
     {
     	const char* redirectUrlChars = jenv->GetStringUTFChars(jRedirectUrl, 0);
     	FString redirectUrl = FString(UTF8_TO_TCHAR(redirectUrlChars));
-		USequenceAuthenticator * CallbackLcl = Callback;
-		AsyncTask(ENamedThreads::GameThread, [CallbackLcl,redirectUrl]() {
-			CallbackLcl->UpdateMobileLogin(redirectUrl);
+		FString TokenId = GetIdTokenFromTokenizedUrl(redirectUrl);
+		
+		INativeAuthCallback* CallbackLcl = Callback;
+		AsyncTask(ENamedThreads::GameThread, [CallbackLcl, TokenId]() {
+			CallbackLcl->HandleNativeIdToken(TokenId);
 		});
 		
 		jenv->ReleaseStringUTFChars(jRedirectUrl, redirectUrlChars);
