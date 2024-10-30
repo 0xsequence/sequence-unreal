@@ -28,7 +28,7 @@ FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FStri
 
 	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 
 	Arr.Add(&ABIProof);
 	Arr.Add(&ABIAccount);
@@ -56,7 +56,7 @@ FRawTransaction UERC20::MakeApproveTransaction(const FString& Spender, const int
 
 	TFixedABIData ABITokenId = ABI::Int32(Amount);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABITokenId);
 
@@ -82,7 +82,7 @@ FRawTransaction UERC20::MakeMintTransaction(const FString& ToAddress, const int3
 
 	TFixedABIData ABIAmount = ABI::Int32(Amount);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABIAmount);
 
@@ -103,7 +103,7 @@ FRawTransaction UERC20::MakeBurnTransaction(const int32 Amount)
 
 	TFixedABIData ABIAmount = ABI::Int32(Amount);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAmount);
 
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
