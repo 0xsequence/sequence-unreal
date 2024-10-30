@@ -122,8 +122,8 @@ FRawTransaction UERC721::MakeBatchBurnTransaction(const TArray<int32>& TokenIds)
 	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
-		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* TokenIdData = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*TokenIdData));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 

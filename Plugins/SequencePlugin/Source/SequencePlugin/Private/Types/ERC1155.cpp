@@ -55,7 +55,6 @@ FRawTransaction UERC1155::MakeSetApprovalForAllTransaction(const FString& Oppera
 	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
 	TFixedABIData ABIApproval = ABI::Bool(Approved);
 
-
 	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABIApproval);
@@ -113,16 +112,16 @@ FRawTransaction UERC1155::MakeBatchMintTransaction(const FString& ToAddress, con
 	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
-		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* TokenIdData = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*TokenIdData));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
 	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
-		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* AmountData = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*AmountData));
 	}
 	
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
@@ -174,16 +173,16 @@ FRawTransaction UERC1155::MakeBatchBurnTransaction(const TArray<int32>& TokenIds
 	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
-		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* TokenIdData = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*TokenIdData));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
 	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
-		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* AmountData = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*AmountData));
 	}
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
 

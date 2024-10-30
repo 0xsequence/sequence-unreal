@@ -26,16 +26,16 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
-		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* TokenIdData = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*TokenIdData));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
 	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
-		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* AmountData = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*AmountData));
 	}
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
 
@@ -46,8 +46,8 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 		ProofBytes.SetNumUninitialized(32);
 		FMemory::Memcpy(ProofBytes.GetData(), TCHAR_TO_UTF8(*ProofEntry), FMath::Min(ProofEntry.Len(), 32));
 
-		const TFixedABIData* Data = new TFixedABIData(ProofBytes);
-		ProofArray.Add(MakeShared<TFixedABIData>(*Data));
+		const TFixedABIData* ProofData = new TFixedABIData(ProofBytes);
+		ProofArray.Add(MakeShared<TFixedABIData>(*ProofData));
 	}
 	TDynamicABIArray ABIArrayProof(ProofArray);
 

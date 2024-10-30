@@ -36,8 +36,8 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
         ProofBytes.SetNumUninitialized(32);
         FMemory::Memcpy(ProofBytes.GetData(), TCHAR_TO_UTF8(*ProofEntry), FMath::Min(ProofEntry.Len(), 32));
         
-        const TFixedABIData* Data = new TFixedABIData(ProofBytes);
-        ProofArray.Add(MakeShared<TFixedABIData>(*Data));
+        const TFixedABIData* ProofData = new TFixedABIData(ProofBytes);
+        ProofArray.Add(MakeShared<TFixedABIData>(*ProofData));
     }
     TDynamicABIArray ABIArrayProof(ProofArray);
 
