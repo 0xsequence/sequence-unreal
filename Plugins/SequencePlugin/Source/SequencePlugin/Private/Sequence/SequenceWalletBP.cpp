@@ -423,7 +423,7 @@ void USequenceWalletBP::ApiSendTransaction(UTransactions * Transactions)
 	}
 }
 
-void USequenceWalletBP::ApiGetIdToken(FString& Nonce)
+void USequenceWalletBP::ApiGetIdToken(const FString& Nonce)
 {
 	const TFunction<void (FSeqIdTokenResponse_Data)> OnSuccess = [this](const FSeqIdTokenResponse_Data& Data)
 		{

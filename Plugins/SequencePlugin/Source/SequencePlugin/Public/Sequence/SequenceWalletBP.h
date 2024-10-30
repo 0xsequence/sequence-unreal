@@ -265,7 +265,7 @@ public:
 	void ApiSendTransaction(UTransactions * Transactions);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiGetIdToken(FString& Nonce);
+	void ApiGetIdToken(const FString& Nonce);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiListSessions();
