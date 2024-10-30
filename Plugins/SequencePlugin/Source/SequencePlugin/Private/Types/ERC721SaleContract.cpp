@@ -29,17 +29,19 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
 
     TFixedABIData ABIMaxTotal = ABI::Int32(MaxTotal);
 
-    TArray<ABIEncodeable*> ProofArray;
+    TArray<TSharedPtr<ABIElement>> ProofArray;
     for (const FString& ProofEntry : Proof)
     {
         TArray<uint8> ProofBytes;
         ProofBytes.SetNumUninitialized(32);
         FMemory::Memcpy(ProofBytes.GetData(), TCHAR_TO_UTF8(*ProofEntry), FMath::Min(ProofEntry.Len(), 32));
-        ProofArray.Add(new TFixedABIData(ProofBytes));
+        
+        const TFixedABIData* Data = new TFixedABIData(ProofBytes);
+        ProofArray.Add(MakeShared<TFixedABIData>(*Data));
     }
     TDynamicABIArray ABIArrayProof(ProofArray);
 
-    TArray<ABIEncodeable*> Arr;
+    TArray<ABIElement*> Arr;
     Arr.Add(&ABIAccountTo);      
     Arr.Add(&ABIAmount);         
     Arr.Add(&ABIAddressPayment); 
@@ -60,7 +62,7 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
 FContractCall UERC721SaleContract::GetSaleDetails()
 {
     FString FunctionSignature = "saleDetails()";
-    TArray<ABIEncodeable*> Arr;
+    TArray<ABIElement*> Arr;
     FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
     FContractCall CallData;

@@ -29,7 +29,7 @@ FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FS
 
 	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 
 	Arr.Add(&ABIProof);
 	Arr.Add(&ABIAccount);
@@ -56,7 +56,7 @@ FRawTransaction UERC1155::MakeSetApprovalForAllTransaction(const FString& Oppera
 	TFixedABIData ABIApproval = ABI::Bool(Approved);
 
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABIApproval);
 
@@ -84,7 +84,7 @@ FRawTransaction UERC1155::MakeMintTransaction(const FString& ToAddress, const in
 	TFixedABIData ABIAmount = ABI::Int32(Amount);
 	TDynamicABIData ABIData = ABI::String(Data);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABITokenId);
 	Arr.Add(&ABIAmount);
@@ -110,23 +110,25 @@ FRawTransaction UERC1155::MakeBatchMintTransaction(const FString& ToAddress, con
 
 	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
 
-	TArray<ABIEncodeable*> TokenIdsArray;
+	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		TokenIdsArray.Add(new TFixedABIData(ABI::Int32(TokenId)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
-	TArray<ABIEncodeable*> AmountsArray;
+	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		AmountsArray.Add(new TFixedABIData(ABI::Int32(Amount)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
+	
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
-
 	TDynamicABIData ABIData = ABI::String(Data);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABIArrayTokenIds);
 	Arr.Add(&ABIArrayAmounts);
@@ -150,7 +152,7 @@ FRawTransaction UERC1155::MakeBurnTransaction(int32 TokenId, int32 Amount)
 
 	TFixedABIData ABIFixedAmount = ABI::Int32(Amount);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 
 	Arr.Add(&ABITokenId);
 	Arr.Add(&ABIFixedAmount);
@@ -169,21 +171,23 @@ FRawTransaction UERC1155::MakeBatchBurnTransaction(const TArray<int32>& TokenIds
 {
 	FString FunctionSignature = "burn(uint256[],uint256[])";
 
-	TArray<ABIEncodeable*> TokenIdsArray;
+	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		TokenIdsArray.Add(new TFixedABIData(ABI::Int32(TokenId)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
-	TArray<ABIEncodeable*> AmountsArray;
+	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		AmountsArray.Add(new TFixedABIData(ABI::Int32(Amount)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIArrayTokenIds);
 	Arr.Add(&ABIArrayAmounts);
 

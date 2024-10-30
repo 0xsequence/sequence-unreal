@@ -156,7 +156,7 @@ public:
 
     void Setup(FJsonObject& json_in)
     {
-        OrderId = json_in.GetStringField("orderId");
+        OrderId = json_in.GetStringField(TEXT("orderId"));
 
         if (!json_in.TryGetField(TEXT("marketplace")))
             Marketplace = EMarketplaceKind(json_in.GetIntegerField(TEXT("marketplace")));
@@ -167,25 +167,25 @@ public:
         if (!json_in.TryGetField(TEXT("status")))
             Status = EOrderStatus(json_in.GetIntegerField(TEXT("Status")));
 
-        ChainId = json_in.GetNumberField("chainId");
-        CollectionContractAddress = json_in.GetStringField("collectionContractAddress");
-        TokenId = json_in.GetStringField("tokenId");
-        CreatedBy = json_in.GetStringField("createdBy");
-        PriceAmount = json_in.GetStringField("priceAmount");
-        PriceAmountFormatted = json_in.GetStringField("priceAmountFormatted");
-        PriceAmountNet = json_in.GetStringField("priceAmountNet");
-        PriceAmountNetFormatted = json_in.GetStringField("priceAmountNetFormatted");
-        PriceCurrencyAddress = json_in.GetStringField("priceCurrencyAddress");
-        PriceDecimals = json_in.GetNumberField("priceDecimals");
-        PriceUSD = json_in.GetNumberField("priceUSD");
-        QuantityInitial = json_in.GetStringField("quantityInitial");
-        QuantityInitialFormatted = json_in.GetStringField("quantityInitialFormatted");
-        QuantityRemaining = json_in.GetStringField("quantityRemaining");
-        QuantityRemainingFormatted = json_in.GetStringField("quantityRemainingFormatted");
-        QuantityAvailable = json_in.GetStringField("quantityAvailable");
-        QuantityAvailableFormatted = json_in.GetStringField("quantityAvailableFormatted");
-        QuantityDecimals = json_in.GetNumberField("quantityDecimals");
-        FeeBps = json_in.GetNumberField("feeBps");
+        ChainId = json_in.GetNumberField(TEXT("chainId"));
+        CollectionContractAddress = json_in.GetStringField(TEXT("collectionContractAddress"));
+        TokenId = json_in.GetStringField(TEXT("tokenId"));
+        CreatedBy = json_in.GetStringField(TEXT("createdBy"));
+        PriceAmount = json_in.GetStringField(TEXT("priceAmount"));
+        PriceAmountFormatted = json_in.GetStringField(TEXT("priceAmountFormatted"));
+        PriceAmountNet = json_in.GetStringField(TEXT("priceAmountNet"));
+        PriceAmountNetFormatted = json_in.GetStringField(TEXT("priceAmountNetFormatted"));
+        PriceCurrencyAddress = json_in.GetStringField(TEXT("priceCurrencyAddress"));
+        PriceDecimals = json_in.GetNumberField(TEXT("priceDecimals"));
+        PriceUSD = json_in.GetNumberField(TEXT("priceUSD"));
+        QuantityInitial = json_in.GetStringField(TEXT("quantityInitial"));
+        QuantityInitialFormatted = json_in.GetStringField(TEXT("quantityInitialFormatted"));
+        QuantityRemaining = json_in.GetStringField(TEXT("quantityRemaining"));
+        QuantityRemainingFormatted = json_in.GetStringField(TEXT("quantityRemainingFormatted"));
+        QuantityAvailable = json_in.GetStringField(TEXT("quantityAvailable"));
+        QuantityAvailableFormatted = json_in.GetStringField(TEXT("quantityAvailableFormatted"));
+        QuantityDecimals = json_in.GetNumberField(TEXT("quantityDecimals"));
+        FeeBps = json_in.GetNumberField(TEXT("feeBps"));
 
         if (json_in.HasField(TEXT("feeBreakdown"))) 
         {
@@ -204,12 +204,12 @@ public:
             }
         }
 
-        ValidFrom = json_in.GetStringField("validFrom");
-        ValidUntil = json_in.GetStringField("validUntil");
-        OrderCreatedAt = json_in.GetStringField("orderCreatedAt");
-        OrderUpdatedAt = json_in.GetStringField("orderUpdatedAt");
-        CreatedAt = json_in.GetStringField("createdAt");
-        UpdatedAt = json_in.GetStringField("updatedAt");
-        DeletedAt = json_in.GetStringField("deletedAt");
+        ValidFrom = json_in.GetStringField(TEXT("validFrom"));
+        ValidUntil = json_in.GetStringField(TEXT("validUntil"));
+        OrderCreatedAt = json_in.GetStringField(TEXT("orderCreatedAt"));
+        OrderUpdatedAt = json_in.GetStringField(TEXT("orderUpdatedAt"));
+        CreatedAt = json_in.GetStringField(TEXT("createdAt"));
+        UpdatedAt = json_in.GetStringField(TEXT("updatedAt"));
+        DeletedAt = json_in.GetStringField(TEXT("deletedAt"));
     }
 };

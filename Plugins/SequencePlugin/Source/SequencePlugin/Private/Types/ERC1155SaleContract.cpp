@@ -23,27 +23,31 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 
 	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
 
-	TArray<ABIEncodeable*> TokenIdsArray;
+	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
 	{
-		TokenIdsArray.Add(new TFixedABIData(ABI::Int32(TokenId)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(TokenId));
+		TokenIdsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
 
-	TArray<ABIEncodeable*> AmountsArray;
+	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
 	{
-		AmountsArray.Add(new TFixedABIData(ABI::Int32(Amount)));
+		const TFixedABIData* Data = new TFixedABIData(ABI::Int32(Amount));
+		AmountsArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayAmounts(AmountsArray);
 
-	TArray<ABIEncodeable*> ProofArray;
+	TArray<TSharedPtr<ABIElement>> ProofArray;
 	for (const FString& ProofEntry : Proof)
 	{
 		TArray<uint8> ProofBytes;
 		ProofBytes.SetNumUninitialized(32);
 		FMemory::Memcpy(ProofBytes.GetData(), TCHAR_TO_UTF8(*ProofEntry), FMath::Min(ProofEntry.Len(), 32));
-		ProofArray.Add(new TFixedABIData(ProofBytes));
+
+		const TFixedABIData* Data = new TFixedABIData(ProofBytes);
+		ProofArray.Add(MakeShared<TFixedABIData>(*Data));
 	}
 	TDynamicABIArray ABIArrayProof(ProofArray);
 
@@ -52,7 +56,7 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 	TFixedABIData ABIAmount = ABI::UInt32(MaxTotal);
 
 
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	Arr.Add(&ABIAccount);
 	Arr.Add(&ABIArrayTokenIds);
 	Arr.Add(&ABIArrayAmounts);
@@ -74,7 +78,7 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 FContractCall UERC1155SaleContract::GetPaymentToken()
 {
 	FString FunctionSignature = "paymentToken()";
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
@@ -87,7 +91,7 @@ FContractCall UERC1155SaleContract::GetPaymentToken()
 FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
 {
 	FString FunctionSignature = "globalSaleDetails()";
-	TArray<ABIEncodeable*> Arr;
+	TArray<ABIElement*> Arr;
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
