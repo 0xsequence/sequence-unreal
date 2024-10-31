@@ -135,7 +135,7 @@ public:
         TArray<FString> StringArray;
         for (const TEnumAsByte<EMarketplaceKind>& Kind : MarketplaceKinds)
         {
-            StringArray.Add(UMarketplaceEnumsExtensions::AsString(Kind));
+            StringArray.Add(NewObject<UMarketplaceEnumsExtensions>()->AsString(Kind));
         }
         return StringArray;
     }
@@ -147,7 +147,7 @@ public:
         TArray<FString> StringArray;
         for (const TEnumAsByte<EMarketplacePropertyType>& Type : PropertyTypes)
         {
-            StringArray.Add(UMarketplaceEnumsExtensions::AsString(Type));
+            StringArray.Add(NewObject<UMarketplaceEnumsExtensions>()->AsString(Type));
         }
         return StringArray;
     }

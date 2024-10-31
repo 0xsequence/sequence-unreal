@@ -84,7 +84,7 @@ public:
                 for (int32 i = 0; i < MarketplaceKinds.Num(); i++)
                 {
                     ret.Append("\"");
-                    ret.Append(UMarketplaceEnumsExtensions::AsString(MarketplaceKinds[i]));
+                    ret.Append(NewObject<UMarketplaceEnumsExtensions>()->AsString(MarketplaceKinds[i]));
                     ret.Append("\"");
 
                     if (i < MarketplaceKinds.Num() - 1)
@@ -143,7 +143,7 @@ public:
             ret->SetArrayField("properties", propertiesJsonArray);
         }
 
-        ret->SetArrayField("marketplaces", USequenceSupport::StringListToJsonArray(UMarketplaceEnumsExtensions::EnumArrayToStringList<EMarketplaceKind>(MarketplaceKinds)));
+        ret->SetArrayField("marketplaces", USequenceSupport::StringListToJsonArray(NewObject<UMarketplaceEnumsExtensions>()->EnumArrayToStringList<EMarketplaceKind>(MarketplaceKinds)));
 
         if (InAccounts.Num() > 0)
         {

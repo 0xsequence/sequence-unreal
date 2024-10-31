@@ -14,7 +14,6 @@ public:
         FString contractAddress = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool includeMetaData = false;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         TOptional<FSeqPage> page;
 
     bool customGetter = true;
