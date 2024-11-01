@@ -47,7 +47,7 @@ FString UIndexer::HostName(const int64 ChainID)
 	FString AccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 
 	HTTP_Post_Req->SetVerb("POST");
-	HTTP_Post_Req->SetHeader("Content-Type", "application/json"); // Two differing headers for the request
+	HTTP_Post_Req->SetHeader("Content-Type", "application/json"); 
 	HTTP_Post_Req->SetHeader("Accept", "application/json");
 	HTTP_Post_Req->SetHeader("X-Access-Key", AccessKey);
 	HTTP_Post_Req->SetTimeout(30);
@@ -59,8 +59,9 @@ FString UIndexer::HostName(const int64 ChainID)
 		*HTTP_Post_Req->GetVerb(),
 		*HTTP_Post_Req->GetURL(),
 		*HTTP_Post_Req->GetHeader("X-Access-Key"),
-		*FString::Printf(TEXT("%s"), *FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\"")))
+		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
 	);
+
 	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
 
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
