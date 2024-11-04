@@ -198,6 +198,13 @@ FString USequenceRPCManager::BuildGetSessionAuthProofIntent(const FCredentials_B
 	return Intent;
 }
 
+FString USequenceRPCManager::BuildCloseSessionIntent(TOptional<int64> CurrentTime) const
+{
+	const FCloseSessionData CloseSessionData(this->SessionWallet->GetSessionId());
+	const FString Intent = this->GenerateIntent(CloseSessionData, CurrentTime);
+	return Intent;
+}
+
 FString USequenceRPCManager::BuildSessionValidationIntent(TOptional<int64> CurrentTime) const
 {
 	const FString Intent = "{\\\"sessionId\\\":\\\"" + this->SessionWallet->GetSessionId() + "\\\", \"\"}";
@@ -389,7 +396,7 @@ void USequenceRPCManager::SendTransactionWithFeeOption(const FCredentials_BE& Cr
 {
 	Transactions.Insert(FeeOption.CreateTransaction(),0);
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
-	{		
+	{	
 		const FSeqTransactionResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqTransactionResponse>(Response);
 
 		if (ParsedResponse.IsValid())
