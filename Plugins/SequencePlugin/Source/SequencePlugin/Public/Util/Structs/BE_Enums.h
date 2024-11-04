@@ -17,6 +17,8 @@ UENUM(BlueprintType)
 enum ENetwork
 {
     Ethereum           UMETA(DisplayName = "Ethereum"),
+    Immutable          UMETA(DisplayName = "Immutable"),
+    SkaleNebula        UMETA(DisplayName = "SKALE Nebula"),
     Optimism           UMETA(DisplayName = "Optimism"),
     BNBSmartChain      UMETA(DisplayName = "BNB Smart Chain"),
     GnosisChain        UMETA(DisplayName = "Gnosis Chain"),
@@ -31,7 +33,8 @@ enum ENetwork
     Avalanche          UMETA(DisplayName = "Avalanche"),
     Blast              UMETA(DisplayName = "Blast"),
     Xai                UMETA(DisplayName = "Xai"),
-	
+
+	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
 	SoneiumMinatoTestnet  UMETA(DisplayName = "Soneium Minato Testnet"),
     B3Sepolia          UMETA(DisplayName = "B3 Sepolia"),
