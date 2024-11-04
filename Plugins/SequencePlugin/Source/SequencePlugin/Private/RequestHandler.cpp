@@ -152,7 +152,7 @@ void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailu
 		}
 		else
 		{
-			if(!Response.IsValid())
+			if(Response.IsValid())
 			{
 				OnFailure(FSequenceError(RequestFail, "Request is invalid" + Response->GetContentAsString()));
 			}
