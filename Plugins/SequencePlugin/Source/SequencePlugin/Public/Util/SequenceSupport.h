@@ -51,6 +51,8 @@ private:
 
 	static inline TMap<int64, FString> NetworkIdToUrlMap = {
 		FIdName(1,TEXT("mainnet")),
+		FIdName(13371,TEXT("immutable-zkevm")),
+		FIdName(1482601649,TEXT("skale-nebula")),
 		FIdName(10,TEXT("optimism")),
 		FIdName(56,TEXT("bsc")),
 		FIdName(100,TEXT("gnosis")),
@@ -66,6 +68,7 @@ private:
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
 		
+		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(97,TEXT("bsc-testnet")),
 		FIdName(1946,TEXT("soneium-minato")),
 		FIdName(1993,TEXT("b3-sepolia")),
@@ -86,6 +89,8 @@ private:
 	
 	static inline TMap<int64, FString> NetworkIdToNameMap = {
 		FIdName(1,TEXT("Ethereum")),
+		FIdName(13371,TEXT("Immutable")),
+		FIdName(1482601649,TEXT("SKALE Nebula")),
 		FIdName(10,TEXT("Optimism")),
 		FIdName(56,TEXT("BNB Smart Chain")),
 		FIdName(100,TEXT("Gnosis Chain")),
@@ -101,6 +106,7 @@ private:
 		FIdName(81457,TEXT("Blast")),
 		FIdName(660279,TEXT("Xai")),
 		
+		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
 		FIdName(1946,TEXT("Soneium Minato Testnet")),
 		FIdName(1993,TEXT("B3 Sepolia")),
@@ -121,6 +127,8 @@ private:
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
 		FNameId(TEXT("ethereum"),1),
+		FNameId(TEXT("immutable"),13371),
+		FNameId(TEXT("skale-nebula"),1482601649),
 		FNameId(TEXT("optimism"),10),
 		FNameId(TEXT("bnbsmartchain"),56),
 		FNameId(TEXT("gnosischain"),100),
@@ -136,6 +144,7 @@ private:
 		FNameId(TEXT("blast"),81457),
 		FNameId(TEXT("xai"),660279),
 		
+		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
 		FNameId(TEXT("soneiumminato"),1946),
 		FNameId(TEXT("b3sepolia"),1993),
@@ -156,6 +165,8 @@ private:
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
 		{ENetwork::Ethereum, 1},
+		{ENetwork::Immutable, 13371},
+		{ENetwork::SkaleNebula, 1482601649},
 		{ENetwork::Optimism, 10},
 		{ENetwork::BNBSmartChain, 56},
 		{ENetwork::GnosisChain, 100},
@@ -171,6 +182,7 @@ private:
 		{ENetwork::Blast, 81457},
 		{ENetwork::Xai, 660279},
 		
+		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
 		{ENetwork::SoneiumMinatoTestnet, 1946},
 		{ENetwork::B3Sepolia, 1993},
@@ -192,6 +204,8 @@ private:
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
 		{ENetwork::Ethereum, TEXT("Ethereum")},
+		{ENetwork::Immutable, TEXT("Immutable")},
+		{ENetwork::SkaleNebula, TEXT("SKALE Nebula")},
 		{ENetwork::Optimism, TEXT("Optimism")},
 		{ENetwork::BNBSmartChain, TEXT("BNB Smart Chain")},
 		{ENetwork::GnosisChain, TEXT("Gnosis Chain")},
@@ -207,6 +221,7 @@ private:
 		{ENetwork::Blast, TEXT("Blast")},
 		{ENetwork::Xai, TEXT("Xai")},
 		
+		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
 		{ENetwork::SoneiumMinatoTestnet, TEXT("Soneium Minato Testnet")},
 		{ENetwork::B3Sepolia, TEXT("B3 Sepolia")},
