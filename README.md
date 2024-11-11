@@ -131,13 +131,13 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 ### For Blueprints
 
-1) Create a blueprint Actor (if you wish to spawn it your self) Or Pawn (if you wish to use it with a Gamemode)
+1) Create a blueprint Actor (if you wish to spawn it yourself) Or Pawn (if you wish to use it with a Gamemode)
 
 2) Attach the **[AC_SequencePawn_Component]** to the Blueprint you created via the add components section.
 
 [Where to find Components window](ReadmeImages/Example_AddComponent.PNG)
 
-3) Then you can setup you blueprint like so to start utilizing the SequenceAPI
+3) Then you can setup your blueprint like so to start utilizing the SequenceAPI
 
 [How to setup the Blueprint](ReadmeImages/Example_BP_Setup.PNG)
 
@@ -198,7 +198,7 @@ For beta we currently only read from Sequence_Style_Dark_Mode
 
 ### Custom UI Integration
 
-In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls are implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
+In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly to **[SequenceBackendManager.h/.cpp]**. Each of these calls is implemented in **[UAuthenticator]** you just need to pass through the data with YOUR UAuthenticator UObject
 
 ```clike
 
@@ -441,7 +441,7 @@ We have 2 options we can choose between:
 
 2) ForceCreate: Ask the user if they'd wish to force create a new account with the email address present in *[FFederationSupportData]*
    & login type they initially tried.
-   This will assign a new wallet address to them & it will be treated like a entirely separate account.
+   This will assign a new wallet address to them & it will be treated like an entirely separate account.
    To do this simply call "UAuthenticator::ForceOpenLastOpenSessionAttempt" This will ForceCreate a new account with the
    last login attempt that resulted in an EmailAlreadyInUse error.
 
@@ -866,7 +866,7 @@ no data is reset when a level is changed in your games!
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
-Note: if you want call contracts with the Raw type you'll want include the header
+Note: if you want call contracts with the Raw type you'll want to include the header
 `#include "ABI/ABI.h"` in order to use the ABI to encode the data for a contract call.
 
 	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
@@ -1327,7 +1327,7 @@ Note: this doesn't rotate the application into any one view it just makes the UI
 
 Modes:
 - Desktop (default)
-- Mobile Portrait (Custom built for portrait mode reducing the X width where ever possible)
+- Mobile Portrait (Custom built for portrait mode reducing the X width wherever possible)
 - Mobile Landscape
 
 ***
@@ -1350,7 +1350,7 @@ const TFunction<void(FSequenceError)> OnFailureTest = **[Capturable variables]**
 };
 ```
 
-One thing to be aware of is keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
+One thing to be aware of is to keep an eye on capturables if you have lots of nested TFunctions it's very easy to miss
 something and start over writing memory. If you require lots of nesting swapping to a better approach using
 UFUNCTION callbacks helps to avoid these problems.
 
@@ -1439,7 +1439,7 @@ During the Unreal Package process in the event a code signing error occurs you c
 11) Click on the General tab
 12) Click on Mac and Applevision Pro under supported destinations and hit the delete key
 13) Now the project can be built (if the build fails at first, wait a few moments then try again. It can sometimes take a bit before the build registers the run script)
-14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is creating when you packaging the project again._
+14) Once you have finished running the project, and want to make changes to the code, REMEMBER to delete this xcodeproj file in the sequence-unreal folder to ensure that a new xcodeproj is created when you package the project again._
 
 ## TroubleShooting
 
