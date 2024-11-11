@@ -15,7 +15,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
 	FString FiatCurrency = FDefaultTransak::FiatCurrency;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default") 
 	FString FiatAmount = FDefaultTransak::FiatAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
@@ -34,11 +34,15 @@ UENUM(BlueprintType)
 enum ETransactionResponseType
 {
 	SignMessageTrt UMETA(DisplayName = "SignMessage"),
+	ValidateMessageSignatureTrt  UMETA(DisplayName = "ValidateMessageSignature"),
 	GetFilteredFeeTrt UMETA(DisplayName = "GetFilteredFeeOptions"),
 	GetUnFilteredFeeOptionsTrt UMETA(DisplayName = "GetUnFilteredFeeOptions"),
 	SendTransactionWithFeeTrt UMETA(DisplayName = "SendTransactionWithFee"),
 	SendTransactionTrt UMETA(DisplayName = "SendTransaction"),
+	GetIdTokenTrt  UMETA(DisplayName = "GetIdToken"),
 	ListSessionsTrt UMETA(DisplayName = "ListSessions"),
+	ListAccountsTrt UMETA(DisplayName = "ListAccounts"),
+	GetSessionAuthProofTrt UMETA(DisplayName = "GetSessionAuthProof"),
 	GetSupportedTransakCountriesTrt UMETA(DisplayName = "GetSupportedTransakCountries"),
 	PingTrt UMETA(DisplayName = "Ping"),
 	VersionTrt UMETA(DisplayName = "Version"),
@@ -50,6 +54,7 @@ enum ETransactionResponseType
 	GetTokenSuppliesMapTrt UMETA(DisplayName = "GetTokenSuppliesMap"),
 	GetBalanceUpdatesTrt UMETA(DisplayName = "GetBalanceUpdates"),
 	GetTransactionHistoryTrt UMETA(DisplayName = "GetTransactionHistory"),	
+	GetCollectiblesWithLowestListingsTrt UMETA(DisplayName = "GetCollectiblesWithLowestListings")
 };
 
 USTRUCT(Blueprintable)

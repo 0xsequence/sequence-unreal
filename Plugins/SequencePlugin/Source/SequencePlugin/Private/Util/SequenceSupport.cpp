@@ -18,6 +18,17 @@ FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
 	return TEXT("");
 }
 
+FString USequenceSupport::GetNetworkName(const ENetwork NetworkIn)
+{
+	if (NetworkIdToNameMap.Contains(NetworkIn))
+	{
+		return *NetworkEnumToNameMap.Find(NetworkIn);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
+	return TEXT("");
+}
+
 FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 {
 	if (NetworkIdToUrlMap.Contains(NetworkIdIn))
@@ -43,6 +54,17 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
 	return -1;
+}
+
+int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
+{
+	if (NetworkEnumToIdMap.Contains(Network))
+	{
+		return *NetworkEnumToIdMap.Find(Network);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), Network);
+	return 0;
 }
 
 TArray<FIdNamePair> USequenceSupport::GetAllNetworks()
@@ -393,6 +415,18 @@ FString USequenceSupport::StringListToParsableString(TArray<FString> StringData)
 	Ret += "]";
 	return Ret;
 }
+
+TArray<TSharedPtr<FJsonValue>> USequenceSupport::StringListToJsonArray(const TArray<FString>& StringData)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const FString& String : StringData)
+	{
+		// Add each string to the JSON array as a FJsonValueString
+		JsonArray.Add(MakeShareable(new FJsonValueString(String)));
+	}
+	return JsonArray;
+}
+
 
 FString USequenceSupport::Int64ListToSimpleString(TArray<int64> IntData)
 {

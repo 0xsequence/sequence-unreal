@@ -193,11 +193,35 @@ FString USequenceWallet::GetSessionId() const
 }
 
 
+void USequenceWallet::GetIdToken(const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetIdToken(this->Credentials, Nonce, OnSuccess, OnFailure);
+	}
+}
+
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
 	{
 		this->SequenceRPCManager->ListSessions(this->Credentials,OnSuccess,OnFailure);
+	}
+}
+
+void USequenceWallet::ListAccounts(const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->ListAccounts(this->Credentials, OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->GetSessionAuthProof(this->Credentials, Nonce, OnSuccess, OnFailure);
 	}
 }
 
@@ -262,6 +286,20 @@ void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
 	auth->StoreCredentials(this->Credentials);
 }
 
+void USequenceWallet::UpdateNetworkId(FString NewNetworkName)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetworkName));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
+void USequenceWallet::UpdateNetworkId(ENetwork NewNetwork)
+{
+	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetwork));
+	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
+	auth->StoreCredentials(this->Credentials);
+}
+
 void USequenceWallet::UpdateProviderURL(const FString& Url) const
 {
 	if (this->Provider)
@@ -278,6 +316,14 @@ void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback
 	}
 }
 
+
+void USequenceWallet::ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress,const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->SequenceRPCManager)
+	{
+		this->SequenceRPCManager->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
+	}
+}
 void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
@@ -465,12 +511,6 @@ void USequenceWallet::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Arg
 {
 	if (this->Indexer)
 		this->Indexer->GetTokenSuppliesMap(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetBalanceUpdates(const FSeqGetBalanceUpdatesArgs& Args, const TSuccessCallback<FSeqGetBalanceUpdatesReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetBalanceUpdates(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const

@@ -37,4 +37,5 @@ public:
 	FHttpRequestCompleteDelegate& Process() const;
 	void ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFailureCallback OnFailure);
 	void ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const;
+	void ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess, const FFailureCallback& OnFailure) const;
 };

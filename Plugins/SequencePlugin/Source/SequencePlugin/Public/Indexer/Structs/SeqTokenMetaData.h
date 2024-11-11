@@ -95,8 +95,29 @@ public:
     /*
     * Used to handle Edge cases with UE's json parsing
     */
-    void setup(FJsonObject json_in)
+    void Setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
+
+        FString tokenIdString;
+        if (json_in.TryGetStringField(TEXT("tokenId"), tokenIdString))
+        {
+            tokenId = FCString::Atoi64(*tokenIdString);
+        }
+        FString decimalsString;
+        if (json_in.TryGetStringField(TEXT("decimals"), decimalsString))
+        {
+            decimals = FCString::Atoi64(*decimalsString);
+        }
+
+        json_in.TryGetStringField(TEXT("name"), name);
+        json_in.TryGetStringField(TEXT("description"), description);
+        json_in.TryGetStringField(TEXT("image"), image);
+        json_in.TryGetStringField(TEXT("video"), video);
+        json_in.TryGetStringField(TEXT("audio"), audio);
+        json_in.TryGetStringField(TEXT("image_data"), image_data);
+        json_in.TryGetStringField(TEXT("background_color"), background_color);
+        json_in.TryGetStringField(TEXT("animation_url"), animation_url);
+        json_in.TryGetStringField(TEXT("external_url"), external_url);
 
         attributes.Empty();
         properties.Empty();

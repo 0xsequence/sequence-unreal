@@ -146,10 +146,10 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 	FString FunctionSignature = "balanceOf(address,uint256)";
 	TFixedABIData Account = ABI::Address(FAddress::From("0E0f9d1c4BeF9f0B8a2D9D4c09529F260C7758A2"));
 	TFixedABIData Id = ABI::UInt32(0x01);
-	TArray<ABIEncodeable*> Arr;
-	Arr.Add(&Account);
-	Arr.Add(&Id);
-	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+	TArray<TSharedPtr<ABIElement>> Arr;
+	Arr.Add(MakeShared<TFixedABIData>(Account));
+	Arr.Add(MakeShared<TFixedABIData>(Id));
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr).GetValue();
 	
 	
 	TArray<TransactionUnion> Txn;

@@ -486,6 +486,92 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse
 
 //SignMessage//
 
+
+//GetIdToken//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString IdToken;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	int32 ExpiresIn;
+};
+
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Response
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Code = "";
+
+	UPROPERTY()
+	FSeqIdTokenResponse_Data Data;
+
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("idToken"), ESearchCase::IgnoreCase);
+
+	}
+};
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
+{
+	GENERATED_BODY()
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FSeqIdTokenResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+
+//Validate Signature//
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	bool isValid;
+
+	bool IsValid() const
+	{
+		return isValid;
+	}
+};
+
+
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqValidateMessageSignatureResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Data.IsValid();
+	}
+};
+ 
+// 
 //ListSessions//
 
 USTRUCT(Blueprintable)
@@ -535,7 +621,7 @@ struct SEQUENCEPLUGIN_API FSeqListSessionResponse_Response
 
 	bool IsValid() const
 	{
-		return Code.Equals(TEXT("sessionList"),ESearchCase::IgnoreCase);
+		return Code.Equals(TEXT("session"),ESearchCase::IgnoreCase);
 	}
 };
 
@@ -553,4 +639,111 @@ struct SEQUENCEPLUGIN_API FSeqListSessionsResponse
 	}
 };
 
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqAccount
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Id = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Type = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Issuer = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Email = "";
+
+
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse_Data
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	TArray<FSeqAccount> Accounts;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString CurrentAccountId = "";
+};
+
+
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqListAccountsResponse_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("accountList"), ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqListAccountsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqListAccountsResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};
+
+
 //ListSessions//
+
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProof_Data
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString SessionId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Network;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Wallet;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Message; 	//The message contents : �SessionAuthProof <sessionId> <wallet> <nonce ? >� hex encoded
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	FString Signature;
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProofResponse_Response
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString Code = "";
+	UPROPERTY()
+	FSeqGetSessionAuthProof_Data Data;
+
+	bool IsValid() const
+	{
+		return Code.Equals(TEXT("sessionAuthProof"), ESearchCase::IgnoreCase);
+	}
+};
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProofResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FSeqGetSessionAuthProofResponse_Response Response;
+
+	bool IsValid() const
+	{
+		return Response.IsValid();
+	}
+};

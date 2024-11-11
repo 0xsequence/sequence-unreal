@@ -1,8 +1,8 @@
 {
-	"EngineVersion":"5.4",
+	"EngineVersion": "5.4",
 	"FileVersion": 3,
 	"Version": 3,
-	"VersionName": "1.3",
+	"VersionName": "1.4.1",
 	"FriendlyName": "SequencePlugin",
 	"Description": "",
 	"Category": "Sequence",
@@ -26,7 +26,7 @@
 			"Name": "SequencePlugin",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Mac",
 				"Win64",
 				"Android",
