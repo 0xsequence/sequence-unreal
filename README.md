@@ -60,11 +60,11 @@ The location will be All/Engine/Plugins/SequencePluginContent/Core, within the c
 
 ### Upgrading to Unreal 5.4
 If your project is currently on 5.2 or 5.3, then for this version you'll want to upgrade to 5.4.
-To do this close the Unreal Editor, Close your Code Editor. Right click on your Unreal Project
+To do this close the Unreal Editor, Close your Code Editor. Right-click on your Unreal Project
 file. Then select Switch Unreal Engine Version, Choose 5.4 and click okay. Once done. Open your
 code editor and rebuild your source code.
 
-As way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
+As a way of future proofing we recommend installing visual studio 2022 in accordance with [these docs](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine)
 as Unreal 5.4 and onward will be dropping support for visual studio 2019.
 
 ### YourProject.Build.cs
@@ -84,7 +84,7 @@ if this occurs in your Projects Build.cs file please check the private Dependenc
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+		// To include OnlineSubsystemSteam, add it to the plugins section in your project file with the Enabled attribute set to true
 	}
 
 ## Credentials
@@ -143,7 +143,7 @@ In the event unrecognized symbols are seen the engine will not load the .ini fil
 
 Note: Auth Success Forwarder will let you know when the system is ready to be used
 
-4) Depending on what you chose your blueprint parent class to be, You can do one of two things to finish this
+4) Depending on what you choose your blueprint parent class to be, You can do one of two things to finish this
    process. If it's a pawn or a subclass of a pawn, you can attach it to your Gamemode so that it spawns when play begins, OR you can drag it out into
    your scene if it's just an actor Blueprint.
 
@@ -760,7 +760,7 @@ no data is reset when a level is changed in your games!
 	}
 
 ### Example SendTransactionWithFeeOption
-#### Used to get a list of fee's and send a transaction with one of them valid ones
+#### Used to get a list of fees and send a transaction with one of them valid ones
 
 	TArray<TransactionUnion> Transactions;
 	FERC721Transaction T721;
@@ -866,7 +866,7 @@ no data is reset when a level is changed in your games!
 
 ### Example SendTransaction
 ##### Used to send a transaction / perform contract calls
-Note: if you want call contracts with the Raw type you'll want to include the header
+Note: if you want to call contracts with the Raw type you'll want to include the header
 `#include "ABI/ABI.h"` in order to use the ABI to encode the data for a contract call.
 
 	const FFailureCallback OnFailure = [=](const FSequenceError& Error)
