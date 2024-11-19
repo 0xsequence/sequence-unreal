@@ -76,6 +76,9 @@ public:
 	void PlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void PlayfabAuthenticateWithSessionTicketAsync(const FString& SessionTicket);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartGuestSessionAsync();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")

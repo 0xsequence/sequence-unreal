@@ -180,6 +180,13 @@ private:
 	 * If IsFederatingSessionInUse = false, we operate as normal
 	 */
 	void CheckAndFederateSessionInUse();
+
+	/**
+	 * Authenticates using a PlayFab Session Ticket
+	 * @param SessionTicket Session Ticket to authenticate with
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void AuthenticateUsingPlayfabSessionTicket(const FString& SessionTicket, const bool ForceCreateAccountIn);
 public:
 	
 	/**
@@ -259,6 +266,12 @@ public:
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
+	 * Used to authenticate using a Session Ticket
+	 * @param SessionTicket Session Ticket to login with
+	 */
+	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket);
+
+	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
 	 */
@@ -333,7 +346,7 @@ public:
 	 * Override to handle Id Token received from NativeOAuth.h
 	 */
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
-	
+
 private:
 	
 	FString BuildRedirectPrefix() const;
@@ -366,7 +379,7 @@ private:
 	 * @param OnFailure Called when unsuccessful (returns error)
 	 */
 	static void PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
+	
 	static FString GeneratePlayFabUrl();
 	
 	static FString GeneratePlayFabRegisterUrl();
