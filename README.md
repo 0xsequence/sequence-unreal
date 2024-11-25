@@ -2,7 +2,7 @@
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
 
 ## Documentation
-https://docs.sequence.xyz/sdk/unreal/overview
+https://docs.sequence.xyz/sdk/unreal/introduction
 
 ## Requirements
 Unreal 5.2*, 5.3*, and 5.4 (* Supported by Beta 1.0.3 and lower)
