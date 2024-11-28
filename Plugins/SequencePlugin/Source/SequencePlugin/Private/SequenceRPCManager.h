@@ -51,7 +51,7 @@ private:
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(USequenceRPCManager::GetPluginVersion()).Append(TEXT(")"));
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(GetPluginVersion()).Append(TEXT(")"));
 
 	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
