@@ -166,6 +166,14 @@ void ASequenceBackendManager::PlayFabRegisterAndLogin(const FString& UsernameIn,
 	}
 }
 
+void ASequenceBackendManager::PlayfabAuthenticateWithSessionTicket(const FString& SessionTicket)
+{
+	if (this->Authenticator)
+	{
+		this->Authenticator->PlayFabAuthenticateWithSessionTicket(SessionTicket);
+	}
+}
+
 void ASequenceBackendManager::FederateEmail(const FString& EmailIn) const
 {
 	if (this->Authenticator)

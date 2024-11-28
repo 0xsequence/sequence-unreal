@@ -278,6 +278,12 @@ In a C++ UObject with a series of pass through **[UFUNCTIONS]** setup similarly 
 	 */
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
+   /**
+     * Used to authenticate using a Session Ticket
+     * @param SessionTicket Session Ticket to login with
+     */
+    void PlayfabAuthenticateWithSessionTicket(const FString& SessionTicket);
+
 	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
@@ -401,6 +407,7 @@ else
 ### PlayFab Social Signin based Authentication with CustomUI
 1) Start by calling either PlayFabLogin (Login With Existing)
    or PlayFabRegisterAndLogin (Create a new PlayFab account & Login with it) that's it.
+   or PlayfabAuthenticateWithSessionTicket (Authenticate with a PlayFab Session Ticket)
 
 ### Guest Login with CustomUI
 1) Start by calling GuestLogin, and that's it.
