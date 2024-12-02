@@ -46,7 +46,6 @@ enum ENetwork
     AvalancheTestnet    UMETA(DisplayName = "Avalanche Testnet"),
     PolygonAmoy        UMETA(DisplayName = "Polygon Amoy"),
     BaseSepolia        UMETA(DisplayName = "Base Sepolia"),
-	BorneTestnet	   UMETA(DisplayName = "Borne Testnet"),
     ArbitrumSepolia    UMETA(DisplayName = "Arbitrum Sepolia"),
     Sepolia            UMETA(DisplayName = "Sepolia"),
     OptimismSepolia    UMETA(DisplayName = "Optimism Sepolia"),
