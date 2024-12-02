@@ -51,15 +51,16 @@ private:
 
 	static inline TMap<int64, FString> NetworkIdToUrlMap = {
 		FIdName(1,TEXT("mainnet")),
-		FIdName(13371,TEXT("immutable-zkevm")),
-		FIdName(1482601649,TEXT("skale-nebula")),
 		FIdName(10,TEXT("optimism")),
 		FIdName(56,TEXT("bsc")),
 		FIdName(100,TEXT("gnosis")),
 		FIdName(137,TEXT("polygon")),
 		FIdName(1101,TEXT("polygon-zkevm")),
+		FIdName(6283,TEXT("laos")),
+		FIdName(7668,TEXT("rootnet")),
 		FIdName(8333,TEXT("b3")),
 		FIdName(8453,TEXT("base")),
+		FIdName(13371,TEXT("immutable-zkevm")),
 		FIdName(19011,TEXT("homeverse")),
 		FIdName(33139,TEXT("apechain")),
 		FIdName(42161,TEXT("arbitrum")),
@@ -67,15 +68,18 @@ private:
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
+		FIdName(1482601649,TEXT("skale-nebula")),
 		
-		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(97,TEXT("bsc-testnet")),
 		FIdName(1946,TEXT("soneium-minato")),
 		FIdName(1993,TEXT("b3-sepolia")),
 		FIdName(2730,TEXT("xr-sepolia")),
+		FIdName(7672,TEXT("rootnet-porcini")),
+		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(33111,TEXT("apechain-testnet")),
 		FIdName(40875,TEXT("homeverse-testnet")),
 		FIdName(43113,TEXT("avalanche-testnet")),
+		FIdName(62850,TEXT("laos-sigma-testnet")),
 		FIdName(80002,TEXT("amoy")),
 		FIdName(84532,TEXT("base-sepolia")),
 		FIdName(94984,TEXT("borne-testnet")),
@@ -105,6 +109,8 @@ private:
 		FIdName(43114,TEXT("Avalanche")),
 		FIdName(81457,TEXT("Blast")),
 		FIdName(660279,TEXT("Xai")),
+		FIdName(6283,TEXT("LAOS")),
+		FIdName(7668,TEXT("Root Network")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -123,7 +129,10 @@ private:
 		FIdName(21000000,TEXT("TOY Testnet")),
 		FIdName(37084624,TEXT("SKALE Nebula Gaming Hub Testnet")),
 		FIdName(168587773,TEXT("Blast Sepolia")),
-		FIdName(37714555429,TEXT("Xai Sepolia"))};
+		FIdName(37714555429,TEXT("Xai Sepolia")),
+		FIdName(62850,TEXT("LAOS Sigma Testnet")),
+		FIdName(7672,TEXT("Root Network Porcini Testnet")),
+	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
 		FNameId(TEXT("ethereum"),1),
@@ -143,6 +152,8 @@ private:
 		FNameId(TEXT("avalanche"),43114),
 		FNameId(TEXT("blast"),81457),
 		FNameId(TEXT("xai"),660279),
+		FNameId(TEXT("laos"),6283),
+		FNameId(TEXT("rootnet"),7668),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -151,7 +162,7 @@ private:
 		FNameId(TEXT("xrsepolia"),2730),
 		FNameId(TEXT("apechaintestnet"),33111),
 		FNameId(TEXT("oasyshomeversetestnet"),40875),
-		FNameId(TEXT("avalanchetestnet"),43113),
+		FNameId(TEXT("avalanche-testnet"),43113),
 		FNameId(TEXT("polygonamoy"),80002),
 		FNameId(TEXT("basesepolia"),84532),
 		FNameId(TEXT("bornetestnet"),94984),
@@ -161,7 +172,10 @@ private:
 		FNameId(TEXT("toytestnet"),21000000),
 		FNameId(TEXT("skalenebulagaminghubtestnet"),37084624),
 		FNameId(TEXT("blastsepolia"),168587773),
-		FNameId(TEXT("xaisepolia"),37714555429)};
+		FNameId(TEXT("xaisepolia"),37714555429),
+		FNameId(TEXT("laos-sigma"),62850),
+		FNameId(TEXT("rootnet-porcini"),7672),
+	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
 		{ENetwork::Ethereum, 1},
@@ -181,6 +195,8 @@ private:
 		{ENetwork::Avalanche, 43114},
 		{ENetwork::Blast, 81457},
 		{ENetwork::Xai, 660279},
+		{ENetwork::LAOS, 6283},
+		{ENetwork::Root, 7668},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -199,8 +215,10 @@ private:
 		{ENetwork::TOYTestnet, 21000000},
 		{ENetwork::SKALENebulaGamingHubTestnet, 37084624},
 		{ENetwork::BlastSepolia, 168587773},
-		{ENetwork::XaiSepolia, 37714555429}
-		};
+		{ENetwork::XaiSepolia, 37714555429},
+		{ENetwork::LAOSSigma, 62850},
+		{ENetwork::RootPorcini, 7672},
+	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
 		{ENetwork::Ethereum, TEXT("Ethereum")},
@@ -220,6 +238,8 @@ private:
 		{ENetwork::Avalanche, TEXT("Avalanche")},
 		{ENetwork::Blast, TEXT("Blast")},
 		{ENetwork::Xai, TEXT("Xai")},
+		{ENetwork::LAOS, TEXT("LAOS")},
+		{ENetwork::Root, TEXT("Root Network")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
@@ -238,7 +258,9 @@ private:
 		{ENetwork::TOYTestnet, TEXT("TOY Testnet")},
 		{ENetwork::SKALENebulaGamingHubTestnet, TEXT("SKALE Nebula Gaming Hub Testnet")},
 		{ENetwork::BlastSepolia, TEXT("Blast Sepolia")},
-		{ENetwork::XaiSepolia, TEXT("Xai Sepolia")}
+		{ENetwork::XaiSepolia, TEXT("Xai Sepolia")},
+		{ENetwork::LAOSSigma, TEXT("LAOS Sigma Testnet")},
+		{ENetwork::RootPorcini, TEXT("Root Network Porcini Testnet")},
 	};
 
 public:
