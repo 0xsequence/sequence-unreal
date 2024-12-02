@@ -86,7 +86,7 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->ProcessRequest();
 }
 
-void UMarketplace::GetCollectibleListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UMarketplace::GetCollectiblesWithLowestListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "ListCollectiblesWithLowestListing"; 
 
