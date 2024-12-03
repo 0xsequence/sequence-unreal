@@ -18,7 +18,7 @@ Unreal Engine 5.2, 5.3, or 5.4
 
 ## Samples
 
-
+The SDK comes with a number of samples that can be imported used from the `SequencePlugin Content/Core` directory.
 
 ## TroubleShooting
 
