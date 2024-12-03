@@ -98,11 +98,17 @@ void UMarketplace::GetCollectiblesWithLowestListings(const int64 ChainID, const 
 {
 	const FString Endpoint = "ListCollectiblesWithLowestListing"; 
 
-	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetCollectiblesWithLowestListingsArgs>(Args), [this, OnSuccess](const FString& Content)
+	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqListCollectibleListingsWithLowestPriceListingsFirstArgs>(Args), [this, OnSuccess](const FString& Content)
 		{
-			const FSeqGetCollectiblesWithLowestListingsReturn Response = this->BuildResponse<FSeqGetCollectiblesWithLowestListingsReturn>(Content);
+			const FSeqListCollectiblesReturn Response = this->BuildResponse<FSeqListCollectiblesReturn>(Content);
 			OnSuccess(Response);
 		}, OnFailure);
+}
+
+void UMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqListCurrenciesResponse> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	
 }
 
 template < typename T> FString UMarketplace::BuildArgs(T StructIn)
