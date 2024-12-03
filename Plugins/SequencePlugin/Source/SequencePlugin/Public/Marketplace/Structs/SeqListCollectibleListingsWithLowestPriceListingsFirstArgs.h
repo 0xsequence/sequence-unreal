@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "SeqCollectiblesFilter.h" 
 #include "SeqMarketplacePage.h"
-#include "SeqGetCollectiblesWithLowestListingsArgs.generated.h"
+#include "SeqListCollectibleListingsWithLowestPriceListingsFirstArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqGetCollectiblesWithLowestListingsArgs
+struct SEQUENCEPLUGIN_API FSeqListCollectiblesArgs
 {
     GENERATED_USTRUCT_BODY()
 
