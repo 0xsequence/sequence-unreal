@@ -1,3 +1,5 @@
+![header](https://github.com/user-attachments/assets/2db8f2e9-bf37-4417-9501-5234cc031c50)
+
 # Sequence Unreal SDK
 
 This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
