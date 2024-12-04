@@ -25,17 +25,6 @@ If your project is currently on 5.2 or 5.3, then for this version you'll want to
 
 As a way of future proofing we recommend installing visual studio 2022 in accordance with these docs as Unreal 5.4 and onward will be dropping support for visual studio 2019.
 
-## Security
-
-You must provide a 32 character encryption key in the [SequenceConfig.ini] file under [YourProject]/Config/SequenceConfig.ini under the config variable FallbackEncryptionKey
-
-In order to prevent tampering with data you must encrypt your packaged project using Unreals packaging settings You can refer to these docs
-
-Note: For generating secure keys feel free to use tools such as: Lastpass Password generator or equivalent, Encryption Key Generators, etc
-
-Important for values you place in FallbackEncryptionKey
-Be sure what ever key data you place in [FallbackEncryptionKey] is of hex form & does NOT contain any extraneous symbols, eg) *,/\ etc. In the event unrecognized symbols are seen the engine will not load the .ini file.
-
 ## TroubleShooting
 
 In events where the editor crashes on launch, try deleting the following file, Saved/SaveGames/Cr.sav
