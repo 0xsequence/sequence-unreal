@@ -98,29 +98,6 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 	}, OnFailure);
 }
 
-FString USequenceRPCManager::GetPluginVersion()
-{
-	// Get the PluginManager instance
-	IPluginManager& PluginManager = IPluginManager::Get();
-
-	// Find the plugin by name
-	TSharedPtr<IPlugin> SequencePlugin = PluginManager.FindPlugin(TEXT("SequencePlugin"));
-
-	// Check if the plugin was found
-	if (SequencePlugin.IsValid())
-	{
-		// Retrieve the descriptor, which includes metadata such as the version
-		const FPluginDescriptor& Descriptor = SequencePlugin->GetDescriptor();
-
-		// Return the version string
-		return Descriptor.VersionName;
-	}
-
-	// Return a default value if the plugin is not found
-	UE_LOG(LogTemp, Error, TEXT("[Failed to find Sequence Plugin, Unknown version]"));
-	return TEXT("Plugin not found");
-}
-
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
 {
 	const FGetFeeOptionsData GetFeeOptionsData(Credentials.GetNetworkString(),Transactions,Credentials.GetWalletAddress());

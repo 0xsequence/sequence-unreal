@@ -42,16 +42,12 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
-	//Get Plugin Version
-
-	static FString GetPluginVersion();
-
 	/**
 	 * If this flag is enabled, we will preserve the SessionWallet for the next request
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(GetPluginVersion()).Append(TEXT(")"));
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal 1.4.1)"));
 
 	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
