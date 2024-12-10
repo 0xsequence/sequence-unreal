@@ -9,9 +9,9 @@ USequenceMarketplaceBP::USequenceMarketplaceBP()
 
 }
 
-void USequenceMarketplaceBP::GetGetCollectiblesWithLowestListingsAsync(const int64 ChainId, const FSeqGetCollectiblesWithLowestListingsArgs& Args)
+void USequenceMarketplaceBP::GetGetCollectiblesWithLowestListingsAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args)
 {
-	const TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess = [this, ChainId, Args](const FSeqGetCollectiblesWithLowestListingsReturn& CollectiblesWithLowestListings)
+	const TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess = [this, ChainId, Args](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
 		{
 			this->CallCollectiblesWithLowestListingsReceived(true, ChainId, CollectiblesWithLowestListings);
 		};
@@ -19,15 +19,15 @@ void USequenceMarketplaceBP::GetGetCollectiblesWithLowestListingsAsync(const int
 	const FFailureCallback OnFailure = [this, ChainId, Args](const FSequenceError& Error)
 		{
 			SEQ_LOG(Error, TEXT("Error getting Collectibles with Lowest Listings: %s"), *Error.Message);
-			FSeqGetCollectiblesWithLowestListingsReturn CollectiblesWithLowestListings;
+			FSeqListCollectiblesReturn CollectiblesWithLowestListings;
 			this->CallCollectiblesWithLowestListingsReceived(false, ChainId, CollectiblesWithLowestListings);
 		};
 
 
-	this->Marketplace->GetCollectiblesWithLowestListings(ChainId, Args, OnSuccess, OnFailure);
+	this->Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(ChainId, Args.ContractAddress, Args.Filter, Args.Page, OnSuccess, OnFailure);
 }
 
-void USequenceMarketplaceBP::CallCollectiblesWithLowestListingsReceived(const bool Status, const int64 ChainId, const FSeqGetCollectiblesWithLowestListingsReturn& Response)
+void USequenceMarketplaceBP::CallCollectiblesWithLowestListingsReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response)
 {
 	if (this->CollectiblesWithLowestListingsResponse.IsBound())
 		this->CollectiblesWithLowestListingsResponse.Broadcast(Status, ChainId, Response);

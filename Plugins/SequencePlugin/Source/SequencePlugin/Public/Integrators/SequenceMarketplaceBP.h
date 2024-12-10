@@ -5,7 +5,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceMarketplaceBP.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetCollectiblesWithLowestListings, bool, Status, const int64, ChainId, FSeqGetCollectiblesWithLowestListingsReturn, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetCollectiblesWithLowestListings, bool, Status, const int64, ChainId, FSeqListCollectiblesReturn, Response);
 
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
@@ -15,16 +15,17 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 public:
 	USequenceMarketplaceBP();
 
+	
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnGetCollectiblesWithLowestListings CollectiblesWithLowestListingsResponse;
 
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetGetCollectiblesWithLowestListingsAsync(const int64 ChainId, const FSeqGetCollectiblesWithLowestListingsArgs& Args);
+	void GetGetCollectiblesWithLowestListingsAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
 
 private:
 
 	UMarketplace* Marketplace;
 
-	void CallCollectiblesWithLowestListingsReceived(const bool Status, const int64 ChainId, const FSeqGetCollectiblesWithLowestListingsReturn& Response);
+	void CallCollectiblesWithLowestListingsReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response);
 };

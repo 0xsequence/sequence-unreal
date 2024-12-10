@@ -4,7 +4,11 @@
 #include "Sequence/SequenceAPI.h"
 #include "SequenceAuthenticator.h"
 #include "ABI/ABI.h"
+#include "Marketplace/Marketplace.h"
+#include "Marketplace/Structs/SeqCollectibleOrder.h"
+#include "Marketplace/Structs/SeqCollectiblesFilter.h"
 #include "Native/NativeOAuth.h"
+
 
 /*
  * testing stack based implementation for memory faults
@@ -461,4 +465,65 @@ void SequenceAPITest::TestLoadTransakUrl()
 		USequenceWallet * Api = WalletOptional.GetValue();
 		Api->OpenTransakLink();
 	}
+}
+
+void SequenceAPITest::ListCurrencies(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+
+	Marketplace->ListCurrencies(Support->GetNetworkId(PolygonChain), [OnSuccess](FSeqListCurrenciesReturn Response)
+	{
+		FString Currencies = "Currencies: \n";
+
+		for(FSeqCurrency Currency : Response.Currencies)
+		{
+			Currencies += USequenceSupport::StructToString(Currency) + "\n";
+		}
+
+		OnSuccess(Currencies);
+	}, [OnFailure](FSequenceError Error)
+	{
+		OnFailure("Error: " + Error.Message, Error);
+	});
+}
+
+void SequenceAPITest::ListCollectibleListingsWithLowestPricedListingsFirst(TFunction<void(FString)> OnSuccess,
+                                                                           TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		FSeqCollectiblesFilter::Empty(),
+		FSeqMarketplacePage::Empty(),
+		[OnSuccess](FSeqListCollectiblesReturn Orders) {
+			OnSuccess("Orders: " + FString::FromInt(Orders.CollectibleOrders.Num()));
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(TFunction<void(FString)> OnSuccess,
+                                                                             TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
+			OnSuccess("Orders: " + FString::FromInt(Orders.Num()));
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
 }
