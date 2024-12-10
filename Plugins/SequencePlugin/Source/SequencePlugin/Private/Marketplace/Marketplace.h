@@ -56,7 +56,7 @@ public:
 
     UMarketplace();
 
-    void GetCollectibleListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure);
+    void GetCollectiblesWithLowestListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 
 
