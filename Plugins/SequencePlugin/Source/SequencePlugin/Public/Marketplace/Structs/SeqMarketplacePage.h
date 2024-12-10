@@ -33,6 +33,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Page")
     bool More;
 
+    static FSeqMarketplacePage Empty()
+    {
+        return FSeqMarketplacePage{};
+    }
+
     bool ContainsData()
     {
         bool ret = false;//assume nothing & look for true states!

@@ -77,6 +77,15 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestGuestLogin();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListCurrencies() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListCollectibleListingsWithLowestPriceListingsFirst() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListAllCollectibleListingsWithLowestPriceListingsFirst() const;
 	
 	/*
 	* Called by frontend to test the indexer
