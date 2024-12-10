@@ -197,9 +197,11 @@ public:
                 if (feeValue->Type == EJson::Object)
                 {
                     FSeqFeeBreakdown fee;
-                    TSharedPtr<FJsonObject> feeJsonObject = USequenceSupport::JsonStringToObject(feeValue->AsString()); 
-                    fee.Setup(*feeJsonObject); 
-                    FeeBreakdown.Add(fee); 
+                    //TSharedPtr<FJsonObject> feeJsonObject = USequenceSupport::JsonStringToObject(feeValue->AsString()); 
+                    fee.Setup(*feeValue->AsObject()); 
+                    FeeBreakdown.Add(fee);
+
+                    UE_LOG(LogTemp, Warning, TEXT("fee setup"));
                 }
             }
         }

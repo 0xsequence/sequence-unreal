@@ -220,6 +220,51 @@ void AGeneralTesting::TestGuestLogin()
 	Auth->GuestLogin(false);
 }
 
+void AGeneralTesting::TestListCurrencies() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListCurrencies(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListCollectibleListingsWithLowestPriceListingsFirst() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListCollectibleListingsWithLowestPricedListingsFirst(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListAllCollectibleListingsWithLowestPriceListingsFirst() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)

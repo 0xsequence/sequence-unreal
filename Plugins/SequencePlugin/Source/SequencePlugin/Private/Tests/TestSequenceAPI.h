@@ -21,4 +21,9 @@ public:
 	static void GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
 	static void TestLoadTransakUrl();
+
+	// Market
+	static void ListCurrencies(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void ListCollectibleListingsWithLowestPricedListingsFirst(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void ListAllCollectibleListingsWithLowestPriceListingsFirst(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 };
