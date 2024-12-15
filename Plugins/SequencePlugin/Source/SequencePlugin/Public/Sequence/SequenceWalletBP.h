@@ -75,6 +75,9 @@ public:
 	FOnIApiGetUnFilteredFeeOptions OnApiGetUnFilteredFeeOptions;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	FOnIApiSendTransaction OnApiSendEther;
+	
+	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiSendTransactionWtihFeeOption OnApiSendTransactionWithFeeOption;
 
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
@@ -140,6 +143,7 @@ private:
 	void CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const;
 	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
 	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
+	void CallOnApiSendEther(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
 	void CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const;
@@ -258,6 +262,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiGetUnfilteredFeeOptions(UTransactions * Transactions);
 
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void ApiSendEther(const FString& RecipientAddress, const FString& Amount);
+	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiSendTransactionWithFee(UTransactions * Transactions);
 

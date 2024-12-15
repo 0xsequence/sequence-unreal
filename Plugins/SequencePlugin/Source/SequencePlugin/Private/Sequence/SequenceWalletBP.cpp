@@ -40,6 +40,14 @@ void USequenceWalletBP::CallOnApiGetUnFilteredFeeOptions(const FSequenceResponse
 		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiGetUnFilteredFeeOptions]"));
 }
 
+void USequenceWalletBP::CallOnApiSendEther(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const
+{
+	if (this->OnApiSendEther.IsBound())
+		this->OnApiSendEther.Broadcast(Status, Response);
+	else
+		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: OnApiSendEther]"));
+}
+
 void USequenceWalletBP::CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const
 {
 	if (this->OnApiSendTransactionWithFeeOption.IsBound())
@@ -373,6 +381,26 @@ void USequenceWalletBP::ApiGetUnfilteredFeeOptions(UTransactions * Transactions)
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->GetUnfilteredFeeOptions(Transactions->GetTransactions(), OnSuccess, OnFailure);
+	}
+}
+
+void USequenceWalletBP::ApiSendEther(const FString& RecipientAddress, const FString& Amount)
+{
+	const TFunction<void (FSeqTransactionResponse_Data)> OnSuccess = [this](const FSeqTransactionResponse_Data& Response)
+	{
+		this->CallOnApiSendEther(FSequenceResponseStatus(true, SendTransactionWithFeeTrt), Response);
+	};
+
+	const TFunction<void (FSequenceError)> OnFailure = [this](const FSequenceError& Err)
+	{
+		this->CallOnApiSendEther(FSequenceResponseStatus(false, Err.Message, SendTransactionWithFeeTrt), FSeqTransactionResponse_Data());
+	};
+	
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
+		Wallet->SendEther(RecipientAddress, Amount, OnSuccess, OnFailure);
 	}
 }
 
