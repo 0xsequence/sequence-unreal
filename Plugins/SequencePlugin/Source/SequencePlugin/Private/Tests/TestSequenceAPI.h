@@ -24,6 +24,14 @@ public:
 
 	// Market
 	static void ListCurrencies(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
-	static void ListCollectibleListingsWithLowestPricedListingsFirst(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
 	static void ListAllCollectibleListingsWithLowestPriceListingsFirst(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void ListAllCollectibleOffersWithHighestPricedOfferFirst(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetLowestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetHighestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetLowestPriceListingForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetHighestPriceListingForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void ListAllListingsForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void ListAllOffersForCollectible(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	static void GetFloorOrder(TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure);
+	
 };
