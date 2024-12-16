@@ -489,26 +489,6 @@ void SequenceAPITest::ListCurrencies(TFunction<void(FString)> OnSuccess,
 	});
 }
 
-void SequenceAPITest::ListCollectibleListingsWithLowestPricedListingsFirst(TFunction<void(FString)> OnSuccess,
-                                                                           TFunction<void(FString, FSequenceError)> OnFailure)
-{
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
-	USequenceSupport* Support = NewObject<USequenceSupport>();
-		
-	Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(
-		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
-		FSeqCollectiblesFilter::Empty(),
-		FSeqMarketplacePage::Empty(),
-		[OnSuccess](FSeqListCollectiblesReturn Orders) {
-			OnSuccess("Orders: " + FString::FromInt(Orders.CollectibleOrders.Num()));
-		},
-		[OnFailure](FSequenceError Error) {
-			OnFailure("Error: " + Error.Message, Error);
-		}
-	);
-}
-
 void SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(TFunction<void(FString)> OnSuccess,
                                                                              TFunction<void(FString, FSequenceError)> OnFailure)
 {
@@ -527,3 +507,162 @@ void SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(TFu
 		}
 	);
 }
+
+void SequenceAPITest::ListAllCollectibleOffersWithHighestPricedOfferFirst(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
+			OnSuccess("Orders: " + FString::FromInt(Orders.Num()));
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::GetLowestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->GetLowestPriceOfferForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"1",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](FSeqCollectibleOrder Order) {
+			OnSuccess("Order: " + Order.Order.OrderId);
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::GetHighestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->GetHighestPriceOfferForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"1",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](FSeqCollectibleOrder Order) {
+			OnSuccess("Order: " + Order.Order.OrderId);
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::GetLowestPriceListingForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->GetLowestPriceListingForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		"130",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](FSeqCollectibleOrder Order) {
+			OnSuccess("Order: " + Order.Order.OrderId);
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::GetHighestPriceListingForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->GetLowestPriceListingForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		"130",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](FSeqCollectibleOrder Order) {
+			OnSuccess("Order: " + Order.Order.OrderId);
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::ListAllListingsForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->ListAllListingsForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		"130",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
+			OnSuccess("Orders: " + FString::FromInt(Orders.Num()));
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::ListAllOffersForCollectible(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->ListAllOffersForCollectible(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"1",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
+			OnSuccess("Orders: " + FString::FromInt(Orders.Num()));
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+
+void SequenceAPITest::GetFloorOrder(TFunction<void(FString)> OnSuccess,
+	TFunction<void(FString, FSequenceError)> OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceSupport* Support = NewObject<USequenceSupport>();
+		
+	Marketplace->GetFloorOrder(
+		Support->GetNetworkId(ENetwork::PolygonChain),
+		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
+		FSeqCollectiblesFilter::Empty(),
+		[OnSuccess](FSeqCollectibleOrder Order) {
+			OnSuccess("Order: %s" + Order.Order.OrderId);
+		},
+		[OnFailure](FSequenceError Error) {
+			OnFailure("Error: " + Error.Message, Error);
+		}
+	);
+}
+

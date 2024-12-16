@@ -334,7 +334,6 @@ void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAdd
 				const FSeqGetOrderReturn Response = this->BuildResponse<FSeqGetOrderReturn>(Content);
 				OnSuccess(Response.Collectible);
 			}, OnFailure);
-	
 }
 
 
