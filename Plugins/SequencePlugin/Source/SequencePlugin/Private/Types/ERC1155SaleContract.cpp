@@ -1,5 +1,6 @@
 #include "Types/ERC1155SaleContract.h"
 #include "ABI/ABI.h"
+#include "Util/Log.h"
 
 UERC1155SaleContract::UERC1155SaleContract()
 {
@@ -16,12 +17,12 @@ UERC1155SaleContract::UERC1155SaleContract(FString ContractAddress, FString Paym
 FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof)
 {
 	FString FunctionSignature = "mint(address,uint256[],uint256[],bytes,address,uint256,bytes32[])";
-
+	
 	FString WalletAddress = ToAddress;
 	FString WalletAddressNoPrefix = WalletAddress.Mid(2, WalletAddress.Len());
 	FAddress WalletAddressBytes = FAddress::From(WalletAddressNoPrefix);
 
-	TFixedABIData ABIAccount = ABI::Address(WalletAddressBytes);
+	TSharedPtr<TFixedABIData> ABIAccount = MakeShared<TFixedABIData>(ABI::Address(WalletAddressBytes));
 
 	TArray<TSharedPtr<ABIElement>> TokenIdsArray;
 	for (uint32 TokenId : TokenIds)
@@ -29,7 +30,7 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 		const TFixedABIData* TokenIdData = new TFixedABIData(ABI::Int32(TokenId));
 		TokenIdsArray.Add(MakeShared<TFixedABIData>(*TokenIdData));
 	}
-	TDynamicABIArray ABIArrayTokenIds(TokenIdsArray);
+	TSharedPtr<TDynamicABIArray> ABIArrayTokenIds = MakeShared<TDynamicABIArray>(TokenIdsArray);
 
 	TArray<TSharedPtr<ABIElement>> AmountsArray;
 	for (uint32 Amount : Amounts)
@@ -37,7 +38,7 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 		const TFixedABIData* AmountData = new TFixedABIData(ABI::Int32(Amount));
 		AmountsArray.Add(MakeShared<TFixedABIData>(*AmountData));
 	}
-	TDynamicABIArray ABIArrayAmounts(AmountsArray);
+	TSharedPtr<TDynamicABIArray> ABIArrayAmounts = MakeShared<TDynamicABIArray>(AmountsArray);
 
 	TArray<TSharedPtr<ABIElement>> ProofArray;
 	for (const FString& ProofEntry : Proof)
@@ -49,28 +50,33 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 		const TFixedABIData* ProofData = new TFixedABIData(ProofBytes);
 		ProofArray.Add(MakeShared<TFixedABIData>(*ProofData));
 	}
-	TDynamicABIArray ABIArrayProof(ProofArray);
+	TSharedPtr<TDynamicABIArray> ABIArrayProof = MakeShared<TDynamicABIArray>(ProofArray);
 
-	TDynamicABIData ABIData = ABI::String(Data);
-	TFixedABIData ABIAddressPayment = ABI::Address(FAddress::From(PaymentToken.Mid(2, PaymentToken.Len())));
-	TFixedABIData ABIAmount = ABI::UInt32(MaxTotal);
+	TSharedPtr<TDynamicABIData> ABIData = MakeShared<TDynamicABIData>(ABI::String(Data));
+	TSharedPtr<TFixedABIData> ABIAddressPayment = MakeShared<TFixedABIData>(ABI::Address(FAddress::From(PaymentToken.Mid(2, PaymentToken.Len()))));
+	TSharedPtr<TFixedABIData> ABIAmount = MakeShared<TFixedABIData>(ABI::UInt32(MaxTotal));
 
 
-	TArray<ABIElement*> Arr;
-	Arr.Add(&ABIAccount);
-	Arr.Add(&ABIArrayTokenIds);
-	Arr.Add(&ABIArrayAmounts);
-	Arr.Add(&ABIData);
-	Arr.Add(&ABIAddressPayment);
-	Arr.Add(&ABIAmount);
-	Arr.Add(&ABIArrayProof);
+	TArray<TSharedPtr<ABIElement>> Arr;
+	Arr.Add(ABIAccount);
+	Arr.Add(ABIArrayTokenIds);
+	Arr.Add(ABIArrayAmounts);
+	Arr.Add(ABIData);
+	Arr.Add(ABIAddressPayment);
+	Arr.Add(ABIAmount);
+	Arr.Add(ABIArrayProof);
 
-	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-
+	TOptional<FUnsizedData> EncodedData = ABI::Encode(FunctionSignature, Arr);
 	FRawTransaction T;
+	
+	if (!EncodedData.IsSet())
+	{
+		SEQ_LOG(Display, TEXT("Encoded data is invalid"));
+		return T;
+	}
 
 	T.to = ContractAddress;
-	T.data = "0x" + EncodedData.ToHex();
+	T.data = "0x" + EncodedData.GetValue().ToHex();
 	T.value = "0";
     return T;
 }
