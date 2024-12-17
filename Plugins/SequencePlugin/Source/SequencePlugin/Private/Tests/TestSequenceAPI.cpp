@@ -535,7 +535,7 @@ void SequenceAPITest::GetLowestPriceOfferForCollectible(TFunction<void(FString)>
 		
 	Marketplace->GetLowestPriceOfferForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
 		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](FSeqCollectibleOrder Order) {
@@ -555,7 +555,7 @@ void SequenceAPITest::GetHighestPriceOfferForCollectible(TFunction<void(FString)
 		
 	Marketplace->GetHighestPriceOfferForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
 		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](FSeqCollectibleOrder Order) {
@@ -575,8 +575,8 @@ void SequenceAPITest::GetLowestPriceListingForCollectible(TFunction<void(FString
 		
 	Marketplace->GetLowestPriceListingForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
-		"130",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
+		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](FSeqCollectibleOrder Order) {
 			OnSuccess("Order: " + Order.Order.OrderId);
@@ -595,8 +595,8 @@ void SequenceAPITest::GetHighestPriceListingForCollectible(TFunction<void(FStrin
 		
 	Marketplace->GetLowestPriceListingForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
-		"130",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
+		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](FSeqCollectibleOrder Order) {
 			OnSuccess("Order: " + Order.Order.OrderId);
@@ -615,8 +615,8 @@ void SequenceAPITest::ListAllListingsForCollectible(TFunction<void(FString)> OnS
 		
 	Marketplace->ListAllListingsForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
-		"130",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
+		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
 			OnSuccess("Orders: " + FString::FromInt(Orders.Num()));
@@ -635,7 +635,7 @@ void SequenceAPITest::ListAllOffersForCollectible(TFunction<void(FString)> OnSuc
 		
 	Marketplace->ListAllOffersForCollectible(
 		Support->GetNetworkId(ENetwork::PolygonChain),
-		"0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+		"0x079294e6ffec16234578c672fa3fbfd4b6c48640",
 		"1",
 		FSeqCollectiblesFilter::Empty(),
 		[OnSuccess](TArray<FSeqCollectibleOrder> Orders) {
