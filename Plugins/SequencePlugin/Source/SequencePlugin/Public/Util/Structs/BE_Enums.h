@@ -35,6 +35,7 @@ enum ENetwork
     Xai                UMETA(DisplayName = "Xai"),
     LAOS               UMETA(DisplayName = "LAOS"),
     Root        UMETA(DisplayName = "Root Network"),
+	Soneium			   UMETA(DisplayName = "Soneium"),
 
 	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
