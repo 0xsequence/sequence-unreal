@@ -97,7 +97,7 @@ void ABI::Decode(TArray<uint8> Data, TArray<TSharedPtr<ABIElement>> Args)
 
 bool ABI::IsValidSignature(FString Signature)
 {
-	const FRegexPattern FunctionABIRegex(TEXT("^[a-z]+\\(([a-z0-9\\[\\]]+(,[a-z0-9\\[\\]]+)*)\\)$"));
+	const FRegexPattern FunctionABIRegex(TEXT("^[A-Z|a-z|_,-|0-9]+\\(([A-Za-z0-9\\[\\]]+(, *[A-Za-z0-9\\[\\]]+)*)?\\)$"));
 	FRegexMatcher MyMatcher(FunctionABIRegex, Signature);
 	return MyMatcher.FindNext();
 }
