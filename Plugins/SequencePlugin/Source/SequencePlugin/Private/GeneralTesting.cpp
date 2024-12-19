@@ -220,6 +220,156 @@ void AGeneralTesting::TestGuestLogin()
 	Auth->GuestLogin(false);
 }
 
+void AGeneralTesting::TestListCurrencies() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListCurrencies(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListAllCollectibleListingsWithLowestPriceListingsFirst() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListAllCollectibleOffersWithHighestPricedOfferFirst() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListAllCollectibleOffersWithHighestPricedOfferFirst(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetLowestPriceOfferForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetLowestPriceOfferForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetHighestPriceOfferForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetHighestPriceOfferForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetLowestPriceListingForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetLowestPriceListingForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetHighestPriceListingForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetHighestPriceListingForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListAllListingsForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListAllListingsForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestListAllOffersForCollectible() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::ListAllOffersForCollectible(OnSuccess, OnFailure);
+}
+
+void AGeneralTesting::TestGetFloorOrder() const
+{
+	const TFunction<void (FString)> OnSuccess = [this](FString State)
+	{
+		CallbackPassed(State);
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnFailure = [this](FString Data, FSequenceError Err)
+	{
+		CallbackFailed(Data, Err);
+	};
+	
+	SequenceAPITest::GetFloorOrder(OnSuccess, OnFailure);
+}
+
 void AGeneralTesting::TestIndexer()
 {
 	TFunction<void(FString)> OnSuccess = [this](FString State)

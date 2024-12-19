@@ -77,6 +77,37 @@ protected:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
 	void TestGuestLogin();
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListCurrencies() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListAllCollectibleListingsWithLowestPriceListingsFirst() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListAllCollectibleOffersWithHighestPricedOfferFirst() const;
+	
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetLowestPriceOfferForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetHighestPriceOfferForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetLowestPriceListingForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetHighestPriceListingForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListAllListingsForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestListAllOffersForCollectible() const;
+
+	UFUNCTION(BlueprintCallable, CATEGORY = "Test_API")
+	void TestGetFloorOrder() const;
+	
 	
 	/*
 	* Called by frontend to test the indexer
