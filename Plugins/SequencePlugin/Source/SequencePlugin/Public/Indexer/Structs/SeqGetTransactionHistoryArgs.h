@@ -14,8 +14,8 @@ struct SEQUENCEPLUGIN_API FSeqGetTransactionHistoryArgs
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FSeqTransactionHistoryFilter filter;
-
-        TOptional<FSeqPage> page;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+        FSeqPage page;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool includeMetaData = false;
 
