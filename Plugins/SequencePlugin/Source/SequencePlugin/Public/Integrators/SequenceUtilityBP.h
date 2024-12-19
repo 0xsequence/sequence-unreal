@@ -23,4 +23,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	UTransactions* ConstructSingleERC1155Transaction(const FString& ContractAddress, const FString& RecipientAddress, const FString& TokenId, const FString& Amount);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void ClipboardCopy(const FString& Text);
 };

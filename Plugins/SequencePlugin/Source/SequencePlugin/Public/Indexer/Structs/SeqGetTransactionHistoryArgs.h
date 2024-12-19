@@ -14,8 +14,8 @@ struct SEQUENCEPLUGIN_API FSeqGetTransactionHistoryArgs
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         FSeqTransactionHistoryFilter filter;
-
-        TOptional<FSeqPage> page;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+        FSeqPage page;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool includeMetaData = false;
 
@@ -25,12 +25,12 @@ public:
         FString ret = "{";
         ret.Append("\"filter\":");
         ret.Append(filter.GetArgs());//get the args! MUST Have this!
-        if (page.IsSet())
+        if (page.containsData())
         {
             ret.Append(".\"page\":");
-            ret.Append(page.GetValue().GetArgs());
+            ret.Append(page.GetArgs());
             TSharedPtr<FJsonObject> PageObject = MakeShared<FJsonObject>();
-            FJsonObjectConverter::UStructToJsonObject(FSeqPage::StaticStruct(), &(page.GetValue()), PageObject.ToSharedRef(), 0, 0);
+            FJsonObjectConverter::UStructToJsonObject(FSeqPage::StaticStruct(), &page, PageObject.ToSharedRef(), 0, 0);
             
         }
 

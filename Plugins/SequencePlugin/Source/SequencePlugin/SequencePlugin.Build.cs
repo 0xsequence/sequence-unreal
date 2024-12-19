@@ -8,6 +8,7 @@ public class SequencePlugin : ModuleRules
 {
 	public SequencePlugin(ReadOnlyTargetRules Target) : base(Target)
 	{
+		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(

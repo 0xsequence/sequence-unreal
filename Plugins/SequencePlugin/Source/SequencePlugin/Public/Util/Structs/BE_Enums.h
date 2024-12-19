@@ -33,6 +33,9 @@ enum ENetwork
     Avalanche          UMETA(DisplayName = "Avalanche"),
     Blast              UMETA(DisplayName = "Blast"),
     Xai                UMETA(DisplayName = "Xai"),
+    LAOS               UMETA(DisplayName = "LAOS"),
+    Root        UMETA(DisplayName = "Root Network"),
+	Soneium			   UMETA(DisplayName = "Soneium"),
 
 	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
@@ -44,12 +47,13 @@ enum ENetwork
     AvalancheTestnet    UMETA(DisplayName = "Avalanche Testnet"),
     PolygonAmoy        UMETA(DisplayName = "Polygon Amoy"),
     BaseSepolia        UMETA(DisplayName = "Base Sepolia"),
-	BorneTestnet	   UMETA(DisplayName = "Borne Testnet"),
     ArbitrumSepolia    UMETA(DisplayName = "Arbitrum Sepolia"),
     Sepolia            UMETA(DisplayName = "Sepolia"),
     OptimismSepolia    UMETA(DisplayName = "Optimism Sepolia"),
 	TOYTestnet 		   UMETA(DisplayName = "TOY Testnet"),
 	SKALENebulaGamingHubTestnet UMETA(DisplayName = "SKALE Nebula Gaming Hub Testnet"),
     BlastSepolia       UMETA(DisplayName = "Blast Sepolia"),
-    XaiSepolia         UMETA(DisplayName = "XAI Sepolia")
+    XaiSepolia         UMETA(DisplayName = "XAI Sepolia"),
+    LAOSSigma          UMETA(DisplayName = "LAOS Sigma Testnet"),
+    RootPorcini        UMETA(DisplayName = "Root Network Porcini Testnet"),
 };
