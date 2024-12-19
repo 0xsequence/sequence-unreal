@@ -1,5 +1,6 @@
 #include "Types/ERC721SaleContract.h"
 #include "ABI/ABI.h"
+#include "Util/Log.h"
 
 UERC721SaleContract::UERC721SaleContract()
 {
@@ -19,15 +20,15 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
 
     FString ToAddressNoPrefix = ToAddress.Mid(2, ToAddress.Len());
     FAddress ToAddressBytes = FAddress::From(ToAddressNoPrefix);
-    TFixedABIData ABIAccountTo = ABI::Address(ToAddressBytes);
+    TSharedPtr<TFixedABIData> ABIAccountTo = MakeShared<TFixedABIData>(ABI::Address(ToAddressBytes));
 
-    TFixedABIData ABIAmount = ABI::Int32(Amount); 
+    TSharedPtr<TFixedABIData> ABIAmount = MakeShared<TFixedABIData>(ABI::Int32(Amount)); 
 
     FString PaymentTokenNoPrefix = PaymentToken.Mid(2, PaymentToken.Len());
     FAddress PaymentTokenBytes = FAddress::From(PaymentTokenNoPrefix);
-    TFixedABIData ABIAddressPayment = ABI::Address(PaymentTokenBytes);
+    TSharedPtr<TFixedABIData> ABIAddressPayment = MakeShared<TFixedABIData>(ABI::Address(PaymentTokenBytes));
 
-    TFixedABIData ABIMaxTotal = ABI::Int32(MaxTotal);
+    TSharedPtr<TFixedABIData> ABIMaxTotal = MakeShared<TFixedABIData>(ABI::Int32(MaxTotal));
 
     TArray<TSharedPtr<ABIElement>> ProofArray;
     for (const FString& ProofEntry : Proof)
@@ -35,23 +36,29 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
         TArray<uint8> ProofBytes;
         ProofBytes.SetNumUninitialized(32);
         FMemory::Memcpy(ProofBytes.GetData(), TCHAR_TO_UTF8(*ProofEntry), FMath::Min(ProofEntry.Len(), 32));
-        
+
         const TFixedABIData* ProofData = new TFixedABIData(ProofBytes);
         ProofArray.Add(MakeShared<TFixedABIData>(*ProofData));
     }
-    TDynamicABIArray ABIArrayProof(ProofArray);
+    TSharedPtr<TDynamicABIArray> ABIArrayProof = MakeShared<TDynamicABIArray>(ProofArray);
 
-    TArray<ABIElement*> Arr;
-    Arr.Add(&ABIAccountTo);      
-    Arr.Add(&ABIAmount);         
-    Arr.Add(&ABIAddressPayment); 
-    Arr.Add(&ABIMaxTotal);       
-    Arr.Add(&ABIArrayProof);     
+    TArray<TSharedPtr<ABIElement>> Arr;
+    Arr.Add(ABIAccountTo);      
+    Arr.Add(ABIAmount);         
+    Arr.Add(ABIAddressPayment); 
+    Arr.Add(ABIMaxTotal);       
+    Arr.Add(ABIArrayProof);     
 
-    FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-
+    TOptional<FUnsizedData> EncodedData = ABI::Encode(FunctionSignature, Arr);
     FRawTransaction T;
-    T.data = "0x" + EncodedData.ToHex();
+	
+    if (!EncodedData.IsSet())
+    {
+        SEQ_LOG(Display, TEXT("Encoded data is invalid"));
+        return T;
+    }
+
+    T.data = "0x" + EncodedData.GetValue().ToHex();
     T.to = ContractAddress;
     T.value = "0";
    

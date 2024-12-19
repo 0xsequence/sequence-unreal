@@ -3,7 +3,7 @@
 #include "Integrators/SequenceUtilityBP.h"
 
 #include "Engine/Engine.h"
-#include "Kismet/GameplayStatics.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
@@ -50,4 +50,11 @@ UTransactions* USequenceUtilityBP::ConstructSingleERC1155Transaction(const FStri
 	Transactions->AddERC1155(Transaction);
 	
 	return Transactions;
+}
+
+void USequenceUtilityBP::ClipboardCopy(const FString& Text)
+{
+	TArray<TCHAR> CharArray = Text.GetCharArray();
+	const TCHAR* CharArrayPtr = CharArray.GetData();
+	FPlatformApplicationMisc::ClipboardCopy(CharArrayPtr);
 }

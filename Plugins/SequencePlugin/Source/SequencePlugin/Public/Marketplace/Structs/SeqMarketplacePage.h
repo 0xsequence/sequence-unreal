@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqMarketplaceSortBy.h"  // Ensure this includes your SortBy struct or enum
+#include "Util/SequenceSupport.h"
 #include "SeqMarketplacePage.generated.h"
 
 USTRUCT(BlueprintType)
