@@ -56,6 +56,7 @@ private:
 		FIdName(100,TEXT("gnosis")),
 		FIdName(137,TEXT("polygon")),
 		FIdName(1101,TEXT("polygon-zkevm")),
+		FIdName(1868,TEXT("soneium")),
 		FIdName(6283,TEXT("laos")),
 		FIdName(7668,TEXT("rootnet")),
 		FIdName(8333,TEXT("b3")),
@@ -110,6 +111,7 @@ private:
 		FIdName(660279,TEXT("Xai")),
 		FIdName(6283,TEXT("LAOS")),
 		FIdName(7668,TEXT("Root Network")),
+		FIdName(1868,TEXT("Soneium")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -152,6 +154,7 @@ private:
 		FNameId(TEXT("xai"),660279),
 		FNameId(TEXT("laos"),6283),
 		FNameId(TEXT("rootnet"),7668),
+		FNameId(TEXT("soneium"),1868),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -194,6 +197,7 @@ private:
 		{ENetwork::Xai, 660279},
 		{ENetwork::LAOS, 6283},
 		{ENetwork::Root, 7668},
+		{ENetwork::Soneium, 1868},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -236,6 +240,7 @@ private:
 		{ENetwork::Xai, TEXT("Xai")},
 		{ENetwork::LAOS, TEXT("LAOS")},
 		{ENetwork::Root, TEXT("Root Network")},
+		{ENetwork::Soneium, TEXT("Soneium")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
