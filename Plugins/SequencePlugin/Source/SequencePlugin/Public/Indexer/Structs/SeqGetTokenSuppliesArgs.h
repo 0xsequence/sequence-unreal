@@ -15,7 +15,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
         bool includeMetaData = false;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-        TOptional<FSeqPage> page;
+        FSeqPage page;
 
     bool customGetter = true;
     FString GetArgs() { 
@@ -24,10 +24,10 @@ public:
         JsonObject->SetStringField("contractAddress", contractAddress);
         JsonObject->SetBoolField("includeMetaData", includeMetaData);
     
-        if (page.IsSet())
+        if (page.containsData())
         {
             TSharedPtr<FJsonObject> PageObject = MakeShared<FJsonObject>();
-            FJsonObjectConverter::UStructToJsonObject(FSeqPage::StaticStruct(), &(page.GetValue()), PageObject.ToSharedRef(), 0, 0);
+            FJsonObjectConverter::UStructToJsonObject(FSeqPage::StaticStruct(), &(page), PageObject.ToSharedRef(), 0, 0);
             JsonObject->SetObjectField("page", PageObject);
         }
 

@@ -96,6 +96,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, CATEGORY = "Login")
 		void PlayFabRegisterAndLogin(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
+
+	UFUNCTION(BlueprintCallable, Category = "Login")
+		void PlayfabAuthenticateWithSessionTicket(const FString& SessionTicket);
 	
 	UFUNCTION(BlueprintCallable, CATEGORY = "Federation")
 		void FederateEmail(const FString& EmailIn) const;

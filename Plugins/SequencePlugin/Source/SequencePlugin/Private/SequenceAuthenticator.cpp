@@ -153,6 +153,31 @@ void USequenceAuthenticator::CheckAndFederateSessionInUse()
 	}
 }
 
+void USequenceAuthenticator::AuthenticateUsingPlayfabSessionTicket(const FString& SessionTicket, const bool ForceCreateAccountIn)
+{
+	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+		this->CheckAndFederateSessionInUse();
+	};
+
+	const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+		this->ResetFederateSessionInUse();
+		this->CallAuthFailure(Error.Message);
+	};
+
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		this->SetIsFederatingSessionInUse();
+		this->CallFederateOrForce(FederationData);
+	};
+		
+	this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+}
+
 void USequenceAuthenticator::ResetFederateSessionInUse()
 {
 	this->IsFederatingSessionInUse = false;
@@ -480,27 +505,7 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 	
 	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
-		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
-		{
-			this->InitializeSequence(Credentials);
-			this->CheckAndFederateSessionInUse();
-		};
-
-		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
-			this->ResetFederateSessionInUse();
-			this->CallAuthFailure(Error.Message);
-		};
-
-		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-			this->SetIsFederatingSessionInUse();
-			this->CallFederateOrForce(FederationData);
-		};
-		
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+		this->AuthenticateUsingPlayfabSessionTicket(SessionTicket, ForceCreateAccountIn);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -510,6 +515,11 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 	};
 	
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
+}
+
+void USequenceAuthenticator::PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket)
+{
+	AuthenticateUsingPlayfabSessionTicket(SessionTicket, false);
 }
 
 FString USequenceAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const
