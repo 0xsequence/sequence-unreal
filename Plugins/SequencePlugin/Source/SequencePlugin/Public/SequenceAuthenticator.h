@@ -271,6 +271,7 @@ public:
 	 */
 	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket);
 
+	static FString ValidatePassword(const FString& Password);
 	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
@@ -385,6 +386,8 @@ private:
 	static FString GeneratePlayFabRegisterUrl();
 	
 	static void PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	
+	static FString ValidateUsername(const FString& Username);
+	static FString ValidateEmail(const FString& Email);
+
 	//PlayFab RPC//
 };
