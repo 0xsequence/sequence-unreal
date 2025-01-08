@@ -822,7 +822,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 
@@ -842,7 +842,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
@@ -860,7 +860,7 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 		
@@ -880,7 +880,7 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
