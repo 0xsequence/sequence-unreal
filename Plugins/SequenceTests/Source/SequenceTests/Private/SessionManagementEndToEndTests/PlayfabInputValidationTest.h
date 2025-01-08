@@ -5,6 +5,32 @@
 #include "SequencePlugin/Public/SequenceAuthenticator.h"
 #include "PlayfabInputValidationTest.generated.h"
 
+UENUM()
+enum class EValidationType : uint8
+{
+	Login,
+	NewAccount,
+	Federation,
+	FederationLogin
+};
+
+USTRUCT()
+struct FValidationStep
+{
+	GENERATED_BODY()
+
+	FString ExpectedError;
+	FString TestDescription;
+	TFunction<void()> TestAction;
+
+	FValidationStep() {}
+	FValidationStep(const FString& InExpectedError, const FString& InTestDescription, TFunction<void()> InTestAction)
+		: ExpectedError(InExpectedError)
+		, TestDescription(InTestDescription)
+		, TestAction(InTestAction)
+	{}
+};
+
 UCLASS()
 class UPlayFabInputValidationTestHelper : public UObject
 {
@@ -23,36 +49,28 @@ public:
 	UFUNCTION()
 	void OnFederateFailure(const FString& Error);
 
-	void RunLoginValidationTests();
-	void RunFederationValidationTests();
+	void RunValidationTests(EValidationType ValidationType);
 	bool IsTestComplete() const { return bTestComplete; }
 	bool GetTestPassed() const { return bTestPassed; }
 	bool AreAllTestsComplete() const { return bAllTestsComplete; }
 	FString GetLastError() const { return LastError; }
-	void SetIsLoginTest(bool bIsLogin) { bIsLoginTest = true; }
-	bool IsLoginTest() const { return bIsLoginTest; }
-	void SetIsNewAccountTest(bool bIsNewAccount) { bIsNewAccountTest = true; }
-	bool IsNewAccountTest() const { return bIsNewAccountTest; }
-	void SetIsFederationTest(bool bIsFederation) { bIsFederationTest = true; }
-	bool IsFederationTest() const { return bIsFederationTest; }
-	void SetIsFederationLoginTest(bool bIsFederationLogin) { bIsFederationLoginTest = true; }
-	bool IsFederationLoginTest() const { return bIsFederationLoginTest; }
-
-	void RunNewAccountValidationTests();
-	void RunFederationLoginValidationTests();
+	void SetValidationType(EValidationType Type) { CurrentValidationType = Type; }
+	EValidationType GetValidationType() const { return CurrentValidationType; }
 
 	class FAutomationTestBase* ParentTest;
 
 private:
+	void InitializeAuthenticator();
+	void SetupValidationSteps();
+	TArray<FValidationStep> GetValidationStepsForType(EValidationType Type);
+
 	bool bTestComplete = false;
 	bool bTestPassed = false;
 	bool bAllTestsComplete = false;
 	FString LastError;
 	USequenceAuthenticator* Authenticator = nullptr;
-	bool bIsLoginTest = false;
-	bool bIsNewAccountTest = false;
-	bool bIsFederationTest = false;
-	bool bIsFederationLoginTest = false;
+	EValidationType CurrentValidationType;
+	int32 CurrentStepIndex = -1;
 };
 
 DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForValidationTestComplete, UPlayFabInputValidationTestHelper*, TestHelper);

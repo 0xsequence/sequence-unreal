@@ -682,17 +682,16 @@ FString USequenceAuthenticator::ValidateEmail(const FString& Email)
 		return "Email cannot be empty";
 	}
 
-	// Basic email validation
 	int32 AtIndex;
 
 	if (!Email.FindChar('@', AtIndex) || AtIndex == 0)
 	{
-		return TEXT("Email is invalid");
+		return TEXT("Email is invalid, given " + Email);
 	}
 
 	if (!Email.FindChar('.', AtIndex) || AtIndex == 0)
 	{
-		return TEXT("Email is invalid");
+		return TEXT("Email is invalid, given " + Email);
 	}
 
 	

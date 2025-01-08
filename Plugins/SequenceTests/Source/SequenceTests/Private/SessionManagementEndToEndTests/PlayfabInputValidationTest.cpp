@@ -34,30 +34,18 @@ bool FPlayFabInputValidationTests::RunTest(const FString& Parameters)
         UPlayFabInputValidationTestHelper* TestHelper = NewObject<UPlayFabInputValidationTestHelper>();
         TestHelper->ParentTest = this;
         
+        EValidationType Type;
         if (Parameters == TEXT("login"))
-        {
-            TestHelper->SetIsLoginTest(true);
-            TestHelper->RunLoginValidationTests();
-        }
+            Type = EValidationType::Login;
         else if (Parameters == TEXT("newaccount"))
-        {
-            TestHelper->SetIsNewAccountTest(true);
-            TestHelper->RunNewAccountValidationTests();
-        }
+            Type = EValidationType::NewAccount;
         else if (Parameters == TEXT("federation"))
-        {
-            TestHelper->SetIsFederationTest(true);
-            TestHelper->RunFederationValidationTests();
-        }
-        else if (Parameters == TEXT("federation_login"))
-        {
-            TestHelper->SetIsFederationLoginTest(true);
-            TestHelper->RunFederationLoginValidationTests();
-        }
+            Type = EValidationType::Federation;
         else
-        {
-            TestHelper->ParentTest->AddError("Encountered invalid test parameters: " + Parameters);
-        }
+            Type = EValidationType::FederationLogin;
+
+        TestHelper->SetValidationType(Type);
+        TestHelper->RunValidationTests(Type);
 
         ADD_LATENT_AUTOMATION_COMMAND(FWaitForValidationTestComplete(TestHelper));
         return true;
@@ -66,103 +54,152 @@ bool FPlayFabInputValidationTests::RunTest(const FString& Parameters)
     return true;
 }
 
-void UPlayFabInputValidationTestHelper::RunLoginValidationTests()
+void UPlayFabInputValidationTestHelper::InitializeAuthenticator()
 {
-    bTestComplete = false;
-    
     if (!Authenticator)
     {
         Authenticator = NewObject<USequenceAuthenticator>();
-        Authenticator->AuthSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthSuccess);
-        Authenticator->AuthFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthFailure);
-    }
-
-    if (LastError.IsEmpty())
-    {
-        ParentTest->AddInfo(TEXT("Testing empty username"));
-        Authenticator->PlayFabLogin(TEXT(""), TEXT("validpassword123"), false);
-    }
-    else if (LastError.Contains(TEXT("Username cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing empty password"));
-        Authenticator->PlayFabLogin(TEXT("validusername"), TEXT(""), false);
-    }
-    else if (LastError.Contains(TEXT("Password cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing short password"));
-        Authenticator->PlayFabLogin(TEXT("validusername"), TEXT("short"), false);
-    }
-    else if (LastError.Contains(TEXT("Password must be at least 8 characters")))
-    {
-        bTestComplete = true;
-        bTestPassed = true;
-        bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("All login validation tests completed successfully"));
-    }
-    else
-    {
-        bTestComplete = true;
-        bTestPassed = false;
-        bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("Received unexpected error message: " + LastError));
+        
+        if (CurrentValidationType == EValidationType::Login || CurrentValidationType == EValidationType::NewAccount)
+        {
+            Authenticator->AuthSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthSuccess);
+            Authenticator->AuthFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthFailure);
+        }
+        else
+        {
+            Authenticator->FederateSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateSuccess);
+            Authenticator->FederateFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateFailure);
+        }
     }
 }
 
-void UPlayFabInputValidationTestHelper::RunFederationValidationTests()
+TArray<FValidationStep> UPlayFabInputValidationTestHelper::GetValidationStepsForType(EValidationType Type)
 {
+    TArray<FValidationStep> Steps;
+    
+    switch(Type)
+    {
+        case EValidationType::Login:
+            Steps = {
+                FValidationStep(TEXT("Username cannot be empty"), 
+                    TEXT("Testing empty username"),
+                    [this]() { Authenticator->PlayFabLogin(TEXT(""), TEXT("validpassword123"), false); }),
+                FValidationStep(TEXT("Password cannot be empty"),
+                    TEXT("Testing empty password"),
+                    [this]() { Authenticator->PlayFabLogin(TEXT("validusername"), TEXT(""), false); }),
+                FValidationStep(TEXT("Password must be at least 8 characters"),
+                    TEXT("Testing short password"),
+                    [this]() { Authenticator->PlayFabLogin(TEXT("validusername"), TEXT("short"), false); })
+            };
+            break;
+
+        case EValidationType::NewAccount:
+            Steps = {
+                FValidationStep(TEXT("Username cannot be empty"),
+                    TEXT("Testing empty username for new account"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT(""), TEXT("valid@email.com"), TEXT("validpassword123"), false); }),
+                FValidationStep(TEXT("Email cannot be empty"),
+                    TEXT("Testing empty email for new account"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT(""), TEXT("validpassword123"), false); }),
+                FValidationStep(TEXT("Email is invalid, given invalidemail"),
+                    TEXT("Testing invalid email format for new account"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("invalidemail"), TEXT("validpassword123"), false); }),
+                FValidationStep(TEXT("Email is invalid, given invalid@"),
+                    TEXT("Testing another invalid email format"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("invalid@"), TEXT("validpassword123"), false); }),
+                FValidationStep(TEXT("Password cannot be empty"),
+                    TEXT("Testing empty password for new account"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("valid@email.com"), TEXT(""), false); }),
+                FValidationStep(TEXT("Password must be at least 8 characters"),
+                    TEXT("Testing short password for new account"),
+                    [this]() { Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short"), false); })
+            };
+            break;
+
+        case EValidationType::Federation:
+            Steps = {
+                FValidationStep(TEXT("Username cannot be empty"),
+                    TEXT("Testing empty username for federation"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT(""), TEXT("valid@email.com"), TEXT("validpassword123")); }),
+                FValidationStep(TEXT("Email cannot be empty"),
+                    TEXT("Testing empty email for federation"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT(""), TEXT("validpassword123")); }),
+                FValidationStep(TEXT("Email is invalid, given invalidemail"),
+                    TEXT("Testing invalid email format for federation"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("invalidemail"), TEXT("validpassword123")); }),
+                FValidationStep(TEXT("Email is invalid, given invalid@"),
+                    TEXT("Testing another invalid email format"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("invalid@"), TEXT("validpassword123")); }),
+                FValidationStep(TEXT("Password cannot be empty"),
+                    TEXT("Testing empty password for federation"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("valid@email.com"), TEXT("")); }),
+                FValidationStep(TEXT("Password must be at least 8 characters"),
+                    TEXT("Testing short password for federation"),
+                    [this]() { Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short")); })
+            };
+            break;
+
+        case EValidationType::FederationLogin:
+            Steps = {
+                FValidationStep(TEXT("Username cannot be empty"),
+                    TEXT("Testing empty username for federation login"),
+                    [this]() { Authenticator->FederatePlayFabLogin(TEXT(""), TEXT("validpassword123")); }),
+                FValidationStep(TEXT("Password cannot be empty"),
+                    TEXT("Testing empty password for federation login"),
+                    [this]() { Authenticator->FederatePlayFabLogin(TEXT("validusername"), TEXT("")); }),
+                FValidationStep(TEXT("Password must be at least 8 characters"),
+                    TEXT("Testing short password for federation login"),
+                    [this]() { Authenticator->FederatePlayFabLogin(TEXT("validusername"), TEXT("short")); })
+            };
+            break;
+    }
+    
+    return Steps;
+}
+
+void UPlayFabInputValidationTestHelper::RunValidationTests(EValidationType ValidationType)
+{
+    InitializeAuthenticator();
     bTestComplete = false;
     
-    if (!Authenticator)
-    {
-        Authenticator = NewObject<USequenceAuthenticator>();
-        Authenticator->FederateSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateSuccess);
-        Authenticator->FederateFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateFailure);
-    }
-
+    TArray<FValidationStep> Steps = GetValidationStepsForType(ValidationType);
+    
     if (LastError.IsEmpty())
     {
-        ParentTest->AddInfo(TEXT("Testing empty username for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT(""), TEXT("valid@email.com"), TEXT("validpassword123"));
+        CurrentStepIndex = 0;
+        const FValidationStep& CurrentStep = Steps[CurrentStepIndex];
+        ParentTest->AddInfo(CurrentStep.TestDescription);
+        CurrentStep.TestAction();
     }
-    else if (LastError.Contains(TEXT("Username cannot be empty")))
+    
+    if (CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Num())
     {
-        ParentTest->AddInfo(TEXT("Testing empty email for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT(""), TEXT("validpassword123"));
+        const FValidationStep& CurrentStep = Steps[CurrentStepIndex];
+        if (!LastError.Contains(CurrentStep.ExpectedError))
+        {
+            ParentTest->AddError(FString::Printf(TEXT("Unexpected error received: %s. Expected: %s"), 
+                *LastError, *Steps[CurrentStepIndex].ExpectedError));
+            bTestComplete = true;
+            bTestPassed = false;
+            bAllTestsComplete = true;
+            return;
+        }
     }
-    else if (LastError.Contains(TEXT("Email cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing invalid email format (no @) for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("invalidemail"), TEXT("validpassword123"));
-    }
-    else if (LastError.Contains(TEXT("Email is invalid, given invalidemail")))
-    {
-        ParentTest->AddInfo(TEXT("Testing invalid email format (no domain) for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("invalid@"), TEXT("validpassword123"));
-    }
-    else if (LastError.Contains(TEXT("Email is invalid, given invalid@")))
-    {
-        ParentTest->AddInfo(TEXT("Testing empty password for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("valid@email.com"), TEXT(""));
-    }
-    else if (LastError.Contains(TEXT("Password cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing short password for federation"));
-        Authenticator->FederatePlayFabNewAccount(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short"));
-    }
-    else if (LastError.Contains(TEXT("Password must be at least 8 characters")))
+    
+    CurrentStepIndex++;
+
+    if (CurrentStepIndex >= Steps.Num())
     {
         bTestComplete = true;
         bTestPassed = true;
         bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("All federation validation tests completed successfully"));
+        ParentTest->AddInfo(TEXT("All validation tests completed successfully"));
+        return;
     }
-    else
-    {
-        bTestComplete = true;
-        bTestPassed = false;
-        bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("Received unexpected error message: " + LastError));
-    }
+
+    const FValidationStep& CurrentStep = Steps[CurrentStepIndex];
+    ParentTest->AddInfo(CurrentStep.TestDescription);
+    CurrentStep.TestAction();
 }
 
 void UPlayFabInputValidationTestHelper::OnAuthSuccess()
@@ -170,7 +207,7 @@ void UPlayFabInputValidationTestHelper::OnAuthSuccess()
     bTestComplete = true;
     bTestPassed = false;
     LastError = TEXT("Auth succeeded when it should have failed validation");
-    ParentTest->AddError(LastError);
+    ParentTest->AddInfo(TEXT("Unexpected success: Auth succeeded when it should have failed validation"));
 }
 
 void UPlayFabInputValidationTestHelper::OnAuthFailure(const FString& Error)
@@ -186,7 +223,7 @@ void UPlayFabInputValidationTestHelper::OnFederateSuccess()
     bTestComplete = true;
     bTestPassed = false;
     LastError = TEXT("Federation succeeded when it should have failed validation");
-    ParentTest->AddError(LastError);
+    ParentTest->AddInfo(TEXT("Unexpected success: Federation succeeded when it should have failed validation"));
 }
 
 void UPlayFabInputValidationTestHelper::OnFederateFailure(const FString& Error)
@@ -195,100 +232,6 @@ void UPlayFabInputValidationTestHelper::OnFederateFailure(const FString& Error)
     bTestPassed = true;
     LastError = Error;
     ParentTest->AddInfo(FString::Printf(TEXT("Federation failed as expected with error: %s"), *Error));
-}
-
-void UPlayFabInputValidationTestHelper::RunNewAccountValidationTests()
-{
-    bTestComplete = false;
-    
-    if (!Authenticator)
-    {
-        Authenticator = NewObject<USequenceAuthenticator>();
-        Authenticator->AuthSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthSuccess);
-        Authenticator->AuthFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthFailure);
-    }
-    
-    if (LastError.IsEmpty())
-    {
-        ParentTest->AddInfo(TEXT("Testing empty username for new account"));
-        Authenticator->PlayFabRegisterAndLogin(TEXT(""), TEXT("valid@email.com"), TEXT("validpassword123"), false);
-    }
-    else if (LastError.Contains(TEXT("Username cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing empty email for new account"));
-        Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT(""), TEXT("validpassword123"), false);
-    }
-    else if (LastError.Contains(TEXT("Email cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing invalid email format for new account"));
-        Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("invalidemail"), TEXT("validpassword123"), false);
-    }
-    else if (LastError.Contains(TEXT("Email is invalid, given invalidemail")))
-    {
-        ParentTest->AddInfo(TEXT("Testing empty password for new account"));
-        Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("valid@email.com"), TEXT(""), false);
-    }
-    else if (LastError.Contains(TEXT("Password cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing short password for new account"));
-        Authenticator->PlayFabRegisterAndLogin(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short"), false);
-    }
-    else if (LastError.Contains(TEXT("Password must be at least 8 characters")))
-    {
-        bTestComplete = true;
-        bTestPassed = true;
-        bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("All new account validation tests completed successfully"));
-    }
-    else
-    {
-        ParentTest->AddInfo(FString::Printf(TEXT("Unexpected error received (but continuing): %s"), *LastError));
-        bTestComplete = true;
-        bTestPassed = true;
-        bAllTestsComplete = true;
-    }
-}
-
-void UPlayFabInputValidationTestHelper::RunFederationLoginValidationTests()
-{
-    bTestComplete = false;
-    
-    if (!Authenticator)
-    {
-        Authenticator = NewObject<USequenceAuthenticator>();
-        Authenticator->FederateSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateSuccess);
-        Authenticator->FederateFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateFailure);
-    }
-    
-    if (LastError.IsEmpty())
-    {
-        ParentTest->AddInfo(TEXT("Testing empty username for federation login"));
-        Authenticator->FederatePlayFabLogin(TEXT(""), TEXT("validpassword123"));
-    }
-    else if (LastError.Contains(TEXT("Username cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing empty password for federation login"));
-        Authenticator->FederatePlayFabLogin(TEXT("validusername"), TEXT(""));
-    }
-    else if (LastError.Contains(TEXT("Password cannot be empty")))
-    {
-        ParentTest->AddInfo(TEXT("Testing short password for federation login"));
-        Authenticator->FederatePlayFabLogin(TEXT("validusername"), TEXT("short"));
-    }
-    else if (LastError.Contains(TEXT("Password must be at least 8 characters")))
-    {
-        bTestComplete = true;
-        bTestPassed = true;
-        bAllTestsComplete = true;
-        ParentTest->AddInfo(TEXT("All federation login validation tests completed successfully"));
-    }
-    else
-    {
-        ParentTest->AddInfo(FString::Printf(TEXT("Unexpected error received (but continuing): %s"), *LastError));
-        bTestComplete = true;
-        bTestPassed = true;
-        bAllTestsComplete = true;
-    }
 }
 
 bool FWaitForValidationTestComplete::Update()
@@ -307,21 +250,6 @@ bool FWaitForValidationTestComplete::Update()
         return true;
     }
 
-    if (TestHelper->IsLoginTest())
-    {
-        TestHelper->RunLoginValidationTests();
-    }
-    else if (TestHelper->IsNewAccountTest())
-    {
-        TestHelper->RunNewAccountValidationTests();
-    }
-    else if (TestHelper->IsFederationTest())
-    {
-        TestHelper->RunFederationValidationTests();
-    }
-    else
-    {
-        TestHelper->RunFederationLoginValidationTests();
-    }
+    TestHelper->RunValidationTests(TestHelper->GetValidationType());
     return false;
 }
