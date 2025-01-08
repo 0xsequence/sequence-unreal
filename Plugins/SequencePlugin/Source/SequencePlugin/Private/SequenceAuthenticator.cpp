@@ -822,7 +822,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 
