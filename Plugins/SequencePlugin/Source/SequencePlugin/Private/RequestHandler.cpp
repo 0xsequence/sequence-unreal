@@ -134,34 +134,34 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 void URequestHandler::ProcessAndThen(TFunction<void (FString)> OnSuccess, FFailureCallback OnFailure) const
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
-	{
-		FString CurlCommand = FString::Printf(
-			TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
-			*Req->GetVerb(),                
-			*Req->GetURL(),                 
-			*Req->GetHeader("X-Access-Key"),
-			*FString::Printf(TEXT("%s"),*FString(UTF8_TO_TCHAR(Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\"")))
-		);
+    {
+        FString CurlCommand = FString::Printf(
+            TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
+            *Req->GetVerb(),
+            *Req->GetURL(),
+            *Req->GetHeader("X-Access-Key"),
+            *FString(UTF8_TO_TCHAR(Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
+        );
 
-		SEQ_LOG_EDITOR(Log,TEXT("%s"), *CurlCommand);
-		SEQ_LOG_EDITOR(Log,TEXT("%s"), *Response->GetContentAsString());
+        SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
+        SEQ_LOG_EDITOR(Log, TEXT("%s"), *Response->GetContentAsString());
 
-		if (bWasSuccessful)
-		{
-			OnSuccess(Response->GetContentAsString());
-		}
-		else
-		{
-			if(Response.IsValid())
-			{
-				OnFailure(FSequenceError(RequestFail, "Request is invalid" + Response->GetContentAsString()));
-			}
-			else
-			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
-			}
-		}
-	});
+        if (bWasSuccessful)
+        {
+            OnSuccess(Response->GetContentAsString());
+        }
+        else
+        {
+            if (Response.IsValid())
+            {
+                OnFailure(FSequenceError(RequestFail, "Request is invalid: " + Response->GetContentAsString()));
+            }
+            else
+            {
+                OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
+            }
+        }
+    });
 }
 
 void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess,
