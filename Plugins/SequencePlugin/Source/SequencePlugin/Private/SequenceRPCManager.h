@@ -18,6 +18,7 @@
 /**
  * Used to manage all of the Sequence RPC Calls
  */
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceRPCManager : public UObject
 {
@@ -48,54 +49,66 @@ private:
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = "1.0.0";
-	inline const static FString UrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
-	inline const static FString UrlRegisterPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
-	
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal 1.5.0)"));
+
+	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
+	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
+
+	inline const static FString WaaSSequenceApiUrlPath = TEXT("https://api.sequence.app/rpc/API/");
+
 	//Vars//
 
 	//Requires Credentials//
 	
-	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
-	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message) const;
-	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions) const;
-	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions,const FString& FeeQuote) const;	
-	FString BuildListSessionIntent(const FCredentials_BE& Credentials) const;
-	FString BuildCloseSessionIntent() const;
-	FString BuildSessionValidationIntent() const;
-	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent) const;
+
+	FString BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const;
+	FString BuildSignMessageIntent(const FCredentials_BE& Credentials, const FString& Message, TOptional<int64> CurrentTime) const;
+	FString BuildValidateMessageSignatureIntent(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, TOptional<int64> CurrentTime) const;
+	FString BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const;
+	FString BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote, TOptional<
+	                                          int64> CurrentTime) const;
+	FString BuildGetIdTokenIntent(const FCredentials_BE& Credentials, const FString& nonce, TOptional<int64> CurrentTime) const;
+	FString BuildListSessionIntent(const FCredentials_BE& Credentials, TOptional<int64> CurrentTime) const;
+	FString BuildListAccountsIntent(const FCredentials_BE& Credentials, TOptional<int64> CurrentTime) const;
+	FString BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce, TOptional<int64> CurrentTime) const;
+	FString BuildCloseSessionIntent(TOptional<int64> CurrentTime) const;
+	FString BuildSessionValidationIntent(TOptional<int64> CurrentTime) const;
+	FString BuildFederateAccountIntent(const FFederateAccountData& FederateAccountIntent, TOptional<int64> CurrentTime) const;
 
 	//Requires Credentials//
 
 	//Requires Bootstrap//
 	
-	FString BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData) const;
-	FString BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData) const;	
+	FString BuildOpenSessionIntent(const FOpenSessionData& OpenSessionData, TOptional<int64> CurrentTime) const;
+	FString BuildInitiateAuthIntent(const FInitiateAuthData& InitiateAuthData, TOptional<int64> CurrentTime) const;	
 	FString GeneratePacketSignature(const FString& Packet) const;
-	template<typename T> FString GenerateIntent(T Data) const;
+	template<typename T> FString GenerateIntent(T Data, TOptional<int64> CurrentTime) const;
 
 	//Requires Bootstrap//
 
 	//Url Builder//
 
-	FString BuildUrl() const;
-
 	FString BuildRegisterUrl() const;
+	FString BuildAuthenticatorIntentsUrl() const;
+	FString BuildAPIUrl(const FString& Endpoint) const;
+
 	
 	//Url Builder//
+
+	
 
 	//Session Wallet Management Code//
 
 	void CheckAndUpdateSessionFromPreserveSessionWallet();
 	
 	//Session Wallet Management Code//
-	
-	//RPC Caller//
 
+	//RPC Caller//
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const
+	                  FFailureCallback& OnFailure) const;
+	void SendIntent(const FString& Url, TFunction<FString (TOptional<int64>)> ContentGenerator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
-	//RPC Caller//
-
 	/**
 	 * Updates the SessionWallet with a random one
 	 */
@@ -137,12 +150,25 @@ public:
 	void SignMessage(const FCredentials_BE& Credentials, const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
+	 * Allows you to send a signature for validation using the sequence rpc api
+	 * @param Signature The signature you wish to validate
+	 * @param Message The message that has been signed
+	 * @param OnSuccess The returned Struct from the signing process
+	 * @param OnFailure If an error occurs
+	 */
+
+
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Signature, const FString& Message, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+
+	/**
 	 * Used to send transactions via the sequence rpc api
 	 * @param Credentials Credentials Credentials used to build Intent
 	 * @param Transactions List of Transaction Items you wish to send
 	 * @param OnSuccess Called if the operation succeeds with Transaction Details
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
+
 	void SendTransaction(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
@@ -170,8 +196,15 @@ public:
 	 * @param OnSuccess Called if the operation succeeds with your Sessions
 	 * @param OnFailure Called if the operation fails with an Error
 	 */
+
+	void GetIdToken(const FCredentials_BE& Credentials, const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const;
+
+
 	void ListSessions(const FCredentials_BE& Credentials, const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const;
 
+	void ListAccounts(const FCredentials_BE& Credentials, const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	void GetSessionAuthProof(const FCredentials_BE& Credentials, const FString& Nonce,  const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 	/**
 	 * Used to close the Current Session
 	 * @param Credentials Credentials used to build Intent

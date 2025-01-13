@@ -8,6 +8,7 @@ public class SequencePlugin : ModuleRules
 {
 	public SequencePlugin(ReadOnlyTargetRules Target) : base(Target)
 	{
+		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
@@ -40,7 +41,7 @@ public class SequencePlugin : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "HTTP", "Json", "ApplicationCore", "OpenSSL"
+				"Core", "HTTP", "Json", "ApplicationCore", "Engine", "OpenSSL"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

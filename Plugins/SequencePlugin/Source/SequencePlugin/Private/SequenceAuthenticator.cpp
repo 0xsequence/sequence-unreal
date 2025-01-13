@@ -19,6 +19,7 @@
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Log.h"
 
 USequenceAuthenticator::USequenceAuthenticator()
 {
@@ -46,38 +47,47 @@ USequenceAuthenticator::USequenceAuthenticator()
 
 void USequenceAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
 {
+	switch (Type)
+	{
+		case ESocialSigninType::Apple:
+			this->SignInWithAppleMobile(this);
+			break;
+		case ESocialSigninType::Google:
+			this->SignInWithGoogleMobile(this);
+			break;
+		case ESocialSigninType::FaceBook:
+			SEQ_LOG(Error, TEXT("Facebook Login is not supported yet."))
+			break;
+		case ESocialSigninType::Discord:
+			SEQ_LOG(Error, TEXT("Discord Login is not supported yet."))
+			break;
+	}
+}
+
+void USequenceAuthenticator::SignInWithGoogleMobile(INativeAuthCallback* CallbackHandler)
+{
 #if PLATFORM_ANDROID
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::RequestAuthWebView(GenerateSigninURL(Type),GenerateRedirectURL(Type), this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
+	NativeOAuth::SignInWithGoogle(UConfigFetcher::GetConfigVar(UConfigFetcher::GoogleClientID), CallbackHandler);
+#elif PLATFORM_IOS
+	NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(ESocialSigninType::Google),UrlScheme,CallbackHandler);
 #endif
-	
-#if PLATFORM_IOS
-	FString clientID = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(Type) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
-	switch (Type)
-	{
-	case ESocialSigninType::Apple:
-		NativeOAuth::SignInWithApple(clientID, this);
-		break;
-	case ESocialSigninType::Google:
-		NativeOAuth::SignInWithGoogle_IOS(this->GetSigninURL(Type),UrlScheme,this);
-		break;
-	case ESocialSigninType::FaceBook:
-		break;
-	case ESocialSigninType::Discord:
-		break;
-	}
+}
+
+void USequenceAuthenticator::SignInWithAppleMobile(INativeAuthCallback* CallbackHandler)
+{
+#if PLATFORM_ANDROID
+	const FString RequestUrl = GenerateSigninURL(ESocialSigninType::Apple);
+	const FString RedirectUrl = GenerateRedirectURL(ESocialSigninType::Apple);
+	NativeOAuth::RequestAuthWebView(RequestUrl, RedirectUrl, CallbackHandler);
+#elif PLATFORM_IOS
+	const FString ClientId = UrlScheme + "---" + this->StateToken + UEnum::GetValueAsString(ESocialSigninType::Apple) + "&client_id=" + UConfigFetcher::GetConfigVar(UConfigFetcher::AppleClientID);
+	NativeOAuth::SignInWithApple(ClientId, CallbackHandler);
 #endif
+}
+
+void USequenceAuthenticator::HandleNativeIdToken(const FString& IdToken)
+{
+	this->UpdateMobileLogin_IdToken(IdToken);
 }
 
 void USequenceAuthenticator::SetIsForcing(const bool IsForcingIn)
@@ -142,6 +152,31 @@ void USequenceAuthenticator::CheckAndFederateSessionInUse()
 			this->CallFederateFailure(TEXT("Failed to Federate Session in use"));
 		}
 	}
+}
+
+void USequenceAuthenticator::AuthenticateUsingPlayfabSessionTicket(const FString& SessionTicket, const bool ForceCreateAccountIn)
+{
+	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->InitializeSequence(Credentials);
+		this->CheckAndFederateSessionInUse();
+	};
+
+	const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+		this->ResetFederateSessionInUse();
+		this->CallAuthFailure(Error.Message);
+	};
+
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		this->SetIsFederatingSessionInUse();
+		this->CallFederateOrForce(FederationData);
+	};
+		
+	this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 }
 
 void USequenceAuthenticator::ResetFederateSessionInUse()
@@ -294,33 +329,8 @@ void USequenceAuthenticator::CallFederateOrForce(const FFederationSupportData& F
 
 void USequenceAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
 {
-	//we need to parse out the id_token out of TokenizedUrl
-	TArray<FString> UrlParts;
-	TokenizedUrl.ParseIntoArray(UrlParts,TEXT("?"),true);
-	for (FString part: UrlParts)
-	{
-		if (part.Contains("id_token",ESearchCase::IgnoreCase))
-		{
-			TArray<FString> ParameterParts;
-			part.ParseIntoArray(ParameterParts,TEXT("&"),true);
-			for (FString parameter : ParameterParts)
-			{
-				if (parameter.Contains("id_token",ESearchCase::IgnoreCase))
-				{
-					const FString Token = parameter.RightChop(9);//we chop off: id_token
-					if (this->ReadAndResetIsFederating())
-					{
-						FederateOIDCIdToken(Token);
-					}
-					else
-					{
-						SocialLogin(Token, this->ReadAndResetIsForcing());
-					}
-					return;
-				}//find id_token
-			}//parse out &
-		}//find id_token
-	}//parse out ?
+	const FString IdToken = NativeOAuth::GetIdTokenFromTokenizedUrl(TokenizedUrl);
+	UpdateMobileLogin_IdToken(IdToken);
 }
 
 void USequenceAuthenticator::UpdateMobileLogin_IdToken(const FString& IdTokenIn)
@@ -496,27 +506,7 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 	
 	const TSuccessCallback<FString> OnSuccess = [this, ForceCreateAccountIn](const FString& SessionTicket)
 	{
-		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
-		{
-			this->InitializeSequence(Credentials);
-			this->CheckAndFederateSessionInUse();
-		};
-
-		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
-			this->ResetFederateSessionInUse();
-			this->CallAuthFailure(Error.Message);
-		};
-
-		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
-			this->SetIsFederatingSessionInUse();
-			this->CallFederateOrForce(FederationData);
-		};
-		
-		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+		this->AuthenticateUsingPlayfabSessionTicket(SessionTicket, ForceCreateAccountIn);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -526,6 +516,11 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 	};
 	
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
+}
+
+void USequenceAuthenticator::PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket)
+{
+	AuthenticateUsingPlayfabSessionTicket(SessionTicket, false);
 }
 
 FString USequenceAuthenticator::GenerateRedirectURL(const ESocialSigninType& Type) const

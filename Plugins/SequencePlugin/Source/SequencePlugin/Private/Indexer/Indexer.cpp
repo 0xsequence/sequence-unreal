@@ -36,49 +36,75 @@ FString UIndexer::HostName(const int64 ChainID)
 	Hostname.Append("-indexer.sequence.app");
 	return Hostname;
 }
+// 
 
 /*
 	Here we construct a post request and parse out a response if valid.
-*/
-void UIndexer::HTTPPost(const int64& ChainID,const FString& Endpoint,const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+*/void UIndexer::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const FString Url = *this->Url(ChainID,Endpoint);
+	const FString Url = *this->Url(ChainID, Endpoint);
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
+	FString AccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 
-	SEQ_LOG_EDITOR(Display, TEXT("POST >> %s with payload %s"), *Url, *Args);
-	
 	HTTP_Post_Req->SetVerb("POST");
-	HTTP_Post_Req->SetHeader("Content-Type", "application/json");//2 differing headers for the request
+	HTTP_Post_Req->SetHeader("Content-Type", "application/json"); 
 	HTTP_Post_Req->SetHeader("Accept", "application/json");
-	HTTP_Post_Req->SetHeader("X-Access-Key",UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey));
+	HTTP_Post_Req->SetHeader("X-Access-Key", AccessKey);
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(Url);
 	HTTP_Post_Req->SetContentAsString(Args);
+
+	FString CurlCommand = FString::Printf(
+		TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
+		*HTTP_Post_Req->GetVerb(),
+		*HTTP_Post_Req->GetURL(),
+		*HTTP_Post_Req->GetHeader("X-Access-Key"),
+		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
+	);
+
+	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
+
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
-	{ 
-		if(bWasSuccessful)
 		{
-			const FString Content = Request->GetResponse()->GetContentAsString();
-			SEQ_LOG_EDITOR(Display, TEXT("POST << %d %s (from %s)"), Request->GetResponse()->GetResponseCode(), *Content, *Request->GetURL());
-			
-			OnSuccess(Content);
-		}
-		else
-		{
-			if(Request.IsValid() && Request->GetResponse().IsValid())
+			if (bWasSuccessful && Response.IsValid())
 			{
-				const FString Content = Request->GetResponse()->GetContentAsString();
-				SEQ_LOG_EDITOR(Error, TEXT("POST << %d %s (from %s)"), Request->GetResponse()->GetResponseCode(), *Content, *Request->GetURL());
-				
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Content));
+				const int32 ResponseCode = Response->GetResponseCode();
+				const FString Content = Response->GetContentAsString();
+
+				SEQ_LOG_EDITOR(Log, TEXT("%s"), *Response->GetContentAsString());
+
+				if (ResponseCode >= 200 && ResponseCode < 300 )
+				{
+					TSharedPtr<FJsonObject> JsonResponse;
+					if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), JsonResponse) && JsonResponse->HasField(TEXT("error")))
+					{
+						const FString ErrorMessage = JsonResponse->GetStringField(TEXT("error"));
+						OnFailure(FSequenceError(RequestFail, "API Error: " + ErrorMessage));
+					}
+					else
+					{
+						OnSuccess(Content);
+					}
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, FString::Printf(TEXT("HTTP Error: %d. Response: %s"), ResponseCode, *Content)));
+				}
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				if (Request.IsValid() && Response.IsValid())
+				{
+					const FString Content = Response->GetContentAsString();
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + Content));
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				}
 			}
-			
-		}
-	});
+		});
+
 	HTTP_Post_Req->ProcessRequest();
 }
 
@@ -117,6 +143,7 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 		UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *Text);
 		return T();
 	}
+
 	//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
 	if (Ret_Struct.customConstructor) 
 	{//use the custom constructor!
@@ -201,14 +228,6 @@ void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppli
 	HTTPPost(ChainID, "GetTokenSuppliesMap", BuildArgs<FSeqGetTokenSuppliesMapArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
 		OnSuccess(this->BuildResponse<FSeqGetTokenSuppliesMapReturn>(Content));
-	}, OnFailure);
-}
-
-void UIndexer::GetBalanceUpdates(const int64 ChainID, const FSeqGetBalanceUpdatesArgs& Args, TSuccessCallback<FSeqGetBalanceUpdatesReturn> OnSuccess, const FFailureCallback& OnFailure)
-{
-	HTTPPost(ChainID, "GetBalanceUpdates", BuildArgs<FSeqGetBalanceUpdatesArgs>(Args), [this,OnSuccess](const FString& Content)
-	{
-		OnSuccess(this->BuildResponse<FSeqGetBalanceUpdatesReturn>(Content));
 	}, OnFailure);
 }
 

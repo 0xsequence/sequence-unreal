@@ -9,6 +9,7 @@
 #include "IImageWrapper.h"
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
+#include "Util/Log.h"
 #include "TextureResource.h"
 
 URequestHandler* URequestHandler::PrepareRequest()
@@ -120,8 +121,10 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 			if (!Response.IsValid())
 			{
 				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+			} else
+			{
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 			}
-			OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 		}//if wasn't successful
 		//catch all error case!
 		OnFailure(FSequenceError(RequestFail, "Failed to build QR Image data"));
@@ -130,6 +133,7 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 
 void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)> OnSuccess, FFailureCallback OnFailure) const
 {
+
 	if (Validator.HasFoundTamperedResponse())
 	{
 		UE_LOG(LogTemp, Error, TEXT("Validator is null!"));
@@ -155,9 +159,37 @@ void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFu
 			else
 			{
 				if (Response.IsValid())
+				{
+					OnFailure(FSequenceError(RequestFail, "Request is invalid: " + Response->GetContentAsString()));
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
+				}
+			}
+    });
+}
+
+void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess,
+                                     const FFailureCallback& OnFailure) const
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	{		
+		if(bWasSuccessful)
+		{
+			OnSuccess(Response);
+		}
+		else
+		{
+			if(!Response.IsValid())
+				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+			else
+			{
+				if (Response.IsValid())
 					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 				else
 					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
 			}
-		});
+		}
+	});
 }

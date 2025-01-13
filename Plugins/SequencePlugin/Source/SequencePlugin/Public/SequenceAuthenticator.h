@@ -8,6 +8,7 @@
 #include "ConfigFetcher.h"
 #include "NativeEncryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
+#include "INativeAuthCallback.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
 #include "SequencePlugin/Private/ResponseSignatureValidator.h"
@@ -45,7 +46,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederatio
  * 
  */
 UCLASS()
-class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject
+class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject, public INativeAuthCallback
 {
 	GENERATED_BODY()
 public:
@@ -183,6 +184,13 @@ private:
 	 * If IsFederatingSessionInUse = false, we operate as normal
 	 */
 	void CheckAndFederateSessionInUse();
+
+	/**
+	 * Authenticates using a PlayFab Session Ticket
+	 * @param SessionTicket Session Ticket to authenticate with
+	 * @param ForceCreateAccountIn Force create account if it already exists
+	 */
+	void AuthenticateUsingPlayfabSessionTicket(const FString& SessionTicket, const bool ForceCreateAccountIn);
 public:
 	
 	/**
@@ -262,6 +270,12 @@ public:
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const bool ForceCreateAccountIn);
 
 	/**
+	 * Used to authenticate using a Session Ticket
+	 * @param SessionTicket Session Ticket to login with
+	 */
+	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket);
+
+	/**
 	 * Used to complete Email based authentication, whether it be for normal Authentication OR Federation
 	 * @param CodeIn Received Code from email
 	 */
@@ -321,7 +335,22 @@ public:
 	 * Clears stored credentials on disk with blanks
 	 */
 	void ClearStoredCredentials() const;
-	
+
+	/**
+	 * Sign-In with Google using native plugins
+	 */
+	void SignInWithGoogleMobile(INativeAuthCallback* CallbackHandler);
+
+	/**
+	 * Sign-In with Apple using native plugins
+	 */
+	void SignInWithAppleMobile(INativeAuthCallback* CallbackHandler);
+
+	/**
+	 * Override to handle Id Token received from NativeOAuth.h
+	 */
+	virtual void HandleNativeIdToken(const FString& IdToken) override;
+
 private:
 	
 	FString BuildRedirectPrefix() const;
