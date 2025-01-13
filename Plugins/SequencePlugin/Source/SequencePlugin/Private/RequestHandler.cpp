@@ -131,7 +131,7 @@ void URequestHandler::ProcessAndThen(TFunction<void(UTexture2D*)> OnSuccess, FFa
 	});//lambda
 }
 
-void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)> OnSuccess, FFailureCallback OnFailure) const
+void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)>& OnSuccess, FFailureCallback& OnFailure) const
 {
 
 	if (Validator.HasFoundTamperedResponse())
@@ -170,7 +170,7 @@ void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFu
     });
 }
 
-void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr> OnSuccess,
+void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr>& OnSuccess,
                                      const FFailureCallback& OnFailure) const
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
