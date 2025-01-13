@@ -52,7 +52,7 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 		->ProcessAndThen(RPCValidator,OnSuccess, OnFailure);
 }
 
-void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
