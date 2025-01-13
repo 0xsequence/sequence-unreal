@@ -195,7 +195,7 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSucc
 	});//lambda
 }
 
-void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)> OnSuccess, FFailureCallback OnFailure) const
+void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFunction<void(FString)>& OnSuccess, FFailureCallback& OnFailure) const
 {
 	if (Validator.HasFoundTamperedResponse())
 	{
@@ -219,6 +219,33 @@ void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, TFu
 					OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
 				}
 			}
+			else
+			{
+				if (Response.IsValid())
+				{
+					OnFailure(FSequenceError(RequestFail, "Request is invalid: " + Response->GetContentAsString()));
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
+				}
+			}
+    });
+}
+
+void URequestHandler::ProcessAndThen(TSuccessCallback<FHttpResponsePtr>& OnSuccess,
+                                     const FFailureCallback& OnFailure) const
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	{		
+		if(bWasSuccessful)
+		{
+			OnSuccess(Response);
+		}
+		else
+		{
+			if(!Response.IsValid())
+				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
 			else
 			{
 				if (Response.IsValid())
