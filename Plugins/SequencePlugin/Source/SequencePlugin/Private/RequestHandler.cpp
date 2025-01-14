@@ -69,6 +69,70 @@ FHttpRequestCompleteDelegate& URequestHandler::Process() const
 	return Request->OnProcessRequestComplete();
 }
 
+
+void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure, bool bUseValidator) const
+{
+	if (bUseValidator && Validator.HasFoundTamperedResponse())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Validator is null!"));
+		OnFailure(FSequenceError(RequestFail, "Validator is null."));
+		return;
+	}
+
+	Process().BindLambda([&Validator, bUseValidator, OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				if (!bUseValidator || Validator.ValidateResponseSignature(Response))
+				{
+					UE_LOG(LogTemp, Log, TEXT("Valid Signature or Validator skipped"));
+					OnSuccess(Response->GetContentAsString());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
+					OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
+				}
+			}
+			else
+			{
+				if (Response.IsValid())
+				{
+					OnFailure(FSequenceError(RequestFail, "Request is invalid: " + Response->GetContentAsString()));
+				}
+				else
+				{
+					OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
+				}
+			}
+		});
+}
+
+void URequestHandler::ProcessAndThen(const TSuccessCallback<FHttpResponsePtr>& OnSuccess,
+	const FFailureCallback& OnFailure) const
+{
+	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				OnSuccess(Response);
+			}
+			else
+			{
+				if (!Response.IsValid())
+					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+				else
+				{
+					if (Response.IsValid())
+						OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
+					else
+						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
+				}
+			}
+		});
+}
+
+
 void URequestHandler::ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSuccess, const FFailureCallback OnFailure) const
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -129,67 +193,4 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSucc
 		//catch all error case!
 		OnFailure(FSequenceError(RequestFail, "Failed to build QR Image data"));
 	});//lambda
-}
-
-void URequestHandler::ProcessAndThen(UResponseSignatureValidator& Validator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-
-	if (Validator.HasFoundTamperedResponse())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Validator is null!"));
-		OnFailure(FSequenceError(RequestFail, "Validator is null."));
-		return;
-	}
-
-	Process().BindLambda([&Validator,OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
-		{
-			if (bWasSuccessful)
-			{
-				if (Validator.ValidateResponseSignature(Response))
-				{
-					UE_LOG(LogTemp, Log, TEXT("Valid Signature"));
-					OnSuccess(Response->GetContentAsString());
-				}
-				else
-				{
-					UE_LOG(LogTemp, Log, TEXT("Invalid Signature"));
-					OnFailure(FSequenceError(RequestFail, "Invalid response Signature"));
-				}
-			}
-			else
-			{
-				if (Response.IsValid())
-				{
-					OnFailure(FSequenceError(RequestFail, "Request is invalid: " + Response->GetContentAsString()));
-				}
-				else
-				{
-					OnFailure(FSequenceError(RequestFail, "Request failed: No response received!"));
-				}
-			}
-    });
-}
-
-void URequestHandler::ProcessAndThen(const TSuccessCallback<FHttpResponsePtr>& OnSuccess,
-                                     const FFailureCallback& OnFailure) const
-{
-	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
-	{		
-		if(bWasSuccessful)
-		{
-			OnSuccess(Response);
-		}
-		else
-		{
-			if(!Response.IsValid())
-				OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-			else
-			{
-				if (Response.IsValid())
-					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-				else
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
-			}
-		}
-	});
 }

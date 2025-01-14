@@ -639,7 +639,7 @@ void USequenceAuthenticator::PlayFabRPC(const FString& Url, const FString& Conte
 		->WithVerb("POST")
 		->WithContentAsString(Content);
 
-	RequestHandler->ProcessAndThen(*Validator,OnSuccess, OnFailure);
+	RequestHandler->ProcessAndThen(*Validator,OnSuccess, OnFailure, false);
 }
 
 void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)

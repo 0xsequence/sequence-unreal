@@ -349,7 +349,7 @@ void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Con
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(*RPCManager->Validator, OnSuccess, OnFailure);
+		->ProcessAndThen(*RPCManager->Validator, OnSuccess, OnFailure, false);
 }
 
 void USequenceSessionsBP::CallEmailLoginRequiresCode() const

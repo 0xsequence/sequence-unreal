@@ -38,7 +38,7 @@ public:
 
 	// Process
 	FHttpRequestCompleteDelegate& Process() const;
-	void ProcessAndThen(UResponseSignatureValidator& Validator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void ProcessAndThen(UResponseSignatureValidator& Validator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure, bool bUseValidator = true) const;
 	void ProcessAndThen(const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void ProcessAndThen(const TSuccessCallback<UTexture2D*>& OnSuccess, const FFailureCallback OnFailure) const;
 
