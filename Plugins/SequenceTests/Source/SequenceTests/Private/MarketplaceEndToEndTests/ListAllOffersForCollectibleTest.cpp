@@ -1,5 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
+#include <cstdlib>
+
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "SequencePlugin/Public/Sequence/SequenceAPI.h"
@@ -10,18 +12,18 @@
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListCollectibleOffersWithHighestPricedOfferFirst, "SequencePlugin.EndToEnd.MarketplaceTests.ListCollectibleOffersWithHighestPricedOfferFirst", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllOffersForCollectible, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllOffersForCollectible", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
 
-void FListCollectibleOffersWithHighestPricedOfferFirst::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+void FListAllOffersForCollectible::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
-    OutBeautifiedNames.Add(TEXT("List All Collectible Listings With Lowest Price Listings First Test"));
+    OutBeautifiedNames.Add(TEXT("List All Offers For Collectible Test"));
     OutTestCommands.Add(TEXT(""));
 }
 
-bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& Parameters)
+bool FListAllOffersForCollectible::RunTest(const FString& Parameters)
 {
-    AddInfo(TEXT("Testing List All Collectible Listings With Highest Priced Offer First"));
+    AddInfo(TEXT("Testing List All Offers For Collectible"));
     ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(true));
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
@@ -34,8 +36,8 @@ bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& P
         {
             if(Orders.Num() == 0)
             {
-                const FString Message = "List All Collectible Listings With Highest Priced Offer First Failure";
-                AddError(FString::Printf(TEXT("%s returned no currencies. Remaining tests: %d"), 
+                const FString Message = "List All Listings For Collectible Failure";
+                AddError(FString::Printf(TEXT("%s had no offers. Remaining tests: %d"), 
                     *Message,
                     MarketplaceTestData->DecrementPendingRequests()));
                 MarketplaceTestData->RequestFailed();
@@ -53,7 +55,7 @@ bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& P
 
         const FFailureCallback GenericFailure = [this, MarketplaceTestData](const FSequenceError& Error)
         {
-            const FString Message = "List All Collectible Listings With Highest Priced Offer First Failure";
+            const FString Message = "List All Listings For Collectible Failure";
             AddError(FString::Printf(TEXT("%s with error: %s. Remaining tests: %d"), 
                 *Message, 
                 *Error.Message, 
@@ -61,9 +63,10 @@ bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& P
             MarketplaceTestData->RequestFailed();
         };
 		    
-        MarketplaceTestData->GetMarketplace()->ListAllCollectibleOffersWithHighestPricedOfferFirst(
+        MarketplaceTestData->GetMarketplace()->ListAllOffersForCollectible(
             Support->GetNetworkId(ENetwork::PolygonChain),
-            "0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+            "0x079294e6ffec16234578c672fa3fbfd4b6c48640",
+            "1",
             FSeqCollectiblesFilter::Empty(),
             GenericSuccess,
             GenericFailure

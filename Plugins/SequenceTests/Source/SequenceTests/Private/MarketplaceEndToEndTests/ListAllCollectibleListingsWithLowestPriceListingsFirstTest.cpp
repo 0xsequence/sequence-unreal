@@ -21,7 +21,7 @@ void FListAllCollectibleListingsWithLowestPriceListingsFirstTest::GetTests(TArra
 
 bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const FString& Parameters)
 {
-    AddInfo(TEXT("Testing List Currencies"));
+    AddInfo(TEXT("Testing List All Collectible Listings With Lowest Price Listings First Test"));
     ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(true));
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
@@ -34,7 +34,7 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
         {
             if(Orders.Num() == 0)
             {
-                const FString Message = "List currencies Failure";
+                const FString Message = "List All Collectible Listings With Lowest Price Listings First Test Failure";
                 AddError(FString::Printf(TEXT("%s returned no currencies. Remaining tests: %d"), 
                     *Message,
                     MarketplaceTestData->DecrementPendingRequests()));
@@ -47,13 +47,13 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
                 {
                     Message += USequenceSupport::StructToString(Order) + "\n";
                 }
-                AddInfo(FString::Printf(TEXT("%s. Remaining pings: %d"), *Message, MarketplaceTestData->DecrementPendingRequests()));
+                AddInfo(FString::Printf(TEXT("%s. Remaining tests: %d"), *Message, MarketplaceTestData->DecrementPendingRequests()));
             }
         };
 
         const FFailureCallback GenericFailure = [this, MarketplaceTestData](const FSequenceError& Error)
         {
-            const FString Message = "List currencies Failure";
+            const FString Message = "List All Collectible Listings With Lowest Price Listings First Test Failure";
             AddError(FString::Printf(TEXT("%s with error: %s. Remaining tests: %d"), 
                 *Message, 
                 *Error.Message, 
