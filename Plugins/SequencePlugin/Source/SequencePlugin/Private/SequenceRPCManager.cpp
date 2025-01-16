@@ -423,7 +423,7 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "No fee options recieved, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
+				OnFailure(FSequenceError(RequestFail, "No fee options received, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
 
 			}
 			
