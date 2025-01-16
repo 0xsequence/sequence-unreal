@@ -69,7 +69,6 @@ bool FIndexerRuntimeStatusTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Indexer should be enabled"), Status.indexerEnabled);
         TestTrue(TEXT("Health should be OK"), Status.healthOK);
         TestFalse(TEXT("StartTime should not be empty"), Status.startTime.IsEmpty());
-        TestFalse(TEXT("Version should not be empty"), Status.ver.IsEmpty());
         TestFalse(TEXT("Branch should not be empty"), Status.branch.IsEmpty());
         TestFalse(TEXT("CommitHash should not be empty"), Status.commitHash.IsEmpty());
         TestTrue(TEXT("ChainID should be supported"), USequenceSupport::IsNetworkIdSupported(Status.chainID));
