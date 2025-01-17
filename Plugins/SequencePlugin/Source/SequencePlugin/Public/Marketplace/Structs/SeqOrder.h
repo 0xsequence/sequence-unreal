@@ -196,8 +196,7 @@ public:
                 TSharedPtr<FJsonValue> feeValue = feeBreakdownArray[i];
                 if (feeValue->Type == EJson::Object)
                 {
-                    FSeqFeeBreakdown fee;
-                    //TSharedPtr<FJsonObject> feeJsonObject = USequenceSupport::JsonStringToObject(feeValue->AsString()); 
+                    FSeqFeeBreakdown fee; 
                     fee.Setup(*feeValue->AsObject()); 
                     FeeBreakdown.Add(fee);
 

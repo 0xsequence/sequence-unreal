@@ -220,7 +220,7 @@ void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
 	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();
 
-	return ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
+	return ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
 	{
 		OrderArray.Append(Orders);
 
