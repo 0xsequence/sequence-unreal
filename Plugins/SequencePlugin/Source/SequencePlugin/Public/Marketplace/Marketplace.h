@@ -69,33 +69,154 @@ public:
 
     UMarketplace();
 
-	// Nothing
+	/**
+	 * Lists the marketplace currencies
+	 * @param ChainID the id of the chain
+	 * @param OnSuccess handler for success, takes in a FSeqListCurrenciesReturn
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqListCurrenciesReturn> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, filter, page 
-    void ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, filter
+
+	/**
+	 * Lists collectible listings with the lowest price listings first
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param Filter the filter to apply
+	 * @param Page the page to apply
+	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
+	void ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
+
+	/**
+	 * Lists all collectible listings with the lowest price listings first
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, filter, page
+
+	/**
+	 * List collectible offers with the highest priced offer first
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param Filter the filter to apply
+	 * @param Page the page to apply
+	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
+	 * @param OnFailure	handler for failure, takes in a FSequenceError
+	 */
 	void ListCollectibleOffersWithHighestPricedOfferFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, filter
+
+	/**
+	 * Lists all collectible offers with the highest priced offer first
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListAllCollectibleOffersWithHighestPricedOfferFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Gets the lowest price offer for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void GetLowestPriceOfferForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Gets the highest price offer for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void GetHighestPriceOfferForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Gets the lowest price listing for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void GetLowestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Get the highest price listing for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void GetHighestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter, page
+
+	/**
+	 * Get listings for a collectible
+	 * @param ChainID the id of the chain 
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param Page the page to apply
+	 * @param OnSuccess handler for success, takes in a FSeqListCollectibleListingsReturn
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListListingsForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectibleListingsReturn> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Get all listings for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListAllListingsForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter, page
+
+	/**
+	 * Get offers for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract 
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param Page the page to apply
+	 * @param OnSuccess handler for success, takes in a FSeqListCollectibleOffersReturn
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectibleOffersReturn> OnSuccess, const FFailureCallback& OnFailure);
-	// Takes address, tokenId, filter
+
+	/**
+	 * Get all offers for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenID the id of the token
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
-	// takes address, filter
+
+	/**
+	 * Get the floor order for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param Filter the filter to apply
+	 * @param OnSuccess handler for success, takes in a FSeqCollectibleOrder
+	 * @param OnFailure handler for failure, takes in a FSequenceError
+	 */
 	void GetFloorOrder(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
 };
 
