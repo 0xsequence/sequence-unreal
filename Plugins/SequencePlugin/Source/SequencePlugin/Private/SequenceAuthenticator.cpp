@@ -250,6 +250,7 @@ bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) 
 		if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(SaveGame))
 		{
 			FString CTR_Json = "";
+
 			if (Encryptor)
 			{//Use set encryptor
 				CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
@@ -261,6 +262,13 @@ bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) 
 
 			ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
 			ret &= Credentials->RegisteredValid();
+
+			if (ret == false)
+			{
+				// Assumed that there is an issue with the save file, therefore we'll just delete the save file
+				UE_LOG(LogTemp, Error, TEXT("[System Failure: Unable to read save file or file is corrupted]"));
+				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
+			}
 		}
 	}
 	return ret;
