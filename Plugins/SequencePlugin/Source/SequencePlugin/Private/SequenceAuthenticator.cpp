@@ -576,6 +576,17 @@ void USequenceAuthenticator::InitializeSequence(const FCredentials_BE& Credentia
 
 void USequenceAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	if (!USequenceAuthenticator::ValidateUsername(UsernameIn).IsEmpty())
+	{
+		OnFailure(FSequenceError(InvalidArgument, USequenceAuthenticator::ValidateUsername(UsernameIn)));
+		return;
+	}
+	if (!USequenceAuthenticator::ValidatePassword(PasswordIn).IsEmpty())
+	{
+		OnFailure(FSequenceError(InvalidArgument, USequenceAuthenticator::ValidatePassword(PasswordIn)));
+		return;
+	}
+	
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
 		if (const FPlayFabLoginUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
@@ -597,6 +608,22 @@ void USequenceAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FS
 
 void USequenceAuthenticator::PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	if (!USequenceAuthenticator::ValidateUsername(UsernameIn).IsEmpty())
+	{
+		OnFailure(FSequenceError(InvalidArgument, USequenceAuthenticator::ValidateUsername(UsernameIn)));
+		return;
+	}
+	if (!USequenceAuthenticator::ValidatePassword(PasswordIn).IsEmpty())
+	{
+		OnFailure(FSequenceError(InvalidArgument, USequenceAuthenticator::ValidatePassword(PasswordIn)));
+		return;
+	}
+	if (!USequenceAuthenticator::ValidateEmail(EmailIn).IsEmpty())
+	{
+		OnFailure(FSequenceError(InvalidArgument, USequenceAuthenticator::ValidateEmail(EmailIn)));
+		return;
+	}
+	
 	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
 		if (const FPlayFabRegisterUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
@@ -637,6 +664,51 @@ void USequenceAuthenticator::PlayFabRPC(const FString& Url, const FString& Conte
 	->WithVerb("POST")
 	->WithContentAsString(Content)
 	->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+FString USequenceAuthenticator::ValidateUsername(const FString& Username)
+{
+	if (Username.IsEmpty())
+	{
+		return "Username cannot be empty";
+	}
+	return "";
+}
+
+FString USequenceAuthenticator::ValidateEmail(const FString& Email)
+{
+	if (Email.IsEmpty())
+	{
+		return "Email cannot be empty";
+	}
+
+	int32 AtIndex;
+
+	if (!Email.FindChar('@', AtIndex) || AtIndex == 0)
+	{
+		return TEXT("Email is invalid, given " + Email);
+	}
+
+	if (!Email.FindChar('.', AtIndex) || AtIndex == 0)
+	{
+		return TEXT("Email is invalid, given " + Email);
+	}
+
+	
+	return "";
+}
+
+FString USequenceAuthenticator::ValidatePassword(const FString& Password)
+{
+	if (Password.IsEmpty())
+	{
+		return "Password cannot be empty";
+	}
+	if (Password.Len() < 8)
+	{
+		return "Password must be at least 8 characters long";
+	}
+	return "";
 }
 
 void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
@@ -769,7 +841,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
@@ -787,7 +859,7 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 		
@@ -807,7 +879,7 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
