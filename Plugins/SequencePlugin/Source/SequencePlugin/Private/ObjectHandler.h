@@ -73,7 +73,7 @@ private:
 	void AddToCache(FString URL, TArray<uint8> RawData);
 
 	/*
-	* Simple check to see if the cache can accomadate additional bytes
+	* Simple check to see if the cache can accommodate additional bytes
 	* @param byte_count_to_add the amount of byte data we would like to add to the cache
 	* @return true if we can add it else false
 	*/
