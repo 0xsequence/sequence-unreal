@@ -11,7 +11,7 @@
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 
-UCLASS()
+UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequencePayBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
