@@ -25,7 +25,8 @@ USequenceAuthenticator::USequenceAuthenticator()
 {
 	this->StateToken = FGuid::NewGuid().ToString();
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
-	
+	this->Validator = SequenceRPCManager->Validator;
+
 	if constexpr (PLATFORM_ANDROID)
 	{
 		this->Encryptor = NewObject<UAndroidEncryptor>();
@@ -665,13 +666,15 @@ FString USequenceAuthenticator::GeneratePlayFabRegisterUrl()
 
 void USequenceAuthenticator::PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	NewObject<URequestHandler>()
-	->PrepareRequest()
-	->WithUrl(Url)
-	->WithHeader("Content-type", "application/json")
-	->WithVerb("POST")
-	->WithContentAsString(Content)
-	->ProcessAndThen(OnSuccess, OnFailure);
+	URequestHandler* RequestHandler = NewObject<URequestHandler>();
+
+	RequestHandler->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithVerb("POST")
+		->WithContentAsString(Content);
+
+	RequestHandler->ProcessAndThen(*Validator,OnSuccess, OnFailure, false);
 }
 
 FString USequenceAuthenticator::ValidateUsername(const FString& Username)
@@ -818,7 +821,7 @@ void USequenceAuthenticator::InitiateMobileFederateOIDC(const ESocialSigninType&
 	this->InitiateMobileSSO_Internal(Type);
 }
 
-void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const
+void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) 
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
@@ -856,7 +859,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
 }
 
-void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const
+void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) 
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
