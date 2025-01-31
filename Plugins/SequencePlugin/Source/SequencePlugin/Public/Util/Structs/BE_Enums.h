@@ -36,6 +36,7 @@ enum ENetwork
     LAOS               UMETA(DisplayName = "LAOS"),
     Root        UMETA(DisplayName = "Root Network"),
 	Soneium			   UMETA(DisplayName = "Soneium"),
+	Telos              UMETA(DisplayName = "Telos"),
 
 	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
@@ -56,4 +57,5 @@ enum ENetwork
     XaiSepolia         UMETA(DisplayName = "XAI Sepolia"),
     LAOSSigma          UMETA(DisplayName = "LAOS Sigma Testnet"),
     RootPorcini        UMETA(DisplayName = "Root Network Porcini Testnet"),
+    TelosTestnet        UMETA(DisplayName = "Telos Testnet"),
 };

@@ -3,6 +3,7 @@
 #include "Http.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 #include "HttpManager.h"
+#include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
 UTransakOnRamp::UTransakOnRamp(){}
@@ -16,11 +17,13 @@ UTransakOnRamp * UTransakOnRamp::Init(const FString& WalletAddressIn)
 
 void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure)
 {
+	const FString& Url = "https://api.transak.com/api/v2/countries";
+	SEQ_LOG(Log, TEXT("%s"), *Url);
+	
 	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
 	http_post_req->SetVerb("GET");
-	http_post_req->SetHeader("","");
-	http_post_req->SetTimeout(30);
-	http_post_req->SetURL("https://api.transak.com/api/v2/countries");
+	http_post_req->SetTimeout(15);
+	http_post_req->SetURL(Url);
 	http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
 		if(bWasSuccessful)
@@ -28,16 +31,21 @@ void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCou
 			const FString Content = Request->GetResponse()->GetContentAsString();
 			const FSupportedCountryResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSupportedCountryResponse>(Content);
 			OnSuccess(ParsedResponse.Response);
+			SEQ_LOG(Log, TEXT("%s"), *Content);
 		}
 		else
 		{
 			if(Request.IsValid() && Request->GetResponse().IsValid())
 			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: " + Request->GetResponse()->GetContentAsString()));
+				const FString& Content = Request->GetResponse()->GetContentAsString();
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + Content));
+				SEQ_LOG_EDITOR(Log, TEXT("%s"), *Content);
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				const FString& Error = "Request failed: Invalid Request Pointer";
+				OnFailure(FSequenceError(RequestFail, Error));
+				SEQ_LOG(Error, TEXT("%s"), *Error);
 			}
 		}
 	});

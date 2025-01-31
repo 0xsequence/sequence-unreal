@@ -38,22 +38,21 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOption
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Log, TEXT("URL set to: %s"), *Url);
-	UE_LOG(LogTemp, Log, TEXT("Request content set to: %s"), *Content);
-
+	UResponseSignatureValidator& RPCValidator = *Validator;
 
 	NewObject<URequestHandler>()
-	->PrepareRequest()
-	->WithUrl(Url)
-	->WithHeader("Content-type", "application/json")
-	->WithHeader("Accept", "application/json")
-	->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
-	->WithVerb("POST")
-	->WithContentAsString(Content)
-	->ProcessAndThen(OnSuccess, OnFailure);
+		->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept", "application/json")
+		->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
+		->WithHeader("Accept-Signature", "sig=()")
+		->WithVerb("POST")
+		->WithContentAsString(Content)
+		->ProcessAndThen(RPCValidator,OnSuccess, OnFailure);
 }
 
-void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -285,7 +284,7 @@ USequenceRPCManager* USequenceRPCManager::Make(UCryptoWallet* SessionWalletIn)
 {
 	USequenceRPCManager * SequenceRPCManager = NewObject<USequenceRPCManager>();
 	SequenceRPCManager->SessionWallet = SessionWalletIn;
-
+	SequenceRPCManager->Validator = NewObject<UResponseSignatureValidator>();
 	FString ParsedJwt;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJwt);
 	SequenceRPCManager->WaaSSettings = USequenceSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);
@@ -423,7 +422,7 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "No fee options recieved, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
+				OnFailure(FSequenceError(RequestFail, "No fee options received, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
 
 			}
 			

@@ -2,7 +2,7 @@
 
 # Sequence Unreal SDK
 
-This SDK allows easy integration of Sequence Embedded Wallet from any Unreal Framework project.
+The Sequence Unreal Embedded Wallet SDK provides full Sequence Embedded Wallet and Indexer integration for your Unreal Framework games.
 
 [![Docs](https://img.shields.io/badge/Documentation-7334f8)](https://docs.sequence.xyz/sdk/unreal/introduction)
 [![Boilerplate](https://img.shields.io/badge/Get%20started%20using%20our%20Boilerplate%20Project-7334f8)](https://github.com/0xsequence/unreal-embedded-wallet-boilerplate)

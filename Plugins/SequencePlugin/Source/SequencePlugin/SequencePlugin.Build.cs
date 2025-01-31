@@ -41,7 +41,7 @@ public class SequencePlugin : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "HTTP", "Json", "ApplicationCore", "Engine"
+				"Core", "HTTP", "Json", "ApplicationCore", "Engine", "OpenSSL"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

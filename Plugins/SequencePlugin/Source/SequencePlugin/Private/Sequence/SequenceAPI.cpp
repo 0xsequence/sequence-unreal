@@ -22,7 +22,7 @@ USequenceWallet::USequenceWallet()
 
 void USequenceWallet::Initialize(FSubsystemCollectionBase& Collection)
 {
-	UE_LOG(LogTemp,Display,TEXT("Initilizing wallet subsystem"));
+	UE_LOG(LogTemp,Display,TEXT("Initializing wallet subsystem"));
 }
 
 void USequenceWallet::Deinitialize()

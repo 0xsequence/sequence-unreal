@@ -621,7 +621,7 @@ struct SEQUENCEPLUGIN_API FSeqListSessionResponse_Response
 
 	bool IsValid() const
 	{
-		return Code.Equals(TEXT("session"),ESearchCase::IgnoreCase);
+		return Code.Equals(TEXT("sessionList"),ESearchCase::IgnoreCase);
 	}
 };
 
