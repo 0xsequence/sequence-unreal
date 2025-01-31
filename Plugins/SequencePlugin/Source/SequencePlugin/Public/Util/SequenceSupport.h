@@ -52,6 +52,7 @@ private:
 	static inline TMap<int64, FString> NetworkIdToUrlMap = {
 		FIdName(1,TEXT("mainnet")),
 		FIdName(10,TEXT("optimism")),
+		FIdName(40,TEXT("telos")),
 		FIdName(56,TEXT("bsc")),
 		FIdName(100,TEXT("gnosis")),
 		FIdName(137,TEXT("polygon")),
@@ -71,6 +72,7 @@ private:
 		FIdName(660279,TEXT("xai")),
 		FIdName(1482601649,TEXT("skale-nebula")),
 		
+		FIdName(41,TEXT("telos-testnet")),
 		FIdName(97,TEXT("bsc-testnet")),
 		FIdName(1946,TEXT("soneium-minato")),
 		FIdName(1993,TEXT("b3-sepolia")),
@@ -112,6 +114,7 @@ private:
 		FIdName(6283,TEXT("LAOS")),
 		FIdName(7668,TEXT("Root Network")),
 		FIdName(1868,TEXT("Soneium")),
+		FIdName(40,TEXT("Telos")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -132,6 +135,7 @@ private:
 		FIdName(37714555429,TEXT("Xai Sepolia")),
 		FIdName(62850,TEXT("LAOS Sigma Testnet")),
 		FIdName(7672,TEXT("Root Network Porcini Testnet")),
+		FIdName(41,TEXT("Telos Testnet")),
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -155,6 +159,7 @@ private:
 		FNameId(TEXT("laos"),6283),
 		FNameId(TEXT("rootnet"),7668),
 		FNameId(TEXT("soneium"),1868),
+		FNameId(TEXT("telos"),40),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -175,6 +180,7 @@ private:
 		FNameId(TEXT("xaisepolia"),37714555429),
 		FNameId(TEXT("laos-sigma"),62850),
 		FNameId(TEXT("rootnet-porcini"),7672),
+		FNameId(TEXT("telos-testnet"), 41),
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -198,6 +204,7 @@ private:
 		{ENetwork::LAOS, 6283},
 		{ENetwork::Root, 7668},
 		{ENetwork::Soneium, 1868},
+		{ENetwork::Telos, 40},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -218,6 +225,7 @@ private:
 		{ENetwork::XaiSepolia, 37714555429},
 		{ENetwork::LAOSSigma, 62850},
 		{ENetwork::RootPorcini, 7672},
+		{ENetwork::TelosTestnet, 41},
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -241,6 +249,7 @@ private:
 		{ENetwork::LAOS, TEXT("LAOS")},
 		{ENetwork::Root, TEXT("Root Network")},
 		{ENetwork::Soneium, TEXT("Soneium")},
+		{ENetwork::Telos, TEXT("Telos")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
@@ -261,6 +270,7 @@ private:
 		{ENetwork::XaiSepolia, TEXT("Xai Sepolia")},
 		{ENetwork::LAOSSigma, TEXT("LAOS Sigma Testnet")},
 		{ENetwork::RootPorcini, TEXT("Root Network Porcini Testnet")},
+		{ENetwork::TelosTestnet, TEXT("Telos Testnet")},
 	};
 
 public:
