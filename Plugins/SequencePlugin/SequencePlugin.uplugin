@@ -2,7 +2,7 @@
 	"EngineVersion": "5.4",
 	"FileVersion": 3,
 	"Version": 3,
-	"VersionName": "1.5.0",
+	"VersionName": "1.5.1",
 	"FriendlyName": "SequencePlugin",
 	"Description": "",
 	"Category": "Sequence",
@@ -18,8 +18,7 @@
 	"SupportedTargetPlatforms": [
 		"Mac",
 		"Win64",
-		"Android",
-		"IOS"
+		"Android"
 	],
 	"Modules": [
 		{
