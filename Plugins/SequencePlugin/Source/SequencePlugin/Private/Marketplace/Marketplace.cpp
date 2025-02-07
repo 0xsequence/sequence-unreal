@@ -7,10 +7,14 @@
 #include "Util/SequenceSupport.h"
 #include "ConfigFetcher.h"
 #include "HttpManager.h"
+#include "Indexer/Indexer.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderArgs.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
+#include "Marketplace/Structs/SeqGetSwapPricesRequest.h"
+#include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
+#include "Marketplace/Structs/SeqGetSwapQuoteRequest.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
 #include "Marketplace/Structs/SeqListCurrenciesReturn.h"
@@ -43,6 +47,62 @@ FString UMarketplace::HostName(const int64 ChainID)
 void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = this->Url(ChainID, Endpoint);
+
+	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
+
+	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
+	if (AccessKey.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		return;  
+	}
+
+	HTTP_Post_Req->SetVerb("POST");
+	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	
+
+	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
+	HTTP_Post_Req->SetTimeout(30);
+	HTTP_Post_Req->SetURL(RequestURL);
+	HTTP_Post_Req->SetContentAsString(Args);
+	 
+	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
+	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
+
+
+	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				const FString Content = Response->GetContentAsString();
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				OnSuccess(Content);
+			}
+			else
+			{
+				if (Request.IsValid() && Response.IsValid())
+				{
+					const FString ErrorMessage = Response->GetContentAsString();
+					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				}
+			}
+		});
+
+	// Process the request
+	HTTP_Post_Req->ProcessRequest();
+}
+
+void UMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
+	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const FString RequestURL = "https://api.sequence.app/rpc/API/" + Endpoint;
 
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
 
@@ -334,6 +394,143 @@ void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAdd
 				const FSeqGetOrderReturn Response = this->BuildResponse<FSeqGetOrderReturn>(Content);
 				OnSuccess(Response.Collectible);
 			}, OnFailure);
+}
+
+void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& BuyCurrency, const FString& SellCurrency,
+	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
+	const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapPrice";
+	FGetSwapPriceRequest Args {
+		BuyCurrency,
+		SellCurrency,
+		BuyAmount,
+		static_cast<int>(ChainID),
+		SlippagePercentage		
+	};
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+		{
+			FSeqSwapPrice Response;
+			
+			if(!Response.FromResponse(Content))
+			{
+				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+				return;
+			}
+			
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
+	const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapPrices";
+	FGetSwapPricesRequest Args {
+		UserWallet,
+		BuyCurrency,
+		BuyAmount,
+		static_cast<int>(ChainID),
+		SlippagePercentage
+	};
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+		{
+			TArray<FSeqSwapPrice> Response;
+			TSharedPtr<FJsonObject> Json;
+
+			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPrices")))
+			{
+				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+				return;
+			}
+
+			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPrices"));
+
+			for (TSharedPtr<FJsonValue> Value : Array)
+			{
+				FSeqSwapPrice SwapPrice;
+				if (!SwapPrice.FromJson(Value->AsObject()))
+				{
+					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+					return;
+				}
+				Response.Add(SwapPrice);
+			}
+		
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
+	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapQuote";
+
+	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
+	{
+		FGetSwapQuoteRequest Args {
+			UserWallet,
+			BuyCurrency,
+			SellCurrency,
+			BuyAmount,
+			static_cast<int>(ChainID),
+			IncludeApprove,
+			SlippagePercentage
+		};
+		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+			{
+				FSeqSwapQuote Response;
+			
+				if(!Response.FromResponse(Content))
+				{
+					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+					return;
+				}
+				
+				OnSuccess(Response);
+			}, OnFailure);
+	}, OnFailure, SlippagePercentage);
+}
+
+void UMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
+	const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	GetSwapPrice(ChainID, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
+		{
+			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
+		
+			UIndexer* Indexer = NewObject<UIndexer>();
+			FSeqGetTokenBalancesArgs Args;
+			Args.accountAddress = UserWallet;
+			Args.contractAddress = SellCurrency;
+
+			Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess, SlippagePercentage](const FSeqGetTokenBalancesReturn& TokenBalances)
+				{
+					TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
+					long Have = 0;
+				
+					if(SellCurrencies.Num() > 0)
+					{
+						Have = SellCurrencies[0].balance;
+					}
+				
+					UE_LOG(LogTemp, Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
+
+					if(Have < Required)
+					{
+						const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
+						                                            { *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
+						OnFailure(FSequenceError(InsufficientBalance, ErrorString));
+					}
+					else
+					{
+						OnSuccess();
+					}
+				}, OnFailure);
+		}, OnFailure, SlippagePercentage);
 }
 
 
