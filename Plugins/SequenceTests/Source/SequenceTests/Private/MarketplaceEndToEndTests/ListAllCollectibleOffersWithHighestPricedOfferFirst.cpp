@@ -12,6 +12,27 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListCollectibleOffersWithHighestPricedOfferFirst, "SequencePlugin.EndToEnd.MarketplaceTests.ListCollectibleOffersWithHighestPricedOfferFirst", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FListCollectibleOffersWithHighestPricedOfferFirstIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FListCollectibleOffersWithHighestPricedOfferFirst);
+
+bool FListCollectibleOffersWithHighestPricedOfferFirstIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FListCollectibleOffersWithHighestPricedOfferFirst->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FListCollectibleOffersWithHighestPricedOfferFirst->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
 
 void FListCollectibleOffersWithHighestPricedOfferFirst::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -69,6 +90,7 @@ bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& P
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FListCollectibleOffersWithHighestPricedOfferFirstIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;

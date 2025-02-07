@@ -12,6 +12,27 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListCurrenciesTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListCurrenciesTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FListCurrenciesTestIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FListCurrenciesTest);
+
+bool FListCurrenciesTestIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FListCurrenciesTest->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FListCurrenciesTest->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
 
 void FListCurrenciesTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -58,6 +79,7 @@ bool FListCurrenciesTest::RunTest(const FString& Parameters)
             GenericSuccess(Currencies);
         }, GenericFailure);
     
+        ADD_LATENT_AUTOMATION_COMMAND(FListCurrenciesTestIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;

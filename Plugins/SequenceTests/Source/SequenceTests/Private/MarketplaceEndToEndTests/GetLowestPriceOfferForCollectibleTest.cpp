@@ -12,6 +12,28 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetLowestPriceOfferForCollectibleTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetLowestPriceOfferForCollectibleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FGetLowestPriceOfferForCollectibleTestIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FGetLowestPriceOfferForCollectibleTest);
+
+bool FGetLowestPriceOfferForCollectibleTestIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FGetLowestPriceOfferForCollectibleTest->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FGetLowestPriceOfferForCollectibleTest->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
+
 
 void FGetLowestPriceOfferForCollectibleTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -54,6 +76,7 @@ bool FGetLowestPriceOfferForCollectibleTest::RunTest(const FString& Parameters)
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FGetLowestPriceOfferForCollectibleTestIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;

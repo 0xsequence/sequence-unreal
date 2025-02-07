@@ -12,16 +12,37 @@
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllOffersForCollectible, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllOffersForCollectible", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllOffersForCollectibleTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllOffersForCollectible", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FListAllOffersForCollectibleTestIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FListAllOffersForCollectibleTest);
 
-void FListAllOffersForCollectible::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+bool FListAllOffersForCollectibleTestIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FListAllOffersForCollectibleTest->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FListAllOffersForCollectibleTest->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
+
+void FListAllOffersForCollectibleTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
     OutBeautifiedNames.Add(TEXT("List All Offers For Collectible Test"));
     OutTestCommands.Add(TEXT(""));
 }
 
-bool FListAllOffersForCollectible::RunTest(const FString& Parameters)
+bool FListAllOffersForCollectibleTest::RunTest(const FString& Parameters)
 {
     AddInfo(TEXT("Testing List All Offers For Collectible"));
     ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(true));
@@ -72,6 +93,7 @@ bool FListAllOffersForCollectible::RunTest(const FString& Parameters)
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FListAllOffersForCollectibleTestIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;
