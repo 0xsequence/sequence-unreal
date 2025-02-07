@@ -12,6 +12,27 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllCollectibleListingsWithLowestPriceListingsFirstTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllCollectibleListingsWithLowestPriceListingsFirstTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FListAllCollectibleListingsWithLowestPriceListingsFirstTestIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FListAllCollectibleListingsWithLowestPriceListingsFirstTest);
+
+bool FListAllCollectibleListingsWithLowestPriceListingsFirstTestIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FListAllCollectibleListingsWithLowestPriceListingsFirstTest->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FListAllCollectibleListingsWithLowestPriceListingsFirstTest->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
 
 void FListAllCollectibleListingsWithLowestPriceListingsFirstTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -69,6 +90,7 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FListAllCollectibleListingsWithLowestPriceListingsFirstTestIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;

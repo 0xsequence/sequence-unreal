@@ -14,6 +14,27 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllListingsForCollectible, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllListingsForCollectible", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FListAllListingsForCollectibleIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FListAllListingsForCollectible);
+
+bool FListAllListingsForCollectibleIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FListAllListingsForCollectible->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FListAllListingsForCollectible->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
 
 void FListAllListingsForCollectible::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -72,6 +93,7 @@ bool FListAllListingsForCollectible::RunTest(const FString& Parameters)
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FListAllListingsForCollectibleIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;

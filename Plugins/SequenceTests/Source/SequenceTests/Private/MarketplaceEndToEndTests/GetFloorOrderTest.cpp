@@ -14,6 +14,27 @@
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetFloorOrderTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetFloorOrder", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
+/* Latent command used to poll off main thread to see if our requests are done */
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FGetFloorOrderTestIsDone, const UMarketplaceRequestsTestData *, MarketPlaceRequestsTestData, FAutomationTestBase *, FGetFloorOrderTest);
+
+bool FGetFloorOrderTestIsDone::Update()
+{
+    while(this->MarketPlaceRequestsTestData->GetPendingRequests() > 0)
+    {
+        return false;
+    }
+
+    if (this->MarketPlaceRequestsTestData->GetAllRequestsSuccessful())
+    {
+        FGetFloorOrderTest->AddInfo(TEXT("GetFloorOrderTest request completed"));
+    }
+    else
+    {
+        FGetFloorOrderTest->AddError(FString::Printf(TEXT("GetFloorOrderTest request failed")));
+    }
+    
+    return true;
+}
 
 void FGetFloorOrderTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
@@ -55,6 +76,7 @@ bool FGetFloorOrderTest::RunTest(const FString& Parameters)
             GenericFailure
         );
     
+        ADD_LATENT_AUTOMATION_COMMAND(FGetFloorOrderTestIsDone(MarketplaceTestData, this));
         return true;
     }));
     return true;
