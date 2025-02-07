@@ -119,6 +119,11 @@ private:
 	 */
 	void UpdateWithStoredSessionWallet();
 	
+	FTimespan TimeShift;
+	
+	void InitializeTimeShift();
+	static FTimespan GetTimeShiftFromResponse(const FString& DateHeader);
+
 public:
 
 	UResponseSignatureValidator* Validator;
