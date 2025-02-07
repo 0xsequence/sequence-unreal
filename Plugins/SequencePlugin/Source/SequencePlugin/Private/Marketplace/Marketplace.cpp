@@ -5,6 +5,7 @@
 #include "JsonObjectConverter.h"
 #include "Http.h"
 #include "Util/SequenceSupport.h"
+#include "Util/Log.h"
 #include "ConfigFetcher.h"
 #include "HttpManager.h"
 
@@ -54,8 +55,15 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
 	 
-	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
-	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
+	FString CurlCommand = FString::Printf(
+		TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
+		*HTTP_Post_Req->GetVerb(),
+		*HTTP_Post_Req->GetURL(),
+		*HTTP_Post_Req->GetHeader("X-Access-Key"),
+		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
+	);
+
+	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
 
 
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
@@ -86,7 +94,7 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->ProcessRequest();
 }
 
-void UMarketplace::GetCollectibleListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UMarketplace::GetCollectiblesWithLowestListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "ListCollectiblesWithLowestListing"; 
 

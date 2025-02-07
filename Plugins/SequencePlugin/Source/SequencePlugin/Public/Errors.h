@@ -14,6 +14,7 @@ enum EErrorType
 	TestFail,
 	TimeMismatch,
 	FailedToParseIntentTime,
+	InvalidArgument,
 };
 
 class SEQUENCEPLUGIN_API FSequenceError

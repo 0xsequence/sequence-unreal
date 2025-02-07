@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Marketplace/Marketplace_Enums.h"
+#include "Util/SequenceSupport.h"
 #include "SeqPropertyFilter.generated.h"
 
 USTRUCT(BlueprintType)

@@ -173,6 +173,15 @@ public:
 	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
+	 * Allows you to send Ether balance to another 
+	 * @param RecipientAddress Specify the recipient address you want to send Ether to
+	 * @param Amount Amount of Ether to send
+	 * @param OnSuccess Status if the transaction was successful
+	 * @param OnFailure An error occured during the transaction
+	 */
+	void SendEther(const FString& RecipientAddress, const FString& Amount, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const;
+	
+	/**
 	 * Allows you to send a transaction that will be automatically gassed IF the token is able to be (not all can be)
 	 * @param Transactions The transaction you wish to send
 	 * @param OnSuccess FSeqTransactionResponse_Data containing information about the Successful Transaction

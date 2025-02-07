@@ -7,6 +7,7 @@
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "ResponseSignatureValidator.h"
 #include "RPCCaller.generated.h"
 
 template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
@@ -18,6 +19,11 @@ class SEQUENCEPLUGIN_API URPCCaller : public UObject
 {
 	GENERATED_BODY()
 public:
+
+	URPCCaller();
+
+	UResponseSignatureValidator* Validator;
+
 	static TSharedPtr<FJsonObject> Parse(const FString& JsonRaw);
 	static TResult<TSharedPtr<FJsonObject>> ExtractJsonObjectResult(const FString& JsonRaw);
 	static TResult<FString> ExtractStringResult(const FString& JsonRaw);

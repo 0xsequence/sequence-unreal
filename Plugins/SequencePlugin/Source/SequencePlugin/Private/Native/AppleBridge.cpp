@@ -32,8 +32,16 @@ FString UAppleBridge::AppleDecrypt(const FString& StringIn)
 #if PLATFORM_IOS || PLATFORM_MAC
 	NSString * _ToDecrypt = StringIn.GetNSString();
 	NativeAppleEncryptor * Encryptor = [[NativeAppleEncryptor alloc] init];
-	char * CharResult = [Encryptor Decrypt:_ToDecrypt];
-	Result = FString(UTF8_TO_TCHAR(CharResult));
+	
+	@try {
+		char * CharResult = [Encryptor Decrypt:_ToDecrypt];
+		Result = FString(UTF8_TO_TCHAR(CharResult));
+	}
+	@catch (NSException *exception) {
+		// Handle the exception and log the error
+		NSLog(@"Caught exception: %@ - Reason: %@", exception.name, exception.reason);
+	}
+
 #endif
 	return Result;
 }

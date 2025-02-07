@@ -141,25 +141,7 @@ void USequenceSessionsBP::PlayFabLoginAsync(const FString& UsernameIn, const FSt
 {
 	const TSuccessCallback<FString> OnSuccess = [this](const FString& SessionTicket)
 	{
-		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
-		{
-			this->StartSession(Credentials);
-		};
-
-		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
-		{
-			SEQ_LOG(Error, TEXT("Error: %s"), *Error.Message);
-			this->CallSessionCreationFailure();
-		};
-
-		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
-		{
-			SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
-			this->CallFederationRequired(FederationData);
-		};
-
-		this->ClearSession();
-		this->RPCManager->OpenPlayFabSession(SessionTicket, true, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
+		PlayfabAuthenticateWithSessionTicketAsync(SessionTicket);
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
@@ -182,6 +164,29 @@ void USequenceSessionsBP::PlayFabLoginAsync(const FString& UsernameIn, const FSt
 
 	this->ClearSession();
 	this->PlayFabLoginRpcAsync(UsernameIn, PasswordIn, OnSuccess, OnFailure);
+}
+
+void USequenceSessionsBP::PlayfabAuthenticateWithSessionTicketAsync(const FString& SessionTicket)
+{
+	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this](const FCredentials_BE& Credentials)
+	{
+		this->StartSession(Credentials);
+	};
+
+	const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error: %s"), *Error.Message);
+		this->CallSessionCreationFailure();
+	};
+
+	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
+	{
+		SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
+		this->CallFederationRequired(FederationData);
+	};
+
+	this->ClearSession();
+	this->RPCManager->OpenPlayFabSession(SessionTicket, true, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
 }
 
 void USequenceSessionsBP::StartGuestSessionAsync()
@@ -336,7 +341,7 @@ void USequenceSessionsBP::PlayFabLoginRpcAsync(const FString& UsernameIn, const 
 	this->PlayFabRpcAsync(Url, RequestBody, OnSuccessResponse, OnFailure);
 }
 
-void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) 
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -344,7 +349,7 @@ void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Con
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnFailure);
+		->ProcessAndThen(*RPCManager->Validator, OnSuccess, OnFailure, false);
 }
 
 void USequenceSessionsBP::CallEmailLoginRequiresCode() const

@@ -22,7 +22,7 @@ USequenceWallet::USequenceWallet()
 
 void USequenceWallet::Initialize(FSubsystemCollectionBase& Collection)
 {
-	UE_LOG(LogTemp,Display,TEXT("Initilizing wallet subsystem"));
+	UE_LOG(LogTemp,Display,TEXT("Initializing wallet subsystem"));
 }
 
 void USequenceWallet::Deinitialize()
@@ -324,6 +324,7 @@ void USequenceWallet::ValidateMessageSignature(const int64& ChainId, const FStri
 		this->SequenceRPCManager->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
 	}
 }
+
 void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)
@@ -453,6 +454,19 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 	{
 		this->SequenceRPCManager->GetFeeOptions(this->Credentials,Transactions,OnResponse,OnFailure);
 	}
+}
+
+void USequenceWallet::SendEther(const FString& RecipientAddress, const FString& Amount, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	FRawTransaction T;
+	T.data = "0x0";
+	T.to = RecipientAddress;
+	T.value = Amount;
+	
+	TArray<TransactionUnion> Transactions;
+	Transactions.Push(TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction, FDelayedTransaction>(T));
+	
+	this->SendTransaction(Transactions, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const

@@ -12,6 +12,7 @@
 #include "Types/CryptoWallet.h"
 #include "Util/Async.h"
 #include "Sequence/SequenceFederationSupport.h"
+#include "ResponseSignatureValidator.h"
 #include "SequenceRPCManager.generated.h"
 
 /**
@@ -22,6 +23,7 @@ UCLASS()
 class SEQUENCEPLUGIN_API USequenceRPCManager : public UObject
 {
 	GENERATED_BODY()
+
 private:
 
 	//Vars//
@@ -42,16 +44,12 @@ private:
 	FString Cached_Challenge = "";
 	FString Cached_Email = "";
 
-	//Get Plugin Version
-
-	static FString GetPluginVersion();
-
 	/**
 	 * If this flag is enabled, we will preserve the SessionWallet for the next request
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal ")).Append(USequenceRPCManager::GetPluginVersion()).Append(TEXT(")"));
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal 1.5.1)"));
 
 	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");
@@ -107,8 +105,7 @@ private:
 
 	//RPC Caller//
 	void SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const
-	                  FFailureCallback& OnFailure) const;
+	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void SendIntent(const FString& Url, TFunction<FString (TOptional<int64>)> ContentGenerator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	/**
@@ -122,7 +119,14 @@ private:
 	 */
 	void UpdateWithStoredSessionWallet();
 	
+	FTimespan TimeShift;
+	
+	void InitializeTimeShift();
+	static FTimespan GetTimeShiftFromResponse(const FString& DateHeader);
+
 public:
+
+	UResponseSignatureValidator* Validator;
 
 	/**
 	 * Allows you to create a new Manager with a session wallet that's either random or set by on disk credentials

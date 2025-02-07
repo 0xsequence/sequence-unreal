@@ -5,6 +5,7 @@
 #include "SequenceAuthenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
+#include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
@@ -15,7 +16,7 @@
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {
-	const int64 Issued = CurrentTime.IsSet() ? CurrentTime.GetValue() : FDateTime::UtcNow().ToUnixTimestamp() - 30;
+	const int64 Issued = CurrentTime.IsSet() ? CurrentTime.GetValue() : (FDateTime::UtcNow() + TimeShift).ToUnixTimestamp() - 30;
 	const int64 Expires = Issued + 86400;
 	FGenericData * LocalDataPtr = &Data;
 	const FString Operation = LocalDataPtr->Operation;
@@ -38,22 +39,21 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOption
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Log, TEXT("URL set to: %s"), *Url);
-	UE_LOG(LogTemp, Log, TEXT("Request content set to: %s"), *Content);
-
+	UResponseSignatureValidator& RPCValidator = *Validator;
 
 	NewObject<URequestHandler>()
-	->PrepareRequest()
-	->WithUrl(Url)
-	->WithHeader("Content-type", "application/json")
-	->WithHeader("Accept", "application/json")
-	->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
-	->WithVerb("POST")
-	->WithContentAsString(Content)
-	->ProcessAndThen(OnSuccess, OnFailure);
+		->PrepareRequest()
+		->WithUrl(Url)
+		->WithHeader("Content-type", "application/json")
+		->WithHeader("Accept", "application/json")
+		->WithHeader("X-Access-Key", this->Cached_ProjectAccessKey)
+		->WithHeader("Accept-Signature", "sig=()")
+		->WithVerb("POST")
+		->WithContentAsString(Content)
+		->ProcessAndThen(RPCValidator,OnSuccess, OnFailure);
 }
 
-void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TFunction<void(FHttpResponsePtr)>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	NewObject<URequestHandler>()
 	->PrepareRequest()
@@ -96,20 +96,6 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 			OnSuccess(Content);
 		}
 	}, OnFailure);
-}
-
-FString USequenceRPCManager::GetPluginVersion()
-{
-	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("SequencePlugin"));
-	if (Plugin.IsValid())
-	{
-		return Plugin->GetDescriptor().VersionName;
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Error, TEXT("[Failed to find Sequence Plugin, Unknown version]"));
-		return FString("UNKNOWN");
-	}
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
@@ -284,26 +270,36 @@ void USequenceRPCManager::UpdateWithStoredSessionWallet()
 
 USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
 {
+	USequenceRPCManager* Manager = nullptr;
+	
 	if (UseStoredSessionId)
 	{
-		const USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
+		const USequenceAuthenticator* Authenticator = NewObject<USequenceAuthenticator>();
 		if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
-			return Make(StoredCredentials.GetCredentials().GetSessionWallet());
+			Manager = Make(StoredCredentials.GetCredentials().GetSessionWallet());
 		}
 	}
-	return Make(UCryptoWallet::Make());
+	
+	if (!Manager)
+	{
+		Manager = Make(UCryptoWallet::Make());
+	}
+	
+	return Manager;
 }
 
 USequenceRPCManager* USequenceRPCManager::Make(UCryptoWallet* SessionWalletIn)
 {
-	USequenceRPCManager * SequenceRPCManager = NewObject<USequenceRPCManager>();
+	USequenceRPCManager* SequenceRPCManager = NewObject<USequenceRPCManager>();
 	SequenceRPCManager->SessionWallet = SessionWalletIn;
-
+	SequenceRPCManager->Validator = NewObject<UResponseSignatureValidator>();
 	FString ParsedJwt;
-	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey),ParsedJwt);
+	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey), ParsedJwt);
 	SequenceRPCManager->WaaSSettings = USequenceSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);
 	SequenceRPCManager->Cached_ProjectAccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
+	
+	SequenceRPCManager->InitializeTimeShift();
 	return SequenceRPCManager;
 }
 
@@ -437,7 +433,7 @@ void USequenceRPCManager::GetFeeOptions(const FCredentials_BE& Credentials, cons
 			}
 			else
 			{
-				OnFailure(FSequenceError(RequestFail, "No fee options recieved, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
+				OnFailure(FSequenceError(RequestFail, "No fee options received, contract gas might be sponsored, check builder configs or use a non-fee options transaction. " + Response));
 
 			}
 			
@@ -1102,4 +1098,51 @@ void USequenceRPCManager::FederateSessionInUse(const FString& WalletIn, const TF
 	{
 		return this->BuildFederateAccountIntent(FederateAccountData, CurrentTime);
 	}, OnFederateResponse, OnFailure);
+}
+
+void USequenceRPCManager::InitializeTimeShift()
+{
+	const FString WaasUrl = this->WaaSSettings.GetRPCServer();
+	const FString StatusUrl = WaasUrl.EndsWith(TEXT("/")) ? WaasUrl + TEXT("status") : WaasUrl + TEXT("/status");
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+	HttpRequest->SetVerb(TEXT("GET"));
+	HttpRequest->SetURL(StatusUrl);
+	
+	HttpRequest->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess)
+	{
+		if (bSuccess && Response.IsValid())
+		{
+			const FString DateHeader = Response->GetHeader(TEXT("date"));
+			if (!DateHeader.IsEmpty())
+			{
+				TimeShift = GetTimeShiftFromResponse(DateHeader);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No date header in response from status endpoint"));
+				TimeShift = FTimespan::Zero();
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get server time for time shift calculation"));
+			TimeShift = FTimespan::Zero();
+		}
+	});
+
+	HttpRequest->ProcessRequest();
+}
+
+FTimespan USequenceRPCManager::GetTimeShiftFromResponse(const FString& DateHeader)
+{
+	FDateTime ServerTime;
+	if (FDateTime::ParseHttpDate(DateHeader, ServerTime))
+	{
+		const FDateTime LocalTime = FDateTime::UtcNow();
+		return ServerTime - LocalTime;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Failed to parse server time from date header: %s"), *DateHeader);
+	return FTimespan::Zero();
 }
