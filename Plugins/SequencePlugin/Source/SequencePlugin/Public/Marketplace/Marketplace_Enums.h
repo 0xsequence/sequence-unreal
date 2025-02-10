@@ -67,6 +67,19 @@ enum EOrderStatus
     FILLED  UMETA(DisplayName = "Filled"),
 };
 
+UENUM(BlueprintType)
+enum class EOrderbookKind : uint8
+{
+    Unknown UMETA(DisplayName = "unknown"),
+    Sequence_Marketplace_V1 UMETA(DisplayName = "sequence_marketplace_v1"),
+    Sequence_Marketplace_V2 UMETA(DisplayName = "sequence_marketplace_v2"),
+    Blur UMETA(DisplayName = "blur"),
+    Opensea UMETA(DisplayName = "opensea"),
+    Looks_Rare UMETA(DisplayName = "looks_rare"),
+    Reservoir UMETA(DisplayName = "reservoir"),
+    X2Y2 UMETA(DisplayName = "x2y2")
+};
+
 
 // PropertyType Extensions
 UCLASS()
