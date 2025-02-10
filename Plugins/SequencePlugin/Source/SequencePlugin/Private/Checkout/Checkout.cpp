@@ -5,6 +5,8 @@
 #include "Checkout/Structs/GenerateListingTransactionArgs.h"
 #include "Checkout/Structs/GenerateOfferTransactionArgs.h"
 #include "Checkout/Structs/GenerateSellTransaction.h"
+#include "Checkout/Structs/GetCheckoutOptionsArgs.h"
+#include "Checkout/Structs/GetCheckoutOptionsResponse.h"
 #include "Checkout/Structs/OrderData.h"
 
 UCheckout::UCheckout(): ChainID()
@@ -67,8 +69,34 @@ template<typename T> T UCheckout::BuildResponse(const FString Text) const
 	return Ret_Struct;
 }
 
+void UCheckout::GetCheckoutOptions(const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
+	TSuccessCallback<FGetCheckoutOptionsResponse> OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const FString Endpoint = "CheckoutOptionsMarketplace";
+	const FString Args = BuildArgs<FGetCheckoutOptionsArgs>(FGetCheckoutOptionsArgs { Wallet->GetWalletAddress(), Orders, AdditionalFeeBps });
+
+	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+		{
+			const FGetCheckoutOptionsResponse Response = BuildResponse<FGetCheckoutOptionsResponse>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UCheckout::GetCheckoutOptions(const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps,
+	const TSuccessCallback<FGetCheckoutOptionsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	TArray<FCheckoutOptionsMarketplaceOrder> Options;
+	Options.Reserve(Orders.Num());
+	for (int32 i = 0; i < Orders.Num(); i++)
+	{
+		Options[i] = FCheckoutOptionsMarketplaceOrder(Orders[i].CollectionContractAddress, Orders[i].OrderId, Orders[i].Marketplace);
+	}
+
+	GetCheckoutOptions(Options, AdditionalFeeBps, OnSuccess, OnFailure);
+}
+
 void UCheckout::GenerateBuyTransaction(const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee,
-	TSuccessCallback<FGenerateTransactionResponse> OnSuccess, const FFailureCallback& OnFailure) const
+                                       TSuccessCallback<FGenerateTransactionResponse> OnSuccess, const FFailureCallback& OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
 	OrdersData.Reserve(1);
