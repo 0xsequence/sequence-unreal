@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #import "NativeAppleEncryptor.h"
 #import <Foundation/Foundation.h>
@@ -105,14 +105,24 @@ static SecKeyRef PublicKeyRef = NULL;
 }
 
 - (char *)Decrypt:(NSString *)str
-{    
+{
+    if (str == nil || [str length] == 0) {
+        NSString *FailureString = @"Invalid input string";
+        return [self ConvertNSStringToChars:FailureString];
+    }
+
     if ([self LoadKeys])
     {
         NSData *DecodedData = [[NSData alloc] initWithBase64EncodedString:str options:0];
+        if (DecodedData == nil) {
+            NSString *FailureString = @"Failed to decode base64 input";
+            return [self ConvertNSStringToChars:FailureString];
+        }
+
         CFDataRef plainText = (__bridge CFDataRef)DecodedData;
         CFErrorRef error = NULL;
             
-        CFDataRef cfDecryptedData = SecKeyCreateDecryptedData(PrivateKeyRef,algorithm,plainText,&error);
+        CFDataRef cfDecryptedData = SecKeyCreateDecryptedData(PrivateKeyRef, algorithm, plainText, &error);
         
         if (cfDecryptedData)
         {
@@ -125,7 +135,8 @@ static SecKeyRef PublicKeyRef = NULL;
         else
         {
             NSError *err = CFBridgingRelease(error);
-            char * ErrorChars = [self ConvertNSStringToChars:err.localizedDescription];
+            NSString *errorString = err ? err.localizedDescription : @"Unknown decryption error";
+            char * ErrorChars = [self ConvertNSStringToChars:errorString];
             [self Clean];
             return ErrorChars;
         }
@@ -133,9 +144,7 @@ static SecKeyRef PublicKeyRef = NULL;
     else
     {
         NSString * FailureString = @"Failed to load keys";
-        char * ErrorChars = [self ConvertNSStringToChars:FailureString];
-        [self Clean];
-        return ErrorChars;
+        return [self ConvertNSStringToChars:FailureString];
     }
 }
 
