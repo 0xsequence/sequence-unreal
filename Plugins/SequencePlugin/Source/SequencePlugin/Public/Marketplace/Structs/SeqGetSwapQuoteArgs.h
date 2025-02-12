@@ -4,10 +4,10 @@
 #include "SeqFeeBreakdown.h"
 #include "Marketplace/Marketplace_Enums.h"
 #include "Util/SequenceSupport.h"
-#include "SeqGetSwapQuoteRequest.generated.h"
+#include "SeqGetSwapQuoteArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FGetSwapQuoteRequest
+struct SEQUENCEPLUGIN_API FGetSwapQuoteArgs
 {
     GENERATED_USTRUCT_BODY()
 

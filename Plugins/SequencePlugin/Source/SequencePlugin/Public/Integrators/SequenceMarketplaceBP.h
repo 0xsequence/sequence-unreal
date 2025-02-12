@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Marketplace/Marketplace.h"
+#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
+#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "SequenceMarketplaceBP.generated.h"
@@ -19,6 +21,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllListingsForCollectible,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListOffersForCollectible, bool, Status, const int64, ChainId, FSeqListCollectibleOffersReturn, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllOffersForCollectible, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetFloorOrder, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapPrice, bool, Status, const int64, ChainId, FSeqSwapPrice, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapPrices, bool, Status, const int64, ChainId, TArray<FSeqSwapPrice>, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapQuote, bool, Status, const int64, ChainId, FSeqSwapQuote, Response);
 
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
@@ -107,6 +112,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void GetFloorOrderAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
 
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnGetSwapPrice FOnGetSwapPriceResponse;
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
+	void GetSwapPriceAsync(const int64 ChainId, const FGetSwapPriceArgs& Args);
+
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnGetSwapPrices FOnGetSwapPricesResponse;
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
+	void GetSwapPricesAsync(const int64 ChainId, const FGetSwapPricesArgs& Args);
+
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnGetSwapQuote FonGetSwapQuoteResponse;
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
+	void GetSwapQuoteAsync(const int64 ChainId, const FGetSwapQuoteArgs& Args);
 	
 private:
 	UMarketplace* Marketplace;
@@ -124,4 +146,7 @@ private:
 	void CallListOffersForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqListCollectibleOffersReturn& Response);
 	void CallListAllOffersForCollectibleReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);
 	void CallGetFloorOrderReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
+	void CallGetSwapPriceReceived(const bool Status, const int64 ChainId, const FSeqSwapPrice& Response);
+	void CallGetSwapPricesReceived(const bool Status, const int64 ChainId, const TArray<FSeqSwapPrice>& Response);
+	void CallGetSwapQuoteReceived(const bool Status, const int64 ChainId, const FSeqSwapQuote& Response);
 };

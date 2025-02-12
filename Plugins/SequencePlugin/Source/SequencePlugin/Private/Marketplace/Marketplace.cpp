@@ -12,9 +12,9 @@
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
-#include "Marketplace/Structs/SeqGetSwapPricesRequest.h"
+#include "..\..\Public\Marketplace\Structs\SeqGetSwapPricesArgs.h"
 #include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
-#include "Marketplace/Structs/SeqGetSwapQuoteRequest.h"
+#include "..\..\Public\Marketplace\Structs\SeqGetSwapQuoteArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
 #include "Marketplace/Structs/SeqListCurrenciesReturn.h"
@@ -401,7 +401,7 @@ void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& BuyCurrency,
 	const int SlippagePercentage)
 {
 	const FString EndPoint = "GetSwapPrice";
-	FGetSwapPriceRequest Args {
+	FGetSwapPriceArgs Args {
 		BuyCurrency,
 		SellCurrency,
 		BuyAmount,
@@ -427,7 +427,7 @@ void UMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet,
 	const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
 	const FString EndPoint = "GetSwapPrices";
-	FGetSwapPricesRequest Args {
+	FGetSwapPricesArgs Args {
 		UserWallet,
 		BuyCurrency,
 		BuyAmount,
@@ -470,7 +470,7 @@ void UMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, 
 
 	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
 	{
-		FGetSwapQuoteRequest Args {
+		FGetSwapQuoteArgs Args {
 			UserWallet,
 			BuyCurrency,
 			SellCurrency,

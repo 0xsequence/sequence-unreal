@@ -249,6 +249,57 @@ void USequenceMarketplaceBP::GetFloorOrderAsync(const int64 ChainId, const FSeqL
 	this->Marketplace->GetFloorOrder(ChainId, Args.ContractAddress, Args.Filter, OnSuccess, OnFailure);
 }
 
+void USequenceMarketplaceBP::GetSwapPriceAsync(const int64 ChainId, const FGetSwapPriceArgs& Args)
+{
+	const TSuccessCallback<FSeqSwapPrice> OnSuccess = [this, ChainId](const FSeqSwapPrice& SwapPrice)
+	{
+		this->FOnGetSwapPriceResponse.Broadcast(true, ChainId, SwapPrice);
+	};
+
+	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Swap Price: %s"), *Error.Message);
+		FSeqSwapPrice SwapPrice;
+		this->FOnGetSwapPriceResponse.Broadcast(false, ChainId, SwapPrice);
+	};
+
+	this->Marketplace->GetSwapPrice(ChainId, Args.BuyAmount, Args.SellCurrencyAddress, Args.BuyAmount, OnSuccess, OnFailure, Args.SlippagePercentage);
+}
+
+void USequenceMarketplaceBP::GetSwapPricesAsync(const int64 ChainId, const FGetSwapPricesArgs& Args)
+{
+	const TSuccessCallback<TArray<FSeqSwapPrice>> OnSuccess = [this, ChainId](const TArray<FSeqSwapPrice>& SwapPrices)
+	{
+		this->FOnGetSwapPricesResponse.Broadcast(true, ChainId, SwapPrices);
+	};
+
+	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Swap Prices: %s"), *Error.Message);
+		TArray<FSeqSwapPrice> SwapPrices;
+		this->FOnGetSwapPricesResponse.Broadcast(false, ChainId, SwapPrices);
+	};
+
+	this->Marketplace->GetSwapPrices(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.BuyAmount, OnSuccess, OnFailure, Args.SlippagePercentage);
+}
+
+void USequenceMarketplaceBP::GetSwapQuoteAsync(const int64 ChainId, const FGetSwapQuoteArgs& Args)
+{
+	const TSuccessCallback<FSeqSwapQuote> OnSuccess = [this, ChainId](const FSeqSwapQuote& SwapQuote)
+	{
+		this->FonGetSwapQuoteResponse.Broadcast(true, ChainId, SwapQuote);
+	};
+
+	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Swap Quote: %s"), *Error.Message);
+		FSeqSwapQuote SwapQuote;
+		this->FonGetSwapQuoteResponse.Broadcast(false, ChainId, SwapQuote);
+	};
+
+	this->Marketplace->GetSwapQuote(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.SellCurrencyAddress, Args.BuyAmount, Args.IncludeApprove, OnSuccess, OnFailure, Args.SlippagePercentage);
+}
+
 void USequenceMarketplaceBP::CallCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response)
 {
 	if (this->CollectiblesWithLowestListingsResponse.IsBound())
@@ -363,4 +414,31 @@ void USequenceMarketplaceBP::CallGetFloorOrderReceived(const bool Status, const 
 		this->FOnGetFloorOrderResponse.Broadcast(Status, ChainId, Response);
 	else
 		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetFloorOrderResponse"));
+}
+
+void USequenceMarketplaceBP::CallGetSwapPriceReceived(const bool Status, const int64 ChainId,
+	const FSeqSwapPrice& Response)
+{
+	if (this->FOnGetSwapPriceResponse.IsBound())
+		this->FOnGetSwapPriceResponse.Broadcast(Status, ChainId, Response);
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapPriceResponse"));
+}
+
+void USequenceMarketplaceBP::CallGetSwapPricesReceived(const bool Status, const int64 ChainId,
+	const TArray<FSeqSwapPrice>& Response)
+{
+	if (this->FOnGetSwapPricesResponse.IsBound())
+		this->FOnGetSwapPricesResponse.Broadcast(Status, ChainId, Response);
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapPricesResponse"));
+}
+
+void USequenceMarketplaceBP::CallGetSwapQuoteReceived(const bool Status, const int64 ChainId,
+	const FSeqSwapQuote& Response)
+{
+	if (this->FonGetSwapQuoteResponse.IsBound())
+		this->FonGetSwapQuoteResponse.Broadcast(Status, ChainId, Response);
+	else
+		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapQuoteResponse"));
 }
