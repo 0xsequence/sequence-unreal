@@ -51,18 +51,24 @@ private:
 	}
 	
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString CollectionAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Seller;
-	EMarketplaceKind Marketplace;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<EMarketplaceKind> Marketplace;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FOrderData> OrdersData;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FAdditionalFee> AdditionalFees;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EWalletKind WalletType;
 
 	FGenerateSellTransaction()
 	{
 		this->CollectionAddress = "";
 		this->Seller = "";
-		this->Marketplace = SEQUENCE_MARKETPLACE_V2;
+		this->Marketplace = EMarketplaceKind::SEQUENCE_MARKETPLACE_V2;
 		this->OrdersData = TArray<FOrderData>();
 		this->AdditionalFees = TArray<FAdditionalFee>();
 		this->WalletType = EWalletKind::Unknown;
@@ -77,7 +83,7 @@ public:
 		this->AdditionalFees = AdditionalFees;
 		this->WalletType = WalletType;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

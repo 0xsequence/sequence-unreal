@@ -8,7 +8,9 @@ struct SEQUENCEPLUGIN_API FOrderData
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString OrderId;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Quantity;
 
 	FOrderData()
@@ -22,7 +24,7 @@ public:
 		this->OrderId = OrderId;
 		this->Quantity = Quantity;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

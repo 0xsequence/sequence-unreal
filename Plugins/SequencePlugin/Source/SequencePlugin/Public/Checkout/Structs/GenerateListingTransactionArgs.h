@@ -12,11 +12,17 @@ struct SEQUENCEPLUGIN_API FGenerateListingTransactionArgs
 	GENERATED_USTRUCT_BODY()
 	
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString CollectionAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Owner;
-	EContractType ContractType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<EContractType> ContractType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EOrderbookKind Orderbook;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FCreateReq Listing;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EWalletKind WalletType;
 
 	FGenerateListingTransactionArgs()
@@ -38,7 +44,7 @@ public:
 		this->Listing = Listing;
 		this->WalletType = WalletType;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

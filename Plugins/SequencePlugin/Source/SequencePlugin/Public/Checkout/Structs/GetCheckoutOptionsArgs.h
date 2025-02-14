@@ -29,8 +29,11 @@ private:
 	}
 	
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString WalletAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FCheckoutOptionsMarketplaceOrder> Orders;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int64 AdditionalFee;
 
 	FGetCheckoutOptionsArgs()
@@ -46,7 +49,7 @@ public:
 		this->Orders = Orders;
 		this->AdditionalFee = AdditionalFee;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

@@ -7,7 +7,9 @@ struct SEQUENCEPLUGIN_API FAdditionalFee
 {
 	GENERATED_USTRUCT_BODY()
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Amount;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Receiver;
 
 	FAdditionalFee()
@@ -19,7 +21,7 @@ public:
 		this->Amount = Amount;
 		this->Receiver = Receiver;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

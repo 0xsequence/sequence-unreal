@@ -10,9 +10,13 @@ struct SEQUENCEPLUGIN_API FTransactionSignature
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FDomain Domain;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Types;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString PrimaryType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Value;
 
 	FTransactionSignature()
@@ -30,7 +34,7 @@ public:
 		this->PrimaryType = PrimaryType;
 		this->Value = Value;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{
