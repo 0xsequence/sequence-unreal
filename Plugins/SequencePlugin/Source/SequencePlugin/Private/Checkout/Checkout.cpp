@@ -70,20 +70,29 @@ template<typename T> T UCheckout::BuildResponse(const FString Text) const
 }
 
 void UCheckout::GetCheckoutOptions(const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
-	TSuccessCallback<FGetCheckoutOptionsResponse> OnSuccess, const FFailureCallback& OnFailure) const
+                                   const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	const FString Endpoint = "CheckoutOptionsMarketplace";
 	const FString Args = BuildArgs<FGetCheckoutOptionsArgs>(FGetCheckoutOptionsArgs { Wallet->GetWalletAddress(), Orders, AdditionalFeeBps });
 
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGetCheckoutOptionsResponse Response = BuildResponse<FGetCheckoutOptionsResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGetCheckoutOptionsResponse Response = BuildResponse<FGetCheckoutOptionsResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
-void UCheckout::GetCheckoutOptions(const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps,
-	const TSuccessCallback<FGetCheckoutOptionsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+void UCheckout::GetCheckoutOptionsByOrders(const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps,
+	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	TArray<FCheckoutOptionsMarketplaceOrder> Options;
 	Options.Reserve(Orders.Num());
@@ -96,7 +105,7 @@ void UCheckout::GetCheckoutOptions(const TArray<FSeqOrder>& Orders, const int64 
 }
 
 void UCheckout::GenerateBuyTransaction(const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee,
-                                       TSuccessCallback<FGenerateTransactionResponse> OnSuccess, const FFailureCallback& OnFailure) const
+                                       FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
 	OrdersData.Reserve(1);
@@ -108,14 +117,23 @@ void UCheckout::GenerateBuyTransaction(const FSeqOrder& Order, const int64 Amoun
 	const FString Args = BuildArgs<FGenerateBuyTransaction>(FGenerateBuyTransaction{ Order.CollectionContractAddress, Wallet->GetWalletAddress(), Order.Marketplace, OrdersData, AdditionalFees, UMarketplaceWalletKindExtensions::GetWalletKind(Wallet) });
 	
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
-void UCheckout::GenerateSellTransaction(const FSeqOrder& Order, int64 Amount, const FAdditionalFee& AdditionalFee,
-	TSuccessCallback<FGenerateTransactionResponse> OnSuccess, const FFailureCallback& OnFailure) const
+void UCheckout::GenerateSellTransaction(const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee,
+	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
 	OrdersData.Reserve(1);
@@ -127,15 +145,24 @@ void UCheckout::GenerateSellTransaction(const FSeqOrder& Order, int64 Amount, co
 	const FString Args = BuildArgs<FGenerateSellTransaction>(FGenerateSellTransaction{ Order.CollectionContractAddress, Wallet->GetWalletAddress(), Order.Marketplace, OrdersData, AdditionalFees, UMarketplaceWalletKindExtensions::GetWalletKind(Wallet) });;
 
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
 void UCheckout::GenerateListingTransaction(const FString& CollectionAddress, const FString& TokenId, const int64 Amount, const EContractType ContractType,
 	const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind,
-	TSuccessCallback<FGenerateTransactionResponse> OnSuccess, const FFailureCallback& OnFailure) const
+	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	int64 EpochTime = Expiry.ToUnixTimestamp();
 	const FString Endpoint = "GenerateListingTransaction";
@@ -146,16 +173,24 @@ void UCheckout::GenerateListingTransaction(const FString& CollectionAddress, con
 	});
 
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
 void UCheckout::GenerateOfferTransaction(const FString& CollectionAddress, const FString& TokenId, const int64 Amount,
 	const EContractType ContractType, const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry,
-	const EOrderbookKind OrderbookKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess,
-	const FFailureCallback& OnFailure) const
+	const EOrderbookKind OrderbookKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	int64 EpochTime = Expiry.ToUnixTimestamp();
 	const FString Endpoint = "GenerateOfferTransaction";
@@ -166,15 +201,23 @@ void UCheckout::GenerateOfferTransaction(const FString& CollectionAddress, const
 	});
 
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
 void UCheckout::GenerateCancelTransaction(const FString& CollectionAddress, const FString& OrderId,
-	const EMarketplaceKind MarketplaceKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess,
-	const FFailureCallback& OnFailure) const
+	const EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	const FString Endpoint = "GenerateCancelTransaction";
 	const FString Args = BuildArgs<FGenerateCancelTransactionRequest>(FGenerateCancelTransactionRequest {
@@ -182,15 +225,23 @@ void UCheckout::GenerateCancelTransaction(const FString& CollectionAddress, cons
 	});
 
 	Marketplace->HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		if (OnSuccess.IsBound())
 		{
-			const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
 }
 
-void UCheckout::GenerateCancelTransaction(const FString& CollectionAddress, const FSeqOrder& Order,
-	const EMarketplaceKind MarketplaceKind, const TSuccessCallback<FGenerateTransactionResponse>& OnSuccess,
-	const FFailureCallback& OnFailure) const
+void UCheckout::GenerateCancelTransactionByOrder(const FString& CollectionAddress, const FSeqOrder& Order,
+	const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	GenerateCancelTransaction(CollectionAddress, Order.OrderId, MarketplaceKind, OnSuccess, OnFailure);
 }
