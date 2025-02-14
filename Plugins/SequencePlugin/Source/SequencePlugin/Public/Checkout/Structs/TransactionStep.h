@@ -12,11 +12,17 @@ struct SEQUENCEPLUGIN_API FTransactionStep
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EStepType Id;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Data;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString To;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Value;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FTransactionSignature Signature;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FPostRequest Post;
 
 	FTransactionStep()
@@ -38,7 +44,7 @@ public:
 		this->Signature = Signature;
 		this->Post = Post;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

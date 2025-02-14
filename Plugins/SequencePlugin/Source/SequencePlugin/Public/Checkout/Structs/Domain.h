@@ -8,10 +8,14 @@ struct SEQUENCEPLUGIN_API FDomain
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Name;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Version;
-	uint64 ChainId;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int64 ChainId;
 	// Chain enum?
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString VerifyingContract;
 
 	FDomain()
@@ -29,7 +33,7 @@ public:
 		this->ChainId = ChainId;
 		this->VerifyingContract = VerifyingContract;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

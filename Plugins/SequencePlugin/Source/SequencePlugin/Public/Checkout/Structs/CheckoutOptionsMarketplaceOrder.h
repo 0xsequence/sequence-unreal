@@ -9,9 +9,12 @@ struct SEQUENCEPLUGIN_API FCheckoutOptionsMarketplaceOrder
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ContractAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString OrderId;
-	EMarketplaceKind Marketplace;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<EMarketplaceKind> Marketplace;
 
 	FCheckoutOptionsMarketplaceOrder()
 	{
@@ -26,7 +29,7 @@ public:
 		this->OrderId = OrderId;
 		this->Marketplace = Marketplace;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

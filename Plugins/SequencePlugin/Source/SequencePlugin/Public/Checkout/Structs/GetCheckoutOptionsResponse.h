@@ -9,6 +9,7 @@ struct SEQUENCEPLUGIN_API FGetCheckoutOptionsResponse
 	GENERATED_USTRUCT_BODY()
 
 	public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	ECheckoutOptions Options;
 
 	FGetCheckoutOptionsResponse()
@@ -20,7 +21,7 @@ struct SEQUENCEPLUGIN_API FGetCheckoutOptionsResponse
 	{
 		this->Options = Options;
 	}
-
+	
 	bool customConstructor = false;
 
 	void Construct(FJsonObject JSON_In)

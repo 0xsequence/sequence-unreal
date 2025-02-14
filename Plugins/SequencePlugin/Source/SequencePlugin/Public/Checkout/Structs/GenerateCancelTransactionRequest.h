@@ -9,16 +9,20 @@ struct SEQUENCEPLUGIN_API FGenerateCancelTransactionRequest
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString CollectionAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Maker;
-	EMarketplaceKind Marketplace;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<EMarketplaceKind> Marketplace;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString OrderId;
 
 	FGenerateCancelTransactionRequest()
 	{
 		this->CollectionAddress = "";
 		this->Maker = "";
-		this->Marketplace = EMarketplaceKind::UNKNOWN_MK;
+		this->Marketplace = UNKNOWN_MK;
 		this->OrderId = "";
 	}
 
@@ -29,7 +33,7 @@ public:
 		this->Marketplace = Marketplace;
 		this->OrderId = OrderId;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

@@ -8,10 +8,15 @@ struct SEQUENCEPLUGIN_API FCreateReq
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString TokenId;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Quantity;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Expiry;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString CurrencyAddress;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString PricePerToken;
 
 	FCreateReq()
@@ -31,7 +36,7 @@ public:
 		this->CurrencyAddress = CurrencyAddress;
 		this->PricePerToken = PricePerToken;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{

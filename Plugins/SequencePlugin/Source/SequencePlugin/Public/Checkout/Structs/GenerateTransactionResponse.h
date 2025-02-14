@@ -31,6 +31,7 @@ private:
 	
 	
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FTransactionStep> Steps;
 	
 	FGenerateTransactionResponse()
@@ -42,7 +43,7 @@ public:
 	{
 		this->Steps = Steps;
 	}
-
+	
 	bool customConstructor = false;
 
 	void Construct(FJsonObject JSON_In)

@@ -8,8 +8,11 @@ struct SEQUENCEPLUGIN_API FPostRequest
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString EndPoint;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Method;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString Body;
 
 	FPostRequest()
@@ -25,7 +28,7 @@ public:
 		this->Method = Method;
 		this->Body = Body;
 	}
-
+	
 	bool customGetter = true;
 	FString GetArgs() const
 	{
