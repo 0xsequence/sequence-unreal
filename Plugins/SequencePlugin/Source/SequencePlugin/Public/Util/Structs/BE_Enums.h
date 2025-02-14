@@ -38,6 +38,8 @@ enum ENetwork
 	Soneium			   UMETA(DisplayName = "Soneium"),
 	Telos              UMETA(DisplayName = "Telos"),
 	Moonbeam           UMETA(DisplayName = "Moonbeam"),
+	Etherlink          UMETA(DisplayName = "Etherlink"),
+	XR1				   UMETA(DisplayName = "XR1"),
 
 	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
@@ -60,4 +62,5 @@ enum ENetwork
     RootPorcini        UMETA(DisplayName = "Root Network Porcini Testnet"),
     TelosTestnet        UMETA(DisplayName = "Telos Testnet"),
 	MoonbaseAlpha      UMETA(DisplayName = "Moonbase Alpha"),
+	EtherlinkTestnet   UMETA(DisplayName = "Etherlink Testnet"),
 };

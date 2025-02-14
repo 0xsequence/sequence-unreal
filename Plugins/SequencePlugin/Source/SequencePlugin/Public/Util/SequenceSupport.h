@@ -56,6 +56,7 @@ private:
 		FIdName(56,TEXT("bsc")),
 		FIdName(100,TEXT("gnosis")),
 		FIdName(137,TEXT("polygon")),
+		FIdName(273,TEXT("xr1")),
 		FIdName(1101,TEXT("polygon-zkevm")),
 		FIdName(1284,TEXT("moonbeam")),
 		FIdName(1868,TEXT("soneium")),
@@ -68,6 +69,7 @@ private:
 		FIdName(33139,TEXT("apechain")),
 		FIdName(42161,TEXT("arbitrum")),
 		FIdName(42170,TEXT("arbitrum-nova")),
+		FIdName(42793,TEXT("etherlink")),
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
@@ -87,6 +89,7 @@ private:
 		FIdName(62850,TEXT("laos-sigma-testnet")),
 		FIdName(80002,TEXT("amoy")),
 		FIdName(84532,TEXT("base-sepolia")),
+		FIdName(128123,TEXT("etherlink-testnet")),
 		FIdName(421614,TEXT("arbitrum-sepolia")),
 		FIdName(11155111,TEXT("sepolia")),
 		FIdName(11155420,TEXT("optimism-sepolia")),
@@ -118,6 +121,8 @@ private:
 		FIdName(1868,TEXT("Soneium")),
 		FIdName(40,TEXT("Telos")),
 		FIdName(1284,TEXT("Moonbeam")),
+		FIdName(42793, TEXT("Etherlink")),
+		FIdName(273, TEXT("XR1")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -140,6 +145,7 @@ private:
 		FIdName(7672,TEXT("Root Network Porcini Testnet")),
 		FIdName(41,TEXT("Telos Testnet")),
 		FIdName(1287,TEXT("Moonbase Alpha")),
+		FIdName(128123,TEXT("Etherlink Testnet")),
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -165,6 +171,8 @@ private:
 		FNameId(TEXT("soneium"),1868),
 		FNameId(TEXT("telos"),40),
 		FNameId(TEXT("moonbeam"),1284),
+		FNameId(TEXT("etherlink"),42793),
+		FNameId(TEXT("xr1"),273),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -187,6 +195,7 @@ private:
 		FNameId(TEXT("rootnet-porcini"),7672),
 		FNameId(TEXT("telos-testnet"), 41),
 		FNameId(TEXT("moonbase-alpha"),1287),
+		FNameId(TEXT("etherlink-testnet"),128123),
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -212,6 +221,8 @@ private:
 		{ENetwork::Soneium, 1868},
 		{ENetwork::Telos, 40},
 		{ENetwork::Moonbeam, 1284},
+		{ENetwork::Etherlink, 42793},
+		{ENetwork::XR1, 273},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -234,6 +245,7 @@ private:
 		{ENetwork::RootPorcini, 7672},
 		{ENetwork::TelosTestnet, 41},
 		{ENetwork::MoonbaseAlpha, 1287},
+		{ENetwork::EtherlinkTestnet, 128123},
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -259,6 +271,8 @@ private:
 		{ENetwork::Soneium, TEXT("Soneium")},
 		{ENetwork::Telos, TEXT("Telos")},
 		{ENetwork::Moonbeam, TEXT("Moonbeam")},
+		{ENetwork::Etherlink, TEXT("Etherlink")},
+		{ENetwork::XR1, TEXT("XR1")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
@@ -281,6 +295,7 @@ private:
 		{ENetwork::RootPorcini, TEXT("Root Network Porcini Testnet")},
 		{ENetwork::TelosTestnet, TEXT("Telos Testnet")},
 		{ENetwork::MoonbaseAlpha, TEXT("Moonbase Alpha")},
+		{ENetwork::EtherlinkTestnet, TEXT("Etherlink Testnet")},
 	};
 
 public:
