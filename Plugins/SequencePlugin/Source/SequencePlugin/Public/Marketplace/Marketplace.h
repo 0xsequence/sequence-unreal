@@ -6,14 +6,13 @@
 #include "Util/Async.h"
 #include "Marketplace/Structs/Struct_Data.h"
 #include "Structs/SeqGetCollectibleOrderArgs.h"
-#include "Structs/SeqGetSwapPriceArgs.h"
 #include "Structs/SeqListCollectibleListingsReturn.h"
 #include "Structs/SeqListCollectibleOffersReturn.h"
 #include "Structs/SeqListCurrenciesReturn.h"
 #include "Structs/SeqSwapPrice.h"
 #include "Structs/SeqSwapQuote.h"
+#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
 #include "Marketplace.generated.h"
-
 
 constexpr int DefaultSlippagePercentage = 5;
 

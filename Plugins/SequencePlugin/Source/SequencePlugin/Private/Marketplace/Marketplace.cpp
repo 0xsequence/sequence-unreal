@@ -12,13 +12,12 @@
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
-#include "..\..\Public\Marketplace\Structs\SeqGetSwapPricesArgs.h"
+#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
 #include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
-#include "..\..\Public\Marketplace\Structs\SeqGetSwapQuoteArgs.h"
+#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
 #include "Marketplace/Structs/SeqListCurrenciesReturn.h"
-
 
 UMarketplace::UMarketplace(){}
 
@@ -401,7 +400,7 @@ void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& BuyCurrency,
 	const int SlippagePercentage)
 {
 	const FString EndPoint = "GetSwapPrice";
-	FGetSwapPriceArgs Args {
+	FGetSwapPricesArgs Args {
 		BuyCurrency,
 		SellCurrency,
 		BuyAmount,

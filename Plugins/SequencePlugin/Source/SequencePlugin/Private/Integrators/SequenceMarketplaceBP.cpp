@@ -1,6 +1,8 @@
 #include "Integrators/SequenceMarketplaceBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Marketplace/Structs/SeqGetSwapPriceArgs.h"
+#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "Util/Log.h"
 
