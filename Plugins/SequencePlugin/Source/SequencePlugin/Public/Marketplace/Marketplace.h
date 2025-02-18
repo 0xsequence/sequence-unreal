@@ -6,7 +6,7 @@
 #include "Util/Async.h"
 #include "Marketplace/Structs/Struct_Data.h"
 #include "Structs/SeqGetCollectibleOrderArgs.h"
-#include "Structs\SeqGetSwapPriceArgs.h"
+#include "Structs/SeqGetSwapPriceArgs.h"
 #include "Structs/SeqListCollectibleListingsReturn.h"
 #include "Structs/SeqListCollectibleOffersReturn.h"
 #include "Structs/SeqListCurrenciesReturn.h"
