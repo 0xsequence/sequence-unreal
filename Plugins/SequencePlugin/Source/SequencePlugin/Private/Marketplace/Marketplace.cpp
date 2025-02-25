@@ -12,6 +12,7 @@
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
+#include "Marketplace/Structs/SeqGetSwapPriceArgs.h"
 #include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
 #include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
 #include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
@@ -395,12 +396,12 @@ void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAdd
 			}, OnFailure);
 }
 
-void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& BuyCurrency, const FString& SellCurrency,
+void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
 	const int SlippagePercentage)
 {
 	const FString EndPoint = "GetSwapPrice";
-	FGetSwapPricesArgs Args {
+	FGetSwapPriceArgs Args {
 		BuyCurrency,
 		SellCurrency,
 		BuyAmount,
@@ -497,7 +498,7 @@ void UMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FStr
 	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
 	const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
-	GetSwapPrice(ChainID, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
+	GetSwapPrice(ChainID, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
 		{
 			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
 		

@@ -34,7 +34,7 @@ public:
             return false;
         }
 
-        return FromJson(Values);
+        return FromJson(*JsonOut);
     }
     
 

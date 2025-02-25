@@ -33,7 +33,7 @@ public:
             return false;
         }
 
-        return FromJson(Values);
+        return FromJson(*JsonOut);
     }
     
     bool FromJson(const TSharedPtr<FJsonObject>& Json) {

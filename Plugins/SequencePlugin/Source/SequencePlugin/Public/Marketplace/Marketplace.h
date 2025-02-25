@@ -232,14 +232,14 @@ public:
 	/**
 	 * 
 	 * @param ChainID the id of the chain
-	 * @param BuyCurrency the address of the currency to buy
 	 * @param SellCurrency the address of the currency to sell
+	 * @param BuyCurrency the address of the currency to buy
 	 * @param BuyAmount the amount to buy
 	 * @param OnSuccess handler for success, takes in a FSeqSwapPrice
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 * @param SlippagePercentage the slippage percentage
 	 */
-	void GetSwapPrice(const int64 ChainID, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
+	void GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
 
 	/**
 	 * 
