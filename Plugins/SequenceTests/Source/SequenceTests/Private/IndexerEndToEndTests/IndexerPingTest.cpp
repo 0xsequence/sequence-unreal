@@ -6,6 +6,7 @@
 #include "Util/SequenceSupport.h"
 #include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
 #include "Helpers/BatchTestBuilder.h" // Include the BatchTestBuilder header
+#include "Helpers/IndexerRequestsTestData.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
