@@ -6,6 +6,7 @@
 #include "Checkout/Structs/GetCheckoutOptionsResponse.h"
 #include "Marketplace/Marketplace.h"
 #include "Sequence/SequenceAPI.h"
+#include "Sequence/Wallet_Enums.h"
 
 #include "Checkout.generated.h"
 
@@ -22,33 +23,39 @@ class SEQUENCEPLUGIN_API UCheckout : public UObject
 	GENERATED_BODY()
 	
 private:
-	UMarketplace* Marketplace = nullptr;
-	USequenceWallet* Wallet = nullptr;
 	int64 ChainID;
+
+	const FString PATH = "/rpc/Marketplace/";
+	
+	FString Url(const int64& TargetChainID,const FString& EndPoint) const;
+	static FString HostName(int64 TargetChainID);
+	void HTTPPost(const int64& TargetChainID,const FString& Endpoint,const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 public:
 	// Constructor
 	UCheckout();
-	UCheckout(UMarketplace* Marketplace, USequenceWallet* InWallet, const int64& InChainID);
+	UCheckout(const int64& InChainID);
 
 	template < typename T> FString BuildArgs(T StructIn) const;
 
 	template < typename T > T BuildResponse(FString Text) const;
+
+	void SetChainID(const int64& InChainID);
 	
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GetCheckoutOptions(const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GetCheckoutOptionsByOrders(const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure)const;
+	void GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure)const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateBuyTransaction(const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateSellTransaction(const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateListingTransaction(const FString& CollectionAddress, const FString& TokenId, int64 Amount, EContractType ContractType, const FString& CurrencyTokenAddress, int64 PricePerToken, FDateTime Expiry, EOrderbookKind OrderbookKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, int64 Amount, EContractType ContractType, const FString& CurrencyTokenAddress, int64 PricePerToken, FDateTime Expiry, EOrderbookKind OrderbookKind, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateOfferTransaction(const FString& CollectionAddress, const FString& TokenId, int64 Amount, EContractType ContractType, const FString& CurrencyTokenAddress, int64 PricePerToken, FDateTime Expiry, EOrderbookKind OrderbookKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, int64 Amount, EContractType ContractType, const FString& CurrencyTokenAddress, int64 PricePerToken, FDateTime Expiry, EOrderbookKind OrderbookKind, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateCancelTransaction(const FString& CollectionAddress, const FString& OrderId, EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& OrderId, EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateCancelTransactionByOrder(const FString& CollectionAddress, const FSeqOrder& Order, const EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateCancelTransactionByOrder(const FString& WalletAddress, const FString& CollectionAddress, const FSeqOrder& Order, const EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 };
