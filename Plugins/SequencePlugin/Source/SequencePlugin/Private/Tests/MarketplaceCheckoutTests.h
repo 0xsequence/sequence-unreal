@@ -19,8 +19,8 @@ public:
 	const FString TestWalletAddress = "0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07";
 	
 	static void TestGetCheckoutOptions_Marketplace(int64 Amount);
-	static void TestGetCheckoutOptions_PrimarySale_ERC1155(TArray<FString> TokenIds, TArray<int64> Amounts, FString ExpectedException);
-	static void TestGetCheckoutOptions_PrimarySale_ERC721(FString TokenId, int64 Amount, FString ExpectedException);
+	static void TestGetCheckoutOptions_PrimarySale_Erc1155(TArray<FString> TokenIds, TArray<int64> Amounts, FString ExpectedException);
+	static void TestGetCheckoutOptions_PrimarySale_Erc721(FString TokenId, int64 Amount, FString ExpectedException);
 	static void TestGenerateBuyTransaction(int64 Amount);
 	static void TestGenerateSellTransaction(int64 Amount);
 	static void TestGenerateListingTransaction(int64 Amount);

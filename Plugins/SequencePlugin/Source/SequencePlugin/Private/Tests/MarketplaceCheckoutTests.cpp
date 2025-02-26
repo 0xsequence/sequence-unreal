@@ -1,6 +1,5 @@
 #include "MarketplaceCheckoutTests.h"
 
-// Private
 
 void FMarketplaceCheckoutTests::SubmitStepsAsTransaction(const TArray<FTransactionStep>& Steps, USequenceWallet Wallet)
 {
@@ -64,12 +63,12 @@ void FMarketplaceCheckoutTests::TestGetCheckoutOptions_Marketplace(int64 Amount)
 {
 }
 
-void FMarketplaceCheckoutTests::TestGetCheckoutOptions_PrimarySale_ERC1155(TArray<FString> TokenIds,
+void FMarketplaceCheckoutTests::TestGetCheckoutOptions_PrimarySale_Erc1155(TArray<FString> TokenIds,
 	TArray<int64> Amounts, FString ExpectedException)
 {
 }
 
-void FMarketplaceCheckoutTests::TestGetCheckoutOptions_PrimarySale_ERC721(FString TokenId, int64 Amount,
+void FMarketplaceCheckoutTests::TestGetCheckoutOptions_PrimarySale_Erc721(FString TokenId, int64 Amount,
 	FString ExpectedException)
 {
 }
