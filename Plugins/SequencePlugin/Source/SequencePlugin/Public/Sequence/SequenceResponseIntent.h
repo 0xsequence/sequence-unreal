@@ -538,6 +538,59 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
 	}
 };
 
+// Wallet Linking
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString SignatureChainId = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString ParentWalletAddress = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString ParentWalletMessage = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString ParentWalletSignature = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString LinkedWalletAddress = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWallet
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	int64 Id = 0;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString WalletType = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString WalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString LinkedWalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	FString CreatedAt = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	TArray<FSeqLinkedWallet> LinkedWallets;
+};
+
 
 //Validate Signature//
 

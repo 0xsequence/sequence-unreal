@@ -952,6 +952,22 @@ void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredenti
 	}, OnOpenResponse, OnFailure);
 }
 
+void USequenceRPCManager::GetLinkedWallets(const FSeqLinkedWalletRequest& Request, const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	/*this->SendIntent(this->BuildAPIUrl("GetLinkedWallets"),[this, ChainId, WalletAddress, Message, Signature](const TOptional<int64>& CurrentTime)
+	{
+		return BuildValidateMessageSignatureIntent(ChainId, WalletAddress, Message, Signature, CurrentTime);
+	}, OnResponse, OnFailure);*/
+}
+
+void USequenceRPCManager::RemoveLinkedWallet(const FSeqLinkedWalletRequest& Request, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	/*this->SendIntent(this->BuildAPIUrl("RemoveLinkedWallet"),[this, ChainId, WalletAddress, Message, Signature](const TOptional<int64>& CurrentTime)
+	{
+		return BuildValidateMessageSignatureIntent(ChainId, WalletAddress, Message, Signature, CurrentTime);
+	}, OnResponse, OnFailure);*/
+}
+
 void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->UpdateWithStoredSessionWallet();

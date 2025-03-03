@@ -304,6 +304,46 @@ void USequenceWalletBP::ApiSignOut()
 	}
 }
 
+void USequenceWalletBP::GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnFailure OnFailure)
+{
+	const TFunction<void (FSeqLinkedWalletsResponse)> OnApiSuccess = [OnSuccess](const FSeqLinkedWalletsResponse& LinkedWallets)
+	{
+		OnSuccess.ExecuteIfBound(LinkedWallets);
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
+	{
+		OnFailure.ExecuteIfBound(Err.Message);
+	};
+	
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
+		Wallet->GetLinkedWallets(OnApiSuccess, OnApiFailure);
+	}
+}
+
+void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnFailure OnFailure)
+{
+	const TFunction<void()> OnApiSuccess = [OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
+	{
+		OnFailure.ExecuteIfBound(Err.Message);
+	};
+	
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		const USequenceWallet * Wallet = WalletOptional.GetValue();
+		Wallet->RemoveLinkedWallet(LinkedWalletAddress, OnApiSuccess, OnApiFailure);
+	}
+}
+
 void USequenceWalletBP::ApiSignMessage(const FString& Message)
 {
 	const TFunction<void (FSeqSignMessageResponse_Response)> OnSuccess = [this](const FSeqSignMessageResponse_Response& SignedMessage)
