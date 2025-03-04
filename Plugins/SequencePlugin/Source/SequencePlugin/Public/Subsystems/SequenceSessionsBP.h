@@ -9,99 +9,72 @@
 #include "INativeAuthCallback.h"
 #include "SequenceSessionsBP.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailFederationRequiresCode);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionEstablished);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationSucceeded);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederationFailure);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSessionCreationFailure);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSignInWebViewRequired, const FString&, SignInUrl);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
-
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, public INativeAuthCallback
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBrowserRequired, const FString&, SignInUrl);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 	
 public:
 	USequenceSessionsBP();
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnEmailLoginRequiresCode EmailLoginRequiresCode;
 
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnEmailFederationRequiresCode EmailFederationRequiresCode;
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnSessionEstablished SessionEstablished;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnFederationSucceeded FederationSucceeded;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnFederationFailure FederationFailure;
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnSessionCreationFailure SessionCreationFailure;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnSignInWebViewRequired SignInWebViewRequired;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIdTokenReceived IdTokenReceived;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnFederationRequired FederationRequired;
-	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void StartEmailLoginAsync(const FString& Email);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ConfirmEmailLoginWithCodeAsync(const FString& Code);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetGoogleTokenIdAsync();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetAppleTokenIdAsync();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void StartOidcSessionAsync(const FString& IdToken);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayFabRegistrationAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayfabAuthenticateWithSessionTicketAsync(const FString& SessionTicket);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void StartGuestSessionAsync();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederateEmailAsync(const FString& EmailIn);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ConfirmEmailFederationWithCodeAsync(const FString& Code);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederateOidcTokenAsync(const FString& IdTokenIn);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederatePlayFabRegistrationAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederatePlayFabLoginAsync(const FString& UsernameIn, const FString& PasswordIn) const;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ClearSession() const;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetGoogleTokenId(FOnBrowserRequired BrowserRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetAppleTokenId(FOnBrowserRequired BrowserRequired);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	bool CheckExistingSession() const;
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void StartEmailLogin(const FString& Email, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void StartOidcSession(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederateEmail(const FString& EmailIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void ConfirmEmailFederationWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederateOidcToken(const FString& IdTokenIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure) const;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure) const;
+	
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
 
 private:
@@ -111,18 +84,7 @@ private:
 	UPROPERTY()
 	USequenceAuthenticator* Authenticator;
 	
-	void StartSession(const FCredentials_BE& Credentials) const;
-	void PlayFabNewAccountLoginRpcAsync(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void PlayFabLoginRpcAsync(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void CallEmailLoginRequiresCode() const;
-	void CallEmailFederationRequiresCode() const;
-	void CallSessionEstablished() const;
-	void CallFederationSucceeded() const;
-	void CallFederationFailure() const;
-	void CallSessionCreationFailure() const;
-	void CallSignInWebViewRequired(const FString& SignInUrl) const;
-	void CallIdTokenReceived(const FString& IdToken) const;
-	void CallFederationRequired(const FFederationSupportData& FederationData) const;
+	void PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void PlayFabLoginRpc(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void PlayFabRpc(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 };

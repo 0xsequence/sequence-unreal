@@ -8,13 +8,13 @@
 #include "UObject/Object.h"
 #include "SequencePayBP.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
-
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequencePayBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 
 public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")

@@ -25,35 +25,33 @@ void USequenceIndexerBP::SetChainByType(const ENetwork& NewChainType)
 	ChainId = USequenceSupport::GetNetworkId(NewChainType);
 }
 
-void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress)
+void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress, FOnGetEtherBalance OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqEtherBalance> OnSuccess = [this, WalletAddress](const FSeqEtherBalance& EtherBalance)
+	const TSuccessCallback<FSeqEtherBalance> OnApiSuccess = [this, WalletAddress, OnSuccess](const FSeqEtherBalance& EtherBalance)
 	{
-		this->CallEtherBalanceReceived(true, WalletAddress, EtherBalance.balanceWei);
+		OnSuccess.Execute(WalletAddress, EtherBalance.balanceWei);
 	};
 
-	const FFailureCallback OnFailure = [this, WalletAddress](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting ether balance: %s"), *Error.Message);
-		this->CallEtherBalanceReceived(false, WalletAddress, 0);
+		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->GetEtherBalance(this->ChainId, WalletAddress, OnSuccess, OnFailure);
+	this->Indexer->GetEtherBalance(this->ChainId, WalletAddress, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata)
+void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess = [this, WalletAddress, ContractAddress](const FSeqGetTokenBalancesReturn& TokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnApiSuccess = [this, WalletAddress, ContractAddress, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
 	{
-		this->CallTokenBalancesReceived(true, WalletAddress, ContractAddress, TokenBalances);
+		OnSuccess.Execute(WalletAddress, ContractAddress, TokenBalances);
 	};
 
-	const FFailureCallback OnFailure = [this, WalletAddress, ContractAddress](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting token balances: %s"), *Error.Message);
-
-		const FSeqGetTokenBalancesReturn Balances;
-		this->CallTokenBalancesReceived(false, WalletAddress, ContractAddress, Balances);
+		OnFailure.Execute(Error.Message);
 	};
 
 	FSeqGetTokenBalancesArgs Args;
@@ -61,103 +59,59 @@ void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, con
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 	
-	this->Indexer->GetTokenBalances(this->ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTokenBalances(this->ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata)
+void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess = [this, ContractAddress](const FSeqGetTokenSuppliesReturn& Supplies)
+	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnApiSuccess = [this, ContractAddress, OnSuccess](const FSeqGetTokenSuppliesReturn& Supplies)
 	{
-		this->CallTokenSuppliesReceived(true, ContractAddress, Supplies);
+		OnSuccess.Execute(ContractAddress, Supplies);
 	};
 
-	const FFailureCallback OnFailure = [this, ContractAddress](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting token supplies: %s"), *Error.Message);
 		
 		const FSeqGetTokenSuppliesReturn Supplies;
-		this->CallTokenSuppliesReceived(false, ContractAddress, Supplies);
+		OnFailure.Execute(Error.Message);
 	};
 
 	FSeqGetTokenSuppliesArgs Args;
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 		
-	this->Indexer->GetTokenSupplies(this->ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTokenSupplies(this->ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args)
+void USequenceIndexerBP::GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess = [this, Args](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
+	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnApiSuccess = [this, Args, OnSuccess](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
 	{
-		this->CallTokenSuppliesMapReceived(true, Args, SuppliesMap);
+		OnSuccess.Execute(Args, SuppliesMap);
 	};
 
-	const FFailureCallback OnFailure = [this, Args](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting token supplies map: %s"), *Error.Message);
-		
-		const FSeqGetTokenSuppliesMapReturn SuppliesMap;
-		this->CallTokenSuppliesMapReceived(false, Args, SuppliesMap);
+		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTokenSuppliesMap(ChainId, Args, OnSuccess, OnFailure);
+	this->Indexer->GetTokenSuppliesMap(ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args)
+void USequenceIndexerBP::GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess = [this, Args](const FSeqGetTransactionHistoryReturn& TransactionHistory)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, Args, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{
-		this->CallTransactionHistoryReceived(true, Args, TransactionHistory);
+		OnSuccess.Execute(Args, TransactionHistory);
 	};
 
-	const FFailureCallback OnFailure = [this, Args](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
-		
-		const FSeqGetTransactionHistoryReturn TransactionHistory;
-		this->CallTransactionHistoryReceived(false, Args, TransactionHistory);
+		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTransactionHistory(this->ChainId, Args, OnSuccess, OnFailure);
-}
-
-void USequenceIndexerBP::CallEtherBalanceReceived(const bool Status, const FString& WalletAddress, const int64 Balance) const
-{
-	if (this->EtherBalanceReceived.IsBound())
-		this->EtherBalanceReceived.Broadcast(Status, WalletAddress, Balance);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: EtherBalanceReceived"));
-}
-
-void USequenceIndexerBP::CallTokenBalancesReceived(const bool Status, const FString& WalletAddress, const FString& ContractAddress, const FSeqGetTokenBalancesReturn& Balances) const
-{
-	if (this->TokenBalancesReceived.IsBound())
-		this->TokenBalancesReceived.Broadcast(Status, WalletAddress, ContractAddress, Balances);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: TokenBalancesReceived"));
-}
-
-void USequenceIndexerBP::CallTokenSuppliesReceived(const bool Status, const FString& ContractAddress, const FSeqGetTokenSuppliesReturn& Supplies) const
-{
-	if (this->TokenSuppliesReceived.IsBound())
-		this->TokenSuppliesReceived.Broadcast(Status, ContractAddress, Supplies);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: TokenSuppliesReceived"));
-}
-
-void USequenceIndexerBP::CallTokenSuppliesMapReceived(const bool Status, const FSeqGetTokenSuppliesMapArgs& Request, const FSeqGetTokenSuppliesMapReturn& SuppliesMap) const
-{
-	if (this->TokenSuppliesMapReceived.IsBound())
-		this->TokenSuppliesMapReceived.Broadcast(Status, Request, SuppliesMap);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: TokenSuppliesMapReceived"));
-}
-
-void USequenceIndexerBP::CallTransactionHistoryReceived(const bool Status, const FSeqGetTransactionHistoryArgs& Request, const FSeqGetTransactionHistoryReturn& TransactionHistory) const
-{
-	if (this->TransactionHistoryReceived.IsBound())
-		this->TransactionHistoryReceived.Broadcast(Status, Request, TransactionHistory);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: TransactionHistoryReceived"));
+	this->Indexer->GetTransactionHistory(this->ChainId, Args, OnApiSuccess, OnApiFailure);
 }

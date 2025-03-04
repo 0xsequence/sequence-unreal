@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
+#include "Log.h"
 #include "Containers/Union.h"
 #include "Types/Types.h"
-#include "Util/Log.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"

@@ -10,105 +10,26 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceWalletBP.generated.h"
 
-//ASYNC Response Delegates//
-
-//Api//
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiValidateMessageSignature, FSequenceResponseStatus, ResponseStatus, FSeqValidateMessageSignatureResponse_Data, isValidMessageSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
-
-/**
- * Used for exposing portions of the USequenceWallet
- * to Blueprints for ease of use.
- */
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnValidateMessageSignature, FSequenceResponseStatus, ResponseStatus, FSeqValidateMessageSignatureResponse_Data, isValidMessageSignature);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
 	USequenceWalletBP();
 
-	//ASYNC Response Bindable Delegates//
-
-	//Api//
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiSignMessage OnApiSignMessage;
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnIApiValidateMessageSignature OnApiValidateMessageSignature;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiGetFilteredFeeOptions OnApiGetFilteredFeeOptions;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiGetUnFilteredFeeOptions OnApiGetUnFilteredFeeOptions;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiSendTransaction OnApiSendEther;
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiSendTransactionWtihFeeOption OnApiSendTransactionWithFeeOption;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiSendTransaction OnApiSendTransaction;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiGetIdToken OnApiGetIdToken;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiListSessions OnApiListSessions;
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnIApiListAccounts OnApiListAccounts;
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnIApiGetSessionAuthProof OnApiGetSessionAuthProof;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
-	
-	//ASYNC Response Bindable Delegates//
-private:
-
-	//ASYNC Response Internal Calls//
-
-	//Api//
-
-	void CallOnApiSignMessage(const FSequenceResponseStatus& Status, const FSeqSignMessageResponse_Response& SignedMessage) const;
-	void CallOnApiValidateMessageSignature(const FSequenceResponseStatus& Status, const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature) const;
-	void CallOnApiGetFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
-	void CallOnApiGetUnFilteredFeeOptions(const FSequenceResponseStatus& Status, const TArray<FFeeOption>& FeeOptions) const;
-	void CallOnApiSendEther(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
-	void CallOnApiSendTransactionWithFee(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
-	void CallOnApiSendTransaction(const FSequenceResponseStatus& Status, const FSeqTransactionResponse_Data& Response) const;
-	void CallOnApiGetIdToken(const FSequenceResponseStatus& Status, const FSeqIdTokenResponse_Data& Response) const;
-	void CallOnApiListSessions(const FSequenceResponseStatus& Status, const TArray<FSeqListSessions_Session>& Sessions) const;
-	void CallOnApiListAccounts(const FSequenceResponseStatus& Status, const FSeqListAccountsResponse_Data& Response) const;
-	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
-	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
-	
-public:
-	//SYNC//
-
-	//Support//
-
-	/*
-	* Used to get the amount that users can read,
-	* int64 Amount, the integer amount of Crypto
-	* int64 Decimals, the integer amount of Decimal places used to represent the Amount
-	* Return, The user readable Float amount
-	*/
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	float GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals);
 
@@ -142,75 +63,57 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Static")
 	static TArray<int64> GetAllNetworkIds();
 	
-	//Support//
-	
-	//SequenceApi//
-	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	FString ApiGetWalletAddress();
+	FString GetWalletAddress();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	int64 ApiGetNetworkId();
+	int64 GetNetworkId();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiUpdateNetworkId(int64 NewNetworkId);
+	void UpdateNetworkId(int64 NewNetworkId);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ApiUpdateNetworkIdFromName(FString NewNetworkName);
+	void UpdateNetworkIdFromName(FString NewNetworkName);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ApiUpdateNetworkIdFromEnum(ENetwork NewNetwork);
+	void UpdateNetworkIdFromEnum(ENetwork NewNetwork);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiUpdateProviderUrl(const FString& NewProviderUrl);
+	void UpdateProviderUrl(const FString& NewProviderUrl);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiOpenTransakUrl(const FTransakSettings& Settings);
+	void SignOut();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiSignOut();
-
-	//SequenceApi//
-	
-	//SYNC//
-	
-	//ASYNC//
-
-	//SequenceApi//
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiSignMessage(const FString& Message);
+	void SignMessage(const FString& Message, FOnSignMessage OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ApiValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature);
+	void ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, FOnValidateMessageSignature OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiGetFilteredFeeOptions(UTransactions * Transactions);
+	void GetFilteredFeeOptions(UTransactions * Transactions, FOnGetFilteredFeeOptions OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiGetUnfilteredFeeOptions(UTransactions * Transactions);
+	void GetUnfilteredFeeOptions(UTransactions * Transactions, FOnGetUnFilteredFeeOptions OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiSendEther(const FString& RecipientAddress, const FString& Amount);
+	void SendEther(const FString& RecipientAddress, const FString& Amount, FOnSendTransaction OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiSendTransactionWithFee(UTransactions * Transactions);
+	void SendTransactionWithFee(UTransactions * Transactions, FOnSendTransactionWtihFeeOption OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiSendTransaction(UTransactions * Transactions);
+	void SendTransaction(UTransactions * Transactions, FOnSendTransaction OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiGetIdToken(const FString& Nonce);
+	void GetIdToken(const FString& Nonce, FOnGetIdToken OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiListSessions();
+	void ListSessions(FOnListSessions OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ApiListAccounts();
+	void ListAccounts(FOnListAccounts OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ApiGetSessionAuthProof(const FString& Nonce);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ApiGetSupportedTransakCountries();
+	void GetSessionAuthProof(const FString& Nonce, FOnGetSessionAuthProof OnSuccess, FOnFailure OnFailure);
 };
