@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Eth/RLP.h"
 #include "Misc/AutomationTest.h"
+#include "Util/Log.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestRLPLong, "Public.Tests.TestRLPLong",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -24,7 +25,7 @@ bool TestRLPLong::RunTest(const FString& Parameters)
 	
 	FUnsizedData Data = RLP::Encode(Itemize(HexStringToBinary(ByteCode)));
 
-	UE_LOG(LogTemp, Display, TEXT("%s"), *Data.ToHex());
+	SEQ_LOG(Display, TEXT("%s"), *Data.ToHex());
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

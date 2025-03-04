@@ -196,7 +196,7 @@ void AGeneralTesting::TestGetSupportedCountries() const
 	{
 		for (FSupportedCountry Country : SupportedCountries)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Country: %s"), *USequenceSupport::StructToString(Country));
+			SEQ_LOG(Display, TEXT("Country: %s"), *USequenceSupport::StructToString(Country));
 		}
 		CallbackPassed("TestPassed");
 	};
@@ -240,12 +240,12 @@ void AGeneralTesting::TestTokenBalances() const
 	const TSuccessCallback<FSeqGetTokenBalancesReturn> GenericSuccess = [](const FSeqGetTokenBalancesReturn tokenBalances)
 	{
 		const FString ret = USequenceSupport::StructToString<FSeqGetTokenBalancesReturn>(tokenBalances);
-		UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
+		SEQ_LOG(Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *ret);
 	};
 
 	const FFailureCallback GenericFailure = [](const FSequenceError Error)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Error with getting balances"));
+		SEQ_LOG(Display, TEXT("Error with getting balances"));
 	};
 	
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
@@ -267,13 +267,13 @@ void AGeneralTesting::TestHistory() const
 		if (GPrintAll)
 		{
 			const FString ret = USequenceSupport::StructToString<FSeqGetTransactionHistoryReturn>(transactionHistory);
-			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
+			SEQ_LOG(Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *ret);
 		}
 	};
 
 	const FFailureCallback GenericFailure = [](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Error with getting history"));
+		SEQ_LOG(Display, TEXT("Error with getting history"));
 	};
 	
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
@@ -297,7 +297,7 @@ void AGeneralTesting::TestGetWalletAddress() const
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		const USequenceWallet * Api = WalletOptional.GetValue();
-		UE_LOG(LogTemp, Display, TEXT("Wallet Address: %s"), *Api->GetWalletAddress());
+		SEQ_LOG(Display, TEXT("Wallet Address: %s"), *Api->GetWalletAddress());
 	}
 }
 
@@ -307,11 +307,11 @@ void AGeneralTesting::TestEncryption() const
 	const FString EncryptedData = USequenceEncryptor::Encrypt(PreEncrypt);
 	const FString DecryptedData = USequenceEncryptor::Decrypt(EncryptedData,PreEncrypt.Len());
 
-	UE_LOG(LogTemp, Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
-	UE_LOG(LogTemp, Display, TEXT("Encrypted: %s"), *EncryptedData);
-	UE_LOG(LogTemp, Display, TEXT("Post Encrypt: %s"), *DecryptedData);
+	SEQ_LOG(Display, TEXT("Pre Encrypt: %s"), *PreEncrypt);
+	SEQ_LOG(Display, TEXT("Encrypted: %s"), *EncryptedData);
+	SEQ_LOG(Display, TEXT("Post Encrypt: %s"), *DecryptedData);
 	const FString TestState = (PreEncrypt.Compare(DecryptedData) == 0) ? "Passed" : "Failed";
-	UE_LOG(LogTemp, Display, TEXT("Test: [%s]"), *TestState);
+	SEQ_LOG(Display, TEXT("Test: [%s]"), *TestState);
 }
 
 void AGeneralTesting::TestMisc()
@@ -335,18 +335,18 @@ void AGeneralTesting::Tick(const float DeltaTime)
 
 void AGeneralTesting::CallbackPassed(FString StateData) const
 {
-	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
-	UE_LOG(LogTemp, Display, TEXT("[Callback Passed!]\nAdditional State: [%s]"), *StateData);
-	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
+	SEQ_LOG(Display, TEXT("========================================================================="));
+	SEQ_LOG(Display, TEXT("[Callback Passed!]\nAdditional State: [%s]"), *StateData);
+	SEQ_LOG(Display, TEXT("========================================================================="));
 }
 
 void AGeneralTesting::CallbackFailed(const FString StateData, FSequenceError Error) const
 {
-	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
-	UE_LOG(LogTemp, Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *StateData);
-	UE_LOG(LogTemp, Error, TEXT("[Error Message]:\n[%s]"),*Error.Message);
-	UE_LOG(LogTemp, Error, TEXT("[Error Type]: [%s]"),*ErrorToString(Error.Type));
-	UE_LOG(LogTemp, Display, TEXT("========================================================================="));
+	SEQ_LOG(Display, TEXT("========================================================================="));
+	SEQ_LOG(Error, TEXT("[Callback Failed!]\nAdditional State: [%s]"), *StateData);
+	SEQ_LOG(Error, TEXT("[Error Message]:\n[%s]"),*Error.Message);
+	SEQ_LOG(Error, TEXT("[Error Type]: [%s]"),*ErrorToString(Error.Type));
+	SEQ_LOG(Display, TEXT("========================================================================="));
 }
 
 FString AGeneralTesting::ErrorToString(EErrorType Error)

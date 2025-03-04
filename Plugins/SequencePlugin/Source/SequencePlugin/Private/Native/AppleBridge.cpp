@@ -9,6 +9,7 @@
 #include "Native/IOS/objective_c/NativeAppleEncryptor.mm"
 #endif
 #include "Native/IOS/objective_c/NativeAppleEncryptor.h"
+#include "Util/Log.h"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ FString UAppleBridge::AppleDecrypt(const FString& StringIn)
 
 void UAppleBridge::InitiateGoogleSSO(const FString& Url, const FString& Scheme, void(*IOSCallback)(char *idToken))
 {
-	UE_LOG(LogTemp,Display,TEXT("Preparing to Signin with Google"));
+	SEQ_LOG(Display,TEXT("Preparing to Signin with Google"));
 #if PLATFORM_IOS
 	NSString * _url = Url.GetNSString();
 	NSString * _scheme = Scheme.GetNSString();

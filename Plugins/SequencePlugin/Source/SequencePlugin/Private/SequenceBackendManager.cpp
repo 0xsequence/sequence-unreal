@@ -10,7 +10,7 @@ void ASequenceBackendManager::CallReadyToReceiveCode()
 	if (this->ReadyToReceiveCodeDelegate.IsBound())
 		this->ReadyToReceiveCodeDelegate.Broadcast();
 	else
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ReadyToReceiveCodeDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ReadyToReceiveCodeDelegate]"));
 }
 
 void ASequenceBackendManager::CallShowAuthFailureScreen(const FString& ErrorIn)
@@ -18,7 +18,7 @@ void ASequenceBackendManager::CallShowAuthFailureScreen(const FString& ErrorIn)
 	if (this->ShowAuthFailureDelegate.IsBound())
 		this->ShowAuthFailureDelegate.Broadcast(ErrorIn);
 	else
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ShowAuthFailureDelegate]"));
 }
 
 void ASequenceBackendManager::CallShowAuthSuccessScreen()
@@ -26,7 +26,7 @@ void ASequenceBackendManager::CallShowAuthSuccessScreen()
 	if (this->ShowAuthSuccessDelegate.IsBound())
 		this->ShowAuthSuccessDelegate.Broadcast();
 	else
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ShowAuthSuccessDelegate]"));
 }
 
 void ASequenceBackendManager::CallShowFederationSuccess()
@@ -37,7 +37,7 @@ void ASequenceBackendManager::CallShowFederationSuccess()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederateSuccessDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ShowFederateSuccessDelegate]"));
 	}
 }
 
@@ -49,7 +49,7 @@ void ASequenceBackendManager::CallShowFederationFailure(const FString& Error)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederationFailureDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ShowFederationFailureDelegate]"));
 	}
 }
 
@@ -61,7 +61,7 @@ void ASequenceBackendManager::CallShowFederateOrForce(const FFederationSupportDa
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Nothing bound to: ShowFederateOrForceDelegate]"));
+		SEQ_LOG(Error, TEXT("[Nothing bound to: ShowFederateOrForceDelegate]"));
 	}
 }
 

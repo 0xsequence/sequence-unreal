@@ -3,6 +3,7 @@
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "Misc/Base64.h"
 #include "Internationalization/Regex.h"
+#include "Util/Log.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
@@ -39,7 +40,7 @@ FString UWindowsEncryptor::Encrypt(const FString& StringIn)
 	}
 	else
 	{
-		UE_LOG(LogTemp,Display,TEXT("Encryption Failed on windows"));
+		SEQ_LOG(Display,TEXT("Encryption Failed on windows"));
 	}
 	delete[] CharsIn;
 #endif
@@ -66,7 +67,7 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 	else
 	{
 		delete[] CharsIn;
-		UE_LOG(LogTemp,Error,TEXT("Provided String is InValid and cannot be decoded!"));
+		SEQ_LOG(Error,TEXT("Provided String is InValid and cannot be decoded!"));
 		return "";
 	}
 	
@@ -88,7 +89,7 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 		
 		if (!FBase64::Decode(PreResult,Result))
 		{
-			UE_LOG(LogTemp,Error,TEXT("UnSuccessful B64 Decode in Windows Encryptor"));
+			SEQ_LOG(Error,TEXT("UnSuccessful B64 Decode in Windows Encryptor"));
 		}
 		
 		LocalFree(DataOut.pbData);
@@ -97,7 +98,7 @@ FString UWindowsEncryptor::Decrypt(const FString& StringIn)
 	else
 	{
 		const int32 ErrorCode = GetLastError();
-		UE_LOG(LogTemp,Display,TEXT("Decryption Failed on windows, Error code: %d"),ErrorCode);
+		SEQ_LOG(Display,TEXT("Decryption Failed on windows, Error code: %d"),ErrorCode);
 	}
 	delete[] CharsIn;
 #endif

@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Integrators/SequenceUtilityBP.h"
-
+#include "Subsystems/SequenceUtilityBP.h"
 #include "Engine/Engine.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"

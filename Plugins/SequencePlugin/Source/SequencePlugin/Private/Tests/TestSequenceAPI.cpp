@@ -5,6 +5,7 @@
 #include "SequenceAuthenticator.h"
 #include "ABI/ABI.h"
 #include "Native/NativeOAuth.h"
+#include "Util/Log.h"
 
 /*
  * testing stack based implementation for memory faults
@@ -13,12 +14,12 @@ void SequenceAPITest::BasicProviderTests()
 {
 	const TFunction<void(FUnsizedData)> TestResponse = [](FUnsizedData Response)
 	{
-		UE_LOG(LogTemp,Display,TEXT("Basic provider response"));
+		SEQ_LOG(Display,TEXT("Basic provider response"));
 	};
 
 	const TFunction<void(FSequenceError)> TestError = [](FSequenceError Error)
 	{
-		UE_LOG(LogTemp,Display,TEXT("Error"));
+		SEQ_LOG(Display,TEXT("Error"));
 	};
 
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
@@ -53,7 +54,7 @@ void SequenceAPITest::SignMessage(TFunction<void(FString)> OnSuccess, TFunction<
 #endif
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignMessage Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API SignMessage Test]========================"));
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
@@ -69,7 +70,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 	{
 		for (auto Session : Response)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Session: %s"), *USequenceSupport::StructToString(Session));	
+			SEQ_LOG(Display, TEXT("Session: %s"), *USequenceSupport::StructToString(Session));	
 		}
 		
 		OnSuccess("List Sessions Test Passed");
@@ -80,7 +81,7 @@ void SequenceAPITest::ListSessions(TFunction<void(FString)> OnSuccess, TFunction
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API ListSessions Test]========================"));
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
@@ -97,7 +98,7 @@ void SequenceAPITest::SendRaw(TFunction<void(FString)> OnSuccess, TFunction<void
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Send[Raw]Transaction Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API Send[Raw]Transaction Test]========================"));
 	
 	TArray<TransactionUnion> Txn;
 	FRawTransaction T;
@@ -140,7 +141,7 @@ void SequenceAPITest::CallContract(TFunction<void(FString)> OnSuccess,
 #endif
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Call Contract Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API Call Contract Test]========================"));
 	
 	// CALL DATA
 	FString FunctionSignature = "balanceOf(address,uint256)";

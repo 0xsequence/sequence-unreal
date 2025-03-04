@@ -2,6 +2,7 @@
 
 #include "SequenceEncryptor.h"
 #include "ConfigFetcher.h"
+#include "Util/Log.h"
 
 FString USequenceEncryptor::GetStoredKey()
 {
@@ -13,7 +14,7 @@ FString USequenceEncryptor::Encrypt(FString Payload)
 	FString key = GetStoredKey();
 	if (key.Len() < 32)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY that is at least 32 CHARACTERS in length!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"));
+		SEQ_LOG(Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY that is at least 32 CHARACTERS in length!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"));
 		return "[NOP]";
 	}
 	//prepping the key for encryption
@@ -42,7 +43,7 @@ FString USequenceEncryptor::Decrypt(FString Payload,int32 PayloadLength)
 	FString key = GetStoredKey();
 	if (key.Len() < 32)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
+		SEQ_LOG(Error, TEXT("[Invalid key provided, BE SURE TO GENERATE A SECURE KEY!, NO STATE WILL BE SAVED UNLESS A SECURE KEY IS PROVIDED]"), *key);
 		return "[NOP]";
 	}
 	//prepping the key for decryption

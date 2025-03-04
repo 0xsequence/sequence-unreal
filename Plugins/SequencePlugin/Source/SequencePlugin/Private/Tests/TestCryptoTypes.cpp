@@ -4,6 +4,7 @@
 #include "Types/Types.h"
 #include "Misc/AutomationTest.h"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
+#include "Util/Log.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestCryptoTypes, "Public.Tests.TestCryptoTypes",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -19,9 +20,9 @@ bool TestCryptoTypes::RunTest(const FString& Parameters)
 	TStaticArray<uint8, 32> TestArr;
 	for(int i = 0; i < 32; i++) TestArr[i] = TestPtr[i];
 	
-	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(TestArr).ToHex());
+	SEQ_LOG(Display, TEXT("%s"), *FHash256::From(TestArr).ToHex());
 	Test.getBigEndianBytes(Arr.GetData());
-	UE_LOG(LogTemp, Display, TEXT("%s"), *FHash256::From(Arr).ToHex());
+	SEQ_LOG(Display, TEXT("%s"), *FHash256::From(Arr).ToHex());
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

@@ -123,7 +123,7 @@ public:
 			}
 			else
 			{
-				UE_LOG(LogTemp,Error,TEXT("Error Parsing Fee Option"));
+				SEQ_LOG(Error,TEXT("Error Parsing Fee Option"));
 			}
 		}
 	}

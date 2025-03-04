@@ -6,6 +6,7 @@
 #include "JsonObjectConverter.h"
 #include "Containers/Union.h"
 #include "Types/Types.h"
+#include "Util/Log.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"
@@ -23,9 +24,9 @@ struct SEQUENCEPLUGIN_API FIdNamePair
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Network Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence - Structs")
 	int64 NetworkId = -1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Network Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence - Structs")
 	FString NetworkName = "";
 
 	FIdNamePair(){}
@@ -413,11 +414,11 @@ public:
 		if (FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JSON), JsonObj))
 		{
 			if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JsonObj.ToSharedRef(), &Ret))
-				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
+				SEQ_LOG(Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
 		}
 		else
 		{//failed to convert the decrypted string into a jsonObject
-			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
+			SEQ_LOG(Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
 		}
 
 		return Ret;
@@ -438,12 +439,12 @@ public:
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
+				SEQ_LOG(Error, TEXT("[Failed to convert jsonObject into a UStruct: [%s]]"), *JSON);
 			}
 		}
 		else
 		{//failed to convert the decrypted string into a jsonObject
-			UE_LOG(LogTemp, Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
+			SEQ_LOG(Error, TEXT("[Failed to convert jsonObjectString into a jsonObject: [%s]]"), *JSON);
 		}
 
 		return Ret;

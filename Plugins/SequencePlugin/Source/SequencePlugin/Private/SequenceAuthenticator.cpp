@@ -163,14 +163,14 @@ void USequenceAuthenticator::AuthenticateUsingPlayfabSessionTicket(const FString
 
 	const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error: %s"), *Error.Message);
 		this->ResetFederateSessionInUse();
 		this->CallAuthFailure(Error.Message);
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 		this->SetIsFederatingSessionInUse();
 		this->CallFederateOrForce(FederationData);
 	};
@@ -189,11 +189,11 @@ void USequenceAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * Encryp
 	if (this->Encryptor)
 	{
 		const FString EncryptorName = this->Encryptor->GetClass()->GetName();
-		UE_LOG(LogTemp,Display,TEXT("Setting custom encryptor to: %s"),*EncryptorName);
+		SEQ_LOG(Display,TEXT("Setting custom encryptor to: %s"),*EncryptorName);
 	}
 	else
 	{
-		UE_LOG(LogTemp,Warning,TEXT("Received null instead of a pointer to an Encryptor Object using fallback encryptor"));	
+		SEQ_LOG(Warning,TEXT("Received null instead of a pointer to an Encryptor Object using fallback encryptor"));	
 	}
 }
 
@@ -223,7 +223,7 @@ void USequenceAuthenticator::StoreCredentials(const FCredentials_BE& Credentials
 
 		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Data Saved Correctly!"));
+			SEQ_LOG(Display, TEXT("Data Saved Correctly!"));
 		}
 	}
 }
@@ -266,7 +266,7 @@ bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) 
 			if (ret == false)
 			{
 				// Assumed that there is an issue with the save file, therefore we'll just delete the save file
-				UE_LOG(LogTemp, Error, TEXT("[System Failure: Unable to read save file or file is corrupted]"));
+				SEQ_LOG(Error, TEXT("[System Failure: Unable to read save file or file is corrupted]"));
 				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
 			}
 		}
@@ -279,7 +279,7 @@ void USequenceAuthenticator::CallAuthRequiresCode() const
 	if (this->AuthRequiresCode.IsBound())
 		this->AuthRequiresCode.Broadcast();
 	else
-		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
+		SEQ_LOG(Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
 }
 
 void USequenceAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
@@ -287,7 +287,7 @@ void USequenceAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) cons
 	if (this->AuthFailure.IsBound())
 		this->AuthFailure.Broadcast(ErrorMessageIn);
 	else
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
+		SEQ_LOG(Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
 }
 
 void USequenceAuthenticator::CallAuthSuccess() const
@@ -295,7 +295,7 @@ void USequenceAuthenticator::CallAuthSuccess() const
 	if (this->AuthSuccess.IsBound())
 		this->AuthSuccess.Broadcast();
 	else
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
+		SEQ_LOG(Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
 }
 
 void USequenceAuthenticator::CallFederateSuccess() const
@@ -306,7 +306,7 @@ void USequenceAuthenticator::CallFederateSuccess() const
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess]"));
+		SEQ_LOG(Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess]"));
 	}
 }
 
@@ -318,7 +318,7 @@ void USequenceAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) 
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateFailure], Captured Error Message: %s"), *ErrorMessageIn);
+		SEQ_LOG(Error, TEXT("[System Error: nothing bound to delegate: FederateFailure], Captured Error Message: %s"), *ErrorMessageIn);
 	}
 }
 
@@ -330,7 +330,7 @@ void USequenceAuthenticator::CallFederateOrForce(const FFederationSupportData& F
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateOrForce]"));
+		SEQ_LOG(Error, TEXT("[System Error: nothing bound to delegate: FederateOrForce]"));
 	}
 }
 
@@ -370,7 +370,7 @@ FString USequenceAuthenticator::GetSigninURL(const ESocialSigninType& Type) cons
 	else
 	{
 		const FString SSOType = UEnum::GetValueAsString(Type);
-		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
+		SEQ_LOG(Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
 	//clear web cache here so signin will be clean each time!
@@ -403,14 +403,14 @@ void USequenceAuthenticator::SocialLogin(const FString& IDTokenIn, const bool Fo
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->ResetFederateSessionInUse();
 		this->CallAuthFailure(Error.Message);
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 		this->SetIsFederatingSessionInUse();
 		this->CallFederateOrForce(FederationData);
 	};
@@ -435,7 +435,7 @@ void USequenceAuthenticator::EmailLogin(const FString& EmailIn, const bool Force
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
 	
@@ -456,7 +456,7 @@ void USequenceAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Guest Auth Error: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
 	
@@ -480,14 +480,14 @@ void USequenceAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, 
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
 			this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 			this->SetIsFederatingSessionInUse();
 			this->CallFederateOrForce(FederationData);
 		};
@@ -497,7 +497,7 @@ void USequenceAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, 
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Response: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
 	
@@ -518,7 +518,7 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Response: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
 	
@@ -740,7 +740,7 @@ void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
 			this->CallFederateFailure(ErrorMessage);
 		}
 	}
@@ -754,14 +754,14 @@ void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
 			this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 			this->SetIsFederatingSessionInUse();
 			this->CallFederateOrForce(FederationData);
 		};
@@ -781,7 +781,7 @@ void USequenceAuthenticator::FederateEmail(const FString& EmailIn)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
@@ -807,7 +807,7 @@ void USequenceAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 	else
 	{
 		const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+		SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
 		this->CallFederateFailure(ErrorMessage);
 	}
 }
@@ -829,7 +829,7 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			SEQ_LOG(Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 
@@ -842,14 +842,14 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
 			this->CallFederateFailure(ErrorMessage);
 		}
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
@@ -867,7 +867,7 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 			this->CallFederateFailure(Error.Message);
 		};
 		
@@ -880,14 +880,14 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
 			this->CallFederateFailure(ErrorMessage);
 		}
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
 		this->CallFederateFailure(Error.Message);
 	};
 
@@ -903,7 +903,7 @@ void USequenceAuthenticator::ForceOpenLastOpenSessionAttempt()
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
 		this->CallAuthFailure(Error.Message);
 	};
 

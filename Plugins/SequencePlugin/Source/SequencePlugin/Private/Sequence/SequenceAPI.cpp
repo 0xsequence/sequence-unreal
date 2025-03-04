@@ -12,6 +12,7 @@
 #include "Provider.h"
 #include "Transak.h"
 #include "SequenceRPCManager.h"
+#include "Util/Log.h"
 
 USequenceWallet::USequenceWallet()
 {
@@ -22,12 +23,12 @@ USequenceWallet::USequenceWallet()
 
 void USequenceWallet::Initialize(FSubsystemCollectionBase& Collection)
 {
-	UE_LOG(LogTemp,Display,TEXT("Initializing wallet subsystem"));
+	SEQ_LOG(Display,TEXT("Initializing wallet subsystem"));
 }
 
 void USequenceWallet::Deinitialize()
 {
-	UE_LOG(LogTemp,Display,TEXT("Deinitializing wallet subsystem"));
+	SEQ_LOG(Display,TEXT("Deinitializing wallet subsystem"));
 }
 
 USequenceWallet * USequenceWallet::GetSubSystem()
@@ -51,9 +52,9 @@ USequenceWallet * USequenceWallet::GetSubSystem()
 		}//GEngine Check
 		else
 		{
-			UE_LOG(LogTemp,Error,TEXT("Error Accessing GEngine"));
+			SEQ_LOG(Error,TEXT("Error Accessing GEngine"));
 		}
-	UE_LOG(LogTemp,Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
+	SEQ_LOG(Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
 	return nullptr;
 }
 
@@ -68,20 +69,20 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 		}
 		else
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
+			SEQ_LOG(Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
 			const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
 
 			if (StoredCredentials.GetValid())
 			{
-				UE_LOG(LogTemp,Display,TEXT("Successfully loaded on disk credentials"));
+				SEQ_LOG(Display,TEXT("Successfully loaded on disk credentials"));
 				Wallet->Init(StoredCredentials.GetCredentials());
 				TOptional OptionalWallet(Wallet);
 				return OptionalWallet;
 			}
 			else
 			{
-				UE_LOG(LogTemp,Warning,TEXT("The Credentials on disk were invalid please login"));
+				SEQ_LOG(Warning,TEXT("The Credentials on disk were invalid please login"));
 			}//Stored Valid Check
 		}//Registered Valid Check
 	}//SubSystem Check
@@ -181,7 +182,7 @@ FString USequenceWallet::GetWalletAddress() const
 	}
 	else
 	{
-		UE_LOG(LogTemp,Warning,TEXT("[Please Login first before trying to use credentials]"));
+		SEQ_LOG(Warning,TEXT("[Please Login first before trying to use credentials]"));
 	}
 	
 	return Addr;
@@ -264,7 +265,7 @@ void USequenceWallet::OpenTransakLink(const FString& FiatCurrency, const FString
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Please login first."));
+		SEQ_LOG(Warning, TEXT("Please login first."));
 	}
 }
 

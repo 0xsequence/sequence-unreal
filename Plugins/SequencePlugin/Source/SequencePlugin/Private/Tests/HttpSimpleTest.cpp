@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Misc/AutomationTest.h"
 #include "Provider.h"
+#include "Util/Log.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpSimpleTest, "Public.HttpSimpleTest",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -10,7 +11,7 @@ void LogIfError(FString Name, TResult<T> Result)
 {
 	if(!Result.HasValue())
 	{
-		UE_LOG(LogTemp, Error, TEXT("ERROR for %s: %s"), *Name, *Result.GetError().Message);
+		SEQ_LOG(Error, TEXT("ERROR for %s: %s"), *Name, *Result.GetError().Message);
 	}
 }
 

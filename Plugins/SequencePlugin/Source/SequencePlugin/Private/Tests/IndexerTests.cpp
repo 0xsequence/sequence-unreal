@@ -2,6 +2,8 @@
 
 #include "Tests//IndexerTests.h"
 
+#include "Util/Log.h"
+
 void PingTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
 {
 	const TSuccessCallback<bool> GenericSuccess = [OnSuccess](const bool bSuccess)
@@ -32,7 +34,7 @@ void VersionTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunctio
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqVersion>(Version);
-			UE_LOG(LogTemp, Display, TEXT("Parsed Version Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed Version Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -52,7 +54,7 @@ void RunTimeStatusTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TF
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqRuntimeStatus>(RunTimeStatus);
-			UE_LOG(LogTemp, Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed RunTimeStatus Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -72,7 +74,7 @@ void GetChainIDTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunc
 		if (GPrintAll)
 		{
 			const FString Ret = FString::Printf(TEXT("%lld"), ChainID);
-			UE_LOG(LogTemp, Display, TEXT("ChainID: %s"), *Ret);
+			SEQ_LOG(Display, TEXT("ChainID: %s"), *Ret);
 		}
 	};
 
@@ -92,7 +94,7 @@ void GetEtherBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqEtherBalance>(EtherBalance);
-			UE_LOG(LogTemp, Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed EtherBalance Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -112,7 +114,7 @@ void GetTokenBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqGetTokenBalancesReturn>(TokenBalances);
-			UE_LOG(LogTemp, Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed TokenBalancesReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 

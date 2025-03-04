@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Integrators/SequencePayBP.h"
+#include "Subsystems/SequencePayBP.h"
 #include "Transak.h"
 
 FString USequencePayBP::GetOnRampLink(const FString& WalletAddress, const FTransakSettings& Settings)

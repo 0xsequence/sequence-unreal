@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Util/SequenceSupport.h"
-#include "Indexer/Structs/Struct_Data.h"
-#include "SequenceWalletBPTypes.h"
-#include "Transactions.h"
-#include "SequenceResponseIntent.h"
+#include "Sequence/SequenceWalletBPTypes.h"
+#include "Sequence/Transactions.h"
+#include "Sequence/SequenceResponseIntent.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceWalletBP.generated.h"
 
@@ -26,25 +25,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListSessions, FSequenceRespo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
-
-
-//Api//
-
-//Indexer
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerPing, FSequenceResponseStatus, ResponseStatus, bool, PingResponse);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerVersion, FSequenceResponseStatus, ResponseStatus, FSeqVersion, Version);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerRuntimeStatus, FSequenceResponseStatus, ResponseStatus, FSeqRuntimeStatus, RuntimeStatus);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetChainId, FSequenceResponseStatus, ResponseStatus, int64, ChainId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetEtherBalance, FSequenceResponseStatus, ResponseStatus, FSeqEtherBalance, EtherBalance);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenBalances, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenBalancesReturn, TokenBalances);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSupplies, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesReturn, TokenSupplies);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTokenSuppliesMap, FSequenceResponseStatus, ResponseStatus, FSeqGetTokenSuppliesMapReturn, TokenSuppliesMap);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIIndexerGetTransactionHistory, FSequenceResponseStatus, ResponseStatus, FSeqGetTransactionHistoryReturn, TransactionHistory);
-
-//Indexer//
-
-//ASYNC Response Delegates//
 
 /**
  * Used for exposing portions of the USequenceWallet
@@ -98,40 +78,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
 	FOnIApiGetSupportedTransakCountries OnApiGetSupportedTransakCountries;
 	
-	//Api//
-
-	//Indexer//
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerPing OnIndexerPing;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerVersion OnIndexerVersion;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerRuntimeStatus OnIndexerRuntimeStatus;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetChainId OnIndexerGetChainId;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetEtherBalance OnIndexerGetEtherBalance;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetTokenBalances OnIndexerGetTokenBalances;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetTokenSupplies OnIndexerGetTokenSupplies;
-
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetTokenSuppliesMap OnIndexerGetTokenSuppliesMap;
-	
-	UPROPERTY(BlueprintAssignable, Category="0xSequence SDK - Events")
-	FOnIIndexerGetTransactionHistory OnIndexerGetTransactionHistory;
-
-	//Indexer//
-
-
 	//ASYNC Response Bindable Delegates//
 private:
 
@@ -151,24 +97,6 @@ private:
 	void CallOnApiListAccounts(const FSequenceResponseStatus& Status, const FSeqListAccountsResponse_Data& Response) const;
 	void CallOnApiGetSessionAuthProof(const FSequenceResponseStatus& Status, const FSeqGetSessionAuthProof_Data Response) const;
 	void CallOnApiGetSupportedTransakCountries(const FSequenceResponseStatus& Status, const TArray<FSupportedCountry>& SupportedCountries) const;
-	
-	//Api//
-
-	//Indexer//
-	
-	void CallOnIndexerPing(const FSequenceResponseStatus& Status, bool PingResponse) const;
-	void CallOnIndexerVersion(const FSequenceResponseStatus& Status, const FSeqVersion& Version) const;
-	void CallOnIndexerRuntimeStatus(const FSequenceResponseStatus& Status, const FSeqRuntimeStatus& RuntimeStatus) const;
-	void CallOnIndexerGetChainId(const FSequenceResponseStatus& Status, int64 ChainId) const;
-	void CallOnIndexerGetEtherBalance(const FSequenceResponseStatus& Status, const FSeqEtherBalance& EtherBalance) const;
-	void CallOnIndexerGetTokenBalances(const FSequenceResponseStatus& Status, const FSeqGetTokenBalancesReturn& TokenBalances) const;
-	void CallOnIndexerGetTokenSupplies(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesReturn& TokenSupplies) const;
-	void CallOnIndexerGetTokenSuppliesMap(const FSequenceResponseStatus& Status, const FSeqGetTokenSuppliesMapReturn& TokenSuppliesMap) const;
-	void CallOnIndexerGetTransactionHistory(const FSequenceResponseStatus& Status, const FSeqGetTransactionHistoryReturn& TransactionHistory) const;
-
-	//Indexer//
-	
-	//ASYNC Response Internal Calls//
 	
 public:
 	//SYNC//
@@ -285,40 +213,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ApiGetSupportedTransakCountries();
-	
-	//SequenceApi//
-
-	//Indexer//
-	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerPing();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerVersion();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerRuntimeStatus();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetChainId();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetEtherBalance(const FString& WalletAddress);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetTokenBalances(const FSeqGetTokenBalancesArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void IndexerGetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args);
-
-	//Indexer//
-	
-
-	//ASYNC//
 };

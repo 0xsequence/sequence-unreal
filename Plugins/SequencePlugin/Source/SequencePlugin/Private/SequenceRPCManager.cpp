@@ -12,6 +12,7 @@
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 #include "Misc/DateTime.h"
+#include "Util/Log.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {
@@ -38,8 +39,8 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOption
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	UE_LOG(LogTemp, Log, TEXT("URL set to: %s"), *Url);
-	UE_LOG(LogTemp, Log, TEXT("Request content set to: %s"), *Content);
+	SEQ_LOG(Log, TEXT("URL set to: %s"), *Url);
+	SEQ_LOG(Log, TEXT("Request content set to: %s"), *Content);
 
 
 	NewObject<URequestHandler>()
@@ -71,10 +72,10 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 {
 	this->SequenceRPC(Url, ContentGenerator(TOptional<int64>()), [this, Url, ContentGenerator, OnSuccess, OnFailure](FHttpResponsePtr Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("SUCCESS"));
-		UE_LOG(LogTemp, Display, TEXT("CONTENT"));
+		SEQ_LOG(Display, TEXT("SUCCESS"));
+		SEQ_LOG(Display, TEXT("CONTENT"));
 		FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
-		UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
+		SEQ_LOG(Display, TEXT("%s"), *Content);
 
 		if(Content.Contains("intent is invalid: intent expired") || Content.Contains("intent is invalid: intent issued in the future"))
 		{
@@ -88,7 +89,7 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 				return;
 			}
 			
-			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
+			SEQ_LOG(Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
 			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
 		}
 		else
@@ -264,7 +265,7 @@ void USequenceRPCManager::UpdateWithStoredSessionWallet()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Stored Credentials are Invalid, Please Login"));
+		SEQ_LOG(Error, TEXT("Stored Credentials are Invalid, Please Login"));
 	}
 }
 
@@ -326,7 +327,7 @@ void USequenceRPCManager::ValidateMessageSignature(const int64& ChainId, const F
 {
 	const TSuccessCallback<FString> OnResponse = [OnSuccess, OnFailure](const FString& Response)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Response: %s"), *Response);
+		SEQ_LOG(Log, TEXT("Response: %s"), *Response);
 
 		const FSeqValidateMessageSignatureResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqValidateMessageSignatureResponse>(Response);
 
@@ -512,7 +513,7 @@ void USequenceRPCManager::ListAccounts(const FCredentials_BE& Credentials, const
 		{
 			const FSeqListAccountsResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FSeqListAccountsResponse>(Response);
 
-			UE_LOG(LogTemp, Log, TEXT("%s"), *Response);
+			SEQ_LOG(Log, TEXT("%s"), *Response);
 			if (ParsedResponse.IsValid())
 			{
 				OnSuccess(ParsedResponse.Response.Data);

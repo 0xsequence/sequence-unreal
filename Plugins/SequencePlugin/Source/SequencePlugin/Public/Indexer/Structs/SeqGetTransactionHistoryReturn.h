@@ -6,6 +6,7 @@
 #include "SeqTransaction.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Util/Log.h"
 #include "SeqGetTransactionHistoryReturn.generated.h"
 
 USTRUCT(BlueprintType)
@@ -49,12 +50,12 @@ public:
         {
             if (!FJsonObjectConverter::JsonObjectToUStruct((*pageObj).ToSharedRef(), &page))
             {
-                UE_LOG(LogTemp, Warning, TEXT("Failed to convert page object to FSeqPage"));
+                SEQ_LOG(Warning, TEXT("Failed to convert page object to FSeqPage"));
             }
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("No page information found in the JSON."));
+            SEQ_LOG(Warning, TEXT("No page information found in the JSON."));
         }
 
         const TArray<TSharedPtr<FJsonValue>>* lst;
@@ -62,7 +63,7 @@ public:
         {
             if (lst->Num() == 0)
             {
-                UE_LOG(LogTemp, Warning, TEXT("No transactions found."));
+                SEQ_LOG(Warning, TEXT("No transactions found."));
             }
             else
             {

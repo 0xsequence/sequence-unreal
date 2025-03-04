@@ -1,6 +1,8 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Util/SequenceSupport.h"
+
+#include "Log.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
@@ -14,7 +16,7 @@ FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
 	{
 		return *NetworkIdToNameMap.Find(NetworkIdIn);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
+	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
 	return TEXT("");
 }
 
@@ -25,7 +27,7 @@ FString USequenceSupport::GetNetworkName(const ENetwork NetworkIn)
 		return *NetworkEnumToNameMap.Find(NetworkIn);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
+	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
 	return TEXT("");
 }
 
@@ -35,7 +37,7 @@ FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 	{
 		return *NetworkIdToUrlMap.Find(NetworkIdIn);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
+	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
 	return TEXT("");
 }
 
@@ -52,7 +54,7 @@ int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
 	{
 		return *NetworkNameToIdMap.Find(SearchKey);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
+	SEQ_LOG(Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
 	return -1;
 }
 
@@ -63,7 +65,7 @@ int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
 		return *NetworkEnumToIdMap.Find(Network);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), Network);
+	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), Network);
 	return 0;
 }
 

@@ -1,7 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Integrators/SequenceIndexerBP.h"
-
+#include "Subsystems/SequenceIndexerBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Util/Log.h"

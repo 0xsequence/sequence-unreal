@@ -2,6 +2,7 @@
 #include "Util/HexUtility.h"
 #include "Eth/RLP.h"
 #include "Misc/AutomationTest.h"
+#include "Util/Log.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestRLP, "Public.Tests.TestRLP",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -9,7 +10,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestRLP, "Public.Tests.TestRLP",
 bool TestRLP::RunTest(const FString& Parameters)
 {
 	FString encoded = RLP::Encode(Itemize(HexStringToBinary("80d868b36ea76878df071e4a4f868942cf79224532e5dcf88eb8fc56b2aa055e"))).ToHex();
-	UE_LOG(LogTemp, Display, TEXT("%s"), *encoded);
+	SEQ_LOG(Display, TEXT("%s"), *encoded);
 
 	auto item2 = Itemize(new RLPItem[]
 	{
@@ -25,7 +26,7 @@ bool TestRLP::RunTest(const FString& Parameters)
 	}, 9);
 	
 	encoded = RLP::Encode(item2).ToHex();
-	UE_LOG(LogTemp, Display, TEXT("%s"), *encoded);
+	SEQ_LOG(Display, TEXT("%s"), *encoded);
 	
 	// Make the test pass by returning true, or fail by returning false.
 	return true;

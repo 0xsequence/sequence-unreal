@@ -124,7 +124,7 @@ template < typename T> FString UIndexer::BuildArgs(T StructIn)
 	{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(StructIn, Result))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
+			SEQ_LOG(Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
 	return Result;
@@ -140,7 +140,7 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), JSON_Step))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *Text);
+		SEQ_LOG(Display, TEXT("Failed to convert String: %s to Json object"), *Text);
 		return T();
 	}
 
@@ -153,7 +153,7 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 	{//use unreal parsing!
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JSON_Step.ToSharedRef(), &Ret_Struct))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
+			SEQ_LOG(Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
 			return T();
 		}
 	}

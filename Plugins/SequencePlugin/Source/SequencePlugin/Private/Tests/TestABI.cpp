@@ -2,6 +2,7 @@
 #include "ABI/ABI.h"
 #include "Misc/AutomationTest.h"
 #include "Types/BinaryData.h"
+#include "Util/Log.h"
 
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestABI, "Public.Tests.TestABI",
@@ -40,7 +41,7 @@ bool TestABI::RunTest(const FString& Parameters)
 	Arr.Push(MakeShared<TDynamicABIArray>(IntArrayArray));
 	Arr.Push(MakeShared<TDynamicABIArray>(StringArray));
 	
-	UE_LOG(LogTemp, Display, TEXT("%s"), *ABI::Display("g(uint256[][],string[])", Arr));
+	SEQ_LOG(Display, TEXT("%s"), *ABI::Display("g(uint256[][],string[])", Arr));
 
 	TOptional<FUnsizedData> Encoded = ABI::Encode("g(uint256[][],string[])", Arr);
 
@@ -90,14 +91,14 @@ bool TestABI::RunTest(const FString& Parameters)
 		// Loop through integer array
 		for(auto SubElement : Element->AsArray())
 		{
-			UE_LOG(LogTemp, Display, TEXT("%d"), SubElement->AsInt32());
+			SEQ_LOG(Display, TEXT("%d"), SubElement->AsInt32());
 		}
 	}
 
 	// Loop through string array
 	for(auto Element : DecodeStringArray->AsArray())
 	{
-		UE_LOG(LogTemp, Display, TEXT("%s"), *Element->AsString());
+		SEQ_LOG(Display, TEXT("%s"), *Element->AsString());
 	}
 
 	if(DecodeIntArrayArray->AsArray()[0]->AsArray()[0]->AsInt32() != 1) return false;

@@ -65,6 +65,6 @@ void UTransakOnRamp::OpenTransakLink(const FString& FiatCurrencyIn, const FStrin
 	FPlatformProcess::LaunchURL(*GetTransakLink(FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
 	if (ErrorPtr)
 	{
-		UE_LOG(LogTemp,Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
+		SEQ_LOG(Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
 	}
 }
