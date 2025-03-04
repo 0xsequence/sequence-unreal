@@ -17,6 +17,6 @@ private:
 	UPROPERTY()
 	FCredentials_BE Credentials;
 	
-	UFUNCTION(BlueprintCallable, CATEGORY="FUNCTION")
+	UFUNCTION(BlueprintCallable, CATEGORY="0xSequence")
 	void SystemReady();
 };

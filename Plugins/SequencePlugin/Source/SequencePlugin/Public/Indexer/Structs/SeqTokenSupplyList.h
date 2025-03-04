@@ -19,7 +19,7 @@ struct SEQUENCEPLUGIN_API FSeqTokenSupplyList
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TArray<FSeqTokenSupply> token_supply_list;
 
     /*

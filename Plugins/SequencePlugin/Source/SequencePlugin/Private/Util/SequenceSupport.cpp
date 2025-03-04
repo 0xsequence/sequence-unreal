@@ -2,7 +2,6 @@
 
 #include "Util/SequenceSupport.h"
 
-#include "Log.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"

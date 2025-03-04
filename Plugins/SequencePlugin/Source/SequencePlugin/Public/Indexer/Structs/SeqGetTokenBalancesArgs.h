@@ -10,13 +10,13 @@ struct SEQUENCEPLUGIN_API FSeqGetTokenBalancesArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString accountAddress = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString contractAddress = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         bool includeMetaData = false;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FSeqPage page;
 
     bool customGetter = true;

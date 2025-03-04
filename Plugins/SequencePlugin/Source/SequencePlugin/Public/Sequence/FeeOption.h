@@ -6,6 +6,7 @@
 #include "Indexer/Structs/SeqTokenBalance.h"
 #include "Containers/Union.h"
 #include "Indexer/Structs/SeqEtherBalance.h"
+#include "Util/Log.h"
 #include "Util/Structs/BE_Structs.h"
 #include "FeeOption.generated.h"
 
@@ -22,21 +23,21 @@ struct FFeeToken
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 ChainID = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString ContractAddress = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int32 Decimals = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString LogoURL = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Name = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Symbol = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TokenID = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TEnumAsByte<EFeeType> Type = Unknown;
 
 	FFeeToken(){}
@@ -61,17 +62,17 @@ struct FFeeOption
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	int64 GasLimit = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString To = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FFeeToken Token;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Value = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	int64 ValueNumber = 0;//Used for making easy comparisons
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	bool bCanAfford = false;
 	FFeeOption(){}
 

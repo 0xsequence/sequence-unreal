@@ -231,23 +231,23 @@ struct SEQUENCEPLUGIN_API FSeqTxnLog
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Address = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString BlockHash = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString BlockNumber = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Data = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString LogIndex = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	bool Removed = false;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FString> Topics;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TransactionHash = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TransactionIndex = "";
 };
 
@@ -256,27 +256,27 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_NativeReceipt
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString BlockHash = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString BlockNumber = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString ContractAddress = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString CumulativeGasUsed = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString GasUsed = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FSeqTxnLog> Logs;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString LogsBloom = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Root = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Status = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TransactionHash = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TransactionIndex = "";
 };
 
@@ -285,17 +285,17 @@ struct SEQUENCEPLUGIN_API FSeqTxnSimulation
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	bool Executed = false;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 GasLimit = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 GasUsed = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Reason = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Result = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	bool Succeeded = false;
 };
 
@@ -304,9 +304,9 @@ struct SEQUENCEPLUGIN_API FSeqTxnSignature
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString SessionId = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Signature = "";
 };
 
@@ -315,13 +315,13 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Transaction
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString To = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TokenAddress = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Type = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Value = "";	
 };
 
@@ -330,15 +330,15 @@ struct SEQUENCEPLUGIN_API FSeqTxnData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Identifier = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Network = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FSeqTransactionResponse_Transaction> Transactions;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TransactionFeeQuote = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Wallet = "";
 };
 
@@ -347,17 +347,17 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Request
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FSeqTxnData Data;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 ExpiresAt = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 IssuedAt = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Name = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FSeqTxnSignature> Signatures;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Version = "";
 };
 
@@ -366,17 +366,17 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Receipt
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Id = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 Index = 0;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FSeqTxnLog> Logs;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString RevertReason = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Status = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TxnReceipt = "";
 };
 
@@ -385,19 +385,19 @@ struct SEQUENCEPLUGIN_API FSeqTransactionResponse_Data
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString IdentifyingCode = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString TxHash = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString MetaTxHash = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FSeqTransactionResponse_Request Request;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FSeqTransactionResponse_NativeReceipt NativeReceipt;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FSeqTransactionResponse_Receipt Receipt;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	TArray<FSeqTxnSimulation> Simulations;
 
 	//Raw Json Response for ease of use with older code
@@ -449,9 +449,9 @@ USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSeqSignMessageResponse_Data
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Message = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Signature = "";
 };
 
@@ -461,7 +461,7 @@ struct SEQUENCEPLUGIN_API FSeqSignMessageResponse_Response
 	GENERATED_BODY()
 	UPROPERTY()
 	FString Code = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FSeqSignMessageResponse_Data Data;
 
 	bool IsValid() const
@@ -494,10 +494,10 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Data
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString IdToken;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int32 ExpiresIn;
 };
 
@@ -529,7 +529,7 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
 	GENERATED_BODY()
 
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FSeqIdTokenResponse_Response Response;
 
 	bool IsValid() const
@@ -546,7 +546,7 @@ struct SEQUENCEPLUGIN_API FSeqValidateMessageSignatureResponse_Data
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	bool isValid;
 
 	bool IsValid() const
@@ -579,11 +579,11 @@ struct SEQUENCEPLUGIN_API FSeqListSessions_Identity
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Type = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Iss = "";
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Sub = "";
 };
 
@@ -592,21 +592,21 @@ struct SEQUENCEPLUGIN_API FSeqListSessions_Session
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Id = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	int64 ProjectId = -1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString UserId = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FSeqListSessions_Identity Identity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString FriendlyName = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString CreatedAt = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString RefreshedAt = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString ExpiresAt = "";
 };
 
@@ -644,13 +644,13 @@ struct SEQUENCEPLUGIN_API FSeqAccount
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Id = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Type = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Issuer = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Email = "";
 
 
@@ -661,9 +661,9 @@ struct SEQUENCEPLUGIN_API FSeqListAccountsResponse_Data
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TArray<FSeqAccount> Accounts;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString CurrentAccountId = "";
 };
 
@@ -707,15 +707,15 @@ struct SEQUENCEPLUGIN_API FSeqGetSessionAuthProof_Data
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString SessionId;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Network;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Wallet;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Message; 	//The message contents : �SessionAuthProof <sessionId> <wallet> <nonce ? >� hex encoded
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Signature;
 };
 

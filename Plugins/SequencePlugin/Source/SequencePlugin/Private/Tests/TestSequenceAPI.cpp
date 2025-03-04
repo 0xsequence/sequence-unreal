@@ -184,7 +184,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Send[ERC20]Transaction Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API Send[ERC20]Transaction Test]========================"));
 	
 	TArray<TransactionUnion> Txn;
 	
@@ -208,7 +208,7 @@ void SequenceAPITest::SendERC20(TFunction<void(FString)> OnSuccess, TFunction<vo
 			FString OutputString;
 			const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			SEQ_LOG(Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 			OnSuccess(OutputString);
 		},GenericFailure);
 	}
@@ -221,7 +221,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Send[ERC721]Transaction Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API Send[ERC721]Transaction Test]========================"));
 	
 	TArray<TransactionUnion> Txn;
 
@@ -243,7 +243,7 @@ void SequenceAPITest::SendERC721(TFunction<void(FString)> OnSuccess, TFunction<v
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			SEQ_LOG(Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 			OnSuccess(OutputString);
 		},GenericFailure);
 	}
@@ -256,7 +256,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API Send[ERC1155]Transaction Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API Send[ERC1155]Transaction Test]========================"));
 	
 	TArray<TransactionUnion> Txn;
 	FERC1155Transaction T1155;
@@ -280,7 +280,7 @@ void SequenceAPITest::SendERC1155(TFunction<void(FString)> OnSuccess, TFunction<
 			FString OutputString;
 			TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
 			FJsonSerializer::Serialize(Transaction.Json.ToSharedRef(), Writer);
-			UE_LOG(LogTemp,Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
+			SEQ_LOG(Display,TEXT("Transaction Hash: %s"),*Transaction.TxHash);
 			OnSuccess(OutputString);
 		},GenericFailure);
 	}
@@ -298,7 +298,7 @@ void SequenceAPITest::CloseSession(TFunction<void(FString)> OnSuccess, TFunction
 		OnFailure("Test Failed", Error);
 	};
 	
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API SignOut Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API SignOut Test]========================"));
 
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
@@ -316,7 +316,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 		for (const FFeeOption& Fee : Response)
 		{
 			FString FeeOption = USequenceSupport::StructToString(Fee);
-			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s"), *FeeOption);
+			SEQ_LOG(Display,TEXT("FeeOption: %s"), *FeeOption);
 		}
 		OnSuccess("Get FeeOptions Test Passed");
 	};
@@ -326,7 +326,7 @@ void SequenceAPITest::GetFeeOptions(TFunction<void(FString)> OnSuccess, TFunctio
 		OnFailure("Test Failed", Error);
 	};
 
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API GetFeeOptions Test]========================"));
 
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
@@ -362,7 +362,7 @@ void SequenceAPITest::SendTransactionWithFee(TFunction<void(FString)> OnSuccess,
 		if (Response.Num() > 0)
 		{
 			const FFeeOption SelectedFeeOption = Response[0];
-			UE_LOG(LogTemp, Display, TEXT("Using FeeOption: %s"), *USequenceSupport::StructToString(SelectedFeeOption));
+			SEQ_LOG(Display, TEXT("Using FeeOption: %s"), *USequenceSupport::StructToString(SelectedFeeOption));
 			
 			const FFailureCallback OnTransactionFailure = [OnFailure](const FSequenceError& Error)
 			{
@@ -411,7 +411,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 		{
 			FString FeeOption = USequenceSupport::StructToString(Fee);
 			FString CanAfford = (Fee.bCanAfford) ? "Yes" : "No";
-			UE_LOG(LogTemp,Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
+			SEQ_LOG(Display,TEXT("FeeOption: %s\nCanAfford: %s"), *FeeOption, *CanAfford);
 			
 		}
 		OnSuccess("Get FeeOptions Test Passed");
@@ -422,7 +422,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 		OnFailure("Test Failed", Error);
 	};
 
-	UE_LOG(LogTemp,Display,TEXT("========================[Running Sequence API GetUnfilteredFeeOptions Test]========================"));
+	SEQ_LOG(Display,TEXT("========================[Running Sequence API GetUnfilteredFeeOptions Test]========================"));
 
 	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());

@@ -136,7 +136,7 @@ void GetTokenSuppliesTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess,
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqGetTokenSuppliesReturn>(TokenSupplies);
-			UE_LOG(LogTemp, Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed tokenSuppliesReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -158,7 +158,7 @@ void GetTokenSuppliesMapTest(UIndexer* Indexer, TFunction<void(FString)> OnSucce
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqGetTokenSuppliesMapReturn>(TokenSuppliesMap);
-			UE_LOG(LogTemp, Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed TokenSuppliesMapReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -184,7 +184,7 @@ void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuc
 		if (GPrintAll)
 		{
 			const FString Ret = USequenceSupport::StructToString<FSeqGetTransactionHistoryReturn>(TransactionHistory);
-			UE_LOG(LogTemp, Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *Ret);
+			SEQ_LOG(Display, TEXT("Parsed transactionHistoryReturn Struct:\n%s\n"), *Ret);
 		}
 	};
 
@@ -203,81 +203,81 @@ void GetTransactionHistoryTest(UIndexer* Indexer, TFunction<void(FString)> OnSuc
 
 void EmptyResponseTest(UIndexer * Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("EmptyResponseTest"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("EmptyResponseTest"));
 	const FString Args = "{}";
 	const FSeqPingReturn Rep = Indexer->BuildResponse<FSeqPingReturn>(Args);
 	//by default this should still be false!
 	if (!Rep.status)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void InvalidResponseTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Invalid Response Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Invalid Response Test"));
 	const FString Args = "+)0asfjlkj;ksjfa{sdfkaljsa;f[}}}skaflasjfd;";
 	const FSeqPingReturn Rep = Indexer->BuildResponse<FSeqPingReturn>(Args);
 	//by default this should still be false!
 	if (!Rep.status)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void WrongResponseReceivedTest1(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Wrong Response Received Test 1"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Wrong Response Received Test 1"));
 	const FString Args = "{\"wrong_arg\" : true}";
 	const FSeqPingReturn Rep = Indexer->BuildResponse<FSeqPingReturn>(Args);
 	//by default this should still be false!
 	if (!Rep.status)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void WrongResponseReceivedTest2(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Wrong Response Received Test 2"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Wrong Response Received Test 2"));
 	const FString Args = "{ [ \"alt1\" , \"alt2\" , \"alt3\" ] }";
 	const FSeqPingReturn rep = Indexer->BuildResponse<FSeqPingReturn>(Args);
 	//by default this should still be false!
 	if (!rep.status)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 //end of return parsing tests
 void PingParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Ping Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Ping Parsing Test"));
 	FString args = "{\"status\":true}";
 	const FSeqPingReturn rep = Indexer->BuildResponse<FSeqPingReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -287,25 +287,25 @@ void PingParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"),*args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"),*repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"),*args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"),*repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower())==0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void VersionParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Version Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Version Parsing Test"));
 	FString args = "{\"version\":{\"webrpcVersion\":\"1.0\" , \"schemaVersion\":\"s1.0\" , \"schemaHash\":\"0x1\" , \"appVersion\":\"a1.0\"}}";
 	const FSeqVersionReturn rep = Indexer->BuildResponse<FSeqVersionReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -315,25 +315,25 @@ void VersionParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void RunTimeStatusParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Runtime Status Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Runtime Status Parsing Test"));
 	FString args = "{\"status\":{\"healthOK\":true,\"indexerEnabled\":true,\"startTime\":\"now\",\"uptime\":10.1,\"ver\":\"1.1\",\"branch\":\"main\",\"commitHash\":\"0x12\",\"chainID\":1,\"checks\":{\"running\":true,\"syncMode\":\"Synced\",\"lastBlockNum\":10}}}";
 	const FSeqRuntimeStatusReturn rep = Indexer->BuildResponse<FSeqRuntimeStatusReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -343,25 +343,25 @@ void RunTimeStatusParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetChainIDParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Chain ID Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Chain ID Parsing Test"));
 	FString args = "{\"chainID\":169}";
 	const FSeqGetChainIDReturn rep = Indexer->BuildResponse<FSeqGetChainIDReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -371,25 +371,25 @@ void GetChainIDParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetEtherBalanceParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Ether Balance Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Ether Balance Parsing Test"));
 	FString args = "{\"balance\":{\"accountAddress\":\"main_address\",\"balanceWei\":101}}";
 	const FSeqGetEtherBalanceReturn rep = Indexer->BuildResponse<FSeqGetEtherBalanceReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -399,25 +399,25 @@ void GetEtherBalanceParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetTokenBalanceParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Balance Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Token Balance Parsing Test"));
 	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"balances\":[{\"id\":15,\"contractAddress\":\"0xc1\",\"contractType\":\"ERC20\",\"accountAddress\":\"0xa1\",\"tokenID\":11,\"balance\":16384,\"blockHash\":\"0xb1\",\"blockNumber\":1,\"updateID\":3,\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FSeqGetTokenBalancesReturn rep = Indexer->BuildResponse<FSeqGetTokenBalancesReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -429,25 +429,25 @@ void GetTokenBalanceParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetTokenSuppliesParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("get Token Supplies Parsing Test"));
 	FString args = "{\"page\":{\"page\":10,\"column\":\"left\",\"before\":\"b1\",\"after\":\"a1\",\"sort\":[{\"column\":\"left\",\"order\":\"DESC\"}],\"pageSize\":64,\"more\":true},\"contractType\":\"ERC1155\",\"tokenIDs\":[{\"tokenID\":69,\"supply\":\"supply_data\",\"chainId\":9,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}";
 	FSeqGetTokenSuppliesReturn rep = Indexer->BuildResponse<FSeqGetTokenSuppliesReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -459,25 +459,25 @@ void GetTokenSuppliesParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetTokenSuppliesMapParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("get Token Supplies Map Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("get Token Supplies Map Parsing Test"));
 	FString args = "{\"supplies\":{\"key1\":[{\"tokenID\":101,\"supply\":\"supply_data\",\"chainId\":137,\"contractInfo\":{\"chainId\":137,\"address\":\"0xa11\",\"name\":\"coin\",\"type\":\"t1\",\"symbol\":\"%\",\"decimals\":101,\"logoURI\":\"http://stuff.ca\",\"extensions\":{\"link\":\"https://that.com\",\"description\":\"extension\",\"ogImage\":\"uint8[]\",\"originChainId\":137,\"originAddress\":\"http://origin.ca\",\"blacklist\":true,\"verified\":false,\"verifiedBy\":\"\"}},\"tokenMetaData\":{\"tokenId\":101,\"contractAddress\":\"0xc112\",\"name\":\"testing_name\",\"description\":\"some_desc_stuff\",\"image\":\"string_image_data\",\"decimals\":101,\"video\":\"video data\",\"audio\":\"audo_data\",\"image_data\":\"image_data\",\"external_url\":\"external_url_data\",\"background_color\":\"red\",\"animation_url\":\"http://anim.ca\",\"properties\":{\"p1\":10,\"p2\":\"prop_2\",\"p3\":1},\"attributes\":[{\"a11\":\"a\",\"a12\":\"b\"},{\"a21\":\"c\",\"a22\":\"d\",\"a23\":\"e\"}]}}]}}";
 	FSeqGetTokenSuppliesMapReturn rep = Indexer->BuildResponse<FSeqGetTokenSuppliesMapReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -489,25 +489,25 @@ void GetTokenSuppliesMapParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void GetTransactionHistoryParsingTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("get Transaction History Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("get Transaction History Parsing Test"));
 	FString args = "{\"page\":"+GTestingPage+",\"transactions\":["+GTestingTransactionData+"]}";
 	FSeqGetTransactionHistoryReturn rep = Indexer->BuildResponse<FSeqGetTransactionHistoryReturn>(args);
 	args = USequenceSupport::SimplifyString(args);
@@ -519,27 +519,27 @@ void GetTransactionHistoryParsingTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *args);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *repString);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *args);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *repString);
 	}
 
 	if (args.ToLower().Compare(repString.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 //end of return parsing tests
 
 //start of args parsing tests
 void TokenBalanceMaxArgsTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Balance [MAX] Args Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Token Balance [MAX] Args Parsing Test"));
 	FString testArgs = "{\"accountAddress\":\""+GTestingAddress+"\",\"contractAddress\":\""+GTestingContractAddress+"\",\"includeMetaData\":true,\"page\":"+GTestingPage+"}";
 	
 	FSeqGetTokenBalancesArgs args;
@@ -553,25 +553,25 @@ void TokenBalanceMaxArgsTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void TokenBalanceMinArgsTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Balance [MIN] Args Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Token Balance [MIN] Args Parsing Test"));
 	FString testArgs = "{\"accountAddress\":\"" + GTestingAddress + "\",\"includeMetaData\":false}";
 
 	FSeqGetTokenBalancesArgs args;
@@ -582,19 +582,19 @@ void TokenBalanceMinArgsTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 /*
@@ -651,8 +651,8 @@ FSeqTransactionHistoryFilter BuildHistoryFilter()
 
 void TokenSuppliesArgsTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Supplies Args Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Token Supplies Args Parsing Test"));
 	//this will mirror args!
 	FString testArgs = "{\"contractAddress\":\""+GTestingContractAddress+"\",\"includeMetaData\":true}";
 
@@ -665,25 +665,25 @@ void TokenSuppliesArgsTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void TokenSuppliesMapArgsTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("Token Supplies Map Args Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("Token Supplies Map Args Parsing Test"));
 	//this will mirror args!
 	FString testArgs = "{\"tokenMap\":"+GTestTokenMap+",\"includeMetaData\":true}";
 	FSeqGetTokenSuppliesMapArgs args;
@@ -694,26 +694,26 @@ void TokenSuppliesMapArgsTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 //set of args testing for transaction history filter as there can be many types of calls made!
 
 void TransactionHistoryArgsMaxTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("transaction History Args [Max] Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("transaction History Args [Max] Parsing Test"));
 	//this will mirror args!
 	FString testArgs = "{\"filter\":"+ GTestHistoryFilterMax +",\"page\":"+GTestingPage+",\"includeMetaData\":true}";
 	FSeqGetTransactionHistoryArgs args;
@@ -726,25 +726,25 @@ void TransactionHistoryArgsMaxTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void TransactionHistoryArgsMinTest(UIndexer* Indexer)
 {
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
-	UE_LOG(LogTemp, Display, TEXT("transaction History Args [Min] Parsing Test"));
+	SEQ_LOG(Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("transaction History Args [Min] Parsing Test"));
 	//this will mirror args!
 	FString testArgs = "{\"filter\":" + GTestHistoryFilterMin + ",\"includeMetaData\":true}";
 	FSeqGetTransactionHistoryArgs args;
@@ -756,19 +756,19 @@ void TransactionHistoryArgsMinTest(UIndexer* Indexer)
 
 	if (GPrintAll)
 	{
-		UE_LOG(LogTemp, Display, TEXT("In:\n%s"), *testArgs);
-		UE_LOG(LogTemp, Display, TEXT("Out:\n%s"), *stringArgs);
+		SEQ_LOG(Display, TEXT("In:\n%s"), *testArgs);
+		SEQ_LOG(Display, TEXT("Out:\n%s"), *stringArgs);
 	}
 
 	if (stringArgs.ToLower().Compare(testArgs.ToLower()) == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Passed"));
+		SEQ_LOG(Display, TEXT("Passed"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed"));
+		SEQ_LOG(Error, TEXT("Failed"));
 	}
-	UE_LOG(LogTemp, Display, TEXT("==========================================================="));
+	SEQ_LOG(Display, TEXT("==========================================================="));
 }
 
 void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString, FSequenceError)>& OnFailure)
@@ -777,19 +777,19 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	UIndexer* indexer = NewObject<UIndexer>();//for testing!
 
 	//failure testing//
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
-	UE_LOG(LogTemp, Display, TEXT("Start of Failure Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("Start of Failure Tests"));
 	EmptyResponseTest(indexer);
 	InvalidResponseTest(indexer);
 	WrongResponseReceivedTest1(indexer);
 	WrongResponseReceivedTest2(indexer);
-	UE_LOG(LogTemp, Display, TEXT("End of Failure Tests"));
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("End of Failure Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
 	//parsing tests//
 	//buildResponse parsing tests//
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
-	UE_LOG(LogTemp, Display, TEXT("Start of Response Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("Start of Response Tests"));
 	PingParsingTest(indexer);
 	VersionParsingTest(indexer);
 	RunTimeStatusParsingTest(indexer);
@@ -800,11 +800,11 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	GetTokenSuppliesMapParsingTest(indexer);
 	GetTransactionHistoryParsingTest(indexer);
 	//buildResponse parsing tests//
-	UE_LOG(LogTemp, Display, TEXT("End of Response Tests"));
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("End of Response Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
-	UE_LOG(LogTemp, Display, TEXT("Start of Argument Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("Start of Argument Tests"));
 	//buildArgs parsing tests//
 	TokenBalanceMaxArgsTest(indexer);
 	TokenBalanceMinArgsTest(indexer);
@@ -813,11 +813,11 @@ void IndexerTest(const TFunction<void(FString)>& OnSuccess, const TFunction<void
 	TransactionHistoryArgsMaxTest(indexer);
 	TransactionHistoryArgsMinTest(indexer);
 	//buildArgs parsing tests//
-	UE_LOG(LogTemp, Display, TEXT("End of Argument Tests"));
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("End of Argument Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
 
-	UE_LOG(LogTemp, Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
-	UE_LOG(LogTemp, Display, TEXT("Start of System Tests"));
+	SEQ_LOG(Display, TEXT("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+	SEQ_LOG(Display, TEXT("Start of System Tests"));
 	//system tests//
 	PingTest(indexer, OnSuccess, OnFailure);
 	VersionTest(indexer, OnSuccess, OnFailure);

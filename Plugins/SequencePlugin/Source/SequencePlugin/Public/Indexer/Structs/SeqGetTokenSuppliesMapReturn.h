@@ -13,7 +13,7 @@ struct SEQUENCEPLUGIN_API FSeqGetTokenSuppliesMapReturn
 {
 	GENERATED_USTRUCT_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 		TMap<FString, FSeqTokenSupplyList> supplies;
 	bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
 

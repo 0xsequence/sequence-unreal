@@ -12,19 +12,19 @@ struct SEQUENCEPLUGIN_API FSeqTransaction
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString txnHash = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         int64 blockNumber = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString blockHash = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         int64 chainId = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString metaTxnID = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TArray<FSeqTxnTransfer> transfers;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString timestamp = "";
 
     /*

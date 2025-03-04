@@ -14,9 +14,9 @@ struct SEQUENCEPLUGIN_API FSeqGetTransactionHistoryReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FSeqPage page;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TArray<FSeqTransaction> transactions;
     bool customConstructor = true;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating

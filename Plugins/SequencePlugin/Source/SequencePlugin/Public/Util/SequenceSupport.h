@@ -24,9 +24,9 @@ struct SEQUENCEPLUGIN_API FIdNamePair
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence - Structs")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence")
 	int64 NetworkId = -1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence - Structs")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence")
 	FString NetworkName = "";
 
 	FIdNamePair(){}

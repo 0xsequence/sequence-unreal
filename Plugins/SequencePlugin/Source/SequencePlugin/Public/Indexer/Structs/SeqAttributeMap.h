@@ -17,7 +17,7 @@ struct SEQUENCEPLUGIN_API FSeqAttributeMap
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence - Structs")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TMap<FString, FString> AttributeMap;
         
         /*
