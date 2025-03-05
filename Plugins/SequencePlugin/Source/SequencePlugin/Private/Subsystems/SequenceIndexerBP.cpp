@@ -5,7 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
-#include "Util/SequenceChain.h"
+#include "Sequence/SequenceSdk.h"
 
 USequenceIndexerBP::USequenceIndexerBP()
 {
@@ -25,7 +25,7 @@ void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOn
 		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), WalletAddress, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetNativeTokenBalance(SequenceSdk::GetChainId(), WalletAddress, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
@@ -46,7 +46,7 @@ void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FS
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 	
-	this->Indexer->GetTokenBalances(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
@@ -68,7 +68,7 @@ void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const 
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 		
-	this->Indexer->GetTokenSupplies(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenSupplies(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
@@ -84,7 +84,7 @@ void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& 
 		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTokenSuppliesMap(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenSuppliesMap(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
@@ -100,7 +100,7 @@ void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryAr
 		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTransactionHistory(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTransactionHistory(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure OnFailure)
@@ -116,7 +116,7 @@ void USequenceIndexerBP::RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure On
 		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->RuntimeStatus(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
+	this->Indexer->RuntimeStatus(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::Version(FOnVersion OnSuccess, FOnFailure OnFailure)
@@ -132,7 +132,7 @@ void USequenceIndexerBP::Version(FOnVersion OnSuccess, FOnFailure OnFailure)
 		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->Version(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
+	this->Indexer->Version(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
@@ -148,5 +148,5 @@ void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
 		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->Ping(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
+	this->Indexer->Ping(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
 }

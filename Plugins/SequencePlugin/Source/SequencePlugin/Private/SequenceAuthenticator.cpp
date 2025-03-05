@@ -19,6 +19,7 @@
 #include "NativeEncryptors/WindowsEncryptor.h"
 #include "PlayFabResponseIntent.h"
 #include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceSdk.h"
 #include "Util/Log.h"
 
 USequenceAuthenticator::USequenceAuthenticator()
@@ -230,7 +231,7 @@ void USequenceAuthenticator::StoreCredentials(const FCredentials_BE& Credentials
 
 FString USequenceAuthenticator::BuildRedirectPrefix() const
 {
-	const FString Redirect = UConfigFetcher::GetConfigVar(UConfigFetcher::RedirectUrl);
+	const FString Redirect = SequenceSdk::GetRedirectUrl();
 	if (Redirect.EndsWith(TEXT("/"),ESearchCase::IgnoreCase))
 		return Redirect + this->RedirectPrefixTrailer;
 	else

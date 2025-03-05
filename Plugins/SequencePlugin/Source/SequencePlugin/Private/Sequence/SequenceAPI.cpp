@@ -14,7 +14,7 @@
 #include "SequenceRPCManager.h"
 #include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
-#include "Util/SequenceChain.h"
+#include "Sequence/SequenceSdk.h"
 
 USequenceWallet::USequenceWallet()
 {
@@ -351,7 +351,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 				OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
 			};
 
-			this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
+			this->Indexer->GetNativeTokenBalance(SequenceSdk::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
 		};
 
 		const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
@@ -359,7 +359,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 			OnFailure(FSequenceError(RequestFail, "Failed to Get Balances from Indexer"));
 		};
 						
-		this->Indexer->GetTokenBalances(SequenceChain::GetChainId(), Args,BalanceSuccess,BalanceFailure);
+		this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(), Args,BalanceSuccess,BalanceFailure);
 	};
 
 	if (this->SequenceRPCManager)
@@ -387,7 +387,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 				OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
 			};
 
-			this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
+			this->Indexer->GetNativeTokenBalance(SequenceSdk::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
 		};
 
 		const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
@@ -399,7 +399,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 		Args.accountAddress = this->GetWalletAddress();
 		Args.includeMetaData = true;
 		
-		this->Indexer->GetTokenBalances(SequenceChain::GetChainId(),Args,BalanceSuccess,BalanceFailure);
+		this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(),Args,BalanceSuccess,BalanceFailure);
 	};
 
 	if (this->SequenceRPCManager)

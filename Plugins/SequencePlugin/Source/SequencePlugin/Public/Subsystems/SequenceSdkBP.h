@@ -27,6 +27,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void SetChainByType(const ENetwork& NewChainType);
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SetRedirectUrl(const FString& NewRedirectUrl);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	int64 GetChainId();

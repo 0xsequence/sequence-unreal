@@ -2,33 +2,38 @@
 
 
 #include "Subsystems/SequenceSdkBP.h"
-
 #include "ConfigFetcher.h"
-#include "Util/SequenceChain.h"
+#include "Sequence/SequenceSdk.h"
 #include "Util/SequenceSupport.h"
 
 USequenceSdkBP::USequenceSdkBP()
 {
-	const FString& DefaultChainName = UConfigFetcher::GetConfigVar("DefaultChain");
+	const FString& DefaultChainName = UConfigFetcher::GetConfigVar(UConfigFetcher::DefaultChain);
 	SetChainByName(DefaultChainName);
+	SetRedirectUrl("https://api.sequence.app");
 }
 
 void USequenceSdkBP::SetChainById(const int64 NewChainId)
 {
-	SequenceChain::SetChainId(NewChainId);
+	SequenceSdk::SetChainId(NewChainId);
 }
 
 void USequenceSdkBP::SetChainByName(const FString& NewChainName)
 {
-	SequenceChain::SetChainId(USequenceSupport::GetNetworkId(NewChainName));
+	SequenceSdk::SetChainId(USequenceSupport::GetNetworkId(NewChainName));
 }
 
 void USequenceSdkBP::SetChainByType(const ENetwork& NewChainType)
 {
-	SequenceChain::SetChainId(USequenceSupport::GetNetworkId(NewChainType));
+	SequenceSdk::SetChainId(USequenceSupport::GetNetworkId(NewChainType));
+}
+
+void USequenceSdkBP::SetRedirectUrl(const FString& NewRedirectUrl)
+{
+	SequenceSdk::SetRedirectUrl(NewRedirectUrl);
 }
 
 int64 USequenceSdkBP::GetChainId()
 {
-	return SequenceChain::GetChainId();
+	return SequenceSdk::GetChainId();
 }
