@@ -501,8 +501,6 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Data
 	int32 ExpiresIn;
 };
 
-
-
 USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FSeqIdTokenResponse_Response
 {

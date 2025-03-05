@@ -13,11 +13,11 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetEtherBalance, const FString&, WalletAddress, int64, Balance);
-	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnGetTokenBalances, const FString&, WalletAddress, const FString&, ContractAddress, FSeqGetTokenBalancesReturn, Balances);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTokenSupplies, const FString&, ContractAddress, FSeqGetTokenSuppliesReturn, Supplies);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTokenSuppliesMap, const FSeqGetTokenSuppliesMapArgs&, Request, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTransactionHistory, const FSeqGetTransactionHistoryArgs&, Request, FSeqGetTransactionHistoryReturn, TransactionHistory);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetNativeTokenBalance, int64, Balance);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenBalances, FSeqGetTokenBalancesReturn, Balances);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSupplies, FSeqGetTokenSuppliesReturn, Supplies);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSuppliesMap, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTransactionHistory, FSeqGetTransactionHistoryReturn, TransactionHistory);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
@@ -33,19 +33,19 @@ public:
 	void SetChainByType(const ENetwork& NewChainType);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetEtherBalanceAsync(const FString& WalletAddress, FOnGetEtherBalance OnSuccess, FOnFailure OnFailure);
+	void GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure);
+	void GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure);
+	void GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure);
+	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
+	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
 	
 private:
 	UPROPERTY()

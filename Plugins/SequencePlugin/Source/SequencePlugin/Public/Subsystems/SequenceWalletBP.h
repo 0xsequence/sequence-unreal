@@ -15,16 +15,16 @@ class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSignMessage, FSequenceResponseStatus, ResponseStatus, FSeqSignMessageResponse_Response, SignedMessage);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnValidateMessageSignature, FSequenceResponseStatus, ResponseStatus, FSeqValidateMessageSignatureResponse_Data, isValidMessageSignature);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetUnFilteredFeeOptions, FSequenceResponseStatus, ResponseStatus, const TArray<FFeeOption>&, FeeOptions);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSendTransactionWtihFeeOption, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnSendTransaction, FSequenceResponseStatus, ResponseStatus, FSeqTransactionResponse_Data, Response);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetIdToken, FSequenceResponseStatus, ResponseStatus, FSeqIdTokenResponse_Data, Response);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListSessions, FSequenceResponseStatus, ResponseStatus, const TArray<FSeqListSessions_Session>&, Sessions);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListAccounts, FSequenceResponseStatus, ResponseStatus, const FSeqListAccountsResponse_Data&, Data);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSignMessage, const FString&, SignedMessage);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnValidateMessageSignature, bool, isValid);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetFilteredFeeOptions, const TArray<FFeeOption>&, FeeOptions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetUnFilteredFeeOptions, const TArray<FFeeOption>&, FeeOptions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSendTransactionWtihFeeOption, FSeqTransactionResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSendTransaction, FSeqTransactionResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetIdToken, FSeqIdTokenResponse_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListSessions, const TArray<FSeqListSessions_Session>&, Sessions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAccounts, const FSeqListAccountsResponse_Data&, Data);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSessionAuthProof, const FSeqGetSessionAuthProof_Data, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
@@ -97,7 +97,7 @@ public:
 	void GetUnfilteredFeeOptions(UTransactions * Transactions, FOnGetUnFilteredFeeOptions OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SendEther(const FString& RecipientAddress, const FString& Amount, FOnSendTransaction OnSuccess, FOnFailure OnFailure);
+	void SendNativeToken(const FString& RecipientAddress, const FString& Amount, FOnSendTransaction OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void SendTransactionWithFee(UTransactions * Transactions, FOnSendTransactionWtihFeeOption OnSuccess, FOnFailure OnFailure);

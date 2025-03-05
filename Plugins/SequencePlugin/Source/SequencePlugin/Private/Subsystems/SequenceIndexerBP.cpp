@@ -25,11 +25,11 @@ void USequenceIndexerBP::SetChainByType(const ENetwork& NewChainType)
 	ChainId = USequenceSupport::GetNetworkId(NewChainType);
 }
 
-void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress, FOnGetEtherBalance OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqEtherBalance> OnApiSuccess = [this, WalletAddress, OnSuccess](const FSeqEtherBalance& EtherBalance)
+	const TSuccessCallback<FSeqEtherBalance> OnApiSuccess = [this, OnSuccess](const FSeqEtherBalance& EtherBalance)
 	{
-		OnSuccess.Execute(WalletAddress, EtherBalance.balanceWei);
+		OnSuccess.Execute(EtherBalance.balanceWei);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -41,11 +41,11 @@ void USequenceIndexerBP::GetEtherBalanceAsync(const FString& WalletAddress, FOnG
 	this->Indexer->GetEtherBalance(this->ChainId, WalletAddress, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnApiSuccess = [this, WalletAddress, ContractAddress, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
+	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
 	{
-		OnSuccess.Execute(WalletAddress, ContractAddress, TokenBalances);
+		OnSuccess.Execute(TokenBalances);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -62,11 +62,11 @@ void USequenceIndexerBP::GetTokenBalancesAsync(const FString& WalletAddress, con
 	this->Indexer->GetTokenBalances(this->ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnApiSuccess = [this, ContractAddress, OnSuccess](const FSeqGetTokenSuppliesReturn& Supplies)
+	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenSuppliesReturn& Supplies)
 	{
-		OnSuccess.Execute(ContractAddress, Supplies);
+		OnSuccess.Execute(Supplies);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -84,11 +84,11 @@ void USequenceIndexerBP::GetTokenSuppliesAsync(const FString& ContractAddress, c
 	this->Indexer->GetTokenSupplies(this->ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnApiSuccess = [this, Args, OnSuccess](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
+	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
 	{
-		OnSuccess.Execute(Args, SuppliesMap);
+		OnSuccess.Execute(SuppliesMap);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -100,11 +100,11 @@ void USequenceIndexerBP::GetTokenSuppliesMapAsync(const FSeqGetTokenSuppliesMapA
 	this->Indexer->GetTokenSuppliesMap(ChainId, Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTransactionHistoryAsync(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, Args, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
+	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{
-		OnSuccess.Execute(Args, TransactionHistory);
+		OnSuccess.Execute(TransactionHistory);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
