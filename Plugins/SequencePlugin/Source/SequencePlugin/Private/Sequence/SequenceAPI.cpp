@@ -12,7 +12,9 @@
 #include "Provider.h"
 #include "Transak.h"
 #include "SequenceRPCManager.h"
+#include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
+#include "Util/SequenceChain.h"
 
 USequenceWallet::USequenceWallet()
 {
@@ -250,51 +252,6 @@ void USequenceWallet::SignOut() const
 	}
 }
 
-void USequenceWallet::GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	const UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
-	Transak->GetSupportedCountries(OnSuccess,OnFailure);
-}
-
-void USequenceWallet::OpenTransakLink(const FString& FiatCurrency, const FString& DefaultAmount, const FString& DefaultCryptoCurrency, const FString& Networks, bool DisableWalletAddressForm)
-{
-	if (Credentials.RegisteredValid())
-	{
-		UTransakOnRamp * Transak = UTransakOnRamp::Init(this->GetWalletAddress());
-		Transak->OpenTransakLink(FiatCurrency, DefaultAmount, DefaultCryptoCurrency, Networks, DisableWalletAddressForm);
-	}
-	else
-	{
-		SEQ_LOG(Warning, TEXT("Please login first."));
-	}
-}
-
-int64 USequenceWallet::GetNetworkId() const
-{
-	return this->Credentials.GetNetwork();
-}
-
-void USequenceWallet::UpdateNetworkId(int64 NewNetwork)
-{
-	this->Credentials.UpdateNetwork(NewNetwork);
-	const USequenceAuthenticator * auth = NewObject<USequenceAuthenticator>();
-	auth->StoreCredentials(this->Credentials);
-}
-
-void USequenceWallet::UpdateNetworkId(FString NewNetworkName)
-{
-	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetworkName));
-	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
-	auth->StoreCredentials(this->Credentials);
-}
-
-void USequenceWallet::UpdateNetworkId(ENetwork NewNetwork)
-{
-	this->Credentials.UpdateNetwork(USequenceSupport::GetNetworkId(NewNetwork));
-	const USequenceAuthenticator* auth = NewObject<USequenceAuthenticator>();
-	auth->StoreCredentials(this->Credentials);
-}
-
 void USequenceWallet::UpdateProviderURL(const FString& Url) const
 {
 	if (this->Provider)
@@ -394,7 +351,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 				OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
 			};
 
-			this->GetEtherBalance(this->GetWalletAddress(),EtherSuccess,EtherFailure);
+			this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
 		};
 
 		const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
@@ -402,7 +359,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 			OnFailure(FSequenceError(RequestFail, "Failed to Get Balances from Indexer"));
 		};
 						
-		this->GetTokenBalances(Args,BalanceSuccess,BalanceFailure);
+		this->Indexer->GetTokenBalances(SequenceChain::GetChainId(), Args,BalanceSuccess,BalanceFailure);
 	};
 
 	if (this->SequenceRPCManager)
@@ -430,7 +387,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 				OnFailure(FSequenceError(RequestFail, "Failed to Get EtherBalance from Indexer"));
 			};
 
-			this->GetEtherBalance(this->GetWalletAddress(),EtherSuccess,EtherFailure);
+			this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), this->GetWalletAddress(),EtherSuccess,EtherFailure);
 		};
 
 		const FFailureCallback BalanceFailure = [this, OnFailure](const FSequenceError& Err)
@@ -442,7 +399,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 		Args.accountAddress = this->GetWalletAddress();
 		Args.includeMetaData = true;
 		
-		this->GetTokenBalances(Args,BalanceSuccess,BalanceFailure);
+		this->Indexer->GetTokenBalances(SequenceChain::GetChainId(),Args,BalanceSuccess,BalanceFailure);
 	};
 
 	if (this->SequenceRPCManager)
@@ -470,62 +427,6 @@ void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactio
 	{
 		this->SequenceRPCManager->SendTransaction(this->Credentials, Transactions, OnSuccess, OnFailure);
 	}
-}
-
-//Indexer Calls
-
-void USequenceWallet::Ping(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->Ping(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
-}
-
-void USequenceWallet::Version(const TSuccessCallback<FSeqVersion>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->Version(this->Credentials.GetNetwork(),OnSuccess,OnFailure);
-}
-
-void USequenceWallet::RunTimeStatus(const TSuccessCallback<FSeqRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->RunTimeStatus(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetChainID(const TSuccessCallback<int64>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetChainID(this->Credentials.GetNetwork(), OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FSeqEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetEtherBalance(this->Credentials.GetNetwork(), AccountAddr, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetTokenBalances(const FSeqGetTokenBalancesArgs& Args, const TSuccessCallback<FSeqGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetTokenBalances(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetTokenSupplies(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetTokenSuppliesMap(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
-}
-
-void USequenceWallet::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (this->Indexer)
-		this->Indexer->GetTransactionHistory(this->Credentials.GetNetwork(), Args, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::BlockByNumber(uint64 Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure) const

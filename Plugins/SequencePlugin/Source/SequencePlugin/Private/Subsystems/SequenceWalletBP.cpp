@@ -65,47 +65,6 @@ FString USequenceWalletBP::GetWalletAddress()
 	return "";
 }
 
-int64 USequenceWalletBP::GetNetworkId()
-{
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		return Wallet->GetNetworkId();
-	}
-	return 0;
-}
-
-void USequenceWalletBP::UpdateNetworkId(int64 NewNetworkId)
-{
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->UpdateNetworkId(NewNetworkId);
-	}
-}
-
-void USequenceWalletBP::UpdateNetworkIdFromName(FString NewNetworkName)
-{
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->UpdateNetworkId(NewNetworkName);
-	}
-}
-
-void USequenceWalletBP::UpdateNetworkIdFromEnum(ENetwork NewNetwork)
-{
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->UpdateNetworkId(NewNetwork);
-	}
-}
-
 void USequenceWalletBP::UpdateProviderUrl(const FString& NewProviderUrl)
 {
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	

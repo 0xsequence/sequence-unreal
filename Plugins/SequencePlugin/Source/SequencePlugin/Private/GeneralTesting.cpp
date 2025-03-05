@@ -256,7 +256,7 @@ void AGeneralTesting::TestTokenBalances() const
 		FSeqGetTokenBalancesArgs args;
 		args.accountAddress = Api->GetWalletAddress();
 		args.includeMetaData = true;
-		Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
+		//TODO: Api->GetTokenBalances(args,GenericSuccess,GenericFailure);
 	}
 }
 
@@ -286,7 +286,7 @@ void AGeneralTesting::TestHistory() const
 		args.includeMetaData = true;
 		args.page.page = 0;
 		args.page.more = true;
-		Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
+		//TODO: Api->GetTransactionHistory(args,GenericSuccess,GenericFailure);
 	}
 }
 

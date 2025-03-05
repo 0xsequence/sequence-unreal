@@ -67,18 +67,6 @@ public:
 	FString GetWalletAddress();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	int64 GetNetworkId();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void UpdateNetworkId(int64 NewNetworkId);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void UpdateNetworkIdFromName(FString NewNetworkName);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void UpdateNetworkIdFromEnum(ENetwork NewNetwork);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void UpdateProviderUrl(const FString& NewProviderUrl);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")

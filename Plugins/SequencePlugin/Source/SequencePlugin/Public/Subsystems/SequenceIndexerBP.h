@@ -14,23 +14,17 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetNativeTokenBalance, int64, Balance);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenBalances, FSeqGetTokenBalancesReturn, Balances);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSupplies, FSeqGetTokenSuppliesReturn, Supplies);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSuppliesMap, FSeqGetTokenSuppliesMapReturn, SuppliesMap);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTransactionHistory, FSeqGetTransactionHistoryReturn, TransactionHistory);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTokenBalances, const TArray<FSeqTokenBalance>&, Balances, FSeqPage, Page);
+	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnGetTokenSupplies, const TArray<FSeqTokenSupply>&, Tokens, EContractType, ContractType, FSeqPage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSuppliesMap, FSeqGetTokenSuppliesMapReturn, Return);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTransactionHistory, const TArray<FSeqTransaction>&, Transactions, FSeqPage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRuntimeStatus, FSeqRuntimeStatus, Status);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnVersion, FSeqVersion, Version);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPing, bool, Success);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
 	USequenceIndexerBP();
-	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SetChainById(const int64 NewChainId);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SetChainByName(const FString& NewChainName);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void SetChainByType(const ENetwork& NewChainType);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure);
@@ -46,9 +40,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void Version(FOnVersion OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void Ping(FOnPing OnSuccess, FOnFailure OnFailure);
 	
 private:
 	UPROPERTY()
 	UIndexer* Indexer;
-	int64 ChainId = 137;
 };

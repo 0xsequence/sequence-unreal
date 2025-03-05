@@ -63,7 +63,7 @@ void RunTimeStatusTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TF
 		OnFailure("RunTimeStatus Failure", Error);
 	};
 
-	Indexer->RunTimeStatus(GTestingChainID, GenericSuccess, GenericFailure);
+	Indexer->RuntimeStatus(GTestingChainID, GenericSuccess, GenericFailure);
 }
 
 void GetChainIDTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)
@@ -103,7 +103,7 @@ void GetEtherBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, 
 		OnFailure("etherBalance Failure", Error);
 	};
 
-	Indexer->GetEtherBalance(GTestingChainID, GTestingAddress, GenericSuccess, GenericFailure);
+	Indexer->GetNativeTokenBalance(GTestingChainID, GTestingAddress, GenericSuccess, GenericFailure);
 }
 
 void GetTokenBalanceTest(UIndexer* Indexer, TFunction<void(FString)> OnSuccess, TFunction<void(FString, FSequenceError)> OnFailure)

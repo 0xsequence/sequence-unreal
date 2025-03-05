@@ -133,22 +133,6 @@ public:
 	void UpdateProviderURL(const FString& Url) const;
 
 	/**
-	 * Allows you to update the set network for the SequenceWallet
-	 * @param NewNetwork New network you wish to use
-	 */
-	void UpdateNetworkId(int64 NewNetwork);
-
-	void UpdateNetworkId(FString NewNetworkName);
-
-	void UpdateNetworkId(ENetwork NewNetwork);
-
-	/**
-	 * Allows to get the currently set network for the SequenceWallet
-	 * @return currently set network for the SequenceWallet
-	 */
-	int64 GetNetworkId() const;
-
-	/**
 	 * Allows you to sign the given message with the SequenceWallet
 	 * @param Message The message you wish to sign
 	 * @param OnSuccess The returned Struct from the signing process
@@ -227,23 +211,6 @@ public:
 	 */
 	void SignOut() const;
 
-	/**
-	 * Gets a list of supported Transak Countries
-	 * @param OnSuccess TArray<FSupportedCountry> containing supported countries
-	 * @param OnFailure An FSequenceError
-	 */
-	void GetSupportedTransakCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/**
-	 * Opens a link in Transak with the parameters set
-	 * @param FiatCurrency FiatCurrency to use in Transak
-	 * @param DefaultAmount Default amount to use in Transak
-	 * @param DefaultCryptoCurrency Default CryptoCurrency to use in Transak
-	 * @param Networks List of networks used in Transak
-	 * @param DisableWalletAddressForm DisableWalletAddressForm in Transak
-	 */
-	void OpenTransakLink(const FString& FiatCurrency = FDefaultTransak::FiatCurrency, const FString& DefaultAmount = FDefaultTransak::FiatAmount, const FString& DefaultCryptoCurrency = FDefaultTransak::CryptoCurrency, const FString& Networks = FDefaultTransak::Networks, bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm);
-
 private:
 	static USequenceWallet * GetSubSystem();
 	void Init(const FCredentials_BE& CredentialsIn);
@@ -254,58 +221,6 @@ private:
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
 
 public:
-	//Indexer Specific Calls
-	
-	/*
-	Used to get a ping back from the Chain
-	*/
-	void Ping(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Used to get version data back from the Chain
-	*/
-	void Version(const TSuccessCallback<FSeqVersion>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Used to get the runtime status of the Chain
-	*/
-	void RunTimeStatus(const TSuccessCallback<FSeqRuntimeStatus>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Used to get the chainID from the Chain
-	*/
-	void GetChainID(const TSuccessCallback<int64>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Used to get the Ether balance from the Chain
-		@param 1st the ChainID
-		@param 2nd the accountAddr we want to get the balance for
-		@return the Balance ASYNC calls (update ether balance in the bck_mngr when done processing)
-	*/
-	void GetEtherBalance(const FString& AccountAddr, const TSuccessCallback<FSeqEtherBalance>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		Gets the token balances from the Chain
-	*/
-	void GetTokenBalances(const FSeqGetTokenBalancesArgs& Args, const TSuccessCallback<FSeqGetTokenBalancesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		gets the token supplies from the Chain
-	*/
-	void GetTokenSupplies(const FSeqGetTokenSuppliesArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		gets the token supplies map from the Chain
-	*/
-	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, const TSuccessCallback<FSeqGetTokenSuppliesMapReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	/*
-		get transaction history from the Chain
-	*/
-	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	//Provider calls
-
 	void BlockByNumber(uint64 Number, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,
 	                   const TFunction<void(FSequenceError)>& OnFailure) const;
 	void BlockByNumber(EBlockTag Tag, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,

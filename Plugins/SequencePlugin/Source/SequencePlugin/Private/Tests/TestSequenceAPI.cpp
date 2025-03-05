@@ -3,6 +3,7 @@
 #include "TestSequenceAPI.h"
 #include "Sequence/SequenceAPI.h"
 #include "SequenceAuthenticator.h"
+#include "Transak.h"
 #include "ABI/ABI.h"
 #include "Native/NativeOAuth.h"
 #include "Util/Log.h"
@@ -444,13 +445,7 @@ void SequenceAPITest::GetUnfilteredFeeOptions(TFunction<void(FString)> OnSuccess
 
 void SequenceAPITest::GetSupportedCountries(const TSuccessCallback<TArray<FSupportedCountry>>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->GetSupportedTransakCountries(OnSuccess,OnFailure);
-	}
+	UTransakOnRamp::GetSupportedCountries(OnSuccess,OnFailure);
 }
 
 void SequenceAPITest::TestLoadTransakUrl()
@@ -459,7 +454,8 @@ void SequenceAPITest::TestLoadTransakUrl()
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		USequenceWallet * Api = WalletOptional.GetValue();
-		Api->OpenTransakLink();
+		USequenceWallet* Api = WalletOptional.GetValue();
+		UTransakOnRamp* OnRamp = UTransakOnRamp::Init(Api->GetWalletAddress());
+		OnRamp->OpenTransakLink();
 	}
 }

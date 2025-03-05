@@ -3,26 +3,13 @@
 #include "Subsystems/SequenceIndexerBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
+#include "Util/SequenceChain.h"
 
 USequenceIndexerBP::USequenceIndexerBP()
 {
 	this->Indexer = NewObject<UIndexer>();
-}
-
-void USequenceIndexerBP::SetChainById(const int64 NewChainId)
-{
-	ChainId = NewChainId;
-}
-
-void USequenceIndexerBP::SetChainByName(const FString& NewChainName)
-{
-	ChainId = USequenceSupport::GetNetworkId(NewChainName);
-}
-
-void USequenceIndexerBP::SetChainByType(const ENetwork& NewChainType)
-{
-	ChainId = USequenceSupport::GetNetworkId(NewChainType);
 }
 
 void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure)
@@ -38,14 +25,14 @@ void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOn
 		OnFailure.Execute(Error.Message);
 	};
 	
-	this->Indexer->GetEtherBalance(this->ChainId, WalletAddress, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetNativeTokenBalance(SequenceChain::GetChainId(), WalletAddress, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
 	{
-		OnSuccess.Execute(TokenBalances);
+		OnSuccess.Execute(TokenBalances.balances, TokenBalances.page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -59,14 +46,14 @@ void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FS
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 	
-	this->Indexer->GetTokenBalances(this->ChainId, Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenBalances(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenSuppliesReturn& Supplies)
 	{
-		OnSuccess.Execute(Supplies);
+		OnSuccess.Execute(Supplies.tokenIDs, Supplies.contractType, Supplies.page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -81,7 +68,7 @@ void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const 
 	Args.contractAddress = ContractAddress;
 	Args.includeMetaData = IncludeMetadata;
 		
-	this->Indexer->GetTokenSupplies(this->ChainId, Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenSupplies(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
@@ -97,14 +84,14 @@ void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& 
 		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTokenSuppliesMap(ChainId, Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTokenSuppliesMap(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{
-		OnSuccess.Execute(TransactionHistory);
+		OnSuccess.Execute(TransactionHistory.transactions, TransactionHistory.page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -113,5 +100,53 @@ void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryAr
 		OnFailure.Execute(Error.Message);
 	};
 		
-	this->Indexer->GetTransactionHistory(this->ChainId, Args, OnApiSuccess, OnApiFailure);
+	this->Indexer->GetTransactionHistory(SequenceChain::GetChainId(), Args, OnApiSuccess, OnApiFailure);
+}
+
+void USequenceIndexerBP::RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FSeqRuntimeStatus> OnApiSuccess = [this, OnSuccess](const FSeqRuntimeStatus& Status)
+	{
+		OnSuccess.Execute(Status);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		OnFailure.Execute(Error.Message);
+	};
+	
+	this->Indexer->RuntimeStatus(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
+}
+
+void USequenceIndexerBP::Version(FOnVersion OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FSeqVersion> OnApiSuccess = [this, OnSuccess](const FSeqVersion& Status)
+	{
+		OnSuccess.Execute(Status);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		OnFailure.Execute(Error.Message);
+	};
+	
+	this->Indexer->Version(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
+}
+
+void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<bool> OnApiSuccess = [this, OnSuccess](const bool Status)
+	{
+		OnSuccess.Execute(Status);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		OnFailure.Execute(Error.Message);
+	};
+	
+	this->Indexer->Ping(SequenceChain::GetChainId(), OnApiSuccess, OnApiFailure);
 }

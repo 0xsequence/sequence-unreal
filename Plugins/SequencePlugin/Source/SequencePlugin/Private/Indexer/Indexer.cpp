@@ -176,7 +176,7 @@ void UIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSucc
 	}, OnFailure);
 }
 
-void UIndexer::RunTimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::RuntimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "RuntimeStatus", "", [this,OnSuccess](const FString& Content)
 	{
@@ -192,7 +192,7 @@ void UIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess
 	}, OnFailure);
 }
 
-void UIndexer::GetEtherBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetNativeTokenBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString JSON_Arg = "{\"accountAddress\":\"";
 	JSON_Arg.Append(AccountAddr);
