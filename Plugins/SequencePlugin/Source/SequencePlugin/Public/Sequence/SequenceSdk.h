@@ -15,6 +15,6 @@ public:
 	static FString GetChainName();
 	static FString GetRedirectUrl();
 private:
-	static int64 ChainId;
-	static FString RedirectUrl;
+	inline static int64 ChainId = -1;
+	inline static FString RedirectUrl = "";
 };

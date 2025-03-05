@@ -9,51 +9,6 @@
 
 USequenceWalletBP::USequenceWalletBP() { }
 
-float USequenceWalletBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
-{
-	return USequenceSupport::GetUserReadableAmount(Amount,Decimals);
-}
-
-int64 USequenceWalletBP::GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals)
-{
-	return USequenceSupport::GetSystemReadableAmount(Amount,Decimals);
-}
-
-int64 USequenceWalletBP::GetNetworkIdFromName(const FString& NetworkNameIn)
-{
-	return USequenceSupport::GetNetworkId(NetworkNameIn);
-}
-
-int64 USequenceWalletBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
-{
-	return USequenceSupport::GetNetworkId(NetworkEnumIn);
-}
-
-FString USequenceWalletBP::GetNetworkNameFromId(const int64 NetworkIdIn)
-{
-	return USequenceSupport::GetNetworkName(NetworkIdIn);
-}
-
-FString USequenceWalletBP::GetNetworkNameFromEnum(const ENetwork NetworkIn)
-{
-	return USequenceSupport::GetNetworkName(NetworkIn);
-}
-
-TArray<FIdNamePair> USequenceWalletBP::GetAllNetworks()
-{
-	return USequenceSupport::GetAllNetworks();
-}
-
-TArray<FString> USequenceWalletBP::GetAllNetworkNames()
-{
-	return USequenceSupport::GetAllNetworkNames();
-}
-
-TArray<int64> USequenceWalletBP::GetAllNetworkIds()
-{
-	return USequenceSupport::GetAllNetworkIds();
-}
-
 FString USequenceWalletBP::GetWalletAddress()
 {
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -169,7 +124,7 @@ void USequenceWalletBP::SendNativeToken(const FString& RecipientAddress, const F
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response);
+		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
@@ -185,11 +140,11 @@ void USequenceWalletBP::SendNativeToken(const FString& RecipientAddress, const F
 	}
 }
 
-void USequenceWalletBP::SendTransactionWithFee(UTransactions * Transactions, FOnSendTransactionWtihFeeOption OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::SendTransactionWithFee(UTransactions * Transactions, FOnSendTransaction OnSuccess, FOnFailure OnFailure)
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response);
+		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
@@ -216,7 +171,7 @@ void USequenceWalletBP::SendTransaction(UTransactions * Transactions, FOnSendTra
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response);
+		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
@@ -236,7 +191,7 @@ void USequenceWalletBP::GetIdToken(const FString& Nonce, FOnGetIdToken OnSuccess
 {
 	const TFunction<void (FSeqIdTokenResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqIdTokenResponse_Data& Data)
 	{
-		OnSuccess.Execute(Data);
+		OnSuccess.Execute(Data.IdToken, Data.ExpiresIn);
 	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
@@ -276,7 +231,7 @@ void USequenceWalletBP::ListAccounts(FOnListAccounts OnSuccess, FOnFailure OnFai
 {
 	const TFunction<void(FSeqListAccountsResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqListAccountsResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response);
+		OnSuccess.Execute(Response.Accounts, Response.CurrentAccountId);
 	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)

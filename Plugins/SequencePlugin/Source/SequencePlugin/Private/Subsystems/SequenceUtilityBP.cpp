@@ -57,3 +57,48 @@ void USequenceUtilityBP::ClipboardCopy(const FString& Text)
 	const TCHAR* CharArrayPtr = CharArray.GetData();
 	FPlatformApplicationMisc::ClipboardCopy(CharArrayPtr);
 }
+
+float USequenceUtilityBP::GetUserReadableAmountIntDecimals(int64 Amount, int64 Decimals)
+{
+	return USequenceSupport::GetUserReadableAmount(Amount,Decimals);
+}
+
+int64 USequenceUtilityBP::GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals)
+{
+	return USequenceSupport::GetSystemReadableAmount(Amount,Decimals);
+}
+
+int64 USequenceUtilityBP::GetNetworkIdFromName(const FString& NetworkNameIn)
+{
+	return USequenceSupport::GetNetworkId(NetworkNameIn);
+}
+
+int64 USequenceUtilityBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
+{
+	return USequenceSupport::GetNetworkId(NetworkEnumIn);
+}
+
+FString USequenceUtilityBP::GetNetworkNameFromId(const int64 NetworkIdIn)
+{
+	return USequenceSupport::GetNetworkName(NetworkIdIn);
+}
+
+FString USequenceUtilityBP::GetNetworkNameFromEnum(const ENetwork NetworkIn)
+{
+	return USequenceSupport::GetNetworkName(NetworkIn);
+}
+
+TArray<FIdNamePair> USequenceUtilityBP::GetAllNetworks()
+{
+	return USequenceSupport::GetAllNetworks();
+}
+
+TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
+{
+	return USequenceSupport::GetAllNetworkNames();
+}
+
+TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
+{
+	return USequenceSupport::GetAllNetworkIds();
+}

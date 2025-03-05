@@ -3,7 +3,6 @@
 #include "Subsystems/SequenceIndexerBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
 #include "Sequence/SequenceSdk.h"
 
@@ -59,8 +58,6 @@ void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting token supplies: %s"), *Error.Message);
-		
-		const FSeqGetTokenSuppliesReturn Supplies;
 		OnFailure.Execute(Error.Message);
 	};
 
@@ -112,7 +109,7 @@ void USequenceIndexerBP::RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure On
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
-		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error getting Runtime Status: %s"), *Error.Message);
 		OnFailure.Execute(Error.Message);
 	};
 	
@@ -128,7 +125,7 @@ void USequenceIndexerBP::Version(FOnVersion OnSuccess, FOnFailure OnFailure)
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
-		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error getting Indexer Version: %s"), *Error.Message);
 		OnFailure.Execute(Error.Message);
 	};
 	
@@ -144,7 +141,7 @@ void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
-		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("Error during Ping: %s"), *Error.Message);
 		OnFailure.Execute(Error.Message);
 	};
 	
