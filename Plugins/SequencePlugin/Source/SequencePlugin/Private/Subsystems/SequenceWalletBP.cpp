@@ -37,6 +37,7 @@ void USequenceWalletBP::SignOut()
 	{
 		const USequenceWallet * Wallet = WalletOptional.GetValue();
 		Wallet->SignOut();
+		this->CallOnSessionClosed();
 	}
 }
 
@@ -266,3 +267,12 @@ void USequenceWalletBP::GetSessionAuthProof(const FString& Nonce, FOnGetSessionA
 		Wallet->GetSessionAuthProof(Nonce,OnApiSuccess, OnApiFailure);
 	}
 }
+
+void USequenceWalletBP::CallOnSessionClosed() const
+{
+	if (this->OnSessionClosed.IsBound())
+	{
+		this->OnSessionClosed.Broadcast();
+	}
+}
+

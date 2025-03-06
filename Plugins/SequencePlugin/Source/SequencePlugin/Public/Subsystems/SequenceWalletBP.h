@@ -26,8 +26,13 @@ class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSessionAuthProof, const FSeqGetSessionAuthProof_Data, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
+	
 public:
 	USequenceWalletBP();
+
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnSession OnSessionClosed;
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	FString GetWalletAddress();
@@ -70,4 +75,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void GetSessionAuthProof(const FString& Nonce, FOnGetSessionAuthProof OnSuccess, FOnFailure OnFailure);
+
+private:
+	void CallOnSessionClosed() const;
 };

@@ -16,11 +16,6 @@ USequenceSessionsBP::USequenceSessionsBP()
 	this->Authenticator = NewObject<USequenceAuthenticator>();
 }
 
-void USequenceSessionsBP::ClearSession() const
-{
-	this->Authenticator->ClearStoredCredentials();
-}
-
 bool USequenceSessionsBP::CheckExistingSession() const
 {
 	const FStoredCredentials_BE Credentials = this->Authenticator->GetStoredCredentials();
@@ -67,7 +62,7 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCode(const FString& Code, FOnSucc
 {
 	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 	{
-		this->Authenticator->StoreCredentials(Credentials);
+		this->CallOnSessionCreated(Credentials);
 		OnSuccess.Execute();
 	};
 
@@ -83,7 +78,6 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCode(const FString& Code, FOnSucc
 		OnFederationRequired.Execute(FederationData);
 	};
 
-	this->ClearSession();
 	this->RPCManager->OpenEmailSession(Code, true, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
@@ -99,7 +93,7 @@ void USequenceSessionsBP::StartOidcSession(const FString& IdToken, FOnSuccess On
 {
 	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 	{
-		this->Authenticator->StoreCredentials(Credentials);
+		this->CallOnSessionCreated(Credentials);
 		OnSuccess.Execute();
 	};
 
@@ -115,7 +109,6 @@ void USequenceSessionsBP::StartOidcSession(const FString& IdToken, FOnSuccess On
 		OnFederationRequired.Execute(FederationData);
 	};
 
-	this->ClearSession();
 	this->RPCManager->OpenOIDCSession(IdToken, true, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
@@ -125,7 +118,7 @@ void USequenceSessionsBP::PlayFabRegistration(const FString& UsernameIn, const F
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 		{
-			this->Authenticator->StoreCredentials(Credentials);
+			this->CallOnSessionCreated(Credentials);
 			OnSuccess.Execute();
 		};
 
@@ -150,7 +143,6 @@ void USequenceSessionsBP::PlayFabRegistration(const FString& UsernameIn, const F
 		OnFailure.Execute(Error.Message);
 	};
 
-	this->ClearSession();
 	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
@@ -179,7 +171,6 @@ void USequenceSessionsBP::PlayFabLogin(const FString& UsernameIn, const FString&
 		}
 	};
 
-	this->ClearSession();
 	this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
@@ -187,7 +178,7 @@ void USequenceSessionsBP::PlayFabAuthenticateWithSessionTicket(const FString& Se
 {
 	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 	{
-		this->Authenticator->StoreCredentials(Credentials);
+		this->CallOnSessionCreated(Credentials);
 		OnSuccess.Execute();
 	};
 
@@ -203,7 +194,6 @@ void USequenceSessionsBP::PlayFabAuthenticateWithSessionTicket(const FString& Se
 		OnFederationRequired.Execute(FederationData);
 	};
 
-	this->ClearSession();
 	this->RPCManager->OpenPlayFabSession(SessionTicket, true, OnOpenSuccess, OnOpenFailure, OnApiFederationRequired);
 }
 
@@ -211,7 +201,7 @@ void USequenceSessionsBP::StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnF
 {
 	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 	{
-		this->Authenticator->StoreCredentials(Credentials);
+		this->CallOnSessionCreated(Credentials);
 		OnSuccess.Execute();
 	};
 
@@ -221,7 +211,6 @@ void USequenceSessionsBP::StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnF
 		OnFailure.Execute(Error.Message);
 	};
 
-	this->ClearSession();
 	this->RPCManager->OpenGuestSession(true, OnApiSuccess, OnApiFailure);
 }
 
@@ -352,4 +341,13 @@ void USequenceSessionsBP::PlayFabRpc(const FString& Url, const FString& Content,
 		->WithVerb("POST")
 		->WithContentAsString(Content)
 		->ProcessAndThen(OnSuccess, OnFailure);
+}
+
+void USequenceSessionsBP::CallOnSessionCreated(const FCredentials_BE& Credentials) const
+{
+	this->Authenticator->StoreCredentials(Credentials);
+	if (this->OnSessionCreated.IsBound())
+	{
+		this->OnSessionCreated.Broadcast();
+	}
 }

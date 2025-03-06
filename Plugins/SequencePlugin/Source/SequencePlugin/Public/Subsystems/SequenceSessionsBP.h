@@ -19,16 +19,17 @@ class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, pu
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 	
 public:
 	USequenceSessionsBP();
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnSession OnSessionCreated;
+	
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIdTokenReceived IdTokenReceived;
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ClearSession() const;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetGoogleTokenId(FOnBrowserRequired BrowserRequired);
@@ -87,4 +88,5 @@ private:
 	void PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void PlayFabLoginRpc(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void PlayFabRpc(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void CallOnSessionCreated(const FCredentials_BE& Credentials) const;
 };
