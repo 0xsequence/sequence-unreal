@@ -52,7 +52,6 @@ FJsonArray FJsonBuilder::AddArray(FString Name)
 
 FString FJsonBuilder::ToString() const
 {
-	auto x = 3;
 	return FString("{") + StringValue + FString("}");
 }
 
