@@ -545,19 +545,19 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWalletRequest
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "signatureChainId"))
 	FString SignatureChainId = "";
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletAddress"))
 	FString ParentWalletAddress = "";
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletMessage"))
 	FString ParentWalletMessage = "";
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletSignature"))
 	FString ParentWalletSignature = "";
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
 	FString LinkedWalletAddress = "";
 };
 
@@ -566,19 +566,19 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWallet
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "id"))
 	int64 Id = 0;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletType"))
 	FString WalletType = "";
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletAddress"))
 	FString WalletAddress = "";
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
 	FString LinkedWalletAddress = "";
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "createdAt"))
 	FString CreatedAt = "";
 };
 
@@ -587,7 +587,7 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWalletsResponse
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWallets"))
 	TArray<FSeqLinkedWallet> LinkedWallets;
 };
 

@@ -511,7 +511,35 @@ void USequenceWallet::GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsR
 
 void USequenceWallet::RemoveLinkedWallet(const FString& LinkedWalletAddress, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	const FString& WalletAddress = this->GetWalletAddress();
+	const FString& MessageToSign = "parent wallet with address " + WalletAddress + LinkedWalletAddress;
+
+	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, LinkedWalletAddress, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
+	{
+		if (this->SequenceRPCManager)
+		{
+			const FString& ChainId = this->Credentials.GetNetworkString();
+			FSeqLinkedWalletRequest Request;
+			Request.SignatureChainId = ChainId;
+			Request.ParentWalletAddress = WalletAddress;
+			Request.ParentWalletMessage = MessageToSign;
+			Request.ParentWalletSignature = SignatureResponse.Data.Signature;
+			Request.LinkedWalletAddress = LinkedWalletAddress;
+			
+			this->SequenceRPCManager->RemoveLinkedWallet(Request, OnSuccess, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "SequenceRPCManager is not available."));
+		}
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnSignatureFailure = [OnFailure](FString Data, FSequenceError Err)
+	{
+		OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Err.Message));
+	};
 	
+	this->SignMessage(MessageToSign, OnSignatureSuccess, OnFailure);
 }
 
 //Indexer Calls

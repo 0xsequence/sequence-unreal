@@ -304,7 +304,7 @@ void USequenceWalletBP::ApiSignOut()
 	}
 }
 
-void USequenceWalletBP::GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnLinkedWalletsFailure OnFailure)
 {
 	const TFunction<void (FSeqLinkedWalletsResponse)> OnApiSuccess = [OnSuccess](const FSeqLinkedWalletsResponse& LinkedWallets)
 	{
@@ -324,7 +324,7 @@ void USequenceWalletBP::GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnFailure 
 	}
 }
 
-void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure)
 {
 	const TFunction<void()> OnApiSuccess = [OnSuccess]()
 	{

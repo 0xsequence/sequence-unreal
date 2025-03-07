@@ -399,6 +399,7 @@ public:
 	{
 		FString Ret;
 		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
+		StringReplace(&Ret, "\n", "");
 		return Ret;
 	}
 
@@ -511,4 +512,5 @@ private:
 	* some special edge cases from json responses / parsing as well!
 	*/
 	static FString StringCleanup(FString String);
+	static void StringReplace(FString* Input, const FString& Search, const FString& Replacement);
 };

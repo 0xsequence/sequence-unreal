@@ -282,14 +282,14 @@ public:
 	 * @param OnSuccess 
 	 * @param OnFailure 
 	 */
-	void GetLinkedWallets(const FSeqLinkedWalletRequest& Request, const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetLinkedWallets(const FSeqLinkedWalletRequest& Request, const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	/**
 	 * GetLinkedWallets
 	 * @param OnSuccess 
 	 * @param OnFailure 
 	 */
-	void RemoveLinkedWallet(const FSeqLinkedWalletRequest& Request, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
+	void RemoveLinkedWallet(const FSeqLinkedWalletRequest& Request, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Auth Calls//
 

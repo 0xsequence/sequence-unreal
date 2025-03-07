@@ -27,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiListAccounts, FSequenceRespo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSessionAuthProof, FSequenceResponseStatus, ResponseStatus, const FSeqGetSessionAuthProof_Data, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIApiGetSupportedTransakCountries, FSequenceResponseStatus, ResponseStatus, const TArray<FSupportedCountry>&, SupportedCountries);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWallets, const FSeqLinkedWalletsResponse&, LinkedWallets);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWalletsFailure, const FString&, Error);
 DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 
 //Api//
@@ -245,10 +245,10 @@ public:
 	void ApiSignOut();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnFailure OnFailure);
+	void GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnLinkedWalletsFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure);
 
 	//SequenceApi//
 	
