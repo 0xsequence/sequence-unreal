@@ -45,12 +45,12 @@ void USequenceWalletBP::SignMessage(const FString& Message, FOnSignMessage OnSuc
 {
 	const TFunction<void (FSeqSignMessageResponse_Response)> OnApiSuccess = [this, OnSuccess](const FSeqSignMessageResponse_Response& SignedMessage)
 	{
-		OnSuccess.Execute(SignedMessage.Data.Signature);
+		OnSuccess.ExecuteIfBound(SignedMessage.Data.Signature);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -65,12 +65,12 @@ void USequenceWalletBP::ValidateMessageSignature(const int64& ChainId, const FSt
 {
 	const TFunction<void(FSeqValidateMessageSignatureResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature)
 		{
-			OnSuccess.Execute(isValidMessageSignature.isValid);
+			OnSuccess.ExecuteIfBound(isValidMessageSignature.isValid);
 		};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -85,12 +85,12 @@ void USequenceWalletBP::GetFilteredFeeOptions(UTransactions * Transactions, FOnG
 {
 	const TFunction<void (TArray<FFeeOption>)> OnApiSuccess = [this, OnSuccess](const TArray<FFeeOption>& FeeOptions)
 	{
-		OnSuccess.Execute(FeeOptions);
+		OnSuccess.ExecuteIfBound(FeeOptions);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -105,12 +105,12 @@ void USequenceWalletBP::GetUnfilteredFeeOptions(UTransactions * Transactions, FO
 {
 	const TFunction<void (TArray<FFeeOption>)> OnApiSuccess = [this, OnSuccess](const TArray<FFeeOption>& FeeOptions)
 	{
-		OnSuccess.Execute(FeeOptions);
+		OnSuccess.ExecuteIfBound(FeeOptions);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -125,12 +125,12 @@ void USequenceWalletBP::SendNativeToken(const FString& RecipientAddress, const F
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
+		OnSuccess.ExecuteIfBound(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -145,12 +145,12 @@ void USequenceWalletBP::SendTransactionWithFee(UTransactions * Transactions, FOn
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
+		OnSuccess.ExecuteIfBound(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
@@ -172,12 +172,12 @@ void USequenceWalletBP::SendTransaction(UTransactions * Transactions, FOnSendTra
 {
 	const TFunction<void (FSeqTransactionResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqTransactionResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response.Receipt.TxnReceipt, Response);
+		OnSuccess.ExecuteIfBound(Response.Receipt.TxnReceipt, Response);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -192,12 +192,12 @@ void USequenceWalletBP::GetIdToken(const FString& Nonce, FOnGetIdToken OnSuccess
 {
 	const TFunction<void (FSeqIdTokenResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqIdTokenResponse_Data& Data)
 	{
-		OnSuccess.Execute(Data.IdToken, Data.ExpiresIn);
+		OnSuccess.ExecuteIfBound(Data.IdToken, Data.ExpiresIn);
 	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -212,12 +212,12 @@ void USequenceWalletBP::ListSessions(FOnListSessions OnSuccess, FOnFailure OnFai
 {
 	const TFunction<void (TArray<FSeqListSessions_Session>)> OnApiSuccess = [this, OnSuccess](const TArray<FSeqListSessions_Session>& Sessions)
 	{
-		OnSuccess.Execute(Sessions);
+		OnSuccess.ExecuteIfBound(Sessions);
 	};
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -232,12 +232,12 @@ void USequenceWalletBP::ListAccounts(FOnListAccounts OnSuccess, FOnFailure OnFai
 {
 	const TFunction<void(FSeqListAccountsResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqListAccountsResponse_Data& Response)
 	{
-		OnSuccess.Execute(Response.Accounts, Response.CurrentAccountId);
+		OnSuccess.ExecuteIfBound(Response.Accounts, Response.CurrentAccountId);
 	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
@@ -252,12 +252,12 @@ void USequenceWalletBP::GetSessionAuthProof(const FString& Nonce, FOnGetSessionA
 {
 	const TFunction<void(FSeqGetSessionAuthProof_Data)> OnApiSuccess = [this, OnSuccess](const FSeqGetSessionAuthProof_Data& Response)
 	{
-		OnSuccess.Execute(Response);
+		OnSuccess.ExecuteIfBound(Response);
 	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
-		OnFailure.Execute(Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
 	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();

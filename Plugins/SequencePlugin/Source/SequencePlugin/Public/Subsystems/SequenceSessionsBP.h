@@ -41,7 +41,7 @@ public:
 	bool CheckExistingSession() const;
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void StartEmailLogin(const FString& Email, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
