@@ -63,4 +63,6 @@ enum ENetwork
     TelosTestnet        UMETA(DisplayName = "Telos Testnet"),
 	MoonbaseAlpha      UMETA(DisplayName = "Moonbase Alpha"),
 	EtherlinkTestnet   UMETA(DisplayName = "Etherlink Testnet"),
+	MonadTestnet		UMETA(DisplayName = "Monad Testnet"),
+	SomniaTestnet 		UMETA(DisplayName = "Somnia Testnet"),
 };
