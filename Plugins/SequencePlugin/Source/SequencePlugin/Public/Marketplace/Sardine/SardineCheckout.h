@@ -7,6 +7,7 @@
 #include "Marketplace/Structs/SeqCollectibleOrder.h"
 #include "Structs/SardineFiatCurrency.h"
 #include "Structs/SardineNFTCheckout.h"
+#include "Structs/SardineOrder.h"
 #include "Structs/SardinePaymentType.h"
 #include "Structs/SardineQuote.h"
 #include "Structs/SardineQuoteType.h"
@@ -44,7 +45,7 @@ public:
 
 	void SardineGetNFTCheckoutToken(UERC721SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 
-	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<SardineOrder> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess, const FFailureCallback& OnFailure);
 	
 	FString CheckoutURL(FSardineNFTCheckout Token);
 
