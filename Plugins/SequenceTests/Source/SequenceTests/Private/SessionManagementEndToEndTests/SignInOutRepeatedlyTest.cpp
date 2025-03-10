@@ -1,6 +1,6 @@
 #include "SignInOutRepeatedlyTest.h"
 #include "Engine/World.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 
@@ -42,9 +42,9 @@ void USignInOutRepeatedlyTestHelper::RunTest()
         bTestComplete = true;
         return;
     }
-
-    Authenticator->AuthSuccess.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthSuccess);
-    Authenticator->AuthFailure.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthFailure);
+    // TODO: re-add delegates as function parameters 
+    //Authenticator->AuthSuccess.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthSuccess);
+    //Authenticator->AuthFailure.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthFailure);
 
     ConnectAsGuest();
 }

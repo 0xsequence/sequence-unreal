@@ -14,10 +14,8 @@
 #include "ProviderEnum.h"
 #include "SequenceResponseIntent.h"
 #include "Sequence/FeeOption.h"
-#include "TransakDataTypes.h"
 #include "Util/SequenceSupport.h"
-#include "Util/Structs/BE_Enums.h"
-#include "SequenceAPI.generated.h"
+#include "SequenceWallet.generated.h"
  
 using FSignature = FUnsizedData;
 using TransactionID = FString;

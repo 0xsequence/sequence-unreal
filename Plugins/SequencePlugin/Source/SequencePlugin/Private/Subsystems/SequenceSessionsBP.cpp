@@ -14,11 +14,12 @@ USequenceSessionsBP::USequenceSessionsBP()
 {
 	this->RPCManager = USequenceRPCManager::Make(false);
 	this->Authenticator = NewObject<USequenceAuthenticator>();
+	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
 
 bool USequenceSessionsBP::CheckExistingSession() const
 {
-	const FStoredCredentials_BE Credentials = this->Authenticator->GetStoredCredentials();
+	const FStoredCredentials_BE Credentials = this->CredentialsStorage->GetStoredCredentials();
 	return Credentials.GetValid();
 }
 
@@ -232,7 +233,7 @@ void USequenceSessionsBP::FederateEmail(const FString& EmailIn, FOnSuccess OnSuc
 
 void USequenceSessionsBP::ConfirmEmailFederationWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	if (FStoredCredentials_BE StoredCredentials = this->Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
 		const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 		{
@@ -255,7 +256,7 @@ void USequenceSessionsBP::ConfirmEmailFederationWithCode(const FString& Code, FO
 
 void USequenceSessionsBP::FederateOidcToken(const FString& IdTokenIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	if (FStoredCredentials_BE StoredCredentials = this->Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
 		const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 		{
@@ -345,7 +346,7 @@ void USequenceSessionsBP::PlayFabRpc(const FString& Url, const FString& Content,
 
 void USequenceSessionsBP::CallOnSessionCreated(const FCredentials_BE& Credentials) const
 {
-	this->Authenticator->StoreCredentials(Credentials);
+	this->CredentialsStorage->StoreCredentials(Credentials);
 	if (this->OnSessionCreated.IsBound())
 	{
 		this->OnSessionCreated.Broadcast();

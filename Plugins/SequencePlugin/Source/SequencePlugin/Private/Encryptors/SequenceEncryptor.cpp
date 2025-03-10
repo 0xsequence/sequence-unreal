@@ -6,7 +6,7 @@
 
 FString USequenceEncryptor::GetStoredKey()
 {
-	return "";
+	return UConfigFetcher::GetConfigVar(UConfigFetcher::FallbackEncryptionKey);
 }
 
 FString USequenceEncryptor::Encrypt(FString Payload)

@@ -4,7 +4,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Util/Log.h"
 
 USequenceWalletBP::USequenceWalletBP() { }

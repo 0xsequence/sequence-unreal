@@ -1,5 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
 #include "Kismet/GameplayStatics.h"
@@ -72,8 +72,8 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 		else
 		{
 			SEQ_LOG(Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
-			const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-			FStoredCredentials_BE StoredCredentials = Auth->GetStoredCredentials();
+			const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+			FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials();
 
 			if (StoredCredentials.GetValid())
 			{
@@ -224,17 +224,17 @@ void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCa
 
 void USequenceWallet::SignOut() const
 {
-	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
 	if (this->Credentials.IsRegistered())
 	{
-		const TFunction<void()> OnSuccess = [Auth]
+		const TFunction<void()> OnSuccess = [CredentialsStorage]
 		{
-			Auth->ClearStoredCredentials();
+			CredentialsStorage->ClearStoredCredentials();
 		};
 
-		const TFunction<void (FSequenceError)> OnFailure = [Auth](FSequenceError Err)
+		const TFunction<void (FSequenceError)> OnFailure = [CredentialsStorage](FSequenceError Err)
 		{
-			Auth->ClearStoredCredentials();
+			CredentialsStorage->ClearStoredCredentials();
 		};
 
 		if (this->SequenceRPCManager)
@@ -243,12 +243,12 @@ void USequenceWallet::SignOut() const
 		}
 		else
 		{
-			Auth->ClearStoredCredentials();
+			CredentialsStorage->ClearStoredCredentials();
 		}
 	}
 	else
 	{
-		Auth->ClearStoredCredentials();
+		CredentialsStorage->ClearStoredCredentials();
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "SequenceAuthenticator.h"
 #include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Util/CredentialsStorage.h"
 #include "INativeAuthCallback.h"
 #include "SequenceSessionsBP.generated.h"
 
@@ -84,6 +85,8 @@ private:
 	
 	UPROPERTY()
 	USequenceAuthenticator* Authenticator;
+
+	UCredentialsStorage* CredentialsStorage;
 	
 	void PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	void PlayFabLoginRpc(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);

@@ -6,8 +6,8 @@
 #include "Misc/AES.h"
 #include "Containers/UnrealString.h"
 #include "Util/SequenceSupport.h"
-#include "SequenceEncryptor.h"
-#include "Sequence/SequenceAPI.h"
+#include "Encryptors/SequenceEncryptor.h"
+#include "Sequence/SequenceWallet.h"
 #include "Tests/TestSequenceAPI.h"
 #include "SequenceAuthenticator.h"
 
@@ -248,8 +248,8 @@ void AGeneralTesting::TestTokenBalances() const
 		SEQ_LOG(Display, TEXT("Error with getting balances"));
 	};
 	
-	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(CredentialsStorage->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -276,8 +276,8 @@ void AGeneralTesting::TestHistory() const
 		SEQ_LOG(Display, TEXT("Error with getting history"));
 	};
 	
-	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(CredentialsStorage->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		USequenceWallet * Api = WalletOptional.GetValue();
@@ -292,8 +292,8 @@ void AGeneralTesting::TestHistory() const
 
 void AGeneralTesting::TestGetWalletAddress() const
 {
-	const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Auth->GetStoredCredentials().GetCredentials());
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(CredentialsStorage->GetStoredCredentials().GetCredentials());
 	if (WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		const USequenceWallet * Api = WalletOptional.GetValue();

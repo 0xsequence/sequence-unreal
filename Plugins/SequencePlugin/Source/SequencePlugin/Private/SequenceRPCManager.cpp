@@ -9,7 +9,7 @@
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
 #include "Interfaces/IPluginManager.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 #include "Misc/DateTime.h"
 #include "Util/Log.h"
@@ -259,8 +259,8 @@ void USequenceRPCManager::UpdateWithRandomSessionWallet()
 
 void USequenceRPCManager::UpdateWithStoredSessionWallet()
 {
-	const USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
-	if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+	if (FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
 		this->SessionWallet = StoredCredentials.GetCredentials().GetSessionWallet();
 	}
@@ -274,8 +274,8 @@ USequenceRPCManager* USequenceRPCManager::Make(const bool UseStoredSessionId)
 {
 	if (UseStoredSessionId)
 	{
-		const USequenceAuthenticator * Authenticator = NewObject<USequenceAuthenticator>();
-		if (FStoredCredentials_BE StoredCredentials = Authenticator->GetStoredCredentials(); StoredCredentials.GetValid())
+		const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+		if (FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
 			return Make(StoredCredentials.GetCredentials().GetSessionWallet());
 		}

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NativeEncryptors/GenericNativeEncryptor.h"
-#include "AndroidEncryptor.generated.h"
+#include "Encryptors/GenericNativeEncryptor.h"
+#include "AppleEncryptor.generated.h"
 
 /**
  * 
  */
-UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API UAndroidEncryptor : public UGenericNativeEncryptor
+UCLASS()
+class SEQUENCEPLUGIN_API UAppleEncryptor : public UGenericNativeEncryptor
 {
 	GENERATED_BODY()
 

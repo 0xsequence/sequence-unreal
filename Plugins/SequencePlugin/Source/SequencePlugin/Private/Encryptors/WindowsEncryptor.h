@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NativeEncryptors/GenericNativeEncryptor.h"
+#include "Encryptors/GenericNativeEncryptor.h"
 #include "WindowsEncryptor.generated.h"
 
 /**
