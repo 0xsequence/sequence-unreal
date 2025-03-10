@@ -28,6 +28,8 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 	GENERATED_BODY()
 
 public:
+	const FString SequenceMarketplaceV2Contract = "0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712";
+	
 	void CheckSardineWhiteListStatus(FString Address, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure);
 	
 	void SardineGetQuote(FSardineToken Token, u_long Amount, ESardinePaymentType PaymentType = Credit,
@@ -42,9 +44,9 @@ public:
 
 	void SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 
-	void SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContract, FString CollectionAddress, u_long TokenID, u_long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure, FString RecipientAddress = "", TArray<uint8> data = TArray<uint8>(),TArray<uint8> Proof = TArray<uint8>());
 
-	void SardineGetNFTCheckoutToken(UERC721SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutToken(UERC721SaleContract SaleContract, FString CollectionAddress, u_long TokenID, u_long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure, FString RecipientAddress = "", TArray<uint8> data = TArray<uint8>(),TArray<uint8> Proof = TArray<uint8>());
 
 	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess, const FFailureCallback& OnFailure);
 
