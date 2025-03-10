@@ -11,6 +11,7 @@
 #include "Structs/SardinePaymentType.h"
 #include "Structs/SardineQuote.h"
 #include "Structs/SardineQuoteType.h"
+#include "Structs/SardineRegion.h"
 #include "Structs/SardineToken.h"
 #include "Types/ERC1155SaleContract.h"
 #include "Types/ERC721SaleContract.h"
@@ -46,6 +47,8 @@ public:
 	void SardineGetNFTCheckoutToken(UERC721SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess, const FFailureCallback& OnFailure);
 	
 	FString CheckoutURL(FSardineNFTCheckout Token);
 
