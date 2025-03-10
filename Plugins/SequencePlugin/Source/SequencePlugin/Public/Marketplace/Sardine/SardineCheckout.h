@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Marketplace/Structs/AdditionalFee.h"
 #include "Marketplace/Structs/SeqCollectibleOrder.h"
+#include "Structs/SardineEnabledToken.h"
 #include "Structs/SardineFiatCurrency.h"
 #include "Structs/SardineNFTCheckout.h"
 #include "Structs/SardineOrder.h"
@@ -12,6 +13,7 @@
 #include "Structs/SardineQuote.h"
 #include "Structs/SardineQuoteType.h"
 #include "Structs/SardineRegion.h"
+#include "Structs/SardineSupportedToken.h"
 #include "Structs/SardineToken.h"
 #include "Types/ERC1155SaleContract.h"
 #include "Types/ERC721SaleContract.h"
@@ -51,6 +53,12 @@ public:
 	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetSupportedFiatCurrencies(TSuccessCallback<TArray<FSardineFiatCurrency>> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetSupportedTokens(TSuccessCallback<TArray<FSardineSupportedToken>> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess, const FFailureCallback& OnFailure);
 	
 	FString CheckoutURL(FSardineNFTCheckout Token);
 
