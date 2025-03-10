@@ -3,11 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Marketplace/Structs/AdditionalFee.h"
+#include "Marketplace/Structs/SeqCollectibleOrder.h"
 #include "Structs/SardineFiatCurrency.h"
+#include "Structs/SardineNFTCheckout.h"
 #include "Structs/SardinePaymentType.h"
 #include "Structs/SardineQuote.h"
 #include "Structs/SardineQuoteType.h"
 #include "Structs/SardineToken.h"
+#include "Types/ERC1155SaleContract.h"
+#include "Types/ERC721SaleContract.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
 #include "SardineCheckout.generated.h"
@@ -33,5 +38,15 @@ public:
 
 	void OnRampAsync(FString ClientToken, TFunction<void> OnSuccess, const FFailureCallback& OnFailure);
 
+	void SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetNFTCheckoutToken(UERC721SaleContract SaleContract, u_long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+
+	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<SardineOrder> OnSuccess, const FFailureCallback& OnFailure);
 	
+	FString CheckoutURL(FSardineNFTCheckout Token);
+
+	void Checkout(FSardineNFTCheckout Token);
 };
