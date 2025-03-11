@@ -6,7 +6,7 @@
 #include "StorableCredentials.h"
 #include "Kismet/GameplayStatics.h"
 #include "Util/SequenceSupport.h"
-#include "SequenceEncryptor.h"
+#include "Encryptors/SequenceEncryptor.h"
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"
 #include "PlayFabSendIntent.h"
@@ -14,34 +14,17 @@
 #include "WebBrowserModule.h"
 #include "SequenceRPCManager.h"
 #include "Native/NativeOAuth.h"
-#include "NativeEncryptors/AppleEncryptor.h"
-#include "NativeEncryptors/AndroidEncryptor.h"
-#include "NativeEncryptors/WindowsEncryptor.h"
+#include "Encryptors/AndroidEncryptor.h"
 #include "PlayFabResponseIntent.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceSdk.h"
 #include "Util/Log.h"
 
 USequenceAuthenticator::USequenceAuthenticator()
 {
 	this->StateToken = FGuid::NewGuid().ToString();
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
-	
-	if constexpr (PLATFORM_ANDROID)
-	{
-		this->Encryptor = NewObject<UAndroidEncryptor>();
-	}
-	else if constexpr (PLATFORM_MAC)
-	{
-		this->Encryptor = NewObject<UAppleEncryptor>();
-	}
-	else if constexpr (PLATFORM_WINDOWS)
-	{
-		this->Encryptor = NewObject<UWindowsEncryptor>();
-	}
-	else if constexpr (PLATFORM_IOS)
-	{
-		this->Encryptor = NewObject<UAppleEncryptor>();
-	}
+	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
 
 void USequenceAuthenticator::InitiateMobileSSO_Internal(const ESocialSigninType& Type)
@@ -129,18 +112,18 @@ void USequenceAuthenticator::CheckAndFederateSessionInUse()
 {
 	if (this->ReadAndResetIsFederatingSessionInUse())
 	{
-		FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials();
+		FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials();
 
 		if (StoredCredentials.GetValid())
 		{
 			const TFunction<void()> OnSuccess = [this]()
 			{
-				this->CallFederateSuccess();
+				//this->CallFederateSuccess();
 			};
 
 			const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 			{
-				this->CallFederateFailure(Error.Message);
+				//this->CallFederateFailure(Error.Message);
 			};
 
 			
@@ -148,7 +131,7 @@ void USequenceAuthenticator::CheckAndFederateSessionInUse()
 		}
 		else
 		{
-			this->CallFederateFailure(TEXT("Failed to Federate Session in use"));
+			//this->CallFederateFailure(TEXT("Failed to Federate Session in use"));
 		}
 	}
 }
@@ -163,16 +146,16 @@ void USequenceAuthenticator::AuthenticateUsingPlayfabSessionTicket(const FString
 
 	const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+		SEQ_LOG(Warning, TEXT("Error: %s"), *Error.Message);
 		this->ResetFederateSessionInUse();
-		this->CallAuthFailure(Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 		this->SetIsFederatingSessionInUse();
-		this->CallFederateOrForce(FederationData);
+		//this->CallFederateOrForce(FederationData);
 	};
 		
 	this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
@@ -183,155 +166,18 @@ void USequenceAuthenticator::ResetFederateSessionInUse()
 	this->IsFederatingSessionInUse = false;
 }
 
-void USequenceAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn)
+void USequenceAuthenticator::SetCustomEncryptor(UGenericNativeEncryptor* EncryptorIn) const
 {
-	this->Encryptor = EncryptorIn;
-	if (this->Encryptor)
-	{
-		const FString EncryptorName = this->Encryptor->GetClass()->GetName();
-		UE_LOG(LogTemp,Display,TEXT("Setting custom encryptor to: %s"),*EncryptorName);
-	}
-	else
-	{
-		UE_LOG(LogTemp,Warning,TEXT("Received null instead of a pointer to an Encryptor Object using fallback encryptor"));	
-	}
-}
-
-void USequenceAuthenticator::ClearStoredCredentials() const
-{
-	const FCredentials_BE BlankCredentials;
-	this->StoreCredentials(BlankCredentials);
-}
-
-void USequenceAuthenticator::StoreCredentials(const FCredentials_BE& Credentials) const
-{
-	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
-	{
-		const FString CTS_Json = USequenceSupport::StructToString<FCredentials_BE>(Credentials);
-		const int32 CTS_Json_Length = CTS_Json.Len();
-
-		if (Encryptor)
-		{//Use set encryptor
-			StorableCredentials->EK = this->Encryptor->Encrypt(CTS_Json);
-			StorableCredentials->KL = CTS_Json_Length;
-		}
-		else
-		{//Use the fallback
-			StorableCredentials->EK = USequenceEncryptor::Encrypt(CTS_Json);
-			StorableCredentials->KL = CTS_Json_Length;
-		}
-
-		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
-		{
-			UE_LOG(LogTemp, Display, TEXT("Data Saved Correctly!"));
-		}
-	}
+	this->CredentialsStorage->SetEncryptor(EncryptorIn);
 }
 
 FString USequenceAuthenticator::BuildRedirectPrefix() const
 {
-	const FString Redirect = UConfigFetcher::GetConfigVar(UConfigFetcher::RedirectUrl);
+	const FString Redirect = SequenceSdk::GetRedirectUrl();
 	if (Redirect.EndsWith(TEXT("/"),ESearchCase::IgnoreCase))
 		return Redirect + this->RedirectPrefixTrailer;
 	else
 		return Redirect + "/" + this->RedirectPrefixTrailer;
-}
-
-bool USequenceAuthenticator::GetStoredCredentials(FCredentials_BE* Credentials) const
-{
-	bool ret = false;
-
-	//This line crashes the engine if Cr.sav is modified externally in anyway
-	
-	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
-
-	if (SaveGame != nullptr)
-	{
-		if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(SaveGame))
-		{
-			FString CTR_Json = "";
-
-			if (Encryptor)
-			{//Use set encryptor
-				CTR_Json = Encryptor->Decrypt(LoadedCredentials->EK);
-			}
-			else
-			{//Use the fallback
-				CTR_Json = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
-			}
-
-			ret = USequenceSupport::JSONStringToStruct<FCredentials_BE>(CTR_Json, Credentials);
-			ret &= Credentials->RegisteredValid();
-
-			if (ret == false)
-			{
-				// Assumed that there is an issue with the save file, therefore we'll just delete the save file
-				UE_LOG(LogTemp, Error, TEXT("[System Failure: Unable to read save file or file is corrupted]"));
-				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
-			}
-		}
-	}
-	return ret;
-}
-
-void USequenceAuthenticator::CallAuthRequiresCode() const
-{
-	if (this->AuthRequiresCode.IsBound())
-		this->AuthRequiresCode.Broadcast();
-	else
-		UE_LOG(LogTemp, Error, TEXT("[System Failure: nothing bound to delegate: AuthRequiresCode]"));
-}
-
-void USequenceAuthenticator::CallAuthFailure(const FString& ErrorMessageIn) const
-{
-	if (this->AuthFailure.IsBound())
-		this->AuthFailure.Broadcast(ErrorMessageIn);
-	else
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthFailure]"));
-}
-
-void USequenceAuthenticator::CallAuthSuccess() const
-{
-	if (this->AuthSuccess.IsBound())
-		this->AuthSuccess.Broadcast();
-	else
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: AuthSuccess]"));
-}
-
-void USequenceAuthenticator::CallFederateSuccess() const
-{
-	if (this->FederateSuccess.IsBound())
-	{
-		this->FederateSuccess.Broadcast();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateSuccess]"));
-	}
-}
-
-void USequenceAuthenticator::CallFederateFailure(const FString& ErrorMessageIn) const
-{
-	if (this->FederateFailure.IsBound())
-	{
-		this->FederateFailure.Broadcast(ErrorMessageIn);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateFailure], Captured Error Message: %s"), *ErrorMessageIn);
-	}
-}
-
-void USequenceAuthenticator::CallFederateOrForce(const FFederationSupportData& FederationData) const
-{
-	if (this->FederateOrForce.IsBound())
-	{
-		this->FederateOrForce.Broadcast(FederationData);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[System Error: nothing bound to delegate: FederateOrForce]"));
-	}
 }
 
 void USequenceAuthenticator::UpdateMobileLogin(const FString& TokenizedUrl)
@@ -370,7 +216,7 @@ FString USequenceAuthenticator::GetSigninURL(const ESocialSigninType& Type) cons
 	else
 	{
 		const FString SSOType = UEnum::GetValueAsString(Type);
-		UE_LOG(LogTemp, Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
+		SEQ_LOG(Error, TEXT("No Entry for SSO type: [%s] in SSOProviderMap"),*SSOType);
 	}
 
 	//clear web cache here so signin will be clean each time!
@@ -403,16 +249,16 @@ void USequenceAuthenticator::SocialLogin(const FString& IDTokenIn, const bool Fo
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
+		SEQ_LOG(Error, TEXT("OIDC Auth Error: %s"), *Error.Message);
 		this->ResetFederateSessionInUse();
-		this->CallAuthFailure(Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 
 	const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+		SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 		this->SetIsFederatingSessionInUse();
-		this->CallFederateOrForce(FederationData);
+		//this->CallFederateOrForce(FederationData);
 	};
 	
 	this->SequenceRPCManager->OpenOIDCSession(IDTokenIn, ForceCreateAccountIn, OnSuccess, OnFailure, OnFederationRequired);
@@ -430,13 +276,13 @@ void USequenceAuthenticator::EmailLogin(const FString& EmailIn, const bool Force
 	
 	const TFunction<void()> OnSuccess = [this]
 	{
-		this->CallAuthRequiresCode();
+		//this->CallAuthRequiresCode();
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure(Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 	
 	this->SequenceRPCManager->InitEmailAuth(EmailIn.ToLower(),OnSuccess,OnFailure);
@@ -456,8 +302,8 @@ void USequenceAuthenticator::GuestLogin(const bool ForceCreateAccountIn)
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Guest Auth Error: %s"), *Error.Message);
-		this->CallAuthFailure(Error.Message);
+		SEQ_LOG(Error, TEXT("Guest Auth Error: %s"), *Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 	
 	this->SequenceRPCManager->OpenGuestSession(ForceCreateAccountIn,OnSuccess,OnFailure);
@@ -480,16 +326,16 @@ void USequenceAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, 
 
 		const FFailureCallback OnOpenFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *Error.Message);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
-			this->CallAuthFailure(Error.Message);
+			//this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 			this->SetIsFederatingSessionInUse();
-			this->CallFederateOrForce(FederationData);
+			//this->CallFederateOrForce(FederationData);
 		};
 		
 		this->SequenceRPCManager->OpenPlayFabSession(SessionTicket,ForceCreateAccountIn, OnOpenSuccess, OnOpenFailure, OnFederationRequired);
@@ -497,8 +343,8 @@ void USequenceAuthenticator::PlayFabRegisterAndLogin(const FString& UsernameIn, 
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
-		this->CallAuthFailure(Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Response: %s"), *Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 	
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
@@ -518,8 +364,8 @@ void USequenceAuthenticator::PlayFabLogin(const FString& UsernameIn, const FStri
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Response: %s"), *Error.Message);
-		this->CallAuthFailure(Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Response: %s"), *Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 	
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
@@ -573,12 +419,12 @@ void USequenceAuthenticator::InitializeSequence(const FCredentials_BE& Credentia
 {
 	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
-		this->StoreCredentials(Credentials);
-		this->CallAuthSuccess();
+		this->CredentialsStorage->StoreCredentials(Credentials);
+		//this->CallAuthSuccess();
 	}
 	else
 	{
-		this->CallAuthFailure(TEXT("Failed to Initialize SequenceWallet"));
+		//this->CallAuthFailure(TEXT("Failed to Initialize SequenceWallet"));
 	}
 }
 
@@ -725,23 +571,23 @@ void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
 	{
 		const TFunction<void()> OnSuccess = [this]()
 		{
-			this->CallFederateSuccess();
+			//this->CallFederateSuccess();
 		};
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			this->CallFederateFailure(Error.Message);
+			//this->CallFederateFailure(Error.Message);
 		};
 		
-		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
 			this->SequenceRPCManager->FederateEmailSession(StoredCredentials.GetCredentials().GetWalletAddress(), CodeIn, OnSuccess, OnFailure);
 		}
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
-			this->CallFederateFailure(ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+			//this->CallFederateFailure(ErrorMessage);
 		}
 	}
 	else
@@ -754,16 +600,16 @@ void USequenceAuthenticator::EmailLoginCode(const FString& CodeIn)
 
 		const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
+			SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
 			this->ResetFederateSessionInUse();
-			this->CallAuthFailure(Error.Message);
+			//this->CallAuthFailure(Error.Message);
 		};
 
 		const TFunction<void (FFederationSupportData)> OnFederationRequired = [this](const FFederationSupportData& FederationData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Account Force Create Or Federation Required"));
+			SEQ_LOG(Warning, TEXT("Account Force Create Or Federation Required"));
 			this->SetIsFederatingSessionInUse();
-			this->CallFederateOrForce(FederationData);
+			//this->CallFederateOrForce(FederationData);
 		};
 		
 		this->SequenceRPCManager->OpenEmailSession(CodeIn, this->ReadAndResetIsForcing(), OnSuccess, OnFailure, OnFederationRequired);
@@ -776,13 +622,13 @@ void USequenceAuthenticator::FederateEmail(const FString& EmailIn)
 
 	const TFunction<void()> OnSuccess = [this]
 	{
-		this->CallAuthRequiresCode();
+		//this->CallAuthRequiresCode();
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Email Auth Error: %s"), *Error.Message);
-		this->CallFederateFailure(Error.Message);
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		//this->CallFederateFailure(Error.Message);
 	};
 
 	this->SequenceRPCManager->InitEmailFederation(EmailIn.ToLower(),OnSuccess,OnFailure);
@@ -792,23 +638,23 @@ void USequenceAuthenticator::FederateOIDCIdToken(const FString& IdTokenIn)
 {
 	const TFunction<void()> OnSuccess = [this]()
 	{
-		this->CallFederateSuccess();
+		//this->CallFederateSuccess();
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		this->CallFederateFailure(Error.Message);
+		//this->CallFederateFailure(Error.Message);
 	};
 
-	if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{		
 		this->SequenceRPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnSuccess, OnFailure);
 	}
 	else
 	{
 		const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-		UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
-		this->CallFederateFailure(ErrorMessage);
+		SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+		//this->CallFederateFailure(ErrorMessage);
 	}
 }
 
@@ -824,33 +670,33 @@ void USequenceAuthenticator::FederatePlayFabNewAccount(const FString& UsernameIn
 	{
 		const TFunction<void()> OnFederateSuccess = [this]()
 		{
-			this->CallFederateSuccess();
+			//this->CallFederateSuccess();
 		};
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-			this->CallFederateFailure(Error.Message);
+			SEQ_LOG(Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			//this->CallFederateFailure(Error.Message);
 		};
 
 		//Load on disk credentials and get the wallet current address//
 
-		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
-			this->CallFederateFailure(ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+			//this->CallFederateFailure(ErrorMessage);
 		}
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-		this->CallFederateFailure(Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		//this->CallFederateFailure(Error.Message);
 	};
 
 	this->PlayFabNewAccountLoginRPC(UsernameIn, EmailIn, PasswordIn, OnSuccess, OnFailure);
@@ -862,33 +708,33 @@ void USequenceAuthenticator::FederatePlayFabLogin(const FString& UsernameIn, con
 	{
 		const TFunction<void()> OnFederateSuccess = [this]()
 		{
-			this->CallFederateSuccess();
+			//this->CallFederateSuccess();
 		};
 
 		const FFailureCallback OnFederateFailure = [this](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-			this->CallFederateFailure(Error.Message);
+			SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			//this->CallFederateFailure(Error.Message);
 		};
 		
 		//Load on disk credentials and get the wallet current address//
 
-		if (FStoredCredentials_BE StoredCredentials = this->GetStoredCredentials(); StoredCredentials.GetValid())
+		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 		{
 			this->SequenceRPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
 		}
 		else
 		{
 			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			UE_LOG(LogTemp, Warning, TEXT("Error: %s"), *ErrorMessage);
-			this->CallFederateFailure(ErrorMessage);
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+			//this->CallFederateFailure(ErrorMessage);
 		}
 	};
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-		this->CallFederateFailure(Error.Message);
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		//this->CallFederateFailure(Error.Message);
 	};
 
 	this->PlayFabLoginRPC(UsernameIn, PasswordIn, OnSuccess, OnFailure);
@@ -903,18 +749,10 @@ void USequenceAuthenticator::ForceOpenLastOpenSessionAttempt()
 
 	const FFailureCallback OnFailure = [this](const FSequenceError& Error)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
-		this->CallAuthFailure(Error.Message);
+		SEQ_LOG(Error, TEXT("Error Force Opening Session: %s"), *Error.Message);
+		//this->CallAuthFailure(Error.Message);
 	};
 
 	this->ResetFederateSessionInUse();
 	this->SequenceRPCManager->ForceOpenSessionInUse(OnSuccess, OnFailure);
-}
-
-FStoredCredentials_BE USequenceAuthenticator::GetStoredCredentials() const
-{	
-	FCredentials_BE CredData;
-	FCredentials_BE* Credentials = &CredData;
-	const bool IsValid = this->GetStoredCredentials(Credentials);
-	return FStoredCredentials_BE(IsValid, *Credentials);
 }

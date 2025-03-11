@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "SequencePlugin/Public/SequenceAuthenticator.h"
 #include "FederateAuthTest.generated.h"
 

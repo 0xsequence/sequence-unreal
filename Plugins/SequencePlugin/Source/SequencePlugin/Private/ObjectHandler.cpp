@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "ObjectHandler.h"
 #include "TextureResource.h"
+#include "Util/Log.h"
 
 TMap<FString, UTexture2D*> UObjectHandler::GetProcessedImages()
 {
@@ -11,12 +12,12 @@ void UObjectHandler::OnDone()
 {
 	if (FOnDoneImageProcessingDelegate.IsBound())
 	{
-		UE_LOG(LogTemp, Display, TEXT("[Delegate bound calling bound UFUNCTION]"));
+		SEQ_LOG(Display, TEXT("[Delegate bound calling bound UFUNCTION]"));
 		FOnDoneImageProcessingDelegate.ExecuteIfBound();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[Delegate Not bound in UObjectHandler]"));
+		SEQ_LOG(Error, TEXT("[Delegate Not bound in UObjectHandler]"));
 	}
 }
 
@@ -46,7 +47,7 @@ void UObjectHandler::SetupCustomFormat(bool RawCacheEnabled, EImageFormat Format
 void UObjectHandler::StoreImageData(UTexture2D* Image, FString URL)
 {
 	this->StoredResponses.Add(TPair<FString,UTexture2D*>(URL,Image));
-	UE_LOG(LogTemp, Display, TEXT("[Image stored]"));
+	SEQ_LOG(Display, TEXT("[Image stored]"));
 	this->Syncer->Decrement();
 	//this is when we would consider a response satisfied
 }
@@ -68,7 +69,7 @@ void UObjectHandler::HandleRequestRaw(FHttpRequestPtr Request, FHttpResponsePtr 
 	}
 	else//error
 	{
-		UE_LOG(LogTemp, Error, TEXT("Connection Error."));
+		SEQ_LOG(Error, TEXT("Connection Error."));
 		//in the event we failed or errored out we should decrement
 		this->Syncer->Decrement();
 	}
@@ -98,12 +99,12 @@ bool UObjectHandler::CheckRawCache(FString URL, TArray<uint8>* RawData)
 
 	if (cache_hit)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Raw Cache hit"));
+		SEQ_LOG(Display, TEXT("Raw Cache hit"));
 		*RawData = this->Cache.Find(URL)->RawData;//get the data in the cache!
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Raw Cache miss"));
+		SEQ_LOG(Error, TEXT("Raw Cache miss"));
 	}
 	return cache_hit;
 }
@@ -159,7 +160,7 @@ bool UObjectHandler::CanAddToCache(int32 ByteCountToAdd)
 
 bool UObjectHandler::RequestRawBase(FString URL)
 {
-	UE_LOG(LogTemp, Display, TEXT("Fetching Raw From: %s"), *URL);
+	SEQ_LOG(Display, TEXT("Fetching Raw From: %s"), *URL);
 
 	if (this->UseRawCache)//are we using the cache?
 	{
@@ -252,7 +253,7 @@ UTexture2D* UObjectHandler::TryBuildImage(TArray<uint8> ImgData, EImageFormat Fo
 
 UTexture2D* UObjectHandler::BuildImgData(TArray<uint8> ImgData,FString URL)
 {
-	UE_LOG(LogTemp, Display, TEXT("Image size: [%d]"), ImgData.Num());
+	SEQ_LOG(Display, TEXT("Image size: [%d]"), ImgData.Num());
 
 	int32 width = 0, height = 0;
 	UTexture2D* img = nullptr;
@@ -277,7 +278,7 @@ UTexture2D* UObjectHandler::BuildImgData(TArray<uint8> ImgData,FString URL)
 
 	if (!img)
 	{//still no dice possible we don't support this in unreal!
-		UE_LOG(LogTemp, Warning, TEXT("Bad Image format chosen for: [%s]"), *URL);
+		SEQ_LOG(Warning, TEXT("Bad Image format chosen for: [%s]"), *URL);
 	}
 
 	return img;

@@ -8,6 +8,7 @@
 #include "Util/HexUtility.h"
 #include "Eth/Crypto.h"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
+#include "Util/Log.h"
 
 UCryptoWallet::UCryptoWallet(){}
 
@@ -44,7 +45,7 @@ UCryptoWallet* UCryptoWallet::Make(const FString& PrivateKey)
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT("PrivateKey: %s is %d Characters in length, This key needs to be 64 Hex Characters in length"),*PrivateKey, PrivateKey.Len());
+		SEQ_LOG(Error,TEXT("PrivateKey: %s is %d Characters in length, This key needs to be 64 Hex Characters in length"),*PrivateKey, PrivateKey.Len());
 	}
 	return Wallet;
 }

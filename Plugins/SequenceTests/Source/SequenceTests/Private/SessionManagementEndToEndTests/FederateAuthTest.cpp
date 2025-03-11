@@ -42,10 +42,11 @@ void UWaaSFederatedAuthTestsHelper::RunTest()
     Username = FString::Printf(TEXT("testuser%lld"), FDateTime::UtcNow().ToUnixTimestamp());
     Password = "testpassword";
 
-    Authenticator->FederateSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateSuccess);
-    Authenticator->FederateFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateFailure);
-    Authenticator->AuthSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthSuccess);
-    Authenticator->AuthFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthFailure);
+    // TODO: re-add delegates as function parameters 
+    //Authenticator->FederateSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateSuccess);
+    //Authenticator->FederateFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateFailure);
+    //Authenticator->AuthSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthSuccess);
+    //Authenticator->AuthFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthFailure);
 
     Authenticator->GuestLogin(false);
 }

@@ -62,13 +62,14 @@ void UPlayFabInputValidationTestHelper::InitializeAuthenticator()
         
         if (CurrentValidationType == EValidationType::Login || CurrentValidationType == EValidationType::NewAccount)
         {
-            Authenticator->AuthSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthSuccess);
-            Authenticator->AuthFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthFailure);
+            // TODO: Re-add delegates as function parameters
+            //Authenticator->AuthSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthSuccess);
+            //Authenticator->AuthFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnAuthFailure);
         }
         else
         {
-            Authenticator->FederateSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateSuccess);
-            Authenticator->FederateFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateFailure);
+            //Authenticator->FederateSuccess.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateSuccess);
+            //Authenticator->FederateFailure.AddDynamic(this, &UPlayFabInputValidationTestHelper::OnFederateFailure);
         }
     }
 }

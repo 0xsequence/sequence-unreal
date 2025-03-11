@@ -14,11 +14,11 @@ struct SEQUENCEPLUGIN_API FSeqGetTokenSuppliesReturn
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FSeqPage page;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TEnumAsByte<EContractType> contractType = EContractType::ERC1155;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TArray<FSeqTokenSupply> tokenIDs;
     bool customConstructor = false;//used to tell buildresponse whether or not to use a custom constructor OR the unreal one!
     void construct(FJsonObject json_in) {};//dummy construct for templating

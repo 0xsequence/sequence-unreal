@@ -12,19 +12,19 @@ struct SEQUENCEPLUGIN_API FTransakSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString FiatCurrency = FDefaultTransak::FiatCurrency;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default") 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence") 
 	FString FiatAmount = FDefaultTransak::FiatAmount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString CryptoCurrency = FDefaultTransak::CryptoCurrency;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Networks = FDefaultTransak::Networks;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	bool DisableWalletAddressForm = FDefaultTransak::DisableWalletAddressForm;
 
 	FTransakSettings(){}
@@ -62,13 +62,13 @@ struct SEQUENCEPLUGIN_API FSequenceResponseStatus
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	bool Status = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	TEnumAsByte<ETransactionResponseType> Operation = ETransactionResponseType::PingTrt;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString StatusMessage = "";
 
 	FSequenceResponseStatus(){}

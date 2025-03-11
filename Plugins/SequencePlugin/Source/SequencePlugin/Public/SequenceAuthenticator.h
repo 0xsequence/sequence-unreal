@@ -6,11 +6,11 @@
 #include "Util/Structs/BE_Enums.h"
 #include "Dom/JsonObject.h"
 #include "ConfigFetcher.h"
-#include "NativeEncryptors/GenericNativeEncryptor.h"
+#include "Encryptors/GenericNativeEncryptor.h"
 #include "Credentials.h"
 #include "INativeAuthCallback.h"
-#include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
+#include "Util/CredentialsStorage.h"
 #include "SequenceAuthenticator.generated.h"
 
 class USequenceRPCManager;
@@ -29,18 +29,6 @@ struct SEQUENCEPLUGIN_API FSSOCredentials
 	}
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthRequiresCode);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuthFailure, const FString&, Error);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuthSuccess);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFederateSuccess);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateFailure, const FString&, Error);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederateOrForce, const FFederationSupportData&, FederationData);
-
 /**
  * 
  */
@@ -48,34 +36,10 @@ UCLASS()
 class SEQUENCEPLUGIN_API USequenceAuthenticator : public UObject, public INativeAuthCallback
 {
 	GENERATED_BODY()
-public:
-	UPROPERTY()
-	FOnAuthRequiresCode AuthRequiresCode;
-	UPROPERTY()
-	FOnAuthFailure AuthFailure;
-	UPROPERTY()
-	FOnAuthSuccess AuthSuccess;
-	UPROPERTY()
-	FOnFederateSuccess FederateSuccess;
-	UPROPERTY()
-	FOnFederateFailure FederateFailure;
-	UPROPERTY()
-	FOnFederateOrForce FederateOrForce;
 	
-private://Broadcast handlers
-	void CallAuthRequiresCode() const;
-	void CallAuthFailure(const FString& ErrorMessageIn) const;
-	void CallAuthSuccess() const;
-	void CallFederateSuccess() const;
-	void CallFederateFailure(const FString& ErrorMessageIn) const;
-	void CallFederateOrForce(const FFederationSupportData& FederationData) const;
-//vars
 private:
 	UPROPERTY()
-	UGenericNativeEncryptor * Encryptor = nullptr;
 	
-	const FString SaveSlot = "Cr";
-	const uint32 UserIndex = 0;
 	FString StateToken = "";
 
 	/**
@@ -200,7 +164,7 @@ public:
 	 * Sets a custom encryptor
 	 * @param EncryptorIn Encryptor to use
 	 */
-	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn);
+	void SetCustomEncryptor(UGenericNativeEncryptor * EncryptorIn) const;
 
 	/**
 	 * Used to get an OIDC Login Url
@@ -317,23 +281,6 @@ public:
 	void ForceOpenLastOpenSessionAttempt();
 
 	/**
-	 * Used to get stored credentials from Disk
-	 * @return Stored Credentials
-	 */
-	FStoredCredentials_BE GetStoredCredentials() const;
-
-	/**
-	 * Used to store Credentials on Disk
-	 * @param Credentials Credentials to be Stored
-	 */
-	void StoreCredentials(const FCredentials_BE& Credentials) const;
-
-	/**
-	 * Clears stored credentials on disk with blanks
-	 */
-	void ClearStoredCredentials() const;
-
-	/**
 	 * Sign-In with Google using native plugins
 	 */
 	void SignInWithGoogleMobile(INativeAuthCallback* CallbackHandler);
@@ -352,8 +299,6 @@ private:
 	
 	FString BuildRedirectPrefix() const;
 	
-	bool GetStoredCredentials(FCredentials_BE * Credentials) const;
-
 	FString GenerateSigninURL(const ESocialSigninType& Type) const;
 
 	FString GenerateRedirectURL(const ESocialSigninType& Type) const;
@@ -389,5 +334,5 @@ private:
 	static FString ValidateUsername(const FString& Username);
 	static FString ValidateEmail(const FString& Email);
 
-	//PlayFab RPC//
+	UCredentialsStorage* CredentialsStorage;
 };

@@ -14,9 +14,9 @@ struct SEQUENCEPLUGIN_API FSeqGetTokenSuppliesMapArgs
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TMap<FString, FSeqTokenList> tokenMap;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         bool includeMetaData = false;
 
 	bool customGetter = true;

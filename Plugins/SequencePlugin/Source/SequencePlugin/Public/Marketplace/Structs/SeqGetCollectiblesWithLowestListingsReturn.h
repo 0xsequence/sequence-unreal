@@ -68,7 +68,7 @@ public:
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("No  collectibles  field found in the GetCollectiblesWithLowestListings response."));
+            SEQ_LOG(Warning, TEXT("No  collectibles  field found in the GetCollectiblesWithLowestListings response."));
         }
     }
 };

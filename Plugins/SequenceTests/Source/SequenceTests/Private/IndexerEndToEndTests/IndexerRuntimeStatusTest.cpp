@@ -27,7 +27,7 @@ bool FProcessRuntimeRequests::Update()
     for (int i = WatchIndex; i <= FinishIndex; i++)
     {
         UE_LOG(LogTemp, Display, TEXT("Index: %d, Testing Network: %lld"), i, Networks[i]);
-        IndexerRequestsTestData->GetIndexer()->RunTimeStatus(Networks[i], SuccessCallback, FailureCallback);
+        IndexerRequestsTestData->GetIndexer()->RuntimeStatus(Networks[i], SuccessCallback, FailureCallback);
     }
     
     return true;

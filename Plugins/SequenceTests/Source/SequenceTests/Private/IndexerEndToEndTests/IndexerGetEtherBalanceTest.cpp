@@ -62,7 +62,7 @@ bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
 
     AddInfo(FString::Printf(TEXT("Starting GetEtherBalance request")));
 
-    IndexerRequestsTestData->GetIndexer()->GetEtherBalance(PolygonNetworkId, TestAddress, GenericSuccess, GenericFailure);
+    IndexerRequestsTestData->GetIndexer()->GetNativeTokenBalance(PolygonNetworkId, TestAddress, GenericSuccess, GenericFailure);
     
     ADD_LATENT_AUTOMATION_COMMAND(FIsDoneGetEtherBalance(IndexerRequestsTestData, this));
     return true;

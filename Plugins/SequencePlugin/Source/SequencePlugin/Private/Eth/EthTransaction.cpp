@@ -8,10 +8,11 @@
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
+#include "Util/Log.h"
 
 FEthTransaction::FEthTransaction(FBlockNonce Nonce, FUnsizedData GasPrice, FUnsizedData GasLimit, FAddress To,
-	FUnsizedData Value, FUnsizedData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
-	                                               Value(Value), Data(Data), V(TArray<uint8>()), R(FHash256{}), S(FHash256{})
+                                 FUnsizedData Value, FUnsizedData Data) : Nonce(Nonce), GasPrice(GasPrice), GasLimit(GasLimit), To(To),
+                                                                          Value(Value), Data(Data), V(TArray<uint8>()), R(FHash256{}), S(FHash256{})
 {
 }
 
@@ -111,13 +112,13 @@ FUnsizedData FEthTransaction::GetSignedTransaction(FPrivateKey PrivateKey, int C
 
 void FEthTransaction::Log()
 {
-	UE_LOG(LogTemp, Display, TEXT("Nonce: %s"), *Nonce.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Gasprice: %s"), *GasPrice.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Gaslimit: %s"), *GasLimit.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Address: %s"), *To.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Value: %s"), *Value.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("Data: %s"), *Data.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("V: %s"), *V.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("R: %s"), *R.ToHex());
-	UE_LOG(LogTemp, Display, TEXT("S: %s"), *S.ToHex());
+	SEQ_LOG(Display, TEXT("Nonce: %s"), *Nonce.ToHex());
+	SEQ_LOG(Display, TEXT("Gasprice: %s"), *GasPrice.ToHex());
+	SEQ_LOG(Display, TEXT("Gaslimit: %s"), *GasLimit.ToHex());
+	SEQ_LOG(Display, TEXT("Address: %s"), *To.ToHex());
+	SEQ_LOG(Display, TEXT("Value: %s"), *Value.ToHex());
+	SEQ_LOG(Display, TEXT("Data: %s"), *Data.ToHex());
+	SEQ_LOG(Display, TEXT("V: %s"), *V.ToHex());
+	SEQ_LOG(Display, TEXT("R: %s"), *R.ToHex());
+	SEQ_LOG(Display, TEXT("S: %s"), *S.ToHex());
 }

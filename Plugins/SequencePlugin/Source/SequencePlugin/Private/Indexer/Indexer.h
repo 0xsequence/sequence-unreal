@@ -73,7 +73,7 @@ public:
 	/*
 		Used to get the runtime status of the Chain
 	*/
-	void RunTimeStatus(int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure);
+	void RuntimeStatus(int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		Used to get the chainID from the Chain
@@ -81,12 +81,12 @@ public:
 	void GetChainID(int64 ChainID, TSuccessCallback<int64> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
-		Used to get the Ether balance from the Chain
+		Used to get the native token balance from the Chain
 		@param 1st the ChainID
 		@param 2nd the accountAddr we want to get the balance for
 		@return the Balance ASYNC calls
 	*/
-	void GetEtherBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure);
+	void GetNativeTokenBalance(int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure);
 
 	/*
 		Gets the token balances from the Chain

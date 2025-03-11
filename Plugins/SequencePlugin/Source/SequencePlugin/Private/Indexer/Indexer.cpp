@@ -124,7 +124,7 @@ template < typename T> FString UIndexer::BuildArgs(T StructIn)
 	{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(StructIn, Result))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
+			SEQ_LOG(Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
 	return Result;
@@ -140,7 +140,7 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), JSON_Step))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *Text);
+		SEQ_LOG(Display, TEXT("Failed to convert String: %s to Json object"), *Text);
 		return T();
 	}
 
@@ -153,7 +153,7 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 	{//use unreal parsing!
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JSON_Step.ToSharedRef(), &Ret_Struct))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
+			SEQ_LOG(Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
 			return T();
 		}
 	}
@@ -176,7 +176,7 @@ void UIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSucc
 	}, OnFailure);
 }
 
-void UIndexer::RunTimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::RuntimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "RuntimeStatus", "", [this,OnSuccess](const FString& Content)
 	{
@@ -192,7 +192,7 @@ void UIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess
 	}, OnFailure);
 }
 
-void UIndexer::GetEtherBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
+void UIndexer::GetNativeTokenBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString JSON_Arg = "{\"accountAddress\":\"";
 	JSON_Arg.Append(AccountAddr);

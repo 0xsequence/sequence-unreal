@@ -71,8 +71,6 @@ private:
 	UPROPERTY()
 	int64 Expires = -1;
 	UPROPERTY()
-	int64 Network = 137;
-	UPROPERTY()
 	bool Registered = false;
 public:
 	FCredentials_BE(){}
@@ -94,21 +92,6 @@ public:
 		Refreshed = RefreshedAtIn;
 		Expires = ExpiresAtIn;		
 		Registered = true;
-	}
-	
-	void UpdateNetwork(int64 NewNetwork)
-	{
-		Network = NewNetwork;
-	}
-	
-	FString GetNetworkString() const
-	{
-		return FString::Printf(TEXT("%lld"),Network);
-	}
-	
-	int64 GetNetwork() const
-	{
-		return Network;
 	}
 
 	UCryptoWallet * GetSessionWallet() const

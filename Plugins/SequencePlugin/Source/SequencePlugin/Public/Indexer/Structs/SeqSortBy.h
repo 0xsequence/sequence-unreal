@@ -11,9 +11,9 @@ struct SEQUENCEPLUGIN_API FSeqSortBy
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString column = "";
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         TEnumAsByte<ESortOrder_Sequence> order = ESortOrder_Sequence::ASC;
 
     /*
