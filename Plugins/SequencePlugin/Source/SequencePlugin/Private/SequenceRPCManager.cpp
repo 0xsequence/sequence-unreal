@@ -81,30 +81,31 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 		
 		SEQ_LOG_EDITOR(Display, TEXT("%d %s"), Code, *Content);
 
-		if(Content.Contains("intent is invalid: intent expired") || Content.Contains("intent is invalid: intent issued in the future"))
+		OnSuccess(Content);
+	}, [this, Url, ContentGenerator, OnSuccess, OnFailure](const FSequenceError& Error)
+	{
+		const FString Content = Error.Response->GetContentAsString();
+		const int32 Code = Error.Response->GetResponseCode();
+		SEQ_LOG_EDITOR(Error, TEXT("%d %s"), Code, *Content);
+		
+		if (!Content.Contains("intent is invalid: intent expired") &&
+			!Content.Contains("intent is invalid: intent issued in the future"))
 		{
-			FString Date = Response->GetHeader("Date");
-			FDateTime Time;
-			bool IsParsed = FDateTime::ParseHttpDate(Date, Time);
-
-			if(!IsParsed)
-			{
-				OnFailure(FSequenceError(FailedToParseIntentTime, "Failed to parse intent time " + Date));
-				return;
-			}
-			
-			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
-			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
+			OnFailure(Error);
+			return;
 		}
-		else if (Code >= 200 && Code < 300)
+		
+		FDateTime Time;
+		const FString Date = Error.Response->GetHeader("Date");
+		if(!FDateTime::ParseHttpDate(Date, Time))
 		{
-			OnSuccess(Content);
+			OnFailure(FSequenceError(FailedToParseIntentTime, Error.Response, "Failed to parse intent time " + Date));
+			return;
 		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "Request failed"));
-		}
-	}, OnFailure);
+					
+		UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
+		this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
+	});
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
