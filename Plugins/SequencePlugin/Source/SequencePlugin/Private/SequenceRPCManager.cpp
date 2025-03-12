@@ -76,8 +76,10 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 {
 	this->SequenceRPC(Url, ContentGenerator(TOptional<int64>()), [this, Url, ContentGenerator, OnSuccess, OnFailure](FHttpResponsePtr Response)
 	{
-		FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
-		SEQ_LOG_EDITOR(Display, TEXT("%s"), *Content);
+		const FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
+		const int32 Code = Response.Get()->GetResponseCode();
+		
+		SEQ_LOG_EDITOR(Display, TEXT("%d %s"), Code, *Content);
 
 		if(Content.Contains("intent is invalid: intent expired") || Content.Contains("intent is invalid: intent issued in the future"))
 		{
@@ -94,9 +96,13 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
 			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
 		}
-		else
+		else if (Code >= 200 && Code < 300)
 		{
 			OnSuccess(Content);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "Request failed"));
 		}
 	}, OnFailure);
 }

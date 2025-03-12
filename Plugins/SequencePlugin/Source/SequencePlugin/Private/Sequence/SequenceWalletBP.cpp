@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Sequence/SequenceAPI.h"
+#include "Util/Log.h"
 
 USequenceWalletBP::USequenceWalletBP() { }
 
@@ -333,6 +334,7 @@ void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, F
 
 	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
 	{
+		SEQ_LOG(Error, TEXT("Failed to unlink wallet."));
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
