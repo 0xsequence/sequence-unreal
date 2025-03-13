@@ -82,10 +82,12 @@ private:
 		FIdName(1993,TEXT("b3-sepolia")),
 		FIdName(2730,TEXT("xr-sepolia")),
 		FIdName(7672,TEXT("rootnet-porcini")),
+		FIdName(10143,TEXT("monad-testnet")),
 		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(33111,TEXT("apechain-testnet")),
 		FIdName(40875,TEXT("homeverse-testnet")),
 		FIdName(43113,TEXT("avalanche-testnet")),
+		FIdName(50312,TEXT("somnia-testnet")),
 		FIdName(62850,TEXT("laos-sigma-testnet")),
 		FIdName(80002,TEXT("amoy")),
 		FIdName(84532,TEXT("base-sepolia")),
@@ -146,6 +148,8 @@ private:
 		FIdName(41,TEXT("Telos Testnet")),
 		FIdName(1287,TEXT("Moonbase Alpha")),
 		FIdName(128123,TEXT("Etherlink Testnet")),
+		FIdName(10143,TEXT("Monad Testnet")),
+		FIdName(50312,TEXT("Somnia Testnet")),
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -196,6 +200,8 @@ private:
 		FNameId(TEXT("telos-testnet"), 41),
 		FNameId(TEXT("moonbase-alpha"),1287),
 		FNameId(TEXT("etherlink-testnet"),128123),
+		FNameId(TEXT("monad-testnet"),10143),
+		FNameId(TEXT("somnia-testnet"),50312),
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -246,6 +252,8 @@ private:
 		{ENetwork::TelosTestnet, 41},
 		{ENetwork::MoonbaseAlpha, 1287},
 		{ENetwork::EtherlinkTestnet, 128123},
+		{ENetwork::MonadTestnet, 10143},
+		{ENetwork::SomniaTestnet, 50312},
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -296,6 +304,8 @@ private:
 		{ENetwork::TelosTestnet, TEXT("Telos Testnet")},
 		{ENetwork::MoonbaseAlpha, TEXT("Moonbase Alpha")},
 		{ENetwork::EtherlinkTestnet, TEXT("Etherlink Testnet")},
+		{ENetwork::MonadTestnet, TEXT("Monad Testnet")},
+		{ENetwork::SomniaTestnet, TEXT("Somnia Testnet")},
 	};
 
 public:
