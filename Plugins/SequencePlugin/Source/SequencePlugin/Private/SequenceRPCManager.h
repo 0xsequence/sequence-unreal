@@ -276,6 +276,20 @@ public:
 	 * @param OnFailure Fires if there's an Authentication Issue
 	 */
 	void ForceOpenSessionInUse(const TSuccessCallback<FCredentials_BE>& OnSuccess, const FFailureCallback& OnFailure);
+
+	/**
+	 * GetLinkedWallets
+	 * @param OnSuccess 
+	 * @param OnFailure 
+	 */
+	void GetLinkedWallets(const FSeqLinkedWalletRequest& Request, const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/**
+	 * GetLinkedWallets
+	 * @param OnSuccess 
+	 * @param OnFailure 
+	 */
+	void RemoveLinkedWallet(const FSeqLinkedWalletRequest& Request, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Auth Calls//
 

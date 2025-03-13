@@ -13,6 +13,7 @@
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 #include "Misc/DateTime.h"
+#include "Util/Log.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {
@@ -41,6 +42,8 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 {
 	UResponseSignatureValidator& RPCValidator = *Validator;
 
+	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
+	
 	NewObject<URequestHandler>()
 		->PrepareRequest()
 		->WithUrl(Url)
@@ -55,6 +58,8 @@ void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content
 
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const
 {
+	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
+	
 	NewObject<URequestHandler>()
 	->PrepareRequest()
 	->WithUrl(Url)
@@ -71,31 +76,36 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 {
 	this->SequenceRPC(Url, ContentGenerator(TOptional<int64>()), [this, Url, ContentGenerator, OnSuccess, OnFailure](FHttpResponsePtr Response)
 	{
-		UE_LOG(LogTemp, Display, TEXT("SUCCESS"));
-		UE_LOG(LogTemp, Display, TEXT("CONTENT"));
-		FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
-		UE_LOG(LogTemp, Display, TEXT("%s"), *Content);
+		const FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
+		const int32 Code = Response.Get()->GetResponseCode();
+		
+		SEQ_LOG_EDITOR(Display, TEXT("%d %s"), Code, *Content);
 
-		if(Content.Contains("intent is invalid: intent expired") || Content.Contains("intent is invalid: intent issued in the future"))
+		OnSuccess(Content);
+	}, [this, Url, ContentGenerator, OnSuccess, OnFailure](const FSequenceError& Error)
+	{
+		const FString Content = Error.Response->GetContentAsString();
+		const int32 Code = Error.Response->GetResponseCode();
+		SEQ_LOG_EDITOR(Error, TEXT("%d %s"), Code, *Content);
+		
+		if (!Content.Contains("intent is invalid: intent expired") &&
+			!Content.Contains("intent is invalid: intent issued in the future"))
 		{
-			FString Date = Response->GetHeader("Date");
-			FDateTime Time;
-			bool IsParsed = FDateTime::ParseHttpDate(Date, Time);
-
-			if(!IsParsed)
-			{
-				OnFailure(FSequenceError(FailedToParseIntentTime, "Failed to parse intent time " + Date));
-				return;
-			}
-			
-			UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
-			this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
+			OnFailure(Error);
+			return;
 		}
-		else
+		
+		FDateTime Time;
+		const FString Date = Error.Response->GetHeader("Date");
+		if(!FDateTime::ParseHttpDate(Date, Time))
 		{
-			OnSuccess(Content);
+			OnFailure(FSequenceError(FailedToParseIntentTime, Error.Response, "Failed to parse intent time " + Date));
+			return;
 		}
-	}, OnFailure);
+					
+		UE_LOG(LogTemp, Display, TEXT("Resending intent with date %i"), Time.ToUnixTimestamp());
+		this->SequenceRPC(Url, ContentGenerator(TOptional(Time.ToUnixTimestamp())), OnSuccess, OnFailure);
+	});
 }
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
@@ -950,6 +960,33 @@ void USequenceRPCManager::ForceOpenSessionInUse(const TSuccessCallback<FCredenti
 	{
 		return this->BuildOpenSessionIntent(this->Cached_OpenSessionData, CurrentTime);
 	}, OnOpenResponse, OnFailure);
+}
+
+void USequenceRPCManager::GetLinkedWallets(const FSeqLinkedWalletRequest& Request, const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess](const FString& OnResponse)
+	{
+		const FSeqLinkedWalletsResponse LinkedWallets = USequenceSupport::JSONStringToStruct<FSeqLinkedWalletsResponse>(OnResponse);
+		OnSuccess(LinkedWallets);
+	};
+	
+	this->SendIntent(this->BuildAPIUrl("GetLinkedWallets"),[this, Request](const TOptional<int64>& CurrentTime)
+	{
+		return USequenceSupport::StructToString(Request);
+	}, OnResponse, OnFailure);
+}
+
+void USequenceRPCManager::RemoveLinkedWallet(const FSeqLinkedWalletRequest& Request, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const TSuccessCallback<FString> OnResponse = [this, OnSuccess](const FString& OnResponse)
+	{
+		OnSuccess();
+	};
+	
+	this->SendIntent(this->BuildAPIUrl("RemoveLinkedWallet"),[this, Request](const TOptional<int64>& CurrentTime)
+	{
+		return USequenceSupport::StructToString(Request);
+	}, OnResponse, OnFailure);
 }
 
 void USequenceRPCManager::FederateEmailSession(const FString& WalletIn, const FString& CodeIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)

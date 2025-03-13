@@ -575,6 +575,11 @@ FString USequenceSupport::StringCleanup(FString String)
 	return (*Ret);
 }
 
+void USequenceSupport::StringReplace(FString* Input, const FString& Search, const FString& Replacement)
+{
+	Input->ReplaceInline(*Search, *Replacement, ESearchCase::IgnoreCase);
+}
+
 int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 {
 	FDateTime ParsedDate;
