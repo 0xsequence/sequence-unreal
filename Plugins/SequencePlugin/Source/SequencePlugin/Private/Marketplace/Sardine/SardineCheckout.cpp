@@ -2,3 +2,105 @@
 
 
 #include "Marketplace/Sardine/SardineCheckout.h"
+
+#include "ConfigFetcher.h"
+#include "HttpModule.h"
+#include "Interfaces/IHttpResponse.h"
+#include "Marketplace/Sardine/Structs/SardineGetQuoteArgs.h"
+#include "Marketplace/Sardine/Structs/SardineGetQuoteResponse.h"
+#include "Util/Log.h"
+
+FString USardineCheckout::Url(const FString& EndPoint) const
+{
+	return _baseUrl + "/" + EndPoint;
+}
+
+void USardineCheckout::HTTPPost(const FString& Endpoint, const FString& Args,
+                                const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const FString RequestURL = this->Url(Endpoint);
+
+	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
+
+	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
+	if (AccessKey.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		return;  
+	}
+
+	HTTP_Post_Req->SetVerb("POST");
+	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	
+
+	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
+	HTTP_Post_Req->SetTimeout(30);
+	HTTP_Post_Req->SetURL(RequestURL);
+	HTTP_Post_Req->SetContentAsString(Args);
+	 
+	FString CurlCommand = FString::Printf(
+		TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
+		*HTTP_Post_Req->GetVerb(),
+		*HTTP_Post_Req->GetURL(),
+		*HTTP_Post_Req->GetHeader("X-Access-Key"),
+		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
+	);
+
+	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
+
+
+	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
+		{
+			if (bWasSuccessful)
+			{
+				const FString Content = Response->GetContentAsString();
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				OnSuccess(Content);
+			}
+			else
+			{
+				if (Request.IsValid() && Response.IsValid())
+				{
+					const FString ErrorMessage = Response->GetContentAsString();
+					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				}
+			}
+		});
+
+	// Process the request
+	HTTP_Post_Req->ProcessRequest();
+}
+
+void USardineCheckout::SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess, const FFailureCallback& OnFailure, FString WalletAddress, FSardineToken Token, u_long Amount, ESardinePaymentType PaymentType,
+	TOptional<FSardineFiatCurrency> QuotedCurrency, ESardineQuoteType QuoteType)
+{
+	const FString Endpoint = "SardineGetQuote";
+	
+	FSardineGetQuoteArgs Args {
+		Token.AssetSymbol,
+		Token.Network,
+		Amount,
+		QuotedCurrency.IsSet() ? QuotedCurrency->CurrencySymbol : "",
+		PaymentType,
+		QuoteType,
+		WalletAddress
+	};
+
+	HTTPPost(Endpoint, BuildArgs<FSardineGetQuoteArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSardineGetQuoteResponse Response = this->BuildResponse<FSardineGetQuoteResponse>(Content);
+			OnSuccess(Response.Quote);
+		}, OnFailure);
+}
+
+void USardineCheckout::SardineGetClientToken(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+{
+	
+}
