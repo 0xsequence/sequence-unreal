@@ -159,7 +159,7 @@ void USardineCheckout::SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContr
 
 	UMarketplace* Marketplace = NewObject<UMarketplace>();
 
+	Marketplace->GetCollectibleOrder();
 	
-	
-	FSeqTokenMetaData metaData = 
+	//FSeqTokenMetaData metaData = 
 }

@@ -6,9 +6,9 @@
 UENUM(BlueprintType)
 enum ESardinePaymentMethod
 {
-	Us_Debit  UMETA(DisplayName = "US_DEBIT"),
-	Us_Credit  UMETA(DisplayName = "US_CREDIT"),
-	International_Debit  UMETA(DisplayName = "INTERNATIONAL_DEBIT"),
-	International_Credit  UMETA(DisplayName = "INTERNATIONAL_CREDIT"),
-	Ach UMETA(DisplayName = "ACH"),
+	PaymentMethod_Us_Debit  UMETA(DisplayName = "US_DEBIT"),
+	PaymentMethod_Us_Credit  UMETA(DisplayName = "US_CREDIT"),
+	PaymentMethod_International_Debit  UMETA(DisplayName = "INTERNATIONAL_DEBIT"),
+	PaymentMethod_International_Credit  UMETA(DisplayName = "INTERNATIONAL_CREDIT"),
+	PaymentMethod_Ach UMETA(DisplayName = "ACH"),
 };

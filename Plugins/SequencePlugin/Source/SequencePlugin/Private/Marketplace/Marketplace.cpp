@@ -8,8 +8,10 @@
 #include "Util/Log.h"
 #include "ConfigFetcher.h"
 #include "HttpManager.h"
+#include "Marketplace/Structs/SeqGetCollectibleArgs.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderArgs.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
+#include "Marketplace/Structs/SeqGetCollectibleReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
@@ -229,6 +231,18 @@ void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
 			OnSuccess(OrderArray);
 		}
 	}, OnFailure);
+}
+
+void UMarketplace::GetCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenId,
+	TSuccessCallback<FSeqTokenMetaData> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetCollectible";
+	const FSeqGetCollectibleArgs Args = FSeqGetCollectibleArgs{ContractAddress, TokenId};
+	HTTPPost(ChainID, Endpoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSeqGetCollectibleReturn Response = this->BuildResponse<FSeqGetCollectibleReturn>(Content);
+			OnSuccess(Response.MetaData);
+		}, OnFailure);
 }
 
 void UMarketplace::GetLowestPriceOfferForCollectible(

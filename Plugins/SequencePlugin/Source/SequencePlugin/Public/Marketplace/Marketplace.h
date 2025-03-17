@@ -120,6 +120,16 @@ public:
 	void ListAllCollectibleOffersWithHighestPricedOfferFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
+	 * Gets the meta data for a collectible
+	 * @param ChainID the id of the chain
+	 * @param ContractAddress the address of the contract
+	 * @param TokenId the id of the token
+	 * @param OnSuccess handler for success, takes in a FSeqTokenMetaData
+	 * @param OnFailure  handler for failure, takes in a FSequenceError
+	 */
+	void GetCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenId, TSuccessCallback<FSeqTokenMetaData> OnSuccess, const FFailureCallback& OnFailure);
+	
+	/**
 	 * Gets the lowest price offer for a collectible
 	 * @param ChainID the id of the chain
 	 * @param ContractAddress the address of the contract

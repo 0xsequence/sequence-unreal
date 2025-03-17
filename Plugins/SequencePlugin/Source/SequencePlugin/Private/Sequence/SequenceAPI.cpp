@@ -13,61 +13,6 @@
 #include "Transak.h"
 #include "SequenceRPCManager.h"
 
-FTransaction_Sequence FTransaction_Sequence::Convert(const FTransaction_FE& Transaction_Fe)
-{
-	return FTransaction_Sequence{
-		static_cast<uint64>(Transaction_Fe.chainId),
-		FAddress::From(Transaction_Fe.From),
-		FAddress::From(Transaction_Fe.To),
-		Transaction_Fe.AutoGas == "" ? TOptional<FString>() : TOptional(Transaction_Fe.AutoGas),
-		Transaction_Fe.Nonce < 0 ? TOptional<uint64>() : TOptional(static_cast<uint64>(Transaction_Fe.Nonce)),
-		Transaction_Fe.Value == "" ? TOptional<FString>() : TOptional(Transaction_Fe.Value),
-		Transaction_Fe.CallData == "" ? TOptional<FString>() : TOptional(Transaction_Fe.CallData),
-		Transaction_Fe.TokenAddress == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAddress),
-		Transaction_Fe.TokenAmount == "" ? TOptional<FString>() : TOptional(Transaction_Fe.TokenAmount),
-		Transaction_Fe.TokenIds.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenIds),
-		Transaction_Fe.TokenAmounts.Num() == 0 ? TOptional<TArray<FString>>() : TOptional(Transaction_Fe.TokenAmounts),
-	};
-}
-
-FString FTransaction_Sequence::ToJson()
-{
-	FJsonBuilder Json = FJsonBuilder();
-
-	Json.AddInt("chainId", ChainId);
-	Json.AddString("from", "0x" + From.ToHex());
-	Json.AddString("to", "0x" + To.ToHex());
-
-	if(this->Value.IsSet()) Json.AddString("value", this->Value.GetValue());
-
-	return Json.ToString();
-}
-
-TransactionID FTransaction_Sequence::ID()
-{
-	FUnsizedData Data = StringToUTF8(ToJson());
-	return GetKeccakHash(Data).ToHex();
-}
-
-FString USequenceWallet::Url(const FString& Name) const
-{
-	return this->Hostname + this->Path + Name;
-}
-
-void USequenceWallet::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	URequestHandler* RequestHandler = NewObject<URequestHandler>();
-
-	RequestHandler->PrepareRequest()
-		->WithUrl(Url)
-		->WithHeader("Content-type", "application/json")
-		->WithHeader("Authorization", "Bearer " + this->Credentials.GetIDToken())
-		->WithVerb("POST")
-		->WithContentAsString(Content);
-
-	RequestHandler->ProcessAndThen(*SequenceRPCManager->Validator, OnSuccess, OnFailure);
-}
-
 USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<UIndexer>();
@@ -255,12 +200,6 @@ void USequenceWallet::GetIdToken(const FString& Nonce, const TSuccessCallback<FS
 		this->SequenceRPCManager->GetIdToken(this->Credentials, Nonce, OnSuccess, OnFailure);
 	}
 }
-
-FString USequenceWallet::GetSessionId() const
-{
-	return this->Credentials.GetSessionWallet()->GetSessionId();
-}
-
 
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
@@ -536,6 +475,71 @@ void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactio
 	{
 		this->SequenceRPCManager->SendTransaction(this->Credentials, Transactions, OnSuccess, OnFailure);
 	}
+}
+
+void USequenceWallet::GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const FString& WalletAddress = this->GetWalletAddress();
+	const FString& MessageToSign = "parent wallet with address " + WalletAddress;
+
+	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
+	{
+		if (this->SequenceRPCManager)
+		{
+			const FString& ChainId = this->Credentials.GetNetworkString();
+			FSeqLinkedWalletRequest Request;
+			Request.SignatureChainId = ChainId;
+			Request.ParentWalletAddress = WalletAddress;
+			Request.ParentWalletMessage = MessageToSign;
+			Request.ParentWalletSignature = SignatureResponse.Data.Signature;
+			
+			this->SequenceRPCManager->GetLinkedWallets(Request, OnSuccess, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "SequenceRPCManager is not available."));
+		}
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnSignatureFailure = [OnFailure](FString Data, FSequenceError Err)
+	{
+		OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Err.Message));
+	};
+	
+	this->SignMessage(MessageToSign, OnSignatureSuccess, OnFailure);
+}
+
+void USequenceWallet::RemoveLinkedWallet(const FString& LinkedWalletAddress, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	const FString& WalletAddress = this->GetWalletAddress();
+	const FString& MessageToSign = "parent wallet with address " + WalletAddress + LinkedWalletAddress;
+
+	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, LinkedWalletAddress, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
+	{
+		if (this->SequenceRPCManager)
+		{
+			const FString& ChainId = this->Credentials.GetNetworkString();
+			FSeqLinkedWalletRequest Request;
+			Request.SignatureChainId = ChainId;
+			Request.ParentWalletAddress = WalletAddress;
+			Request.ParentWalletMessage = MessageToSign;
+			Request.ParentWalletSignature = SignatureResponse.Data.Signature;
+			Request.LinkedWalletAddress = LinkedWalletAddress;
+			
+			this->SequenceRPCManager->RemoveLinkedWallet(Request, OnSuccess, OnFailure);
+		}
+		else
+		{
+			OnFailure(FSequenceError(RequestFail, "SequenceRPCManager is not available."));
+		}
+	};
+
+	const TFunction<void (FString, FSequenceError)> OnSignatureFailure = [OnFailure](FString Data, FSequenceError Err)
+	{
+		OnFailure(FSequenceError(RequestFail, "Error Parsing Response: " + Err.Message));
+	};
+	
+	this->SignMessage(MessageToSign, OnSignatureSuccess, OnFailure);
 }
 
 //Indexer Calls
