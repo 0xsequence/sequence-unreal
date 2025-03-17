@@ -538,6 +538,59 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
 	}
 };
 
+// Wallet Linking
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "signatureChainId"))
+	FString SignatureChainId = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "parentWalletAddress"))
+	FString ParentWalletAddress = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "parentWalletMessage"))
+	FString ParentWalletMessage = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "parentWalletSignature"))
+	FString ParentWalletSignature = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "linkedWalletAddress"))
+	FString LinkedWalletAddress = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWallet
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "id"))
+	int64 Id = 0;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "walletType"))
+	FString WalletType = "";
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "walletAddress"))
+	FString WalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "linkedWalletAddress"))
+	FString LinkedWalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "createdAt"))
+	FString CreatedAt = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence", meta = (JsonFieldName = "linkedWallets"))
+	TArray<FSeqLinkedWallet> LinkedWallets;
+};
+
 
 //Validate Signature//
 

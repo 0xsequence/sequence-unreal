@@ -112,24 +112,23 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<FHttpResponsePtr>& O
 	const FFailureCallback& OnFailure) const
 {
 	Process().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Req, const FHttpResponsePtr& Response, const bool bWasSuccessful)
+	{
+		const int32 Code = Response->GetResponseCode();
+		if (bWasSuccessful && Code >= 200 && Code < 300)
 		{
-			if (bWasSuccessful)
-			{
-				OnSuccess(Response);
-			}
-			else
-			{
-				if (!Response.IsValid())
-					OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-				else
-				{
-					if (Response.IsValid())
-						OnFailure(FSequenceError(RequestFail, "The Request is invalid!"));
-					else
-						OnFailure(FSequenceError(RequestFail, "Request failed: " + Response->GetContentAsString()));
-				}
-			}
-		});
+			OnSuccess(Response);
+			return;
+		}
+
+		if (!Response.IsValid())
+		{
+			OnFailure(FSequenceError(RequestFail, Response, "The Request is invalid!"));
+			return;
+		}
+
+		const FString Content = Response->GetContentAsString();
+		OnFailure(FSequenceError(RequestFail, Response, "Request failed: " + Content));
+	});
 }
 
 

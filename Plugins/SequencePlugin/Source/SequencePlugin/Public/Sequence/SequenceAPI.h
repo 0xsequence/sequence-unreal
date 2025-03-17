@@ -127,6 +127,12 @@ public:
 	FString GetWalletAddress() const;
 
 	/**
+	 * Get the current/active session id associated with this wallet
+	 * @return the current/active session id associated with this wallet
+	 */
+	FString GetSessionId() const;
+
+	/**
 	 * Allows you to update the provider URL set for the SequenceWallet
 	 * @param Url New provider Url you wish to use
 	 */
@@ -303,6 +309,16 @@ public:
 		get transaction history from the Chain
 	*/
 	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, const TSuccessCallback<FSeqGetTransactionHistoryReturn>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/*
+		Get Linked Wallets
+	*/
+	void GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
+
+	/*
+		Remove a Linked Wallet
+	*/
+	void RemoveLinkedWallet(const FString& LinkedWalletAddress, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	//Provider calls
 
