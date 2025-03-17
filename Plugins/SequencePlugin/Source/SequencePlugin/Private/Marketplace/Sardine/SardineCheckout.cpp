@@ -6,6 +6,7 @@
 #include "ConfigFetcher.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
+#include "Marketplace/Marketplace.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteArgs.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteResponse.h"
 #include "Util/Log.h"
@@ -13,6 +14,22 @@
 FString USardineCheckout::Url(const FString& EndPoint) const
 {
 	return _baseUrl + "/" + EndPoint;
+}
+
+void USardineCheckout::SardineGetNFTCHeckoutToken(FSardineGetNFTCheckoutTokenArgs Args,
+	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
+{
+	if(Args.TokenAddress == FAddress::New().ToHex())
+	{
+		OnFailure(FSequenceError(InvalidArgument, "Sardine doesn't support native currency checkout; please choose a different payment token"));
+		return;
+	}
+
+	HTTPPost("SardineGetNFTCheckoutToken", BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSardineNFTCheckout Response = this->BuildResponse<FSardineNFTCheckout>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
 }
 
 void USardineCheckout::HTTPPost(const FString& Endpoint, const FString& Args,
@@ -78,8 +95,14 @@ void USardineCheckout::HTTPPost(const FString& Endpoint, const FString& Args,
 	HTTP_Post_Req->ProcessRequest();
 }
 
+void USardineCheckout::CheckSardineWhiteListStatus(FString Address, TSuccessCallback<bool> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	
+}
+
 void USardineCheckout::SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess, const FFailureCallback& OnFailure, FString WalletAddress, FSardineToken Token, u_long Amount, ESardinePaymentType PaymentType,
-	TOptional<FSardineFiatCurrency> QuotedCurrency, ESardineQuoteType QuoteType)
+                                       TOptional<FSardineFiatCurrency> QuotedCurrency, ESardineQuoteType QuoteType)
 {
 	const FString Endpoint = "SardineGetQuote";
 	
@@ -103,4 +126,40 @@ void USardineCheckout::SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess
 void USardineCheckout::SardineGetClientToken(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
 	
+}
+
+void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity,
+	FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress,
+	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
+{
+	if(Orders.Num() < 1)
+	{
+		OnFailure(FSequenceError(InvalidArgument, "Orders must contain at least one collectible"));
+		return;
+	}
+
+	if(Orders[0].Order.PriceCurrencyAddress == FAddress::New().ToHex())
+	{
+		OnFailure(FSequenceError(InvalidArgument, "Sardine doesn't support native currency checkout; please choose a different payment token"));
+		return;
+	}
+
+	//TODO Generate steps from checkout
+}
+
+void USardineCheckout::SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContract, FString CollectionAddress,
+	long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure,
+	FString RecipientAddress, TArray<uint8> data, TArray<uint8> Proof)
+{
+	if(Amount < 1)
+	{
+		OnFailure(FSequenceError(InvalidArgument, "Amount must be greater than 0"));
+		return;
+	}
+
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+
+	
+	
+	FSeqTokenMetaData metaData = 
 }
