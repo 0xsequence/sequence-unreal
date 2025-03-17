@@ -7,6 +7,7 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Marketplace/Marketplace.h"
+#include "Marketplace/Sardine/Structs/SardineEnabledTokensResponse.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteArgs.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteResponse.h"
 #include "Util/Log.h"
@@ -147,7 +148,7 @@ void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> O
 	//TODO Generate steps from checkout
 }
 
-void USardineCheckout::SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContract, FString CollectionAddress,
+void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract SaleContract, FString CollectionAddress,
 	long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure,
 	FString RecipientAddress, TArray<uint8> data, TArray<uint8> Proof)
 {
@@ -159,7 +160,25 @@ void USardineCheckout::SardineGetNFTCheckoutToken(UERC1155SaleContract SaleContr
 
 	UMarketplace* Marketplace = NewObject<UMarketplace>();
 
-	Marketplace->GetCollectibleOrder();
+	Marketplace->GetCollectible(ChainId, CollectionAddress, FString::FromInt(TokenID), [this, &SaleContract, Amount, OnSuccess, RecipientAddress, data, Proof](FSeqTokenMetaData MetaData)
+		{
+			//TODO
+		}, [OnFailure](FSequenceError Error)
+		{
+			SEQ_LOG_EDITOR(Error, TEXT("Failed to get collectible: %s"), *Error.Message);
+			OnFailure(Error);
+		});
 	
 	//FSeqTokenMetaData metaData = 
+}
+
+void USardineCheckout::SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "SardineGetEnabledTokens";
+	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
+		{
+			const FSardineEnabledTokensResponse Response = this->BuildResponse<FSardineEnabledTokensResponse>(Content);
+			OnSuccess(Response.Tokens);
+		}, OnFailure);
 }
