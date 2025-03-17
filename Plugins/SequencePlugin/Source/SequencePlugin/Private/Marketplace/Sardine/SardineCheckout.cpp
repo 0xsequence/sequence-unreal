@@ -10,6 +10,9 @@
 #include "Marketplace/Sardine/Structs/SardineEnabledTokensResponse.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteArgs.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteResponse.h"
+#include "Marketplace/Sardine/Structs/SardineSupportedFiatCurrenciesResponse.h"
+#include "Marketplace/Sardine/Structs/SardineSupportedRegionsResponse.h"
+#include "Marketplace/Sardine/Structs/SardineSupportedTokensResponse.h"
 #include "Util/Log.h"
 
 FString USardineCheckout::Url(const FString& EndPoint) const
@@ -172,8 +175,41 @@ void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleCon
 	//FSeqTokenMetaData metaData = 
 }
 
-void USardineCheckout::SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess,
+void USardineCheckout::SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess,
 	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "SardineGetSupportedRegions";
+	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
+		{
+			const FSardineSupportedRegionsResponse Response = this->BuildResponse<FSardineSupportedRegionsResponse>(Content);
+			OnSuccess(Response.Regions);
+		}, OnFailure);
+}
+
+void USardineCheckout::SardineGetSupportedFiatCurrencies(TSuccessCallback<TArray<FSardineFiatCurrency>> OnSuccess,
+                                                         const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "SardineGetSupportedFiatCurrencies";
+	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
+		{
+			const FSardineSupportedFiatCurrenciesResponse Response = this->BuildResponse<FSardineSupportedFiatCurrenciesResponse>(Content);
+			OnSuccess(Response.Tokens);
+		}, OnFailure);
+}
+
+void USardineCheckout::SardineGetSupportedTokens(TSuccessCallback<TArray<FSardineSupportedToken>> OnSuccess,
+                                                 const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "SardineGetSupportedTokens";
+	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
+		{
+			const FSardineSupportedTokensResponse Response = this->BuildResponse<FSardineSupportedTokensResponse>(Content);
+			OnSuccess(Response.Tokens);
+		}, OnFailure);
+}
+
+void USardineCheckout::SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess,
+                                               const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "SardineGetEnabledTokens";
 	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
