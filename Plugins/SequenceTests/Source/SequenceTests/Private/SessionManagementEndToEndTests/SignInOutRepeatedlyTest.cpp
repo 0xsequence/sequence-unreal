@@ -59,16 +59,8 @@ void USignInOutRepeatedlyTestHelper::OnAuthSuccess()
     if (Repetitions < MaxRepetitions)
     {
         Repetitions++;
-        if (TOptional<USequenceWallet*> OptionalSequenceWallet = USequenceWallet::Get(); OptionalSequenceWallet.IsSet() && OptionalSequenceWallet.GetValue())
-        {
-            OptionalSequenceWallet.GetValue()->SignOut();
-        }
-        else
-        {
-            bTestComplete = true;
-            ParentTest->AddError(TEXT("Failed to get SequenceWallet"));
-            return;
-        }
+        const USequenceWallet* Wallet = NewObject<USequenceWallet>();
+        Wallet->SignOut();
         ConnectAsGuest();
     }
     else

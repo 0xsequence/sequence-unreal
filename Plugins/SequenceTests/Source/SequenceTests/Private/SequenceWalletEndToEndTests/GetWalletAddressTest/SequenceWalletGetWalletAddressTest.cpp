@@ -22,24 +22,18 @@ bool FGetWalletAddressTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(true));
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
-    {      
-        if (TOptional<USequenceWallet*> OptionalSequenceWallet = USequenceWallet::Get(); OptionalSequenceWallet.IsSet() && OptionalSequenceWallet.GetValue())
+    {
+        const USequenceWallet* SequenceWallet = NewObject<USequenceWallet>();
+        const FString WalletAddress = SequenceWallet->GetWalletAddress();
+        if (WalletAddress.Len() > 0)
         {
-            const USequenceWallet * SequenceWallet = OptionalSequenceWallet.GetValue();
-            const FString WalletAddress = SequenceWallet->GetWalletAddress();
-            if (WalletAddress.Len() > 0)
-            {
-                AddInfo(FString::Printf(TEXT("Got Walletaddress: %s\nTest Complete"), *WalletAddress));
-            }
-            else
-            {
-                AddError(FString::Printf(TEXT("Failed to get walletaddress")));
-            }          
+            AddInfo(FString::Printf(TEXT("Got Walletaddress: %s\nTest Complete"), *WalletAddress));
         }
         else
         {
             AddError(FString::Printf(TEXT("Failed to get walletaddress")));
         }
+        
         return true;
     }));
     return true;

@@ -1,18 +1,20 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Subsystems/SequencePayBP.h"
-#include "Transak.h"
+
+USequencePayBP::USequencePayBP()
+{
+	this->Pay = NewObject<USequencePay>();
+}
 
 FString USequencePayBP::GetOnRampLink(const FString& WalletAddress, const FTransakSettings& Settings)
 {
-	UTransakOnRamp* OnRamp = UTransakOnRamp::Init(WalletAddress);
-	return OnRamp->GetTransakLink(Settings.FiatCurrency, Settings.FiatAmount, Settings.CryptoCurrency, Settings.Networks, Settings.DisableWalletAddressForm);
+	return this->Pay->GetOnRampLink(WalletAddress, Settings.FiatCurrency, Settings.FiatAmount, Settings.CryptoCurrency, Settings.Networks, Settings.DisableWalletAddressForm);
 }
 
 void USequencePayBP::OpenOnRampInExternalBrowser(const FString& WalletAddress, const FTransakSettings& Settings)
 {
-	UTransakOnRamp* OnRamp = UTransakOnRamp::Init(WalletAddress);
-	OnRamp->OpenTransakLink(Settings.FiatCurrency, Settings.FiatAmount, Settings.CryptoCurrency, Settings.Networks, Settings.DisableWalletAddressForm);
+	this->Pay->OpenOnRampInExternalBrowser(WalletAddress, Settings.FiatCurrency, Settings.FiatAmount, Settings.CryptoCurrency, Settings.Networks, Settings.DisableWalletAddressForm);
 }
 
 void USequencePayBP::GetSupportedOnRampCountries(FOnSupportedTransakCountries OnSuccess, FOnFailure OnFailure)
@@ -27,6 +29,5 @@ void USequencePayBP::GetSupportedOnRampCountries(FOnSupportedTransakCountries On
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	const UTransakOnRamp* OnRamp = NewObject<UTransakOnRamp>();
-	OnRamp->GetSupportedCountries(SuccessCallback,FailureCallback);
+	this->Pay->GetSupportedOnRampCountries(SuccessCallback,FailureCallback);
 }

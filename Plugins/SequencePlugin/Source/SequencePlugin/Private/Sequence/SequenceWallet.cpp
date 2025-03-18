@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #include "Sequence/SequenceWallet.h"
-#include "Util/SequenceSupport.h"
 #include "Dom/JsonObject.h"
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
@@ -10,9 +10,7 @@
 #include "Engine/GameInstance.h"
 #include "Indexer/Indexer.h"
 #include "Provider.h"
-#include "Transak.h"
 #include "SequenceRPCManager.h"
-#include "Subsystems/SequenceSdkBP.h"
 #include "Util/Log.h"
 #include "Sequence/SequenceSdk.h"
 
@@ -21,131 +19,20 @@ USequenceWallet::USequenceWallet()
 	this->Indexer = NewObject<UIndexer>();
 	this->Provider = UProvider::Make("");
 	this->SequenceRPCManager = nullptr;
-}
 
-void USequenceWallet::Initialize(FSubsystemCollectionBase& Collection)
-{
-	SEQ_LOG(Display,TEXT("Initializing wallet subsystem"));
-}
+	SEQ_LOG(Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
+	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
+	FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials();
 
-void USequenceWallet::Deinitialize()
-{
-	SEQ_LOG(Display,TEXT("Deinitializing wallet subsystem"));
-}
-
-USequenceWallet * USequenceWallet::GetSubSystem()
-{
-		if (GEngine)
-		{
-			const TIndirectArray<FWorldContext> Contexts = GEngine->GetWorldContexts();
-			for (FWorldContext Context : Contexts)
-			{
-				if (const UWorld * World = Context.World())
-				{
-					if (const UGameInstance * GI = UGameplayStatics::GetGameInstance(World))
-					{
-						if (USequenceWallet * Wallet = GI->GetSubsystem<USequenceWallet>())
-						{
-							return Wallet;
-						}//GameInstance Subsystem Check
-					}//GameInstance Check
-				}//World Context Check
-			}//Context Search
-		}//GEngine Check
-		else
-		{
-			SEQ_LOG(Error,TEXT("Error Accessing GEngine"));
-		}
-	SEQ_LOG(Error,TEXT("Error Accessing USequenceWallet GameInstanceSubSystem"));
-	return nullptr;
-}
-
-TOptional<USequenceWallet*> USequenceWallet::Get()
-{
-	if (USequenceWallet * Wallet = GetSubSystem())
+	if (StoredCredentials.GetValid())
 	{
-		if (Wallet->Credentials.RegisteredValid())
-		{
-			TOptional OptionalWallet(Wallet);
-			return OptionalWallet;
-		}
-		else
-		{
-			SEQ_LOG(Warning,TEXT("Wallet is NOT registered and valid checking on disk credentials"));
-			const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
-			FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials();
-
-			if (StoredCredentials.GetValid())
-			{
-				SEQ_LOG(Display,TEXT("Successfully loaded on disk credentials"));
-				Wallet->Init(StoredCredentials.GetCredentials());
-				TOptional OptionalWallet(Wallet);
-				return OptionalWallet;
-			}
-			else
-			{
-				SEQ_LOG(Warning,TEXT("The Credentials on disk were invalid please login"));
-			}//Stored Valid Check
-		}//Registered Valid Check
-	}//SubSystem Check
-	return nullptr;
-}
-
-TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials)
-{
-	if (USequenceWallet * Wallet = GetSubSystem())
-	{
-		Wallet->Init(Credentials);
-		TOptional OptionalWallet(Wallet);
-		return OptionalWallet;
+		SEQ_LOG(Display,TEXT("Successfully loaded on disk credentials"));
+		this->Init(StoredCredentials.GetCredentials());
 	}
-	return nullptr;
-}
-
-TOptional<USequenceWallet*> USequenceWallet::Get(const FCredentials_BE& Credentials, const FString& ProviderUrl)
-{
-	if (USequenceWallet * Wallet = GetSubSystem())
+	else
 	{
-		Wallet->Init(Credentials,ProviderUrl);
-		TOptional OptionalWallet(Wallet);
-		return OptionalWallet;
+		SEQ_LOG(Warning,TEXT("The Credentials on disk were invalid please login"));
 	}
-	return nullptr;
-}
-
-TArray<FIdNamePair> USequenceWallet::GetAllNetworks()
-{
-	return USequenceSupport::GetAllNetworks();
-}
-
-TArray<FString> USequenceWallet::GetAllNetworkNames()
-{
-	return USequenceSupport::GetAllNetworkNames();
-}
-
-TArray<int64> USequenceWallet::GetAllNetworkIds()
-{
-	return USequenceSupport::GetAllNetworkIds();
-}
-
-FString USequenceWallet::GetNetworkName(const int64 NetworkIdIn)
-{
-	return USequenceSupport::GetNetworkName(NetworkIdIn);
-}
-
-int64 USequenceWallet::GetNetworkId(const FString& NetworkNameIn)
-{
-	return USequenceSupport::GetNetworkId(NetworkNameIn);
-}
-
-int64 USequenceWallet::GetSystemReadableAmount(const float AmountIn, const int64 DecimalsIn)
-{
-	return USequenceSupport::GetSystemReadableAmount(AmountIn, DecimalsIn);
-}
-
-float USequenceWallet::GetUserReadableAmount(const int64 AmountIn, const int64 DecimalsIn)
-{
-	return USequenceSupport::GetUserReadableAmount(AmountIn, DecimalsIn);
 }
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
@@ -162,7 +49,6 @@ void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL)
 {
 	this->Credentials = CredentialsIn;
-	this->Indexer = NewObject<UIndexer>();
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->Credentials.GetSessionWallet());
 	if (!this->Provider)
 	{

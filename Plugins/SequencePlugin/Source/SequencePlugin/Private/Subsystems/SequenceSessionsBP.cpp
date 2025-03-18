@@ -1,6 +1,9 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Subsystems/SequenceSessionsBP.h"
+
+#include "Errors.h"
+#include "Errors.h"
 #include "PlayFabResponseIntent.h"
 #include "PlayFabSendIntent.h"
 #include "RequestHandler.h"
@@ -277,16 +280,76 @@ void USequenceSessionsBP::FederateOidcToken(const FString& IdTokenIn, FOnSuccess
 	}
 }
 
-void USequenceSessionsBP::FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure) const
+void USequenceSessionsBP::FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	SEQ_LOG(Error, TEXT("PlayFab Registration Federation is not yet supported and will be included in v1.4.1"));
-	OnFailure.ExecuteIfBound("");
+	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		};
+
+		const FFailureCallback OnFederateFailure = [OnFailure](const FSequenceError& Error)
+		{
+			SEQ_LOG(Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			OnFailure.ExecuteIfBound(Error.Message);
+		};
+
+		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+		{
+			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+			OnFailure.ExecuteIfBound(ErrorMessage);
+		}
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+
+	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceSessionsBP::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure) const
+void USequenceSessionsBP::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	SEQ_LOG(Error, TEXT("PlayFab Login Federation is not yet supported and will be included in v1.4.1"));
-	OnFailure.ExecuteIfBound("");
+	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
+	{
+		const TFunction<void()> OnFederateSuccess = [OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		};
+
+		const FFailureCallback OnFederateFailure = [OnFailure](const FSequenceError& Error)
+		{
+			SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+			OnFailure.ExecuteIfBound(Error.Message);
+		};
+		
+		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+		{
+			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
+		}
+		else
+		{
+			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
+			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
+			OnFailure.ExecuteIfBound(ErrorMessage);
+		}
+	};
+
+	const FFailureCallback OnApiFailure = [OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+
+	this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)

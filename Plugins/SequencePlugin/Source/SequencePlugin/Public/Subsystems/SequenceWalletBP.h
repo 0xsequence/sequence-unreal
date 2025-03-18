@@ -7,6 +7,7 @@
 #include "Sequence/SequenceWalletBPTypes.h"
 #include "Sequence/Transactions.h"
 #include "Sequence/SequenceResponseIntent.h"
+#include "Sequence/SequenceWallet.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceWalletBP.generated.h"
 
@@ -77,5 +78,8 @@ public:
 	void GetSessionAuthProof(const FString& Nonce, FOnGetSessionAuthProof OnSuccess, FOnFailure OnFailure);
 
 private:
+	UPROPERTY()
+	USequenceWallet* Wallet;
+	
 	void CallOnSessionClosed() const;
 };

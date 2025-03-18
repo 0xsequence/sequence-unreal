@@ -417,7 +417,7 @@ FString USequenceAuthenticator::GenerateSigninURL(const ESocialSigninType& Type)
 
 void USequenceAuthenticator::InitializeSequence(const FCredentials_BE& Credentials) const
 {
-	if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
+	/*if (const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get(Credentials); WalletOptional.IsSet() && WalletOptional.GetValue())
 	{
 		this->CredentialsStorage->StoreCredentials(Credentials);
 		//this->CallAuthSuccess();
@@ -425,7 +425,7 @@ void USequenceAuthenticator::InitializeSequence(const FCredentials_BE& Credentia
 	else
 	{
 		//this->CallAuthFailure(TEXT("Failed to Initialize SequenceWallet"));
-	}
+	}*/
 }
 
 void USequenceAuthenticator::PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)

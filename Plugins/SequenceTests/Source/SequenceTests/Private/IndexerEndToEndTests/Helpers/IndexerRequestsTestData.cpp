@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "IndexerRequestsTestData.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
+#include "SequencePlugin/Public/Indexer/Indexer.h"
 
 UIndexerRequestsTestData * UIndexerRequestsTestData::Make(const int32 PendingRequestsIn)
 {

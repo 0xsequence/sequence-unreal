@@ -1,44 +1,28 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Subsystems/SequenceWalletBP.h"
-
 #include "Engine/Engine.h"
-#include "Engine/GameInstance.h"
 #include "Sequence/SequenceWallet.h"
-#include "Util/Log.h"
 
-USequenceWalletBP::USequenceWalletBP() { }
+USequenceWalletBP::USequenceWalletBP()
+{
+	this->Wallet = NewObject<USequenceWallet>();
+}
 
 FString USequenceWalletBP::GetWalletAddress()
 {
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		return Wallet->GetWalletAddress();
-	}
-	return "";
+	return this->Wallet->GetWalletAddress();
 }
 
 void USequenceWalletBP::UpdateProviderUrl(const FString& NewProviderUrl)
 {
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->UpdateProviderURL(NewProviderUrl);
-	}
+	return this->Wallet->UpdateProviderURL(NewProviderUrl);
 }
 
 void USequenceWalletBP::SignOut()
 {
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->SignOut();
-		this->CallOnSessionClosed();
-	}
+	this->Wallet->SignOut();
+	this->CallOnSessionClosed();
 }
 
 void USequenceWalletBP::SignMessage(const FString& Message, FOnSignMessage OnSuccess, FOnFailure OnFailure)
@@ -53,32 +37,22 @@ void USequenceWalletBP::SignMessage(const FString& Message, FOnSignMessage OnSuc
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->SignMessage(Message, OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->SignMessage(Message, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress, const FString& Message, const FString& Signature, FOnValidateMessageSignature OnSuccess, FOnFailure OnFailure)
 {
 	const TFunction<void(FSeqValidateMessageSignatureResponse_Data)> OnApiSuccess = [this, OnSuccess](const FSeqValidateMessageSignatureResponse_Data& isValidMessageSignature)
-		{
-			OnSuccess.ExecuteIfBound(isValidMessageSignature.isValid);
-		};
+	{
+		OnSuccess.ExecuteIfBound(isValidMessageSignature.isValid);
+	};
 
 	const TFunction<void(FSequenceError)> OnApiFailure = [this, OnFailure](const FSequenceError& Err)
 	{
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::GetFilteredFeeOptions(UTransactions * Transactions, FOnGetFilteredFeeOptions OnSuccess, FOnFailure OnFailure)
@@ -93,12 +67,7 @@ void USequenceWalletBP::GetFilteredFeeOptions(UTransactions * Transactions, FOnG
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->GetFeeOptions(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->GetFeeOptions(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::GetUnfilteredFeeOptions(UTransactions * Transactions, FOnGetUnFilteredFeeOptions OnSuccess, FOnFailure OnFailure)
@@ -113,12 +82,7 @@ void USequenceWalletBP::GetUnfilteredFeeOptions(UTransactions * Transactions, FO
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->GetUnfilteredFeeOptions(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->GetUnfilteredFeeOptions(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::SendNativeToken(const FString& RecipientAddress, const FString& Amount, FOnSendTransaction OnSuccess, FOnFailure OnFailure)
@@ -133,12 +97,7 @@ void USequenceWalletBP::SendNativeToken(const FString& RecipientAddress, const F
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->SendNativeToken(RecipientAddress, Amount, OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->SendNativeToken(RecipientAddress, Amount, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::SendTransactionWithFee(UTransactions * Transactions, FOnSendTransaction OnSuccess, FOnFailure OnFailure)
@@ -153,18 +112,13 @@ void USequenceWalletBP::SendTransactionWithFee(UTransactions * Transactions, FOn
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();	
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	if (Transactions->IsFeeSet())
 	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		if (Transactions->IsFeeSet())
-		{
-			Wallet->SendTransactionWithFeeOption(Transactions->GetTransactions(), Transactions->GetFee(), OnApiSuccess, OnApiFailure);
-		}
-		else
-		{
-			SEQ_LOG(Warning, TEXT("No Fee was set for a transaction being sent with a Fee!"));
-		}
+		this->Wallet->SendTransactionWithFeeOption(Transactions->GetTransactions(), Transactions->GetFee(), OnApiSuccess, OnApiFailure);
+	}
+	else
+	{
+		OnFailure.ExecuteIfBound("No Fee was set for a transaction being sent with a Fee!");
 	}
 }
 
@@ -180,12 +134,7 @@ void USequenceWalletBP::SendTransaction(UTransactions * Transactions, FOnSendTra
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->SendTransaction(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->SendTransaction(Transactions->GetTransactions(), OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::GetIdToken(const FString& Nonce, FOnGetIdToken OnSuccess, FOnFailure OnFailure)
@@ -200,12 +149,7 @@ void USequenceWalletBP::GetIdToken(const FString& Nonce, FOnGetIdToken OnSuccess
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->GetIdToken(Nonce, OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->GetIdToken(Nonce, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::ListSessions(FOnListSessions OnSuccess, FOnFailure OnFailure)
@@ -220,12 +164,7 @@ void USequenceWalletBP::ListSessions(FOnListSessions OnSuccess, FOnFailure OnFai
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 	
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet * Wallet = WalletOptional.GetValue();
-		Wallet->ListSessions(OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->ListSessions(OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::ListAccounts(FOnListAccounts OnSuccess, FOnFailure OnFailure)
@@ -240,12 +179,7 @@ void USequenceWalletBP::ListAccounts(FOnListAccounts OnSuccess, FOnFailure OnFai
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->ListAccounts(OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->ListAccounts(OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::GetSessionAuthProof(const FString& Nonce, FOnGetSessionAuthProof OnSuccess, FOnFailure OnFailure)
@@ -260,12 +194,7 @@ void USequenceWalletBP::GetSessionAuthProof(const FString& Nonce, FOnGetSessionA
 		OnFailure.ExecuteIfBound(Err.Message);
 	};
 
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (WalletOptional.IsSet() && WalletOptional.GetValue())
-	{
-		const USequenceWallet* Wallet = WalletOptional.GetValue();
-		Wallet->GetSessionAuthProof(Nonce,OnApiSuccess, OnApiFailure);
-	}
+	this->Wallet->GetSessionAuthProof(Nonce,OnApiSuccess, OnApiFailure);
 }
 
 void USequenceWalletBP::CallOnSessionClosed() const

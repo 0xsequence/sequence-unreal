@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
+#include "SequencePlugin/Public/Indexer/Indexer.h"
 #include "IndexerRequestsTestData.generated.h"
 
 /**

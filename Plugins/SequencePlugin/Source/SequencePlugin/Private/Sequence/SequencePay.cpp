@@ -1,30 +1,21 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "Transak.h"
+
+#include "Sequence/SequencePay.h"
+#include "HttpModule.h"
 #include "Http.h"
-#include "GenericPlatform/GenericPlatformProcess.h"
-#include "HttpManager.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
-UTransakOnRamp::UTransakOnRamp(){}
-
-UTransakOnRamp * UTransakOnRamp::Init(const FString& WalletAddressIn)
-{
-	UTransakOnRamp * Transak = NewObject<UTransakOnRamp>();
-	Transak->WalletAddress = WalletAddressIn;
-	return Transak;
-}
-
-void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure)
+void USequencePay::GetSupportedOnRampCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure)
 {
 	const FString& Url = "https://api.transak.com/api/v2/countries";
 	SEQ_LOG(Log, TEXT("%s"), *Url);
 	
-	const TSharedRef<IHttpRequest> http_post_req = FHttpModule::Get().CreateRequest();
-	http_post_req->SetVerb("GET");
-	http_post_req->SetTimeout(15);
-	http_post_req->SetURL(Url);
-	http_post_req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	const TSharedRef<IHttpRequest> GetRequest = FHttpModule::Get().CreateRequest();
+	GetRequest->SetVerb("GET");
+	GetRequest->SetTimeout(15);
+	GetRequest->SetURL(Url);
+	GetRequest->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 	{
 		if(bWasSuccessful)
 		{
@@ -49,20 +40,20 @@ void UTransakOnRamp::GetSupportedCountries(TSuccessCallback<TArray<FSupportedCou
 			}
 		}
 	});
-	http_post_req->ProcessRequest();
+	GetRequest->ProcessRequest();
 }
 
-FString UTransakOnRamp::GetTransakLink(const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)
+FString USequencePay::GetOnRampLink(const FString& WalletAddress, const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)
 {
 	const FAddFundsSettings AddFundsSettings(WalletAddress,FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn);
 	const FOnOffQueryParameters QueryParameters(WalletAddress,AddFundsSettings,DisableWalletAddressFormIn);
 	return ("https://global.transak.com?" + QueryParameters.AsQueryParameters()).Replace(TEXT(" "), TEXT(""));
 }
 
-void UTransakOnRamp::OpenTransakLink(const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)
+void USequencePay::OpenOnRampInExternalBrowser(const FString& WalletAddress, const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn)
 {
 	FString * ErrorPtr = nullptr;
-	FPlatformProcess::LaunchURL(*GetTransakLink(FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
+	FPlatformProcess::LaunchURL(*this->GetOnRampLink(WalletAddress,FiatCurrencyIn,DefaultFiatAmountIn,DefaultCryptoCurrencyIn,NetworksIn,DisableWalletAddressFormIn),TEXT(""),ErrorPtr);
 	if (ErrorPtr)
 	{
 		SEQ_LOG(Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
