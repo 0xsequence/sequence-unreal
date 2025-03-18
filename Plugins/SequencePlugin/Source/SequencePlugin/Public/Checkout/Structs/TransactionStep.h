@@ -54,37 +54,44 @@ public:
 		ReturnArgs += "\"data\":\"" + Data + "\",";
 		ReturnArgs += "\"to\":\"" + To + "\",";
 		ReturnArgs += "\"value\":\"" + Value + "\",";
-		ReturnArgs += "\"signature\":\"" + Signature.GetArgs() + "\",";
-		ReturnArgs += "\"post\":\"" + Post.GetArgs() + "\"";
+		ReturnArgs += "\"signature\":" + Signature.GetArgs() + ",";
+		ReturnArgs += "\"post\":" + Post.GetArgs();
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		
 		return ReturnArgs;
 	}
 
-	void Setup(FJsonObject& JSON_In)
+	void Setup(const FJsonObject& JSON_In)
 	{
 		if (JSON_In.TryGetField(TEXT("id")))
 		{
-			Id = static_cast<EStepType>(JSON_In.GetIntegerField(TEXT("id")));
+			Id = UStepType::GetStepTypeFromString(JSON_In.GetStringField(TEXT("id")));
 		}
 
 		Data = JSON_In.GetStringField(TEXT("data"));
 		To = JSON_In.GetStringField(TEXT("to"));
 		Value = JSON_In.GetStringField(TEXT("value"));
 		// Setup Signature
-		if (JSON_In.TryGetField(TEXT("signature")))
+		if (JSON_In.HasField(TEXT("signature")))
 		{
-			const TSharedPtr<FJsonValue> SignatureValue = JSON_In.GetField(TEXT("signature"), EJson::Object);
-			TSharedPtr<FJsonObject> SignatureJsonObject = USequenceSupport::JsonStringToObject(SignatureValue->AsString());
-			Signature.Setup(*SignatureJsonObject);
+			const TSharedPtr<FJsonValue> SignatureValue = JSON_In.TryGetField(TEXT("signature"));
+			if (SignatureValue != nullptr)
+			{
+				TSharedPtr<FJsonObject> SignatureJsonObject = SignatureValue->AsObject();
+				Signature.Setup(*SignatureJsonObject);
+			}
 		}
 		// Setup Post Request
-		if (JSON_In.TryGetField(TEXT("post")))
+		if (JSON_In.HasField(TEXT("post")))
 		{
-			const TSharedPtr<FJsonValue> PostRequestValue = JSON_In.GetField(TEXT("post"), EJson::Object);
-			const TSharedPtr<FJsonObject> PostRequestJsonObject = USequenceSupport::JsonStringToObject(PostRequestValue->AsString());
-			Post.Setup(*PostRequestJsonObject);
+			const TSharedPtr<FJsonValue> PostRequestValue = JSON_In.TryGetField(TEXT("post"));
+			
+			if (PostRequestValue != nullptr)
+			{
+				TSharedPtr<FJsonObject> PostRequestJsonObject = PostRequestValue->AsObject();
+				Post.Setup(*PostRequestJsonObject);
+			}
 		}
 	}
 };

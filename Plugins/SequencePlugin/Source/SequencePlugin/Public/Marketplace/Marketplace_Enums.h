@@ -90,6 +90,32 @@ class UMarketplaceEnumsExtensions : public UObject
 public:
 
     template<typename EnumType>
+    static FString AsString(EnumType EnumValue);
+
+    template<>
+    FString AsString<EOrderbookKind>(const EOrderbookKind OrderbookKind)
+    {
+        switch (OrderbookKind)
+        {
+            case EOrderbookKind::Sequence_Marketplace_V1:
+                return FString("sequence_marketplace_v1");
+            case EOrderbookKind::Sequence_Marketplace_V2:
+                return FString("sequence_marketplace_v2");
+            case EOrderbookKind::Blur:
+                return FString("blur");
+            case EOrderbookKind::Opensea:
+                return FString("opensea");
+            case EOrderbookKind::Looks_Rare:
+                return FString("looks_rare");
+            case EOrderbookKind::Reservoir:
+                return FString("reservoir");
+            case EOrderbookKind::X2Y2:
+                return FString("x2y2");
+            default: return FString("unknown");
+        }
+    }
+    
+    template<typename EnumType>
     static FString AsString(TEnumAsByte<EnumType> EnumValue);
 
     template<>

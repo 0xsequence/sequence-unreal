@@ -40,6 +40,7 @@ public:
 
 	template < typename T > T BuildResponse(FString Text) const;
 
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void SetChainID(const int64& InChainID);
 	
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
