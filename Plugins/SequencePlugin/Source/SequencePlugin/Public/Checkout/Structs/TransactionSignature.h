@@ -40,7 +40,7 @@ public:
 	{
 		FString ReturnArgs = "{";
 
-		ReturnArgs += "\"domain\":\"" + Domain.GetArgs() + "\",";
+		ReturnArgs += "\"domain\":" + Domain.GetArgs() + ",";
 		ReturnArgs += "\"types\":\"" + Types + "\",";
 		ReturnArgs += "\"primaryType\":\"" + PrimaryType + "\",";
 		ReturnArgs += "\"value\":\"" + Value + "\"";
@@ -51,18 +51,35 @@ public:
 		return ReturnArgs;
 	}
 
-	void Setup(FJsonObject& JSON_In)
+	void Setup(const FJsonObject& JSON_In)
 	{
 		// Setup Domain
-		if (JSON_In.TryGetField(TEXT("domain")))
+		if (JSON_In.HasField(TEXT("domain")))
 		{
-			const TSharedPtr<FJsonValue> DomainValue = JSON_In.GetField(TEXT("domain"), EJson::Object);
-			const TSharedPtr<FJsonObject> DomainJsonObject = USequenceSupport::JsonStringToObject(DomainValue->AsString());
-			Domain.Setup(*DomainJsonObject);
+			const TSharedPtr<FJsonValue> DomainValue = JSON_In.TryGetField(TEXT("domain"));
+			if (DomainValue != nullptr)
+			{
+				const TSharedPtr<FJsonObject> DomainJsonObject = DomainValue->AsObject(); //USequenceSupport::JsonStringToObject(DomainValue->AsString());
+				if (DomainJsonObject != nullptr)
+				{
+					Domain.Setup(*DomainJsonObject);
+				}
+			}
+		}
+
+		if (FString ReturnTypesString; JSON_In.TryGetStringField(TEXT("types"), ReturnTypesString))
+		{
+			Types = ReturnTypesString;
+		}
+
+		if (FString ReturnPrimaryTypeString; JSON_In.TryGetStringField(TEXT("primaryType"), ReturnPrimaryTypeString))
+		{
+			PrimaryType = ReturnPrimaryTypeString;
 		}
 		
-		Types = JSON_In.GetStringField(TEXT("types"));
-		PrimaryType = JSON_In.GetStringField(TEXT("primaryType"));
-		Value = JSON_In.GetStringField(TEXT("value"));
+		if (FString ReturnValueString; JSON_In.TryGetStringField(TEXT("value"), ReturnValueString))
+		{
+			Value = ReturnValueString;
+		}
 	}
 };

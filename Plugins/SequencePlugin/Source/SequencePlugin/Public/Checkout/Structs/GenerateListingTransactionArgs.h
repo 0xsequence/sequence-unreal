@@ -29,7 +29,7 @@ public:
 	{
 		this->CollectionAddress = "";
 		this->Owner = "";
-		this->ContractType = EContractType::UNKOWN_CT;
+		this->ContractType = UNKOWN_CT;
 		this->Orderbook = EOrderbookKind::Unknown;
 		this->Listing = FCreateReq();
 		this->WalletType = EWalletKind::Sequence;
@@ -40,7 +40,7 @@ public:
 		this->CollectionAddress = CollectionAddress;
 		this->Owner = Owner;
 		this->ContractType = ContractType;
-		this->Orderbook = Orderbook;
+		this->Orderbook = OrderbookKind;
 		this->Listing = Listing;
 		this->WalletType = WalletType;
 	}
@@ -49,15 +49,15 @@ public:
 	FString GetArgs() const
 	{
 		FString ReturnArgs = "{";
-
+		
 		ReturnArgs += "\"collectionAddress\":\"" + CollectionAddress + "\",";
 		ReturnArgs += "\"owner\":\"" + Owner + "\",";
 		ReturnArgs += "\"contractType\":\"" + UEnum::GetValueAsString(ContractType) + "\",";
-		ReturnArgs += "\"orderbook\":\"" + UEnum::GetValueAsString(Orderbook) + "\",";
-		ReturnArgs += "\"listing\":\"" + Listing.GetArgs() + "\",";
-		ReturnArgs += "\"WalletType\":\"" + UEnum::GetValueAsString(WalletType) + "\"";
+		ReturnArgs += "\"orderbook\":\"" + UMarketplaceEnumsExtensions::AsString(Orderbook) + "\",";
+		ReturnArgs += "\"listing\":" + Listing.GetArgs() + ",";
+		ReturnArgs += "\"walletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
 
-		ReturnArgs.Append("}"); // Close the JSON object
+		ReturnArgs.Append("}");// Close the JSON object
 		
 		return ReturnArgs;
 	}

@@ -50,11 +50,29 @@ public:
 		return ReturnArgs;
 	}
 
-	void Setup(FJsonObject& JSON_In)
+	void Setup(const FJsonObject& JSON_In)
 	{
-		Name = JSON_In.GetStringField(TEXT("name"));
-		Version = JSON_In.GetStringField(TEXT("version"));
-		ChainId = JSON_In.GetIntegerField(TEXT("chainId"));
-		VerifyingContract = JSON_In.GetStringField(TEXT("verifyingContract"));
+		FString ReturnStringValue;
+		int64 ReturnIntegerValue;
+		
+		if (JSON_In.TryGetStringField(TEXT("name"), ReturnStringValue))
+		{
+			this->Name = ReturnStringValue;
+		}
+		
+		if (JSON_In.TryGetStringField(TEXT("version"), ReturnStringValue))
+		{
+			this->Version = ReturnStringValue;	
+		}
+
+		if (JSON_In.TryGetNumberField(TEXT("chainId"), ReturnIntegerValue))
+		{
+			this->ChainId = ReturnIntegerValue;			
+		}
+
+		if (JSON_In.TryGetStringField(TEXT("verifyingContract"), ReturnStringValue))
+		{
+			this->VerifyingContract = ReturnStringValue;	
+		}
 	}
 };

@@ -43,10 +43,21 @@ public:
 		return ReturnArgs;
 	}
 
-	void Setup(FJsonObject& JSON_In)
+	void Setup(const FJsonObject& JSON_In)
 	{
-		EndPoint = JSON_In.GetStringField(TEXT("endPoint"));
-		Method = JSON_In.GetStringField(TEXT("method"));
-		Body = JSON_In.GetStringField(TEXT("body"));
+		if (FString ReturnEndPointString; JSON_In.TryGetStringField(TEXT("endPoint"), ReturnEndPointString))
+		{
+			EndPoint = ReturnEndPointString;
+		}
+
+		if (FString ReturnMethodString; JSON_In.TryGetStringField(TEXT("method"), ReturnMethodString))
+		{
+			Method = ReturnMethodString;
+		}
+		
+		if (FString ReturnBodyString; JSON_In.TryGetStringField(TEXT("body"), ReturnBodyString))
+		{
+			Body = ReturnBodyString;
+		}
 	}
 };

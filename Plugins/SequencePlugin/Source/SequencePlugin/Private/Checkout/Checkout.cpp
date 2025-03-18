@@ -150,9 +150,9 @@ template<typename T> T UCheckout::BuildResponse(const FString Text) const
 	return Ret_Struct;
 }
 
-void UCheckout::SetChainID(const int64& NewChainID)
+void UCheckout::SetChainID(const int64& InChainID)
 {
-	this->ChainID = NewChainID;
+	this->ChainID = InChainID;
 }
 
 void UCheckout::GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,

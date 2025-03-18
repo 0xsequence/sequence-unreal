@@ -58,11 +58,10 @@ public:
 			Steps.Empty();
 			for (int32 i = 0; i < StepsArray.Num(); ++i) 
 			{
-				TSharedPtr<FJsonValue> StepValue = StepsArray[i];
-				if (StepValue->Type == EJson::Object)
+				if (const TSharedPtr<FJsonValue> StepValue = StepsArray[i]; StepValue->Type == EJson::Object)
 				{
 					FTransactionStep Step;
-					TSharedPtr<FJsonObject> StepJsonObject = USequenceSupport::JsonStringToObject(StepValue->AsString()); 
+					TSharedPtr<FJsonObject> StepJsonObject = StepValue->AsObject();//USequenceSupport::JsonStringToObject(StepValue->AsString()); 
 					Step.Setup(*StepJsonObject); 
 					Steps.Add(Step); 
 				}
