@@ -13,7 +13,7 @@
 FString UCheckout::Url(const int64& TargetChainID, const FString& EndPoint) const
 {
 	FString Out_URL = HostName(TargetChainID);
-	Out_URL.Append(this->PATH);
+	Out_URL.Append(this->Path);
 
 	if (EndPoint.Len() > 0)
 	{
@@ -250,7 +250,7 @@ void UCheckout::GenerateListingTransaction(const FString& WalletAddress, const F
 	const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind, 
 	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
-	int64 EpochTime = Expiry.ToUnixTimestamp();
+	const int64 EpochTime = Expiry.ToUnixTimestamp();
 	const FString Endpoint = "GenerateListingTransaction";
 	const FString Args = BuildArgs<FGenerateListingTransactionArgs>(FGenerateListingTransactionArgs {
 		CollectionAddress, WalletAddress, ContractType, OrderbookKind, FCreateReq {

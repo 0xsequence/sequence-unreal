@@ -1,6 +1,7 @@
 #pragma once
 #include "StepType.generated.h"
 
+ENUM_RANGE_BY_COUNT(EStepType, 8)
 UENUM(Blueprintable)
 enum class EStepType : uint8
 {
@@ -22,16 +23,14 @@ class SEQUENCEPLUGIN_API UStepType : public UObject
 public:
 	static EStepType GetStepTypeFromString(const FString& StepTypeString)
 	{
-		const FString EStepTypeString{ TEXT("EStepType") };
-
-		if (const UEnum* StepTypeEnum{ FindObject<UEnum>(ANY_PACKAGE, *EStepTypeString, true) }) 
+		FText EnumDisplayText = FText::FromString("");
+		for (const EStepType Val : TEnumRange<EStepType>())
 		{
-			const int32 Index{ StepTypeEnum->GetIndexByNameString(StepTypeString) };
-
-			// Check if the enum is valid
-			if (const EStepType RegionInfoCheck{ static_cast<EStepType>(static_cast<uint8>(Index)) }; UEnum::GetValueAsString(RegionInfoCheck) != TEXT("None"))
+			UEnum::GetDisplayValueAsText(Val, EnumDisplayText);
+			
+			if (UEnum::GetValueAsString(Val).Equals(StepTypeString) || EnumDisplayText.ToString().Equals(StepTypeString))
 			{
-				return RegionInfoCheck;
+				return Val;
 			}
 		}
 
