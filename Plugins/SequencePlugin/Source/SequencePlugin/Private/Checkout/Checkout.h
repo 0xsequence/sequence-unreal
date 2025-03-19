@@ -25,7 +25,7 @@ class SEQUENCEPLUGIN_API UCheckout : public UObject
 private:
 	int64 ChainID;
 
-	const FString PATH = "/rpc/Marketplace/";
+	const FString Path = "/rpc/Marketplace/";
 	
 	FString Url(const int64& TargetChainID,const FString& EndPoint) const;
 	static FString HostName(int64 TargetChainID);
@@ -34,7 +34,7 @@ private:
 public:
 	// Constructor
 	UCheckout();
-	UCheckout(const int64& InChainID);
+	explicit UCheckout(const int64& InChainID);
 
 	template < typename T> FString BuildArgs(T StructIn) const;
 
