@@ -12,13 +12,13 @@
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"
 #include "SequenceResponseIntent.h"
+#include "Indexer/SequenceIndexer.h"
 #include "Sequence/FeeOption.h"
 #include "SequenceWallet.generated.h"
  
 using FSignature = FUnsizedData;
 using TransactionID = FString;
 
-class UIndexer;
 class UProvider;
 class USequenceRPCManager;
 
@@ -31,7 +31,7 @@ class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 	USequenceRPCManager * SequenceRPCManager;
 	
 	UPROPERTY()
-	UIndexer * Indexer;
+	USequenceIndexer * Indexer;
 
 	UPROPERTY()
 	UProvider * Provider;

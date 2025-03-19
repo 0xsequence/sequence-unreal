@@ -6,14 +6,14 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Dom/JsonObject.h"
 #include "Engine/Texture2D.h"
-#include "Indexer.generated.h"
+#include "SequenceIndexer.generated.h"
 
 /**
  * 
  */
 UCLASS()
 
-class SEQUENCEPLUGIN_API UIndexer : public UObject
+class SEQUENCEPLUGIN_API USequenceIndexer : public UObject
 {
 	GENERATED_BODY()
 
@@ -58,7 +58,7 @@ public:
 	*/
 	template < typename T> FString BuildArgs(T StructIn);
 	
-	UIndexer();
+	USequenceIndexer();
 
 	/*
 		Used to get a ping back from the Chain

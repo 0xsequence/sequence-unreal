@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SequenceRPCManager.h"
-#include "Indexer/Indexer.h"
+#include "Indexer/SequenceIndexer.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceIndexerBP.generated.h"
 
@@ -19,7 +19,7 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSuppliesMap, FSeqGetTokenSuppliesMapReturn, Return);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTransactionHistory, const TArray<FSeqTransaction>&, Transactions, FSeqPage, Page);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRuntimeStatus, FSeqRuntimeStatus, Status);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnVersion, FSeqVersion, Version);
+	DECLARE_DYNAMIC_DELEGATE_FourParams(FOnVersion, FString, WebRpcVersion, FString, SchemaVersion, FString, SchemaHash, FString, AppVersion);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPing, bool, Success);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
@@ -36,10 +36,10 @@ public:
 	void GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure);
+	void GetTokenSuppliesMap(const TMap<FString, FSeqTokenList>& TokenMap, const bool IncludeMetadata, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
+	void GetTransactionHistory(const FSeqTransactionHistoryFilter& Filter, const FSeqPage& Page, const bool IncludeMetadata, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure OnFailure);
@@ -52,5 +52,5 @@ public:
 	
 private:
 	UPROPERTY()
-	UIndexer* Indexer;
+	USequenceIndexer* Indexer;
 };

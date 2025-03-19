@@ -8,7 +8,7 @@
 #include "Native/NativeOAuth.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Indexer/Indexer.h"
+#include "Indexer/SequenceIndexer.h"
 #include "Provider.h"
 #include "SequenceRPCManager.h"
 #include "Util/Log.h"
@@ -16,7 +16,7 @@
 
 USequenceWallet::USequenceWallet()
 {
-	this->Indexer = NewObject<UIndexer>();
+	this->Indexer = NewObject<USequenceIndexer>();
 	this->Provider = UProvider::Make("");
 	this->SequenceRPCManager = nullptr;
 
@@ -38,7 +38,7 @@ USequenceWallet::USequenceWallet()
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
 	this->Credentials = CredentialsIn;
-	this->Indexer = NewObject<UIndexer>();
+	this->Indexer = NewObject<USequenceIndexer>();
 	this->SequenceRPCManager = USequenceRPCManager::Make(this->Credentials.GetSessionWallet());
 	if (!this->Provider)
 	{

@@ -8,7 +8,7 @@
 
 USequenceIndexerBP::USequenceIndexerBP()
 {
-	this->Indexer = NewObject<UIndexer>();
+	this->Indexer = NewObject<USequenceIndexer>();
 }
 
 void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure)
@@ -68,7 +68,7 @@ void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const 
 	this->Indexer->GetTokenSupplies(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& Args, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenSuppliesMap(const TMap<FString, FSeqTokenList>& TokenMap, const bool IncludeMetadata, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenSuppliesMapReturn& SuppliesMap)
 	{
@@ -80,11 +80,15 @@ void USequenceIndexerBP::GetTokenSuppliesMap(const FSeqGetTokenSuppliesMapArgs& 
 		SEQ_LOG(Error, TEXT("Error getting token supplies map: %s"), *Error.Message);
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
-		
+
+	FSeqGetTokenSuppliesMapArgs Args;
+	Args.tokenMap = TokenMap;
+	Args.includeMetaData = IncludeMetadata;
+	
 	this->Indexer->GetTokenSuppliesMap(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryArgs& Args, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTransactionHistory(const FSeqTransactionHistoryFilter& Filter, const FSeqPage& Page, const bool IncludeMetadata, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{
@@ -96,7 +100,12 @@ void USequenceIndexerBP::GetTransactionHistory(const FSeqGetTransactionHistoryAr
 		SEQ_LOG(Error, TEXT("Error getting transaction history: %s"), *Error.Message);
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
-		
+
+	FSeqGetTransactionHistoryArgs Args;
+	Args.filter = Filter;
+	Args.page = Page;
+	Args.includeMetaData = IncludeMetadata;
+	
 	this->Indexer->GetTransactionHistory(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
@@ -120,7 +129,7 @@ void USequenceIndexerBP::Version(FOnVersion OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqVersion> OnApiSuccess = [this, OnSuccess](const FSeqVersion& Status)
 	{
-		OnSuccess.ExecuteIfBound(Status);
+		OnSuccess.ExecuteIfBound(Status.webrpcVersion, Status.schemaVersion, Status.schemaHash, Status.appVersion);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)

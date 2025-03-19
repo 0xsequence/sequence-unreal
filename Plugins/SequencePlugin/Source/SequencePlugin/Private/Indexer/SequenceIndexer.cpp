@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Indexer/Indexer.h"
+#include "Indexer/SequenceIndexer.h"
 #include "ConfigFetcher.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
@@ -9,12 +9,12 @@
 #include "HttpManager.h"
 #include "Util/Log.h"
 
-UIndexer::UIndexer(){}
+USequenceIndexer::USequenceIndexer(){}
 
 /*
 	Combines <see cref="PATH" and name="name" to suffix on to the base address
 */
-FString UIndexer::Url(const int64& ChainID,const FString& EndPoint) const
+FString USequenceIndexer::Url(const int64& ChainID,const FString& EndPoint) const
 {
 	FString Out_URL = HostName(ChainID);
 	Out_URL.Append(this->PATH);
@@ -29,7 +29,7 @@ FString UIndexer::Url(const int64& ChainID,const FString& EndPoint) const
 /*
 	Get hostname directing to specific chainID
 */
-FString UIndexer::HostName(const int64 ChainID)
+FString USequenceIndexer::HostName(const int64 ChainID)
 {
 	FString Hostname = "https://";
 	Hostname.Append(USequenceSupport::GetNetworkNameForUrl(ChainID));
@@ -40,7 +40,7 @@ FString UIndexer::HostName(const int64 ChainID)
 
 /*
 	Here we construct a post request and parse out a response if valid.
-*/void UIndexer::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+*/void USequenceIndexer::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString Url = *this->Url(ChainID, Endpoint);
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
@@ -113,7 +113,7 @@ FString UIndexer::HostName(const int64 ChainID)
 	@Param (T) Struct_in the struct we are converting to a json object string
 	@Return the JSON Object String
 */
-template < typename T> FString UIndexer::BuildArgs(T StructIn)
+template < typename T> FString USequenceIndexer::BuildArgs(T StructIn)
 {
 	FString Result = "[FAILED TO PARSE]";
 	if (StructIn.customGetter)
@@ -131,7 +131,7 @@ template < typename T> FString UIndexer::BuildArgs(T StructIn)
 }
 
 //generic
-template<typename T> T UIndexer::BuildResponse(const FString Text)
+template<typename T> T USequenceIndexer::BuildResponse(const FString Text)
 {
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> JSON_Step;
@@ -161,14 +161,14 @@ template<typename T> T UIndexer::BuildResponse(const FString Text)
 	return Ret_Struct;
 }
 
-void UIndexer::Ping(const int64 ChainID, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::Ping(const int64 ChainID, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "Ping", "", [this,OnSuccess](const FString& Content) {
 		OnSuccess(this->BuildResponse<FSeqPingReturn>(Content).status);
 	}, OnFailure);
 }
 
-void UIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "Version", "", [this,OnSuccess](const FString& Content)
 	{
@@ -176,7 +176,7 @@ void UIndexer::Version(const int64 ChainID, TSuccessCallback<FSeqVersion> OnSucc
 	}, OnFailure);
 }
 
-void UIndexer::RuntimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::RuntimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeStatus> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "RuntimeStatus", "", [this,OnSuccess](const FString& Content)
 	{
@@ -184,7 +184,7 @@ void UIndexer::RuntimeStatus(const int64 ChainID, TSuccessCallback<FSeqRuntimeSt
 	}, OnFailure);
 }
 
-void UIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "GetChainID", "", [this,OnSuccess](const FString& Content)
 	{
@@ -192,7 +192,7 @@ void UIndexer::GetChainID(const int64 ChainID, TSuccessCallback<int64> OnSuccess
 	}, OnFailure);
 }
 
-void UIndexer::GetNativeTokenBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetNativeTokenBalance(const int64 ChainID, FString AccountAddr, TSuccessCallback<FSeqEtherBalance> OnSuccess, const FFailureCallback& OnFailure)
 {//since we are given a raw accountAddress we compose the json arguments here to put in the request manually
 	FString JSON_Arg = "{\"accountAddress\":\"";
 	JSON_Arg.Append(AccountAddr);
@@ -205,7 +205,7 @@ void UIndexer::GetNativeTokenBalance(const int64 ChainID, FString AccountAddr, T
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenBalances(const int64 ChainID, const FSeqGetTokenBalancesArgs& Args, TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetTokenBalances(const int64 ChainID, const FSeqGetTokenBalancesArgs& Args, TSuccessCallback<FSeqGetTokenBalancesReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "GetTokenBalances";
 	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetTokenBalancesArgs>(Args), [this,OnSuccess](const FString& Content)
@@ -215,7 +215,7 @@ void UIndexer::GetTokenBalances(const int64 ChainID, const FSeqGetTokenBalancesA
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSupplies(const int64 ChainID, const FSeqGetTokenSuppliesArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetTokenSupplies(const int64 ChainID, const FSeqGetTokenSuppliesArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "GetTokenSupplies", BuildArgs<FSeqGetTokenSuppliesArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
@@ -223,7 +223,7 @@ void UIndexer::GetTokenSupplies(const int64 ChainID, const FSeqGetTokenSuppliesA
 	}, OnFailure);
 }
 
-void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppliesMapArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppliesMapArgs& Args, TSuccessCallback<FSeqGetTokenSuppliesMapReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "GetTokenSuppliesMap", BuildArgs<FSeqGetTokenSuppliesMapArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
@@ -231,7 +231,7 @@ void UIndexer::GetTokenSuppliesMap(const int64 ChainID, const FSeqGetTokenSuppli
 	}, OnFailure);
 }
 
-void UIndexer::GetTransactionHistory(const int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceIndexer::GetTransactionHistory(const int64 ChainID, const FSeqGetTransactionHistoryArgs& Args, TSuccessCallback<FSeqGetTransactionHistoryReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, "GetTransactionHistory", BuildArgs<FSeqGetTransactionHistoryArgs>(Args), [this,OnSuccess](const FString& Content)
 	{
@@ -239,7 +239,7 @@ void UIndexer::GetTransactionHistory(const int64 ChainID, const FSeqGetTransacti
 	}, OnFailure);
 }
 
-TMap<int64, FSeqTokenBalance> UIndexer::GetTokenBalancesAsMap(TArray<FSeqTokenBalance> Balances)
+TMap<int64, FSeqTokenBalance> USequenceIndexer::GetTokenBalancesAsMap(TArray<FSeqTokenBalance> Balances)
 {
 	TMap<int64, FSeqTokenBalance> BalanceMap;
 

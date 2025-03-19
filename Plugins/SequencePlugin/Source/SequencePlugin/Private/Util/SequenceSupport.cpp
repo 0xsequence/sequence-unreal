@@ -5,7 +5,7 @@
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
-#include "Indexer/Indexer.h"
+#include "Indexer/SequenceIndexer.h"
 #include "Misc/Base64.h"
 #include "Types/BinaryData.h"
 
