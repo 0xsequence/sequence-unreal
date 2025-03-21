@@ -341,7 +341,7 @@ void USequenceSessionsBP::PlayFabLoginRpcAsync(const FString& UsernameIn, const 
 	this->PlayFabRpcAsync(Url, RequestBody, OnSuccessResponse, OnFailure);
 }
 
-void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) 
 {
 	NewObject<URequestHandler>()
 		->PrepareRequest()
@@ -349,7 +349,7 @@ void USequenceSessionsBP::PlayFabRpcAsync(const FString& Url, const FString& Con
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnFailure);
+		->ProcessAndThen(*RPCManager->Validator, OnSuccess, OnFailure, false);
 }
 
 void USequenceSessionsBP::CallEmailLoginRequiresCode() const

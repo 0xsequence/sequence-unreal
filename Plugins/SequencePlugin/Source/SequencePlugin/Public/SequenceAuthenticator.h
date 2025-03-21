@@ -11,6 +11,7 @@
 #include "INativeAuthCallback.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "Util/Async.h"
+#include "SequencePlugin/Private/ResponseSignatureValidator.h"
 #include "SequenceAuthenticator.generated.h"
 
 class USequenceRPCManager;
@@ -62,6 +63,8 @@ public:
 	UPROPERTY()
 	FOnFederateOrForce FederateOrForce;
 	
+	UResponseSignatureValidator* Validator;
+
 private://Broadcast handlers
 	void CallAuthRequiresCode() const;
 	void CallAuthFailure(const FString& ErrorMessageIn) const;
@@ -129,6 +132,7 @@ private:
 	
 private:
 	USequenceAuthenticator();
+
 	
 	void InitiateMobileSSO_Internal(const ESocialSigninType& Type);
 
@@ -302,14 +306,14 @@ public:
 	 * @param EmailIn PlayFab Email
 	 * @param PasswordIn PlayFab Password
 	 */
-	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn) const;
+	void FederatePlayFabNewAccount(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn);
 
 	/**
 	 * Used to federate an existing account on PlayFab
 	 * @param UsernameIn PlayFab Username
 	 * @param PasswordIn PlayFab Password
 	 */
-	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn) const;
+	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn);
 
 	/**
 	 * Used to force open the last failed OpenSession Attempt
@@ -369,7 +373,7 @@ private:
 	 * @param OnSuccess Called when successful (returns sessionTicket)
 	 * @param OnFailure Called when unsuccessful (returns error)
 	 */
-	static void PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	void PlayFabLoginRPC(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Used to Create a new user & log them in with PlayFab
@@ -379,13 +383,13 @@ private:
 	 * @param OnSuccess Called when successful (returns sessionTicket)
 	 * @param OnFailure Called when unsuccessful (returns error)
 	 */
-	static void PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	
+	void PlayFabNewAccountLoginRPC(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+
 	static FString GeneratePlayFabUrl();
 	
 	static FString GeneratePlayFabRegisterUrl();
 	
-	static void PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+  void PlayFabRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 	static FString ValidateUsername(const FString& Username);
 	static FString ValidateEmail(const FString& Email);
 

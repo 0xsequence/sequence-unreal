@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "SequencePlugin/Public/SequenceAuthenticator.h"
+#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "SignInOutRepeatedlyTest.generated.h"
 
 class FSignInOutRepeatedlyTest;
@@ -29,6 +30,7 @@ private:
 	USequenceAuthenticator* Authenticator = nullptr;
 	int32 Repetitions = 0;
 	static const int32 MaxRepetitions = 3;
+	TArray<FString> SessionIds;
 
 	void ConnectAsGuest();
 };

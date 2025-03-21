@@ -56,7 +56,9 @@ private:
 		FIdName(56,TEXT("bsc")),
 		FIdName(100,TEXT("gnosis")),
 		FIdName(137,TEXT("polygon")),
+		FIdName(273,TEXT("xr1")),
 		FIdName(1101,TEXT("polygon-zkevm")),
+		FIdName(1284,TEXT("moonbeam")),
 		FIdName(1868,TEXT("soneium")),
 		FIdName(6283,TEXT("laos")),
 		FIdName(7668,TEXT("rootnet")),
@@ -67,6 +69,7 @@ private:
 		FIdName(33139,TEXT("apechain")),
 		FIdName(42161,TEXT("arbitrum")),
 		FIdName(42170,TEXT("arbitrum-nova")),
+		FIdName(42793,TEXT("etherlink")),
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
@@ -74,17 +77,21 @@ private:
 		
 		FIdName(41,TEXT("telos-testnet")),
 		FIdName(97,TEXT("bsc-testnet")),
+		FIdName(1287,TEXT("moonbase-alpha")),
 		FIdName(1946,TEXT("soneium-minato")),
 		FIdName(1993,TEXT("b3-sepolia")),
 		FIdName(2730,TEXT("xr-sepolia")),
 		FIdName(7672,TEXT("rootnet-porcini")),
+		FIdName(10143,TEXT("monad-testnet")),
 		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(33111,TEXT("apechain-testnet")),
 		FIdName(40875,TEXT("homeverse-testnet")),
 		FIdName(43113,TEXT("avalanche-testnet")),
+		FIdName(50312,TEXT("somnia-testnet")),
 		FIdName(62850,TEXT("laos-sigma-testnet")),
 		FIdName(80002,TEXT("amoy")),
 		FIdName(84532,TEXT("base-sepolia")),
+		FIdName(128123,TEXT("etherlink-testnet")),
 		FIdName(421614,TEXT("arbitrum-sepolia")),
 		FIdName(11155111,TEXT("sepolia")),
 		FIdName(11155420,TEXT("optimism-sepolia")),
@@ -115,6 +122,9 @@ private:
 		FIdName(7668,TEXT("Root Network")),
 		FIdName(1868,TEXT("Soneium")),
 		FIdName(40,TEXT("Telos")),
+		FIdName(1284,TEXT("Moonbeam")),
+		FIdName(42793, TEXT("Etherlink")),
+		FIdName(273, TEXT("XR1")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -136,6 +146,10 @@ private:
 		FIdName(62850,TEXT("LAOS Sigma Testnet")),
 		FIdName(7672,TEXT("Root Network Porcini Testnet")),
 		FIdName(41,TEXT("Telos Testnet")),
+		FIdName(1287,TEXT("Moonbase Alpha")),
+		FIdName(128123,TEXT("Etherlink Testnet")),
+		FIdName(10143,TEXT("Monad Testnet")),
+		FIdName(50312,TEXT("Somnia Testnet")),
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -160,6 +174,9 @@ private:
 		FNameId(TEXT("rootnet"),7668),
 		FNameId(TEXT("soneium"),1868),
 		FNameId(TEXT("telos"),40),
+		FNameId(TEXT("moonbeam"),1284),
+		FNameId(TEXT("etherlink"),42793),
+		FNameId(TEXT("xr1"),273),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -181,6 +198,10 @@ private:
 		FNameId(TEXT("laos-sigma"),62850),
 		FNameId(TEXT("rootnet-porcini"),7672),
 		FNameId(TEXT("telos-testnet"), 41),
+		FNameId(TEXT("moonbase-alpha"),1287),
+		FNameId(TEXT("etherlink-testnet"),128123),
+		FNameId(TEXT("monad-testnet"),10143),
+		FNameId(TEXT("somnia-testnet"),50312),
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -205,6 +226,9 @@ private:
 		{ENetwork::Root, 7668},
 		{ENetwork::Soneium, 1868},
 		{ENetwork::Telos, 40},
+		{ENetwork::Moonbeam, 1284},
+		{ENetwork::Etherlink, 42793},
+		{ENetwork::XR1, 273},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -226,6 +250,10 @@ private:
 		{ENetwork::LAOSSigma, 62850},
 		{ENetwork::RootPorcini, 7672},
 		{ENetwork::TelosTestnet, 41},
+		{ENetwork::MoonbaseAlpha, 1287},
+		{ENetwork::EtherlinkTestnet, 128123},
+		{ENetwork::MonadTestnet, 10143},
+		{ENetwork::SomniaTestnet, 50312},
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -250,6 +278,9 @@ private:
 		{ENetwork::Root, TEXT("Root Network")},
 		{ENetwork::Soneium, TEXT("Soneium")},
 		{ENetwork::Telos, TEXT("Telos")},
+		{ENetwork::Moonbeam, TEXT("Moonbeam")},
+		{ENetwork::Etherlink, TEXT("Etherlink")},
+		{ENetwork::XR1, TEXT("XR1")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
@@ -271,6 +302,10 @@ private:
 		{ENetwork::LAOSSigma, TEXT("LAOS Sigma Testnet")},
 		{ENetwork::RootPorcini, TEXT("Root Network Porcini Testnet")},
 		{ENetwork::TelosTestnet, TEXT("Telos Testnet")},
+		{ENetwork::MoonbaseAlpha, TEXT("Moonbase Alpha")},
+		{ENetwork::EtherlinkTestnet, TEXT("Etherlink Testnet")},
+		{ENetwork::MonadTestnet, TEXT("Monad Testnet")},
+		{ENetwork::SomniaTestnet, TEXT("Somnia Testnet")},
 	};
 
 public:
@@ -374,6 +409,7 @@ public:
 	{
 		FString Ret;
 		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
+		StringReplace(&Ret, "\n", "");
 		return Ret;
 	}
 
@@ -486,4 +522,5 @@ private:
 	* some special edge cases from json responses / parsing as well!
 	*/
 	static FString StringCleanup(FString String);
+	static void StringReplace(FString* Input, const FString& Search, const FString& Replacement);
 };

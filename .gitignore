@@ -1,3 +1,6 @@
+# Ignore StarterContent, will be added automatically
+Content/StarterContent/
+
 # Unreal dotSettings.user
 SequenceUnreal.uproject.DotSettings.user
 

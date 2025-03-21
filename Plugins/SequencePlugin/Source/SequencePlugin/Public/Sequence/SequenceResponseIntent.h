@@ -538,6 +538,59 @@ struct SEQUENCEPLUGIN_API FSeqIdTokenResponse
 	}
 };
 
+// Wallet Linking
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "signatureChainId"))
+	FString SignatureChainId = "";
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletAddress"))
+	FString ParentWalletAddress = "";
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletMessage"))
+	FString ParentWalletMessage = "";
+
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletSignature"))
+	FString ParentWalletSignature = "";
+
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
+	FString LinkedWalletAddress = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWallet
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "id"))
+	int64 Id = 0;
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletType"))
+	FString WalletType = "";
+	
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletAddress"))
+	FString WalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
+	FString LinkedWalletAddress = "";
+
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "createdAt"))
+	FString CreatedAt = "";
+};
+
+USTRUCT(Blueprintable)
+struct SEQUENCEPLUGIN_API FSeqLinkedWalletsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWallets"))
+	TArray<FSeqLinkedWallet> LinkedWallets;
+};
+
 
 //Validate Signature//
 
