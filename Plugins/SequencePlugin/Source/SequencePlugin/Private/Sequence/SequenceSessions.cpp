@@ -354,5 +354,5 @@ void USequenceSessions::PlayFabRpc(const FString& Url, const FString& Content, c
 		->WithHeader("Content-type", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnFailure);
+		->ProcessAndThen(*this->RPCManager->Validator, OnSuccess, OnFailure);
 }

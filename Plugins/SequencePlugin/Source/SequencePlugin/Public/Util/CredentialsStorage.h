@@ -1,9 +1,16 @@
+// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #pragma once
+
 #include "Credentials.h"
 #include "Encryptors/GenericNativeEncryptor.h"
+#include "CredentialsStorage.generated.h"
 
+UCLASS()
 class SEQUENCEPLUGIN_API UCredentialsStorage : public UObject
 {
+	GENERATED_BODY()
+	
 public:
 	UCredentialsStorage();
 
@@ -14,7 +21,9 @@ public:
 	void ClearStoredCredentials() const;
 
 private:
+	UPROPERTY()
 	UGenericNativeEncryptor* Encryptor = nullptr;
+	
 	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 };

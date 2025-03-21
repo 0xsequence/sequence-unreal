@@ -14,7 +14,7 @@ USequenceSessionsBP::USequenceSessionsBP()
 	this->Sessions = NewObject<USequenceSessions>();
 }
 
-bool USequenceSessionsBP::CheckExistingSession() const
+bool USequenceSessionsBP::CheckExistingSession()
 {
 	return this->Sessions->CheckExistingSession();
 }

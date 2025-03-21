@@ -41,9 +41,6 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOption
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	UResponseSignatureValidator& RPCValidator = *Validator;
-	SEQ_LOG(Log, TEXT("URL set to: %s"), *Url);
-	SEQ_LOG(Log, TEXT("Request content set to: %s"), *Content);
-
 	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
 	
 	NewObject<URequestHandler>()

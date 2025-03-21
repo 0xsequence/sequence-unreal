@@ -1,4 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #pragma once
 #include "Credentials.h"
 #include "Indexer/Structs/Struct_Data.h"
@@ -14,6 +15,7 @@
 #include "SequenceResponseIntent.h"
 #include "Indexer/SequenceIndexer.h"
 #include "Sequence/FeeOption.h"
+#include "Util/CredentialsStorage.h"
 #include "SequenceWallet.generated.h"
  
 using FSignature = FUnsizedData;
@@ -26,18 +28,6 @@ UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
 	GENERATED_BODY()
-	
-	UPROPERTY()
-	USequenceRPCManager * SequenceRPCManager;
-	
-	UPROPERTY()
-	USequenceIndexer * Indexer;
-
-	UPROPERTY()
-	UProvider * Provider;
-
-	UPROPERTY()
-	FCredentials_BE Credentials;
 
 public:
 	USequenceWallet();
@@ -139,15 +129,6 @@ public:
 	 */
 	void SignOut() const;
 
-private:
-	void Init(const FCredentials_BE& CredentialsIn);
-	void Init(const FCredentials_BE& CredentialsIn,const FString& ProviderURL);
-
-	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
-	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
-	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
-
-public:
 	void RemoveLinkedWallet(const FString& LinkedWalletAddress, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void BlockByNumber(uint64 Number, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,
@@ -190,4 +171,23 @@ public:
 	
 	void NonViewCall(const FEthTransaction& Transaction, const FPrivateKey& PrivateKey, int ChainID,
 	                 const TFunction<void(FUnsizedData)>& OnSuccess, const TFunction<void(FSequenceError)>& OnFailure) const;
+
+private:
+	static TArray<FFeeOption> MarkValidFeeOptions(TArray<FFeeOption> FeeOptions, TArray<FFeeOption> BalanceOptions);
+	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
+	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
+
+	FCredentials_BE GetCredentials() const;
+	
+	UPROPERTY()
+	USequenceRPCManager* SequenceRPCManager;
+	
+	UPROPERTY()
+	USequenceIndexer* Indexer;
+
+	UPROPERTY()
+	UProvider * Provider;
+
+	UPROPERTY()
+	UCredentialsStorage* CredentialsStorage;
 };

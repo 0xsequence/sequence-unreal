@@ -65,27 +65,18 @@ void USignInOutRepeatedlyTestHelper::OnAuthSuccess()
     if (Repetitions < MaxRepetitions)
     {
         Repetitions++;
-        if (TOptional<USequenceWallet*> OptionalSequenceWallet = USequenceWallet::Get(); OptionalSequenceWallet.IsSet() && OptionalSequenceWallet.GetValue())
-        {
-            
-            TSet<FString> UniqueSessionIds(SessionIds);
-            bool bAllSessionIdsUnique = UniqueSessionIds.Num() == SessionIds.Num();
-            if (!bAllSessionIdsUnique)
-            {
-                bTestComplete = true;
-                ParentTest->AddError(TEXT("Session Ids are not unique"));
-                return;
-            }
-            
-            SessionIds.Add(OptionalSequenceWallet.GetValue()->GetSessionId());
-            OptionalSequenceWallet.GetValue()->SignOut();
-        }
-        else
+        const USequenceWallet* Wallet = NewObject<USequenceWallet>();
+        TSet<FString> UniqueSessionIds(SessionIds);
+        bool bAllSessionIdsUnique = UniqueSessionIds.Num() == SessionIds.Num();
+        if (!bAllSessionIdsUnique)
         {
             bTestComplete = true;
-            ParentTest->AddError(TEXT("Failed to get SequenceWallet"));
+            ParentTest->AddError(TEXT("Session Ids are not unique"));
             return;
         }
+            
+        SessionIds.Add(Wallet->GetSessionId());
+        Wallet->SignOut();
         ConnectAsGuest();
     }
     else

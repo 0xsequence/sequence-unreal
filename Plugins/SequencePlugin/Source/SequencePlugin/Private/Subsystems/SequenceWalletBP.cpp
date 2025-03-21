@@ -197,6 +197,37 @@ void USequenceWalletBP::GetSessionAuthProof(const FString& Nonce, FOnGetSessionA
 	this->Wallet->GetSessionAuthProof(Nonce,OnApiSuccess, OnApiFailure);
 }
 
+void USequenceWalletBP::GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnLinkedWalletsFailure OnFailure)
+{
+	const TFunction<void (FSeqLinkedWalletsResponse)> OnApiSuccess = [OnSuccess](const FSeqLinkedWalletsResponse& LinkedWallets)
+	{
+		OnSuccess.ExecuteIfBound(LinkedWallets);
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
+	{
+		OnFailure.ExecuteIfBound(Err.Message);
+	};
+	
+	this->Wallet->GetLinkedWallets(OnApiSuccess, OnApiFailure);
+}
+
+void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure)
+{
+	const TFunction<void()> OnApiSuccess = [OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
+	{
+		SEQ_LOG(Error, TEXT("Failed to unlink wallet."));
+		OnFailure.ExecuteIfBound(Err.Message);
+	};
+	
+	this->Wallet->RemoveLinkedWallet(LinkedWalletAddress, OnApiSuccess, OnApiFailure);
+}
+
 void USequenceWalletBP::CallOnSessionClosed() const
 {
 	if (this->OnSessionClosed.IsBound())

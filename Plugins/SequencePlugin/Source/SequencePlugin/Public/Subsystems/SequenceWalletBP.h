@@ -25,7 +25,10 @@ class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListSessions, const TArray<FSeqListSessions_Session>&, Sessions);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListAccounts, const TArray<FSeqAccount>&, Accounts, FString, CurrentAccountId);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSessionAuthProof, const FSeqGetSessionAuthProof_Data, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWallets, const FSeqLinkedWalletsResponse&, LinkedWallets);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWalletsFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
+	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	
@@ -76,6 +79,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
 	void GetSessionAuthProof(const FString& Nonce, FOnGetSessionAuthProof OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void GetLinkedWallets(FOnLinkedWallets OnSuccess, FOnLinkedWalletsFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure);
 
 private:
 	UPROPERTY()

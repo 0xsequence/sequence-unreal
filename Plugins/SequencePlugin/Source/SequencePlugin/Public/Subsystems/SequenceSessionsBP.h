@@ -38,7 +38,7 @@ public:
 	void GetAppleTokenId(FOnBrowserRequired BrowserRequired);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	bool CheckExistingSession() const;
+	bool CheckExistingSession();
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure);
