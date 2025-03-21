@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
-#include "Native/NativeOAuth.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Indexer/SequenceIndexer.h"
@@ -13,6 +12,7 @@
 #include "SequenceRPCManager.h"
 #include "Util/Log.h"
 #include "Sequence/SequenceSdk.h"
+#include "Util/CredentialsStorage.h"
 
 USequenceWallet::USequenceWallet()
 {

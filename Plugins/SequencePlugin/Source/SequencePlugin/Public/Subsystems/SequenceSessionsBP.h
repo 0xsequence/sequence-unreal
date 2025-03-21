@@ -3,11 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceAuthenticator.h"
 #include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Util/CredentialsStorage.h"
 #include "INativeAuthCallback.h"
+#include "Sequence/SequenceSessions.h"
 #include "SequenceSessionsBP.generated.h"
 
 UCLASS(Blueprintable)
@@ -76,20 +75,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SetForceCreateAccount(const bool NewForceCreateAccount);
 	
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
 
 private:
 	UPROPERTY()
-	USequenceRPCManager* RPCManager;
+	USequenceSessions* Sessions;
 	
-	UPROPERTY()
-	USequenceAuthenticator* Authenticator;
-
-	UCredentialsStorage* CredentialsStorage;
-	
-	void PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void PlayFabLoginRpc(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void PlayFabRpc(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void CallOnSessionCreated(const FCredentials_BE& Credentials) const;
+	void CallOnSessionCreated() const;
 };

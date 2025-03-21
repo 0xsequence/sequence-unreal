@@ -34,24 +34,30 @@ bool FSignInOutRepeatedlyTest::RunTest(const FString& Parameters)
 
 void USignInOutRepeatedlyTestHelper::RunTest()
 {
-    
-    Authenticator = NewObject<USequenceAuthenticator>();
-    if (!Authenticator)
+    Sessions = NewObject<USequenceSessions>();
+    if (!Sessions)
     {
         ParentTest->AddError(TEXT("Error creating authenticator"));
         bTestComplete = true;
         return;
     }
-    // TODO: re-add delegates as function parameters 
-    //Authenticator->AuthSuccess.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthSuccess);
-    //Authenticator->AuthFailure.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthFailure);
-
+    
     ConnectAsGuest();
 }
 
 void USignInOutRepeatedlyTestHelper::ConnectAsGuest()
 {
-    Authenticator->GuestLogin(false);
+    const TFunction<void()> OnApiSuccess = [this]()
+    {
+        this->OnAuthSuccess();
+    };
+
+    const FFailureCallback OnApiFailure = [this](const FSequenceError& Error)
+    {
+        this->OnAuthFailure(Error.Message);
+    };
+
+    this->Sessions->StartGuestSession(OnApiSuccess, OnApiFailure);
 }
 
 void USignInOutRepeatedlyTestHelper::OnAuthSuccess()

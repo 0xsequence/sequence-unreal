@@ -1,8 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "SequenceRPCManager.h"
-
-#include "SequenceAuthenticator.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
 #include "Interfaces/IHttpResponse.h"
@@ -14,6 +12,7 @@
 #include "Misc/DateTime.h"
 #include "Util/Log.h"
 #include "Sequence/SequenceSdk.h"
+#include "Util/CredentialsStorage.h"
 
 template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOptional<int64> CurrentTime) const
 {

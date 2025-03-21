@@ -37,18 +37,22 @@ bool FWaaSFederatedAuthTests::RunTest(const FString& Parameters)
 
 void UWaaSFederatedAuthTestsHelper::RunTest()
 {
-    Authenticator = NewObject<USequenceAuthenticator>();
+    Sessions = NewObject<USequenceSessions>();
     Email = FString::Printf(TEXT("test-%lld@example.com"), FDateTime::UtcNow().ToUnixTimestamp());
     Username = FString::Printf(TEXT("testuser%lld"), FDateTime::UtcNow().ToUnixTimestamp());
     Password = "testpassword";
 
-    // TODO: re-add delegates as function parameters 
-    //Authenticator->FederateSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateSuccess);
-    //Authenticator->FederateFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnFederateFailure);
-    //Authenticator->AuthSuccess.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthSuccess);
-    //Authenticator->AuthFailure.AddDynamic(this, &UWaaSFederatedAuthTestsHelper::OnAuthFailure);
+    const TFunction<void()> OnSuccess = [this]()
+    {
+        this->OnAuthSuccess();
+    };
 
-    Authenticator->GuestLogin(false);
+    const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+    {
+        this->OnAuthFailure(Error.Message);
+    };
+    
+    Sessions->StartGuestSession(OnSuccess, OnFailure);
 }
 
 void UWaaSFederatedAuthTestsHelper::OnFederateSuccess()
@@ -65,7 +69,17 @@ void UWaaSFederatedAuthTestsHelper::OnFederateFailure(const FString& Error)
 
 void UWaaSFederatedAuthTestsHelper::OnAuthSuccess()
 {
-    Authenticator->FederatePlayFabNewAccount(Username, Email, Password);
+    const TFunction<void()> OnSuccess = [this]()
+    {
+        this->OnFederateSuccess();
+    };
+
+    const FFailureCallback OnFailure = [this](const FSequenceError& Error)
+    {
+        this->OnFederateFailure(Error.Message);
+    };
+    
+    Sessions->FederatePlayFabRegistration(Username, Email, Password, OnSuccess, OnFailure);
 }
 
 void UWaaSFederatedAuthTestsHelper::OnAuthFailure(const FString& Error)

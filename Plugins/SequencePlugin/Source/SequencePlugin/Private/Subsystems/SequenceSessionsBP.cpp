@@ -3,47 +3,46 @@
 #include "Subsystems/SequenceSessionsBP.h"
 
 #include "Errors.h"
-#include "Errors.h"
 #include "PlayFabResponseIntent.h"
-#include "PlayFabSendIntent.h"
 #include "RequestHandler.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
-#include "Native/NativeOAuth.h"
 #include "Util/Log.h"
-#include "Util/SequenceSupport.h"
 
 USequenceSessionsBP::USequenceSessionsBP()
 {
-	this->RPCManager = USequenceRPCManager::Make(false);
-	this->Authenticator = NewObject<USequenceAuthenticator>();
-	this->CredentialsStorage = NewObject<UCredentialsStorage>();
+	this->Sessions = NewObject<USequenceSessions>();
 }
 
 bool USequenceSessionsBP::CheckExistingSession() const
 {
-	const FStoredCredentials_BE Credentials = this->CredentialsStorage->GetStoredCredentials();
-	return Credentials.GetValid();
+	return this->Sessions->CheckExistingSession();
 }
 
 void USequenceSessionsBP::GetGoogleTokenId(FOnBrowserRequired BrowserRequired)
 {
-#if PLATFORM_ANDROID || PLATFORM_IOS
-	this->Authenticator->SignInWithGoogleMobile(this);
-#else
-	const FString SignInUrl = this->Authenticator->GetSigninURL(ESocialSigninType::Google);
-	BrowserRequired.ExecuteIfBound(SignInUrl);
-#endif
+	if (this->Sessions->IsBrowserRequired)
+	{
+		const FString Url = this->Sessions->GetGoogleSignInUrl();
+		BrowserRequired.ExecuteIfBound(Url);
+	}
+	else
+	{
+		this->Sessions->GetGoogleTokenId(this);
+	}
 }
 
 void USequenceSessionsBP::GetAppleTokenId(FOnBrowserRequired BrowserRequired)
 {
-#if PLATFORM_ANDROID || PLATFORM_IOS
-	this->Authenticator->SignInWithAppleMobile(this);
-#else
-	const FString SignInUrl = this->Authenticator->GetSigninURL(ESocialSigninType::Apple);
-	BrowserRequired.ExecuteIfBound(SignInUrl);
-#endif
+	if (this->Sessions->IsBrowserRequired)
+	{
+		const FString Url = this->Sessions->GetAppleSignInUrl();
+		BrowserRequired.ExecuteIfBound(Url);
+	}
+	else
+	{
+		this->Sessions->GetAppleTokenId(this);
+	}
 }
 
 void USequenceSessionsBP::StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure)
@@ -59,14 +58,13 @@ void USequenceSessionsBP::StartEmailLogin(const FString& Email, FOnSuccess Requi
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->RPCManager->InitEmailAuth(Email.ToLower(),OnApiSuccess,OnApiFailure);
+	this->Sessions->StartEmailLogin(Email, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired)
 {
-	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		this->CallOnSessionCreated(Credentials);
 		OnSuccess.ExecuteIfBound();
 	};
 
@@ -82,7 +80,7 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCode(const FString& Code, FOnSucc
 		OnFederationRequired.ExecuteIfBound(FederationData);
 	};
 
-	this->RPCManager->OpenEmailSession(Code, true, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
+	this->Sessions->ConfirmEmailLoginWithCode(Code, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
 void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
@@ -95,9 +93,8 @@ void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
 
 void USequenceSessionsBP::StartOidcSession(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired)
 {
-	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		this->CallOnSessionCreated(Credentials);
 		OnSuccess.ExecuteIfBound();
 	};
 
@@ -113,32 +110,15 @@ void USequenceSessionsBP::StartOidcSession(const FString& IdToken, FOnSuccess On
 		OnFederationRequired.ExecuteIfBound(FederationData);
 	};
 
-	this->RPCManager->OpenOIDCSession(IdToken, true, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
+	this->Sessions->StartOidcSession(IdToken, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
 void USequenceSessionsBP::PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure, OnFederationRequired](const FString& SessionTicket)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
-		{
-			this->CallOnSessionCreated(Credentials);
-			OnSuccess.ExecuteIfBound();
-		};
-
-		const FFailureCallback OnOpenFailure = [this, OnFailure](const FSequenceError& Error)
-		{
-			SEQ_LOG(Error, TEXT("Error: %s"), *Error.Message);
-			OnFailure.ExecuteIfBound(Error.Message);
-		};
-
-		const TFunction<void (FFederationSupportData)> OnApiFederationRequired = [this, OnFederationRequired](const FFederationSupportData& FederationData)
-		{
-			SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
-			OnFederationRequired.ExecuteIfBound(FederationData);
-		};
-		
-		this->RPCManager->OpenPlayFabSession(SessionTicket, true, OnOpenSuccess, OnOpenFailure, OnApiFederationRequired);
+		this->CallOnSessionCreated();
+		OnSuccess.ExecuteIfBound();
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -147,14 +127,20 @@ void USequenceSessionsBP::PlayFabRegistration(const FString& UsernameIn, const F
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure);
+	const TFunction<void (FFederationSupportData)> OnApiFederationRequired = [this, OnFederationRequired](const FFederationSupportData& FederationData)
+	{
+		SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
+		OnFederationRequired.ExecuteIfBound(FederationData);
+	};
+
+	this->Sessions->PlayFabRegistration(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
 void USequenceSessionsBP::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure, OnFederationRequired](const FString& SessionTicket)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		PlayFabAuthenticateWithSessionTicket(SessionTicket, OnSuccess, OnFailure, OnFederationRequired);
+		OnSuccess.ExecuteIfBound();
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -163,26 +149,20 @@ void USequenceSessionsBP::PlayFabLogin(const FString& UsernameIn, const FString&
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	const TFunction<void(FString)> OnSuccessResponse = [OnApiSuccess, OnApiFailure](const FString& Response)
+	const TFunction<void (FFederationSupportData)> OnApiFederationRequired = [this, OnFederationRequired](const FFederationSupportData& FederationData)
 	{
-		if (const FPlayFabLoginUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
-		{
-			OnApiSuccess(ParsedResponse.Data.SessionTicket);
-		}
-		else
-		{
-			OnApiFailure(FSequenceError(ResponseParseError,Response));
-		}
+		SEQ_LOG(Error, TEXT("Account Force Create Or Federation Required"));
+		OnFederationRequired.ExecuteIfBound(FederationData);
 	};
 
-	this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure);
+	this->Sessions->PlayFabLogin(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure, OnApiFederationRequired);
 }
 
 void USequenceSessionsBP::PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired)
 {
-	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
+	const TFunction<void()> OnOpenSuccess = [this, OnSuccess]()
 	{
-		this->CallOnSessionCreated(Credentials);
+		this->CallOnSessionCreated();
 		OnSuccess.ExecuteIfBound();
 	};
 
@@ -198,14 +178,14 @@ void USequenceSessionsBP::PlayFabAuthenticateWithSessionTicket(const FString& Se
 		OnFederationRequired.ExecuteIfBound(FederationData);
 	};
 
-	this->RPCManager->OpenPlayFabSession(SessionTicket, true, OnOpenSuccess, OnOpenFailure, OnApiFederationRequired);
+	this->Sessions->PlayFabAuthenticateWithSessionTicket(SessionTicket, OnOpenSuccess, OnOpenFailure, OnApiFederationRequired);
 }
 
 void USequenceSessionsBP::StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		this->CallOnSessionCreated(Credentials);
+		this->CallOnSessionCreated();
 		OnSuccess.ExecuteIfBound();
 	};
 
@@ -215,10 +195,10 @@ void USequenceSessionsBP::StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnF
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->RPCManager->OpenGuestSession(true, OnApiSuccess, OnApiFailure);
+	this->Sessions->StartGuestSession(OnApiSuccess, OnApiFailure);
 }
 
-void USequenceSessionsBP::FederateEmail(const FString& EmailIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceSessionsBP::FederateEmail(const FString& Email, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TFunction<void()> OnApiSuccess = [this, OnSuccess]
 	{
@@ -231,80 +211,46 @@ void USequenceSessionsBP::FederateEmail(const FString& EmailIn, FOnSuccess OnSuc
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->RPCManager->InitEmailFederation(EmailIn.ToLower(),OnApiSuccess,OnApiFailure);
+	this->Sessions->FederateEmail(Email, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::ConfirmEmailFederationWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		};
+		OnSuccess.ExecuteIfBound();
+	};
 
-		const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
-		{
-			OnFailure.ExecuteIfBound(Error.Message);
-		};
-		
-		this->RPCManager->FederateEmailSession(StoredCredentials.GetCredentials().GetWalletAddress(), Code, OnApiSuccess, OnApiFailure);
-	}
-	else
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
-		SEQ_LOG(Error, TEXT("StoredCredentials are invalid, please login"));
-		OnFailure.ExecuteIfBound("StoredCredentials are invalid, please login");
-	}
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+		
+	this->Sessions->ConfirmEmailFederationWithCode(Code, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::FederateOidcToken(const FString& IdTokenIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		};
+		OnSuccess.ExecuteIfBound();
+	};
 
-		const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
-		{
-			OnFailure.ExecuteIfBound(Error.Message);
-		};
-		
-		this->RPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnApiSuccess, OnApiFailure);
-	}
-	else
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
-		SEQ_LOG(Error, TEXT("StoredCredentials are invalid, please login"));
-		OnFailure.ExecuteIfBound("StoredCredentials are invalid, please login");
-	}
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+		
+	this->Sessions->FederateOidcToken(IdTokenIn, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		const TFunction<void()> OnFederateSuccess = [OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		};
-
-		const FFailureCallback OnFederateFailure = [OnFailure](const FSequenceError& Error)
-		{
-			SEQ_LOG(Error, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-			OnFailure.ExecuteIfBound(Error.Message);
-		};
-
-		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
-		{
-			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
-		}
-		else
-		{
-			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
-			OnFailure.ExecuteIfBound(ErrorMessage);
-		}
+		OnSuccess.ExecuteIfBound();
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -313,34 +259,14 @@ void USequenceSessionsBP::FederatePlayFabRegistration(const FString& UsernameIn,
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure);
+	this->Sessions->FederatePlayFabRegistration(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceSessionsBP::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
+	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
-		const TFunction<void()> OnFederateSuccess = [OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		};
-
-		const FFailureCallback OnFederateFailure = [OnFailure](const FSequenceError& Error)
-		{
-			SEQ_LOG(Warning, TEXT("Error Federating PlayFab Account: %s"), *Error.Message);
-			OnFailure.ExecuteIfBound(Error.Message);
-		};
-		
-		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
-		{
-			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnFederateSuccess, OnFederateFailure);
-		}
-		else
-		{
-			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
-			OnFailure.ExecuteIfBound(ErrorMessage);
-		}
+		OnSuccess.ExecuteIfBound();
 	};
 
 	const FFailureCallback OnApiFailure = [OnFailure](const FSequenceError& Error)
@@ -349,67 +275,17 @@ void USequenceSessionsBP::FederatePlayFabLogin(const FString& UsernameIn, const 
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure);
+	this->Sessions->FederatePlayFabLogin(UsernameIn, PasswordIn, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceSessionsBP::PlayFabNewAccountLoginRpc(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceSessionsBP::SetForceCreateAccount(const bool NewForceCreateAccount)
 {
-	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
-	{
-		if (const FPlayFabRegisterUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabRegisterUserResponse>(Response); ParsedResponse.IsValid())
-		{
-			OnSuccess(ParsedResponse.Data.SessionTicket);
-		}
-		else
-		{
-			OnFailure(FSequenceError(ResponseParseError,Response));
-		}
-	};
-
-	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
-	const FPlayFabRegisterUser RegisterUser(TitleId, EmailIn, PasswordIn, UsernameIn);
-	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(RegisterUser);
-	const FString Url = "https://" + TitleId + ".playfabapi.com/Client/RegisterPlayFabUser";
-	
-	this->PlayFabRpc(Url, RequestBody, OnSuccessResponse, OnFailure);
+	this->Sessions->SetForceCreateAccount(NewForceCreateAccount);
 }
 
-void USequenceSessionsBP::PlayFabLoginRpc(const FString& UsernameIn, const FString& PasswordIn, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	const TFunction<void(FString)> OnSuccessResponse = [OnSuccess, OnFailure](const FString& Response)
-	{
-		if (const FPlayFabLoginUserResponse ParsedResponse = USequenceSupport::JSONStringToStruct<FPlayFabLoginUserResponse>(Response); ParsedResponse.IsValid())
-		{
-			OnSuccess(ParsedResponse.Data.SessionTicket);
-		}
-		else
-		{
-			OnFailure(FSequenceError(ResponseParseError,Response));
-		}
-	};
 
-	const FString TitleId = UConfigFetcher::GetConfigVar(UConfigFetcher::PlayFabTitleID);
-	const FPlayFabLoginUser LoginUser(PasswordIn,TitleId,UsernameIn);
-	const FString RequestBody = USequenceSupport::StructToPartialSimpleString(LoginUser);
-	const FString Url = "https://" + TitleId + ".playfabapi.com/Client/LoginWithPlayFab";
-	
-	this->PlayFabRpc(Url, RequestBody, OnSuccessResponse, OnFailure);
-}
-
-void USequenceSessionsBP::PlayFabRpc(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceSessionsBP::CallOnSessionCreated() const
 {
-	NewObject<URequestHandler>()
-		->PrepareRequest()
-		->WithUrl(Url)
-		->WithHeader("Content-type", "application/json")
-		->WithVerb("POST")
-		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnFailure);
-}
-
-void USequenceSessionsBP::CallOnSessionCreated(const FCredentials_BE& Credentials) const
-{
-	this->CredentialsStorage->StoreCredentials(Credentials);
 	if (this->OnSessionCreated.IsBound())
 	{
 		this->OnSessionCreated.Broadcast();
