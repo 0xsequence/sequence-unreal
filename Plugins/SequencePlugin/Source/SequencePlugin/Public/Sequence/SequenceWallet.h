@@ -177,6 +177,15 @@ private:
 	static TArray<FFeeOption> FindValidFeeOptions(const TArray<FFeeOption>& FeeOptions, const TArray<FFeeOption>& BalanceOptions);
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
 
+	/*
+	 * Gets the current instance of RPCManager and calls the UpdateWithStoredSessionWallet function
+	 * to ensure that the RPCManager has the correct session data from this wallet instance
+	 */
+	USequenceRPCManager* GetRpcManager() const;
+
+	/*
+	 * Wrapper function to get the currently stored credentials
+	 */
 	FCredentials_BE GetCredentials() const;
 	
 	UPROPERTY()

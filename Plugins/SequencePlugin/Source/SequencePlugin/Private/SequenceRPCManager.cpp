@@ -38,6 +38,12 @@ template<typename T> FString USequenceRPCManager::GenerateIntent(T Data, TOption
 	}
 }
 
+USequenceRPCManager::USequenceRPCManager()
+{
+	this->Validator = NewObject<UResponseSignatureValidator>();
+	this->CredentialsStorage = NewObject<UCredentialsStorage>();
+}
+
 void USequenceRPCManager::SequenceRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	UResponseSignatureValidator& RPCValidator = *Validator;
@@ -109,7 +115,7 @@ void USequenceRPCManager::SendIntent(const FString& Url, TFunction<FString(TOpti
 
 FString USequenceRPCManager::BuildGetFeeOptionsIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
 {
-	const FGetFeeOptionsData GetFeeOptionsData(SequenceSdk::GetChainName(),Transactions,Credentials.GetWalletAddress());
+	const FGetFeeOptionsData GetFeeOptionsData(SequenceSdk::GetChainIdString(),Transactions,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FGetFeeOptionsData>(GetFeeOptionsData, CurrentTime);
 	return Intent;
 }
@@ -130,7 +136,7 @@ FString USequenceRPCManager::BuildSignMessageIntent(const FCredentials_BE& Crede
 	const FUnsizedData PayloadBytes = StringToUTF8(Payload);
 	const FString EIP_Message = "0x" + BytesToHex(PayloadBytes.Ptr(),PayloadBytes.GetLength());
 	
-	const FSignMessageData SignMessageData(EIP_Message,SequenceSdk::GetChainName(),Credentials.GetWalletAddress());
+	const FSignMessageData SignMessageData(EIP_Message,SequenceSdk::GetChainIdString(),Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FSignMessageData>(SignMessageData, CurrentTime);
 
 	return Intent;
@@ -147,7 +153,7 @@ FString USequenceRPCManager::BuildValidateMessageSignatureIntent(const int64& Ch
 FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, TOptional<int64> CurrentTime) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
-	const FSendTransactionData SendTransactionData(Identifier,SequenceSdk::GetChainName(),Transactions,Credentials.GetWalletAddress());
+	const FSendTransactionData SendTransactionData(Identifier,SequenceSdk::GetChainIdString(),Transactions,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FSendTransactionData>(SendTransactionData, CurrentTime);
 	return Intent;
 }
@@ -155,7 +161,7 @@ FString USequenceRPCManager::BuildSendTransactionIntent(const FCredentials_BE& C
 FString USequenceRPCManager::BuildSendTransactionWithFeeIntent(const FCredentials_BE& Credentials, const TArray<TransactionUnion>& Transactions, const FString& FeeQuote, TOptional<int64> CurrentTime) const
 {
 	const FString Identifier = "unreal-sdk-" + FDateTime::UtcNow().ToString() + "-" + Credentials.GetWalletAddress();
-	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,SequenceSdk::GetChainName(),Transactions,FeeQuote,Credentials.GetWalletAddress());
+	const FSendTransactionWithFeeOptionData SendTransactionWithFeeOptionData(Identifier,SequenceSdk::GetChainIdString(),Transactions,FeeQuote,Credentials.GetWalletAddress());
 	const FString Intent = this->GenerateIntent<FSendTransactionWithFeeOptionData>(SendTransactionWithFeeOptionData, CurrentTime);
 	return Intent;
 }
@@ -186,7 +192,7 @@ FString USequenceRPCManager::BuildListAccountsIntent(const FCredentials_BE& Cred
 
 FString USequenceRPCManager::BuildGetSessionAuthProofIntent(const FCredentials_BE& Credentials, const FString& Nonce, TOptional<int64> CurrentTime) const
 {
-	const FGetSessionAuthProofData GetSessionAuthProofData(SequenceSdk::GetChainName(), Credentials.GetWalletAddress(), Nonce);
+	const FGetSessionAuthProofData GetSessionAuthProofData(SequenceSdk::GetChainIdString(), Credentials.GetWalletAddress(), Nonce);
 	const FString Intent = this->GenerateIntent<FGetSessionAuthProofData>(GetSessionAuthProofData, CurrentTime);
 	return Intent;
 }
@@ -266,8 +272,7 @@ void USequenceRPCManager::UpdateWithRandomSessionWallet()
 
 void USequenceRPCManager::UpdateWithStoredSessionWallet()
 {
-	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
-	if (FStoredCredentials_BE StoredCredentials = CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
 		this->SessionWallet = StoredCredentials.GetCredentials().GetSessionWallet();
 	}
@@ -302,7 +307,6 @@ USequenceRPCManager* USequenceRPCManager::Make(UCryptoWallet* SessionWalletIn)
 {
 	USequenceRPCManager* SequenceRPCManager = NewObject<USequenceRPCManager>();
 	SequenceRPCManager->SessionWallet = SessionWalletIn;
-	SequenceRPCManager->Validator = NewObject<UResponseSignatureValidator>();
 	FString ParsedJwt;
 	FBase64::Decode(UConfigFetcher::GetConfigVar(UConfigFetcher::WaaSConfigKey), ParsedJwt);
 	SequenceRPCManager->WaaSSettings = USequenceSupport::JSONStringToStruct<FWaasJWT>(ParsedJwt);

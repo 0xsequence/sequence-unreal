@@ -13,6 +13,7 @@
 #include "Util/Async.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "ResponseSignatureValidator.h"
+#include "Util/CredentialsStorage.h"
 #include "SequenceRPCManager.generated.h"
 
 /**
@@ -108,17 +109,6 @@ private:
 	void SequenceRPC(const ::FString& Url, const ::FString& Content, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void SendIntent(const FString& Url, TFunction<FString (TOptional<int64>)> ContentGenerator, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
-	/**
-	 * Updates the SessionWallet with a random one
-	 */
-	void UpdateWithRandomSessionWallet();
-
-	/**
-	 * Updates the SessionWallet with one stored on disk if possible,
-	 * does nothing if credentials on disk are invalid
-	 */
-	void UpdateWithStoredSessionWallet();
-	
 	FTimespan TimeShift;
 	
 	void InitializeTimeShift();
@@ -126,6 +116,9 @@ private:
 
 public:
 
+	USequenceRPCManager();
+
+	UPROPERTY()
 	UResponseSignatureValidator* Validator;
 
 	/**
@@ -304,6 +297,21 @@ public:
 	void FederateSessionInUse(const FString& WalletIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 	
 	//Federation Calls//
+
+	/**
+	 * Updates the SessionWallet with a random one
+	 */
+	void UpdateWithRandomSessionWallet();
+
+	/**
+	 * Updates the SessionWallet with one stored on disk if possible,
+	 * does nothing if credentials on disk are invalid
+	 */
+	void UpdateWithStoredSessionWallet();
 	
 	//RPC Calls//
+
+private:
+	UPROPERTY()
+	UCredentialsStorage* CredentialsStorage;
 };

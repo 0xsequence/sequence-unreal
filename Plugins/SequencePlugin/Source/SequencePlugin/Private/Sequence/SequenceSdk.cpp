@@ -16,6 +16,11 @@ int64 SequenceSdk::GetChainId()
 	return ChainId;
 }
 
+FString SequenceSdk::GetChainIdString()
+{
+	return FString::FromInt(ChainId);
+}
+
 FString SequenceSdk::GetChainName()
 {
 	return USequenceSupport::GetNetworkName(ChainId);

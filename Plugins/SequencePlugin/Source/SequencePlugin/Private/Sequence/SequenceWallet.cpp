@@ -18,18 +18,8 @@ USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<USequenceIndexer>();
 	this->Provider = UProvider::Make("");
-	this->SequenceRPCManager = nullptr;
+	this->SequenceRPCManager = USequenceRPCManager::Make(false);
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
-
-	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
-	{
-		SEQ_LOG(Display,TEXT("Successfully loaded on disk credentials"));
-		this->SequenceRPCManager = USequenceRPCManager::Make(this->GetCredentials().GetSessionWallet());
-	}
-	else
-	{
-		SEQ_LOG(Warning,TEXT("The Credentials on disk were invalid please login"));
-	}
 }
 
 FString USequenceWallet::GetWalletAddress() const
@@ -42,7 +32,7 @@ FString USequenceWallet::GetWalletAddress() const
 	}
 	else
 	{
-		SEQ_LOG(Warning,TEXT("[Please Login first before trying to use credentials]"));
+		SEQ_LOG(Warning, TEXT("Please Login first before trying to use credentials."));
 	}
 	
 	return Addr;
@@ -55,34 +45,22 @@ FString USequenceWallet::GetSessionId() const
 
 void USequenceWallet::GetIdToken(const FString& Nonce, const TSuccessCallback<FSeqIdTokenResponse_Data>&OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->GetIdToken(this->GetCredentials(), Nonce, OnSuccess, OnFailure);
-	}
+	this->GetRpcManager()->GetIdToken(this->GetCredentials(), Nonce, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::ListSessions(const TSuccessCallback<TArray<FSeqListSessions_Session>>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->ListSessions(this->GetCredentials(),OnSuccess,OnFailure);
-	}
+	this->GetRpcManager()->ListSessions(this->GetCredentials(),OnSuccess,OnFailure);
 }
 
 void USequenceWallet::ListAccounts(const TSuccessCallback<FSeqListAccountsResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->ListAccounts(this->GetCredentials(), OnSuccess, OnFailure);
-	}
+	this->GetRpcManager()->ListAccounts(this->GetCredentials(), OnSuccess, OnFailure);
 }
 
 void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCallback<FSeqGetSessionAuthProof_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->GetSessionAuthProof(this->GetCredentials(), Nonce, OnSuccess, OnFailure);
-	}
+	this->GetRpcManager()->GetSessionAuthProof(this->GetCredentials(), Nonce, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::SignOut() const
@@ -100,9 +78,10 @@ void USequenceWallet::SignOut() const
 			CredentialsStorage->ClearStoredCredentials();
 		};
 
-		if (this->SequenceRPCManager)
+		FCredentials_BE Credentials = this->GetCredentials();
+		if (Credentials.IsRegistered())
 		{
-			this->SequenceRPCManager->CloseSession(this->GetCredentials(), OnSuccess, OnFailure);
+			this->GetRpcManager()->CloseSession(Credentials, OnSuccess, OnFailure);
 		}
 		else
 		{
@@ -125,27 +104,23 @@ void USequenceWallet::UpdateProviderURL(const FString& Url) const
 
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->SignMessage(this->GetCredentials(),Message,OnSuccess,OnFailure);
-	}
+	this->GetRpcManager()->SignMessage(this->GetCredentials(),Message,OnSuccess,OnFailure);
 }
-
 
 void USequenceWallet::ValidateMessageSignature(const int64& ChainId, const FString& WalletAddress,const FString& Message, const FString& Signature, const TSuccessCallback<FSeqValidateMessageSignatureResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
-	}
+	this->GetRpcManager()->ValidateMessageSignature(ChainId, WalletAddress, Message, Signature, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::SendTransactionWithFeeOption(const TArray<TransactionUnion>& Transactions, const FFeeOption& FeeOption, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->SendTransactionWithFeeOption(this->GetCredentials(),Transactions,FeeOption,OnSuccess,OnFailure);
-	}
+	this->GetRpcManager()->SendTransactionWithFeeOption(this->GetCredentials(),Transactions,FeeOption,OnSuccess,OnFailure);
+}
+
+USequenceRPCManager* USequenceWallet::GetRpcManager() const
+{
+	this->SequenceRPCManager->UpdateWithStoredSessionWallet();
+	return this->SequenceRPCManager;
 }
 
 FCredentials_BE USequenceWallet::GetCredentials() const
@@ -230,10 +205,7 @@ void USequenceWallet::GetFeeOptions(const TArray<TransactionUnion>& Transactions
 		this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(), Args,BalanceSuccess,BalanceFailure);
 	};
 
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->GetFeeOptions(this->GetCredentials(),Transactions,OnResponse,OnFailure);
-	}
+	this->GetRpcManager()->GetFeeOptions(this->GetCredentials(),Transactions,OnResponse,OnFailure);
 }
 
 void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<TArray<FFeeOption>>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -270,10 +242,7 @@ void USequenceWallet::GetUnfilteredFeeOptions(const TArray<TransactionUnion>& Tr
 		this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(),Args,BalanceSuccess,BalanceFailure);
 	};
 
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->GetFeeOptions(this->GetCredentials(),Transactions,OnResponse,OnFailure);
-	}
+	this->GetRpcManager()->GetFeeOptions(this->GetCredentials(),Transactions,OnResponse,OnFailure);
 }
 
 void USequenceWallet::SendNativeToken(const FString& RecipientAddress, const FString& Amount, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -291,10 +260,7 @@ void USequenceWallet::SendNativeToken(const FString& RecipientAddress, const FSt
 
 void USequenceWallet::SendTransaction(const TArray<TransactionUnion>& Transactions, const TSuccessCallback<FSeqTransactionResponse_Data>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	if (this->SequenceRPCManager)
-	{
-		this->SequenceRPCManager->SendTransaction(this->GetCredentials(), Transactions, OnSuccess, OnFailure);
-	}
+	this->GetRpcManager()->SendTransaction(this->GetCredentials(), Transactions, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
@@ -304,21 +270,14 @@ void USequenceWallet::GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsR
 
 	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
 	{
-		if (this->SequenceRPCManager)
-		{
-			const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
-			FSeqLinkedWalletRequest Request;
-			Request.SignatureChainId = ChainId;
-			Request.ParentWalletAddress = WalletAddress;
-			Request.ParentWalletMessage = MessageToSign;
-			Request.ParentWalletSignature = SignatureResponse.Data.Signature;
+		const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
+		FSeqLinkedWalletRequest Request;
+		Request.SignatureChainId = ChainId;
+		Request.ParentWalletAddress = WalletAddress;
+		Request.ParentWalletMessage = MessageToSign;
+		Request.ParentWalletSignature = SignatureResponse.Data.Signature;
 			
-			this->SequenceRPCManager->GetLinkedWallets(Request, OnSuccess, OnFailure);
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "SequenceRPCManager is not available."));
-		}
+		this->GetRpcManager()->GetLinkedWallets(Request, OnSuccess, OnFailure);
 	};
 
 	const TFunction<void (FString, FSequenceError)> OnSignatureFailure = [OnFailure](FString Data, FSequenceError Err)
@@ -336,22 +295,15 @@ void USequenceWallet::RemoveLinkedWallet(const FString& LinkedWalletAddress, con
 
 	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, LinkedWalletAddress, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
 	{
-		if (this->SequenceRPCManager)
-		{
-			const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
-			FSeqLinkedWalletRequest Request;
-			Request.SignatureChainId = ChainId;
-			Request.ParentWalletAddress = WalletAddress;
-			Request.ParentWalletMessage = MessageToSign;
-			Request.ParentWalletSignature = SignatureResponse.Data.Signature;
-			Request.LinkedWalletAddress = LinkedWalletAddress;
+		const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
+		FSeqLinkedWalletRequest Request;
+		Request.SignatureChainId = ChainId;
+		Request.ParentWalletAddress = WalletAddress;
+		Request.ParentWalletMessage = MessageToSign;
+		Request.ParentWalletSignature = SignatureResponse.Data.Signature;
+		Request.LinkedWalletAddress = LinkedWalletAddress;
 			
-			this->SequenceRPCManager->RemoveLinkedWallet(Request, OnSuccess, OnFailure);
-		}
-		else
-		{
-			OnFailure(FSequenceError(RequestFail, "SequenceRPCManager is not available."));
-		}
+		this->GetRpcManager()->RemoveLinkedWallet(Request, OnSuccess, OnFailure);
 	};
 
 	const TFunction<void (FString, FSequenceError)> OnSignatureFailure = [OnFailure](FString Data, FSequenceError Err)

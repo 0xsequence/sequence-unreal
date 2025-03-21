@@ -12,6 +12,7 @@ public:
 	static void SetRedirectUrl(const FString& NewRedirectUrl);
 	
 	static int64 GetChainId();
+	static FString GetChainIdString();
 	static FString GetChainName();
 	static FString GetRedirectUrl();
 private:
