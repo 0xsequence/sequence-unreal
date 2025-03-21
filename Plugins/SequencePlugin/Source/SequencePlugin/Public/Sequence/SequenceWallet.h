@@ -49,6 +49,12 @@ public:
 	FString GetWalletAddress() const;
 
 	/**
+	 * Get the current/active session id associated with this wallet
+	 * @return the current/active session id associated with this wallet
+	 */
+	FString GetSessionId() const;
+
+	/**
 	 * Allows you to update the provider URL set for the SequenceWallet
 	 * @param Url New provider Url you wish to use
 	 */
@@ -142,6 +148,8 @@ private:
 	static TArray<FFeeOption> BalancesListToFeeOptionList(const TArray<FSeqTokenBalance>& BalanceList);
 
 public:
+	void RemoveLinkedWallet(const FString& LinkedWalletAddress, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void GetLinkedWallets(const TSuccessCallback<FSeqLinkedWalletsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 	void BlockByNumber(uint64 Number, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,
 	                   const TFunction<void(FSequenceError)>& OnFailure) const;
 	void BlockByNumber(EBlockTag Tag, const TFunction<void(TSharedPtr<FJsonObject>)>& OnSuccess,

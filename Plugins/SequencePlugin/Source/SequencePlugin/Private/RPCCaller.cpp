@@ -6,6 +6,11 @@
 #include "Serialization/JsonReader.h"
 #include "Util/JsonBuilder.h"
 
+URPCCaller::URPCCaller()
+{
+	Validator = NewObject<UResponseSignatureValidator>();
+}
+
 TSharedPtr<FJsonObject> URPCCaller::Parse(const FString& JsonRaw)
 {
 	TSharedPtr<FJsonObject> JsonParsed;
@@ -59,14 +64,16 @@ TResult<uint64> URPCCaller::ExtractUIntResult(const FString& JsonRaw)
 
 void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError)
 {
-	NewObject<URequestHandler>()
-		->PrepareRequest()
+
+	URequestHandler* RequestHandler = NewObject<URequestHandler>();
+
+	RequestHandler->PrepareRequest()
 		->WithUrl(Url)
 		->WithHeader("Content-type", "application/json")
 		->WithHeader("Accept", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(OnSuccess, OnError);
+		->ProcessAndThen(*Validator, OnSuccess, OnError);
 }
 
 FJsonBuilder URPCCaller::RPCBuilder(const FString& MethodName)

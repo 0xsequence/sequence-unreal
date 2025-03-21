@@ -29,6 +29,7 @@ private:
 	USequenceSessions* Sessions = nullptr;
 	int32 Repetitions = 0;
 	static const int32 MaxRepetitions = 3;
+	TArray<FString> SessionIds;
 
 	void ConnectAsGuest();
 };
