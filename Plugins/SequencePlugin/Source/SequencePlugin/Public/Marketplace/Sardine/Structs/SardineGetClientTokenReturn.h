@@ -3,7 +3,7 @@
 #include "SardineGetClientTokenReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FsardineGetClientTokenReturn
+struct SEQUENCEPLUGIN_API FSardineGetClientTokenReturn
 {
 	GENERATED_USTRUCT_BODY()
 
