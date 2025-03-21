@@ -34,7 +34,7 @@ public:
 
 private:
 	bool bTestComplete = false;
-	USequenceSessions* Sessions;
+	USequenceSessions* Sessions = nullptr;
 	FString Username;
 	FString Email;
 	FString Password;

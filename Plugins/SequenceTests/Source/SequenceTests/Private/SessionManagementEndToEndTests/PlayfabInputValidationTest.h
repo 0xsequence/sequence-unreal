@@ -68,7 +68,7 @@ private:
 	bool bTestPassed = false;
 	bool bAllTestsComplete = false;
 	FString LastError;
-	USequenceSessions* Sessions;
+	USequenceSessions* Sessions = nullptr;
 	EValidationType CurrentValidationType;
 	int32 CurrentStepIndex = -1;
 };
