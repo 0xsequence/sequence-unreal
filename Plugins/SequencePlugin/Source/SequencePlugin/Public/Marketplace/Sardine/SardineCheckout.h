@@ -41,6 +41,7 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 	const FString _devUrl = "https://dev-api.sequence.app/rpc/API";
 	const FString _prodUrl = "https://api.sequence.app/rpc/API";
 	FString _baseUrl = _prodUrl;
+	FString _baseCheckoutUrl = _sardineCheckoutUrl;
 
 
 	FString Url(const FString& EndPoint) const;
@@ -78,9 +79,9 @@ public:
 
 	void SardineGetClientToken(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
 
-	void OnRamp(FString ClientToken, bool IsDev = false);
+	void OnRamp(const FString& ClientToken);
 
-	void OnRampAsync(FString ClientToken, TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure);
+	void OnRampAsync(FString ClientToken, TFunction<void> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 
@@ -100,7 +101,7 @@ public:
 
 	void SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess, const FFailureCallback& OnFailure);
 
-	FString CheckoutURL(FString ClientToken, bool IsDev);
+	FString CheckoutURL(FString ClientToken);
 	
 	FString CheckoutURL(FSardineNFTCheckout Token);
 

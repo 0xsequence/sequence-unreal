@@ -13,6 +13,7 @@
 #include "Marketplace/Sardine/Structs/SardineSupportedFiatCurrenciesResponse.h"
 #include "Marketplace/Sardine/Structs/SardineSupportedRegionsResponse.h"
 #include "Marketplace/Sardine/Structs/SardineSupportedTokensResponse.h"
+#include "Marketplace/Sardine/Structs/SardineTokenResponse.h"
 #include "Util/Log.h"
 
 FString USardineCheckout::Url(const FString& EndPoint) const
@@ -129,7 +130,23 @@ void USardineCheckout::SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess
 
 void USardineCheckout::SardineGetClientToken(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
-	
+	const FString Endpoint = "SardineGetClientToken";
+	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
+		{
+			const FSardineTokenResponse Response = this->BuildResponse<FSardineTokenResponse>(Content);
+			OnSuccess(Response.Token);
+		}, OnFailure);
+}
+
+void USardineCheckout::OnRamp(const FString& ClientToken)
+{
+	FString URL = CheckoutURL(ClientToken);
+	FString * ErrorPtr = nullptr;
+	FPlatformProcess::LaunchURL(*URL,TEXT(""),ErrorPtr);
+	if (ErrorPtr)
+	{
+		UE_LOG(LogTemp,Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
+	}
 }
 
 void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity,
@@ -218,3 +235,15 @@ void USardineCheckout::SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineE
 			OnSuccess(Response.Tokens);
 		}, OnFailure);
 }
+
+FString USardineCheckout::CheckoutURL(FString ClientToken)
+{
+	return _baseCheckoutUrl + ClientToken + _sardineCheckoutUrlSuffix;
+}
+
+FString USardineCheckout::CheckoutURL(FSardineNFTCheckout Token)
+{
+	return CheckoutURL(Token.Token);
+}
+
+
