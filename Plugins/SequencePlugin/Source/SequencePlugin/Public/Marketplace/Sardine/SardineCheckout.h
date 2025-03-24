@@ -78,9 +78,9 @@ public:
 
 	void SardineGetClientToken(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
 
-	void OnRamp(FString ClientToken);
+	void OnRamp(FString ClientToken, bool IsDev = false);
 
-	void OnRampAsync(FString ClientToken, TFunction<void> OnSuccess, const FFailureCallback& OnFailure);
+	void OnRampAsync(FString ClientToken, TSuccessCallback<void>& OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 
@@ -99,6 +99,8 @@ public:
 	void SardineGetSupportedTokens(TSuccessCallback<TArray<FSardineSupportedToken>> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess, const FFailureCallback& OnFailure);
+
+	FString CheckoutURL(FString ClientToken, bool IsDev);
 	
 	FString CheckoutURL(FSardineNFTCheckout Token);
 
