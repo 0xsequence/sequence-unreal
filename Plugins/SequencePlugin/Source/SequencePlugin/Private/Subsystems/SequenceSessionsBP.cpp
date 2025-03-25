@@ -96,6 +96,7 @@ void USequenceSessionsBP::StartOidcSession(const FString& IdToken, FOnSuccess On
 {
 	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
+		this->CallOnSessionCreated();
 		OnSuccess.ExecuteIfBound();
 	};
 
