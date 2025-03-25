@@ -17,7 +17,7 @@ USequenceCheckoutBP::USequenceCheckoutBP()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Constructor"));
 	
-	this->Checkout = NewObject<UCheckout>();
+	this->Checkout = NewObject<USequenceCheckout>();
 }
 
 // Do NOT add const for this function, breaks how we get the chainID
@@ -54,9 +54,9 @@ void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, 
 }
 
 void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress,
-                                                     const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
-                                                     const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
-                                                     const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
+	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	this->Checkout->GenerateListingTransaction(WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnSuccess, OnFailure);
 }
@@ -82,3 +82,22 @@ void USequenceCheckoutBP::GenerateCancelTransactionByOrder(const FString& Wallet
 {
 	this->Checkout->GenerateCancelTransactionByOrder(WalletAddress, CollectionAddress, Order, MarketplaceKind, OnSuccess, OnFailure);
 }
+
+UTransactions* USequenceCheckoutBP::StepsToTransactions(const TArray<FTransactionStep>& Steps)
+{
+	UTransactions* Transactions = CreateTransaction();
+
+	for (const FTransactionStep& Step : Steps)
+	{
+		FRawTransaction RawTransaction = FRawTransaction(Step.To, Step.Value, Step.Data);
+		Transactions->AddRaw(RawTransaction);
+	}
+	
+	return Transactions;
+}
+
+UTransactions* USequenceCheckoutBP::CreateTransaction()
+{
+	return NewObject<UTransactions>(this);
+}
+

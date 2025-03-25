@@ -8,7 +8,7 @@
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/Wallet_Enums.h"
 
-#include "Checkout.generated.h"
+#include "SequenceCheckout.generated.h"
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCheckoutOptionsResponseSuccess, FGetCheckoutOptionsResponse, Response);
@@ -18,7 +18,7 @@ UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_DELEGATE(FOnCheckoutFailure);
 
 UCLASS()
-class SEQUENCEPLUGIN_API UCheckout : public UObject
+class SEQUENCEPLUGIN_API USequenceCheckout : public UObject
 {
 	GENERATED_BODY()
 	
@@ -33,8 +33,8 @@ private:
 	
 public:
 	// Constructor
-	UCheckout();
-	explicit UCheckout(const int64& InChainID);
+	USequenceCheckout();
+	explicit USequenceCheckout(const int64& InChainID);
 
 	template < typename T> FString BuildArgs(T StructIn) const;
 

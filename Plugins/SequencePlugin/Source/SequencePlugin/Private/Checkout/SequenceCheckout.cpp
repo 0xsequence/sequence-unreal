@@ -1,4 +1,4 @@
-#include "Checkout.h"
+#include "Checkout/SequenceCheckout.h"
 
 #include "Checkout/Structs/GenerateBuyTransaction.h"
 #include "Checkout/Structs/GenerateCancelTransactionRequest.h"
@@ -10,7 +10,7 @@
 #include "Checkout/Structs/OrderData.h"
 #include "Util/Log.h"
 
-FString UCheckout::Url(const int64& TargetChainID, const FString& EndPoint) const
+FString USequenceCheckout::Url(const int64& TargetChainID, const FString& EndPoint) const
 {
 	FString Out_URL = HostName(TargetChainID);
 	Out_URL.Append(this->Path);
@@ -22,7 +22,7 @@ FString UCheckout::Url(const int64& TargetChainID, const FString& EndPoint) cons
 	return Out_URL;
 }
 
-FString UCheckout::HostName(int64 TargetChainID)
+FString USequenceCheckout::HostName(int64 TargetChainID)
 {
 	FString Hostname = "https://";
 	Hostname.Append("marketplace-api.sequence.app/");
@@ -30,7 +30,7 @@ FString UCheckout::HostName(int64 TargetChainID)
 	return Hostname;
 }
 
-void UCheckout::HTTPPost(const int64& TargetChainID, const FString& Endpoint, const FString& Args,
+void USequenceCheckout::HTTPPost(const int64& TargetChainID, const FString& Endpoint, const FString& Args,
                          const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = this->Url(TargetChainID, Endpoint);
@@ -93,17 +93,17 @@ void UCheckout::HTTPPost(const int64& TargetChainID, const FString& Endpoint, co
 	HTTP_Post_Req->ProcessRequest();
 }
 
-UCheckout::UCheckout()
+USequenceCheckout::USequenceCheckout()
 {
 	this->ChainID = 0;
 }
 
-UCheckout::UCheckout(const int64& InChainID)
+USequenceCheckout::USequenceCheckout(const int64& InChainID)
 {
 	this->ChainID = InChainID;
 }
 
-template < typename T> FString UCheckout::BuildArgs(T StructIn) const
+template < typename T> FString USequenceCheckout::BuildArgs(T StructIn) const
 {
 	FString Result = "[FAILED TO PARSE]";
 	if (StructIn.customGetter)
@@ -121,7 +121,7 @@ template < typename T> FString UCheckout::BuildArgs(T StructIn) const
 }
 
 
-template<typename T> T UCheckout::BuildResponse(const FString Text) const
+template<typename T> T USequenceCheckout::BuildResponse(const FString Text) const
 {
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> JSON_Step;
@@ -150,12 +150,12 @@ template<typename T> T UCheckout::BuildResponse(const FString Text) const
 	return Ret_Struct;
 }
 
-void UCheckout::SetChainID(const int64& InChainID)
+void USequenceCheckout::SetChainID(const int64& InChainID)
 {
 	this->ChainID = InChainID;
 }
 
-void UCheckout::GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
+void USequenceCheckout::GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
                                    const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	const FString Endpoint = "CheckoutOptionsMarketplace";
@@ -177,7 +177,7 @@ void UCheckout::GetCheckoutOptions(const FString& WalletAddress, const TArray<FC
 	});
 }
 
-void UCheckout::GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps,
+void USequenceCheckout::GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps,
 	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	TArray<FCheckoutOptionsMarketplaceOrder> Options;
@@ -190,7 +190,7 @@ void UCheckout::GetCheckoutOptionsByOrders(const FString& WalletAddress, const T
 	GetCheckoutOptions(WalletAddress, Options, AdditionalFeeBps, OnSuccess, OnFailure);
 }
 
-void UCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
                                        FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
@@ -218,7 +218,7 @@ void UCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqO
 	});
 }
 
-void UCheckout::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+void USequenceCheckout::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
 	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
@@ -246,7 +246,7 @@ void UCheckout::GenerateSellTransaction(const FString& WalletAddress, const FSeq
 	});
 }
 
-void UCheckout::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, const EContractType ContractType,
+void USequenceCheckout::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, const EContractType ContractType,
 	const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind, 
 	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
@@ -274,7 +274,7 @@ void UCheckout::GenerateListingTransaction(const FString& WalletAddress, const F
 	});
 }
 
-void UCheckout::GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, const int64 Amount,
+void USequenceCheckout::GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& TokenId, const int64 Amount,
 	const EContractType ContractType, const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry,
 	const EOrderbookKind OrderbookKind, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
@@ -302,7 +302,7 @@ void UCheckout::GenerateOfferTransaction(const FString& WalletAddress, const FSt
 	});
 }
 
-void UCheckout::GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& OrderId,
+void USequenceCheckout::GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& OrderId,
 	const EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	const FString Endpoint = "GenerateCancelTransaction";
@@ -326,7 +326,7 @@ void UCheckout::GenerateCancelTransaction(const FString& WalletAddress, const FS
 	});
 }
 
-void UCheckout::GenerateCancelTransactionByOrder(const FString& WalletAddress, const FString& CollectionAddress, const FSeqOrder& Order,
+void USequenceCheckout::GenerateCancelTransactionByOrder(const FString& WalletAddress, const FString& CollectionAddress, const FSeqOrder& Order,
 	const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	GenerateCancelTransaction(WalletAddress, CollectionAddress, Order.OrderId, MarketplaceKind, OnSuccess, OnFailure);
