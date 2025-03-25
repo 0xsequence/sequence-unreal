@@ -1,8 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Checkout/Checkout.h"
+#include "Checkout/SequenceCheckout.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Sequence/SequenceResponseIntent.h"
 #include "SequenceCheckoutBP.generated.h"
 
 UCLASS()
@@ -35,8 +36,11 @@ public:
 	void GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress, const FString& OrderId, EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateCancelTransactionByOrder(const FString& WalletAddress, const FString& CollectionAddress, const FSeqOrder& Order, const EMarketplaceKind MarketplaceKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	UTransactions* StepsToTransactions(const TArray<FTransactionStep>& Steps);
 	
 private:
-	UCheckout* Checkout;
-	
+	USequenceCheckout* Checkout;
+
+	UTransactions* CreateTransaction();
 };

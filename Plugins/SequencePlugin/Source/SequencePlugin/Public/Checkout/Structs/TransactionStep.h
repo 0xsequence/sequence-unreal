@@ -2,9 +2,15 @@
 #include "PostRequest.h"
 #include "TransactionSignature.h"
 #include "Checkout/Enums/StepType.h"
+#include "Sequence/SequenceAPI.h"
+#include "Sequence/Transactions.h"
 #include "Util/SequenceSupport.h"
 
 #include "TransactionStep.generated.h"
+
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSequenceTransactionResponseSuccess, FSeqTransactionResponse_Data, Response);
+DECLARE_DYNAMIC_DELEGATE(FOnGetSeqTransactionFailure);
 
 USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FTransactionStep
@@ -93,5 +99,40 @@ public:
 				Post.Setup(*PostRequestJsonObject);
 			}
 		}
+	}
+	
+	static TArray<TransactionUnion> AsTransactionArray(const TArray<FTransactionStep>& Steps)
+	{
+		if (Steps.IsEmpty())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Steps cannot be null or empty"));
+		}
+
+		TArray<TransactionUnion> Transactions;
+		Transactions.Reserve(Steps.Num());
+		for (int i = 0; i < Steps.Num(); i++)
+		{
+			Transactions[i] = TUnion<FRawTransaction, FERC20Transaction, FERC721Transaction, FERC1155Transaction, FDelayedTransaction>(
+				FRawTransaction(Steps[i].To, Steps[i].Value, Steps[i].Data));
+		}
+		
+		return Transactions;
+	}
+	
+	static FTransactionStep ExtractBuyStep(const TArray<FTransactionStep>& Steps)
+	{
+		FTransactionStep Result;
+
+		const int64 Length = Steps.Num();
+		for (int i = 0; i < Length; i++)
+		{
+			if (Steps[i].Id == EStepType::Buy)
+			{
+				Result = Steps[i];
+				break;
+			}
+		}
+		
+		return Result;
 	}
 };
