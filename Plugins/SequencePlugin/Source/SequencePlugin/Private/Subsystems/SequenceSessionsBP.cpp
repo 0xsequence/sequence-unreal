@@ -65,6 +65,7 @@ void USequenceSessionsBP::ConfirmEmailLoginWithCode(const FString& Code, FOnSucc
 {
 	const TFunction<void()> OnApiSuccess = [this, OnSuccess]()
 	{
+		this->CallOnSessionCreated();
 		OnSuccess.ExecuteIfBound();
 	};
 
