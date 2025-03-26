@@ -88,8 +88,9 @@ UTransactions* USequenceCheckoutBP::StepsToTransactions(const TArray<FTransactio
 	UTransactions* Transactions = CreateTransaction();
 
 	for (const FTransactionStep& Step : Steps)
-	{
-		FRawTransaction RawTransaction = FRawTransaction(Step.To, Step.Value, Step.Data);
+	{		
+		FRawTransaction RawTransaction = FRawTransaction(Step.To, Step.Data, Step.Value.IsEmpty() ? TEXT("0") : Step.Value);
+		
 		Transactions->AddRaw(RawTransaction);
 	}
 	
