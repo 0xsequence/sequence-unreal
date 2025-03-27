@@ -1,6 +1,5 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-
 #include "Subsystems/SequenceSdkBP.h"
 #include "ConfigFetcher.h"
 #include "Sequence/SequenceSdk.h"
@@ -9,7 +8,7 @@
 USequenceSdkBP::USequenceSdkBP()
 {
 	const FString& DefaultChainName = UConfigFetcher::GetConfigVar(UConfigFetcher::DefaultChain);
-	SetChainByName(DefaultChainName);
+	SetChainById(FCString::Atoi64(*DefaultChainName));
 	SetRedirectUrl("https://api.sequence.app");
 }
 
