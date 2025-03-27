@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Marketplace/Structs/AdditionalFee.h"
+#include "Checkout/Structs/AdditionalFee.h"
 #include "Marketplace/Structs/SeqCollectibleOrder.h"
 #include "Structs/SardineEnabledToken.h"
 #include "Structs/SardineFiatCurrency.h"
