@@ -78,8 +78,11 @@ void UWaaSFederatedAuthTestsHelper::OnAuthSuccess()
     {
         this->OnFederateFailure(Error.Message);
     };
+
+    const TFunction<void(FFederationSupportData)> OnFederationRequired =
+        [this](const FFederationSupportData& Data) { };
     
-    Sessions->FederatePlayFabRegistration(Username, Email, Password, OnSuccess, OnFailure);
+    Sessions->PlayFabRegistration(Username, Email, Password, OnSuccess, OnFailure, OnFederationRequired);
 }
 
 void UWaaSFederatedAuthTestsHelper::OnAuthFailure(const FString& Error)

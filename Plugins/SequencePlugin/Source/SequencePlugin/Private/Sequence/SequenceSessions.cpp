@@ -78,43 +78,23 @@ void USequenceSessions::StartGuestSession(const TFunction<void()>& OnSuccess, co
 	this->RPCManager->OpenGuestSession(this->ForceCreateAccount, OnApiSuccess, OnFailure);
 }
 
-void USequenceSessions::FederateEmail(const FString& Email, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	this->RPCManager->InitEmailFederation(Email.ToLower(), OnSuccess, OnFailure);
-}
-
 void USequenceSessions::StartEmailLogin(const FString& Email, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	this->RPCManager->InitEmailAuth(Email.ToLower(), OnSuccess, OnFailure);
-}
-
-void USequenceSessions::ConfirmEmailFederationWithCode(const FString& Code, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+	if (this->CheckExistingSession())
 	{
-		this->RPCManager->FederateEmailSession(StoredCredentials.GetCredentials().GetWalletAddress(), Code, OnSuccess, OnFailure);
+		this->RPCManager->InitEmailFederation(Email.ToLower(), OnSuccess, OnFailure);
 	}
 	else
 	{
-		SEQ_LOG(Error, TEXT("StoredCredentials are invalid, please login"));
-		OnFailure(FSequenceError(EErrorType::RequestFail, "StoredCredentials are invalid, please login"));
+		this->RPCManager->InitEmailAuth(Email.ToLower(), OnSuccess, OnFailure);
 	}
 }
 
-void USequenceSessions::FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
+void USequenceSessions::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
 {
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
+	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure, OnFederationRequired](const FString& SessionTicket)
 	{
-		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
-		{
-			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnSuccess, OnFailure);
-		}
-		else
-		{
-			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
-			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
-		}
+		this->PlayFabAuthenticateWithSessionTicket(SessionTicket, OnSuccess, OnFailure, OnFederationRequired);
 	};
 
 	this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnFailure);
@@ -125,26 +105,6 @@ void USequenceSessions::SetForceCreateAccount(const bool NewForceCreateAccount)
 	this->ForceCreateAccount = NewForceCreateAccount;
 }
 
-
-void USequenceSessions::FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure)
-{
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure](const FString& SessionTicket)
-	{
-		if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
-		{
-			this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnSuccess, OnFailure);
-		}
-		else
-		{
-			const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-			SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
-			OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
-		}
-	};
-
-	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnFailure);
-}
-
 void USequenceSessions::StartOidcSession(const FString& IdToken, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired) const
 {
 	const TSuccessCallback<FCredentials_BE> OnApiSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
@@ -153,19 +113,13 @@ void USequenceSessions::StartOidcSession(const FString& IdToken, const TFunction
 		OnSuccess();
 	};
 
-	this->RPCManager->OpenOIDCSession(IdToken, this->ForceCreateAccount, OnApiSuccess, OnFailure, OnFederationRequired);
-}
-
-void USequenceSessions::FederateOidcToken(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const
-{
 	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
-		this->RPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdTokenIn, OnSuccess, OnFailure);
+		this->RPCManager->FederateOIDCSession(StoredCredentials.GetCredentials().GetWalletAddress(),IdToken, OnSuccess, OnFailure);
 	}
 	else
 	{
-		SEQ_LOG(Error, TEXT("StoredCredentials are invalid, please login"));
-		OnFailure(FSequenceError(EErrorType::RequestFail, "StoredCredentials are invalid, please login"));
+		this->RPCManager->OpenOIDCSession(IdToken, this->ForceCreateAccount, OnApiSuccess, OnFailure, OnFederationRequired);
 	}
 }
 
@@ -177,44 +131,23 @@ void USequenceSessions::ConfirmEmailLoginWithCode(const FString& Code, const TFu
 		OnSuccess();
 	};
 
-	
-	this->RPCManager->OpenEmailSession(Code, this->ForceCreateAccount, OnApiSuccess, OnFailure, OnFederationRequired);
+	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
+	{
+		this->RPCManager->FederateEmailSession(StoredCredentials.GetCredentials().GetWalletAddress(), Code, OnSuccess, OnFailure);
+	}
+	else
+	{
+		this->RPCManager->OpenEmailSession(Code, this->ForceCreateAccount, OnApiSuccess, OnFailure, OnFederationRequired);	
+	}
 }
 
 void USequenceSessions::PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired) const
 {
-	const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
-	{
-		this->CredentialsStorage->StoreCredentials(Credentials);
-		OnSuccess();
-	};
-
-	this->RPCManager->OpenPlayFabSession(SessionTicket, this->ForceCreateAccount, OnOpenSuccess, OnFailure, OnFederationRequired);
-}
-
-void USequenceSessions::PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
-{
 	if (FStoredCredentials_BE StoredCredentials = this->CredentialsStorage->GetStoredCredentials(); StoredCredentials.GetValid())
 	{
-		const FString WalletAddress = StoredCredentials.GetCredentials().GetWalletAddress();
-		const TSuccessCallback<FString> OnApiSuccess = [this, WalletAddress, OnSuccess, OnFailure](const FString& SessionTicket)
-		{
-			this->RPCManager->FederatePlayFabSession(WalletAddress, SessionTicket, OnSuccess, OnFailure);
-		};
-		
-		this->PlayFabLoginRpc(UsernameIn, PasswordIn, OnApiSuccess, OnFailure);
+		this->RPCManager->FederatePlayFabSession(StoredCredentials.GetCredentials().GetWalletAddress(), SessionTicket, OnSuccess, OnFailure);
 	}
 	else
-	{
-		const FString ErrorMessage = TEXT("StoredCredentials are invalid, please login");
-		SEQ_LOG(Warning, TEXT("Error: %s"), *ErrorMessage);
-		OnFailure(FSequenceError(EErrorType::RequestFail, ErrorMessage));
-	}
-}
-
-void USequenceSessions::PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
-{
-	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure, OnFederationRequired](const FString& SessionTicket)
 	{
 		const TSuccessCallback<FCredentials_BE> OnOpenSuccess = [this, OnSuccess](const FCredentials_BE& Credentials)
 		{
@@ -223,6 +156,14 @@ void USequenceSessions::PlayFabRegistration(const FString& UsernameIn, const FSt
 		};
 		
 		this->RPCManager->OpenPlayFabSession(SessionTicket, this->ForceCreateAccount, OnOpenSuccess, OnFailure, OnFederationRequired);
+	}
+}
+
+void USequenceSessions::PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
+{
+	const TSuccessCallback<FString> OnApiSuccess = [this, OnSuccess, OnFailure, OnFederationRequired](const FString& SessionTicket)
+	{
+		this->PlayFabAuthenticateWithSessionTicket(SessionTicket, OnSuccess, OnFailure, OnFederationRequired);
 	};
 
 	this->PlayFabNewAccountLoginRpc(UsernameIn, EmailIn, PasswordIn, OnApiSuccess, OnFailure);

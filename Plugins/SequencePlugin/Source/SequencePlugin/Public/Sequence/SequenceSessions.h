@@ -63,16 +63,6 @@ public:
 
 	void StartGuestSession(const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void FederateEmail(const FString& EmailIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	void ConfirmEmailFederationWithCode(const FString& Code, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	void FederateOidcToken(const FString& IdTokenIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	void FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
-
-	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, const TFunction<void()>& OnSuccess, const FFailureCallback& OnFailure);
-
 	void SetForceCreateAccount(const bool NewForceCreateAccount);
 	
 	bool IsBrowserRequired;

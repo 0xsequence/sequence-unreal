@@ -16,11 +16,11 @@ class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, pu
 
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBrowserRequired, const FString&, SignInUrl);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 	
 public:
 	USequenceSessionsBP();
@@ -30,6 +30,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnIdTokenReceived IdTokenReceived;
+	
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	FOnFederationRequired FederationRequired;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetGoogleTokenId(FOnBrowserRequired BrowserRequired);
@@ -44,37 +47,22 @@ public:
 	void StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+	void ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void StartOidcSession(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+	void StartOidcSession(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+	void PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, FOnSuccess OnSuccess, FOnFailure OnFailure, FOnFederationRequired OnFederationRequired);
+	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederateEmail(const FString& EmailIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void ConfirmEmailFederationWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederateOidcToken(const FString& IdTokenIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederatePlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
-	void FederatePlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void SetForceCreateAccount(const bool NewForceCreateAccount);
@@ -86,4 +74,5 @@ private:
 	USequenceSessions* Sessions;
 	
 	void CallOnSessionCreated() const;
+	void CallFederationRequired(const FFederationSupportData& FederationData) const;
 };

@@ -119,43 +119,6 @@ TArray<FValidationStep> UPlayFabInputValidationTestHelper::GetValidationStepsFor
                     [this, OnSuccess, OnFailure, OnFederationRequired]() { Sessions->PlayFabRegistration(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short"), OnSuccess, OnFailure, OnFederationRequired); })
             };
             break;
-
-        case EValidationType::Federation:
-            Steps = {
-                FValidationStep(TEXT("Username cannot be empty"),
-                    TEXT("Testing empty username for federation"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT(""), TEXT("valid@email.com"), TEXT("validpassword123"), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Email cannot be empty"),
-                    TEXT("Testing empty email for federation"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT("validusername"), TEXT(""), TEXT("validpassword123"), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Email is invalid, given invalidemail"),
-                    TEXT("Testing invalid email format for federation"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT("validusername"), TEXT("invalidemail"), TEXT("validpassword123"), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Email is invalid, given invalid@"),
-                    TEXT("Testing another invalid email format"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT("validusername"), TEXT("invalid@"), TEXT("validpassword123"), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Password cannot be empty"),
-                    TEXT("Testing empty password for federation"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT("validusername"), TEXT("valid@email.com"), TEXT(""), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Password must be at least 8 characters"),
-                    TEXT("Testing short password for federation"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabRegistration(TEXT("validusername"), TEXT("valid@email.com"), TEXT("short"), OnSuccess, OnFailure); })
-            };
-            break;
-
-        case EValidationType::FederationLogin:
-            Steps = {
-                FValidationStep(TEXT("Username cannot be empty"),
-                    TEXT("Testing empty username for federation login"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabLogin(TEXT(""), TEXT("validpassword123"), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Password cannot be empty"),
-                    TEXT("Testing empty password for federation login"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabLogin(TEXT("validusername"), TEXT(""), OnSuccess, OnFailure); }),
-                FValidationStep(TEXT("Password must be at least 8 characters"),
-                    TEXT("Testing short password for federation login"),
-                    [this, OnSuccess, OnFailure]() { Sessions->FederatePlayFabLogin(TEXT("validusername"), TEXT("short"), OnSuccess, OnFailure); })
-            };
-            break;
     }
     
     return Steps;
