@@ -8,7 +8,18 @@
 #include "Util/Log.h"
 #include "ConfigFetcher.h"
 #include "HttpManager.h"
-
+#include "Indexer/Indexer.h"
+#include "Marketplace/Structs/SeqGetCollectibleOrderArgs.h"
+#include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
+#include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
+#include "Marketplace/Structs/SeqGetOrderReturn.h"
+#include "Marketplace/Structs/SeqGetSwapPriceArgs.h"
+#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
+#include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
+#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
+#include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
+#include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
+#include "Marketplace/Structs/SeqListCurrenciesReturn.h"
 
 UMarketplace::UMarketplace(){}
 
@@ -31,6 +42,8 @@ FString UMarketplace::HostName(const int64 ChainID)
 	Hostname.Append(USequenceSupport::GetNetworkNameForUrl(ChainID));
 	return Hostname;
 }
+
+
 
 void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
@@ -94,15 +107,60 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->ProcessRequest();
 }
 
-void UMarketplace::GetCollectiblesWithLowestListings(const int64 ChainID, const FSeqGetCollectiblesWithLowestListingsArgs& Args, TSuccessCallback<FSeqGetCollectiblesWithLowestListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
+void UMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
+	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const FString Endpoint = "ListCollectiblesWithLowestListing"; 
+	const FString RequestURL = "https://api.sequence.app/rpc/API/" + Endpoint;
 
-	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetCollectiblesWithLowestListingsArgs>(Args), [this, OnSuccess](const FString& Content)
+	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
+
+	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
+	if (AccessKey.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		return;  
+	}
+
+	HTTP_Post_Req->SetVerb("POST");
+	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	
+
+	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
+	HTTP_Post_Req->SetTimeout(30);
+	HTTP_Post_Req->SetURL(RequestURL);
+	HTTP_Post_Req->SetContentAsString(Args);
+	 
+	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
+	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
+
+
+	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 		{
-			const FSeqGetCollectiblesWithLowestListingsReturn Response = this->BuildResponse<FSeqGetCollectiblesWithLowestListingsReturn>(Content);
-			OnSuccess(Response);
-		}, OnFailure);
+			if (bWasSuccessful)
+			{
+				const FString Content = Response->GetContentAsString();
+				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				OnSuccess(Content);
+			}
+			else
+			{
+				if (Request.IsValid() && Response.IsValid())
+				{
+					const FString ErrorMessage = Response->GetContentAsString();
+					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
+				}
+			}
+		});
+
+	// Process the request
+	HTTP_Post_Req->ProcessRequest();
 }
 
 template < typename T> FString UMarketplace::BuildArgs(T StructIn)
@@ -150,4 +208,434 @@ template<typename T> T UMarketplace::BuildResponse(const FString Text)
 	}
 	Ret_Struct.Setup(*JSON_Step.Get());//now for the edge cases we will manually inject the data where it needs to be!
 	return Ret_Struct;
+}
+
+void UMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqListCurrenciesReturn> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "ListCurrencies";
+	const FString Args = "";
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+		{
+			const FSeqListCurrenciesReturn Response = this->BuildResponse<FSeqListCurrenciesReturn>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "ListCollectiblesWithLowestListing";
+	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, Page});
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+		{
+			const FSeqListCollectiblesReturn Response = this->BuildResponse<FSeqListCollectiblesReturn>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID,
+	const FString& ContractAddress, const FSeqCollectiblesFilter& Filter,
+	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, FSeqMarketplacePage::Empty()});
+	OrderArray.Empty();
+
+	return ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
+	{
+		OrderArray.Append(Orders);
+
+		if(IsDone)
+		{
+			OnSuccess(OrderArray);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
+	const int64 ChainID,
+	const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter,
+	const FSeqMarketplacePage& Page,
+	TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "ListCollectibleOffersWithHighestPricedOfferFirst";
+	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{OFFER, ContractAddress, Filter, Page});
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+		{
+			const FSeqListCollectiblesReturn Response = this->BuildResponse<FSeqListCollectiblesReturn>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
+	const int64 ChainID,
+	const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter,
+	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, FSeqMarketplacePage::Empty()});
+	OrderArray.Empty();
+
+	return ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
+	{
+		OrderArray.Append(Orders);
+
+		if(IsDone)
+		{
+			OnSuccess(OrderArray);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::GetLowestPriceOfferForCollectible(
+	const int64 ChainID,
+	const FString& ContractAddress,
+	const FString& TokenID,
+	const FSeqCollectiblesFilter& Filter,
+	const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetLowestPriceOfferForCollectible";
+	const FSeqGetCollectibleOrderArgs Args = FSeqGetCollectibleOrderArgs{ ContractAddress, TokenID, Filter};
+	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
+}
+
+void UMarketplace::GetHighestPriceOfferForCollectible(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetHighestPriceOfferForCollectible";
+	const FSeqGetCollectibleOrderArgs Args = FSeqGetCollectibleOrderArgs{ContractAddress, TokenID, Filter};
+	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
+}
+
+void UMarketplace::GetLowestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetLowestPriceListingForCollectible";
+	const FSeqGetCollectibleOrderArgs Args = FSeqGetCollectibleOrderArgs{ContractAddress, TokenID, Filter};
+	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
+}
+
+void UMarketplace::GetHighestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetHighestPriceListingForCollectible";
+	const FSeqGetCollectibleOrderArgs Args = FSeqGetCollectibleOrderArgs{ContractAddress, TokenID, Filter};
+	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
+}
+
+void UMarketplace::ListListingsForCollectible(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
+	TSuccessCallback<FSeqListCollectibleListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "ListListingsForCollectible";
+	const FSeqListCollectibleListingsArgs Args = FSeqListCollectibleListingsArgs{ContractAddress, TokenID, Filter, Page};
+	HTTPPost(ChainID, Endpoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSeqListCollectibleListingsReturn Response = this->BuildResponse<FSeqListCollectibleListingsReturn>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::ListAllListingsForCollectible(const int64 ChainID,
+	const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter,
+	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Args = BuildArgs<FSeqListCollectibleListingsArgs>(FSeqListCollectibleListingsArgs{ ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty()});
+	OrderArray.Empty();
+
+	return ListAllListingsForCollectibleHelper(ChainID, ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
+	{
+		OrderArray.Append(Orders);
+
+		if(IsDone)
+		{
+			OnSuccess(OrderArray);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::ListOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID,
+	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
+	TSuccessCallback<FSeqListCollectibleOffersReturn> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "ListOffersForCollectible";
+	const FSeqListCollectibleListingsArgs Args = FSeqListCollectibleListingsArgs{ContractAddress, TokenID, Filter, Page};
+	HTTPPost(ChainID, Endpoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSeqListCollectibleOffersReturn Response = this->BuildResponse<FSeqListCollectibleOffersReturn>(Content);
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Args = BuildArgs<FSeqListCollectibleListingsArgs>(FSeqListCollectibleListingsArgs{ ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty()});
+	OrderArray.Empty();
+
+	return ListAllOffersForCollectibleHelper(ChainID, ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, bool IsDone)
+	{
+		OrderArray.Append(Orders);
+
+		if(IsDone)
+		{
+			OnSuccess(OrderArray);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	const FString Endpoint = "GetFloorOrder";
+	const FSeqGetFloorOrderArgs Args = FSeqGetFloorOrderArgs{ContractAddress, Filter, FSeqMarketplacePage::Empty()};
+	HTTPPost(ChainID, Endpoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+			{
+				const FSeqGetOrderReturn Response = this->BuildResponse<FSeqGetOrderReturn>(Content);
+				OnSuccess(Response.Collectible);
+			}, OnFailure);
+}
+
+void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
+	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
+	const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapPrice";
+	FGetSwapPriceArgs Args {
+		BuyCurrency,
+		SellCurrency,
+		BuyAmount,
+		static_cast<int>(ChainID),
+		SlippagePercentage		
+	};
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+		{
+			FSeqSwapPrice Response;
+			
+			if(!Response.FromResponse(Content))
+			{
+				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+				return;
+			}
+			
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
+	const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapPrices";
+	FGetSwapPricesArgs Args {
+		UserWallet,
+		BuyCurrency,
+		BuyAmount,
+		static_cast<int>(ChainID),
+		SlippagePercentage
+	};
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+		{
+			TArray<FSeqSwapPrice> Response;
+			TSharedPtr<FJsonObject> Json;
+
+			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPrices")))
+			{
+				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+				return;
+			}
+
+			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPrices"));
+
+			for (TSharedPtr<FJsonValue> Value : Array)
+			{
+				FSeqSwapPrice SwapPrice;
+				if (!SwapPrice.FromJson(Value->AsObject()))
+				{
+					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+					return;
+				}
+				Response.Add(SwapPrice);
+			}
+		
+			OnSuccess(Response);
+		}, OnFailure);
+}
+
+void UMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
+	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	const FString EndPoint = "GetSwapQuote";
+
+	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
+	{
+		FGetSwapQuoteArgs Args {
+			UserWallet,
+			BuyCurrency,
+			SellCurrency,
+			BuyAmount,
+			static_cast<int>(ChainID),
+			IncludeApprove,
+			SlippagePercentage
+		};
+		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+			{
+				FSeqSwapQuote Response;
+			
+				if(!Response.FromResponse(Content))
+				{
+					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+					return;
+				}
+				
+				OnSuccess(Response);
+			}, OnFailure);
+	}, OnFailure, SlippagePercentage);
+}
+
+void UMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
+	const FFailureCallback& OnFailure, const int SlippagePercentage)
+{
+	GetSwapPrice(ChainID, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
+		{
+			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
+		
+			UIndexer* Indexer = NewObject<UIndexer>();
+			FSeqGetTokenBalancesArgs Args;
+			Args.accountAddress = UserWallet;
+			Args.contractAddress = SellCurrency;
+
+			Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess, SlippagePercentage](const FSeqGetTokenBalancesReturn& TokenBalances)
+				{
+					TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
+					long Have = 0;
+				
+					if(SellCurrencies.Num() > 0)
+					{
+						Have = SellCurrencies[0].balance;
+					}
+				
+					UE_LOG(LogTemp, Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
+
+					if(Have < Required)
+					{
+						const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
+						                                            { *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
+						OnFailure(FSequenceError(InsufficientBalance, ErrorString));
+					}
+					else
+					{
+						OnSuccess();
+					}
+				}, OnFailure);
+		}, OnFailure, SlippagePercentage);
+}
+
+
+// HELPER FUNCTIONS
+void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(
+	const int64 ChainID,
+	const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter,
+	const FSeqMarketplacePage& Page,
+	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	ListCollectibleListingsWithLowestPriceListingsFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
+	{
+		if (CollectiblesReturn.Page.More)
+		{
+			// Call the next page
+			ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, CollectiblesReturn.Page, OnSuccess, OnFailure);
+			OnSuccess(CollectiblesReturn.CollectibleOrders, false);
+		}
+		else
+		{
+			OnSuccess(CollectiblesReturn.CollectibleOrders, true);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(
+	const int64 ChainID,
+	const FString& ContractAddress,
+	const FSeqCollectiblesFilter& Filter,
+	const FSeqMarketplacePage& Page,
+	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	ListCollectibleOffersWithHighestPricedOfferFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
+	{
+		
+		if (CollectiblesReturn.Page.More)
+		{
+			// Call the next page
+			ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(ChainID, ContractAddress, Filter, CollectiblesReturn.Page, OnSuccess, OnFailure);
+			OnSuccess(CollectiblesReturn.CollectibleOrders, false);
+		}
+		else
+		{
+			OnSuccess(CollectiblesReturn.CollectibleOrders, true);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::GetCollectibleOrder(const int64 ChainID, const FString& Endpoint, const FSeqGetCollectibleOrderArgs& Args, TSuccessCallback<FSeqCollectibleOrder> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetCollectibleOrderArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSeqGetCollectibleOrderReturn Response = this->BuildResponse<FSeqGetCollectibleOrderReturn>(Content);
+			OnSuccess(Response.Order);
+		}, OnFailure);
+}
+
+void UMarketplace::ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
+	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure)
+{
+	ListListingsForCollectible(ChainID, ContractAddress, TokenID, Filter, Page, [ChainID, ContractAddress, Filter, TokenID, this, OnSuccess, OnFailure](const FSeqListCollectibleListingsReturn& CollectiblesReturn)
+	{
+		
+		if (CollectiblesReturn.Page.More)
+		{
+			// Call the next page
+			ListAllListingsForCollectibleHelper(ChainID, ContractAddress, TokenID, Filter, CollectiblesReturn.Page, OnSuccess, OnFailure);
+			OnSuccess(CollectiblesReturn.Listings, false);
+		}
+		else
+		{
+			OnSuccess(CollectiblesReturn.Listings, true);
+		}
+	}, OnFailure);
+}
+
+void UMarketplace::ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
+	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
+	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure)
+{
+	ListOffersForCollectible(ChainID, ContractAddress, TokenID, Filter, Page, [ChainID, ContractAddress, Filter, TokenID, this, OnSuccess, OnFailure](const FSeqListCollectibleOffersReturn& CollectiblesReturn)
+	{
+		
+		if (CollectiblesReturn.Page.More)
+		{
+			// Call the next page
+			ListAllOffersForCollectibleHelper(ChainID, ContractAddress, TokenID, Filter, CollectiblesReturn.Page, OnSuccess, OnFailure);
+			OnSuccess(CollectiblesReturn.Offers, false);
+		}
+		else
+		{
+			OnSuccess(CollectiblesReturn.Offers, true);
+		}
+	}, OnFailure);
 }

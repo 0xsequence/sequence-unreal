@@ -3,17 +3,17 @@
 #include "CoreMinimal.h"
 #include "SeqCollectibleOrder.h"
 #include "SeqMarketplacePage.h"
-#include "SeqGetCollectiblesWithLowestListingsReturn.generated.h"
+#include "SeqListCollectibleListingsReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqGetCollectiblesWithLowestListingsReturn
+struct SEQUENCEPLUGIN_API FSeqListCollectibleListingsReturn
 {
     GENERATED_USTRUCT_BODY()
 
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
-    TArray<FSeqCollectibleOrder> CollectibleOrders;
+    TArray<FSeqCollectibleOrder> Listings;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     FSeqMarketplacePage Page;
@@ -35,13 +35,13 @@ public:
 
         // Convert CollectibleOrders array to JSON
         TArray<TSharedPtr<FJsonObject>> collectibleOrdersList;
-        for (FSeqCollectibleOrder order : CollectibleOrders)
+        for (FSeqCollectibleOrder order : Listings)
         {
             collectibleOrdersList.Add(order.GetJson());
         }
 
         // Set the collectible orders as a simple string array in JSON
-        ret->SetStringField("collectibleOrders", USequenceSupport::JsonObjListToSimpleString(collectibleOrdersList));
+        ret->SetStringField("listings", USequenceSupport::JsonObjListToSimpleString(collectibleOrdersList));
         return ret;
     }
 
@@ -51,9 +51,9 @@ public:
     void Setup(FJsonObject json_in)
     {
         const TArray<TSharedPtr<FJsonValue>>* lst;
-        if (json_in.TryGetArrayField(TEXT("collectibles"), lst))
+        if (json_in.TryGetArrayField(TEXT("listings"), lst))
         {
-            CollectibleOrders.SetNum(lst->Num());
+            Listings.SetNum(lst->Num());
 
             for (int32 i = 0; i < lst->Num(); i++)
             {
@@ -62,7 +62,7 @@ public:
                 if (item.IsValid())
                 {
                     TSharedPtr<FJsonObject> itemObj = item->AsObject();
-                    CollectibleOrders[i].Setup(*itemObj);
+                    Listings[i].Setup(*itemObj);
                 }
             }
         }
