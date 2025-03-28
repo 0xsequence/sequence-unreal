@@ -50,14 +50,14 @@ public:
     //*/
     void Setup(FJsonObject json_in)
     {
-        const TArray<TSharedPtr<FJsonValue>>* lst;
-        if (json_in.TryGetArrayField(TEXT("collectibles"), lst))
+        const TArray<TSharedPtr<FJsonValue>>* List;
+        if (json_in.TryGetArrayField(TEXT("collectibles"), List))
         {
-            CollectibleOrders.SetNum(lst->Num());
+            CollectibleOrders.SetNum(List->Num());
 
-            for (int32 i = 0; i < lst->Num(); i++)
+            for (int32 i = 0; i < List->Num(); i++)
             {
-                TSharedPtr<FJsonValue> item = (*lst)[i];
+                TSharedPtr<FJsonValue> item = (*List)[i];
 
                 if (item.IsValid())
                 {
