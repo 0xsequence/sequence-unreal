@@ -28,27 +28,27 @@ void USequenceCheckoutBP::SetChainID(const int64& InChainID)
 
 void USequenceCheckoutBP::GetCheckoutOptions(const FString& WalletAddress,
 	const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
-	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GetCheckoutOptions(WalletAddress, Orders, AdditionalFeeBps, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders,
-	const int64 AdditionalFeeBps, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const int64 AdditionalFeeBps, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GetCheckoutOptionsByOrders(WalletAddress, Orders, AdditionalFeeBps, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order,
 	const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateBuyTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order,
 	const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateSellTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
 }
@@ -56,7 +56,7 @@ void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, 
 void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
 	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateListingTransaction(WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnSuccess, OnFailure);
 }
@@ -64,21 +64,21 @@ void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddres
 void USequenceCheckoutBP::GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
 	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateOfferTransaction(WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& OrderId, const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess,
-	const FOnCheckoutFailure OnFailure) const
+	const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateCancelTransaction(WalletAddress, CollectionAddress, OrderId, MarketplaceKind, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GenerateCancelTransactionByOrder(const FString& WalletAddress,
 	const FString& CollectionAddress, const FSeqOrder& Order, const EMarketplaceKind MarketplaceKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateCancelTransactionByOrder(WalletAddress, CollectionAddress, Order, MarketplaceKind, OnSuccess, OnFailure);
 }

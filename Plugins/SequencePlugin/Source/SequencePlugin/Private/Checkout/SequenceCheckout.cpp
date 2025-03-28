@@ -37,7 +37,7 @@ void USequenceCheckout::HTTPPost(const int64& TargetChainID, const FString& Endp
 
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
 
-	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
+	const FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
 	if (AccessKey.IsEmpty())
 	{
 		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
@@ -53,8 +53,8 @@ void USequenceCheckout::HTTPPost(const int64& TargetChainID, const FString& Endp
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
-	 
-	FString CurlCommand = FString::Printf(
+
+	const FString CurlCommand = FString::Printf(
 		TEXT("curl -X %s \"%s\" -H \"Content-Type: application/json\" -H \"Accept: application/json\" -H \"X-Access-Key: %s\" --data \"%s\""),
 		*HTTP_Post_Req->GetVerb(),
 		*HTTP_Post_Req->GetURL(),
@@ -278,7 +278,7 @@ void USequenceCheckout::GenerateOfferTransaction(const FString& WalletAddress, c
 	const EContractType ContractType, const FString& CurrencyTokenAddress, const int64 PricePerToken, const FDateTime Expiry,
 	const EOrderbookKind OrderbookKind, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
-	int64 EpochTime = Expiry.ToUnixTimestamp();
+	const int64 EpochTime = Expiry.ToUnixTimestamp();
 	const FString Endpoint = "GenerateOfferTransaction";
 	const FString Args = BuildArgs<FGenerateOfferTransactionArgs>(FGenerateOfferTransactionArgs {
 		CollectionAddress, WalletAddress, ContractType, OrderbookKind, FCreateReq {
@@ -327,7 +327,7 @@ void USequenceCheckout::GenerateCancelTransaction(const FString& WalletAddress, 
 }
 
 void USequenceCheckout::GenerateCancelTransactionByOrder(const FString& WalletAddress, const FString& CollectionAddress, const FSeqOrder& Order,
-	const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+	const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	GenerateCancelTransaction(WalletAddress, CollectionAddress, Order.OrderId, MarketplaceKind, OnSuccess, OnFailure);
 }
