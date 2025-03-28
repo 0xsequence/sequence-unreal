@@ -98,14 +98,8 @@ bool UObjectHandler::CheckRawCache(FString URL, TArray<uint8>* RawData)
 	bool cache_hit = this->Cache.Contains(URL);
 
 	if (cache_hit)
-	{
-		SEQ_LOG(Display, TEXT("Raw Cache hit"));
 		*RawData = this->Cache.Find(URL)->RawData;//get the data in the cache!
-	}
-	else
-	{
-		SEQ_LOG(Error, TEXT("Raw Cache miss"));
-	}
+	
 	return cache_hit;
 }
 

@@ -19,7 +19,6 @@ void USequenceWalletQrCode::LoadQrImage()
 		TMap<FString, UTexture2D*> Images = ObjectHandler->GetProcessedImages();
 		if (Images.Contains(QrCodeUrl))
 		{
-			SEQ_LOG_EDITOR(Error, TEXT("Successfully downloaded QR Code."));
 			this->Texture = *Images.Find(QrCodeUrl);
 			this->OnTextureChanged.Broadcast();
 		}
