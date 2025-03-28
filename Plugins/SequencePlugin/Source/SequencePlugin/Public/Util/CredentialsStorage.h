@@ -14,7 +14,7 @@ class SEQUENCEPLUGIN_API UCredentialsStorage : public UObject
 public:
 	UCredentialsStorage();
 
-	void SetEncryptor(UGenericNativeEncryptor* Encryptor);
+	void SetEncryptor(UGenericNativeEncryptor* NewEncryptor);
 	void StoreCredentials(const FCredentials_BE& Credentials) const;
 	bool GetStoredCredentials(FCredentials_BE* Credentials) const;
 	FStoredCredentials_BE GetStoredCredentials() const;

@@ -18,7 +18,7 @@ public:
     void construct(FJsonObject obj) {}
     void Setup(FJsonObject obj) {}
     
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     TArray<FSeqSwapPrice> SwapPrices;
 
 };

@@ -543,19 +543,19 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWalletRequest
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "signatureChainId"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "signatureChainId"), Category = "0xSequence")
 	FString SignatureChainId = "";
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletAddress"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletAddress"), Category = "0xSequence")
 	FString ParentWalletAddress = "";
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletMessage"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletMessage"), Category = "0xSequence")
 	FString ParentWalletMessage = "";
 
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletSignature"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "parentWalletSignature"), Category = "0xSequence")
 	FString ParentWalletSignature = "";
 
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"), Category = "0xSequence")
 	FString LinkedWalletAddress = "";
 };
 
@@ -564,19 +564,19 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWallet
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "id"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "id"), Category = "0xSequence")
 	int64 Id = 0;
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletType"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletType"), Category = "0xSequence")
 	FString WalletType = "";
 	
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletAddress"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "walletAddress"), Category = "0xSequence")
 	FString WalletAddress = "";
 
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWalletAddress"), Category = "0xSequence")
 	FString LinkedWalletAddress = "";
 
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "createdAt"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "createdAt"), Category = "0xSequence")
 	FString CreatedAt = "";
 };
 
@@ -585,7 +585,7 @@ struct SEQUENCEPLUGIN_API FSeqLinkedWalletsResponse
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWallets"))
+	UPROPERTY(BlueprintReadWrite, meta = (JsonFieldName = "linkedWallets"), Category = "0xSequence")
 	TArray<FSeqLinkedWallet> LinkedWallets;
 };
 

@@ -65,17 +65,16 @@ void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCa
 
 void USequenceWallet::SignOut() const
 {
-	const UCredentialsStorage* CredentialsStorage = NewObject<UCredentialsStorage>();
 	if (this->GetCredentials().IsRegistered())
 	{
-		const TFunction<void()> OnSuccess = [CredentialsStorage]
+		const TFunction<void()> OnSuccess = [this]
 		{
-			CredentialsStorage->ClearStoredCredentials();
+			this->CredentialsStorage->ClearStoredCredentials();
 		};
 
-		const TFunction<void (FSequenceError)> OnFailure = [CredentialsStorage](FSequenceError Err)
+		const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err)
 		{
-			CredentialsStorage->ClearStoredCredentials();
+			this->CredentialsStorage->ClearStoredCredentials();
 		};
 
 		FCredentials_BE Credentials = this->GetCredentials();
@@ -85,12 +84,12 @@ void USequenceWallet::SignOut() const
 		}
 		else
 		{
-			CredentialsStorage->ClearStoredCredentials();
+			this->CredentialsStorage->ClearStoredCredentials();
 		}
 	}
 	else
 	{
-		CredentialsStorage->ClearStoredCredentials();
+		this->CredentialsStorage->ClearStoredCredentials();
 	}
 }
 

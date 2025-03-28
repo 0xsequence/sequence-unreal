@@ -27,9 +27,9 @@ UCredentialsStorage::UCredentialsStorage()
 	}
 }
 
-void UCredentialsStorage::SetEncryptor(UGenericNativeEncryptor* Encryptor)
+void UCredentialsStorage::SetEncryptor(UGenericNativeEncryptor* NewEncryptor)
 {
-	this->Encryptor = Encryptor;	
+	this->Encryptor = NewEncryptor;	
 }
 
 void UCredentialsStorage::StoreCredentials(const FCredentials_BE& Credentials) const
