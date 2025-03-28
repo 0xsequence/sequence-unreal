@@ -2,7 +2,7 @@
 
 #include "JsonObjectConverter.h"
 #include "CoreMinimal.h"
-#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
+#include "SequencePlugin/Public/Sequence/SequenceWallet.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
 #include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"

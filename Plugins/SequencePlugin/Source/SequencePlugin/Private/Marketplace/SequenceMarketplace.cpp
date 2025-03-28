@@ -510,7 +510,7 @@ void USequenceMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, co
 		{
 			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
 		
-			UIndexer* Indexer = NewObject<UIndexer>();
+			USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
 			FSeqGetTokenBalancesArgs Args;
 			Args.accountAddress = UserWallet;
 			Args.contractAddress = SellCurrency;
