@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetHighestPriceListingForColle
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListListingsForCollectible, bool, Status, const int64, ChainId, FSeqListCollectibleListingsReturn, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllListingsForCollectible, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListOffersForCollectible, bool, Status, const int64, ChainId, FSeqListCollectibleOffersReturn, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllOffersForCollectible, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllOffersForCollectible, bool, Status, const int64, ChainId, const TArray<FSeqCollectibleOrder>&, Response);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetFloorOrder, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
 
 UCLASS(Blueprintable)
