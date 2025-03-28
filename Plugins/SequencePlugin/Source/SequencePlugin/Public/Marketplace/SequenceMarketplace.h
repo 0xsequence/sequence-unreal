@@ -11,13 +11,12 @@
 #include "Structs/SeqListCurrenciesReturn.h"
 #include "Structs/SeqSwapPrice.h"
 #include "Structs/SeqSwapQuote.h"
-#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
-#include "Marketplace.generated.h"
+#include "SequenceMarketplace.generated.h"
 
 constexpr int DefaultSlippagePercentage = 5;
 
 UCLASS()
-class SEQUENCEPLUGIN_API UMarketplace : public UObject
+class SEQUENCEPLUGIN_API USequenceMarketplace : public UObject
 {
 	GENERATED_BODY()
 
@@ -77,7 +76,7 @@ public:
 	*/
 	template < typename T> FString BuildArgs(T StructIn);
 
-    UMarketplace();
+    USequenceMarketplace();
 
 	/**
 	 * Lists the marketplace currencies

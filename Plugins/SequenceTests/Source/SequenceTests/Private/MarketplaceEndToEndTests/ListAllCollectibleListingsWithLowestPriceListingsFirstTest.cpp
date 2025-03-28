@@ -5,7 +5,7 @@
 #include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "Marketplace/Marketplace.h"
+#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"

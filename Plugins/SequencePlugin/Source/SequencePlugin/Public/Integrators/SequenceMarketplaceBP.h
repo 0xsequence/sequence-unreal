@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Marketplace/Marketplace.h"
+#include "Marketplace/SequenceMarketplace.h"
 #include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
 #include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Subsystems/GameInstanceSubsystem.h"
@@ -131,7 +131,7 @@ public:
 	void GetSwapQuoteAsync(const int64 ChainId, const FGetSwapQuoteArgs& Args);
 	
 private:
-	UMarketplace* Marketplace;
+	USequenceMarketplace* Marketplace;
 
 	void CallCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response);
 	void CallAllCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Marketplace/Marketplace.h"
+#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
 #include "SequencePlugin/Private/Indexer/Indexer.h"
 #include "MarketplaceRequestsTestData.generated.h"
 
@@ -25,7 +25,7 @@ class UMarketplaceRequestsTestData : public UObject
 	bool bAllRequestsSuccessful = true;
 
 	UPROPERTY()
-	UMarketplace * Marketplace;
+	USequenceMarketplace * Marketplace;
 	
 public:
 	
@@ -63,5 +63,5 @@ public:
 
 	bool TestDone() const;
 
-	UMarketplace * GetMarketplace() const;
+	USequenceMarketplace * GetMarketplace() const;
 };

@@ -8,7 +8,7 @@
 
 USequenceMarketplaceBP::USequenceMarketplaceBP()
 {
-	this->Marketplace = NewObject<UMarketplace>();
+	this->Marketplace = NewObject<USequenceMarketplace>();
 
 }
 

@@ -4,7 +4,7 @@
 #include "Sequence/SequenceAPI.h"
 #include "SequenceAuthenticator.h"
 #include "ABI/ABI.h"
-#include "Marketplace/Marketplace.h"
+#include "Marketplace/SequenceMarketplace.h"
 #include "Marketplace/Structs/SeqCollectibleOrder.h"
 #include "Marketplace/Structs/SeqCollectiblesFilter.h"
 #include "Native/NativeOAuth.h"
@@ -470,7 +470,7 @@ void SequenceAPITest::TestLoadTransakUrl()
 void SequenceAPITest::ListCurrencies(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 
 	Marketplace->ListCurrencies(Support->GetNetworkId(PolygonChain), [OnSuccess](FSeqListCurrenciesReturn Response)
@@ -492,7 +492,7 @@ void SequenceAPITest::ListCurrencies(TFunction<void(FString)> OnSuccess,
 void SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(TFunction<void(FString)> OnSuccess,
                                                                              TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(
@@ -511,7 +511,7 @@ void SequenceAPITest::ListAllCollectibleListingsWithLowestPriceListingsFirst(TFu
 void SequenceAPITest::ListAllCollectibleOffersWithHighestPricedOfferFirst(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(
@@ -530,7 +530,7 @@ void SequenceAPITest::ListAllCollectibleOffersWithHighestPricedOfferFirst(TFunct
 void SequenceAPITest::GetLowestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->GetLowestPriceOfferForCollectible(
@@ -550,7 +550,7 @@ void SequenceAPITest::GetLowestPriceOfferForCollectible(TFunction<void(FString)>
 void SequenceAPITest::GetHighestPriceOfferForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->GetHighestPriceOfferForCollectible(
@@ -570,7 +570,7 @@ void SequenceAPITest::GetHighestPriceOfferForCollectible(TFunction<void(FString)
 void SequenceAPITest::GetLowestPriceListingForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->GetLowestPriceListingForCollectible(
@@ -590,7 +590,7 @@ void SequenceAPITest::GetLowestPriceListingForCollectible(TFunction<void(FString
 void SequenceAPITest::GetHighestPriceListingForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->GetLowestPriceListingForCollectible(
@@ -610,7 +610,7 @@ void SequenceAPITest::GetHighestPriceListingForCollectible(TFunction<void(FStrin
 void SequenceAPITest::ListAllListingsForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->ListAllListingsForCollectible(
@@ -630,7 +630,7 @@ void SequenceAPITest::ListAllListingsForCollectible(TFunction<void(FString)> OnS
 void SequenceAPITest::ListAllOffersForCollectible(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->ListAllOffersForCollectible(
@@ -650,7 +650,7 @@ void SequenceAPITest::ListAllOffersForCollectible(TFunction<void(FString)> OnSuc
 void SequenceAPITest::GetFloorOrder(TFunction<void(FString)> OnSuccess,
 	TFunction<void(FString, FSequenceError)> OnFailure)
 {
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
 	USequenceSupport* Support = NewObject<USequenceSupport>();
 		
 	Marketplace->GetFloorOrder(

@@ -7,7 +7,7 @@ UMarketplaceRequestsTestData * UMarketplaceRequestsTestData::Make(const int32 Pe
 {
 	UMarketplaceRequestsTestData * IndexerRequestsTestData = NewObject<UMarketplaceRequestsTestData>();
 	IndexerRequestsTestData->PendingRequests = PendingRequestsIn;
-	IndexerRequestsTestData->Marketplace = NewObject<UMarketplace>();
+	IndexerRequestsTestData->Marketplace = NewObject<USequenceMarketplace>();
 	return IndexerRequestsTestData;
 }
 
@@ -47,7 +47,7 @@ bool UMarketplaceRequestsTestData::TestDone() const
 	return this->PendingRequests == 0;
 }
 
-UMarketplace * UMarketplaceRequestsTestData::GetMarketplace() const
+USequenceMarketplace * UMarketplaceRequestsTestData::GetMarketplace() const
 {
 	return this->Marketplace;
 }

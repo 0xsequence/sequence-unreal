@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "Marketplace/Marketplace.h"
+#include "Marketplace/SequenceMarketplace.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
@@ -21,9 +21,9 @@
 #include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
 #include "Marketplace/Structs/SeqListCurrenciesReturn.h"
 
-UMarketplace::UMarketplace(){}
+USequenceMarketplace::USequenceMarketplace(){}
 
-FString UMarketplace::Url(const int64& ChainID, const FString& EndPoint) const
+FString USequenceMarketplace::Url(const int64& ChainID, const FString& EndPoint) const
 {
 	FString Out_URL = HostName(ChainID);
 	Out_URL.Append(this->PATH);
@@ -35,7 +35,7 @@ FString UMarketplace::Url(const int64& ChainID, const FString& EndPoint) const
 	return Out_URL;
 }
 
-FString UMarketplace::HostName(const int64 ChainID)
+FString USequenceMarketplace::HostName(const int64 ChainID)
 {
 	FString Hostname = "https://";
 	Hostname.Append("marketplace-api.sequence.app/");
@@ -45,7 +45,7 @@ FString UMarketplace::HostName(const int64 ChainID)
 
 
 
-void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = this->Url(ChainID, Endpoint);
 
@@ -107,7 +107,7 @@ void UMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoint, const
 	HTTP_Post_Req->ProcessRequest();
 }
 
-void UMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
+void USequenceMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = "https://api.sequence.app/rpc/API/" + Endpoint;
@@ -163,7 +163,7 @@ void UMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 	HTTP_Post_Req->ProcessRequest();
 }
 
-template < typename T> FString UMarketplace::BuildArgs(T StructIn)
+template < typename T> FString USequenceMarketplace::BuildArgs(T StructIn)
 {
 	FString Result = "[FAILED TO PARSE]";
 	if (StructIn.customGetter)
@@ -181,7 +181,7 @@ template < typename T> FString UMarketplace::BuildArgs(T StructIn)
 }
 
 //generic
-template<typename T> T UMarketplace::BuildResponse(const FString Text)
+template<typename T> T USequenceMarketplace::BuildResponse(const FString Text)
 {
 	//Take the FString and convert it to a JSON object first!
 	TSharedPtr<FJsonObject> JSON_Step;
@@ -210,7 +210,7 @@ template<typename T> T UMarketplace::BuildResponse(const FString Text)
 	return Ret_Struct;
 }
 
-void UMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqListCurrenciesReturn> OnSuccess,
+void USequenceMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqListCurrenciesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "ListCurrencies";
@@ -222,7 +222,7 @@ void UMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<FSeqList
 		}, OnFailure);
 }
 
-void UMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -235,7 +235,7 @@ void UMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int
 		}, OnFailure);
 }
 
-void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID,
+void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID,
 	const FString& ContractAddress, const FSeqCollectiblesFilter& Filter,
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -253,7 +253,7 @@ void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const 
 	}, OnFailure);
 }
 
-void UMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
+void USequenceMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter,
@@ -270,7 +270,7 @@ void UMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
 		}, OnFailure);
 }
 
-void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
+void USequenceMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter,
@@ -291,7 +291,7 @@ void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
 	}, OnFailure);
 }
 
-void UMarketplace::GetLowestPriceOfferForCollectible(
+void USequenceMarketplace::GetLowestPriceOfferForCollectible(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FString& TokenID,
@@ -304,7 +304,7 @@ void UMarketplace::GetLowestPriceOfferForCollectible(
 	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
 }
 
-void UMarketplace::GetHighestPriceOfferForCollectible(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::GetHighestPriceOfferForCollectible(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -313,7 +313,7 @@ void UMarketplace::GetHighestPriceOfferForCollectible(const int64 ChainID, const
 	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
 }
 
-void UMarketplace::GetLowestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::GetLowestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -322,7 +322,7 @@ void UMarketplace::GetLowestPriceListingForCollectible(const int64 ChainID, cons
 	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
 }
 
-void UMarketplace::GetHighestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::GetHighestPriceListingForCollectible(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -331,7 +331,7 @@ void UMarketplace::GetHighestPriceListingForCollectible(const int64 ChainID, con
 	GetCollectibleOrder(ChainID, Endpoint, Args, OnSuccess, OnFailure);
 }
 
-void UMarketplace::ListListingsForCollectible(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::ListListingsForCollectible(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
 	TSuccessCallback<FSeqListCollectibleListingsReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -344,7 +344,7 @@ void UMarketplace::ListListingsForCollectible(const int64 ChainID, const FString
 		}, OnFailure);
 }
 
-void UMarketplace::ListAllListingsForCollectible(const int64 ChainID,
+void USequenceMarketplace::ListAllListingsForCollectible(const int64 ChainID,
 	const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter,
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -362,7 +362,7 @@ void UMarketplace::ListAllListingsForCollectible(const int64 ChainID,
 	}, OnFailure);
 }
 
-void UMarketplace::ListOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID,
+void USequenceMarketplace::ListOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID,
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
 	TSuccessCallback<FSeqListCollectibleOffersReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -375,7 +375,7 @@ void UMarketplace::ListOffersForCollectible(const int64 ChainID, const FString& 
 		}, OnFailure);
 }
 
-void UMarketplace::ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceMarketplace::ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Args = BuildArgs<FSeqListCollectibleListingsArgs>(FSeqListCollectibleListingsArgs{ ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();
@@ -391,7 +391,7 @@ void UMarketplace::ListAllOffersForCollectible(const int64 ChainID, const FStrin
 	}, OnFailure);
 }
 
-void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -404,7 +404,7 @@ void UMarketplace::GetFloorOrder(const int64 ChainID, const FString& ContractAdd
 			}, OnFailure);
 }
 
-void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
+void USequenceMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
 	const int SlippagePercentage)
 {
@@ -430,7 +430,7 @@ void UMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency
 		}, OnFailure);
 }
 
-void UMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+void USequenceMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
 	const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
@@ -470,7 +470,7 @@ void UMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet,
 		}, OnFailure);
 }
 
-void UMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+void USequenceMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
 	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
 	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
@@ -502,7 +502,7 @@ void UMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, 
 	}, OnFailure, SlippagePercentage);
 }
 
-void UMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+void USequenceMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
 	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
 	const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
@@ -543,7 +543,7 @@ void UMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FStr
 
 
 // HELPER FUNCTIONS
-void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(
+void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter,
@@ -566,7 +566,7 @@ void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(
 	}, OnFailure);
 }
 
-void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(
+void USequenceMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter,
@@ -590,7 +590,7 @@ void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(
 	}, OnFailure);
 }
 
-void UMarketplace::GetCollectibleOrder(const int64 ChainID, const FString& Endpoint, const FSeqGetCollectibleOrderArgs& Args, TSuccessCallback<FSeqCollectibleOrder> OnSuccess,
+void USequenceMarketplace::GetCollectibleOrder(const int64 ChainID, const FString& Endpoint, const FSeqGetCollectibleOrderArgs& Args, TSuccessCallback<FSeqCollectibleOrder> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
 	HTTPPost(ChainID, Endpoint, BuildArgs<FSeqGetCollectibleOrderArgs>(Args), [this, OnSuccess](const FString& Content)
@@ -600,7 +600,7 @@ void UMarketplace::GetCollectibleOrder(const int64 ChainID, const FString& Endpo
 		}, OnFailure);
 }
 
-void UMarketplace::ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
 	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -620,7 +620,7 @@ void UMarketplace::ListAllListingsForCollectibleHelper(const int64 ChainID, cons
 	}, OnFailure);
 }
 
-void UMarketplace::ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress,
 	const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
 	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure)
 {
