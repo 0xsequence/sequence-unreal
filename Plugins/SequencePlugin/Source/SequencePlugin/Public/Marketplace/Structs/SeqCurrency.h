@@ -11,7 +11,7 @@ struct SEQUENCEPLUGIN_API FSeqCurrency
 public:
 	// Properties
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	u_long ID;
+	int ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ChainID;
@@ -26,7 +26,7 @@ public:
 	FString Symbol;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	u_long Decimals;
+	int Decimals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ImageURL;
@@ -48,12 +48,12 @@ public:
 
 	void Setup(FJsonObject json_in)
 	{
-		ID = json_in.GetNumberField(TEXT("id"));
+		ID = json_in.GetIntegerField(TEXT("id"));
 		ChainID = json_in.GetIntegerField(TEXT("chain_id"));
 		ContractAddress = json_in.GetStringField(TEXT("contract_address"));
 		Name = json_in.GetStringField(TEXT("name"));
 		Symbol = json_in.GetStringField(TEXT("symbol"));
-		Decimals = json_in.GetNumberField(TEXT("decimals"));
+		Decimals = json_in.GetIntegerField(TEXT("decimals"));
 		ImageURL = json_in.GetStringField(TEXT("image_url"));
 		ExchangeRate = json_in.GetNumberField(TEXT("exchange_rate"));
 		DefaultChainCurrency = json_in.GetBoolField(TEXT("default_chain_currency"));
