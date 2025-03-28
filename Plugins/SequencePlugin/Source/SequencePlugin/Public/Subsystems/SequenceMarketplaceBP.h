@@ -8,145 +8,81 @@
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "SequenceMarketplaceBP.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetCollectiblesWithLowestListingsFirst, bool, Status, const int64, ChainId, FSeqListCollectiblesReturn, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetAllCollectiblesWithLowestListingsFirst, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetCollectiblesWithHighestPricedOffersFirst, bool, Status, const int64, ChainId, FSeqListCollectiblesReturn, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetAllCollectiblesWithHighestPricedOffersFirst, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetLowestPriceOfferForCollectible, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetHighestPriceOfferForCollectible, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetLowestPriceListingForCollectible, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetHighestPriceListingForCollectible, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListListingsForCollectible, bool, Status, const int64, ChainId, FSeqListCollectibleListingsReturn, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllListingsForCollectible, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListOffersForCollectible, bool, Status, const int64, ChainId, FSeqListCollectibleOffersReturn, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnListAllOffersForCollectible, bool, Status, const int64, ChainId, TArray<FSeqCollectibleOrder>, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetFloorOrder, bool, Status, const int64, ChainId, FSeqCollectibleOrder, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapPrice, bool, Status, const int64, ChainId, FSeqSwapPrice, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapPrices, bool, Status, const int64, ChainId, TArray<FSeqSwapPrice>, Response);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetSwapQuote, bool, Status, const int64, ChainId, FSeqSwapQuote, Response);
-
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithLowestListingsFirst, FSeqListCollectiblesReturn, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, TArray<FSeqCollectibleOrder>, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithHighestPricedOffersFirst, FSeqListCollectiblesReturn, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, TArray<FSeqCollectibleOrder>, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetLowestPriceOfferForCollectible, FSeqCollectibleOrder, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetHighestPriceOfferForCollectible, FSeqCollectibleOrder, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetLowestPriceListingForCollectible, FSeqCollectibleOrder, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetHighestPriceListingForCollectible, FSeqCollectibleOrder, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListListingsForCollectible, FSeqListCollectibleListingsReturn, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, TArray<FSeqCollectibleOrder>, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListOffersForCollectible, FSeqListCollectibleOffersReturn, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, TArray<FSeqCollectibleOrder>, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetFloorOrder, FSeqCollectibleOrder, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrice, FSeqSwapPrice, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, TArray<FSeqSwapPrice>, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapQuote, FSeqSwapQuote, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
+
 public:
 	USequenceMarketplaceBP();
-
 	
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetCollectiblesWithLowestListingsFirst CollectiblesWithLowestListingsResponse;
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
+	void GetCollectiblesWithLowestListingsFirst(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetCollectiblesWithLowestListingsFirstAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetAllCollectiblesWithLowestListingsFirst AllCollectiblesWithLowestListingsResponse;
+	void GetAllCollectiblesWithLowestListingsFirst(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetAllCollectiblesWithLowestListingsFirstAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetCollectiblesWithHighestPricedOffersFirst CollectiblesWithHighestListingsResponse;
+	void GetCollectiblesWithHighestPricedOffersFirst(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetCollectiblesWithHighestPricedOffersFirstAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetAllCollectiblesWithHighestPricedOffersFirst AllCollectiblesWithHighestPricedOffersResponse;
+	void GetAllCollectiblesWithHighestPricedOffersFirst(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetAllCollectiblesWithHighestPricedOffersFirstAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetLowestPriceOfferForCollectible GetLowestPriceOfferForCollectibleResponse;
+	void GetLowestPriceOfferForCollectible(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetLowestPriceOfferForCollectibleAsync(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetHighestPriceOfferForCollectible GetHighestPriceOfferForCollectibleResponse;
+	void GetHighestPriceOfferForCollectible(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetHighestPriceOfferForCollectibleAsync(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetLowestPriceListingForCollectible GetLowestPriceListingForCollectibleResponse;
+	void GetLowestPriceListingForCollectible(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetLowestPriceListingForCollectibleAsync(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetHighestPriceListingForCollectible GetHighestPriceListingForCollectibleResponse;
+	void GetHighestPriceListingForCollectible(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetHighestPriceListingForCollectibleAsync(const int64 ChainId, const FSeqGetCollectibleOrderArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnListListingsForCollectible FOnListListingsForCollectibleResponse;
+	void ListListingsForCollectible(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args, FOnListListingsForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListListingsForCollectibleAsync(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnListAllListingsForCollectible FOnListAllListingsForCollectibleResponse;
+	void ListAllListingsForCollectible(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args, FOnListAllListingsForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListAllListingsForCollectibleAsync(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnListOffersForCollectible FOnListOffersForCollectibleResponse;
+	void ListOffersForCollectible(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args, FOnListOffersForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListOffersForCollectibleAsync(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnListAllOffersForCollectible FOnListAllOffersForCollectibleResponse;
+	void ListAllOffersForCollectible(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args, FOnListAllOffersForCollectible OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListAllOffersForCollectibleAsync(const int64 ChainId, const FSeqListCollectibleListingsArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetFloorOrder FOnGetFloorOrderResponse;
+	void GetFloorOrder(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetFloorOrderAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetSwapPrice FOnGetSwapPriceResponse;
+	void GetSwapPrice(const int64 ChainId, const FGetSwapPriceArgs& Args, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapPriceAsync(const int64 ChainId, const FGetSwapPriceArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetSwapPrices FOnGetSwapPricesResponse;
+	void GetSwapPrices(const int64 ChainId, const FGetSwapPricesArgs& Args, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapPricesAsync(const int64 ChainId, const FGetSwapPricesArgs& Args);
-
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
-	FOnGetSwapQuote FonGetSwapQuoteResponse;
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapQuoteAsync(const int64 ChainId, const FGetSwapQuoteArgs& Args);
+	void GetSwapQuote(const int64 ChainId, const FGetSwapQuoteArgs& Args, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
 	
 private:
+	UPROPERTY()
 	USequenceMarketplace* Marketplace;
-
-	void CallCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response);
-	void CallAllCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);
-	void CallCollectiblesWithHighestPricedOffersFirstReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response);
-	void CallAllCollectiblesWithHighestPricedOffersFirstReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);
-	void CallLowestPriceOfferForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
-	void CallHighestPriceOfferForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
-	void CallLowestPriceListingForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
-	void CallHighestPriceListingForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
-	void CallListListingsForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqListCollectibleListingsReturn& Response);
-	void CallListAllListingsForCollectibleReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);
-	void CallListOffersForCollectibleReceived(const bool Status, const int64 ChainId, const FSeqListCollectibleOffersReturn& Response);
-	void CallListAllOffersForCollectibleReceived(const bool Status, const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response);
-	void CallGetFloorOrderReceived(const bool Status, const int64 ChainId, const FSeqCollectibleOrder& Response);
-	void CallGetSwapPriceReceived(const bool Status, const int64 ChainId, const FSeqSwapPrice& Response);
-	void CallGetSwapPricesReceived(const bool Status, const int64 ChainId, const TArray<FSeqSwapPrice>& Response);
-	void CallGetSwapQuoteReceived(const bool Status, const int64 ChainId, const FSeqSwapQuote& Response);
 };

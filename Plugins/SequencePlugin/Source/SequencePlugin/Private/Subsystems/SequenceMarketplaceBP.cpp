@@ -9,438 +9,271 @@
 USequenceMarketplaceBP::USequenceMarketplaceBP()
 {
 	this->Marketplace = NewObject<USequenceMarketplace>();
-
 }
 
-void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirstAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args)
+void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirst(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess = [this, ChainId](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
-		{
-			this->CallCollectiblesWithLowestListingsFirstReceived(true, ChainId, CollectiblesWithLowestListings);
-		};
-
-	const FFailureCallback OnFailure = [this, ChainId, Args](const FSequenceError& Error)
-		{
-			SEQ_LOG(Error, TEXT("Error getting Collectibles with Lowest Listings: %s"), *Error.Message);
-			FSeqListCollectiblesReturn CollectiblesWithLowestListings;
-			this->CallCollectiblesWithLowestListingsFirstReceived(false, ChainId, CollectiblesWithLowestListings);
-		};
-
-
-	this->Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(ChainId, Args.ContractAddress, Args.Filter, Args.Page, OnSuccess, OnFailure);
-}
-
-void USequenceMarketplaceBP::GetAllCollectiblesWithLowestListingsFirstAsync(const int64 ChainId,
-	const FSeqListCollectiblesArgs& Args)
-{
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess = [this, ChainId](const TArray<FSeqCollectibleOrder>& CollectiblesWithLowestListings)
+	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
 	{
-		this->CallAllCollectiblesWithLowestListingsFirstReceived(true, ChainId, CollectiblesWithLowestListings);
+		OnSuccess.ExecuteIfBound(CollectiblesWithLowestListings);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Collectibles with Lowest Listings: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(ChainId, Args.ContractAddress, Args.Filter, Args.Page, OnApiSuccess, OnApiFailure);
+}
+
+void USequenceMarketplaceBP::GetAllCollectiblesWithLowestListingsFirst(const int64 ChainId,
+	const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& CollectiblesWithLowestListings)
+	{
+		OnSuccess.ExecuteIfBound(CollectiblesWithLowestListings);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting All Collectibles with Lowest Listings First: %s"), *Error.Message);
-		const TArray<FSeqCollectibleOrder> CollectiblesWithLowestListings;
-		this->CallAllCollectiblesWithLowestListingsFirstReceived(false, ChainId, CollectiblesWithLowestListings);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
-
-
-	this->Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(ChainId, Args.ContractAddress, Args.Filter, OnSuccess, OnFailure);
-
+	
+	this->Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(ChainId, Args.ContractAddress, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetCollectiblesWithHighestPricedOffersFirstAsync(const int64 ChainId,
-	const FSeqListCollectiblesArgs& Args)
+void USequenceMarketplaceBP::GetCollectiblesWithHighestPricedOffersFirst(const int64 ChainId,
+	const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess = [this, ChainId](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
+	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
 	{
-		this->CallCollectiblesWithHighestPricedOffersFirstReceived(true, ChainId, CollectiblesWithLowestListings);
+		OnSuccess.ExecuteIfBound(CollectiblesWithLowestListings);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Collectibles with Highest Priced Offers First: %s"), *Error.Message);
-		FSeqListCollectiblesReturn CollectiblesWithHighestOffers;
-		this->CallCollectiblesWithHighestPricedOffersFirstReceived(false, ChainId, CollectiblesWithHighestOffers);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
-
-
-	this->Marketplace->ListCollectibleOffersWithHighestPricedOfferFirst(ChainId, Args.ContractAddress, Args.Filter, Args.Page, OnSuccess, OnFailure);
-
+	
+	this->Marketplace->ListCollectibleOffersWithHighestPricedOfferFirst(ChainId, Args.ContractAddress, Args.Filter, Args.Page, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetAllCollectiblesWithHighestPricedOffersFirstAsync(const int64 ChainId,
-	const FSeqListCollectiblesArgs& Args)
+void USequenceMarketplaceBP::GetAllCollectiblesWithHighestPricedOffersFirst(const int64 ChainId,
+	const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess = [this, ChainId](const TArray<FSeqCollectibleOrder>& CollectiblesWithHighestPricedOffers)
+	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& CollectiblesWithHighestPricedOffers)
 	{
-		this->CallAllCollectiblesWithHighestPricedOffersFirstReceived(true, ChainId, CollectiblesWithHighestPricedOffers);
+		OnSuccess.ExecuteIfBound(CollectiblesWithHighestPricedOffers);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting All Collectibles with Highest Priced Offers First: %s"), *Error.Message);
-		const TArray<FSeqCollectibleOrder> CollectiblesWithHighestPricedOffers;
-		this->CallAllCollectiblesWithHighestPricedOffersFirstReceived(false, ChainId, CollectiblesWithHighestPricedOffers);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
-
-
-	this->Marketplace->ListAllCollectibleOffersWithHighestPricedOfferFirst(ChainId, Args.ContractAddress, Args.Filter, OnSuccess, OnFailure);
-
+	
+	this->Marketplace->ListAllCollectibleOffersWithHighestPricedOfferFirst(ChainId, Args.ContractAddress, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetLowestPriceOfferForCollectibleAsync(const int64 ChainId,
-	const FSeqGetCollectibleOrderArgs& Args)
+void USequenceMarketplaceBP::GetLowestPriceOfferForCollectible(const int64 ChainId,
+	const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnSuccess = [this, ChainId](const FSeqCollectibleOrder& LowestPriceOffer)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& LowestPriceOffer)
 	{
-		this->CallLowestPriceOfferForCollectibleReceived(true, ChainId, LowestPriceOffer);
+		OnSuccess.ExecuteIfBound(LowestPriceOffer);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Lowest Price Offer for Collectible: %s"), *Error.Message);
-		FSeqCollectibleOrder LowestPriceOffer;
-		this->CallLowestPriceOfferForCollectibleReceived(false, ChainId, LowestPriceOffer);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetLowestPriceOfferForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->GetLowestPriceOfferForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetHighestPriceOfferForCollectibleAsync(const int64 ChainId,
-	const FSeqGetCollectibleOrderArgs& Args)
+void USequenceMarketplaceBP::GetHighestPriceOfferForCollectible(const int64 ChainId,
+	const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnSuccess = [this, ChainId](const FSeqCollectibleOrder& HighestPriceOffer)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& HighestPriceOffer)
 	{
-		this->CallHighestPriceOfferForCollectibleReceived(true, ChainId, HighestPriceOffer);
+		OnSuccess.ExecuteIfBound(HighestPriceOffer);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Highest Price Offer for Collectible: %s"), *Error.Message);
-		FSeqCollectibleOrder HighestPriceOffer;
-		this->CallHighestPriceOfferForCollectibleReceived(false, ChainId, HighestPriceOffer);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetHighestPriceOfferForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->GetHighestPriceOfferForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetLowestPriceListingForCollectibleAsync(const int64 ChainId,
-	const FSeqGetCollectibleOrderArgs& Args)
+void USequenceMarketplaceBP::GetLowestPriceListingForCollectible(const int64 ChainId,
+	const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceListingForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnSuccess = [this, ChainId](const FSeqCollectibleOrder& LowestPriceListing)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& LowestPriceListing)
 	{
-		this->CallLowestPriceListingForCollectibleReceived(true, ChainId, LowestPriceListing);
+		OnSuccess.ExecuteIfBound(LowestPriceListing);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Lowest Price Listing for Collectible: %s"), *Error.Message);
-		FSeqCollectibleOrder LowestPriceListing;
-		this->CallLowestPriceListingForCollectibleReceived(false, ChainId, LowestPriceListing);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetLowestPriceListingForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->GetLowestPriceListingForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetHighestPriceListingForCollectibleAsync(const int64 ChainId,
-	const FSeqGetCollectibleOrderArgs& Args)
+void USequenceMarketplaceBP::GetHighestPriceListingForCollectible(const int64 ChainId,
+	const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceListingForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnSuccess = [this, ChainId](const FSeqCollectibleOrder& HighestPriceListing)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& HighestPriceListing)
 	{
-		this->CallHighestPriceListingForCollectibleReceived(true, ChainId, HighestPriceListing);
+		OnSuccess.ExecuteIfBound(HighestPriceListing);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Highest Price Listing for Collectible: %s"), *Error.Message);
-		FSeqCollectibleOrder HighestPriceListing;
-		this->CallHighestPriceListingForCollectibleReceived(false, ChainId, HighestPriceListing);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetHighestPriceListingForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->GetHighestPriceListingForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::ListListingsForCollectibleAsync(const int64 ChainId,
-	const FSeqListCollectibleListingsArgs& Args)
+void USequenceMarketplaceBP::ListListingsForCollectible(const int64 ChainId,
+	const FSeqListCollectibleListingsArgs& Args, FOnListListingsForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectibleListingsReturn> OnSuccess = [this, ChainId](const FSeqListCollectibleListingsReturn& Listings)
+	const TSuccessCallback<FSeqListCollectibleListingsReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleListingsReturn& Listings)
 	{
-		this->FOnListListingsForCollectibleResponse.Broadcast(true, ChainId, Listings);
+		OnSuccess.ExecuteIfBound(Listings);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Listings for Collectible: %s"), *Error.Message);
-		FSeqListCollectibleListingsReturn Listings;
-		this->FOnListListingsForCollectibleResponse.Broadcast(false, ChainId, Listings);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->ListListingsForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, Args.Page, OnSuccess, OnFailure);
+	this->Marketplace->ListListingsForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, Args.Page, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::ListAllListingsForCollectibleAsync(const int64 ChainId,
-	const FSeqListCollectibleListingsArgs& Args)
+void USequenceMarketplaceBP::ListAllListingsForCollectible(const int64 ChainId,
+	const FSeqListCollectibleListingsArgs& Args, FOnListAllListingsForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess = [this, ChainId](const TArray<FSeqCollectibleOrder>& Listings)
+	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Listings)
 	{
-		this->CallListAllListingsForCollectibleReceived(true, ChainId, Listings);
+		OnSuccess.ExecuteIfBound(Listings);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting All Listings for Collectible: %s"), *Error.Message);
-		TArray<FSeqCollectibleOrder> Listings;
-		this->CallListAllListingsForCollectibleReceived(false, ChainId, Listings);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->ListAllListingsForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->ListAllListingsForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::ListOffersForCollectibleAsync(const int64 ChainId,
-	const FSeqListCollectibleListingsArgs& Args)
+void USequenceMarketplaceBP::ListOffersForCollectible(const int64 ChainId,
+	const FSeqListCollectibleListingsArgs& Args, FOnListOffersForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectibleOffersReturn> OnSuccess = [this, ChainId](const FSeqListCollectibleOffersReturn& Offers)
+	const TSuccessCallback<FSeqListCollectibleOffersReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleOffersReturn& Offers)
 	{
-		this->FOnListOffersForCollectibleResponse.Broadcast(true, ChainId, Offers);
+		OnSuccess.ExecuteIfBound(Offers);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Offers for Collectible: %s"), *Error.Message);
-		FSeqListCollectibleOffersReturn Offers;
-		this->FOnListOffersForCollectibleResponse.Broadcast(false, ChainId, Offers);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->ListOffersForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, Args.Page, OnSuccess, OnFailure);
+	this->Marketplace->ListOffersForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, Args.Page, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::ListAllOffersForCollectibleAsync(const int64 ChainId,
-	const FSeqListCollectibleListingsArgs& Args)
+void USequenceMarketplaceBP::ListAllOffersForCollectible(const int64 ChainId,
+	const FSeqListCollectibleListingsArgs& Args, FOnListAllOffersForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess = [this, ChainId](const TArray<FSeqCollectibleOrder>& Offers)
+	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Offers)
 	{
-		this->FOnListAllOffersForCollectibleResponse.Broadcast(true, ChainId, Offers);
+		OnSuccess.ExecuteIfBound(Offers);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting All Offers for Collectible: %s"), *Error.Message);
-		TArray<FSeqCollectibleOrder> Offers;
-		this->FOnListAllOffersForCollectibleResponse.Broadcast(false, ChainId, Offers);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->ListAllOffersForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->ListAllOffersForCollectible(ChainId, Args.ContractAddress, Args.TokenID, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetFloorOrderAsync(const int64 ChainId, const FSeqListCollectiblesArgs& Args)
+void USequenceMarketplaceBP::GetFloorOrder(const int64 ChainId, const FSeqListCollectiblesArgs& Args, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnSuccess = [this, ChainId](const FSeqCollectibleOrder& FloorOrder)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& FloorOrder)
 	{
-		this->FOnGetFloorOrderResponse.Broadcast(true, ChainId, FloorOrder);
+		OnSuccess.ExecuteIfBound(FloorOrder);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Floor Order: %s"), *Error.Message);
-		FSeqCollectibleOrder FloorOrder;
-		this->FOnGetFloorOrderResponse.Broadcast(false, ChainId, FloorOrder);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetFloorOrder(ChainId, Args.ContractAddress, Args.Filter, OnSuccess, OnFailure);
+	this->Marketplace->GetFloorOrder(ChainId, Args.ContractAddress, Args.Filter, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetSwapPriceAsync(const int64 ChainId, const FGetSwapPriceArgs& Args)
+void USequenceMarketplaceBP::GetSwapPrice(const int64 ChainId, const FGetSwapPriceArgs& Args, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqSwapPrice> OnSuccess = [this, ChainId](const FSeqSwapPrice& SwapPrice)
+	const TSuccessCallback<FSeqSwapPrice> OnApiSuccess = [this, OnSuccess](const FSeqSwapPrice& SwapPrice)
 	{
-		this->FOnGetSwapPriceResponse.Broadcast(true, ChainId, SwapPrice);
+		OnSuccess.ExecuteIfBound(SwapPrice);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Swap Price: %s"), *Error.Message);
-		FSeqSwapPrice SwapPrice;
-		this->FOnGetSwapPriceResponse.Broadcast(false, ChainId, SwapPrice);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetSwapPrice(ChainId, Args.BuyAmount, Args.SellCurrencyAddress, Args.BuyAmount, OnSuccess, OnFailure, Args.SlippagePercentage);
+	this->Marketplace->GetSwapPrice(ChainId, Args.BuyAmount, Args.SellCurrencyAddress, Args.BuyAmount, OnApiSuccess, OnApiFailure, Args.SlippagePercentage);
 }
 
-void USequenceMarketplaceBP::GetSwapPricesAsync(const int64 ChainId, const FGetSwapPricesArgs& Args)
+void USequenceMarketplaceBP::GetSwapPrices(const int64 ChainId, const FGetSwapPricesArgs& Args, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqSwapPrice>> OnSuccess = [this, ChainId](const TArray<FSeqSwapPrice>& SwapPrices)
+	const TSuccessCallback<TArray<FSeqSwapPrice>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqSwapPrice>& SwapPrices)
 	{
-		this->FOnGetSwapPricesResponse.Broadcast(true, ChainId, SwapPrices);
+		OnSuccess.ExecuteIfBound(SwapPrices);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Swap Prices: %s"), *Error.Message);
-		TArray<FSeqSwapPrice> SwapPrices;
-		this->FOnGetSwapPricesResponse.Broadcast(false, ChainId, SwapPrices);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetSwapPrices(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.BuyAmount, OnSuccess, OnFailure, Args.SlippagePercentage);
+	this->Marketplace->GetSwapPrices(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.BuyAmount, OnApiSuccess, OnApiFailure, Args.SlippagePercentage);
 }
 
-void USequenceMarketplaceBP::GetSwapQuoteAsync(const int64 ChainId, const FGetSwapQuoteArgs& Args)
+void USequenceMarketplaceBP::GetSwapQuote(const int64 ChainId, const FGetSwapQuoteArgs& Args, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqSwapQuote> OnSuccess = [this, ChainId](const FSeqSwapQuote& SwapQuote)
+	const TSuccessCallback<FSeqSwapQuote> OnApiSuccess = [this, OnSuccess](const FSeqSwapQuote& SwapQuote)
 	{
-		this->FonGetSwapQuoteResponse.Broadcast(true, ChainId, SwapQuote);
+		OnSuccess.ExecuteIfBound(SwapQuote);
 	};
 
-	const FFailureCallback OnFailure = [this, ChainId](const FSequenceError& Error)
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
 	{
 		SEQ_LOG(Error, TEXT("Error getting Swap Quote: %s"), *Error.Message);
-		FSeqSwapQuote SwapQuote;
-		this->FonGetSwapQuoteResponse.Broadcast(false, ChainId, SwapQuote);
+		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Marketplace->GetSwapQuote(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.SellCurrencyAddress, Args.BuyAmount, Args.IncludeApprove, OnSuccess, OnFailure, Args.SlippagePercentage);
-}
-
-void USequenceMarketplaceBP::CallCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId, const FSeqListCollectiblesReturn& Response)
-{
-	if (this->CollectiblesWithLowestListingsResponse.IsBound())
-		this->CollectiblesWithLowestListingsResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: CollectiblesWithLowestListingsFirstResponse"));
-}
-
-void USequenceMarketplaceBP::CallAllCollectiblesWithLowestListingsFirstReceived(const bool Status, const int64 ChainId,
-	const TArray<FSeqCollectibleOrder>& Response)
-{
-	if (this->AllCollectiblesWithLowestListingsResponse.IsBound())
-		this->AllCollectiblesWithLowestListingsResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: AllCollectiblesWithLowestListingsFirstResponse"));
-}
-
-void USequenceMarketplaceBP::CallCollectiblesWithHighestPricedOffersFirstReceived(const bool Status, const int64 ChainId,
-	const FSeqListCollectiblesReturn& Response)
-{
-	if (this->CollectiblesWithHighestListingsResponse.IsBound())
-		this->CollectiblesWithHighestListingsResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: CollectiblesWithHighestPricedOffersFirstResponse"));
-}
-
-void USequenceMarketplaceBP::CallAllCollectiblesWithHighestPricedOffersFirstReceived(const bool Status,
-	const int64 ChainId, const TArray<FSeqCollectibleOrder>& Response)
-{
-	if (this->AllCollectiblesWithHighestPricedOffersResponse.IsBound())
-		this->AllCollectiblesWithHighestPricedOffersResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: AllCollectiblesWithHighestPricedOffersFirstResponse"));
-}
-
-void USequenceMarketplaceBP::CallLowestPriceOfferForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqCollectibleOrder& Response)
-{
-	if (this->GetLowestPriceOfferForCollectibleResponse.IsBound())
-		this->GetLowestPriceOfferForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetLowestPriceOfferForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallHighestPriceOfferForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqCollectibleOrder& Response)
-{
-	if (this->GetHighestPriceOfferForCollectibleResponse.IsBound())
-		this->GetHighestPriceOfferForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetHighestPriceOfferForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallLowestPriceListingForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqCollectibleOrder& Response)
-{
-	if (this->GetLowestPriceListingForCollectibleResponse.IsBound())
-		this->GetLowestPriceListingForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetLowestPriceListingForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallHighestPriceListingForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqCollectibleOrder& Response)
-{
-	if (this->GetHighestPriceListingForCollectibleResponse.IsBound())
-		this->GetHighestPriceListingForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetHighestPriceListingForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallListListingsForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqListCollectibleListingsReturn& Response)
-{
-	if (this->FOnListListingsForCollectibleResponse.IsBound())
-		this->FOnListListingsForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: ListListingsForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallListAllListingsForCollectibleReceived(const bool Status, const int64 ChainId,
-	const TArray<FSeqCollectibleOrder>& Response)
-{
-	if (this->FOnListAllListingsForCollectibleResponse.IsBound())
-		this->FOnListAllListingsForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: ListAllListingsForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallListOffersForCollectibleReceived(const bool Status, const int64 ChainId,
-	const FSeqListCollectibleOffersReturn& Response)
-{
-	if (this->FOnListOffersForCollectibleResponse.IsBound())
-		this->FOnListOffersForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: ListOffersForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallListAllOffersForCollectibleReceived(const bool Status, const int64 ChainId,
-	const TArray<FSeqCollectibleOrder>& Response)
-{
-	if (this->FOnListAllOffersForCollectibleResponse.IsBound())
-		this->FOnListAllOffersForCollectibleResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: ListAllOffersForCollectibleResponse"));
-}
-
-void USequenceMarketplaceBP::CallGetFloorOrderReceived(const bool Status, const int64 ChainId,
-	const FSeqCollectibleOrder& Response)
-{
-	if (this->FOnGetFloorOrderResponse.IsBound())
-		this->FOnGetFloorOrderResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetFloorOrderResponse"));
-}
-
-void USequenceMarketplaceBP::CallGetSwapPriceReceived(const bool Status, const int64 ChainId,
-	const FSeqSwapPrice& Response)
-{
-	if (this->FOnGetSwapPriceResponse.IsBound())
-		this->FOnGetSwapPriceResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapPriceResponse"));
-}
-
-void USequenceMarketplaceBP::CallGetSwapPricesReceived(const bool Status, const int64 ChainId,
-	const TArray<FSeqSwapPrice>& Response)
-{
-	if (this->FOnGetSwapPricesResponse.IsBound())
-		this->FOnGetSwapPricesResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapPricesResponse"));
-}
-
-void USequenceMarketplaceBP::CallGetSwapQuoteReceived(const bool Status, const int64 ChainId,
-	const FSeqSwapQuote& Response)
-{
-	if (this->FonGetSwapQuoteResponse.IsBound())
-		this->FonGetSwapQuoteResponse.Broadcast(Status, ChainId, Response);
-	else
-		SEQ_LOG(Error, TEXT("Nothing bound to delegate: GetSwapQuoteResponse"));
+	this->Marketplace->GetSwapQuote(ChainId, Args.UserAddress, Args.BuyCurrencyAddress, Args.SellCurrencyAddress, Args.BuyAmount, Args.IncludeApprove, OnApiSuccess, OnApiFailure, Args.SlippagePercentage);
 }
