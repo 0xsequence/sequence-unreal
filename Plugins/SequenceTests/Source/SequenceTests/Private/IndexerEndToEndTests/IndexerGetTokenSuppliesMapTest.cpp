@@ -36,12 +36,12 @@ void FIndexerGetTokenSuppliesMapTest::GetTests(TArray<FString>& OutBeautifiedNam
 
 bool FIndexerGetTokenSuppliesMapTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const int64 PolygonNetworkId = MarketplaceEndToEndTestsCommon::PolygonNetworkId;
     UIndexerRequestsTestData* IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
-    const FString UsdcAddress = IndexerEndToEndTestsCommon::TestContractAddress_USDC;
-    const FString WmaticAddress = IndexerEndToEndTestsCommon::TestContractAddress_WMATIC;
-    const FString SkyweaverAddress = IndexerEndToEndTestsCommon::TestContractAddress_Skyweaver;
+    const FString UsdcAddress = MarketplaceEndToEndTestsCommon::TestContractAddress_USDC;
+    const FString WmaticAddress = MarketplaceEndToEndTestsCommon::TestContractAddress_WMATIC;
+    const FString SkyweaverAddress = MarketplaceEndToEndTestsCommon::TestContractAddress_Skyweaver;
     const FString SkyweaverTokenId1 = "68657";
     const FString SkyweaverTokenId2 = "66669";
     const FString SkyweaverTokenId3 = "66668";

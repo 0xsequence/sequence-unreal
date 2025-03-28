@@ -16,6 +16,7 @@ enum EErrorType
 	TimeMismatch,
 	FailedToParseIntentTime,
 	InvalidArgument,
+	InsufficientBalance
 };
 
 class SEQUENCEPLUGIN_API FSequenceError

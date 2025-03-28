@@ -37,6 +37,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     TArray<FString> OrdersNotCreatedBy;
 
+    static FSeqCollectiblesFilter Empty()
+    {
+        return FSeqCollectiblesFilter{};
+    }
+
     bool ContainsData()
     {
         // Check for valid data in the properties
