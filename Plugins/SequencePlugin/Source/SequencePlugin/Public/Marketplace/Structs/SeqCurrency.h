@@ -18,4 +18,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ContractAddress;
+
+	void Setup(FJsonObject json_in)
+	{
+		ID = json_in.GetIntegerField(TEXT("id"));
+		ChainID = json_in.GetIntegerField(TEXT("chain_id"));
+		ContractAddress = json_in.GetStringField(TEXT("contract_address"));	
+	};
 };

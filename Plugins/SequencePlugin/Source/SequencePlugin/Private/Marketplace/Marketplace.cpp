@@ -166,7 +166,7 @@ void UMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	const FString Endpoint = "ListCollectiblesWithLowestListing";
+	const FString Endpoint = "ListCollectibles";
 	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, Page});
 	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
 		{
@@ -201,7 +201,7 @@ void UMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
 	TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	const FString Endpoint = "ListCollectibleOffersWithHighestPricedOfferFirst";
+	const FString Endpoint = "ListCollectibles";
 	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{OFFER, ContractAddress, Filter, Page});
 	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
 		{
