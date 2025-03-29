@@ -65,32 +65,13 @@ void USequenceWallet::GetSessionAuthProof(const FString& Nonce, const TSuccessCa
 
 void USequenceWallet::SignOut() const
 {
-	if (this->GetCredentials().IsRegistered())
-	{
-		const TFunction<void()> OnSuccess = [this]
-		{
-			this->CredentialsStorage->ClearStoredCredentials();
-		};
+	const TFunction<void()> OnSuccess = [this] { };
+	const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err) { };
 
-		const TFunction<void (FSequenceError)> OnFailure = [this](FSequenceError Err)
-		{
-			this->CredentialsStorage->ClearStoredCredentials();
-		};
-
-		FCredentials_BE Credentials = this->GetCredentials();
-		if (Credentials.IsRegistered())
-		{
-			this->GetRpcManager()->CloseSession(Credentials, OnSuccess, OnFailure);
-		}
-		else
-		{
-			this->CredentialsStorage->ClearStoredCredentials();
-		}
-	}
-	else
-	{
-		this->CredentialsStorage->ClearStoredCredentials();
-	}
+	if (const FCredentials_BE Credentials = this->GetCredentials(); Credentials.IsRegistered())
+		this->GetRpcManager()->CloseSession(Credentials, OnSuccess, OnFailure);
+		
+	this->CredentialsStorage->ClearStoredCredentials();
 }
 
 void USequenceWallet::UpdateProviderURL(const FString& Url) const
