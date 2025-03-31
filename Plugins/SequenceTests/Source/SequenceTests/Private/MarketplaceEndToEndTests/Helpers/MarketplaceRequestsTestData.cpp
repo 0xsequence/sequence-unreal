@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
+#include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
 
 UMarketplaceRequestsTestData * UMarketplaceRequestsTestData::Make(const int32 PendingRequestsIn)
 {

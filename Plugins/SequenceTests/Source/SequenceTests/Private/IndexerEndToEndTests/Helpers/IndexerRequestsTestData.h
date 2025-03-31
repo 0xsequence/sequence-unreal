@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
+#include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
 #include "IndexerRequestsTestData.generated.h"
 
 /**
@@ -24,7 +24,7 @@ class UIndexerRequestsTestData : public UObject
 	bool bAllRequestsSuccessful = true;
 
 	UPROPERTY()
-	UIndexer * Indexer;
+	USequenceIndexer * Indexer;
 	
 public:
 	
@@ -62,5 +62,5 @@ public:
 
 	bool TestDone() const;
 
-	UIndexer * GetIndexer() const;
+	USequenceIndexer * GetIndexer() const;
 };

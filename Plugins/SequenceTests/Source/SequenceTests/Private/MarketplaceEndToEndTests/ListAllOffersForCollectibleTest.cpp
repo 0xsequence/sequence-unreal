@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
 #include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"

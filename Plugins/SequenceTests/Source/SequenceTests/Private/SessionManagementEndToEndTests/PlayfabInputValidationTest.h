@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/SequenceAuthenticator.h"
+#include "Sequence/SequenceSessions.h"
 #include "PlayfabInputValidationTest.generated.h"
 
 UENUM()
@@ -68,7 +68,7 @@ private:
 	bool bTestPassed = false;
 	bool bAllTestsComplete = false;
 	FString LastError;
-	USequenceAuthenticator* Authenticator = nullptr;
+	USequenceSessions* Sessions = nullptr;
 	EValidationType CurrentValidationType;
 	int32 CurrentStepIndex = -1;
 };

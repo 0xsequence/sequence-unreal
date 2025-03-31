@@ -1,13 +1,13 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "IndexerRequestsTestData.h"
-#include "SequencePlugin/Private/Indexer/Indexer.h"
+#include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
 
 UIndexerRequestsTestData * UIndexerRequestsTestData::Make(const int32 PendingRequestsIn)
 {
 	UIndexerRequestsTestData * IndexerRequestsTestData = NewObject<UIndexerRequestsTestData>();
 	IndexerRequestsTestData->PendingRequests = PendingRequestsIn;
-	IndexerRequestsTestData->Indexer = NewObject<UIndexer>();
+	IndexerRequestsTestData->Indexer = NewObject<USequenceIndexer>();
 	return IndexerRequestsTestData;
 }
 
@@ -47,7 +47,7 @@ bool UIndexerRequestsTestData::TestDone() const
 	return this->PendingRequests == 0;
 }
 
-UIndexer * UIndexerRequestsTestData::GetIndexer() const
+USequenceIndexer * UIndexerRequestsTestData::GetIndexer() const
 {
 	return this->Indexer;
 }

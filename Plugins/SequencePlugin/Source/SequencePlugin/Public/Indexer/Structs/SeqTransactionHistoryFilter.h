@@ -10,21 +10,21 @@ struct SEQUENCEPLUGIN_API FSeqTransactionHistoryFilter
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         FString accountAddress = "";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         FString contractAddress = "";
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         TArray<FString> accountAddresses;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         TArray<FString> contractAddresses;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         TArray<FString> transactionHashes;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         TArray<FString> metaTransactionIDs;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         int32 fromBlock = -1;
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Default")
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
         int32 toBlock = -1;
 
     /// <summary>

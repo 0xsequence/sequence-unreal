@@ -13,6 +13,6 @@ struct SEQUENCEPLUGIN_API FGetSwapPriceResponse
     GENERATED_USTRUCT_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FSeqSwapPrice SwapPrice;
 };

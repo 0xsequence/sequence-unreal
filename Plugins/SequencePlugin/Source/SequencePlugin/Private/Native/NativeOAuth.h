@@ -1,6 +1,6 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
-#include "SequenceAuthenticator.h"
+#include "INativeAuthCallback.h"
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidJNI.h"

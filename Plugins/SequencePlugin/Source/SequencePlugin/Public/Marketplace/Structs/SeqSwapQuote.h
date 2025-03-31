@@ -48,27 +48,27 @@ public:
         return true;
     }
     
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString CurrencyAddress;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString CurrencyBalance;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString Price;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString MaxPrice;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString To;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString TransactionData;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString TransactionValue;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString ApproveData;
 };

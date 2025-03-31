@@ -25,22 +25,22 @@ private:
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddERC20(const FERC20Transaction& Item);
 	
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddERC721(const FERC721Transaction& Item);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddERC1155(const FERC1155Transaction& Item);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddRaw(const FRawTransaction& Item);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddDelayed(const FDelayedTransaction& Item);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void SetFee(const FFeeOption& Fee);
 
 	bool IsFeeSet() const;

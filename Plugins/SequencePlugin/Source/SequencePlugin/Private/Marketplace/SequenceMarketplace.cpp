@@ -8,7 +8,7 @@
 #include "Util/Log.h"
 #include "ConfigFetcher.h"
 #include "HttpManager.h"
-#include "Indexer/Indexer.h"
+#include "Indexer/SequenceIndexer.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderArgs.h"
 #include "Marketplace/Structs/SeqGetCollectibleOrderReturn.h"
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
@@ -510,7 +510,7 @@ void USequenceMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, co
 		{
 			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
 		
-			UIndexer* Indexer = NewObject<UIndexer>();
+			USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
 			FSeqGetTokenBalancesArgs Args;
 			Args.accountAddress = UserWallet;
 			Args.contractAddress = SellCurrency;
