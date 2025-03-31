@@ -9,10 +9,6 @@ struct SEQUENCEPLUGIN_API FSeqCurrency
 	GENERATED_USTRUCT_BODY()
 
 public:
-	// Properties
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int ID;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ChainID;
 
@@ -48,17 +44,16 @@ public:
 
 	void Setup(FJsonObject json_in)
 	{
-		ID = json_in.GetIntegerField(TEXT("id"));
-		ChainID = json_in.GetIntegerField(TEXT("chain_id"));
-		ContractAddress = json_in.GetStringField(TEXT("contract_address"));
+		ChainID = json_in.GetIntegerField(TEXT("chainID"));
+		ContractAddress = json_in.GetStringField(TEXT("contractAddress"));
 		Name = json_in.GetStringField(TEXT("name"));
 		Symbol = json_in.GetStringField(TEXT("symbol"));
 		Decimals = json_in.GetIntegerField(TEXT("decimals"));
-		ImageURL = json_in.GetStringField(TEXT("image_url"));
-		ExchangeRate = json_in.GetNumberField(TEXT("exchange_rate"));
-		DefaultChainCurrency = json_in.GetBoolField(TEXT("default_chain_currency"));
-		CreatedAt = json_in.GetStringField(TEXT("created_at"));
-		UpdatedAt = json_in.GetStringField(TEXT("updated_at"));
-		DeletedAt = json_in.GetStringField(TEXT("deleted_at"));
+		ImageURL = json_in.GetStringField(TEXT("imageUrl"));
+		ExchangeRate = json_in.GetNumberField(TEXT("exchangeRate"));
+		DefaultChainCurrency = json_in.GetBoolField(TEXT("defaultChainCurrency"));
+		CreatedAt = json_in.GetStringField(TEXT("createdAt"));
+		UpdatedAt = json_in.GetStringField(TEXT("updatedAt"));
+		json_in.TryGetStringField(TEXT("deletedAt"), DeletedAt);
 	};
 };

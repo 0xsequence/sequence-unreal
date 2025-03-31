@@ -23,17 +23,12 @@ public:
         const TArray<TSharedPtr<FJsonValue>>* List;
         if (json_in.TryGetArrayField(TEXT("currencies"), List))
         {
-            Currencies.SetNum(List->Num());
 
-            for (int32 i = 0; i < List->Num(); i++)
+            for (TSharedPtr<FJsonValue> Json : *List)
             {
-                TSharedPtr<FJsonValue> item = (*List)[i];
-
-                if (item.IsValid())
-                {
-                    TSharedPtr<FJsonObject> itemObj = item->AsObject();
-                    Currencies[i].Setup(*itemObj);
-                }
+                FSeqCurrency Currency;
+                Currency.Setup(*Json->AsObject());
+                Currencies.Add(Currency);
             }
         }
         else
