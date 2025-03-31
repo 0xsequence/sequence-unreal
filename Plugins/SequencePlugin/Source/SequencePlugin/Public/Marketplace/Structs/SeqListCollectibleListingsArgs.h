@@ -41,7 +41,7 @@ public:
         // Check if the Page has data and append its args if it does
         if (Page.ContainsData())
         {
-            Builder.AddString("page", Page.GetArgs());
+            Builder.AddField("page", Page.GetArgs());
         }
 
         return Builder.ToString();

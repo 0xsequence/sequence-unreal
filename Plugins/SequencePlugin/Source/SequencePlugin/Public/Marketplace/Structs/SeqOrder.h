@@ -211,6 +211,6 @@ public:
         OrderUpdatedAt = json_in.GetStringField(TEXT("orderUpdatedAt"));
         CreatedAt = json_in.GetStringField(TEXT("createdAt"));
         UpdatedAt = json_in.GetStringField(TEXT("updatedAt"));
-        DeletedAt = json_in.GetStringField(TEXT("deletedAt"));
+        json_in.TryGetStringField(TEXT("deletedAt"), DeletedAt);
     }
 };

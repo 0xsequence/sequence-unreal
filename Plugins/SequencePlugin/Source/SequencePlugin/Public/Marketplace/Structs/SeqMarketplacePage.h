@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqMarketplaceSortBy.h"  // Ensure this includes your SortBy struct or enum
+#include "Util/JsonBuilder.h"
 #include "Util/SequenceSupport.h"
 #include "SeqMarketplacePage.generated.h"
 
@@ -35,61 +36,65 @@ public:
 
     static FSeqMarketplacePage Empty()
     {
-        return FSeqMarketplacePage{};
+        return FSeqMarketplacePage{
+        };
+    }
+
+    static FSeqMarketplacePage First()
+    {
+        return FSeqMarketplacePage{
+        1
+        };
+    }
+ 
+    void IncrementPage()
+    {
+        PageNumber += 1;
     }
 
     bool ContainsData()
     {
         bool ret = false;//assume nothing & look for true states!
-        ret = (PageNumber != -1 || PageSize != -1);//int32 data
-        ret = (Column.Len() > 0 || Before.Len() > 0 || After.Len() > 0);//FString data
-        ret = (Sort.Num() > 0);//TArray data
+        ret |= (PageNumber != -1 || PageSize != -1);//int32 data
+        ret |= (Column.Len() > 0 || Before.Len() > 0 || After.Len() > 0);//FString data
+        ret |= (Sort.Num() > 0);//TArray data
         ret |= More;//bool data
         return ret;
     }
 
     FString GetArgs()
     {
-        FString ret = "";
+        FJsonBuilder Json;
+        
         if (ContainsData())
         {
-            ret.Append("{");
-            ret.Append("\"page\":");
-            ret.AppendInt(PageNumber);
+            if (PageNumber != -1)
+            {
+                Json.AddInt("page", PageNumber);
+            }
 
-            if (Column.Len() > 0)
-                ret += ",\"column\":\"" + Column + "\"";
-
-            if (Before.Len() > 0)
-                ret += ",\"before\":\"" + Before + "\"";
-
-            if (After.Len() > 0)
-                ret += ",\"after\":\"" + After + "\"";
-
+            if (Column.Len() > 0) Json.AddString("column", Column);
+            if (Before.Len() > 0) Json.AddString("before", Before);
             if (Sort.Num() > 0)
             {
-                ret.Append(",\"sort\":");
-                //convert SortBy to Json!Strings!
-                TArray<FString> stringList;
-                for (FSeqMarketplaceSortBy sItem : Sort)
+                auto Array = Json.AddArray("sort");
+
+                for(FSeqMarketplaceSortBy SortBy : Sort)
                 {
-                    stringList.Add(sItem.GetJsonString());
+                    Array.AddString(SortBy.GetJsonString());
                 }
-                //Parse the string list into a JsonString
-                ret.Append(USequenceSupport::StringListToSimpleString(stringList));
+
+                Json = *Array.EndArray();
             }
 
             if (PageSize != -1)
             {
-                ret.Append(",\"pageSize\":");
-                ret.AppendInt(PageSize);
+                Json.AddInt("pageSize", PageSize);
             }
 
-            ret.Append(",\"more\":");
-            ret.Append(More ? "true" : "false");
-            ret.Append("}");
+            Json.AddBool("more", More);
         }
-        return ret;
+        return Json.ToString();
     }
 
 
@@ -117,6 +122,29 @@ public:
         ret.Get()->SetBoolField("more", More); 
         return ret;
     }
-    void setup(FJsonObject json_in) {}
+    
+    void setup(FJsonObject json_in)
+    {
+        PageNumber = json_in.GetIntegerField(TEXT("page"));
+        
+        json_in.TryGetStringField(TEXT("column"), Column);
+        json_in.TryGetStringField(TEXT("before"), Before);
+        json_in.TryGetStringField(TEXT("after"), After);
+
+        if(json_in.HasField(TEXT("sort")))
+        {
+            for (TSharedPtr<FJsonValue> Value : json_in.GetArrayField(TEXT("sort")))
+            {
+                FSeqMarketplaceSortBy SortBy;
+                SortBy.setup(*Value->AsObject().Get());
+                Sort.Add(SortBy);
+            }
+        }
+
+        if(json_in.HasField(TEXT("pageSize")))
+            PageSize = json_in.GetIntegerField(TEXT("pageSize"));
+        
+        More = json_in.GetBoolField(TEXT("more"));
+    }
 
 };
