@@ -70,5 +70,7 @@ public:
         {
             UE_LOG(LogTemp, Warning, TEXT("No  collectibles  field found in the GetCollectiblesWithLowestListings response."));
         }
+
+        Page.setup(*json_in.GetObjectField(TEXT("page")).Get());
     }
 };

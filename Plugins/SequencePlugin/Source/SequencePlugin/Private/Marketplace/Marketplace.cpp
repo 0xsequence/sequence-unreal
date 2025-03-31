@@ -171,7 +171,6 @@ void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const 
 	const FString& ContractAddress, const FSeqCollectiblesFilter& Filter,
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();
 
 	return ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
@@ -209,7 +208,6 @@ void UMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirst(
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();
 
 	return ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(ChainID, ContractAddress, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
@@ -280,7 +278,6 @@ void UMarketplace::ListAllListingsForCollectible(const int64 ChainID,
 	const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter,
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString Args = BuildArgs<FSeqListCollectibleListingsArgs>(FSeqListCollectibleListingsArgs{ ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();
 
 	return ListAllListingsForCollectibleHelper(ChainID, ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty(), [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Orders, const bool IsDone)
@@ -350,8 +347,11 @@ void UMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(
 	{
 		if (CollectiblesReturn.Page.More)
 		{
+			FSeqMarketplacePage ReturnedPage = CollectiblesReturn.Page;
+			UE_LOG(LogTemp, Error, TEXT("RETURNED PAGE NUMBER: %d"), ReturnedPage.PageNumber);
+			
 			// Call the next page
-			ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, CollectiblesReturn.Page, OnSuccess, OnFailure);
+			ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(ChainID, ContractAddress, Filter, ReturnedPage, OnSuccess, OnFailure);
 			OnSuccess(CollectiblesReturn.CollectibleOrders, false);
 		}
 		else
