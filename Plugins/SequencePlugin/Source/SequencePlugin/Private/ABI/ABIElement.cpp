@@ -345,6 +345,11 @@ void TDynamicABIData::EncodeTail(TArray<uint8> &Data, int HeadPosition, int Offs
 	PushEmptyBlock(Data);
 	CopyInUInt32(Data, MyData.Num(), BlockPos);
 
+	if (MyData.IsEmpty())
+	{
+		return;
+	}
+	
 	// Encode Data
 	uint32 BlockLen = (MyData.Num() + GBlockByteLength - 1) / GBlockByteLength;
 	Data.Append(&MyData[0], MyData.Num());
