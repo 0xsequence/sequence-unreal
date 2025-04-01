@@ -14,6 +14,15 @@ UERC1155SaleContract::UERC1155SaleContract(FString ContractAddress, FString Paym
 	this->Data = Data;
 }
 
+void UERC1155SaleContract::Initialize(FString _ContractAddress, FString _PaymentToken, int32 _MaxTotal, FString _Data)
+{
+	this->ContractAddress = _ContractAddress;
+	this->PaymentToken = _PaymentToken;
+	this->MaxTotal = _MaxTotal;
+	this->Data = _Data;
+}
+
+
 FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof)
 {
 	FString FunctionSignature = "mint(address,uint256[],uint256[],bytes,address,uint256,bytes32[])";

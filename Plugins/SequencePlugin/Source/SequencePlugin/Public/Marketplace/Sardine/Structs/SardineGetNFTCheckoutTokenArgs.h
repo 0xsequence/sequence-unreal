@@ -43,25 +43,25 @@ public:
 	{
 		FJsonBuilder Builder;
 
-		Builder.AddString(TEXT("ReferenceId"), ReferenceId);
-		Builder.AddInt(TEXT("ExpiresIn"), ExpiresIn);
-		Builder.AddField(TEXT("PaymentMethodTypeConfig"), PaymentMethodTypeConfig.GetArgs());
-		Builder.AddString(TEXT("Name"), Name);
-		Builder.AddString(TEXT("ImageUrl"), ImageUrl);
-		Builder.AddString(TEXT("Network"), Network);
-		Builder.AddString(TEXT("RecipientAddress"), RecipientAddress);
-		Builder.AddString(TEXT("ContractAddress"), ContractAddress);
-		Builder.AddString(TEXT("Platform"), Platform);
-		Builder.AddString(TEXT("ExecutionType"), ExecutionType);
-		Builder.AddString(TEXT("BlockchainNftId"), BlockchainNftId);
-		Builder.AddInt(TEXT("Quantity"), Quantity);
-		Builder.AddInt(TEXT("Decimals"), Decimals);
-		Builder.AddString(TEXT("TokenAmount"), TokenAmount);
-		Builder.AddString(TEXT("TokenAddress"), TokenAddress);
-		Builder.AddString(TEXT("TokenSymbol"), TokenSymbol);
-		Builder.AddInt(TEXT("TokenDecimals"), TokenDecimals);
-		Builder.AddString(TEXT("CallData"), CallData);
-	
-		return Builder.ToString();
+		Builder.AddString(TEXT("name"), Name);
+		Builder.AddString(TEXT("imageUrl"), ImageUrl);
+		Builder.AddString(TEXT("network"), Network);
+		Builder.AddString(TEXT("recipientAddress"), RecipientAddress);
+		Builder.AddString(TEXT("blockchainNftId"), BlockchainNftId);
+		Builder.AddString(TEXT("contractAddress"), ContractAddress);
+		Builder.AddInt(TEXT("decimals"), Decimals);
+		Builder.AddInt(TEXT("quantity"), Quantity);
+		Builder.AddString(TEXT("tokenAmount"), TokenAmount);
+		Builder.AddString(TEXT("tokenAddress"), TokenAddress);
+		Builder.AddString(TEXT("tokenSymbol"), TokenSymbol);
+		Builder.AddInt(TEXT("tokenDecimals"), TokenDecimals);
+		Builder.AddString(TEXT("callData"), CallData);
+		Builder.AddString(TEXT("platform"), Platform);
+		
+		// Builder.AddInt(TEXT("expiresIn"), ExpiresIn);
+		// Builder.AddString(TEXT("referenceId"), ReferenceId);
+
+		FString Params = "{\"params\":" + Builder.ToString() + "}";
+		return Params;
 	}
 };

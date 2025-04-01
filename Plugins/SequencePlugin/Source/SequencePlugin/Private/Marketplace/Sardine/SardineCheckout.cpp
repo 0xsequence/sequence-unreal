@@ -8,6 +8,7 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Marketplace/Marketplace.h"
 #include "Marketplace/Sardine/Structs/SardineEnabledTokensResponse.h"
+#include "Marketplace/Sardine/Structs/SardineGetNFTCheckoutTokenResponse.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteArgs.h"
 #include "Marketplace/Sardine/Structs/SardineGetQuoteResponse.h"
 #include "Marketplace/Sardine/Structs/SardineSupportedFiatCurrenciesResponse.h"
@@ -16,12 +17,116 @@
 #include "Marketplace/Sardine/Structs/SardineTokenResponse.h"
 #include "Util/Log.h"
 
+TArray<ESardinePaymentMethod> PaymentMethods {
+	PaymentMethod_Us_Debit,
+	PaymentMethod_Us_Credit,
+	PaymentMethod_International_Debit,
+	PaymentMethod_International_Credit,
+	PaymentMethod_Ach
+};
+
+USardineCheckout::USardineCheckout(ENetwork Chain)
+{
+	_chain = Chain;
+}
+
 FString USardineCheckout::Url(const FString& EndPoint) const
 {
 	return _baseUrl + "/" + EndPoint;
 }
 
-void USardineCheckout::SardineGetNFTCHeckoutToken(FSardineGetNFTCheckoutTokenArgs Args,
+void USardineCheckout::GetPaymentToken(UERC1155SaleContract* SaleContract, FString CollectionAddress, long TokenID,
+	int64 ChainID, FString RecipientAddress, long Amount, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	FString PaymentToken = SaleContract->PaymentToken;
+	GetPaymentDetails(PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount, Proof,
+		OnSuccess, OnFailure);
+}
+
+void USardineCheckout::GetPaymentDetails(FString PaymentToken, UERC1155SaleContract* SaleContract, FString CollectionAddress,
+	long TokenID, int64 ChainID, FString RecipientAddress, long Amount, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	FString PaymentTokenSymbol = "POL";
+	long PaymentTokenDecimals = 6;
+
+	GetCollectible(PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount,
+		PaymentTokenSymbol, PaymentTokenDecimals, Proof, OnSuccess, OnFailure);
+}
+
+void USardineCheckout::GetCollectible(FString PaymentToken, UERC1155SaleContract* SaleContract,
+	FString CollectionAddress, long TokenID, int64 ChainID, FString RecipientAddress, long Amount,
+	FString PaymentTokenSymbol, long PaymentTokenDecimals, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	UMarketplace* Marketplace = NewObject<UMarketplace>();
+	Marketplace->GetCollectible(ChainID, CollectionAddress, FString::FromInt(TokenID),
+		[this, SaleContract, TokenID, ChainID, RecipientAddress, Amount, PaymentToken, PaymentTokenSymbol, PaymentTokenDecimals, Proof, OnSuccess, OnFailure](const FSeqTokenMetaData& TokenMetaData)
+	{
+		GetSaleDetails(SaleContract, TokenID, TokenMetaData, ChainID, RecipientAddress, Amount, PaymentToken,
+			PaymentTokenSymbol, PaymentTokenDecimals, Proof, OnSuccess, OnFailure);
+	}, OnFailure);
+}
+
+void USardineCheckout::GetSaleDetails(UERC1155SaleContract* SaleContract, long TokenId, FSeqTokenMetaData TokenMetaData,
+	int64 ChainID, FString RecipientAddress, long Amount, FString PaymentToken, FString PaymentTokenSymbol,
+	long PaymentTokenDecimals, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
+{
+	long Cost = 20000;
+	long SupplyCap = 9999999999999;
+	long StartTimeLong = 1723058097;
+	long EndTimeLong = 2448832492;
+
+	if (Amount > SupplyCap)
+	{
+		Amount = SupplyCap;
+	}
+	if (StartTimeLong > FDateTime::UtcNow().ToUnixTimestamp())
+	{
+		OnFailure(FSequenceError(RequestFail, FString::Printf(TEXT("Token id %d is not yet available for sale"), (int) TokenId)));
+	}
+	if (EndTimeLong < FDateTime::UtcNow().ToUnixTimestamp())
+	{
+		OnFailure(FSequenceError(RequestFail, FString::Printf(TEXT("Token id %d is no longer available for sale"), (int) TokenId)));
+	}
+
+	TArray<int32> TokenIds { (int32)TokenId };
+	TArray<int32> Amounts { (int32)Amount };
+	
+	FString CallData = SaleContract->MakePurchaseTransaction(RecipientAddress, TokenIds, Amounts, Proof).data;
+	
+	FSardinePaymentMethodTypeConfig PaymentConfig {
+		PaymentMethods,
+		PaymentMethod_Us_Debit
+	};
+
+	FSardineGetNFTCheckoutTokenArgs Args {
+		"",
+		3600,
+		PaymentConfig,
+		TokenMetaData.name,
+		TokenMetaData.image,
+		USequenceSupport::GetNetworkNameForUrl(ChainID),
+		RecipientAddress,
+		SaleContract->ContractAddress,
+		"calldata_execution",
+		"smart_contract",
+		FString::FromInt(TokenId),
+		Amount,
+		(uint)TokenMetaData.decimals,
+		FString::FromInt(Cost),
+		PaymentToken,
+		PaymentTokenSymbol,
+		PaymentTokenDecimals,
+		CallData
+	};
+
+	SardineGetNFTCheckoutToken(Args, OnSuccess, OnFailure);
+}
+
+
+void USardineCheckout::SardineGetNFTCheckoutToken(const FSardineGetNFTCheckoutTokenArgs& Args,
 	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
 {
 	if(Args.TokenAddress == FAddress::New().ToHex())
@@ -32,8 +137,8 @@ void USardineCheckout::SardineGetNFTCHeckoutToken(FSardineGetNFTCheckoutTokenArg
 
 	HTTPPost("SardineGetNFTCheckoutToken", BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
 		{
-			const FSardineNFTCheckout Response = this->BuildResponse<FSardineNFTCheckout>(Content);
-			OnSuccess(Response);
+			const FSardineGetNFTCheckoutTokenResponse Response = this->BuildResponse<FSardineGetNFTCheckoutTokenResponse>(Content);
+			OnSuccess(Response.Checkout);
 		}, OnFailure);
 }
 
@@ -103,7 +208,53 @@ void USardineCheckout::HTTPPost(const FString& Endpoint, const FString& Args,
 void USardineCheckout::CheckSardineWhiteListStatus(FString Address, TSuccessCallback<bool> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	
+	const FString Endpoint = "SardineGetNFTCheckoutToken";
+
+	FString CheckWhiteListStatusUrl = Url(Endpoint);
+	FString ReferenceId = "sequence-unity-sardine-whitelist-check";
+	FString Name = "whitelist-check";
+	FString ImageUrl = "https://www.sequence.market/images/placeholder.png";
+	FString Platform = "calldata_execution";
+	FString ExecutionType = "smart_contract";
+	FString BlockchainNFTId = "42";
+	uint Quantity = 1;
+	uint Decimals = 0;
+	FString TokenAmount = "1000000";
+	FString TokenAddress = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+	FString TokenSymbol = "USDC";
+	uint TokenDecimals = 6;
+	FString CallData = "0x1";
+
+	FSardinePaymentMethodTypeConfig PaymentConfig {
+		PaymentMethods,
+		ESardinePaymentMethod::PaymentMethod_Us_Debit
+	};
+
+	FSardineGetNFTCheckoutTokenArgs Args {
+		ReferenceId,
+		3600,
+		PaymentConfig,
+		Name,
+		ImageUrl,
+		USequenceSupport::GetNetworkName(_chain),
+		FAddress::New().ToHex(),
+		Address,
+		Platform,
+		ExecutionType,
+		BlockchainNFTId,
+		Quantity,
+		Decimals,
+		TokenAmount,
+		TokenAddress,
+		TokenSymbol,
+		TokenDecimals,
+		CallData
+	};
+
+	HTTPPost(Endpoint, BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			OnSuccess(true);
+		}, OnFailure);
 }
 
 void USardineCheckout::SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess, const FFailureCallback& OnFailure, FString WalletAddress, FSardineToken Token, u_long Amount, ESardinePaymentType PaymentType,
@@ -153,6 +304,11 @@ void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> O
 	FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress,
 	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
 {
+	if (RecipientAddress.IsEmpty())
+	{
+		// set to wallet address
+	}
+	
 	if(Orders.Num() < 1)
 	{
 		OnFailure(FSequenceError(InvalidArgument, "Orders must contain at least one collectible"));
@@ -168,28 +324,22 @@ void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> O
 	//TODO Generate steps from checkout
 }
 
-void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract SaleContract, FString CollectionAddress,
+void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress,
 	long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure,
-	FString RecipientAddress, TArray<uint8> data, TArray<uint8> Proof)
+	FString RecipientAddress, TArray<uint8> data, TArray<FString> Proof)
 {
+	if (RecipientAddress.IsEmpty())
+	{
+		// set address to wallet address
+	}
+	
 	if(Amount < 1)
 	{
 		OnFailure(FSequenceError(InvalidArgument, "Amount must be greater than 0"));
 		return;
 	}
-
-	UMarketplace* Marketplace = NewObject<UMarketplace>();
-
-	Marketplace->GetCollectible(ChainId, CollectionAddress, FString::FromInt(TokenID), [this, &SaleContract, Amount, OnSuccess, RecipientAddress, data, Proof](FSeqTokenMetaData MetaData)
-		{
-			//TODO
-		}, [OnFailure](FSequenceError Error)
-		{
-			SEQ_LOG_EDITOR(Error, TEXT("Failed to get collectible: %s"), *Error.Message);
-			OnFailure(Error);
-		});
 	
-	//FSeqTokenMetaData metaData = 
+	GetPaymentToken(SaleContract, CollectionAddress, TokenID, ChainId, RecipientAddress, Amount, Proof, OnSuccess, OnFailure);
 }
 
 void USardineCheckout::SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess,
