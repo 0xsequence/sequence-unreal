@@ -53,9 +53,9 @@ public:
 		ReturnArgs += "\"collectionAddress\":\"" + CollectionAddress + "\",";
 		ReturnArgs += "\"maker\":\"" + Maker + "\",";
 		ReturnArgs += "\"contractType\":\"" + UEnum::GetValueAsString(ContractType) + "\",";
-		ReturnArgs += "\"orderbook\":\"" + UEnum::GetValueAsString(Orderbook) + "\",";
-		ReturnArgs += "\"offer\":\"" + Offer.GetArgs() + "\",";
-		ReturnArgs += "\"WalletType\":\"" + UEnum::GetValueAsString(WalletType) + "\"";
+		ReturnArgs += "\"orderbook\":\"" + UMarketplaceEnumsExtensions::AsString(Orderbook) + "\",";
+		ReturnArgs += "\"offer\":" + Offer.GetArgs() + ",";
+		ReturnArgs += "\"WalletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

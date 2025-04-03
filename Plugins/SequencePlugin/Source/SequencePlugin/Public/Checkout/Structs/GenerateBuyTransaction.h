@@ -91,10 +91,15 @@ public:
 
 		ReturnArgs += "\"collectionAddress\":\"" + CollectionAddress + "\",";
 		ReturnArgs += "\"buyer\":\"" + Buyer + "\",";
-		ReturnArgs += "\"marketplace\":\"" + UEnum::GetValueAsString(Marketplace) + "\",";
-		ReturnArgs += "\"OrdersData\":[" + GetOrdersDataArgs() + "],";
-		ReturnArgs += "\"AdditionalFees\":[" + GetAdditionalFeesArgs() + "],";
-		ReturnArgs += "\"WalletType\":\"" + UEnum::GetValueAsString(WalletType) + "\"";
+		ReturnArgs += "\"marketplace\":\"" + UMarketplaceEnumsExtensions::AsString(Marketplace) + "\",";
+		ReturnArgs += "\"ordersData\":[" + GetOrdersDataArgs() + "],";
+		
+		if (this->AdditionalFees.IsEmpty() == false)
+		{
+			ReturnArgs += "\"additionalFees\":[" + GetAdditionalFeesArgs() + "],";
+		}
+		
+		ReturnArgs += "\"walletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

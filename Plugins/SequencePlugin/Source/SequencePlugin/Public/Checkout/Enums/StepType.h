@@ -38,5 +38,21 @@ public:
 		constexpr EStepType StepType{ EStepType::Unknown };
 		return StepType;
 	}
+	
+	static FString AsString(const EStepType StepValue)
+	{
+		switch (StepValue)
+		{
+			case EStepType::Unknown: return "unknown";
+			case EStepType::TokenApproval: return "tokenApproval";
+			case EStepType::Buy: return "buy";
+			case EStepType::Sell: return "sell";
+			case EStepType::CreateListing: return "createListing";
+			case EStepType::CreateOffer: return "createOffer";
+			case EStepType::SignEip712: return "signEIP712";
+			case EStepType::SignEip191: return "signEIP191";
+		default: return "unknown";
+		}
+	}
 };
 

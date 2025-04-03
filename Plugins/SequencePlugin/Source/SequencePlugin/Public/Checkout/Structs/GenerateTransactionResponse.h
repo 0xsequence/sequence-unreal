@@ -61,7 +61,7 @@ public:
 				if (const TSharedPtr<FJsonValue> StepValue = StepsArray[i]; StepValue->Type == EJson::Object)
 				{
 					FTransactionStep Step;
-					TSharedPtr<FJsonObject> StepJsonObject = StepValue->AsObject();//USequenceSupport::JsonStringToObject(StepValue->AsString()); 
+					TSharedPtr<FJsonObject> StepJsonObject = StepValue->AsObject(); 
 					Step.Setup(*StepJsonObject); 
 					Steps.Add(Step); 
 				}

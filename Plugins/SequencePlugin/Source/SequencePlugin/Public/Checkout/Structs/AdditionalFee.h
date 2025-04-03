@@ -21,6 +21,11 @@ public:
 		this->Amount = Amount;
 		this->Receiver = Receiver;
 	}
+
+	bool IsEmpty() const
+	{
+		return Amount.IsEmpty() && Receiver.IsEmpty();
+	}
 	
 	bool customGetter = true;
 	FString GetArgs() const

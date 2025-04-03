@@ -56,7 +56,7 @@ public:
 	{
 		FString ReturnArgs = "{";
 
-		ReturnArgs += "\"id\":\"" + UEnum::GetValueAsString(Id) + "\",";
+		ReturnArgs += "\"id\":\"" + UStepType::AsString(Id) + "\",";
 		ReturnArgs += "\"data\":\"" + Data + "\",";
 		ReturnArgs += "\"to\":\"" + To + "\",";
 		ReturnArgs += "\"value\":\"" + Value + "\",";

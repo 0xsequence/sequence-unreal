@@ -41,7 +41,7 @@ public:
 
 		ReturnArgs += "\"collectionAddress\":\"" + CollectionAddress + "\",";
 		ReturnArgs += "\"maker\":\"" + Maker + "\",";
-		ReturnArgs += "\"marketplace\":\"" + UEnum::GetValueAsString(Marketplace) + "\",";
+		ReturnArgs += "\"marketplace\":\"" + UMarketplaceEnumsExtensions::AsString(Marketplace) + "\",";
 		ReturnArgs += "\"orderId\":\"" + OrderId + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object

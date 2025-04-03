@@ -197,7 +197,12 @@ void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, con
 	OrdersData.Reserve(1);
 	OrdersData.Add(FOrderData(Order.OrderId, FString::Printf(TEXT("%lld"), Amount)));
 
-	const TArray AdditionalFees { AdditionalFee };
+	TArray<FAdditionalFee> AdditionalFees;
+	if (AdditionalFee.IsEmpty() == false)
+	{
+		AdditionalFees.Reserve(1);
+		AdditionalFees.Add(AdditionalFee);
+	}
 
 	const FString Endpoint = "GenerateBuyTransaction";
 	const FString Args = BuildArgs<FGenerateBuyTransaction>(FGenerateBuyTransaction{ Order.CollectionContractAddress, WalletAddress, Order.Marketplace, OrdersData, AdditionalFees, WalletKind });
@@ -225,7 +230,12 @@ void USequenceCheckout::GenerateSellTransaction(const FString& WalletAddress, co
 	OrdersData.Reserve(1);
 	OrdersData.Add(FOrderData(Order.OrderId, FString::Printf(TEXT("%lld"), Amount)));
 
-	const TArray AdditionalFees { AdditionalFee };
+	TArray<FAdditionalFee> AdditionalFees;
+	if (AdditionalFee.IsEmpty() == false)
+	{
+		AdditionalFees.Reserve(1);
+		AdditionalFees.Add(AdditionalFee);
+	}
 
 	const FString Endpoint = "GenerateSellTransaction";
 	const FString Args = BuildArgs<FGenerateSellTransaction>(FGenerateSellTransaction{ Order.CollectionContractAddress, WalletAddress, Order.Marketplace, OrdersData, AdditionalFees, WalletKind });;

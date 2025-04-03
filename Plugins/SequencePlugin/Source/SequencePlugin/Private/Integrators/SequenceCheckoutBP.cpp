@@ -40,14 +40,14 @@ void USequenceCheckoutBP::GetCheckoutOptionsByOrders(const FString& WalletAddres
 }
 
 void USequenceCheckoutBP::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order,
-	const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+	const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateBuyTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
 }
 
 void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order,
-	const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+	const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateSellTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
