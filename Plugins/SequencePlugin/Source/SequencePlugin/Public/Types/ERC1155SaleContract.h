@@ -37,5 +37,5 @@ public:
 
     FContractCall GetGlobalSaleDetails();
 
-
+	FContractCall GetTokenSaleDetails(long TokenID);
 };

@@ -298,6 +298,56 @@ private:
 		{ENetwork::EtherlinkTestnet, TEXT("Etherlink Testnet")},
 	};
 
+	static inline TMap<ENetwork, FString> NetworkEnumToSymbolMap = {
+		{ENetwork::Ethereum, TEXT("ETH")},
+		{ENetwork::Immutable, TEXT("IMX")},
+		{ENetwork::SkaleNebula, TEXT("sFUEL")},
+		{ENetwork::Optimism, TEXT("OP")},
+		{ENetwork::BNBSmartChain, TEXT("BNB")},
+		{ENetwork::GnosisChain, TEXT("xDai")},
+		{ENetwork::PolygonChain, TEXT("POL")},
+		{ENetwork::PolygonZkEVM, TEXT("POL")},
+		{ENetwork::B3, TEXT("ETH")},
+		{ENetwork::Base, TEXT("ETH")},
+		{ENetwork::OasysHomeverse, TEXT("OAS")},
+		{ENetwork::APEChain, TEXT("APE")},
+		{ENetwork::ArbitrumOne, TEXT("AETH")},
+		{ENetwork::ArbitrumNova, TEXT("AETH")},
+		{ENetwork::Avalanche, TEXT("AVAX")},
+		{ENetwork::Blast, TEXT("ETH")},
+		{ENetwork::Xai, TEXT("XAI")},
+		{ENetwork::LAOS, TEXT("LAOS")},
+		{ENetwork::Root, TEXT("XRP")},
+		{ENetwork::Soneium, TEXT("ETH")},
+		{ENetwork::Telos, TEXT("TLOS")},
+		{ENetwork::Moonbeam, TEXT("GLMR")},
+		{ENetwork::Etherlink, TEXT("XTZ")},
+		{ENetwork::XR1, TEXT("XR1")},
+		
+		{ENetwork::ImmutableTestnet, TEXT("IMX")},
+		{ENetwork::BNBSmartChainTestnet, TEXT("BNB")},
+		{ENetwork::SoneiumMinatoTestnet, TEXT("ETH")},
+		{ENetwork::B3Sepolia, TEXT("ETH")},
+		{ENetwork::XRSepolia, TEXT("tXR")},
+		{ENetwork::APEChainTestnet, TEXT("APE")},
+		{ENetwork::OasysHomeverseTestnet, TEXT("OAS")},
+		{ENetwork::AvalancheTestnet, TEXT("AVAX")},
+		{ENetwork::PolygonAmoy, TEXT("POL")},
+		{ENetwork::BaseSepolia, TEXT("ETH")},
+		{ENetwork::ArbitrumSepolia, TEXT("AETH")},
+		{ENetwork::Sepolia, TEXT("Sepolia")},
+		{ENetwork::OptimismSepolia, TEXT("OP")},
+		{ENetwork::TOYTestnet, TEXT("TOY")},
+		{ENetwork::SKALENebulaGamingHubTestnet, TEXT("sFUEL")},
+		{ENetwork::BlastSepolia, TEXT("ETH")},
+		{ENetwork::XaiSepolia, TEXT("sXAI")},
+		{ENetwork::LAOSSigma, TEXT("SIGMA")},
+		{ENetwork::RootPorcini, TEXT("XRP")},
+		{ENetwork::TelosTestnet, TEXT("TLOS")},
+		{ENetwork::MoonbaseAlpha, TEXT("DEV")},
+		{ENetwork::EtherlinkTestnet, TEXT("XTZ")},
+	};
+
 public:
 	
 	/**
@@ -311,6 +361,8 @@ public:
 
 
 	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
+
+	static FString GetNetworkSymbol(const ENetwork NetworkIn);
 
 	static bool IsNetworkIdSupported(const int64 NetworkIdIn);
 

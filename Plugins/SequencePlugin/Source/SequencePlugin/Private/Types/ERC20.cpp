@@ -10,6 +10,11 @@ UERC20::UERC20(FString ContractAddress)
 	this->ContractAddress = ContractAddress;
 }
 
+void UERC20::Initialize(FString _contractAddress)
+{
+	this->ContractAddress = _contractAddress;
+}
+
 FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FString& ToAddress)
 {
 	FString FunctionSignature = "grantRole(bytes32,address)";
@@ -113,6 +118,32 @@ FRawTransaction UERC20::MakeBurnTransaction(const int32 Amount)
 	T.to = ContractAddress;
 	T.data = "0x" + EncodedData.ToHex();
 	T.value = "0";
+
+	return T;
+}
+
+FContractCall UERC20::MakeSymbolTransaction()
+{
+	FString FunctionSignature = "symbol()";
+	TArray<ABIElement*> Arr;
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FContractCall T;
+	T.To = FAddress::From(ContractAddress);
+	T.Data = TOptional(EncodedData.ToHex());
+
+	return T;
+}
+
+FContractCall UERC20::MakeDecimalsTransaction()
+{
+	FString FunctionSignature = "decimals()";
+	TArray<ABIElement*> Arr;
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FContractCall T;
+	T.To = FAddress::From(ContractAddress);
+	T.Data = TOptional(EncodedData.ToHex());
 
 	return T;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ContractCall.h"
 #include "UObject/Object.h"
 #include "Sequence/Transactions.h"
 #include "ERC20.generated.h"
@@ -17,6 +18,8 @@ public:
 
 	UERC20(FString ContractAddress);
 
+	void Initialize(FString ContractAddress);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC20")
 	FString ContractAddress;
 
@@ -31,5 +34,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ERC20")
 	FRawTransaction MakeBurnTransaction(const int32 Amount);
+
+	FContractCall MakeSymbolTransaction();
+
+	FContractCall MakeDecimalsTransaction();
 };
  

@@ -115,3 +115,19 @@ FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
 
 	return CallData;
 }
+
+FContractCall UERC1155SaleContract::GetTokenSaleDetails(long TokenID)
+{
+	FString FunctionSignature = "tokenSaleDetails(uint256)";
+	TFixedABIData* TokenIDData = new TFixedABIData(ABI::Int32(TokenID));
+
+	TArray<ABIElement*> Arr;
+	Arr.Add(TokenIDData);
+	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
+
+	FContractCall CallData;
+	CallData.Data = TOptional(EncodedData.ToHex());
+	CallData.To = FAddress::From(ContractAddress);
+
+	return CallData;
+}

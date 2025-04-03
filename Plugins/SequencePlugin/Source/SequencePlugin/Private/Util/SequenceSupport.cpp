@@ -39,6 +39,16 @@ FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 	return TEXT("");
 }
 
+FString USequenceSupport::GetNetworkSymbol(const ENetwork NetworkIn)
+{
+	if (NetworkEnumToSymbolMap.Contains(NetworkIn))
+	{
+		return *NetworkEnumToSymbolMap.Find(NetworkIn);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
+	return TEXT("");
+}
+
 bool USequenceSupport::IsNetworkIdSupported(const int64 NetworkIdIn)
 {
 	return NetworkIdToNameMap.Contains(NetworkIdIn);

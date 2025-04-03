@@ -15,6 +15,7 @@
 #include "Marketplace/Sardine/Structs/SardineSupportedRegionsResponse.h"
 #include "Marketplace/Sardine/Structs/SardineSupportedTokensResponse.h"
 #include "Marketplace/Sardine/Structs/SardineTokenResponse.h"
+#include "Types/ERC20.h"
 #include "Util/Log.h"
 
 TArray<ESardinePaymentMethod> PaymentMethods {
@@ -25,9 +26,13 @@ TArray<ESardinePaymentMethod> PaymentMethods {
 	PaymentMethod_Ach
 };
 
-USardineCheckout::USardineCheckout(ENetwork Chain)
+USardineCheckout::USardineCheckout()
 {
-	_chain = Chain;
+	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
+	if (WalletOptional.IsSet() && WalletOptional.GetValue())
+	{
+		_wallet = WalletOptional.GetValue();
+	}
 }
 
 FString USardineCheckout::Url(const FString& EndPoint) const
@@ -40,19 +45,40 @@ void USardineCheckout::GetPaymentToken(UERC1155SaleContract* SaleContract, FStri
 	const FFailureCallback& OnFailure)
 {
 	FString PaymentToken = SaleContract->PaymentToken;
-	GetPaymentDetails(PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount, Proof,
-		OnSuccess, OnFailure);
+
+	GetPaymentDetails(PaymentToken, [this, PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount, Proof, OnSuccess, OnFailure](TTuple<FString, long> PaymentDetails)
+	{
+		FString PaymentTokenSymbol = PaymentDetails.Get<0>();
+		long PaymentTokenDecimals = PaymentDetails.Get<1>();
+
+		GetCollectible(PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount, PaymentTokenSymbol, PaymentTokenDecimals, Proof, OnSuccess, OnFailure);
+	}, OnFailure);
 }
 
-void USardineCheckout::GetPaymentDetails(FString PaymentToken, UERC1155SaleContract* SaleContract, FString CollectionAddress,
-	long TokenID, int64 ChainID, FString RecipientAddress, long Amount, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess,
-	const FFailureCallback& OnFailure)
+void USardineCheckout::GetPaymentDetails(FString PaymentToken, TSuccessCallback<TTuple<FString, long>> OnSuccess, const FFailureCallback& OnFailure)
 {
-	FString PaymentTokenSymbol = "POL";
-	long PaymentTokenDecimals = 6;
-
-	GetCollectible(PaymentToken, SaleContract, CollectionAddress, TokenID, ChainID, RecipientAddress, Amount,
-		PaymentTokenSymbol, PaymentTokenDecimals, Proof, OnSuccess, OnFailure);
+	if (PaymentToken == FAddress::New().ToHex())
+	{
+		FString PaymentTokenSymbol = "POL";
+		long PaymentTokenDecimals = 18;
+		OnSuccess(TTuple<FString, long>(PaymentTokenSymbol, PaymentTokenDecimals));
+	}
+	else
+	{
+		UERC20* PaymentTokenContract = NewObject<UERC20>();
+		PaymentTokenContract->Initialize(PaymentToken);
+		FContractCall SymbolCall = PaymentTokenContract->MakeSymbolTransaction();
+		_wallet->Call(SymbolCall, [this, PaymentTokenContract, OnSuccess, OnFailure](FUnsizedData Data)
+		{
+			FString PaymentTokenSymbol = UTF8ToString(Data);
+			FContractCall DecimalsCall = PaymentTokenContract->MakeDecimalsTransaction();
+			_wallet->Call(DecimalsCall, [this, PaymentTokenSymbol, OnSuccess](FUnsizedData Data)
+			{
+				long PaymentTokenDecimals = FCString::Atoi64(*UTF8ToString(Data));
+				OnSuccess(TTuple<FString, long>(PaymentTokenSymbol, PaymentTokenDecimals));
+			}, OnFailure);
+		}, OnFailure);
+	}
 }
 
 void USardineCheckout::GetCollectible(FString PaymentToken, UERC1155SaleContract* SaleContract,
@@ -214,6 +240,7 @@ void USardineCheckout::CheckSardineWhiteListStatus(FString Address, TSuccessCall
 	FString ReferenceId = "sequence-unity-sardine-whitelist-check";
 	FString Name = "whitelist-check";
 	FString ImageUrl = "https://www.sequence.market/images/placeholder.png";
+	int64 ChainID = _wallet->GetNetworkId();
 	FString Platform = "calldata_execution";
 	FString ExecutionType = "smart_contract";
 	FString BlockchainNFTId = "42";
@@ -236,7 +263,7 @@ void USardineCheckout::CheckSardineWhiteListStatus(FString Address, TSuccessCall
 		PaymentConfig,
 		Name,
 		ImageUrl,
-		USequenceSupport::GetNetworkName(_chain),
+		USequenceSupport::GetNetworkName(ChainID),
 		FAddress::New().ToHex(),
 		Address,
 		Platform,

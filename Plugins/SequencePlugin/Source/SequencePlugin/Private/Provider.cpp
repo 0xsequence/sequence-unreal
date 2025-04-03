@@ -386,10 +386,37 @@ void UProvider::Call(const FContractCall& ContractCall, const EBlockTag Number, 
 	return CallHelper(ContractCall, ConvertString(UEnum::GetValueAsString(Number)), OnSuccess, OnFailure);
 }
 
+void UProvider::Call(const FContractCall& ContractCall, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	return CallHelper(ContractCall, OnSuccess, OnFailure);
+}
+
 void UProvider::NonViewCall(FEthTransaction Transaction, const FPrivateKey& PrivateKey, const int ChainID, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FUnsizedData SignedTransaction = Transaction.GetSignedTransaction(PrivateKey, ChainID);
 	return SendRawTransaction("0x" + SignedTransaction.ToHex(), OnSuccess, OnFailure);
+}
+
+void UProvider::CallHelper(FContractCall ContractCall, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Content = RPCBuilder("eth_call").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddValue(ContractCall.GetJson())
+			->EndArray()
+		->ToString();
+
+	const FString MyUrl = this->Url;
+	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
+	{
+		TResult<FString> StringResult = Make(MyUrl)->ExtractStringResult(Response);
+
+		if(!StringResult.HasError())
+		{
+			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(StringResult.GetValue())));
+		}
+
+		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
+	}, OnFailure);
 }
 
 void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)

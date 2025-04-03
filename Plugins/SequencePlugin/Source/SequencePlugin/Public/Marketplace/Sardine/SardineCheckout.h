@@ -42,10 +42,10 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 
 	const FString _devUrl = "https://dev-api.sequence.app/rpc/API";
 	const FString _prodUrl = "https://api.sequence.app/rpc/API";
-	FString _baseUrl = _prodUrl;
+	FString _baseUrl = _devUrl;
 	FString _baseCheckoutUrl = _sardineCheckoutUrl;
 
-	ENetwork _chain;
+	USequenceWallet* _wallet = nullptr;
 
 	FString Url(const FString& EndPoint) const;
 
@@ -53,9 +53,14 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 		FString RecipientAddress, long Amount, const TArray<FString>& Proof, TSuccessCallback<FSardineNFTCheckout> OnSuccess,
 		const FFailureCallback& OnFailure);
 
+	void GetPaymentDetails(FString PaymentToken, TSuccessCallback<TTuple<FString, long>> OnSuccess, const FFailureCallback& OnFailure);
+
 	void GetPaymentDetails(FString PaymentToken, UERC1155SaleContract* SaleContract, FString CollectionAddress,
 		long TokenID, int64 ChainID, FString RecipientAddress, long Amount, const TArray<FString>& Proof,
 		TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+
+	void GetCollectible(int64 ChainID, FString CollectionAddress, long TokenID,
+		TSuccessCallback<FSeqTokenMetaData> OnSuccess, const FFailureCallback& OnFailure);
 	
 	void GetCollectible(FString PaymentToken, UERC1155SaleContract* SaleContract, FString CollectionAddress,
 		long TokenID, int64 ChainID, FString RecipientAddress, long Amount, FString PaymentTokenSymbol, long PaymentTokenDecimals,
@@ -69,7 +74,7 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 	
 public:
 	//public functions
-	USardineCheckout(){}
+	USardineCheckout();
 	USardineCheckout(ENetwork Chain);
 
 	/*

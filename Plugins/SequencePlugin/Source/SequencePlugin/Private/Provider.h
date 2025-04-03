@@ -28,6 +28,7 @@ private:
 	void BlockByNumberHelper(const FString& Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);
 	void HeaderByNumberHelper(const FString& Number, TSuccessCallback<FHeader> OnSuccess, const FFailureCallback& OnFailure);
 	void NonceAtHelper(const FString& Number, TSuccessCallback<FBlockNonce> OnSuccess, const FFailureCallback& OnFailure);
+	void CallHelper(FContractCall ContractCall, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
 	void CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
 	void Init(const FString& UrlIn);
 public:
@@ -62,5 +63,6 @@ public:
 
 	void Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
 	void Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
+	void Call(const FContractCall& ContractCall, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
 	void NonViewCall(FEthTransaction Transaction, const FPrivateKey& PrivateKey, const int ChainID, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure);
 };
