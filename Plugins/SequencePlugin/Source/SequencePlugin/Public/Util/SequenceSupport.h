@@ -197,6 +197,56 @@ private:
 		FNameId(TEXT("moonbase-alpha"),1287),
 		FNameId(TEXT("etherlink-testnet"),128123),
 	};
+
+	static inline TMap<int64, ENetwork> NetworkIdToEnumMap = {
+		{1, ENetwork::Ethereum},
+		{13371, ENetwork::Immutable},
+		{1482601649, ENetwork::SkaleNebula},
+		{10, ENetwork::Optimism},
+		{56, ENetwork::BNBSmartChain},
+		{100, ENetwork::GnosisChain},
+		{137, ENetwork::PolygonChain},
+		{1101, ENetwork::PolygonZkEVM},
+		{8333, ENetwork::B3},
+		{8453, ENetwork::Base},
+		{19011, ENetwork::OasysHomeverse},
+		{33139, ENetwork::APEChain},
+		{42161, ENetwork::ArbitrumOne},
+		{42170, ENetwork::ArbitrumNova},
+		{43114, ENetwork::Avalanche},
+		{81457, ENetwork::Blast},
+		{660279, ENetwork::Xai},
+		{6283, ENetwork::LAOS},
+		{7668, ENetwork::Root},
+		{1868, ENetwork::Soneium},
+		{40, ENetwork::Telos},
+		{1284, ENetwork::Moonbeam},
+		{42793, ENetwork::Etherlink},
+		{273, ENetwork::XR1},
+
+		{13473, ENetwork::ImmutableTestnet},
+		{97, ENetwork::BNBSmartChainTestnet},
+		{1946, ENetwork::SoneiumMinatoTestnet},
+		{1993, ENetwork::B3Sepolia},
+		{2730, ENetwork::XRSepolia},
+		{33111, ENetwork::APEChainTestnet},
+		{40875, ENetwork::OasysHomeverseTestnet},
+		{43113, ENetwork::AvalancheTestnet},
+		{80002, ENetwork::PolygonAmoy},
+		{84532, ENetwork::BaseSepolia},
+		{421614, ENetwork::ArbitrumSepolia},
+		{11155111, ENetwork::Sepolia},
+		{11155420, ENetwork::OptimismSepolia},
+		{21000000, ENetwork::TOYTestnet},
+		{37084624, ENetwork::SKALENebulaGamingHubTestnet},
+		{168587773, ENetwork::BlastSepolia},
+		{37714555429, ENetwork::XaiSepolia},
+		{62850, ENetwork::LAOSSigma},
+		{7672, ENetwork::RootPorcini},
+		{41, ENetwork::TelosTestnet},
+		{1287, ENetwork::MoonbaseAlpha},
+		{128123, ENetwork::EtherlinkTestnet},
+	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
 		{ENetwork::Ethereum, 1},
@@ -359,10 +409,13 @@ public:
 
 	static FString GetNetworkName(const ENetwork NetworkIn);
 
+	static ENetwork GetNetworkFromId(const int64 NetworkIdIn);
 
 	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
 
 	static FString GetNetworkSymbol(const ENetwork NetworkIn);
+
+	static FString GetNetworkSymbol(const int64 NetworkIn);
 
 	static bool IsNetworkIdSupported(const int64 NetworkIdIn);
 

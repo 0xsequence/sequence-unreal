@@ -29,6 +29,17 @@ FString USequenceSupport::GetNetworkName(const ENetwork NetworkIn)
 	return TEXT("");
 }
 
+ENetwork USequenceSupport::GetNetworkFromId(const int64 NetworkIdIn)
+{
+	if (NetworkIdToEnumMap.Contains(NetworkIdIn))
+	{
+		return *NetworkIdToEnumMap.Find(NetworkIdIn);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Network not found for Id: %lld"), NetworkIdIn);
+	return Ethereum;
+}
+
 FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
 {
 	if (NetworkIdToUrlMap.Contains(NetworkIdIn))
@@ -47,6 +58,11 @@ FString USequenceSupport::GetNetworkSymbol(const ENetwork NetworkIn)
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
 	return TEXT("");
+}
+
+FString USequenceSupport::GetNetworkSymbol(const int64 NetworkIn)
+{
+	return GetNetworkSymbol(GetNetworkFromId(NetworkIn));
 }
 
 bool USequenceSupport::IsNetworkIdSupported(const int64 NetworkIdIn)
