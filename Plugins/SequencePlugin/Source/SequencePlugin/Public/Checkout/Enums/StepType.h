@@ -13,6 +13,7 @@ enum class EStepType : uint8
 	CreateOffer			UMETA(DisplayName = "createOffer"),
 	SignEip712			UMETA(DisplayName = "signEIP712"),
 	SignEip191			UMETA(DisplayName = "signEIP191"),
+	Cancel				UMETA(DisplayName = "cancel"),
 };
 
 UCLASS()
