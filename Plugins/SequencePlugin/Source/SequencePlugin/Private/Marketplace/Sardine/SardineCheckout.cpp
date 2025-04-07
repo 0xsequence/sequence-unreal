@@ -116,6 +116,42 @@ void USardineCheckout::SardineGetNFTCheckoutToken(const FSardineGetNFTCheckoutTo
 		}, OnFailure);
 }
 
+void USardineCheckout::SardineGetNFTCheckoutTokenSendRequest(int64 ChainId, FSeqCollectibleOrder Order,
+	FString RecipientAddress, FString MarketplaceContractAddress, long Quantity, FString PriceSymbol, FString CallData,
+	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FSardineGetNFTCheckoutTokenArgs Args {
+		"",
+		3600,
+		FSardinePaymentMethodTypeConfig {
+			PaymentMethods,
+			PaymentMethod_Us_Debit
+		},
+		Order.TokenMetadata.name,
+		Order.TokenMetadata.image,
+		USequenceSupport::GetNetworkNameForUrl(ChainId),
+		RecipientAddress,
+		MarketplaceContractAddress,
+		"calldata_execution",
+		"smart_contract",
+		Order.Order.TokenId,
+		Quantity,
+		Order.Order.QuantityDecimals,
+		Order.Order.PriceAmount,
+		Order.Order.PriceCurrencyAddress,
+		PriceSymbol,
+		Order.Order.PriceDecimals,
+		CallData,
+	};
+	
+	FString Endpoint = "SardineGetNFTCheckoutToken";
+	HTTPPost(Endpoint, BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSardineGetNFTCheckoutTokenResponse Response = this->BuildResponse<FSardineGetNFTCheckoutTokenResponse>(Content);
+			OnSuccess(Response.Checkout);
+		}, OnFailure);
+}
+
 void USardineCheckout::HTTPPost(const FString& Endpoint, const FString& Args,
                                 const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
@@ -312,39 +348,31 @@ void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, const FString& 
 	{
 		const FTransactionStep Step = FTransactionStep::ExtractBuyStep(Response.Steps);
 
-		const FSardineGetNFTCheckoutTokenArgs Args {
-			"",
-			3600,
-			FSardinePaymentMethodTypeConfig {
-				PaymentMethods,
-				PaymentMethod_Us_Debit
-			},
-			Order.TokenMetadata.name,
-			Order.TokenMetadata.image,
-			USequenceSupport::GetNetworkNameForUrl(ChainId),
-			RecipientAddress,
-			MarketPlaceContractAddress,
-			"calldata_execution",
-			"smart_contract",
-			Order.Order.TokenId,
-			Quantity,
-			Order.Order.QuantityDecimals,
-			Order.Order.PriceAmount,
-			Order.Order.PriceCurrencyAddress,
-			PriceSymbol,
-			Order.Order.PriceDecimals,
-			Step.Data,
-		};
+		if(Order.Order.PriceCurrencyAddress != FAddress::New().ToHex())
+		{
+			// TODO: The following call will not work currently, so we will use USDC temporarily
+			// UERC20* PaymentTokenContract = NewObject<UERC20>();
+			// PaymentTokenContract->Initialize(Order.Order.PriceCurrencyAddress);
+			// FContractCall SymbolCall = PaymentTokenContract->MakeSymbolTransaction();
+			// _wallet->Call(SymbolCall, [this, OnSuccess, OnFailure, ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, Step](FUnsizedData Data)
+			// {
+			// 	FString PaymentTokenSymbol = UTF8ToString(Data);
+			// 	SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, PaymentTokenSymbol, Step.Data,
+			// 		OnSuccess, OnFailure);
+			// }, OnFailure);
 
-		FString Endpoint = "SardineGetNFTCheckoutToken";
-		HTTPPost(Endpoint, BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
-			{
-				const FSardineGetNFTCheckoutTokenResponse Response = this->BuildResponse<FSardineGetNFTCheckoutTokenResponse>(Content);
-				OnSuccess(Response.Checkout);
-			}, OnFailure);
+			
+			SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, "USDC", Step.Data,
+					OnSuccess, OnFailure);
+		} else
+		{
+			SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, Order.Order.PriceCurrencyAddress, Step.Data,
+					OnSuccess, OnFailure);
+		}
 		
 	}), OnFailure);
 }
+
 
 void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress,
 	long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure,

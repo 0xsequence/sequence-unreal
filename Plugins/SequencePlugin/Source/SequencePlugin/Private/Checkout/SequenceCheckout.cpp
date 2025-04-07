@@ -268,7 +268,7 @@ void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, con
 	GenerateBuyTransaction(WalletAddress, OrdersData, Order.CollectionContractAddress, Order.Marketplace, AdditionalFee, WalletKind, OnSuccess, OnFailure);
 }
 
-void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const TArray<FSeqOrder> Orders,
+void USequenceCheckout::GenerateBuyTransactionMultipleOrders(const FString& WalletAddress, const TArray<FSeqOrder> Orders,
                                                const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
                                                FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {

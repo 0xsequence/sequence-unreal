@@ -56,7 +56,7 @@ public:
 	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void GenerateBuyTransaction(const FString& WalletAddress, const TArray<FSeqOrder> Orders, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateBuyTransactionMultipleOrders(const FString& WalletAddress, const TArray<FSeqOrder> Orders, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	void GenerateBuyTransaction(const FString& WalletAddress, const TArray<FSeqOrder> Orders, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;

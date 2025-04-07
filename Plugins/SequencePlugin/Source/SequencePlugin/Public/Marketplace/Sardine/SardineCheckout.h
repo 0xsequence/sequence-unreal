@@ -55,6 +55,9 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 	void GetSaleDetails(const FContractCall& SaleDetailsCall, long& Amount, long TokenID, TSuccessCallback<FSaleDetails> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutToken(const FSardineGetNFTCheckoutTokenArgs& Args, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutTokenSendRequest(int64 ChainId, FSeqCollectibleOrder Order, FString RecipientAddress,
+		FString MarketplaceContractAddress, long Quantity, FString PriceSymbol, FString CallData,
+		TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 	
 public:
 	//public functions
