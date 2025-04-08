@@ -9,18 +9,23 @@
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCheckSardineWhiteListStatus, bool, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetQuote, FSardineQuote, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetClientToken, FString, Response);
+DECLARE_DYNAMIC_DELEGATE(FOnRampAsync);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetNFTCheckoutToken, FSardineNFTCheckout, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetNFTCheckoutOrderStatus, FSardineOrder, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetSupportedRegions, TArray<FSardineRegion>, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetSupportedFiatCurrencies, TArray<FSardineFiatCurrency>, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetSupportedTokens, TArray<FSardineSupportedToken>, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineGetEnabledTokens, TArray<FSardineEnabledToken>, Response);
 
 UDELEGATE(BlueprintAuthorityOnly)
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSardineCheckoutFailure, FSequenceError, Error);
+DECLARE_DYNAMIC_DELEGATE(FOnSardineCheckoutFailure);
 
 UCLASS()
 class SEQUENCEPLUGIN_API USardineCheckoutBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
 
 	USardineCheckout* SardineCheckout;
 	
@@ -31,9 +36,7 @@ public:
 	void CheckSardineWhiteListStatus(FString Address, FOnCheckSardineWhiteListStatus OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetQuote(TSuccessCallback<FSardineQuote> OnSuccess, const FFailureCallback& OnFailure, FString WalletAddress, FSardineToken Token, u_long Amount, ESardinePaymentType PaymentType = Credit,
-		TOptional<FSardineFiatCurrency> QuotedCurrency = TOptional<FSardineFiatCurrency>(),
-		ESardineQuoteType QuoteType = Buy);
+	void SardineGetQuote(FOnSardineGetQuote OnSuccess, FOnSardineCheckoutFailure OnFailure, FString WalletAddress, FSardineToken Token, int Amount, FSardineFiatCurrency QuotedCurrency, ESardinePaymentType PaymentType = Credit, ESardineQuoteType QuoteType = Buy);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void SardineGetClientToken(FOnSardineGetClientToken OnSuccess, FOnSardineCheckoutFailure OnFailure);
@@ -42,41 +45,38 @@ public:
 	void OnRamp(const FString& ClientToken);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void OnRampAsync(FString ClientToken, TFunction<void> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutTokenOrders(int64 ChainId, const FString& WalletAddress, TArray<FSeqCollectibleOrder> Orders, int Quantity, FString RecipientAddress, TArray
+	                                <FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, FOnSardineGetNFTCheckoutToken OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetNFTCheckoutToken(int64 ChainId, const FString& WalletAddress, TArray<FSeqCollectibleOrder> Orders, long Quantity, FString RecipientAddress, TArray
-	                                <FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const
-	                                FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutTokenERC1155(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress, int TokenID, int Amount,
+		FOnSardineGetNFTCheckoutToken OnSuccess, FOnSardineCheckoutFailure OnFailure,
+		TArray<uint8> data, TArray<FString> Proof, FString RecipientAddress = "");
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress, long TokenID, long Amount,
-		TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure, FString RecipientAddress = "",
-		TArray<uint8> data = TArray<uint8>(), TArray<FString> Proof = TArray<FString>());
+	void SardineGetNFTCheckoutTokenERC721(int64 ChainID, UERC721SaleContract* SaleContract, FString CollectionAddress, int TokenID,
+		int Amount, FOnSardineGetNFTCheckoutToken OnSuccess, FOnSardineCheckoutFailure OnFailure, FString RecipientAddress, TArray<uint8> data , TArray<FString> Proof);
+	
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void SardineGetNFTCheckoutOrderStatus(FString OrderID, FOnSardineGetNFTCheckoutOrderStatus OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetNFTCheckoutToken(int64 ChainId, UERC721SaleContract SaleContract, FString CollectionAddress, long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure, FString RecipientAddress = "", TArray<uint8> data = TArray<uint8>(),TArray<uint8> Proof = TArray<uint8>());
+	void SardineGetSupportedRegions(FOnSardineGetSupportedRegions OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetSupportedFiatCurrencies(FOnSardineGetSupportedFiatCurrencies OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetSupportedTokens(FOnSardineGetSupportedTokens OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetSupportedFiatCurrencies(TSuccessCallback<TArray<FSardineFiatCurrency>> OnSuccess, const FFailureCallback& OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetSupportedTokens(TSuccessCallback<TArray<FSardineSupportedToken>> OnSuccess, const FFailureCallback& OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	void SardineGetEnabledTokens(TSuccessCallback<TArray<FSardineEnabledToken>> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetEnabledTokens(FOnSardineGetEnabledTokens OnSuccess, FOnSardineCheckoutFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	FString CheckoutURL(FString ClientToken);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
-	FString CheckoutURL(FSardineNFTCheckout Token);
+	FString CheckoutURLFromToken(FSardineNFTCheckout Token);
 
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void Checkout(FSardineNFTCheckout Token);

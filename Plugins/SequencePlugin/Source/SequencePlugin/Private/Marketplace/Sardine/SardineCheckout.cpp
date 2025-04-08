@@ -539,9 +539,15 @@ void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainID, UERC721SaleCont
 	}, OnFailure);
 }
 
+void USardineCheckout::SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	//TODO: This needs to be finished
+}
+
 
 void USardineCheckout::SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess,
-	const FFailureCallback& OnFailure)
+                                                  const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "SardineGetSupportedRegions";
 	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
