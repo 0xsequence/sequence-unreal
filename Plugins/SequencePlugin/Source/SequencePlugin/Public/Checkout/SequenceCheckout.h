@@ -7,6 +7,7 @@
 #include "Marketplace/Marketplace.h"
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/Wallet_Enums.h"
+#include "Structs/OrderData.h"
 
 #include "SequenceCheckout.generated.h"
 
@@ -30,7 +31,11 @@ private:
 	FString Url(const int64& TargetChainID,const FString& EndPoint) const;
 	static FString HostName(int64 TargetChainID);
 	void HTTPPost(const int64& TargetChainID,const FString& Endpoint,const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-	
+	static TArray<FOrderData> AssembleOrderData(TArray<FSeqOrder> Orders, int64 amount);
+	void GenerateBuyTransaction(const FString& WalletAddress, const TArray<FOrderData> OrderDatas, FString CollectionContractAddress, EMarketplaceKind
+	                            MarketplaceKind, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse>
+	                            OnSuccess, FFailureCallback OnFailure) const;
+
 public:
 	// Constructor
 	USequenceCheckout();
@@ -49,6 +54,10 @@ public:
 	void GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure)const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const;
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GenerateBuyTransactionMultipleOrders(const FString& WalletAddress, const TArray<FSeqOrder> Orders, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	void GenerateBuyTransaction(const FString& WalletAddress, const TArray<FSeqOrder> Orders, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")

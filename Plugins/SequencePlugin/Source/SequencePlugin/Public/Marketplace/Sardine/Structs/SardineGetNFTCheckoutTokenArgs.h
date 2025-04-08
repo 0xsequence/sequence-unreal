@@ -43,8 +43,8 @@ public:
 	{
 		FJsonBuilder Builder;
 
-		Builder.AddString(TEXT("name"), Name);
-		Builder.AddString(TEXT("imageUrl"), ImageUrl);
+		Builder.AddString(TEXT("name"), Name == "" ? "Placeholder" : Name);
+		Builder.AddString(TEXT("imageUrl"), ImageUrl == "" ? "https://dev-metadata.sequence.app/projects/1010/collections/394/tokens/1/image.webp" : ImageUrl);
 		Builder.AddString(TEXT("network"), Network);
 		Builder.AddString(TEXT("recipientAddress"), RecipientAddress);
 		Builder.AddString(TEXT("blockchainNftId"), BlockchainNftId);

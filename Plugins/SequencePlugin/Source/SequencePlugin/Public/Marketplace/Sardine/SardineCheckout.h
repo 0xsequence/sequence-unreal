@@ -55,6 +55,9 @@ class SEQUENCEPLUGIN_API USardineCheckout : public UObject
 	void GetSaleDetails(const FContractCall& SaleDetailsCall, long& Amount, long TokenID, TSuccessCallback<FSaleDetails> OnSuccess, const FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutToken(const FSardineGetNFTCheckoutTokenArgs& Args, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutTokenSendRequest(int64 ChainId, FSeqCollectibleOrder Order, FString RecipientAddress,
+		FString MarketplaceContractAddress, long Quantity, FString PriceSymbol, FString CallData,
+		TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
 	
 public:
 	//public functions
@@ -93,7 +96,9 @@ public:
 
 	void OnRampAsync(FString ClientToken, TFunction<void> OnSuccess, const FFailureCallback& OnFailure);
 
-	void SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity, FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure);
+	void SardineGetNFTCheckoutToken(int64 ChainId, const FString& WalletAddress, TArray<FSeqCollectibleOrder> Orders, long Quantity, FString RecipientAddress, TArray
+	                                <FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const
+	                                FFailureCallback& OnFailure);
 
 	void SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress, long TokenID, long Amount,
 		TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure, FString RecipientAddress = "",

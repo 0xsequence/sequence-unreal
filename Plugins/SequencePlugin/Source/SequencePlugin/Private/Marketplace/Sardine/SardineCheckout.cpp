@@ -5,6 +5,8 @@
 
 #include "ConfigFetcher.h"
 #include "HttpModule.h"
+#include "Checkout/SequenceCheckout.h"
+#include "Checkout/Structs/TransactionStep.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Marketplace/Marketplace.h"
 #include "Marketplace/Sardine/Structs/SardineEnabledTokensResponse.h"
@@ -108,6 +110,42 @@ void USardineCheckout::SardineGetNFTCheckoutToken(const FSardineGetNFTCheckoutTo
 	}
 
 	HTTPPost("SardineGetNFTCheckoutToken", BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
+		{
+			const FSardineGetNFTCheckoutTokenResponse Response = this->BuildResponse<FSardineGetNFTCheckoutTokenResponse>(Content);
+			OnSuccess(Response.Checkout);
+		}, OnFailure);
+}
+
+void USardineCheckout::SardineGetNFTCheckoutTokenSendRequest(int64 ChainId, FSeqCollectibleOrder Order,
+	FString RecipientAddress, FString MarketplaceContractAddress, long Quantity, FString PriceSymbol, FString CallData,
+	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FSardineGetNFTCheckoutTokenArgs Args {
+		"",
+		3600,
+		FSardinePaymentMethodTypeConfig {
+			PaymentMethods,
+			PaymentMethod_Us_Debit
+		},
+		Order.TokenMetadata.name,
+		Order.TokenMetadata.image,
+		USequenceSupport::GetNetworkNameForUrl(ChainId),
+		RecipientAddress,
+		MarketplaceContractAddress,
+		"calldata_execution",
+		"smart_contract",
+		Order.Order.TokenId,
+		Quantity,
+		Order.Order.QuantityDecimals,
+		Order.Order.PriceAmount,
+		Order.Order.PriceCurrencyAddress,
+		PriceSymbol,
+		Order.Order.PriceDecimals,
+		CallData,
+	};
+	
+	FString Endpoint = "SardineGetNFTCheckoutToken";
+	HTTPPost(Endpoint, BuildArgs<FSardineGetNFTCheckoutTokenArgs>(Args), [this, OnSuccess](const FString& Content)
 		{
 			const FSardineGetNFTCheckoutTokenResponse Response = this->BuildResponse<FSardineGetNFTCheckoutTokenResponse>(Content);
 			OnSuccess(Response.Checkout);
@@ -274,13 +312,13 @@ void USardineCheckout::OnRamp(const FString& ClientToken)
 	}
 }
 
-void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> Orders, long Quantity,
+void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, const FString& WalletAddress, TArray<FSeqCollectibleOrder> Orders, long Quantity,
 	FString RecipientAddress, TArray<FAdditionalFee> AdditionalFee, FString MarketPlaceContractAddress,
 	TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure)
 {
 	if (RecipientAddress.IsEmpty())
 	{
-		// set to wallet address
+		RecipientAddress = WalletAddress;
 	}
 	
 	if(Orders.Num() < 1)
@@ -289,14 +327,52 @@ void USardineCheckout::SardineGetNFTCheckoutToken(TArray<FSeqCollectibleOrder> O
 		return;
 	}
 
-	if(Orders[0].Order.PriceCurrencyAddress == FAddress::New().ToHex())
+	FSeqCollectibleOrder Order = Orders[0];
+
+	if(Order.Order.PriceCurrencyAddress == FAddress::New().ToHex())
 	{
 		OnFailure(FSequenceError(InvalidArgument, "Sardine doesn't support native currency checkout; please choose a different payment token"));
 		return;
 	}
 
-	//TODO Generate steps from checkout
+	FString PriceSymbol = USequenceSupport::GetNetworkSymbol(ChainId);
+
+	const USequenceCheckout* Checkout = NewObject<USequenceCheckout>();
+
+	TArray<FSeqOrder> BuyOrders;
+	for(FSeqCollectibleOrder CollectibleOrder : Orders)
+		BuyOrders.Push(CollectibleOrder.Order);
+
+	Checkout->GenerateBuyTransaction(WalletAddress, BuyOrders, Quantity, AdditionalFee[0], EWalletKind::Unknown, 
+	([this, OnSuccess, ChainId, RecipientAddress, MarketPlaceContractAddress, Quantity, PriceSymbol, Order, OnFailure](const FGenerateTransactionResponse& Response)
+	{
+		const FTransactionStep Step = FTransactionStep::ExtractBuyStep(Response.Steps);
+
+		if(Order.Order.PriceCurrencyAddress != FAddress::New().ToHex())
+		{
+			// TODO: The following call will not work currently, so we will use USDC temporarily
+			// UERC20* PaymentTokenContract = NewObject<UERC20>();
+			// PaymentTokenContract->Initialize(Order.Order.PriceCurrencyAddress);
+			// FContractCall SymbolCall = PaymentTokenContract->MakeSymbolTransaction();
+			// _wallet->Call(SymbolCall, [this, OnSuccess, OnFailure, ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, Step](FUnsizedData Data)
+			// {
+			// 	FString PaymentTokenSymbol = UTF8ToString(Data);
+			// 	SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, PaymentTokenSymbol, Step.Data,
+			// 		OnSuccess, OnFailure);
+			// }, OnFailure);
+
+			
+			SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, "USDC", Step.Data,
+					OnSuccess, OnFailure);
+		} else
+		{
+			SardineGetNFTCheckoutTokenSendRequest(ChainId, Order, RecipientAddress, MarketPlaceContractAddress, Quantity, Order.Order.PriceCurrencyAddress, Step.Data,
+					OnSuccess, OnFailure);
+		}
+		
+	}), OnFailure);
 }
+
 
 void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainId, UERC1155SaleContract* SaleContract, FString CollectionAddress,
 	long TokenID, long Amount, TSuccessCallback<FSardineNFTCheckout> OnSuccess, const FFailureCallback& OnFailure,
@@ -463,9 +539,15 @@ void USardineCheckout::SardineGetNFTCheckoutToken(int64 ChainID, UERC721SaleCont
 	}, OnFailure);
 }
 
+void USardineCheckout::SardineGetNFTCheckoutOrderStatus(FString OrderID, TSuccessCallback<FSardineOrder> OnSuccess,
+	const FFailureCallback& OnFailure)
+{
+	//TODO: This needs to be finished
+}
+
 
 void USardineCheckout::SardineGetSupportedRegions(TSuccessCallback<TArray<FSardineRegion>> OnSuccess,
-	const FFailureCallback& OnFailure)
+                                                  const FFailureCallback& OnFailure)
 {
 	const FString Endpoint = "SardineGetSupportedRegions";
 	HTTPPost(Endpoint, "", [this, OnSuccess](const FString& Content)
@@ -516,6 +598,17 @@ FString USardineCheckout::CheckoutURL(FString ClientToken)
 FString USardineCheckout::CheckoutURL(FSardineNFTCheckout Token)
 {
 	return CheckoutURL(Token.Token);
+}
+
+void USardineCheckout::Checkout(FSardineNFTCheckout Token)
+{
+	FString URL = CheckoutURL(Token);
+	FString * ErrorPtr = nullptr;
+	FPlatformProcess::LaunchURL(*URL,TEXT(""),ErrorPtr);
+	if (ErrorPtr)
+	{
+		UE_LOG(LogTemp,Error,TEXT("Browser LaunchError: %s"), **ErrorPtr);
+	}
 }
 
 

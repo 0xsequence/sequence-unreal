@@ -93,6 +93,55 @@ void USequenceCheckout::HTTPPost(const int64& TargetChainID, const FString& Endp
 	HTTP_Post_Req->ProcessRequest();
 }
 
+TArray<FOrderData> USequenceCheckout::AssembleOrderData(TArray<FSeqOrder> Orders, int64 amount)
+{
+	int64 AmountLeft = amount;
+	TArray<FOrderData> OrderDatas;
+	const int Length = Orders.Num();
+	for (int i = 0; i < Length; i++)
+	{
+		const int64 Available = FCString::Atoi(*Orders[i].QuantityAvailable);
+		if(AmountLeft <= Available)
+		{
+			OrderDatas.Add(FOrderData {
+				Orders[i].OrderId,
+				FString::Printf(TEXT("%lld"), AmountLeft)
+			});
+			break;
+		}
+
+		OrderDatas.Add(FOrderData {
+			Orders[i].OrderId,
+			FString::Printf(TEXT("%lld"), Available)
+		});
+
+		AmountLeft -= Available;
+		if(AmountLeft == 0)
+		{
+			break;
+		}
+	}
+	
+	return OrderDatas;
+}
+
+void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const TArray<FOrderData> OrderDatas,
+	FString CollectionContractAddress, EMarketplaceKind MarketplaceKind, const FAdditionalFee& AdditionalFee,
+	const EWalletKind WalletKind, TSuccessCallback<FGenerateTransactionResponse> OnSuccess,
+	FFailureCallback OnFailure) const
+{
+	const TArray AdditionalFees { AdditionalFee };
+
+	const FString Endpoint = "GenerateBuyTransaction";
+	const FString Args = BuildArgs<FGenerateBuyTransaction>(FGenerateBuyTransaction{ CollectionContractAddress, WalletAddress, MarketplaceKind, OrderDatas, AdditionalFees, WalletKind });
+	
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
+		OnSuccess(Response);
+	},  OnFailure);
+}
+
 USequenceCheckout::USequenceCheckout()
 {
 	this->ChainID = 0;
@@ -193,33 +242,68 @@ void USequenceCheckout::GetCheckoutOptionsByOrders(const FString& WalletAddress,
 void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
                                        FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
-	TArray<FOrderData> OrdersData;
-	OrdersData.Reserve(1);
-	OrdersData.Add(FOrderData(Order.OrderId, FString::Printf(TEXT("%lld"), Amount)));
-
-	const TArray AdditionalFees { AdditionalFee };
-
-	const FString Endpoint = "GenerateBuyTransaction";
-	const FString Args = BuildArgs<FGenerateBuyTransaction>(FGenerateBuyTransaction{ Order.CollectionContractAddress, WalletAddress, Order.Marketplace, OrdersData, AdditionalFees, WalletKind });
-	
-	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	GenerateBuyTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, [OnSuccess](FGenerateTransactionResponse Response)
 	{
-		const FGenerateTransactionResponse Response = BuildResponse<FGenerateTransactionResponse>(Content);
-		if (OnSuccess.IsBound())
+		if(OnSuccess.IsBound())
 		{
 			OnSuccess.Execute(Response);
 		}
-	}, [this, OnFailure](const FSequenceError& Error)
+	}, [OnFailure](FSequenceError Error)
 	{
-		if (OnFailure.IsBound())
+		if(OnFailure.IsBound())
 		{
 			OnFailure.Execute();
 		}
 	});
 }
 
+void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount,
+	const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+	TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const
+{
+	TArray<FOrderData> OrdersData;
+	OrdersData.Reserve(1);
+	OrdersData.Add(FOrderData(Order.OrderId, FString::Printf(TEXT("%lld"), Amount)));
+
+	GenerateBuyTransaction(WalletAddress, OrdersData, Order.CollectionContractAddress, Order.Marketplace, AdditionalFee, WalletKind, OnSuccess, OnFailure);
+}
+
+void USequenceCheckout::GenerateBuyTransactionMultipleOrders(const FString& WalletAddress, const TArray<FSeqOrder> Orders,
+                                               const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+                                               FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
+{
+	GenerateBuyTransaction(WalletAddress, Orders, Amount, AdditionalFee, WalletKind, [OnSuccess](FGenerateTransactionResponse Response)
+	{
+		if(OnSuccess.IsBound())
+		{
+			OnSuccess.Execute(Response);
+		}
+	}, [OnFailure](FSequenceError Error)
+	{
+		if(OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
+}
+
+void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const TArray<FSeqOrder> Orders,
+	const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
+	TSuccessCallback<FGenerateTransactionResponse> OnSuccess, FFailureCallback OnFailure) const
+{
+	TArray<FSeqOrder> SortedOrders = Orders;
+	SortedOrders.Sort([](const FSeqOrder& A, const FSeqOrder& B)
+	{
+		return A.PriceUSD < B.PriceUSD;
+	});
+
+	TArray<FOrderData> OrderDatas = AssembleOrderData(SortedOrders, Amount);
+	GenerateBuyTransaction(WalletAddress, OrderDatas, SortedOrders[0].CollectionContractAddress, SortedOrders[0].Marketplace, AdditionalFee, WalletKind, OnSuccess, OnFailure);
+
+}
+
 void USequenceCheckout::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
-	FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
+                                                FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
 	OrdersData.Reserve(1);
