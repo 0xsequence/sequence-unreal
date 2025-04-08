@@ -308,6 +308,15 @@ void USequenceWallet::UpdateProviderURL(const FString& Url) const
 	}
 }
 
+void USequenceWallet::UpdateProviderURL(int64 ChainID) const
+{
+	if (this->Provider)
+	{
+		this->Provider->UpdateUrl(ChainID);
+	}
+}
+
+
 void USequenceWallet::SignMessage(const FString& Message, const TSuccessCallback<FSeqSignMessageResponse_Response>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->SequenceRPCManager)

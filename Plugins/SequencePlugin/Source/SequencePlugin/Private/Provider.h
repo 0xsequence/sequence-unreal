@@ -22,6 +22,9 @@ class SEQUENCEPLUGIN_API UProvider : public URPCCaller
 {
 	GENERATED_BODY()
 private:
+	const FString _prodURL = "https://nodes.sequence.app/";
+	const FString _devURL = "https://dev-nodes.sequence.app/";
+	const FString _baseURL = _prodURL;
 	FString Url;
 
 //helpers
@@ -34,6 +37,7 @@ private:
 public:
 	static UProvider* Make(const FString& UrlIn);
 	void UpdateUrl(const FString& UrlIn);
+	void UpdateUrl(int64 ChainID);
 	void BlockByNumber(const uint64 Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);
 	void BlockByNumber(const EBlockTag Tag, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);
 	void BlockByHash(const FHash256& Hash, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);

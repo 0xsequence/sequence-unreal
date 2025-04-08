@@ -98,7 +98,7 @@ FContractCall UERC1155SaleContract::GetPaymentToken()
 
 	FContractCall CallData;
 	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.To = FAddress::From(ContractAddress.Mid(2, ContractAddress.Len()));
 
 	return CallData;
 }
@@ -111,7 +111,7 @@ FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
 
 	FContractCall CallData;
 	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.To = FAddress::From(ContractAddress.Mid(2, ContractAddress.Len()));
 
 	return CallData;
 }
@@ -127,7 +127,7 @@ FContractCall UERC1155SaleContract::GetTokenSaleDetails(long TokenID)
 
 	FContractCall CallData;
 	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.To = FAddress::From(ContractAddress.Mid(2, ContractAddress.Len()));
 
 	return CallData;
 }

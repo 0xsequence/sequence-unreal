@@ -97,8 +97,6 @@ public:
     */
     void Setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
-
-        UE_LOG(LogTemp, Warning, TEXT("seq token meta data setup start"));
         
         FString tokenIdString;
         if (json_in.TryGetStringField(TEXT("tokenId"), tokenIdString))
@@ -146,8 +144,5 @@ public:
                 }
             }
         }
-
-
-        UE_LOG(LogTemp, Warning, TEXT("seq token meta data setup done"));
     }
 };

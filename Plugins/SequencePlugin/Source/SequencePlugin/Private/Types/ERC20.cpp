@@ -1,5 +1,6 @@
 #include "Types/ERC20.h"
 #include "ABI/ABI.h"
+#include "Util/Log.h"
 
 UERC20::UERC20()
 {
@@ -125,12 +126,18 @@ FRawTransaction UERC20::MakeBurnTransaction(const int32 Amount)
 FContractCall UERC20::MakeSymbolTransaction()
 {
 	FString FunctionSignature = "symbol()";
-	TArray<ABIElement*> Arr;
-	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
-
+	TArray<TSharedPtr<ABIElement>> Arr;
+	TOptional<FUnsizedData> EncodedData = ABI::Encode(FunctionSignature, Arr);
 	FContractCall T;
-	T.To = FAddress::From(ContractAddress);
-	T.Data = TOptional(EncodedData.ToHex());
+	
+	if (!EncodedData.IsSet())
+	{
+		SEQ_LOG(Display, TEXT("Encoded data is invalid"));
+		return T;
+	}
+	
+	T.To = FAddress::From(ContractAddress.Mid(2, ContractAddress.Len()));
+	T.Data = TOptional(EncodedData.GetValue().ToHex());
 
 	return T;
 }

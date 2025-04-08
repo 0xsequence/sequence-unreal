@@ -32,6 +32,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ERC721 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
 
+    void Initialize(FString _ContractAddress, FString _PaymentToken, int32 _MaxTotal, FString _Data);
+
     FContractCall GetSaleDetails();
 
 };

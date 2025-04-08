@@ -65,6 +65,13 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
     return T; 
 }
 
+void UERC721SaleContract::Initialize(FString _ContractAddress, FString _PaymentToken, int32 _MaxTotal, FString _Data)
+{
+    ContractAddress = _ContractAddress;
+    PaymentToken = _PaymentToken;
+    MaxTotal = _MaxTotal;
+    Data = _Data;
+}
 
 FContractCall UERC721SaleContract::GetSaleDetails()
 {
@@ -74,7 +81,7 @@ FContractCall UERC721SaleContract::GetSaleDetails()
 
     FContractCall CallData;
     CallData.Data = TOptional(EncodedData.ToHex());
-    CallData.To = FAddress::From(ContractAddress);
+    CallData.To = FAddress::From(ContractAddress.Mid(2, ContractAddress.Len()));
 
     return CallData;
 }

@@ -139,6 +139,12 @@ public:
 	void UpdateProviderURL(const FString& Url) const;
 
 	/**
+	 * Allows you to update the provider URL to a node gateway url given the chainID
+	 * @param ChainID ID for chain you want the node gateway to be associated with
+	 */
+	void UpdateProviderURL(int64 ChainID) const;
+
+	/**
 	 * Allows you to update the set network for the SequenceWallet
 	 * @param NewNetwork New network you wish to use
 	 */

@@ -1,4 +1,4 @@
-#include "SardineGetNFTCheckoutTokenTest.h"
+#include "SardineERC721CheckoutTokenTest.h"
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/World.h"
@@ -7,17 +7,17 @@
 #include "Tests/AutomationEditorCommon.h"
 #include "Util/Async.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FSardineGetNFTCheckoutTokenTest, "SequencePlugin.EndToEnd.SardineTests.GetNFTCheckoutTokenTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FSardineERC721CheckoutTokenTest, "SequencePlugin.EndToEnd.SardineTests.ERC721CheckoutTokenTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
-void FSardineGetNFTCheckoutTokenTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+void FSardineERC721CheckoutTokenTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
-    OutBeautifiedNames.Add(TEXT("Sardine Get NFT Checkout Token Test"));
+    OutBeautifiedNames.Add(TEXT("Sardine ERC721 Checkout Token Test"));
     OutTestCommands.Add(TEXT(""));
 }
 
-bool FSardineGetNFTCheckoutTokenTest::RunTest(const FString& Parameters)
+bool FSardineERC721CheckoutTokenTest::RunTest(const FString& Parameters)
 {
-    AddInfo(TEXT("Starting Sardine Get NFT CHeckout Token Test"));
+    AddInfo(TEXT("Starting Sardine ERC721 Checkout Token Test"));
     
     // Start PIE
     ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(true));
@@ -28,26 +28,26 @@ bool FSardineGetNFTCheckoutTokenTest::RunTest(const FString& Parameters)
     // Run the actual test
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {
-        USardineGetNFTCheckoutTokenTestHelper* TestHelper = NewObject<USardineGetNFTCheckoutTokenTestHelper>();
+        USardineERC721CheckoutTokenTestHelper* TestHelper = NewObject<USardineERC721CheckoutTokenTestHelper>();
         TestHelper->ParentTest = this;
         TestHelper->RunTest();
 
-        ADD_LATENT_AUTOMATION_COMMAND(FWaitForGetNFTCheckoutToken(TestHelper));
+        ADD_LATENT_AUTOMATION_COMMAND(FWaitForERC721CheckoutToken(TestHelper));
         return true;
     }));
     return true;
 }
 
-void USardineGetNFTCheckoutTokenTestHelper::RunTest()
+void USardineERC721CheckoutTokenTestHelper::RunTest()
 {
     Checkout = NewObject<USardineCheckout>();
 
     // mock data
     int64 ChainID = 137;
-    UERC1155SaleContract* SaleContract = NewObject<UERC1155SaleContract>();
-    SaleContract->Initialize("0xe65b75eb7c58ffc0bf0e671d64d0e1c6cd0d3e5b", "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", 99999, "");
+    UERC721SaleContract* SaleContract = NewObject<UERC721SaleContract>();
+    SaleContract->Initialize("0xa3834cf6a4a620469fca67c7c7be4b840e2d27c0", "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", 99999, "");
 
-    FString CollectionAddress = "0xdeb398f41ccd290ee5114df7e498cf04fac916cb";
+    FString CollectionAddress = "0x36feb83e1f52180aca9ada43ec1797aa7406a2bd";
     long TokenID = 1;
     long Amount = 1;
     FString RecipientAddress = "0x9886910Faec24328FE8104a300e5D08FF0B5675b";
@@ -74,7 +74,7 @@ void USardineGetNFTCheckoutTokenTestHelper::RunTest()
         GetNFTCheckoutTokenSuccess, GetNFTCheckoutTokenFailure, RecipientAddress, Data, Proof);
 }
 
-bool FWaitForGetNFTCheckoutToken::Update()
+bool FWaitForERC721CheckoutToken::Update()
 {
     return TestHelper->IsTestComplete();
 }

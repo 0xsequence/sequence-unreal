@@ -1,5 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Provider.h"
+
+#include "ConfigFetcher.h"
 #include "Eth/Crypto.h"
 #include "Eth/EthTransaction.h"
 #include "Types/BinaryData.h"
@@ -7,6 +9,7 @@
 #include "Util/JsonBuilder.h"
 #include "RequestHandler.h"
 #include "Types/Header.h"
+#include "Util/SequenceSupport.h"
 
 void UProvider::Init(const FString& UrlIn)
 {
@@ -23,6 +26,11 @@ UProvider* UProvider::Make(const FString& UrlIn)
 void UProvider::UpdateUrl(const FString& UrlIn)
 {
 	this->Url = UrlIn;
+}
+
+void UProvider::UpdateUrl(int64 ChainID)
+{
+	this->Url = _baseURL + USequenceSupport::GetNetworkNameForUrl(ChainID) + "/" + UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 }
 
 void UProvider::BlockByNumberHelper(const FString& Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure)
