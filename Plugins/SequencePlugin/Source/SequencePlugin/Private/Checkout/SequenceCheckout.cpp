@@ -7,6 +7,7 @@
 #include "Checkout/Structs/GenerateSellTransaction.h"
 #include "Checkout/Structs/GetCheckoutOptionsArgs.h"
 #include "Checkout/Structs/GetCheckoutOptionsResponse.h"
+#include "Checkout/Structs/GetPrimarySaleCheckoutOptionsArgs.h"
 #include "Checkout/Structs/OrderData.h"
 #include "Util/Log.h"
 
@@ -158,6 +159,12 @@ void USequenceCheckout::SetChainID(const int64& InChainID)
 void USequenceCheckout::GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
                                    const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
+	if (Orders.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Orders is empty"));
+		return;
+	}
+	
 	const FString Endpoint = "CheckoutOptionsMarketplace";
 	const FString Args = BuildArgs<FGetCheckoutOptionsArgs>(FGetCheckoutOptionsArgs { WalletAddress, Orders, AdditionalFeeBps });
 
@@ -181,17 +188,74 @@ void USequenceCheckout::GetCheckoutOptionsByOrders(const FString& WalletAddress,
 	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
 {
 	TArray<FCheckoutOptionsMarketplaceOrder> Options;
-	Options.Reserve(Orders.Num());
+	
 	for (int32 i = 0; i < Orders.Num(); i++)
 	{
-		Options[i] = FCheckoutOptionsMarketplaceOrder(Orders[i].CollectionContractAddress, Orders[i].OrderId, Orders[i].Marketplace);
+		Options.Add(FCheckoutOptionsMarketplaceOrder(Orders[i].CollectionContractAddress, Orders[i].OrderId, Orders[i].Marketplace));
 	}
 
 	GetCheckoutOptions(WalletAddress, Options, AdditionalFeeBps, OnSuccess, OnFailure);
 }
 
+void USequenceCheckout::GetCheckoutOptionsByTokenIdAmounts(const FString& WalletAddress,
+	const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const TMap<FString, int64> AmountsByTokenId,
+	FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
+{
+	const FString Endpoint = "CheckoutOptionsSalesContract";
+	const FString Args = BuildArgs<FGetPrimarySaleCheckoutOptionsArgs>(FGetPrimarySaleCheckoutOptionsArgs { WalletAddress, SaleContract->ContractAddress, CollectionAddress, AmountsByTokenId });
+
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGetCheckoutOptionsResponse Response = BuildResponse<FGetCheckoutOptionsResponse>(Content);
+		if (OnSuccess.IsBound())
+		{
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
+}
+
+void USequenceCheckout::GetCheckoutOptionsByERC1155Contract(const FString& WalletAddress,
+	const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
+	const int64 Amount, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure) const
+{
+	TMap<FString, int64> Amounts;
+	Amounts.Add(TokenId, Amount);
+	
+	GetCheckoutOptionsByTokenIdAmounts(WalletAddress, SaleContract, CollectionAddress, Amounts, OnSuccess, OnFailure);
+}
+
+void USequenceCheckout::GetCheckoutOptionsByERC721Contract(const FString& WalletAddress,
+	const UERC721SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
+	const int64 Amount, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
+{
+	const FString Endpoint = "CheckoutOptionsSalesContract";
+	const FString Args = BuildArgs<FGetPrimarySaleCheckoutOptionsArgs>(FGetPrimarySaleCheckoutOptionsArgs { WalletAddress, SaleContract->ContractAddress, CollectionAddress, TokenId, Amount });
+
+	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
+	{
+		const FGetCheckoutOptionsResponse Response = BuildResponse<FGetCheckoutOptionsResponse>(Content);
+		if (OnSuccess.IsBound())
+		{
+			OnSuccess.Execute(Response);
+		}
+	}, [this, OnFailure](const FSequenceError& Error)
+	{
+		if (OnFailure.IsBound())
+		{
+			OnFailure.Execute();
+		}
+	});
+}
+
+
 void USequenceCheckout::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, const EWalletKind WalletKind,
-                                       FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
+                                               FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const
 {
 	TArray<FOrderData> OrdersData;
 	OrdersData.Reserve(1);

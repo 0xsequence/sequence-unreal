@@ -55,9 +55,9 @@ public:
 	{
 		FString ReturnArgs = "{";
 
-		ReturnArgs += "\"walletAddress\":\"" + WalletAddress + "\",";
+		ReturnArgs += "\"wallet\":\"" + WalletAddress + "\",";
 		ReturnArgs += "\"orders\":[" + GetOrdersDataArgs() + "],";
-		ReturnArgs += "\"additionalFee\":\"" + FString::Printf(TEXT("%lld"), AdditionalFee) + "\"";
+		ReturnArgs += "\"additionalFee\":" + FString::Printf(TEXT("%lld"), AdditionalFee) + "";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

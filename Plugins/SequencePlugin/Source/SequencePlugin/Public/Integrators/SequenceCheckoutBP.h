@@ -25,6 +25,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByTokenIdAmounts(const FString& WalletAddress, const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, TMap<FString, int64> AmountsByTokenId, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByERC1155Contract(const FString& WalletAddress, UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByERC721Contract(const FString& WalletAddress, UERC721SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);
+	
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure);

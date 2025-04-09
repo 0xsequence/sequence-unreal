@@ -7,6 +7,8 @@
 #include "Marketplace/Marketplace.h"
 #include "Sequence/SequenceAPI.h"
 #include "Sequence/Wallet_Enums.h"
+#include "Types/ERC1155SaleContract.h"
+#include "Types/ERC721SaleContract.h"
 
 #include "SequenceCheckout.generated.h"
 
@@ -47,6 +49,13 @@ public:
 	void GetCheckoutOptions(const FString& WalletAddress, const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")
 	void GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders, const int64 AdditionalFeeBps, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByTokenIdAmounts(const FString& WalletAddress, const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, TMap<FString, int64> AmountsByTokenId, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByERC1155Contract(const FString& WalletAddress, const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	UFUNCTION(BlueprintCallable, Category = "Checkout")
+	void GetCheckoutOptionsByERC721Contract(const FString& WalletAddress, const UERC721SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId, const int64 Amount, FOnGetCheckoutOptionsResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
+	
 	UFUNCTION(BlueprintCallable, Category = "Checkout", meta = (ExpandEnumAsExecs = "WalletKind"))
 	void GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order, const int64 Amount, const FAdditionalFee& AdditionalFee, EWalletKind WalletKind, FOnGenerateTransactionResponseSuccess OnSuccess, FOnCheckoutFailure OnFailure) const;
 	UFUNCTION(BlueprintCallable, Category = "Checkout")

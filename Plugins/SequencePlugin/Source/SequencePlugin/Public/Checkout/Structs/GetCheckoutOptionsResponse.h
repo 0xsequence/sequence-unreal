@@ -7,17 +7,16 @@ USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FGetCheckoutOptionsResponse
 {
 	GENERATED_USTRUCT_BODY()
-
-	public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	ECheckoutOptions Options;
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FCheckoutOptions Options;
 
 	FGetCheckoutOptionsResponse()
 	{
-		this->Options = ECheckoutOptions::CryptoPurchase;
+		this->Options = FCheckoutOptions();
 	}
 
-	FGetCheckoutOptionsResponse(const ECheckoutOptions Options)
+	FGetCheckoutOptionsResponse(const FCheckoutOptions& Options)
 	{
 		this->Options = Options;
 	}
@@ -32,7 +31,12 @@ struct SEQUENCEPLUGIN_API FGetCheckoutOptionsResponse
 	{
 		if (JSON_In.HasField(TEXT("options")))
 		{
-			this->Options = static_cast<ECheckoutOptions>(JSON_In.GetIntegerField(TEXT("options")));
+			if (const TSharedPtr<FJsonValue> OptionsValue = JSON_In.TryGetField(TEXT("options")); OptionsValue != nullptr)
+			{
+				TSharedPtr<FJsonObject> OptionsJsonObject = OptionsValue->AsObject();
+				this->Options = FCheckoutOptions();
+				this->Options.Setup(*OptionsJsonObject);
+			}
 		}
 	}
 };

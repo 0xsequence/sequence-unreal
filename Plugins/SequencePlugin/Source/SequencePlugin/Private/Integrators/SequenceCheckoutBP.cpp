@@ -39,9 +39,30 @@ void USequenceCheckoutBP::GetCheckoutOptionsByOrders(const FString& WalletAddres
 	this->Checkout->GetCheckoutOptionsByOrders(WalletAddress, Orders, AdditionalFeeBps, OnSuccess, OnFailure);
 }
 
+void USequenceCheckoutBP::GetCheckoutOptionsByTokenIdAmounts(const FString& WalletAddress,
+	const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const TMap<FString, int64> AmountsByTokenId,
+	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
+{
+	this->Checkout->GetCheckoutOptionsByTokenIdAmounts(WalletAddress, SaleContract, CollectionAddress, AmountsByTokenId, OnSuccess, OnFailure);
+}
+
+void USequenceCheckoutBP::GetCheckoutOptionsByERC1155Contract(const FString& WalletAddress,
+	UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
+	const int64 Amount, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
+{
+	this->Checkout->GetCheckoutOptionsByERC1155Contract(WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnSuccess, OnFailure);
+}
+
+void USequenceCheckoutBP::GetCheckoutOptionsByERC721Contract(const FString& WalletAddress,
+	UERC721SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
+	const int64 Amount, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
+{
+	this->Checkout->GetCheckoutOptionsByERC721Contract(WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnSuccess, OnFailure);
+}
+
 void USequenceCheckoutBP::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order,
-	const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
-	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
+                                                 const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
+                                                 const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	this->Checkout->GenerateBuyTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
 }

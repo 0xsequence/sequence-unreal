@@ -37,7 +37,7 @@ public:
 
 		ReturnArgs += "\"contractAddress\":\"" + ContractAddress + "\",";
 		ReturnArgs += "\"orderId\":\"" + OrderId + "\",";
-		ReturnArgs += "\"marketplace\":\"" + UEnum::GetValueAsString(Marketplace) + "\"";
+		ReturnArgs += "\"marketplace\":\"" + UEnum::GetValueAsString(Marketplace).ToLower() + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

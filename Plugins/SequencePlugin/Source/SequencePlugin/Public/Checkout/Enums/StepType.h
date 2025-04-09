@@ -1,7 +1,7 @@
 #pragma once
 #include "StepType.generated.h"
 
-ENUM_RANGE_BY_COUNT(EStepType, 8)
+ENUM_RANGE_BY_COUNT(EStepType, 9)
 UENUM(Blueprintable)
 enum class EStepType : uint8
 {
