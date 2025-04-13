@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
+#include "Marketplace/SequenceMarketplace.h"
 #include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
 #include "MarketplaceRequestsTestData.generated.h"
 

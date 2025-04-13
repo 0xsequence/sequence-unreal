@@ -158,14 +158,47 @@ public:
     {
         OrderId = json_in.GetStringField(TEXT("orderId"));
 
-        if (!json_in.TryGetField(TEXT("marketplace")))
-            Marketplace = EMarketplaceKind(json_in.GetIntegerField(TEXT("marketplace")));
+        if (json_in.TryGetField(TEXT("marketplace")))
+        {
+            UEnum* EnumPtr = StaticEnum<EMarketplaceKind>();
+            int32 EnumIndex = EnumPtr->GetValueByName(FName(json_in.GetStringField(TEXT("marketplace"))));
+            if (EnumIndex != INDEX_NONE)
+            {
+                Marketplace = static_cast<EMarketplaceKind>(EnumPtr->GetValueByIndex(EnumIndex));
+            }
+            else
+            {
+                Marketplace = EMarketplaceKind::UNKNOWN_MK;
+            }
+        }
 
-        if (!json_in.TryGetField(TEXT("side")))
-            Side = EOrderSide(json_in.GetIntegerField(TEXT("side")));
+        if (json_in.TryGetField(TEXT("side")))
+        {
+            UEnum* EnumPtr = StaticEnum<EOrderSide>();
+            int32 EnumIndex = EnumPtr->GetValueByName(FName(json_in.GetStringField(TEXT("side"))));
+            if (EnumIndex != INDEX_NONE)
+            {
+                Side = static_cast<EOrderSide>(EnumPtr->GetValueByIndex(EnumIndex));
+            }
+            else
+            {
+                Side = EOrderSide::UNKNOWN_OSD;
+            }
+        }
 
-        if (!json_in.TryGetField(TEXT("status")))
-            Status = EOrderStatus(json_in.GetIntegerField(TEXT("Status")));
+        if (json_in.TryGetField(TEXT("status")))
+        {
+            UEnum* EnumPtr = StaticEnum<EOrderStatus>();
+            int32 EnumIndex = EnumPtr->GetValueByName(FName(json_in.GetStringField(TEXT("status"))));
+            if (EnumIndex != INDEX_NONE)
+            {
+                Status = static_cast<EOrderStatus>(EnumPtr->GetValueByIndex(EnumIndex));
+            }
+            else
+            {
+                Status = EOrderStatus::UNKNOWN_OST;
+            }
+        }
 
         ChainId = json_in.GetNumberField(TEXT("chainId"));
         CollectionContractAddress = json_in.GetStringField(TEXT("collectionContractAddress"));
@@ -211,6 +244,6 @@ public:
         OrderUpdatedAt = json_in.GetStringField(TEXT("orderUpdatedAt"));
         CreatedAt = json_in.GetStringField(TEXT("createdAt"));
         UpdatedAt = json_in.GetStringField(TEXT("updatedAt"));
-        DeletedAt = json_in.GetStringField(TEXT("deletedAt"));
+        json_in.TryGetStringField(TEXT("deletedAt"), DeletedAt);
     }
 };

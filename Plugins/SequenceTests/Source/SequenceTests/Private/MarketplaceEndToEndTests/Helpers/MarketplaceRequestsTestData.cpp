@@ -1,13 +1,13 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
+#include "SequencePlugin/Private/Indexer/Indexer.h"
 
 UMarketplaceRequestsTestData * UMarketplaceRequestsTestData::Make(const int32 PendingRequestsIn)
 {
 	UMarketplaceRequestsTestData * IndexerRequestsTestData = NewObject<UMarketplaceRequestsTestData>();
 	IndexerRequestsTestData->PendingRequests = PendingRequestsIn;
-	IndexerRequestsTestData->Marketplace = NewObject<USequenceMarketplace>();
+	IndexerRequestsTestData->Marketplace = NewObject<UMarketplace>();
 	return IndexerRequestsTestData;
 }
 
@@ -47,7 +47,7 @@ bool UMarketplaceRequestsTestData::TestDone() const
 	return this->PendingRequests == 0;
 }
 
-USequenceMarketplace * UMarketplaceRequestsTestData::GetMarketplace() const
+UMarketplace * UMarketplaceRequestsTestData::GetMarketplace() const
 {
 	return this->Marketplace;
 }

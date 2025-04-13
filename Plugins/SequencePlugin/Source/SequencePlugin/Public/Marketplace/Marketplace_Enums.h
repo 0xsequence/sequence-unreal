@@ -67,6 +67,19 @@ enum EOrderStatus
     FILLED  UMETA(DisplayName = "Filled"),
 };
 
+UENUM(BlueprintType)
+enum class EOrderbookKind : uint8
+{
+    Unknown UMETA(DisplayName = "unknown"),
+    Sequence_Marketplace_V1 UMETA(DisplayName = "sequence_marketplace_v1"),
+    Sequence_Marketplace_V2 UMETA(DisplayName = "sequence_marketplace_v2"),
+    Blur UMETA(DisplayName = "blur"),
+    Opensea UMETA(DisplayName = "opensea"),
+    Looks_Rare UMETA(DisplayName = "looks_rare"),
+    Reservoir UMETA(DisplayName = "reservoir"),
+    X2Y2 UMETA(DisplayName = "x2y2")
+};
+
 
 // PropertyType Extensions
 UCLASS()
@@ -76,6 +89,32 @@ class UMarketplaceEnumsExtensions : public UObject
 
 public:
 
+    template<typename EnumType>
+    static FString AsString(EnumType EnumValue);
+
+    template<>
+    FString AsString<EOrderbookKind>(const EOrderbookKind OrderbookKind)
+    {
+        switch (OrderbookKind)
+        {
+            case EOrderbookKind::Sequence_Marketplace_V1:
+                return FString("sequence_marketplace_v1");
+            case EOrderbookKind::Sequence_Marketplace_V2:
+                return FString("sequence_marketplace_v2");
+            case EOrderbookKind::Blur:
+                return FString("blur");
+            case EOrderbookKind::Opensea:
+                return FString("opensea");
+            case EOrderbookKind::Looks_Rare:
+                return FString("looks_rare");
+            case EOrderbookKind::Reservoir:
+                return FString("reservoir");
+            case EOrderbookKind::X2Y2:
+                return FString("x2y2");
+            default: return FString("unknown");
+        }
+    }
+    
     template<typename EnumType>
     static FString AsString(TEnumAsByte<EnumType> EnumValue);
 
@@ -94,34 +133,32 @@ public:
     }
 
     template<>
-    FString AsString<EMarketplaceKind>(TEnumAsByte<EMarketplaceKind> MarketplaceKind)
+    FString AsString<EMarketplaceKind>(const TEnumAsByte<EMarketplaceKind> MarketplaceKind)
     {
         switch (MarketplaceKind)
         {
+            case EMarketplaceKind::SEQUENCE_MARKETPLACE_V1: return "sequence_marketplace_v1";
+            case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2: return "sequence_marketplace_v2";
+            case EMarketplaceKind::OPENSEA:                 return "opensea";
+            case EMarketplaceKind::MAGIC_EDEN:              return "magic_eden";
+            case EMarketplaceKind::MINTIFY:                 return "mintify";
+            case EMarketplaceKind::LOOKS_RARE:              return "looks_rare";
+            case EMarketplaceKind::X2Y2:                    return "x2y2";
+            case EMarketplaceKind::SUDO_SWAP:               return "sudo_swap";
+            case EMarketplaceKind::COINBASE:                return "coinbase";
+            case EMarketplaceKind::RARIBLE:                 return "rarible";
+            case EMarketplaceKind::NFTX:                    return "nftx";
+            case EMarketplaceKind::FOUNDATION:              return "foundation";
+            case EMarketplaceKind::MANIFOLD:                return "manifold";
+            case EMarketplaceKind::ZORA:                    return "zora";
+            case EMarketplaceKind::BLUR:                    return "blur";
+            case EMarketplaceKind::SUPER_RARE:              return "super_rare";
+            case EMarketplaceKind::OKX:                     return "okx";
+            case EMarketplaceKind::ELEMENT:                 return "element";
+            case EMarketplaceKind::AQUA_XYZ:                return "aqua_xyz";
+            case EMarketplaceKind::AURANFT_CO:              return "auranft_co";
 
-        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V1: return "sequence_marketplace_v1";
-        case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2: return "sequence_marketplace_v2";
-        case EMarketplaceKind::OPENSEA:                return "opensea";
-        case EMarketplaceKind::MAGIC_EDEN:             return "magic_eden";
-        case EMarketplaceKind::MINTIFY:                return "mintify";
-        case EMarketplaceKind::LOOKS_RARE:             return "looks_rare";
-        case EMarketplaceKind::X2Y2:                   return "x2y2";
-        case EMarketplaceKind::SUDO_SWAP:              return "sudo_swap";
-        case EMarketplaceKind::COINBASE:               return "coinbase";
-        case EMarketplaceKind::RARIBLE:                return "rarible";
-        case EMarketplaceKind::NFTX:                   return "nftx";
-        case EMarketplaceKind::FOUNDATION:             return "foundation";
-        case EMarketplaceKind::MANIFOLD:               return "manifold";
-        case EMarketplaceKind::ZORA:                   return "zora";
-        case EMarketplaceKind::BLUR:                   return "blur";
-        case EMarketplaceKind::SUPER_RARE:             return "super_rare";
-        case EMarketplaceKind::OKX:                    return "okx";
-        case EMarketplaceKind::ELEMENT:                return "element";
-        case EMarketplaceKind::AQUA_XYZ:               return "aqua_xyz";
-        case EMarketplaceKind::AURANFT_CO:             return "auranft_co";
-
-        default: return "Unknown";
-
+            default: return "Unknown";
         }
     }
 

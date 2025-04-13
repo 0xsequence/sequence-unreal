@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
+#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
+#include "Marketplace/Marketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
@@ -83,7 +84,7 @@ bool FListCollectibleOffersWithHighestPricedOfferFirst::RunTest(const FString& P
 		    
         MarketplaceTestData->GetMarketplace()->ListAllCollectibleOffersWithHighestPricedOfferFirst(
             Support->GetNetworkId(ENetwork::PolygonChain),
-            "0x5e4bfd71236a21299d43f508dbb76cb7d0fd4e50",
+            "0x079294e6ffec16234578c672fa3fbfd4b6c48640",
             FSeqCollectiblesFilter::Empty(),
             GenericSuccess,
             GenericFailure

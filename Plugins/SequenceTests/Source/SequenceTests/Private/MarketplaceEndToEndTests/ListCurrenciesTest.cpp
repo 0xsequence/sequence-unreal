@@ -2,10 +2,10 @@
 
 #include "JsonObjectConverter.h"
 #include "CoreMinimal.h"
-#include "SequencePlugin/Public/Sequence/SequenceWallet.h"
+#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
+#include "Marketplace/Marketplace.h"
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
@@ -47,7 +47,7 @@ bool FListCurrenciesTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
+        UMarketplace* Marketplace = NewObject<UMarketplace>();
         USequenceSupport* Support = NewObject<USequenceSupport>();
 
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
