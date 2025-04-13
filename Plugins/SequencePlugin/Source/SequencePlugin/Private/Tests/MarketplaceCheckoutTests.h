@@ -2,7 +2,7 @@
 #include "Checkout/Structs/TransactionStep.h"
 #include "Marketplace/Structs/SeqCollectibleOrder.h"
 #include "Marketplace/Structs/SeqCollectiblesFilter.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 
 class FMarketplaceCheckoutTests
 {

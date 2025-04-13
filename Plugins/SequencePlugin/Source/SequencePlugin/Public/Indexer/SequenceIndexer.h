@@ -4,7 +4,6 @@
 #include "CoreMinimal.h"
 #include "Util/Async.h"
 #include "Indexer/Structs/Struct_Data.h"
-#include "Dom/JsonObject.h"
 #include "Engine/Texture2D.h"
 #include "SequenceIndexer.generated.h"
 

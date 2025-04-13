@@ -2,9 +2,8 @@
 #include "PostRequest.h"
 #include "TransactionSignature.h"
 #include "Checkout/Enums/StepType.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Sequence/Transactions.h"
-#include "Util/SequenceSupport.h"
 
 #include "TransactionStep.generated.h"
 

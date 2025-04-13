@@ -1,4 +1,6 @@
-#include "Integrators/SequenceCheckoutBP.h"
+#include "Subsystems/SequenceCheckoutBP.h"
+
+#include "Sequence/SequenceSdk.h"
 
 void USequenceCheckoutBP::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -20,58 +22,129 @@ USequenceCheckoutBP::USequenceCheckoutBP()
 	this->Checkout = NewObject<USequenceCheckout>();
 }
 
-// Do NOT add const for this function, breaks how we get the chainID
-void USequenceCheckoutBP::SetChainID(const int64& InChainID)
-{
-	this->Checkout->SetChainID(InChainID);
-}
-
 void USequenceCheckoutBP::GetCheckoutOptions(const FString& WalletAddress,
 	const TArray<FCheckoutOptionsMarketplaceOrder>& Orders, const int64 AdditionalFeeBps,
 	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GetCheckoutOptions(WalletAddress, Orders, AdditionalFeeBps, OnSuccess, OnFailure);
+	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GetCheckoutOptions(SequenceSdk::GetChainId(), WalletAddress, Orders, AdditionalFeeBps, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GetCheckoutOptionsByOrders(const FString& WalletAddress, const TArray<FSeqOrder>& Orders,
 	const int64 AdditionalFeeBps, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GetCheckoutOptionsByOrders(WalletAddress, Orders, AdditionalFeeBps, OnSuccess, OnFailure);
+	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GetCheckoutOptionsByOrders(SequenceSdk::GetChainId(), WalletAddress, Orders, AdditionalFeeBps, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GetCheckoutOptionsByTokenIdAmounts(const FString& WalletAddress,
 	const UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const TMap<FString, int64> AmountsByTokenId,
 	const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GetCheckoutOptionsByTokenIdAmounts(WalletAddress, SaleContract, CollectionAddress, AmountsByTokenId, OnSuccess, OnFailure);
+	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GetCheckoutOptionsByTokenIdAmounts(SequenceSdk::GetChainId(), WalletAddress, SaleContract, CollectionAddress, AmountsByTokenId, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GetCheckoutOptionsByERC1155Contract(const FString& WalletAddress,
 	UERC1155SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
 	const int64 Amount, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GetCheckoutOptionsByERC1155Contract(WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnSuccess, OnFailure);
+	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GetCheckoutOptionsByERC1155Contract(SequenceSdk::GetChainId(), WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GetCheckoutOptionsByERC721Contract(const FString& WalletAddress,
 	UERC721SaleContract* SaleContract, const FString& CollectionAddress, const FString& TokenId,
 	const int64 Amount, const FOnGetCheckoutOptionsResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GetCheckoutOptionsByERC721Contract(WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnSuccess, OnFailure);
+	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GetCheckoutOptionsByERC721Contract(SequenceSdk::GetChainId(), WalletAddress, SaleContract, CollectionAddress, TokenId, Amount, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateBuyTransaction(const FString& WalletAddress, const FSeqOrder& Order,
                                                  const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
                                                  const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateBuyTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateBuyTransaction(SequenceSdk::GetChainId(), WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, const FSeqOrder& Order,
 	const int64 Amount, const FAdditionalFee AdditionalFee, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateSellTransaction(WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateSellTransaction(SequenceSdk::GetChainId(), WalletAddress, Order, Amount, AdditionalFee, WalletKind, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress,
@@ -79,7 +152,18 @@ void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddres
 	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateListingTransaction(WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateListingTransaction(SequenceSdk::GetChainId(), WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress,
@@ -87,21 +171,54 @@ void USequenceCheckoutBP::GenerateOfferTransaction(const FString& WalletAddress,
 	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateOfferTransaction(WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateOfferTransaction(SequenceSdk::GetChainId(), WalletAddress, CollectionAddress, TokenId, Amount, ContractType, CurrencyTokenAddress, PricePerToken, Expiry, OrderbookKind, WalletKind, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateCancelTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& OrderId, const EMarketplaceKind MarketplaceKind, const FOnGenerateTransactionResponseSuccess OnSuccess,
 	const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateCancelTransaction(WalletAddress, CollectionAddress, OrderId, MarketplaceKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateCancelTransaction(SequenceSdk::GetChainId(), WalletAddress, CollectionAddress, OrderId, MarketplaceKind, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceCheckoutBP::GenerateCancelTransactionByOrder(const FString& WalletAddress,
 	const FString& CollectionAddress, const FSeqOrder& Order, const EMarketplaceKind MarketplaceKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
-	this->Checkout->GenerateCancelTransactionByOrder(WalletAddress, CollectionAddress, Order, MarketplaceKind, OnSuccess, OnFailure);
+	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Email Auth Error: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	this->Checkout->GenerateCancelTransactionByOrder(SequenceSdk::GetChainId(), WalletAddress, CollectionAddress, Order, MarketplaceKind, OnApiSuccess, OnApiFailure);
 }
 
 UTransactions* USequenceCheckoutBP::StepsToTransactions(const TArray<FTransactionStep>& Steps)

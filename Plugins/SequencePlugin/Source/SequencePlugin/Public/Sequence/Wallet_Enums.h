@@ -1,6 +1,6 @@
 #pragma once
-#include "SequenceAPI.h"
 
+#include "SequenceWallet.h"
 #include "Wallet_Enums.generated.h"
 
 UENUM(BlueprintType)

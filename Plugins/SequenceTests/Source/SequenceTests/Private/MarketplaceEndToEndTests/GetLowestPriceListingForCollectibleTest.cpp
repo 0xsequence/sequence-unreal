@@ -2,13 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/Sequence/SequenceAPI.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "Marketplace/Marketplace.h"
+#include "Marketplace/SequenceMarketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
-#include "JsonObjectConverter.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetLowestPriceListingForCollectibleTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetLowestPriceListingForCollectibleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
