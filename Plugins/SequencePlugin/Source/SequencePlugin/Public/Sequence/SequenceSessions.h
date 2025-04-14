@@ -96,5 +96,6 @@ private:
 	UPROPERTY()
 	USequenceRPCManager* RPCManager;
 
+	UPROPERTY()
 	UCredentialsStorage* CredentialsStorage;
 };
