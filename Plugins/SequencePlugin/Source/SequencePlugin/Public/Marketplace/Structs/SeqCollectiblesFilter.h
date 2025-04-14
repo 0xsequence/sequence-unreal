@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "Util/SequenceSupport.h"
 #include "SeqPropertyFilter.h"  
 #include "Marketplace/Marketplace_Enums.h"

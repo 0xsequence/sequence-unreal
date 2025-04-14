@@ -1,4 +1,5 @@
 #pragma once
+#include "Misc/EnumRange.h"
 #include "StepType.generated.h"
 
 ENUM_RANGE_BY_COUNT(EStepType, 9)

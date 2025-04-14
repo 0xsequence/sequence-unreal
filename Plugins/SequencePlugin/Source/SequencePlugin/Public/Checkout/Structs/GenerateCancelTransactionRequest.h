@@ -9,13 +9,13 @@ struct SEQUENCEPLUGIN_API FGenerateCancelTransactionRequest
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString CollectionAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Maker;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TEnumAsByte<EMarketplaceKind> Marketplace;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString OrderId;
 
 	FGenerateCancelTransactionRequest()

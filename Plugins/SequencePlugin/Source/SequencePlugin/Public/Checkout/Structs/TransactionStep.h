@@ -1,5 +1,7 @@
 #pragma once
+
 #include "PostRequest.h"
+#include "Dom/JsonObject.h"
 #include "TransactionSignature.h"
 #include "Checkout/Enums/StepType.h"
 #include "Sequence/SequenceWallet.h"
@@ -17,17 +19,17 @@ struct SEQUENCEPLUGIN_API FTransactionStep
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	EStepType Id;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Data;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString To;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Value;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FTransactionSignature Signature;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FPostRequest Post;
 
 	FTransactionStep()

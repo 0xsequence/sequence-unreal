@@ -12,17 +12,17 @@ struct SEQUENCEPLUGIN_API FGenerateListingTransactionArgs
 	GENERATED_USTRUCT_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString CollectionAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Owner;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TEnumAsByte<EContractType> ContractType;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	EOrderbookKind Orderbook;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FCreateReq Listing;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	EWalletKind WalletType;
 
 	FGenerateListingTransactionArgs()

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SeqMarketplaceSortBy.h"  // Ensure this includes your SortBy struct or enum
+#include "SeqMarketplaceSortBy.h"
+#include "Dom/JsonObject.h"
 #include "Util/JsonBuilder.h"
 #include "Util/SequenceSupport.h"
 #include "SeqMarketplacePage.generated.h"

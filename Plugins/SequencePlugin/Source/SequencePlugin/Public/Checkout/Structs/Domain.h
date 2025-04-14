@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Dom/JsonObject.h"
 #include "Domain.generated.h"
 
 USTRUCT(BlueprintType)
@@ -8,14 +9,14 @@ struct SEQUENCEPLUGIN_API FDomain
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Name;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Version;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	int64 ChainId;
 	// Chain enum?
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString VerifyingContract;
 
 	FDomain()

@@ -3,7 +3,7 @@
 #include "Marketplace/TransactionNFTCheckoutProvider.h"
 #include "Marketplace/TransactionOnRampProvider.h"
 #include "Marketplace/TransactionSwapProvider.h"
-
+#include "Dom/JsonObject.h"
 #include "CheckoutOptions.generated.h"
 
 ENUM_RANGE_BY_COUNT(ECheckoutOptions, 5)
@@ -22,13 +22,13 @@ struct SEQUENCEPLUGIN_API FCheckoutOptions
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	ETransactionCrypto Crypto;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<ETransactionSwapProvider> Swap;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<ETransactionNftCheckoutProvider> NftCheckout;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<ETransactionOnRampProvider> OnRamp;
 
 	FCheckoutOptions()

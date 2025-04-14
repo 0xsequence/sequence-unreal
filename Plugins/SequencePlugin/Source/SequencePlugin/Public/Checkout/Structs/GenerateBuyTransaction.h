@@ -1,9 +1,9 @@
 #pragma once
+
 #include "AdditionalFee.h"
 #include "OrderData.h"
 #include "Marketplace/Marketplace_Enums.h"
 #include "Sequence/Wallet_Enums.h"
-
 #include "GenerateBuyTransaction.generated.h"
 
 USTRUCT(BlueprintType)
@@ -51,17 +51,17 @@ private:
 	}
 	
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString CollectionAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Buyer;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TEnumAsByte<EMarketplaceKind> Marketplace;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<FOrderData> OrdersData;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<FAdditionalFee> AdditionalFees;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	EWalletKind WalletType;
 
 	FGenerateBuyTransaction()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Dom/JsonObject.h"
 #include "PostRequest.generated.h"
 
 USTRUCT(BlueprintType)
@@ -8,11 +9,11 @@ struct SEQUENCEPLUGIN_API FPostRequest
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString EndPoint;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Method;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Body;
 
 	FPostRequest()

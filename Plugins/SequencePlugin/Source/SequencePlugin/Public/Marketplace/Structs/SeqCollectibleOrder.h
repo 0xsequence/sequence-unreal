@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "SeqOrder.h"
-#include "Marketplace/Marketplace_Enums.h"
+#include "Dom/JsonObject.h"
 #include "SeqCollectibleOrder.generated.h"
 
 USTRUCT(BlueprintType)

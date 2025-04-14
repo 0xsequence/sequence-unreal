@@ -1,9 +1,8 @@
 #pragma once 
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "SeqCollectibleOrder.h"
-#include "Util/JsonBuilder.h"
-#include "SeqMarketplacePage.h"
 #include "SeqGetOrderReturn.generated.h"
 
 USTRUCT(BlueprintType)

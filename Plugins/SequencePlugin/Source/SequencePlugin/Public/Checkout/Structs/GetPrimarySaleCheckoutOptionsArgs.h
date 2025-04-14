@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "CheckoutOptionsItem.h"
-
-
 #include "GetPrimarySaleCheckoutOptionsArgs.generated.h"
 
 /**
@@ -44,13 +42,13 @@ private:
 	}
 	
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString WalletAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString ContractAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString CollectionAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<FCheckoutOptionsItem> Items;
 
 	bool customGetter = true;

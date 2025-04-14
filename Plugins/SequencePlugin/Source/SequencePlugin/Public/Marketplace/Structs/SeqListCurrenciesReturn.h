@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqCurrency.h"
+#include "Dom/JsonObject.h"
 #include "SeqListCurrenciesReturn.generated.h"
 
 USTRUCT(BlueprintType)

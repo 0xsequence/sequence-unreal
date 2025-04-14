@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "SeqCollectiblesFilter.h" 
 #include "SeqMarketplacePage.h"
 #include "Util/JsonBuilder.h"

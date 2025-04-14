@@ -1,7 +1,6 @@
 #pragma once
 #include "TransactionStep.h"
-#include "Util/SequenceSupport.h"
-
+#include "Dom/JsonObject.h"
 #include "GenerateTransactionResponse.generated.h"
 
 USTRUCT(BlueprintType)
@@ -31,7 +30,7 @@ private:
 	
 	
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TArray<FTransactionStep> Steps;
 	
 	FGenerateTransactionResponse()

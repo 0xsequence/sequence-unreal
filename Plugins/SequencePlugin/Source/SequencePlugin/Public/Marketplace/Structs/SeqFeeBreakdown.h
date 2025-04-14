@@ -1,8 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Indexer/Structs/Struct_Data.h"
-#include "Marketplace/Marketplace_Enums.h"
+#include "Dom/JsonObject.h"
 #include "SeqFeeBreakdown.generated.h"
 
 USTRUCT(BlueprintType)

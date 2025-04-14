@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "SeqCollectibleOrder.h"
 #include "SeqMarketplacePage.h"
 #include "SeqListCollectibleOffersReturn.generated.h"

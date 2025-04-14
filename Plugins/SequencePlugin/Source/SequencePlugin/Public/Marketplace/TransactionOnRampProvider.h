@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Misc/EnumRange.h"
 #include "TransactionOnRampProvider.generated.h"
 
 ENUM_RANGE_BY_COUNT(ETransactionOnRampProvider, 3)

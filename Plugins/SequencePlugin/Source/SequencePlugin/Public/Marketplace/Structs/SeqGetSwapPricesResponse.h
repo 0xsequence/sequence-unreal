@@ -1,9 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SeqFeeBreakdown.h"
-#include "Marketplace/Marketplace_Enums.h"
-#include "Util/SequenceSupport.h"
+#include "Dom/JsonObject.h"
 #include "SeqSwapPrice.h"
 #include "SeqGetSwapPricesResponse.generated.h"
 

@@ -2,6 +2,7 @@
 
 #include "Util/JsonBuilder.h"
 #include "SeqCollectiblesFilter.h"
+#include "Dom/JsonObject.h"
 #include "SeqGetCollectibleOrderArgs.generated.h"
 
 USTRUCT(BlueprintType)

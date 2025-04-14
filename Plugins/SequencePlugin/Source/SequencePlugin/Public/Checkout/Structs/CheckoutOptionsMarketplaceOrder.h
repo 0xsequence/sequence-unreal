@@ -1,6 +1,6 @@
 #pragma once
-#include "Marketplace/Marketplace_Enums.h"
 
+#include "Marketplace/Marketplace_Enums.h"
 #include "CheckoutOptionsMarketplaceOrder.generated.h"
 
 USTRUCT(BlueprintType)
@@ -9,11 +9,11 @@ struct SEQUENCEPLUGIN_API FCheckoutOptionsMarketplaceOrder
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString ContractAddress;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString OrderId;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	TEnumAsByte<EMarketplaceKind> Marketplace;
 
 	FCheckoutOptionsMarketplaceOrder()

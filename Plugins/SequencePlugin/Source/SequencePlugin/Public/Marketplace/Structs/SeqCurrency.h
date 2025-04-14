@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "SeqCurrency.generated.h"
 
 USTRUCT(BlueprintType)

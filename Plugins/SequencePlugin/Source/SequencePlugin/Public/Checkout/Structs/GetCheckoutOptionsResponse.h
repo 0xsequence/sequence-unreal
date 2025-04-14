@@ -1,6 +1,6 @@
 #pragma once
 #include "Checkout/Enums/CheckoutOptions.h"
-
+#include "Dom/JsonObject.h"
 #include "GetCheckoutOptionsResponse.generated.h"
 
 USTRUCT(BlueprintType)
@@ -8,7 +8,7 @@ struct SEQUENCEPLUGIN_API FGetCheckoutOptionsResponse
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "0xSequence - Checkout")
 	FCheckoutOptions Options;
 
 	FGetCheckoutOptionsResponse()

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "SeqFeeBreakdown.h"
 #include "Marketplace/Marketplace_Enums.h"
-#include "Util/SequenceSupport.h"
+#include "Dom/JsonObject.h"
 #include "SeqOrder.generated.h"
 
 USTRUCT(BlueprintType)

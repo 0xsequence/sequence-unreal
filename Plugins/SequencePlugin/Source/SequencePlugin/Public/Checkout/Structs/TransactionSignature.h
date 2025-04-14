@@ -1,7 +1,8 @@
 #pragma once
+
 #include "Domain.h"
 #include "Util/SequenceSupport.h"
-
+#include "Dom/JsonObject.h"
 #include "TransactionSignature.generated.h"
 
 USTRUCT(BlueprintType)
@@ -10,13 +11,13 @@ struct SEQUENCEPLUGIN_API FTransactionSignature
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FDomain Domain;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Types;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString PrimaryType;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - Checkout")
 	FString Value;
 
 	FTransactionSignature()

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Misc/EnumRange.h"
 #include "TransactionNFTCheckoutProvider.generated.h"
 
 ENUM_RANGE_BY_COUNT(ETransactionNftCheckoutProvider, 3)

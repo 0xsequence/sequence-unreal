@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SeqCollectibleOrder.h"
-#include "SeqCurrency.h"
+#include "Dom/JsonObject.h"
 #include "SeqGetCollectibleOrderReturn.generated.h"
 
 USTRUCT(BlueprintType)
