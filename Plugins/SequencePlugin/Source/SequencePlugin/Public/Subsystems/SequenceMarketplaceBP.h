@@ -13,6 +13,7 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, FSeqListCurrenciesReturn, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithLowestListingsFirst, FSeqListCollectiblesReturn, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, TArray<FSeqCollectibleOrder>, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithHighestPricedOffersFirst, FSeqListCollectiblesReturn, Response);
@@ -33,54 +34,57 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 
 public:
 	USequenceMarketplaceBP();
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void ListCurrencies(FOnListCurrencies OnSuccess, FOnFailure OnFailure);
 	
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetCollectiblesWithLowestListingsFirst(const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetAllCollectiblesWithLowestListingsFirst(const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetAllCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetCollectiblesWithHighestPricedOffersFirst(const FSeqListCollectiblesArgs& Args, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetCollectiblesWithHighestPricedOffersFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetAllCollectiblesWithHighestPricedOffersFirst(const FSeqListCollectiblesArgs& Args, FOnGetAllCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetAllCollectiblesWithHighestPricedOffersFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, FOnGetAllCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetLowestPriceOfferForCollectible(const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetLowestPriceOfferForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetLowestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetHighestPriceOfferForCollectible(const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetHighestPriceOfferForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetHighestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetLowestPriceListingForCollectible(const FSeqGetCollectibleOrderArgs& Args, FOnGetLowestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetLowestPriceListingForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetLowestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetHighestPriceListingForCollectible(const FSeqGetCollectibleOrderArgs& Args, FOnGetHighestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetHighestPriceListingForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetHighestPriceListingForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListListingsForCollectible(const FSeqListCollectibleListingsArgs& Args, FOnListListingsForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void ListListingsForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnListListingsForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListAllListingsForCollectible(const FSeqListCollectibleListingsArgs& Args, FOnListAllListingsForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void ListAllListingsForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnListAllListingsForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListOffersForCollectible(const FSeqListCollectibleListingsArgs& Args, FOnListOffersForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void ListOffersForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnListOffersForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void ListAllOffersForCollectible(const FSeqListCollectibleListingsArgs& Args, FOnListAllOffersForCollectible OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void ListAllOffersForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnListAllOffersForCollectible OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetFloorOrder(const FSeqListCollectiblesArgs& Args, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapPrice(const FGetSwapPriceArgs& Args, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapPrices(const FGetSwapPricesArgs& Args, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetSwapPrices(const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Functions")
-	void GetSwapQuote(const FGetSwapQuoteArgs& Args, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
+	void GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
 	
 private:
 	UPROPERTY()

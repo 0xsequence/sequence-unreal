@@ -408,7 +408,7 @@ void USequenceMarketplace::GetSwapPrice(const int64 ChainID, const FString& Sell
 	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
 	const int SlippagePercentage)
 {
-	const FString EndPoint = "GetSwapPrice";
+	const FString EndPoint = "GetSwapPermit2Price";
 	FGetSwapPriceArgs Args {
 		BuyCurrency,
 		SellCurrency,
@@ -434,7 +434,7 @@ void USequenceMarketplace::GetSwapPrices(const int64 ChainID, const FString& Use
 	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
 	const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
-	const FString EndPoint = "GetSwapPrices";
+	const FString EndPoint = "GetSwapPermit2Prices";
 	FGetSwapPricesArgs Args {
 		UserWallet,
 		BuyCurrency,
@@ -474,7 +474,7 @@ void USequenceMarketplace::GetSwapQuote(const int64 ChainID, const FString& User
 	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
 	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
-	const FString EndPoint = "GetSwapQuote";
+	const FString EndPoint = "GetSwapPermit2Quote";
 
 	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
 	{
