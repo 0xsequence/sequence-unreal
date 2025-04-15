@@ -35,9 +35,9 @@ public:
     bool containsData()
     {
         bool ret = false;//assume nothing & look for true states!
-        ret = (page != -1 || pageSize != -1);//int32 data
-        ret = (column.Len() > 0 || before.Len() > 0 || after.Len() > 0);//FString data
-        ret = (sort.Num() > 0);//TArray data
+        ret |= (page != -1 || pageSize != -1);//int32 data
+        ret |= (column.Len() > 0 || before.Len() > 0 || after.Len() > 0);//FString data
+        ret |= (sort.Num() > 0);//TArray data
         ret |= more;//bool data
         return ret;
     }
@@ -52,8 +52,12 @@ public:
         if (containsData())
         {
             ret.Append("{");
-            ret.Append("\"page\":");
-            ret.AppendInt(page);
+
+            if (page != -1)
+            {
+                ret.Append("\"page\":");
+                ret.AppendInt(page);
+            }
 
             if (column.Len() > 0)
                 ret += ",\"column\":\""+column+"\"";

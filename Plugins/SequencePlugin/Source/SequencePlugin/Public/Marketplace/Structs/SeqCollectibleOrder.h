@@ -12,7 +12,6 @@ struct SEQUENCEPLUGIN_API FSeqCollectibleOrder
     GENERATED_USTRUCT_BODY()
 
 public:
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
     FSeqTokenMetaData TokenMetadata;
 
@@ -32,6 +31,9 @@ public:
 
     void Setup(FJsonObject json_in)
     {
+        UE_LOG(LogTemp, Warning, TEXT("seq collectible setup start"));
+
+        /*
         const TSharedPtr<FJsonObject>* item;
         if (json_in.TryGetObjectField(TEXT("metadata"), item))
         {
@@ -42,6 +44,10 @@ public:
         if (json_in.TryGetObjectField(TEXT("order"), orderItem))
         {
             Order.Setup(*orderItem->Get());
-        }
+        }//*/
+
+        Order.Setup(json_in);
+
+        UE_LOG(LogTemp, Warning, TEXT("seq collectible setup done"));
     }
 };

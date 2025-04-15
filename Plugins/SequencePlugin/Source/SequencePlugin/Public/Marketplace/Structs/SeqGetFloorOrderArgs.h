@@ -3,15 +3,15 @@
 #include "CoreMinimal.h"
 #include "SeqCollectiblesFilter.h" 
 #include "SeqMarketplacePage.h"
-#include "SeqGetCollectiblesWithLowestListingsArgs.generated.h"
+#include "Util/JsonBuilder.h"
+#include "SeqGetFloorOrderArgs.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqGetCollectiblesWithLowestListingsArgs
+struct SEQUENCEPLUGIN_API FSeqGetFloorOrderArgs
 {
     GENERATED_USTRUCT_BODY()
 
 public:
-    // Properties
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     FString ContractAddress;
 
@@ -25,26 +25,22 @@ public:
 
     FString GetArgs()
     {
-        FString ret = "{";
+        FJsonBuilder Builder;
 
-        ret += "\"contractAddress\":\"" + ContractAddress + "\"";
+        Builder.AddString("contractAddress", ContractAddress);
 
         if (Filter.ContainsData())
         {// Check if the Filter has data and append its args if it does
-            ret.Append(",\"filter\":");
-            ret.Append(Filter.GetArgs());
+            Builder.AddField("filter", Filter.GetArgs());
         }
 
         // Check if the Page has data and append its args if it does
         if (Page.ContainsData())
         {
-            ret.Append(",\"page\":");
-            ret.Append(Page.GetArgs());
+            Builder.AddField("page", Page.GetArgs());
         }
 
-        ret.Append("}"); // Close the JSON object
-        return ret;
-
+        return Builder.ToString();
     }
 
 };

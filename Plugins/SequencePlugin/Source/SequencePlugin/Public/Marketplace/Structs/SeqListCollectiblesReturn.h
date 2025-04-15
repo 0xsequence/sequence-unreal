@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "SeqCollectibleOrder.h"
 #include "SeqMarketplacePage.h"
-#include "SeqGetCollectiblesWithLowestListingsReturn.generated.h"
+#include "SeqListCollectiblesReturn.generated.h"
 
 USTRUCT(BlueprintType)
-struct SEQUENCEPLUGIN_API FSeqGetCollectiblesWithLowestListingsReturn
+struct SEQUENCEPLUGIN_API FSeqListCollectiblesReturn
 {
     GENERATED_USTRUCT_BODY()
 
@@ -50,14 +50,14 @@ public:
     //*/
     void Setup(FJsonObject json_in)
     {
-        const TArray<TSharedPtr<FJsonValue>>* lst;
-        if (json_in.TryGetArrayField(TEXT("collectibles"), lst))
+        const TArray<TSharedPtr<FJsonValue>>* List;
+        if (json_in.TryGetArrayField(TEXT("collectibles"), List))
         {
-            CollectibleOrders.SetNum(lst->Num());
+            CollectibleOrders.SetNum(List->Num());
 
-            for (int32 i = 0; i < lst->Num(); i++)
+            for (int32 i = 0; i < List->Num(); i++)
             {
-                TSharedPtr<FJsonValue> item = (*lst)[i];
+                TSharedPtr<FJsonValue> item = (*List)[i];
 
                 if (item.IsValid())
                 {
@@ -70,5 +70,7 @@ public:
         {
             UE_LOG(LogTemp, Warning, TEXT("No  collectibles  field found in the GetCollectiblesWithLowestListings response."));
         }
+
+        Page.setup(*json_in.GetObjectField(TEXT("page")).Get());
     }
 };

@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonValue.h"
+#include "Math/BigInt.h"
 #include "DelayedEncodingArgsBP.generated.h"
 
 class UDelayedEncodingObjectArgsBP;

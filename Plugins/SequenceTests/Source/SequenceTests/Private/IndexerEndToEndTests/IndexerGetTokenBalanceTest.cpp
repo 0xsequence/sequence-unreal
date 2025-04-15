@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Helpers/IndexerEndToEndTestsCommon.h"
+#include "Helpers/IndexerRequestsTestData.h"
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
 #include "Util/SequenceSupport.h"
