@@ -21,14 +21,14 @@ public:
             return false;
         }
         
-        if(!Json->HasField(TEXT("swapPrice")))
+        if(!Json->HasField(TEXT("swapPermit2Price")))
         {
             return false;
         }
 
         const TSharedPtr<FJsonObject> Values;
         const TSharedPtr<FJsonObject>* JsonOut = &Values;
-        if(!Json->TryGetObjectField(TEXT("swapPrice"), JsonOut))
+        if(!Json->TryGetObjectField(TEXT("swapPermit2Price"), JsonOut))
         {
             return false;
         }
