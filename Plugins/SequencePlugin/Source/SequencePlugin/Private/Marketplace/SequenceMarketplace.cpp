@@ -54,7 +54,7 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
 	if (AccessKey.IsEmpty())
 	{
-		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		SEQ_LOG(Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
 		return;  
 	}
 
@@ -76,15 +76,14 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
 	);
 
-	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
-
+	SEQ_LOG_EDITOR(Display, TEXT("%s"), *CurlCommand);
 
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 		{
 			if (bWasSuccessful)
 			{
 				const FString Content = Response->GetContentAsString();
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
 				OnSuccess(Content);
 			}
 			else
@@ -92,12 +91,12 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 				if (Request.IsValid() && Response.IsValid())
 				{
 					const FString ErrorMessage = Response->GetContentAsString();
-					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					SEQ_LOG(Error, TEXT("Request failed: %s"), *ErrorMessage);  
 					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					SEQ_LOG(Error, TEXT("Request failed: Invalid Request Pointer")); 
 					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
 				}
 			}
@@ -111,36 +110,33 @@ void USequenceMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FStrin
 	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString RequestURL = "https://api.sequence.app/rpc/API/" + Endpoint;
-
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
 
 	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
 	if (AccessKey.IsEmpty())
 	{
-		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		SEQ_LOG(Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
 		return;  
 	}
 
 	HTTP_Post_Req->SetVerb("POST");
 	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	
 
 	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
 	 
-	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
-	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
-
-
+	SEQ_LOG(Display, TEXT("body: %s"), *Args);  
+	SEQ_LOG(Display, TEXT("request: %s"), *RequestURL);  
+	
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 		{
 			if (bWasSuccessful)
 			{
 				const FString Content = Response->GetContentAsString();
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
 				OnSuccess(Content);
 			}
 			else
@@ -148,12 +144,12 @@ void USequenceMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FStrin
 				if (Request.IsValid() && Response.IsValid())
 				{
 					const FString ErrorMessage = Response->GetContentAsString();
-					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					SEQ_LOG(Error, TEXT("Request failed: %s"), *ErrorMessage);  
 					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					SEQ_LOG(Error, TEXT("Request failed: Invalid Request Pointer")); 
 					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
 				}
 			}
@@ -174,7 +170,7 @@ template < typename T> FString USequenceMarketplace::BuildArgs(T StructIn)
 	{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(StructIn, Result))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
+			SEQ_LOG(Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
 	return Result;
@@ -190,7 +186,7 @@ template<typename T> T USequenceMarketplace::BuildResponse(const FString Text)
 
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), JSON_Step))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *Text);
+		SEQ_LOG(Display, TEXT("Failed to convert String: %s to Json object"), *Text);
 		return T();
 	}
 	//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
@@ -202,7 +198,7 @@ template<typename T> T USequenceMarketplace::BuildResponse(const FString Text)
 	{//use unreal parsing!
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JSON_Step.ToSharedRef(), &Ret_Struct))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
+			SEQ_LOG(Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
 			return T();
 		}
 	}
@@ -525,7 +521,7 @@ void USequenceMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, co
 						Have = SellCurrencies[0].balance;
 					}
 				
-					UE_LOG(LogTemp, Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
+					SEQ_LOG(Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
 
 					if(Have < Required)
 					{
