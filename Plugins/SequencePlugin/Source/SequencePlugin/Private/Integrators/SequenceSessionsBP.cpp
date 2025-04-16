@@ -81,6 +81,21 @@ void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
 	this->CallIdTokenReceived(IdToken);
 }
 
+void USequenceSessionsBP::SignInWithGoogle(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
+}
+
+void USequenceSessionsBP::SignInWithApple(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
+}
+
+void USequenceSessionsBP::SignInWithEpic(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
+}
+
 void USequenceSessionsBP::StartOidcSessionAsync(const FString& IdToken)
 {
 	const TSuccessCallback<FCredentials_BE> OnSuccess = [this](const FCredentials_BE& Credentials)

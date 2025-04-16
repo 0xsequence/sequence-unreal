@@ -68,6 +68,15 @@ public:
 	void GetAppleTokenIdAsync();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithGoogle(const FString& IdToken);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithApple(const FString& IdToken);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithEpic(const FString& IdToken);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartOidcSessionAsync(const FString& IdToken);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
