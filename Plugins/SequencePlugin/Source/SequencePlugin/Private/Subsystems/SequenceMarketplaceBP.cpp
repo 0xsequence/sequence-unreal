@@ -15,7 +15,7 @@ void USequenceMarketplaceBP::ListCurrencies(FOnListCurrencies OnSuccess, FOnFail
 {
 	const TSuccessCallback<FSeqListCurrenciesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCurrenciesReturn& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Currencies);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -29,9 +29,9 @@ void USequenceMarketplaceBP::ListCurrencies(FOnListCurrencies OnSuccess, FOnFail
 
 void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
+	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& Response)
 	{
-		OnSuccess.ExecuteIfBound(CollectiblesWithLowestListings);
+		OnSuccess.ExecuteIfBound(Response.CollectibleOrders, Response.Page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -61,9 +61,9 @@ void USequenceMarketplaceBP::GetAllCollectiblesWithLowestListingsFirst(const FSt
 
 void USequenceMarketplaceBP::GetCollectiblesWithHighestPricedOffersFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
+	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& Response)
 	{
-		OnSuccess.ExecuteIfBound(CollectiblesWithLowestListings);
+		OnSuccess.ExecuteIfBound(Response.CollectibleOrders, Response.Page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -93,9 +93,9 @@ void USequenceMarketplaceBP::GetAllCollectiblesWithHighestPricedOffersFirst(cons
 
 void USequenceMarketplaceBP::GetLowestPriceOfferForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetLowestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& LowestPriceOffer)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& Response)
 	{
-		OnSuccess.ExecuteIfBound(LowestPriceOffer);
+		OnSuccess.ExecuteIfBound(Response.TokenMetadata, Response.Order);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -109,9 +109,9 @@ void USequenceMarketplaceBP::GetLowestPriceOfferForCollectible(const FString& Co
 
 void USequenceMarketplaceBP::GetHighestPriceOfferForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetHighestPriceOfferForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& HighestPriceOffer)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& Response)
 	{
-		OnSuccess.ExecuteIfBound(HighestPriceOffer);
+		OnSuccess.ExecuteIfBound(Response.TokenMetadata, Response.Order);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -125,9 +125,9 @@ void USequenceMarketplaceBP::GetHighestPriceOfferForCollectible(const FString& C
 
 void USequenceMarketplaceBP::GetLowestPriceListingForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetLowestPriceListingForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& LowestPriceListing)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& Response)
 	{
-		OnSuccess.ExecuteIfBound(LowestPriceListing);
+		OnSuccess.ExecuteIfBound(Response.TokenMetadata, Response.Order);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -141,9 +141,9 @@ void USequenceMarketplaceBP::GetLowestPriceListingForCollectible(const FString& 
 
 void USequenceMarketplaceBP::GetHighestPriceListingForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, FOnGetHighestPriceListingForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& HighestPriceListing)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& Response)
 	{
-		OnSuccess.ExecuteIfBound(HighestPriceListing);
+		OnSuccess.ExecuteIfBound(Response.TokenMetadata, Response.Order);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -157,9 +157,9 @@ void USequenceMarketplaceBP::GetHighestPriceListingForCollectible(const FString&
 
 void USequenceMarketplaceBP::ListListingsForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnListListingsForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectibleListingsReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleListingsReturn& Listings)
+	const TSuccessCallback<FSeqListCollectibleListingsReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleListingsReturn& Response)
 	{
-		OnSuccess.ExecuteIfBound(Listings);
+		OnSuccess.ExecuteIfBound(Response.Listings, Response.Page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -189,9 +189,9 @@ void USequenceMarketplaceBP::ListAllListingsForCollectible(const FString& Contra
 
 void USequenceMarketplaceBP::ListOffersForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnListOffersForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqListCollectibleOffersReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleOffersReturn& Offers)
+	const TSuccessCallback<FSeqListCollectibleOffersReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectibleOffersReturn& Response)
 	{
-		OnSuccess.ExecuteIfBound(Offers);
+		OnSuccess.ExecuteIfBound(Response.Offers, Response.Page);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -221,9 +221,9 @@ void USequenceMarketplaceBP::ListAllOffersForCollectible(const FString& Contract
 
 void USequenceMarketplaceBP::GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& FloorOrder)
+	const TSuccessCallback<FSeqCollectibleOrder> OnApiSuccess = [this, OnSuccess](const FSeqCollectibleOrder& Response)
 	{
-		OnSuccess.ExecuteIfBound(FloorOrder);
+		OnSuccess.ExecuteIfBound(Response.TokenMetadata, Response.Order);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -237,9 +237,9 @@ void USequenceMarketplaceBP::GetFloorOrder(const FString& ContractAddress, const
 
 void USequenceMarketplaceBP::GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqSwapPrice> OnApiSuccess = [this, OnSuccess](const FSeqSwapPrice& SwapPrice)
+	const TSuccessCallback<FSeqSwapPrice> OnApiSuccess = [this, OnSuccess](const FSeqSwapPrice& Response)
 	{
-		OnSuccess.ExecuteIfBound(SwapPrice);
+		OnSuccess.ExecuteIfBound(Response.CurrencyAddress, Response.CurrencyBalance, Response.Price, Response.MaxPrice, Response.TransactionValue);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -269,9 +269,9 @@ void USequenceMarketplaceBP::GetSwapPrices(const FString& UserWallet, const FStr
 
 void USequenceMarketplaceBP::GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqSwapQuote> OnApiSuccess = [this, OnSuccess](const FSeqSwapQuote& SwapQuote)
+	const TSuccessCallback<FSeqSwapQuote> OnApiSuccess = [this, OnSuccess](const FSeqSwapQuote& Response)
 	{
-		OnSuccess.ExecuteIfBound(SwapQuote);
+		OnSuccess.ExecuteIfBound(Response.CurrencyAddress, Response.CurrencyBalance, Response.Price, Response.MaxPrice, Response.To, Response.TransactionData, Response.TransactionValue, Response.ApproveData);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)

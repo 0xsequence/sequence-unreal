@@ -13,23 +13,23 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, FSeqListCurrenciesReturn, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithLowestListingsFirst, FSeqListCollectiblesReturn, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, TArray<FSeqCollectibleOrder>, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCollectiblesWithHighestPricedOffersFirst, FSeqListCollectiblesReturn, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, TArray<FSeqCollectibleOrder>, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetLowestPriceOfferForCollectible, FSeqCollectibleOrder, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetHighestPriceOfferForCollectible, FSeqCollectibleOrder, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetLowestPriceListingForCollectible, FSeqCollectibleOrder, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetHighestPriceListingForCollectible, FSeqCollectibleOrder, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListListingsForCollectible, FSeqListCollectibleListingsReturn, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, TArray<FSeqCollectibleOrder>, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListOffersForCollectible, FSeqListCollectibleOffersReturn, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, TArray<FSeqCollectibleOrder>, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetFloorOrder, FSeqCollectibleOrder, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrice, FSeqSwapPrice, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, TArray<FSeqSwapPrice>, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapQuote, FSeqSwapQuote, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, TArray<FSeqCurrency>, Currencies);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, TArray<FSeqCollectibleOrder>, Listings, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, TArray<FSeqCollectibleOrder>, Listings);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithHighestPricedOffersFirst, TArray<FSeqCollectibleOrder>, Offers, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, TArray<FSeqCollectibleOrder>, Offers);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListListingsForCollectible, TArray<FSeqCollectibleOrder>, Listings, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, TArray<FSeqCollectibleOrder>, CollectibleOrders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, TArray<FSeqCollectibleOrder>, Offers, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, TArray<FSeqCollectibleOrder>, CollectibleOrders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFloorOrder, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
+	DECLARE_DYNAMIC_DELEGATE_FiveParams(FOnGetSwapPrice, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, TransactionValue);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, TArray<FSeqSwapPrice>, SwapPrices);
+	DECLARE_DYNAMIC_DELEGATE_EightParams(FOnGetSwapQuote, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, To, FString, TransactionData, FString, TransactionValue, FString, ApproveData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
 
 public:
