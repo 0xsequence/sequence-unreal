@@ -14,9 +14,6 @@ class SEQUENCEPLUGIN_API USequenceCheckoutBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, TArray<FTransactionStep>, Steps);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCheckoutFailure, FString, Error);
 
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
-	
 public:
 	USequenceCheckoutBP();
 
