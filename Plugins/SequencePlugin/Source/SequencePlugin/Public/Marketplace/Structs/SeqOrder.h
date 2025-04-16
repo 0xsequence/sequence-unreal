@@ -232,8 +232,6 @@ public:
                     FSeqFeeBreakdown fee; 
                     fee.Setup(*feeValue->AsObject()); 
                     FeeBreakdown.Add(fee);
-
-                    UE_LOG(LogTemp, Warning, TEXT("fee setup"));
                 }
             }
         }

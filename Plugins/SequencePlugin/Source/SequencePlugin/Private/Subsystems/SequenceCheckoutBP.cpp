@@ -1,24 +1,8 @@
 #include "Subsystems/SequenceCheckoutBP.h"
-
 #include "Sequence/SequenceSdk.h"
-
-void USequenceCheckoutBP::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Initialize"));
-}
-
-void USequenceCheckoutBP::Deinitialize()
-{
-	Super::Deinitialize();
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Deinitialize"));
-}
 
 USequenceCheckoutBP::USequenceCheckoutBP()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Constructor"));
-	
 	this->Checkout = NewObject<USequenceCheckout>();
 }
 
