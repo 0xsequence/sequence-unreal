@@ -447,13 +447,13 @@ void USequenceMarketplace::GetSwapPrices(const int64 ChainID, const FString& Use
 			TArray<FSeqSwapPrice> Response;
 			TSharedPtr<FJsonObject> Json;
 
-			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPrices")))
+			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPermit2Prices")))
 			{
 				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
 				return;
 			}
 
-			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPrices"));
+			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPermit2Prices"));
 
 			for (TSharedPtr<FJsonValue> Value : Array)
 			{
@@ -474,7 +474,7 @@ void USequenceMarketplace::GetSwapQuote(const int64 ChainID, const FString& User
 	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
 	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
 {
-	const FString EndPoint = "GetSwapPermit2Quote";
+	const FString EndPoint = "GetSwapQuoteV2";
 
 	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
 	{
