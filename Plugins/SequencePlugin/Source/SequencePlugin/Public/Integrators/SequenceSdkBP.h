@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceSdkBP.generated.h"
 

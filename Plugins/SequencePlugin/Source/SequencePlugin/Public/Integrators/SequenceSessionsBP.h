@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "SequenceAuthenticator.h"
-#include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "INativeAuthCallback.h"
 #include "SequenceSessionsBP.generated.h"
+
+class USequenceRPCManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailLoginRequiresCode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEmailFederationRequiresCode);
@@ -65,6 +66,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetAppleTokenIdAsync();
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithGoogle(const FString& IdToken);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithApple(const FString& IdToken);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithEpic(const FString& IdToken);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void StartOidcSessionAsync(const FString& IdToken);

@@ -4,6 +4,7 @@
 #include "PlayFabResponseIntent.h"
 #include "PlayFabSendIntent.h"
 #include "RequestHandler.h"
+#include "SequenceRPCManager.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Native/NativeOAuth.h"
@@ -78,6 +79,21 @@ void USequenceSessionsBP::GetAppleTokenIdAsync()
 void USequenceSessionsBP::HandleNativeIdToken(const FString& IdToken)
 {
 	this->CallIdTokenReceived(IdToken);
+}
+
+void USequenceSessionsBP::SignInWithGoogle(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
+}
+
+void USequenceSessionsBP::SignInWithApple(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
+}
+
+void USequenceSessionsBP::SignInWithEpic(const FString& IdToken)
+{
+	this->StartOidcSessionAsync(IdToken);
 }
 
 void USequenceSessionsBP::StartOidcSessionAsync(const FString& IdToken)
