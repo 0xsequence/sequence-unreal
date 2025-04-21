@@ -4,6 +4,7 @@
 #include "PlayFabResponseIntent.h"
 #include "PlayFabSendIntent.h"
 #include "RequestHandler.h"
+#include "SequenceRPCManager.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Native/NativeOAuth.h"

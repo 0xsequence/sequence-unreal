@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceRPCManager.h"
-#include "Indexer/Indexer.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Util/Structs/BE_Enums.h"
+#include "Indexer/Structs/Struct_Data.h"
 #include "SequenceIndexerBP.generated.h"
+
+class UIndexer;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGetEtherBalance, bool, Status, const FString&, WalletAddress, int64, Balance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGetTokenBalances, bool, Status, const FString&, WalletAddress, const FString&, ContractAddress, FSeqGetTokenBalancesReturn, Balances);
