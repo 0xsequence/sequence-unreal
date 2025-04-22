@@ -5,25 +5,9 @@
 #include "Containers/StringConv.h"
 #include "Misc/DefaultValueHelper.h"
 #include "Engine/Engine.h"
-
-// Placeholder for external helpers
-namespace CallDataCompressor
-{
-	FString Compress(const FString& In)
-	{
-		// Placeholder 
-		return FBase64::Encode(In);
-	}
-}
-
-namespace NftDataEncoder
-{
-	FString Encode(const FTransakNFTData& NftData)
-	{
-		// Placeholder
-		return FBase64::Encode(TEXT("{ \"sample\": \"nftData\" }"));
-	}
-}
+#include "Checkout/Transak/CallDataCompressor.h"
+#include "Checkout/Transak/TransakNFTDataEncoder.h"
+#include "Checkout/Structs/TransactionStep.h"
 
 FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const FString& CallData, const FTransakContractId& ContractId)
 {
@@ -37,7 +21,7 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 	const FString BaseUrl = TEXT("https://global.transak.com");
 	const FString TContractId = ContractId.Id;
 	const FString TransakCryptocurrencyCode = ContractId.PriceTokenSymbol;
-	const FString TransakNftDataEncoded = NftDataEncoder::Encode(Item);
+	const FString TransakNftDataEncoded = TransakNFTDataEncoder::Encode(Item);
 	const int64 EstimatedGasLimit = 500000;
 
 	//GASLIMIT ESTIMATOR USE NFTDATA.COLLECTIONADDRES -> Paramaeter not needed
@@ -69,29 +53,71 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 		return TEXT("Error: Invalid quantity");
 	}
 
-	FContractCall PaymentTokenContractCall = SaleContract->GetPaymentToken();
-	TOptional<FString> PaymentToken = PaymentTokenContractCall.Data;
+	TArray<int32> TokenIds;
+	TArray<int32> Amounts;
 
-	FContractCall SaleDetailsContractCall = SaleContract->GetPaymentToken();
-	TOptional<FString> SaleDetails = SaleDetailsContractCall.Data;
+	for (const FString& TokenIDString : TransakNFTData.TokenID)
+	{
+		int32 ParsedTokenId = FCString::Atoi(*TokenIDString);
+		TokenIds.Add(ParsedTokenId);
+		Amounts.Add(TransakNFTData.Quantity); 
+	}
 
-	//Missing actual queries
-
-	int32 Decimals = PaymentTokenContract->GetDecimals(); //undefined 
-
-	FString CallData = //ContractCallFunction from unity(
-		TransakContractAddresses[Network],
-		{ TokenId },
-		{ Quantity },
-		Data,
-		PaymentToken,
-		SaleContract.SaleDetails.Cost * Quantity, 
+	FString callData = SaleContract->MakePurchaseTransaction(
+		Wallet->GetWalletAddress(),
+		TokenIds,
+		Amounts,
 		Proof
-	); 
+	).data;
 
-	TArray<FString> TokenIDs = { TokenId };
-	TArray<float> Prices;
-	Prices.Add(DecimalNormalizer::ReturnToNormalPrecise(SaleDetails.Cost, Decimals));
+	return GetNFTCheckoutLink(TransakNFTData, callData, ContractId);
+}
+void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder order, int64 quantity, ENFTType type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback)
+{
+	if (quantity <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid quantity"));
+		OnSuccessCallback.ExecuteIfBound(TEXT("Error: Invalid quantity"));
+		return;
+	}
 
-	return GetNFTCheckoutLink(TransakNFTData, CallData, ContractId);
+	TArray<FString> TokenIds = { FString::FromInt(order.TokenMetadata.tokenId) };
+	TArray<float> Prices = { static_cast<float>(order.Order.PriceUSD) };
+
+	FTransakNFTData NFTData(
+		order.TokenMetadata.image,
+		order.TokenMetadata.name,
+		order.TokenMetadata.contractAddress,
+		TokenIds,
+		Prices,
+		quantity,
+		ENFTType::ERC1155
+	);
+
+	FTransakContractId TransakContractID; //Endpoint isntead of this ?
+	TransakContractID.Id = FString::FromInt(order.TokenMetadata.tokenId);
+	TransakContractID.ContractAddress = order.TokenMetadata.contractAddress;
+	TransakContractID.Chain = FString::FromInt(order.Order.ChainId);
+	TransakContractID.PriceTokenSymbol = "USD";
+
+	Checkout->GenerateBuyTransaction(
+		order.Order.ChainId,
+		Wallet->GetWalletAddress(),
+		order.Order,
+		quantity,
+		AdditionalFee,
+		EWalletKind::Sequence,
+
+		[this, NFTData, TransakContractID, OnSuccessCallback](const FGenerateTransactionResponse& Response)
+		{
+			const FString URL = GetNFTCheckoutLink(NFTData, *Response.Steps[0].ExtractBuyStep(Response.Steps).Data, TransakContractID);
+			OnSuccessCallback.ExecuteIfBound(URL);
+		},
+
+		[OnSuccessCallback](const FSequenceError& Error)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to generate buy transaction: %s"), *Error.Message);
+			OnSuccessCallback.ExecuteIfBound(TEXT("Error: Failed to generate transaction"));
+		}
+	);
 }
