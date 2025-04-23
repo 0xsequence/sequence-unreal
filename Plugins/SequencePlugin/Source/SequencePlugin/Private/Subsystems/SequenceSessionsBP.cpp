@@ -1,9 +1,8 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "Subsystems/SequenceSessionsBP.h"
-
+#include "SequenceRPCManager.h"
 #include "Errors.h"
-#include "PlayFabResponseIntent.h"
 #include "RequestHandler.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
@@ -43,6 +42,21 @@ void USequenceSessionsBP::GetAppleTokenId(FOnBrowserRequired BrowserRequired)
 	{
 		this->Sessions->GetAppleTokenId(this);
 	}
+}
+
+void USequenceSessionsBP::SignInWithGoogle(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure)
+{
+	this->StartOidcSession(IdToken, OnSuccess, OnFailure);
+}
+
+void USequenceSessionsBP::SignInWithApple(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure)
+{
+	this->StartOidcSession(IdToken, OnSuccess, OnFailure);
+}
+
+void USequenceSessionsBP::SignInWithEpic(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure)
+{
+	this->StartOidcSession(IdToken, OnSuccess, OnFailure);
 }
 
 void USequenceSessionsBP::StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure)

@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceRPCManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "INativeAuthCallback.h"
 #include "Sequence/SequenceSessions.h"
 #include "SequenceSessionsBP.generated.h"
+
+class USequenceRPCManager;
 
 UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, public INativeAuthCallback
@@ -39,6 +40,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void GetAppleTokenId(FOnBrowserRequired BrowserRequired);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithGoogle(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithApple(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void SignInWithEpic(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	bool CheckExistingSession();
