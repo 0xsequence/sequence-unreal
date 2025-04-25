@@ -23,7 +23,7 @@ class SEQUENCEPLUGIN_API UTransakCheckout : public UObject
 public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Transak")
-	USequenceWallet* Wallet;
+	FString WalletAddress;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Transak")
 	TEnumAsByte<ENetwork> Network;
@@ -44,10 +44,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Transak")
 	FString BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract, const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId,
-		const TArray<uint8>& Data, const TArray<FString>& Proof);
+		const TArray<uint8>& Data,
+		const TArray<FString>& Proof);
 
 	UFUNCTION(BlueprintCallable, Category = "Transak")
 	void BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder Order, int64 Quantity, ENFTType Type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback);
+
+	UFUNCTION(BlueprintCallable, Category = "Transak")
+	FTransakContractId GetTransakContractIdFromCollectibleOrder(FSeqCollectibleOrder order);
 
 };
 
