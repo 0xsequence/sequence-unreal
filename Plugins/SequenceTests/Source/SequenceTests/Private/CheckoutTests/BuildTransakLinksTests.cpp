@@ -11,7 +11,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTransakCheckoutLinkPrimarySaleTest, "SequenceP
 bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 {
 	UTransakCheckout* Checkout = NewObject<UTransakCheckout>();
-	Checkout->WalletAddress = "0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07";
+	Checkout->WalletAddress = FString(TEXT("0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07"));
 	Checkout->Marketplace = NewObject<USequenceMarketplace>();
 	Checkout->Checkout = NewObject<USequenceCheckout>();
 	Checkout->Network = ENetwork::ArbitrumOne;

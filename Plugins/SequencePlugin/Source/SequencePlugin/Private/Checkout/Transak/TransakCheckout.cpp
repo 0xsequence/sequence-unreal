@@ -9,45 +9,79 @@
 #include "Checkout/Transak/TransakNFTDataEncoder.h"
 #include "Checkout/Structs/TransactionStep.h"
 #include "Util/SequenceSupport.h"
-
 FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const FString& CallData, const FTransakContractId& ContractId)
 {
-	if (ContractId.Chain != UEnum::GetValueAsString(Network))
+	UE_LOG(LogTemp, Warning, TEXT("Entered GetNFTCheckoutLink"));
+
+	const FString NetworkString = UEnum::GetValueAsString(Network);
+	UE_LOG(LogTemp, Warning, TEXT("NetworkString: %s"), *NetworkString);
+	UE_LOG(LogTemp, Warning, TEXT("Provided ContractId.Chain: %s"), *ContractId.Chain);
+
+	if (ContractId.Chain != NetworkString)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Chain mismatch in TransakCheckout"));
 		return TEXT("Error: Chain mismatch");
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Compressing call data..."));
 	const FString TransakCallData = FCallDataCompressor::Compress(CallData);
-	const FString BaseUrl = TEXT("https://global.transak.com");
+	UE_LOG(LogTemp, Warning, TEXT("Compressed call data: %s"), *TransakCallData);
+
+	UE_LOG(LogTemp, Warning, TEXT("Encoding NFT data..."));
+	const FString TransakNftDataEncoded = FTransakNFTDataEncoder::Encode(Item);
+	UE_LOG(LogTemp, Warning, TEXT("Base64 Encoded (with padding): %s"), *TransakNftDataEncoded);
+
+	const FString BaseURL = TEXT("https://global.transak.com");
+	UE_LOG(LogTemp, Warning, TEXT("BaseURL: %s"), *BaseURL);
+
 	const FString TContractId = ContractId.Id;
 	const FString TransakCryptocurrencyCode = ContractId.PriceTokenSymbol;
-	const FString TransakNftDataEncoded = FTransakNFTDataEncoder::Encode(Item);
 	const int64 EstimatedGasLimit = 500000;
 
-	//GASLIMIT ESTIMATOR USE NFTDATA.COLLECTIONADDRES -> Paramaeter not needed
+	if (WalletAddress.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("WalletAddress is not set!"));
+		return TEXT("Error: Wallet address missing");
+	}
 
+	UE_LOG(LogTemp, Warning, TEXT("WalletAddress: %s"), *WalletAddress);
 
 	const int64 Timestamp = FDateTime::UtcNow().ToUnixTimestamp();
+	UE_LOG(LogTemp, Warning, TEXT("Timestamp: %lld"), Timestamp);
+
 	const FString PartnerOrderId = FString::Printf(TEXT("%s-%lld"), *WalletAddress, Timestamp);
 
-	FString URL = FString::Printf(TEXT("%s?apiKey=%s&isNFT=true&calldata=%s&contractId=%s&cryptoCurrencyCode=%s&estimatedGasLimit=%lld&nftData=%s&walletAddress=%s&disableWalletAddressForm=true&partnerOrderId=%s"),
-		*BaseUrl,
-		*TEXT("5911d9ec-46b5-48fa-a755-d59a715ff0cf"), // This can be hardcoded as it is a public API key
-		*TransakCallData,
-		*TContractId,
-		*TransakCryptocurrencyCode,
-		EstimatedGasLimit, 
-		*TransakNftDataEncoded,
-		*WalletAddress,
-		*PartnerOrderId
-	);
+	UE_LOG(LogTemp, Warning, TEXT("Building final URL..."));
 
+	FString address = *WalletAddress;
+
+	FString URL =
+		BaseURL + TEXT("?apiKey=5911d9ec-46b5-48fa-a755-d59a715ff0cf")
+		+ TEXT("&isNFT=true")
+		+ TEXT("&calldata=") + TransakCallData
+		+ TEXT("&contractId=") + TContractId
+		+ TEXT("&cryptoCurrencyCode=") + TransakCryptocurrencyCode
+		+ TEXT("&estimatedGasLimit=") + FString::Printf(TEXT("%lld"), EstimatedGasLimit)
+		+ TEXT("&nftData=") + TransakNftDataEncoded
+		+ TEXT("&walletAddress=") + address
+		+ TEXT("&disableWalletAddressForm=true")
+		+ TEXT("&partnerOrderId=") + PartnerOrderId;
+
+	UE_LOG(LogTemp, Warning, TEXT("Final URL: %s"), *URL);
 	return URL;
 }
 
-FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract,const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId, const TArray<uint8>& Data ,const TArray<FString>& Proof)
+
+FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract, const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId, const TArray<uint8>& Data, const TArray<FString>& Proof)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Entered BuildNFTCheckoutLinkFromERC1155"));
+
+	if (!SaleContract)
+	{
+		UE_LOG(LogTemp, Error, TEXT("SaleContract is nullptr!"));
+		return TEXT("Error: Invalid SaleContract");
+	}
+
 	if (TransakNFTData.Quantity <= 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Quantity must be greater than 0"));
@@ -57,23 +91,31 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 	TArray<int32> TokenIds;
 	TArray<int32> Amounts;
 
+	UE_LOG(LogTemp, Warning, TEXT("Processing Token IDs..."));
 	for (const FString& TokenIDString : TransakNFTData.TokenID)
 	{
 		int32 ParsedTokenId = FCString::Atoi(*TokenIDString);
 		TokenIds.Add(ParsedTokenId);
-		Amounts.Add(TransakNFTData.Quantity); 
+		Amounts.Add(TransakNFTData.Quantity);
+		UE_LOG(LogTemp, Warning, TEXT("Parsed TokenID: %d, Quantity: %d"), ParsedTokenId, TransakNFTData.Quantity);
 	}
 
-	FString callData = SaleContract->MakePurchaseTransaction(
+	UE_LOG(LogTemp, Warning, TEXT("Calling MakePurchaseTransaction on SaleContract..."));
+
+
+	FRawTransaction result = SaleContract->MakePurchaseTransaction(
 		WalletAddress,
 		TokenIds,
 		Amounts,
 		Proof
-	).data;
+	);
 
+	FString callData = result.data;
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Transaction callData: %s"), *callData);
 	return GetNFTCheckoutLink(TransakNFTData, callData, ContractId);
 }
-
 void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder order, int64 quantity, ENFTType type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback)
 {
 	if (quantity <= 0)
