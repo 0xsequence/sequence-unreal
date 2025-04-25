@@ -16,12 +16,13 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 		UE_LOG(LogTemp, Error, TEXT("Chain mismatch in TransakCheckout"));
 		return TEXT("Error: Chain mismatch");
 	}
+
 	const FString WalletAddress = *Wallet->GetWalletAddress();
-	const FString TransakCallData = CallDataCompressor::Compress(CallData);
+	const FString TransakCallData = FCallDataCompressor::Compress(CallData);
 	const FString BaseUrl = TEXT("https://global.transak.com");
 	const FString TContractId = ContractId.Id;
 	const FString TransakCryptocurrencyCode = ContractId.PriceTokenSymbol;
-	const FString TransakNftDataEncoded = TransakNFTDataEncoder::Encode(Item);
+	const FString TransakNftDataEncoded = FTransakNFTDataEncoder::Encode(Item);
 	const int64 EstimatedGasLimit = 500000;
 
 	//GASLIMIT ESTIMATOR USE NFTDATA.COLLECTIONADDRES -> Paramaeter not needed

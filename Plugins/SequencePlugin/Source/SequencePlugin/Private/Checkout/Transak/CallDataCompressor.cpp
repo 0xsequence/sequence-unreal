@@ -1,9 +1,9 @@
 ﻿#include "Checkout/Transak/CallDataCompressor.h"
 #include "Misc/Base64.h"
 #include "Misc/Compression.h"
-#include "GenericPlatform/GenericPlatformHttp.h" // ✅ Correct for UrlEncode
+#include "GenericPlatform/GenericPlatformHttp.h" 
 
-FString CallDataCompressor::Compress(const FString& In)
+FString FCallDataCompressor::Compress(const FString& In)
 {
 	FTCHARToUTF8 Converter(*In);
 	const uint8* UncompressedData = reinterpret_cast<const uint8*>(Converter.Get());

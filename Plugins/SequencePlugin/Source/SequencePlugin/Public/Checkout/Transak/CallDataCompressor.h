@@ -2,8 +2,11 @@
 
 #include "CoreMinimal.h"
 
-namespace CallDataCompressor
+/**
+ * Utility class for compressing call data using Deflate + Base64 + URI encoding.
+ */
+class SEQUENCEPLUGIN_API FCallDataCompressor
 {
-	// Compresses call data using Deflate + Base64 + URI escape
-	SEQUENCEPLUGIN_API FString Compress(const FString& In);
-}
+public:
+    static FString Compress(const FString& In);
+};
