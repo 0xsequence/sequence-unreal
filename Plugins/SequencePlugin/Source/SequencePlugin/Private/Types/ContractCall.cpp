@@ -1,18 +1,28 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Types/ContractCall.h"
-#include "Util/HexUtility.h"
 #include "Util/JsonBuilder.h"
+#include "Util/SequenceSupport.h"
 
 FString FContractCall::GetJson()
 {
-	auto JSON = FJsonBuilder();
+	const TSharedPtr<FJsonObject> JsonObject = MakeShareable<FJsonObject>(new FJsonObject);
+	if (!this->From.IsEmpty())
+		JsonObject.Get()->SetStringField("from", this->From);
 
-	if(From.IsSet()) JSON.AddString("from", "0x" + From.GetValue().ToHex());
-	JSON.AddString("to", "0x" + To.ToHex());
-	if(Gas.IsSet()) JSON.AddString("gas", FString::FromInt(Gas.GetValue()));
-	if(GasPrice.IsSet()) JSON.AddString("gasPrice", FString::FromInt(GasPrice.GetValue()));
-	if(Value.IsSet()) JSON.AddString("value", IntToHexString(Value.GetValue()));
-	if(Data.IsSet()) JSON.AddString("data", "0x" + Data.GetValue());
+	if (!this->To.IsEmpty())
+		JsonObject.Get()->SetStringField("to", this->To);
 
-	return JSON.ToString();
+	if (this->Gas >= 0)
+		JsonObject.Get()->SetNumberField("gas", this->Gas);
+
+	if (this->GasPrice >= 0)
+		JsonObject.Get()->SetNumberField("gasPrice", this->GasPrice);
+
+	if (this->Value >= 0)
+		JsonObject.Get()->SetNumberField("value", this->Value);
+		
+	if (!this->Data.IsEmpty())
+		JsonObject.Get()->SetStringField("data", this->Data);
+	
+	return USequenceSupport::JsonToString(JsonObject);
 }

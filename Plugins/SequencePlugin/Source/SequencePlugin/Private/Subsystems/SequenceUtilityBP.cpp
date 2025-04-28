@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
+#include "Types/BinaryData.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
 
@@ -101,4 +102,35 @@ TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
 TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
 {
 	return USequenceSupport::GetAllNetworkIds();
+}
+
+FSaleDetails USequenceUtilityBP::DeserializeSaleDetails(const FString& Json)
+{
+	const TSharedPtr<FJsonObject> Ret = USequenceSupport::JsonStringToObject(Json);
+	
+	FSaleDetails SaleDetails;
+	SaleDetails.Cost = Ret.Get()->GetNumberField(TEXT("cost"));
+	SaleDetails.SupplyCap = Ret.Get()->GetNumberField(TEXT("supplyCap"));
+	SaleDetails.StartTime = Ret.Get()->GetNumberField(TEXT("startTime"));
+	SaleDetails.EndTime = Ret.Get()->GetNumberField(TEXT("endTime"));
+	SaleDetails.MerkleRoot = Ret.Get()->GetStringField(TEXT("merkleRoot"));
+	
+	return SaleDetails;
+}
+
+void USequenceUtilityBP::Decode(const FString& EncodedData, const FString& Abi, FOnDecodeResponse OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FHttpResponsePtr>& OnApiSuccess = [OnSuccess](FHttpResponsePtr Response)
+	{
+		const FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
+		OnSuccess.ExecuteIfBound(Content);
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Failed to decode: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+	
+	USequenceSupport::Decode(EncodedData, Abi, OnApiSuccess, OnApiFailure);
 }

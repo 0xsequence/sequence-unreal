@@ -17,7 +17,7 @@
 USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<USequenceIndexer>();
-	this->Provider = UProvider::Make("");
+	this->Provider = UProvider::Make("https://nodes.sequence.app/arbitrum-sepolia/oesk7yu5tjNfQElu5HjuUunAAAAAAAAAA");
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
@@ -430,15 +430,15 @@ void USequenceWallet::ChainId(const TSuccessCallback<uint64>& OnSuccess, const F
 	}
 }
 
-void USequenceWallet::Call(const FContractCall& ContractCall, uint64 Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::Call(const FContractCall& ContractCall, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)
 	{
-		this->Provider->Call(ContractCall,Number,OnSuccess,OnFailure);
+		this->Provider->Call(ContractCall,EBlockTag::ELatest,OnSuccess,OnFailure);
 	}
 }
 
-void USequenceWallet::Call(const FContractCall& ContractCall, EBlockTag Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::Call(const FContractCall& ContractCall, EBlockTag Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)
 	{

@@ -22,7 +22,7 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	return BytesToHex(Ptr(),GetLength()).ToLower();
+	return "0x" + BytesToHex(Ptr(),GetLength()).ToLower();
 }
 
 void FBinaryData::Renew()

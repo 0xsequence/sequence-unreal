@@ -163,10 +163,10 @@ public:
 
 	void ChainId(const TFunction<void(uint64)>& OnSuccess, const TFunction<void(FSequenceError)>& OnFailure) const;
 
-	void Call(const FContractCall& ContractCall, uint64 Number, const TFunction<void(FUnsizedData)>& OnSuccess,
+	void Call(const FContractCall& ContractCall, const TFunction<void(FString)>& OnSuccess,
 	          const TFunction<void(FSequenceError)>& OnFailure) const;
 	
-	void Call(const FContractCall& ContractCall, EBlockTag Number, const TFunction<void(FUnsizedData)>& OnSuccess,
+	void Call(const FContractCall& ContractCall, EBlockTag Number, const TFunction<void(FString)>& OnSuccess,
 	          const TFunction<void(FSequenceError)>& OnFailure) const;
 	
 	void NonViewCall(const FEthTransaction& Transaction, const FPrivateKey& PrivateKey, int ChainID,

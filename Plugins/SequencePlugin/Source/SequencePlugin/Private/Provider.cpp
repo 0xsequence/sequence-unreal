@@ -7,6 +7,7 @@
 #include "Util/JsonBuilder.h"
 #include "RequestHandler.h"
 #include "Types/Header.h"
+#include "Util/Log.h"
 
 void UProvider::Init(const FString& UrlIn)
 {
@@ -376,14 +377,14 @@ void UProvider::ChainId(const TSuccessCallback<uint64>& OnSuccess, const FFailur
 	}, OnFailure);
 }
 
-void UProvider::Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) //check if eth_call
+void UProvider::Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) //check if eth_call
 {
 	return CallHelper(ContractCall, ConvertInt(Number), OnSuccess, OnFailure);
 }
 
-void UProvider::Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
+void UProvider::Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	return CallHelper(ContractCall, ConvertString(UEnum::GetValueAsString(Number)), OnSuccess, OnFailure);
+	return CallHelper(ContractCall, ConvertString(UEnum::GetDisplayValueAsText(Number).ToString()), OnSuccess, OnFailure);
 }
 
 void UProvider::NonViewCall(FEthTransaction Transaction, const FPrivateKey& PrivateKey, const int ChainID, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
@@ -392,7 +393,7 @@ void UProvider::NonViewCall(FEthTransaction Transaction, const FPrivateKey& Priv
 	return SendRawTransaction("0x" + SignedTransaction.ToHex(), OnSuccess, OnFailure);
 }
 
-void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure)
+void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
@@ -402,15 +403,16 @@ void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, co
 		->ToString();
 
 	const FString MyUrl = this->Url;
-	this->SendRPCAndExtract<FUnsizedData>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
+	this->SendRPCAndExtract<FString>(Url, Content, OnSuccess, [MyUrl](const FString& Response)
 	{
 		TResult<FString> StringResult = Make(MyUrl)->ExtractStringResult(Response);
+		SEQ_LOG(Display, TEXT("%s"), *StringResult.GetValue());
 
 		if(!StringResult.HasError())
 		{
-			return TResult<FUnsizedData>(MakeValue(HexStringToBinary(StringResult.GetValue())));
+			return StringResult;
 		}
 
-		return TResult<FUnsizedData>(MakeError(FSequenceError(ResponseParseError, "")));
+		return TResult<FString>(MakeError(FSequenceError(ResponseParseError, "")));
 	}, OnFailure);
 }
