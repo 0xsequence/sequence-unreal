@@ -26,6 +26,15 @@ class UIndexer;
 class UProvider;
 class USequenceRPCManager;
 
+UENUM(Blueprintable)
+enum class ESessionState : uint8
+{
+	Unchecked UMETA(DisplayName = "Unchecked"),
+	Valid UMETA(DisplayName = "Valid"),
+	Invalid UMETA(DisplayName = "Invalid"),
+	Checking UMETA(DisplayName = "Checking"),
+};
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UGameInstanceSubsystem
 {
@@ -46,6 +55,9 @@ private:
 
 	UPROPERTY()
 	FCredentials_BE Credentials;
+
+	UPROPERTY()
+	ESessionState SessionState = ESessionState::Unchecked;
 
 public:
 	USequenceWallet();
@@ -120,6 +132,12 @@ public:
 	 */
 	static float GetUserReadableAmount(const int64 AmountIn, const int64 DecimalsIn);
 
+	/**
+	 * Check if the wallet and stored credentials are registered to a valid session with the Sequence API
+	 * @return true if the wallet is signed in to Sequence API
+	 */
+	bool IsValidSession();
+	
 	/**
 	 * Returns the wallet address of the currently signed in user
 	 * @return wallet address of the currently signed in user
