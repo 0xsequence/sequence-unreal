@@ -71,7 +71,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 				}
 				else if (PostParsed[0].Equals(TEXT("PlayFab"), ESearchCase::IgnoreCase))
 				{
-					AccountTypes.Add(ESequenceLoginType::PlayFab);
+					AccountTypes.Add(ESequenceLoginType::SequencePlayFab);
 				}
 				else if (PostParsed[0].Equals(TEXT("OIDC"),ESearchCase::IgnoreCase) && PostParsed.Num() >= 3)
 				{
