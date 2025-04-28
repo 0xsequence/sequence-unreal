@@ -62,7 +62,7 @@ TResult<uint64> URPCCaller::ExtractUIntResult(const FString& JsonRaw)
 	return MakeValue(Convert.GetValue());
 }
 
-void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError)
+void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError, bool bUseValidator)
 {
 
 	URequestHandler* RequestHandler = NewObject<URequestHandler>();
@@ -73,7 +73,7 @@ void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSucc
 		->WithHeader("Accept", "application/json")
 		->WithVerb("POST")
 		->WithContentAsString(Content)
-		->ProcessAndThen(*Validator, OnSuccess, OnError);
+		->ProcessAndThen(*Validator, OnSuccess, OnError, bUseValidator);
 }
 
 FJsonBuilder URPCCaller::RPCBuilder(const FString& MethodName)
