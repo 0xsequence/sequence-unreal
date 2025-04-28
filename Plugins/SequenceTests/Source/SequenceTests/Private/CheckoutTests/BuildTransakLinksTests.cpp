@@ -45,6 +45,10 @@ bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 
 	TestFalse(TEXT("Failed"), Link.IsEmpty());
 
+	FString ExpectedLink = TEXT("https://global.transak.com/?apiKey=5911d9ec-46b5-48fa-a755-d59a715ff0cf&isNFT=true&calldata=eJzlkMENBSEIRFsaQFDLUcAafvnfBkw28bCHfZw4vCEMfoY02DIcCM41Jy9qc6UEm0624OHZpADDVEQH6sl%2FRt7pxJf%2B8X2Il95dC3suTWlESdT3VhHNHRLqu4F%2Bdb%2FGlQ667G8nfNsvLKhN8O68yR9x%2Fcs7&contractId=674eb5613d739107bbd18ed2&cryptoCurrencyCode=USDC&estimatedGasLimit=500000&nftData=W3siaW1hZ2VVUkwiOiJodHRwczovL2Rldi1tZXRhZGF0YS5zZXF1ZW5jZS5hcHAvcHJvamVjdHMvMTAxMC9jb2xsZWN0aW9ucy8zOTQvdG9rZW5zLzEvaW1hZ2UucG5nIiwibmZ0TmFtZSI6IktlYXRvbiBULTMyMiIsImNvbGxlY3Rpb25BZGRyZXNzIjoiMHg4ZTk2MDk1OTdmNzM3NjA5OGRkZmM0NDFmNDVjYWU1ZjM3MDU3MjIyIiwidG9rZW5JRCI6WyIxIl0sInByaWNlIjpbMC4wMl0sInF1YW50aXR5IjoxLCJuZnRUeXBlIjoiRVJDMTE1NSJ9XQ%3D%3D&walletAddress=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07&disableWalletAddressForm=true&partnerOrderId=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07");
+	TestTrue(TEXT("TransakNFTCheckoutLink starts with expectedLink"), Link.StartsWith(ExpectedLink));
+
+
 	return true;
 
 }

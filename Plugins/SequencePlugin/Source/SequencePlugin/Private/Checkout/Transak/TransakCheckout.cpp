@@ -31,7 +31,7 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 	const FString TransakNftDataEncoded = FTransakNFTDataEncoder::Encode(Item);
 	UE_LOG(LogTemp, Warning, TEXT("Base64 Encoded (with padding): %s"), *TransakNftDataEncoded);
 
-	const FString BaseURL = TEXT("https://global.transak.com");
+	const FString BaseURL = TEXT("https://global.transak.com/");
 	UE_LOG(LogTemp, Warning, TEXT("BaseURL: %s"), *BaseURL);
 
 	const FString TContractId = ContractId.Id;
