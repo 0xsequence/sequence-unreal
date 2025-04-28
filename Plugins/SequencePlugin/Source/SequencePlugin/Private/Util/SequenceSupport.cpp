@@ -9,6 +9,7 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/Base64.h"
+#include "Plugins/EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
 
 FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
@@ -592,6 +593,9 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 
 void USequenceSupport::Decode(const FString& EncodedData, const FString& Abi, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	const FString Encoded = FEthAbiBridge::EncodeFunctionCall("mint(uint256 value)", "mint", "[1]");
+	SEQ_LOG_EDITOR(Display, TEXT("Encoded Bridge Result %s"), *Encoded);
+	
 	const FString Url = "https://remote-abi-encoding.pages.dev/decode";
 	const FString Content = "{\"abi\":" + Abi + ",\"decodedInput\":\"" + EncodedData + "\"}";
 	
