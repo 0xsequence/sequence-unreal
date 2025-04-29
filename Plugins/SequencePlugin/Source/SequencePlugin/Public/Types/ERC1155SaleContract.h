@@ -16,19 +16,19 @@ public:
 
     UERC1155SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal, FString Data);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")
     FString ContractAddress;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")
     FString PaymentToken;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")
     int32 MaxTotal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155 Sale")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")
     FString Data;
 
-    UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
+    UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof);
 
 

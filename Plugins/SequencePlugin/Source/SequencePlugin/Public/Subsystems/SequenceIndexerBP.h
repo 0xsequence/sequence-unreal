@@ -29,25 +29,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure);
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure);
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetTokenSuppliesMap(const TMap<FString, FSeqTokenList>& TokenMap, const bool IncludeMetadata, FOnGetTokenSuppliesMap OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetTransactionHistory(const FSeqTransactionHistoryFilter& Filter, const FSeqPage& Page, const bool IncludeMetadata, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void RuntimeStatus(FOnRuntimeStatus OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void Version(FOnVersion OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void Ping(FOnPing OnSuccess, FOnFailure OnFailure);
 	
 private:
