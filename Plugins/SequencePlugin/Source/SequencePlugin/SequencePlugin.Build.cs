@@ -11,12 +11,11 @@ public class SequencePlugin : ModuleRules
 		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
-		if (Target.Platform == UnrealTargetPlatform.Mac)
-		{
-			var dylibPath = Path.Combine(ModuleDirectory, "Public/Plugins/EthAbi/libethabi_bridge.dylib");
-			PublicAdditionalLibraries.Add(dylibPath);
-			RuntimeDependencies.Add("$(ProjectDir)/Binaries/Mac/libethabi_bridge.dylib", dylibPath);
-		}
+		string lib = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/target/release/libethabi_bridge.a");
+		string includes = Path.Combine(ModuleDirectory, "Public/EthAbi/target/release/");
+
+		PublicSystemLibraryPaths.Add(includes);
+		PublicAdditionalLibraries.Add(lib);
 		
 		PublicIncludePaths.AddRange(
 			new string[] {

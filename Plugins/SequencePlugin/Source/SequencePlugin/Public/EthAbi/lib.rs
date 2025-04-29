@@ -3,17 +3,11 @@ use serde_json::Value;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
-#[cxx::bridge]
-mod ffi {
-    extern "Rust" {
-        unsafe fn encodeFunctionCall(abiJson: *const c_char, functionName: *const c_char, argsJson: *const c_char) -> *mut c_char;
-    }
-}
-
-pub fn encodeFunctionCall(abiJson: *const c_char, functionName: *const c_char, argsJson: *const c_char) -> *mut c_char {
-    let abi_json = unsafe { CStr::from_ptr(abiJson).to_str().unwrap() };
-    let function_name = unsafe { CStr::from_ptr(functionName).to_str().unwrap() };
-    let args_json = unsafe { CStr::from_ptr(argsJson).to_str().unwrap() };
+#[no_mangle]
+pub extern "C" fn encode_function_call(abi_json: *const c_char, function_name: *const c_char, args_json: *const c_char) -> *mut c_char {
+    let abi_json = unsafe { CStr::from_ptr(abi_json).to_str().unwrap() };
+    let function_name = unsafe { CStr::from_ptr(function_name).to_str().unwrap() };
+    let args_json = unsafe { CStr::from_ptr(args_json).to_str().unwrap() };
         
     let abi: ethabi::Contract = serde_json::from_str(abi_json).unwrap();
     let function = abi.function(function_name).unwrap();

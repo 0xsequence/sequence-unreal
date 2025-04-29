@@ -1,10 +1,8 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Misc/Base64.h"
 
-class SEQUENCEPLUGIN_API FEthAbiBridge
+class FEthAbiBridge
 {
 public:
 	static FString EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values);

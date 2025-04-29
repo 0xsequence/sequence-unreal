@@ -2,13 +2,15 @@
 
 #include "EthAbiBridge.h"
 
-extern "Rust" {
-	char* encodeFunctionCall(const char* abiJson, const char* functionName, const char* argsJson);
+#include "Containers/StringConv.h"
+
+extern "C" {
+	char* encode_function_call(const char* abi_json, const char* function_name, const char* args_json);
 }
 
 FString FEthAbiBridge::EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values)
 {
-	const char* EncodedData = encodeFunctionCall(
+	const char* EncodedData = encode_function_call(
 		TCHAR_TO_UTF8(*Abi),
 		TCHAR_TO_UTF8(*FunctionName),
 		TCHAR_TO_UTF8(*Values));

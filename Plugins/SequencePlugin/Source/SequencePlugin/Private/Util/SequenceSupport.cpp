@@ -9,7 +9,7 @@
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/Base64.h"
-#include "Plugins/EthAbi/EthAbiBridge.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
 
 FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
