@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Marketplace/SequenceMarketplace.h"
-#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
-#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "SequenceMarketplaceBP.generated.h"
@@ -27,9 +25,6 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Offers, FSeqMarketplacePage, Page);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, CollectibleOrders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFloorOrder, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
-	DECLARE_DYNAMIC_DELEGATE_FiveParams(FOnGetSwapPrice, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, TransactionValue);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, const TArray<FSeqSwapPrice>&, SwapPrices);
-	DECLARE_DYNAMIC_DELEGATE_EightParams(FOnGetSwapQuote, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, To, FString, TransactionData, FString, TransactionValue, FString, ApproveData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
 
 public:
@@ -76,15 +71,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
 	void GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapPrices(const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
 	
 private:
 	UPROPERTY()

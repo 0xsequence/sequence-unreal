@@ -6,7 +6,7 @@
 #include "Misc/AutomationTest.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
+#include "SequencePlugin/Public/Sequence/SequencePay.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
@@ -81,8 +81,9 @@ bool FGetSwapQuoteInsufficientBalanceTest::RunTest(const FString& Parameters)
                 MarketplaceTestData->DecrementPendingRequests()));
             MarketplaceTestData->RequestFailed();
         };
-		    
-        MarketplaceTestData->GetMarketplace()->GetSwapQuote(
+        
+        USequencePay* Pay = NewObject<USequencePay>();
+        Pay->GetSwapQuote(
             Support->GetNetworkId(ENetwork::ArbitrumOne),
             UserAddress,
             USDC,

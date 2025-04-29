@@ -26,7 +26,7 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 public:
 	USequenceIndexerBP();
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void GetNativeTokenBalance(const FString& WalletAddress, FOnGetNativeTokenBalance OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")

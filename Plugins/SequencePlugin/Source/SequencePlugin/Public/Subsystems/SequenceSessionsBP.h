@@ -26,55 +26,55 @@ class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, pu
 public:
 	USequenceSessionsBP();
 
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Sessions Events")
 	FOnSession OnSessionCreated;
 	
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Sessions Events")
 	FOnIdTokenReceived IdTokenReceived;
 	
-	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
+	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Sessions Events")
 	FOnFederationRequired FederationRequired;
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void GetGoogleTokenId(FOnBrowserRequired BrowserRequired);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void GetAppleTokenId(FOnBrowserRequired BrowserRequired);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void SignInWithGoogle(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void SignInWithApple(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void SignInWithEpic(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	bool CheckExistingSession();
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void StartEmailLogin(const FString& Email, FOnSuccess RequiresCode, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void ConfirmEmailLoginWithCode(const FString& Code, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void StartOidcSession(const FString& IdToken, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void PlayFabRegistration(const FString& UsernameIn, const FString& EmailIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void PlayFabLogin(const FString& UsernameIn, const FString& PasswordIn, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void PlayFabAuthenticateWithSessionTicket(const FString& SessionTicket, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void StartGuestSession(FOnSuccess OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Sessions")
 	void SetForceCreateAccount(const bool NewForceCreateAccount);
 	
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
