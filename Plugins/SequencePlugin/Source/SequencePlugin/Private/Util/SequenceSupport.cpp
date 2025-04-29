@@ -593,7 +593,7 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 
 void USequenceSupport::Decode(const FString& EncodedData, const FString& Abi, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString Encoded = FEthAbiBridge::EncodeFunctionCall("mint(uint256 value)", "mint", "[1]");
+	const FString Encoded = FEthAbiBridge::EncodeFunctionCall("[{\"name\": \"transfer\",\"type\": \"function\",\"inputs\": [{\"name\": \"to\", \"type\": \"address\" },{ \"name\": \"amount\", \"type\": \"uint256\" }],\"outputs\": [{\"name\": \"\", \"type\": \"bool\" }]}]", "transfer", "[\"0x000000000000000000000000000000000000dead\",1000000000000000000]");
 	SEQ_LOG_EDITOR(Display, TEXT("Encoded Bridge Result %s"), *Encoded);
 	
 	const FString Url = "https://remote-abi-encoding.pages.dev/decode";

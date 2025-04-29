@@ -1,5 +1,6 @@
-use ethabi::{Function, Token};
+use ethabi::{Address, Function, Token};
 use serde_json::Value;
+use hex::FromHex;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
@@ -14,30 +15,46 @@ pub extern "C" fn encode_function_call(abi_json: *const c_char, function_name: *
         
     let args: Vec<Value> = serde_json::from_str(args_json).unwrap();
             
-    let tokens: Vec<Token> = args.into_iter().map(|arg| {
+    let tokens_result: Result<Vec<Token>, &'static str> = args.into_iter().map(|arg| {
         match arg {
             Value::String(s) => {
                 if s.starts_with("0x") && s.len() == 42 {
                     let addr = s.trim_start_matches("0x");
-                    let bytes = hex::decode(addr).unwrap();
-                    Token::Address(ethabi::Address::from_slice(&bytes))
+                    match Vec::from_hex(addr) {
+                        Ok(bytes) if bytes.len() == 20 => Ok(Token::Address(Address::from_slice(&bytes))),
+                        _ => Err("Invalid address hex format"),
+                    }
                 } else {
-                    panic!("Unexpected string format: {}", s);
+                    Err("Unexpected string format")
                 }
             }
             Value::Number(num) => {
                 if let Some(u) = num.as_u64() {
-                    Token::Uint(u.into())
+                    Ok(Token::Uint(u.into()))
                 } else {
-                    panic!("Number too big or invalid: {}", num);
+                    Err("Number too big or invalid")
                 }
             }
-            _ => panic!("Unsupported argument type"),
+            _ => Err("Unsupported argument type"),
         }
     }).collect();
+    
+    let tokens = match tokens_result {
+        Ok(t) => t,
+        Err(_) => {
+            let empty = CString::new("").unwrap();
+            return empty.into_raw();
+        }
+    };
             
-    let encoded = function.encode_input(&tokens).unwrap();
+    let encoded = match function.encode_input(&tokens) {
+        Ok(e) => e,
+        Err(_) => {
+            let empty = CString::new("").unwrap();
+            return empty.into_raw();
+        }
+    };
         
     let hex = hex::encode(encoded);
-    CString::new(hex).unwrap().into_raw()
+    CString::new("hex").unwrap().into_raw()
 }
