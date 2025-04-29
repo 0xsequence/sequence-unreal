@@ -104,7 +104,7 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 
 
 	FRawTransaction result = SaleContract->MakePurchaseTransaction(
-		WalletAddress,
+		TransakContractAddresses[Network],
 		TokenIds,
 		Amounts,
 		Proof
@@ -141,6 +141,8 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 	FTransakContractId TransakContractID = GetTransakContractIdFromCollectibleOrder(order);
 
 	if (TransakContractID.Id.IsEmpty())return;
+
+	USequenceCheckout* Checkout = NewObject< USequenceCheckout>();
 
 	Checkout->GenerateBuyTransaction(
 		order.Order.ChainId,
@@ -212,3 +214,21 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 	}
 	return TransakContractID;
 }
+
+
+const TMap<ENetwork, FString> UTransakCheckout::TransakContractAddresses = {
+	{ENetwork::Ethereum, TEXT("0xab88cd272863b197b48762ea283f24a13f6586dd")},
+	{ENetwork::Sepolia, TEXT("0xD84aC4716A082B1F7eCDe9301aA91A7c4B62ECd7")},
+	{ENetwork::PolygonChain, TEXT("0x4A598B7eC77b1562AD0dF7dc64a162695cE4c78A")},
+	{ENetwork::PolygonAmoy, TEXT("0xCB9bD5aCD627e8FcCf9EB8d4ba72AEb1Cd8Ff5EF")},
+	{ENetwork::BNBSmartChain, TEXT("0x4A598B7eC77b1562AD0dF7dc64a162695cE4c78A")},
+	{ENetwork::BNBSmartChainTestnet, TEXT("0x0E9539455944BE8a307bc43B0a046613a1aD6732")},
+	{ENetwork::ArbitrumOne, TEXT("0x4A598B7eC77b1562AD0dF7dc64a162695cE4c78A")},
+	{ENetwork::ArbitrumSepolia, TEXT("0x489F56e3144FF03A887305839bBCD20FF767d3d1")},
+	{ENetwork::Optimism, TEXT("0x4A598B7eC77b1562AD0dF7dc64a162695cE4c78A")},
+	{ENetwork::OptimismSepolia, TEXT("0xCB9bD5aCD627e8FcCf9EB8d4ba72AEb1Cd8Ff5EF")},
+	{ENetwork::Immutable, TEXT("0x8b83dE7B20059864C479640CC33426935DC5F85b")},
+	{ENetwork::ImmutableTestnet, TEXT("0x489F56e3144FF03A887305839bBCD20FF767d3d1")},
+	{ENetwork::Base, TEXT("0x8b83dE7B20059864C479640CC33426935DC5F85b")},
+	{ENetwork::BaseSepolia, TEXT("0xCB9bD5aCD627e8FcCf9EB8d4ba72AEb1Cd8Ff5EF")}
+};

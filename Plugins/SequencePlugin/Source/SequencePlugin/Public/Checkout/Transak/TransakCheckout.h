@@ -15,7 +15,7 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnTransakCheckoutGenerated, const FString&, CheckoutURL);
 
-UCLASS()
+UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API UTransakCheckout : public UObject
 {
 	GENERATED_BODY()
@@ -28,15 +28,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Transak")
 	TEnumAsByte<ENetwork> Network;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Transak")
-	USequenceCheckout* Checkout;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Transak")
-	USequenceMarketplace* Marketplace;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Transak")
 	FTransakContractId TransakContractId;
 
+	static const TMap<ENetwork, FString> TransakContractAddresses;
 
 	UFUNCTION(BlueprintCallable, Category = "Transak")
 	FString GetNFTCheckoutLink(const FTransakNFTData& Item, const FString& CallData, const FTransakContractId& ContractId);
@@ -53,5 +49,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Transak")
 	FTransakContractId GetTransakContractIdFromCollectibleOrder(FSeqCollectibleOrder order);
 
-};
 
+
+};
