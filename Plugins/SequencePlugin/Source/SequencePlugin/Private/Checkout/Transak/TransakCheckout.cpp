@@ -107,8 +107,6 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Building Transak checkout link from collectible order"));
-
 	TArray<FString> TokenIds = { FString::FromInt(order.TokenMetadata.tokenId) };
 	TArray<float> Prices = { static_cast<float>(order.Order.PriceUSD) };
 
@@ -123,11 +121,6 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 	);
 
 
-	UE_LOG(LogTemp, Warning, TEXT("NFT Image: %s"), *NFTData.ImageURL);
-	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *NFTData.Name);
-	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *NFTData.CollectionAddress);
-	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *UEnum::GetValueAsString(NFTData.Type).RightChop(10));
-
 	FTransakContractId TransakContractID = GetTransakContractIdFromCollectibleOrder(order);
 
 	if (TransakContractID.Id.IsEmpty())
@@ -136,10 +129,7 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Using TransakContractID: %s"), *TransakContractID.Id);
-
 	USequenceCheckout* Checkout = NewObject< USequenceCheckout>();
-	UE_LOG(LogTemp, Log, TEXT("Initialized USequenceCheckout"));
 
 	Checkout->GenerateBuyTransaction(
 		order.Order.ChainId,
@@ -150,43 +140,27 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 		EWalletKind::Sequence,
 
 		[this, NFTData, TransakContractID, OnSuccessCallback](const FGenerateTransactionResponse& Response)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Buy transaction generated successfully"));
-
-			
-			UE_LOG(LogTemp, Log, TEXT("BuyStep Data JSON: %s"), *Response.Steps[0].ExtractBuyStep(Response.Steps).Data);
-			
-
+		{	
 			const FString URL = GetNFTCheckoutLink(NFTData, *Response.Steps[0].ExtractBuyStep(Response.Steps).Data, TransakContractID);
-
-
-			UE_LOG(LogTemp, Log, TEXT("Generated Transak Checkout URL: %s"), *URL);
-
 			OnSuccessCallback.ExecuteIfBound(URL);
 		},
 
 		[OnSuccessCallback](const FSequenceError& Error)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to generate buy transaction: %s"), *Error.Message);
-			OnSuccessCallback.ExecuteIfBound(TEXT("Error: Failed to generate transaction"));
+			OnSuccessCallback.ExecuteIfBound(TEXT("Error: Failed to generate buy transaction"));
 		}
 	);
 }
 
 FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FSeqCollectibleOrder order)
 {
-	UE_LOG(LogTemp, Log, TEXT("Resolving TransakContractId for ChainId: %d, Marketplace: %d"), order.Order.ChainId, static_cast<uint8>(order.Order.Marketplace));
-
 	FTransakContractId TransakContractID;
 
 	if (order.Order.ChainId == 137)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Chain: Polygon"));
-
 		switch (order.Order.Marketplace)
 		{
 		case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2:
-			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V2"));
 
 			TransakContractID.Id = TEXT("67ac543448035690a20ac131");
 			TransakContractID.ContractAddress = TEXT("0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712");
@@ -196,7 +170,6 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 			break;
 
 		default:
-			UE_LOG(LogTemp, Log, TEXT("Marketplace: default (likely SEQUENCE_MARKETPLACE_V1 or unknown)"));
 
 			TransakContractID.Id = TEXT("6675a6d0f597abb8f3e2e9c2");
 			TransakContractID.ContractAddress = TEXT("0xc2c862322e9c97d6244a3506655da95f05246fd8");
@@ -208,12 +181,9 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 	}
 	else if (order.Order.ChainId == 42161)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Chain: Arbitrum"));
 
 		if (order.Order.Marketplace == EMarketplaceKind::SEQUENCE_MARKETPLACE_V2)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V2"));
-
 			TransakContractID.Id = TEXT("66c5a2cf2fb1688e11fcb167");
 			TransakContractID.ContractAddress = TEXT("0xB537a160472183f2150d42EB1c3DD6684A55f74c");
 			TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::ArbitrumOne);
@@ -221,8 +191,6 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 		}
 		else if (order.Order.Marketplace == EMarketplaceKind::SEQUENCE_MARKETPLACE_V1)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V1"));
-
 			TransakContractID.Id = TEXT("66c5a2d8c00223b9cc6edfdc");
 			TransakContractID.ContractAddress = TEXT("0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712");
 			TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::ArbitrumOne);
@@ -230,7 +198,6 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Resolved TransakContractId: Id=%s, Address=%s, Chain=%s, TokenSymbol=%s"),
 		*TransakContractID.Id,
 		*TransakContractID.ContractAddress,
 		*TransakContractID.Chain,
