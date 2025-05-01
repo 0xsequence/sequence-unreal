@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "TransakNftData.generated.h"
 
-// NFT Type Enum
 UENUM(BlueprintType)
 enum class ENFTType : uint8
 {
@@ -11,7 +10,6 @@ enum class ENFTType : uint8
 	ERC721 UMETA(DisplayName = "ERC721")
 };
 
-// Transak NFT Data Struct
 USTRUCT(BlueprintType)
 struct SEQUENCEPLUGIN_API FTransakNFTData
 {
@@ -25,7 +23,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Transak")
 	FString Name;
 
-	// Assuming `Address` is a wrapper type in C#, use FString for now
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Transak")
 	FString CollectionAddress;
 

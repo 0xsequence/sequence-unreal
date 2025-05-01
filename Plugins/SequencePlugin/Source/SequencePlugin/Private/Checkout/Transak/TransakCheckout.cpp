@@ -9,30 +9,26 @@
 #include "Checkout/Transak/TransakNFTDataEncoder.h"
 #include "Checkout/Structs/TransactionStep.h"
 #include "Util/SequenceSupport.h"
+void UTransakCheckout::Initialize(const FString& InWalletAddress, ENetwork InNetwork)
+{
+	WalletAddress = InWalletAddress;
+	Network = InNetwork;
+}
 FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const FString& CallData, const FTransakContractId& ContractId)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Entered GetNFTCheckoutLink"));
-
 	const FString NetworkString = UEnum::GetValueAsString(Network);
-	UE_LOG(LogTemp, Warning, TEXT("NetworkString: %s"), *NetworkString);
-	UE_LOG(LogTemp, Warning, TEXT("Provided ContractId.Chain: %s"), *ContractId.Chain);
 
 	if (ContractId.Chain != NetworkString)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Chain mismatch in TransakCheckout"));
-		return TEXT("Error: Chain mismatch");
+		UE_LOG(LogTemp, Error, TEXT("Chain mismatch: ContractId.Chain = %s, Network = %s"), *ContractId.Chain, *NetworkString);
+		return TEXT("Error: Chain mismatch. Transak Checkout object network must match the TransakContractId chain.");
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Compressing call data..."));
 	const FString TransakCallData = FCallDataCompressor::Compress(CallData);
-	UE_LOG(LogTemp, Warning, TEXT("Compressed call data: %s"), *TransakCallData);
 
-	UE_LOG(LogTemp, Warning, TEXT("Encoding NFT data..."));
 	const FString TransakNftDataEncoded = FTransakNFTDataEncoder::Encode(Item);
-	UE_LOG(LogTemp, Warning, TEXT("Base64 Encoded (with padding): %s"), *TransakNftDataEncoded);
 
 	const FString BaseURL = TEXT("https://global.transak.com/");
-	UE_LOG(LogTemp, Warning, TEXT("BaseURL: %s"), *BaseURL);
 
 	const FString TContractId = ContractId.Id;
 	const FString TransakCryptocurrencyCode = ContractId.PriceTokenSymbol;
@@ -40,18 +36,13 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 
 	if (WalletAddress.IsEmpty())
 	{
-		UE_LOG(LogTemp, Error, TEXT("WalletAddress is not set!"));
-		return TEXT("Error: Wallet address missing");
+		return TEXT("Error: Transak Checkout object wallet address is missing");
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("WalletAddress: %s"), *WalletAddress);
 
 	const int64 Timestamp = FDateTime::UtcNow().ToUnixTimestamp();
-	UE_LOG(LogTemp, Warning, TEXT("Timestamp: %lld"), Timestamp);
 
 	const FString PartnerOrderId = FString::Printf(TEXT("%s-%lld"), *WalletAddress, Timestamp);
-
-	UE_LOG(LogTemp, Warning, TEXT("Building final URL..."));
 
 	FString address = *WalletAddress;
 
@@ -74,33 +65,26 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 
 FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract, const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId, const TArray<uint8>& Data, const TArray<FString>& Proof)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Entered BuildNFTCheckoutLinkFromERC1155"));
 
 	if (!SaleContract)
 	{
-		UE_LOG(LogTemp, Error, TEXT("SaleContract is nullptr!"));
 		return TEXT("Error: Invalid SaleContract");
 	}
 
 	if (TransakNFTData.Quantity <= 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Quantity must be greater than 0"));
 		return TEXT("Error: Invalid quantity");
 	}
 
 	TArray<int32> TokenIds;
 	TArray<int32> Amounts;
 
-	UE_LOG(LogTemp, Warning, TEXT("Processing Token IDs..."));
 	for (const FString& TokenIDString : TransakNFTData.TokenID)
 	{
 		int32 ParsedTokenId = FCString::Atoi(*TokenIDString);
 		TokenIds.Add(ParsedTokenId);
 		Amounts.Add(TransakNFTData.Quantity);
-		UE_LOG(LogTemp, Warning, TEXT("Parsed TokenID: %d, Quantity: %d"), ParsedTokenId, TransakNFTData.Quantity);
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Calling MakePurchaseTransaction on SaleContract..."));
 
 
 	FRawTransaction result = SaleContract->MakePurchaseTransaction(
@@ -113,7 +97,6 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 	FString callData = result.data;
 
 
-	UE_LOG(LogTemp, Warning, TEXT("Transaction callData: %s"), *callData);
 	return GetNFTCheckoutLink(TransakNFTData, callData, ContractId);
 }
 void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder order, int64 quantity, ENFTType type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback)
@@ -121,9 +104,10 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 	if (quantity <= 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Invalid quantity"));
-		OnSuccessCallback.ExecuteIfBound(TEXT("Error: Invalid quantity"));
 		return;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Building Transak checkout link from collectible order"));
 
 	TArray<FString> TokenIds = { FString::FromInt(order.TokenMetadata.tokenId) };
 	TArray<float> Prices = { static_cast<float>(order.Order.PriceUSD) };
@@ -135,14 +119,27 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 		TokenIds,
 		Prices,
 		quantity,
-		ENFTType::ERC1155
+		ENFTType::ERC721
 	);
+
+
+	UE_LOG(LogTemp, Warning, TEXT("NFT Image: %s"), *NFTData.ImageURL);
+	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *NFTData.Name);
+	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *NFTData.CollectionAddress);
+	UE_LOG(LogTemp, Warning, TEXT("NFT Name: %s"), *UEnum::GetValueAsString(NFTData.Type).RightChop(10));
 
 	FTransakContractId TransakContractID = GetTransakContractIdFromCollectibleOrder(order);
 
-	if (TransakContractID.Id.IsEmpty())return;
+	if (TransakContractID.Id.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("TransakContractID is empty. Aborting."));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Using TransakContractID: %s"), *TransakContractID.Id);
 
 	USequenceCheckout* Checkout = NewObject< USequenceCheckout>();
+	UE_LOG(LogTemp, Log, TEXT("Initialized USequenceCheckout"));
 
 	Checkout->GenerateBuyTransaction(
 		order.Order.ChainId,
@@ -154,7 +151,17 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 
 		[this, NFTData, TransakContractID, OnSuccessCallback](const FGenerateTransactionResponse& Response)
 		{
+			UE_LOG(LogTemp, Log, TEXT("Buy transaction generated successfully"));
+
+			
+			UE_LOG(LogTemp, Log, TEXT("BuyStep Data JSON: %s"), *Response.Steps[0].ExtractBuyStep(Response.Steps).Data);
+			
+
 			const FString URL = GetNFTCheckoutLink(NFTData, *Response.Steps[0].ExtractBuyStep(Response.Steps).Data, TransakContractID);
+
+
+			UE_LOG(LogTemp, Log, TEXT("Generated Transak Checkout URL: %s"), *URL);
+
 			OnSuccessCallback.ExecuteIfBound(URL);
 		},
 
@@ -168,50 +175,67 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 
 FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FSeqCollectibleOrder order)
 {
+	UE_LOG(LogTemp, Log, TEXT("Resolving TransakContractId for ChainId: %d, Marketplace: %d"), order.Order.ChainId, static_cast<uint8>(order.Order.Marketplace));
+
 	FTransakContractId TransakContractID;
 
-	// Check the chain ID and set the contract info
-	if (order.Order.ChainId == 137) // Polygon
+	if (order.Order.ChainId == 137)
 	{
-		// Map the MarketplaceKind to OrderbookKind and set the corresponding contract info
-		
+		UE_LOG(LogTemp, Log, TEXT("Chain: Polygon"));
+
 		switch (order.Order.Marketplace)
 		{
 		case EMarketplaceKind::SEQUENCE_MARKETPLACE_V2:
+			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V2"));
+
 			TransakContractID.Id = TEXT("67ac543448035690a20ac131");
 			TransakContractID.ContractAddress = TEXT("0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712");
-			TransakContractID.Chain = USequenceSupport::GetNetworkName(ENetwork::PolygonChain); // Or as a string: TEXT("Polygon")
+			TransakContractID.Chain = TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::PolygonChain);
 			TransakContractID.PriceTokenSymbol = TEXT("POL");
+
 			break;
 
 		default:
-			// Default case for unknown or unhandled marketplace kinds
+			UE_LOG(LogTemp, Log, TEXT("Marketplace: default (likely SEQUENCE_MARKETPLACE_V1 or unknown)"));
+
 			TransakContractID.Id = TEXT("6675a6d0f597abb8f3e2e9c2");
 			TransakContractID.ContractAddress = TEXT("0xc2c862322e9c97d6244a3506655da95f05246fd8");
-			TransakContractID.Chain = USequenceSupport::GetNetworkName(ENetwork::PolygonChain); // Or as a string: TEXT("Polygon")
+			TransakContractID.Chain = TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::PolygonChain);
 			TransakContractID.PriceTokenSymbol = TEXT("MATIC");
+
 			break;
 		}
-		
 	}
-	else if (order.Order.ChainId == 42161) // ArbitrumOne
+	else if (order.Order.ChainId == 42161)
 	{
-		// Map the MarketplaceKind to OrderbookKind and set the corresponding contract info
+		UE_LOG(LogTemp, Log, TEXT("Chain: Arbitrum"));
+
 		if (order.Order.Marketplace == EMarketplaceKind::SEQUENCE_MARKETPLACE_V2)
 		{
-			TransakContractID.Id = "66c5a2cf2fb1688e11fcb167";
-			TransakContractID.ContractAddress = "0xB537a160472183f2150d42EB1c3DD6684A55f74c";
-			TransakContractID.Chain = USequenceSupport::GetNetworkName(ENetwork::ArbitrumOne);
-			TransakContractID.PriceTokenSymbol = "USDC";
+			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V2"));
+
+			TransakContractID.Id = TEXT("66c5a2cf2fb1688e11fcb167");
+			TransakContractID.ContractAddress = TEXT("0xB537a160472183f2150d42EB1c3DD6684A55f74c");
+			TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::ArbitrumOne);
+			TransakContractID.PriceTokenSymbol = TEXT("USDC");
 		}
 		else if (order.Order.Marketplace == EMarketplaceKind::SEQUENCE_MARKETPLACE_V1)
 		{
-			TransakContractID.Id = "66c5a2d8c00223b9cc6edfdc";
-			TransakContractID.ContractAddress = "0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712";
-			TransakContractID.Chain = USequenceSupport::GetNetworkName(ENetwork::ArbitrumOne);
-			TransakContractID.PriceTokenSymbol = "USDC";
+			UE_LOG(LogTemp, Log, TEXT("Marketplace: SEQUENCE_MARKETPLACE_V1"));
+
+			TransakContractID.Id = TEXT("66c5a2d8c00223b9cc6edfdc");
+			TransakContractID.ContractAddress = TEXT("0xfdb42A198a932C8D3B506Ffa5e855bC4b348a712");
+			TransakContractID.Chain = UEnum::GetValueAsString(ENetwork::ArbitrumOne);
+			TransakContractID.PriceTokenSymbol = TEXT("USDC");
 		}
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Resolved TransakContractId: Id=%s, Address=%s, Chain=%s, TokenSymbol=%s"),
+		*TransakContractID.Id,
+		*TransakContractID.ContractAddress,
+		*TransakContractID.Chain,
+		*TransakContractID.PriceTokenSymbol);
+
 	return TransakContractID;
 }
 

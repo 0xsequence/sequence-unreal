@@ -19,7 +19,7 @@ bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 	SaleContract->ContractAddress = TEXT("0xe65b75eb7c58ffc0bf0e671d64d0e1c6cd0d3e5b");
 	SaleContract->PaymentToken = TEXT("0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359");
 	SaleContract->MaxTotal = 20000;
-	SaleContract->Data = TEXT("Minted using the Sequence Unity SDK");
+	SaleContract->Data = TEXT("Minted using the Sequence Unreal SDK");
 	
 	FTransakNFTData NFTData;
 	NFTData.ImageURL = TEXT("https://dev-metadata.sequence.app/projects/1010/collections/394/tokens/1/image.png");
@@ -43,7 +43,7 @@ bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 
 	TestFalse(TEXT("Failed"), Link.IsEmpty());
 
-	FString ExpectedLink = TEXT("https://global.transak.com/?apiKey=5911d9ec-46b5-48fa-a755-d59a715ff0cf&isNFT=true&calldata=eJzlT0kSwzAI%2BxKrMM9xMHlDn9%2Bk90w742N1kgABoheoQThBD7DpOY7oijjYIXPROmMVbDIE6dVWMeaT%2Fzf0np1l0%2F8Yn7Qss9yk%2BvTWwdzMeamgNapIl5eq5855693%2Fp%2B4tIP5vv6gtJDoMDhMKD7014uKGARdyhQeHXxMN%2FVRulmGRd9fMjs0UX%2FEGjwG76g%3D%3D&contractId=674eb5613d739107bbd18ed2&cryptoCurrencyCode=USDC&estimatedGasLimit=500000&nftData=W3siaW1hZ2VVUkwiOiJodHRwczovL2Rldi1tZXRhZGF0YS5zZXF1ZW5jZS5hcHAvcHJvamVjdHMvMTAxMC9jb2xsZWN0aW9ucy8zOTQvdG9rZW5zLzEvaW1hZ2UucG5nIiwibmZ0TmFtZSI6IktlYXRvbiBULTMyMiIsImNvbGxlY3Rpb25BZGRyZXNzIjoiMHhkZWIzOThmNDFjY2QyOTBlZTUxMTRkZjdlNDk4Y2YwNGZhYzkxNmNiIiwidG9rZW5JRCI6WyIxIl0sInByaWNlIjpbMC4wMl0sInF1YW50aXR5IjoxLCJuZnRUeXBlIjoiRVJDMTE1NSJ9XQ%3D%3D&walletAddress=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07&disableWalletAddressForm=true&partnerOrderId=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07-");
+	FString ExpectedLink = TEXT("https://global.transak.com/?apiKey=5911d9ec-46b5-48fa-a755-d59a715ff0cf&isNFT=true&calldata=eJzlj8kRAzEIBFPiHKRwtAjF4PCt9X%2BrXNbT82KA5qAXqEBYoAfZ8N6uqIy42CFj0lwxEzYYgu5ZltHGE%2F%2Bd6gxnOeQf3ydN6z3dJGt5aWMu5r5d0GyZpNNT1fvJeqvT%2B%2FOM3xP%2BmxeziY4Kg8OEwkNvj9ixocGFXOHB4bujoJ%2FMjkK2Z%2BRdN7Pr8I%2Bf9Qb63cD0&contractId=674eb5613d739107bbd18ed2&cryptoCurrencyCode=USDC&estimatedGasLimit=500000&nftData=W3siaW1hZ2VVUkwiOiJodHRwczovL2Rldi1tZXRhZGF0YS5zZXF1ZW5jZS5hcHAvcHJvamVjdHMvMTAxMC9jb2xsZWN0aW9ucy8zOTQvdG9rZW5zLzEvaW1hZ2UucG5nIiwibmZ0TmFtZSI6IktlYXRvbiBULTMyMiIsImNvbGxlY3Rpb25BZGRyZXNzIjoiMHhkZWIzOThmNDFjY2QyOTBlZTUxMTRkZjdlNDk4Y2YwNGZhYzkxNmNiIiwidG9rZW5JRCI6WyIxIl0sInByaWNlIjpbMC4wMl0sInF1YW50aXR5IjoxLCJuZnRUeXBlIjoiRVJDMTE1NSJ9XQ%3D%3D&walletAddress=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07&disableWalletAddressForm=true&partnerOrderId=0xD2eFbb2f18bfE3D265b26D2ACe83400A65335a07-");
 	TestTrue(TEXT("TransakNFTCheckoutLink starts with expectedLink"), Link.StartsWith(ExpectedLink));
 
 

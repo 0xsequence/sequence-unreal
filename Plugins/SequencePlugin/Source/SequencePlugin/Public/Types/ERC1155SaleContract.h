@@ -46,17 +46,17 @@ struct FERC1155SaleDetails
     GENERATED_BODY()
 
     UPROPERTY(BlueprintReadWrite, Category = "ERC1155 Sale")
-    FString Cost; // Use FString or a custom BigInt class
+    FString Cost; 
 
     UPROPERTY(BlueprintReadWrite, Category = "ERC1155 Sale")
-    FString SupplyCap; // Same here
+    FString SupplyCap; 
 
     UPROPERTY(BlueprintReadWrite, Category = "ERC1155 Sale")
-    int64 StartTime; // Use int64 for Unix timestamps
+    int64 StartTime; 
 
     UPROPERTY(BlueprintReadWrite, Category = "ERC1155 Sale")
     int64 EndTime;
 
     UPROPERTY(BlueprintReadWrite, Category = "ERC1155 Sale")
-    FString MerkleRoot; // Represent as hex string
+    FString MerkleRoot; 
 };

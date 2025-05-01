@@ -28,11 +28,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Transak")
 	TEnumAsByte<ENetwork> Network;
 
-
-	UPROPERTY(BlueprintReadWrite, Category = "Transak")
-	FTransakContractId TransakContractId;
-
 	static const TMap<ENetwork, FString> TransakContractAddresses;
+
+	UFUNCTION(BlueprintCallable, Category = "Transak")
+	void Initialize(const FString& InWalletAddress, ENetwork InNetwork);
 
 	UFUNCTION(BlueprintCallable, Category = "Transak")
 	FString GetNFTCheckoutLink(const FTransakNFTData& Item, const FString& CallData, const FTransakContractId& ContractId);

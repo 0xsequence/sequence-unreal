@@ -27,7 +27,7 @@ void USequenceMarketplaceBP::ListCurrencies(FOnListCurrencies OnSuccess, FOnFail
 	this->Marketplace->ListCurrencies(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
 }
 
-void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure)
+void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,  FOnFailure OnFailure, FOnGetCollectiblesWithLowestListingsFirst OnSuccess)
 {
 	const TSuccessCallback<FSeqListCollectiblesReturn> OnApiSuccess = [this, OnSuccess](const FSeqListCollectiblesReturn& CollectiblesWithLowestListings)
 	{

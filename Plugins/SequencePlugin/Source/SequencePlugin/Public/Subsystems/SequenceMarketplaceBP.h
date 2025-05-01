@@ -39,7 +39,7 @@ public:
 	void ListCurrencies(FOnListCurrencies OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnGetCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
+	void GetCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, FOnFailure OnFailure, FOnGetCollectiblesWithLowestListingsFirst OnSuccess);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
 	void GetAllCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure);
