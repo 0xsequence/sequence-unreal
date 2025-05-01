@@ -11,10 +11,10 @@ class SEQUENCEPLUGIN_API UERC1155 : public UObject
 	GENERATED_BODY()
 
 public: 
-
 	UERC1155();
 
-	UERC1155(FString ContractAddress, FString Data);
+	UFUNCTION(BlueprintCallable, Category = "ERC1155")
+	static UERC1155* Create(const FString& ContractAddress, const FString& Data);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC1155")
 	FString ContractAddress;
@@ -39,6 +39,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ERC1155")
 	FRawTransaction MakeBatchBurnTransaction(const TArray<int32>& TokenIds, const TArray<int32>& Amounts);
-	
+
+private:
+	void Init(const FString& InContractAddress, const FString& InData);
 };
 

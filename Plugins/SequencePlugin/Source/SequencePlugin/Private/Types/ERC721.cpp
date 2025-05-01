@@ -5,9 +5,16 @@ UERC721::UERC721()
 {
 }
 
-UERC721::UERC721(FString ContractAddress)
+UERC721* UERC721::Create(const FString& ContractAddress)
 {
-	this->ContractAddress = ContractAddress;
+	UERC721* ERC721 = NewObject<UERC721>();
+	ERC721->Init(ContractAddress);
+	return ERC721;
+}
+
+void UERC721::Init(const FString& InContractAddress)
+{
+	this->ContractAddress = InContractAddress;
 }
 
 FRawTransaction UERC721::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)
