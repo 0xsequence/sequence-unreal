@@ -14,9 +14,6 @@
 #include "Marketplace/Structs/SeqGetFloorOrderArgs.h"
 #include "Marketplace/Structs/SeqGetOrderReturn.h"
 #include "Marketplace/Structs/SeqGetSwapPriceArgs.h"
-#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
-#include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
-#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "Marketplace/Structs/SeqListCollectibleOffersReturn.h"
 #include "Marketplace/Structs/SeqListCurrenciesReturn.h"
@@ -54,7 +51,7 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
 	if (AccessKey.IsEmpty())
 	{
-		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
+		SEQ_LOG(Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
 		return;  
 	}
 
@@ -76,15 +73,14 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 		*FString(UTF8_TO_TCHAR(HTTP_Post_Req->GetContent().GetData())).Replace(TEXT("\""), TEXT("\\\""))
 	);
 
-	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
-
+	SEQ_LOG_EDITOR(Display, TEXT("%s"), *CurlCommand);
 
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 		{
 			if (bWasSuccessful)
 			{
 				const FString Content = Response->GetContentAsString();
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
+				SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
 				OnSuccess(Content);
 			}
 			else
@@ -92,68 +88,12 @@ void USequenceMarketplace::HTTPPost(const int64& ChainID, const FString& Endpoin
 				if (Request.IsValid() && Response.IsValid())
 				{
 					const FString ErrorMessage = Response->GetContentAsString();
-					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
+					SEQ_LOG(Error, TEXT("Request failed: %s"), *ErrorMessage);  
 					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
-					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
-				}
-			}
-		});
-
-	// Process the request
-	HTTP_Post_Req->ProcessRequest();
-}
-
-void USequenceMarketplace::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
-	const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
-{
-	const FString RequestURL = "https://api.sequence.app/rpc/API/" + Endpoint;
-
-	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();
-
-	FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
-	if (AccessKey.IsEmpty())
-	{
-		UE_LOG(LogTemp, Error, TEXT("AccessKey is empty! Failed to set HTTP header."));
-		return;  
-	}
-
-	HTTP_Post_Req->SetVerb("POST");
-	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	
-
-	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);	
-	HTTP_Post_Req->SetTimeout(30);
-	HTTP_Post_Req->SetURL(RequestURL);
-	HTTP_Post_Req->SetContentAsString(Args);
-	 
-	UE_LOG(LogTemp, Display, TEXT("body: %s"), *Args);  
-	UE_LOG(LogTemp, Display, TEXT("request: %s"), *RequestURL);  
-
-
-	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
-		{
-			if (bWasSuccessful)
-			{
-				const FString Content = Response->GetContentAsString();
-				UE_LOG(LogTemp, Display, TEXT("Response: %s"), *Content);  
-				OnSuccess(Content);
-			}
-			else
-			{
-				if (Request.IsValid() && Response.IsValid())
-				{
-					const FString ErrorMessage = Response->GetContentAsString();
-					UE_LOG(LogTemp, Error, TEXT("Request failed: %s"), *ErrorMessage);  
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("Request failed: Invalid Request Pointer")); 
+					SEQ_LOG(Error, TEXT("Request failed: Invalid Request Pointer")); 
 					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
 				}
 			}
@@ -174,7 +114,7 @@ template < typename T> FString USequenceMarketplace::BuildArgs(T StructIn)
 	{
 		if (!FJsonObjectConverter::UStructToJsonObjectString<T>(StructIn, Result))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert specified UStruct to a json object\n"));
+			SEQ_LOG(Display, TEXT("Failed to convert specified UStruct to a json object\n"));
 		}
 	}
 	return Result;
@@ -190,7 +130,7 @@ template<typename T> T USequenceMarketplace::BuildResponse(const FString Text)
 
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), JSON_Step))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to convert String: %s to Json object"), *Text);
+		SEQ_LOG(Display, TEXT("Failed to convert String: %s to Json object"), *Text);
 		return T();
 	}
 	//this next line with throw an exception in null is used as an entry in json attributes! we need to remove null entries
@@ -202,7 +142,7 @@ template<typename T> T USequenceMarketplace::BuildResponse(const FString Text)
 	{//use unreal parsing!
 		if (!FJsonObjectConverter::JsonObjectToUStruct<T>(JSON_Step.ToSharedRef(), &Ret_Struct))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
+			SEQ_LOG(Display, TEXT("Failed to convert Json Object: %s to USTRUCT of type T"), *Text);
 			return T();
 		}
 	}
@@ -226,7 +166,7 @@ void USequenceMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(c
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	const FString Endpoint = "ListCollectiblesWithLowestListing";
+	const FString Endpoint = "ListCollectibles";
 	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{LISTING, ContractAddress, Filter, Page});
 	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
 		{
@@ -261,7 +201,7 @@ void USequenceMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
 	TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	const FString Endpoint = "ListCollectibleOffersWithHighestPricedOfferFirst";
+	const FString Endpoint = "ListCollectibles";
 	const FString Args = BuildArgs<FSeqListCollectiblesArgs>(FSeqListCollectiblesArgs{OFFER, ContractAddress, Filter, Page});
 	HTTPPost(ChainID, Endpoint, Args, [this, OnSuccess](const FString& Content)
 		{
@@ -403,144 +343,6 @@ void USequenceMarketplace::GetFloorOrder(const int64 ChainID, const FString& Con
 				OnSuccess(Response.Collectible);
 			}, OnFailure);
 }
-
-void USequenceMarketplace::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
-	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
-	const int SlippagePercentage)
-{
-	const FString EndPoint = "GetSwapPermit2Price";
-	FGetSwapPriceArgs Args {
-		BuyCurrency,
-		SellCurrency,
-		BuyAmount,
-		static_cast<int>(ChainID),
-		SlippagePercentage		
-	};
-	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
-		{
-			FSeqSwapPrice Response;
-			
-			if(!Response.FromResponse(Content))
-			{
-				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-				return;
-			}
-			
-			OnSuccess(Response);
-		}, OnFailure);
-}
-
-void USequenceMarketplace::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
-	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
-	const FFailureCallback& OnFailure, const int SlippagePercentage)
-{
-	const FString EndPoint = "GetSwapPermit2Prices";
-	FGetSwapPricesArgs Args {
-		UserWallet,
-		BuyCurrency,
-		BuyAmount,
-		static_cast<int>(ChainID),
-		SlippagePercentage
-	};
-	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
-		{
-			TArray<FSeqSwapPrice> Response;
-			TSharedPtr<FJsonObject> Json;
-
-			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPrices")))
-			{
-				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-				return;
-			}
-
-			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPrices"));
-
-			for (TSharedPtr<FJsonValue> Value : Array)
-			{
-				FSeqSwapPrice SwapPrice;
-				if (!SwapPrice.FromJson(Value->AsObject()))
-				{
-					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-					return;
-				}
-				Response.Add(SwapPrice);
-			}
-		
-			OnSuccess(Response);
-		}, OnFailure);
-}
-
-void USequenceMarketplace::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
-	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
-	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
-{
-	const FString EndPoint = "GetSwapPermit2Quote";
-
-	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
-	{
-		FGetSwapQuoteArgs Args {
-			UserWallet,
-			BuyCurrency,
-			SellCurrency,
-			BuyAmount,
-			static_cast<int>(ChainID),
-			IncludeApprove,
-			SlippagePercentage
-		};
-		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
-			{
-				FSeqSwapQuote Response;
-			
-				if(!Response.FromResponse(Content))
-				{
-					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-					return;
-				}
-				
-				OnSuccess(Response);
-			}, OnFailure);
-	}, OnFailure, SlippagePercentage);
-}
-
-void USequenceMarketplace::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
-	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
-	const FFailureCallback& OnFailure, const int SlippagePercentage)
-{
-	GetSwapPrice(ChainID, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
-		{
-			long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
-		
-			USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
-			FSeqGetTokenBalancesArgs Args;
-			Args.accountAddress = UserWallet;
-			Args.contractAddress = SellCurrency;
-
-			Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess, SlippagePercentage](const FSeqGetTokenBalancesReturn& TokenBalances)
-				{
-					TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
-					long Have = 0;
-				
-					if(SellCurrencies.Num() > 0)
-					{
-						Have = SellCurrencies[0].balance;
-					}
-				
-					UE_LOG(LogTemp, Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
-
-					if(Have < Required)
-					{
-						const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
-						                                            { *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
-						OnFailure(FSequenceError(InsufficientBalance, ErrorString));
-					}
-					else
-					{
-						OnSuccess();
-					}
-				}, OnFailure);
-		}, OnFailure, SlippagePercentage);
-}
-
 
 // HELPER FUNCTIONS
 void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirstHelper(

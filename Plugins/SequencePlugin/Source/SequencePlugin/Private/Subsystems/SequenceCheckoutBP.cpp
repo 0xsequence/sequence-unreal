@@ -1,24 +1,8 @@
 #include "Subsystems/SequenceCheckoutBP.h"
-
 #include "Sequence/SequenceSdk.h"
-
-void USequenceCheckoutBP::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Initialize"));
-}
-
-void USequenceCheckoutBP::Deinitialize()
-{
-	Super::Deinitialize();
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Deinitialize"));
-}
 
 USequenceCheckoutBP::USequenceCheckoutBP()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SequenceCheckoutBP::Constructor"));
-	
 	this->Checkout = NewObject<USequenceCheckout>();
 }
 
@@ -28,7 +12,7 @@ void USequenceCheckoutBP::GetCheckoutOptions(const FString& WalletAddress,
 {
 	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Options);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -45,7 +29,7 @@ void USequenceCheckoutBP::GetCheckoutOptionsByOrders(const FString& WalletAddres
 {
 	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Options);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -63,7 +47,7 @@ void USequenceCheckoutBP::GetCheckoutOptionsByTokenIdAmounts(const FString& Wall
 {
 	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Options);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -81,7 +65,7 @@ void USequenceCheckoutBP::GetCheckoutOptionsByERC1155Contract(const FString& Wal
 {
 	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Options);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -99,7 +83,7 @@ void USequenceCheckoutBP::GetCheckoutOptionsByERC721Contract(const FString& Wall
 {
 	const TSuccessCallback<FGetCheckoutOptionsResponse> OnApiSuccess = [this, OnSuccess](const FGetCheckoutOptionsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Options);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -117,7 +101,7 @@ void USequenceCheckoutBP::GenerateBuyTransaction(const FString& WalletAddress, c
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -135,7 +119,7 @@ void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, 
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -154,7 +138,7 @@ void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddres
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -173,7 +157,7 @@ void USequenceCheckoutBP::GenerateOfferTransaction(const FString& WalletAddress,
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -191,7 +175,7 @@ void USequenceCheckoutBP::GenerateCancelTransaction(const FString& WalletAddress
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -209,7 +193,7 @@ void USequenceCheckoutBP::GenerateCancelTransactionByOrder(const FString& Wallet
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response);
+		OnSuccess.ExecuteIfBound(Response.Steps);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)

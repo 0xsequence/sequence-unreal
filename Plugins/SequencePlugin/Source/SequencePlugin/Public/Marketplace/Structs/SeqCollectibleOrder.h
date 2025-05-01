@@ -23,7 +23,6 @@ public:
         TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 
         JsonObject->SetObjectField("metadata", TokenMetadata.GetJson());
-
         JsonObject->SetObjectField("order", Order.GetJson());
 
         return JsonObject;
@@ -44,7 +43,6 @@ public:
         {
             Order.Setup(*orderJsonIn->Get());
         }
-
         UE_LOG(LogTemp, Warning, TEXT("seq collectible setup done"));
     }
 };

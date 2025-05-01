@@ -69,7 +69,7 @@ public:
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("No  collectibles  field found in the GetCollectibleOffers response."));
+            SEQ_LOG(Warning, TEXT("No  collectibles  field found in the GetCollectibleOffers response."));
         }
     }
 };

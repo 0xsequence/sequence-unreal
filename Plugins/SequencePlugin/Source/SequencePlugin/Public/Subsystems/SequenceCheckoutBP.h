@@ -10,13 +10,10 @@ class SEQUENCEPLUGIN_API USequenceCheckoutBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCheckoutOptionsResponseSuccess, FGetCheckoutOptionsResponse, Response);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, FGenerateTransactionResponse, Response);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCheckoutOptionsResponseSuccess, FCheckoutOptions, Options);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, TArray<FTransactionStep>, Steps);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCheckoutFailure, FString, Error);
 
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
-	
 public:
 	USequenceCheckoutBP();
 

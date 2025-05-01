@@ -97,15 +97,6 @@ public:
     */
     void Setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
-
-        FString OutputString;
-        TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
-        FJsonSerializer::Serialize(MakeShared<FJsonObject>(json_in), Writer);
-
-        UE_LOG(LogTemp, Warning, TEXT("Received JSON: %s"), *OutputString);
-
-        UE_LOG(LogTemp, Warning, TEXT("seq token meta data setup start"));
-        
         FString tokenIdString;
         if (json_in.TryGetStringField(TEXT("tokenId"), tokenIdString))
         {
@@ -152,8 +143,5 @@ public:
                 }
             }
         }
-
-
-        UE_LOG(LogTemp, Warning, TEXT("seq token meta data setup done"));
     }
 };
