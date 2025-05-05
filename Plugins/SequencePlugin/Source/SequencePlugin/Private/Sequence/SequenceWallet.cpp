@@ -41,9 +41,8 @@ bool USequenceWallet::IsValidSession()
 				{
 					UE_LOG(LogTemp, Error, TEXT("Error recovering session: %s"), *Error.Message);
 					this->SessionState = ESessionState::Invalid;
-					this->Credentials.UnRegisterCredentials();
-					const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
-					Auth->ClearStoredCredentials();
+					this->GetCredentials().UnRegisterCredentials();
+					this->CredentialsStorage->ClearStoredCredentials();
 				this->SessionState = ESessionState::Checking;
 				};
 				this->ListSessions(OnResponse, GenericFailure);
