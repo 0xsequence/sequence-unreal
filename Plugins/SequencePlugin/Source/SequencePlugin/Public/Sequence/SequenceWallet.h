@@ -24,14 +24,116 @@ using TransactionID = FString;
 class UProvider;
 class USequenceRPCManager;
 
+UENUM(Blueprintable)
+enum class ESessionState : uint8
+{
+	Unchecked UMETA(DisplayName = "Unchecked"),
+	Valid UMETA(DisplayName = "Valid"),
+	Invalid UMETA(DisplayName = "Invalid"),
+	Checking UMETA(DisplayName = "Checking"),
+};
+
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
 	GENERATED_BODY()
 
+	virtual void Deinitialize() override;
+private:
+	UPROPERTY()
+	USequenceRPCManager * SequenceRPCManager;
+	
+	UPROPERTY()
+	UIndexer * Indexer;
+
+	UPROPERTY()
+	UProvider * Provider;
+
+	UPROPERTY()
+	FCredentials_BE Credentials;
+
+	UPROPERTY()
+	ESessionState SessionState = ESessionState::Unchecked;
+
 public:
 	USequenceWallet();
 
+	/**
+	 * Gets the SequenceWallet SubSystem,
+	 * this call will attempt to automatically load stored credentials on disk if any.
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
+	 */
+	static TOptional<USequenceWallet*> Get();
+	
+	/**
+	 * Gets the SequenceWallet SubSystem and initialize it with the given credentials
+	 * @param Credentials Credentials used to Initiate USequenceWallet
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
+	 */
+	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials);
+
+	/**
+	 * Gets the SequenceWallet SubSystem and initializes it with the given credentials & ProviderUrl
+	 * @param Credentials Credentials used to Initiate USequenceWallet
+	 * @param ProviderUrl ProviderUrl used to Initiate USequenceWallet
+	 * @return TOptional<USequenceWallet*> Initialized USequenceWallet
+	 */
+	static TOptional<USequenceWallet*> Get(const FCredentials_BE& Credentials, const FString& ProviderUrl);
+
+	/**
+	 * Gets all networks in the system
+	 * @return TArray of all networks
+	 */
+	static TArray<FIdNamePair> GetAllNetworks();
+
+	/**
+	 * Gets all Network Names supported by sequence
+	 * @return A list of all network names in the system
+	 */
+	static TArray<FString> GetAllNetworkNames();
+
+	/**
+	 * Gets a list of all network Ids support by sequence
+	 * @return A list of all network ids in the system
+	 */
+	static TArray<int64> GetAllNetworkIds();
+
+	/**
+	 * Pass in a network Id and receive the name associated with that Id
+	 * @param NetworkIdIn The Id associated with the Network Name
+	 * @return The matching network name, OR an empty FString if nothing was found
+	 */
+	static FString GetNetworkName(const int64 NetworkIdIn);
+
+	/**
+	 * Gets the associated Network Id with the given Network Name
+	 * @param NetworkNameIn The network's name
+	 * @return The associated Id, if none was found returns -1
+	 */
+	static int64 GetNetworkId(const FString& NetworkNameIn);
+
+	/**
+	 * Converts a decimal value like 3.2 and converts it into an amount that the system uses to sendTransactions with
+	 * @param AmountIn The User readable decimal amount ie) 3.2
+	 * @param DecimalsIn The Decimals value associated with the token, IE) USDC is 6
+	 * @return The Converted Decimals amount
+	 */
+	static int64 GetSystemReadableAmount(const float AmountIn, const int64 DecimalsIn);
+
+	/**
+	 * Takes a Received amount and converts it into a user readable amount
+	 * @param AmountIn The received System amount
+	 * @param DecimalsIn The decimal value associated with the Token IE) USDC is 6
+	 * @return The user readable amount
+	 */
+	static float GetUserReadableAmount(const int64 AmountIn, const int64 DecimalsIn);
+
+	/**
+	 * Check if the wallet and stored credentials are registered to a valid session with the Sequence API
+	 * @return true if the wallet is signed in to Sequence API
+	 */
+	bool IsValidSession();
+	
 	/**
 	 * Returns the wallet address of the currently signed in user
 	 * @return wallet address of the currently signed in user

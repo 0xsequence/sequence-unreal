@@ -11,11 +11,10 @@ class SEQUENCEPLUGIN_API UERC20 : public UObject
 	GENERATED_BODY()
 
 public:
-
 	UERC20();
 
-
-	UERC20(FString ContractAddress);
+	UFUNCTION(BlueprintCallable, Category = "ERC20")
+	static UERC20* Create(const FString& ContractAddress);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence")
 	FString ContractAddress;
@@ -31,5 +30,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	FRawTransaction MakeBurnTransaction(const int32 Amount);
+
+private:
+	void Init(const FString& InContractAddress);
 };
  

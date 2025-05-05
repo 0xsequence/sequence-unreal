@@ -5,9 +5,16 @@ UERC20::UERC20()
 {
 }
 
-UERC20::UERC20(FString ContractAddress)
+UERC20* UERC20::Create(const FString& ContractAddress)
 {
-	this->ContractAddress = ContractAddress;
+	UERC20* ERC20 = NewObject<UERC20>();
+	ERC20->Init(ContractAddress);
+	return ERC20;
+}
+
+void UERC20::Init(const FString& InContractAddress)
+{
+	this->ContractAddress = InContractAddress;
 }
 
 FRawTransaction UERC20::MakeGrantRoleTransaction(const FString& role,const FString& ToAddress)

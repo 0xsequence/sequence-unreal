@@ -10,10 +10,10 @@ class SEQUENCEPLUGIN_API UERC721 : public UObject
 	GENERATED_BODY()
 
 public:
-
 	UERC721();
-
-	UERC721(FString ContractAddress);
+	
+	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	static UERC721* Create(const FString& ContractAddress);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC721")
 	FString ContractAddress;
@@ -32,5 +32,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeBatchBurnTransaction(const TArray<int32>& TokenIds);
+
+private:
+	void Init(const FString& InContractAddress);
 };
 
