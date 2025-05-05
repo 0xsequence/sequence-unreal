@@ -61,7 +61,7 @@ TOptional<USequenceWallet*> USequenceWallet::Get()
 {
 	if (USequenceWallet * Wallet = GetSubSystem())
 	{
-		if (Wallet->Credentials.RegisteredValid())
+		if (Wallet->Credentials.RegisteredValid() && Wallet->IsValidSession())
 		{
 			TOptional OptionalWallet(Wallet);
 			return OptionalWallet;
@@ -144,6 +144,39 @@ float USequenceWallet::GetUserReadableAmount(const int64 AmountIn, const int64 D
 {
 	return USequenceSupport::GetUserReadableAmount(AmountIn, DecimalsIn);
 }
+
+bool USequenceWallet::IsValidSession()
+{
+	switch (this->SessionState)
+	{
+		case ESessionState::Valid:
+			return true;
+		case ESessionState::Invalid:
+			return false;
+		case ESessionState::Unchecked:
+			{
+				const TSuccessCallback<TArray<FSeqListSessions_Session>> OnResponse = [this](TArray<FSeqListSessions_Session> Response)
+				{
+					this->SessionState = ESessionState::Valid;
+				};
+
+				const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Error recovering session: %s"), *Error.Message);
+					this->SessionState = ESessionState::Invalid;
+					this->Credentials.UnRegisterCredentials();
+					const USequenceAuthenticator * Auth = NewObject<USequenceAuthenticator>();
+					Auth->ClearStoredCredentials();
+				};
+				this->SessionState = ESessionState::Checking;
+				this->ListSessions(OnResponse, GenericFailure);
+				return true;
+			}
+		default:
+			return true;
+	}
+}
+
 
 void USequenceWallet::Init(const FCredentials_BE& CredentialsIn)
 {
