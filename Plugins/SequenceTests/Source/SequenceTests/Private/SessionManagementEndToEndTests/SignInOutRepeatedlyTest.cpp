@@ -1,6 +1,6 @@
 #include "SignInOutRepeatedlyTest.h"
 #include "Engine/World.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 
@@ -34,24 +34,30 @@ bool FSignInOutRepeatedlyTest::RunTest(const FString& Parameters)
 
 void USignInOutRepeatedlyTestHelper::RunTest()
 {
-    
-    Authenticator = NewObject<USequenceAuthenticator>();
-    if (!Authenticator)
+    Sessions = NewObject<USequenceSessions>();
+    if (!Sessions)
     {
         ParentTest->AddError(TEXT("Error creating authenticator"));
         bTestComplete = true;
         return;
     }
-
-    Authenticator->AuthSuccess.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthSuccess);
-    Authenticator->AuthFailure.AddDynamic(this, &USignInOutRepeatedlyTestHelper::OnAuthFailure);
-
+    
     ConnectAsGuest();
 }
 
 void USignInOutRepeatedlyTestHelper::ConnectAsGuest()
 {
-    Authenticator->GuestLogin(false);
+    const TFunction<void()> OnApiSuccess = [this]()
+    {
+        this->OnAuthSuccess();
+    };
+
+    const FFailureCallback OnApiFailure = [this](const FSequenceError& Error)
+    {
+        this->OnAuthFailure(Error.Message);
+    };
+
+    this->Sessions->StartGuestSession(OnApiSuccess, OnApiFailure);
 }
 
 void USignInOutRepeatedlyTestHelper::OnAuthSuccess()
@@ -59,27 +65,18 @@ void USignInOutRepeatedlyTestHelper::OnAuthSuccess()
     if (Repetitions < MaxRepetitions)
     {
         Repetitions++;
-        if (TOptional<USequenceWallet*> OptionalSequenceWallet = USequenceWallet::Get(); OptionalSequenceWallet.IsSet() && OptionalSequenceWallet.GetValue())
-        {
-            
-            TSet<FString> UniqueSessionIds(SessionIds);
-            bool bAllSessionIdsUnique = UniqueSessionIds.Num() == SessionIds.Num();
-            if (!bAllSessionIdsUnique)
-            {
-                bTestComplete = true;
-                ParentTest->AddError(TEXT("Session Ids are not unique"));
-                return;
-            }
-            
-            SessionIds.Add(OptionalSequenceWallet.GetValue()->GetSessionId());
-            OptionalSequenceWallet.GetValue()->SignOut();
-        }
-        else
+        const USequenceWallet* Wallet = NewObject<USequenceWallet>();
+        TSet<FString> UniqueSessionIds(SessionIds);
+        bool bAllSessionIdsUnique = UniqueSessionIds.Num() == SessionIds.Num();
+        if (!bAllSessionIdsUnique)
         {
             bTestComplete = true;
-            ParentTest->AddError(TEXT("Failed to get SequenceWallet"));
+            ParentTest->AddError(TEXT("Session Ids are not unique"));
             return;
         }
+            
+        SessionIds.Add(Wallet->GetSessionId());
+        Wallet->SignOut();
         ConnectAsGuest();
     }
     else

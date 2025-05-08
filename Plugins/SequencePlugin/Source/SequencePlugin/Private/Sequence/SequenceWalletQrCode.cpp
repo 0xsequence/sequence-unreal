@@ -1,22 +1,14 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
-#include "../../Public/Sequence/SequenceWalletQrCode.h"
-
+#include "Sequence/SequenceWalletQrCode.h"
 #include "ObjectHandler.h"
 #include "Misc/Base64.h"
 #include "Util/Log.h"
-#include "Sequence/SequenceAPI.h"
+#include "Sequence/SequenceWallet.h"
 
 void USequenceWalletQrCode::LoadQrImage()
 {
-	const TOptional<USequenceWallet*> WalletOptional = USequenceWallet::Get();
-	if (!WalletOptional.IsSet() || !WalletOptional.GetValue())
-	{
-		SEQ_LOG(Display, TEXT("Wallet not defined."));
-		return;
-	}
-
-	const USequenceWallet* Wallet = WalletOptional.GetValue();
+	const USequenceWallet* Wallet = NewObject<USequenceWallet>();
 	UObjectHandler* ObjectHandler = NewObject<UObjectHandler>();
 	ObjectHandler->SetupCustomFormat(true, EImageFormat::GrayscaleJPEG);
 
@@ -27,7 +19,6 @@ void USequenceWalletQrCode::LoadQrImage()
 		TMap<FString, UTexture2D*> Images = ObjectHandler->GetProcessedImages();
 		if (Images.Contains(QrCodeUrl))
 		{
-			SEQ_LOG_EDITOR(Error, TEXT("Successfully downloaded QR Code."));
 			this->Texture = *Images.Find(QrCodeUrl);
 			this->OnTextureChanged.Broadcast();
 		}

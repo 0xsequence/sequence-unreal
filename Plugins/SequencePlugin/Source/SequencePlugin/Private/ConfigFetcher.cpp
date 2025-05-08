@@ -3,12 +3,13 @@
 #include "ConfigFetcher.h"
 #include "Misc/ConfigCacheIni.h"
 #include "CoreGlobals.h"
-	
+#include "Util/Log.h"
+
 FString UConfigFetcher::GetConfigVar(const FString& ConfigKey)
 {
 	if(!GConfig)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[GConfig Error]"));
+		SEQ_LOG(Error, TEXT("[GConfig Error]"));
 		return "";
 	}
  
@@ -21,7 +22,7 @@ FString UConfigFetcher::GetConfigVar(const FString& ConfigKey)
 		return value;
 	}
 	
-	UE_LOG(LogTemp, Error, TEXT("[Error reading config file, Please ensure SequenceConfig.ini is setup correctly]"));
+	SEQ_LOG(Error, TEXT("[Error reading config file, Please ensure SequenceConfig.ini is setup correctly]"));
 	return "";
 }
 

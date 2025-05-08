@@ -5,6 +5,7 @@
 #include "Eth/Crypto.h"
 #include "Internationalization/Regex.h"
 #include "Types/BinaryData.h"
+#include "Util/Log.h"
 
 TFixedABIData ABI::UInt32(uint32 Input)
 {
@@ -75,7 +76,7 @@ TOptional<FUnsizedData> ABI::Encode(FString Signature, TArray<TSharedPtr<ABIElem
 {
 	if(!IsValidSignature(Signature))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Invalid signature! Remember that ABI signatures should only contain argument types without spaces and NOT names."));
+		SEQ_LOG(Display, TEXT("Invalid signature! Remember that ABI signatures should only contain argument types without spaces and NOT names."));
 		return TOptional<FUnsizedData>();
 	}
 	

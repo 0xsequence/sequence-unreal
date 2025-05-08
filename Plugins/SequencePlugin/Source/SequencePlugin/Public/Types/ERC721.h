@@ -15,22 +15,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ERC721")
 	static UERC721* Create(const FString& ContractAddress);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "ERC721")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC721")
 	FString ContractAddress;
 
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeGrantRoleTransaction(const FString& role, const FString& ToAddress);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeApproveTransaction(const FString& ToAddress, const int32 TokenId);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeMintTransaction(const FString& ToAddress, const int32 TokenId);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeBurnTransaction(const int32 TokenId);
 
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	FRawTransaction MakeBatchBurnTransaction(const TArray<int32>& TokenIds);
 
 private:

@@ -16,7 +16,7 @@ struct SEQUENCEPLUGIN_API FSeqTokenList
     GENERATED_USTRUCT_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     TArray<FString> token_list;
 
     // Default constructor

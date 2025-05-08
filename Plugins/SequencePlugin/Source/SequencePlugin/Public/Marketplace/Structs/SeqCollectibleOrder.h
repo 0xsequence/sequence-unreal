@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "SeqOrder.h"
-#include "Marketplace/Marketplace_Enums.h"
+#include "Dom/JsonObject.h"
 #include "SeqCollectibleOrder.generated.h"
 
 USTRUCT(BlueprintType)
@@ -12,7 +12,6 @@ struct SEQUENCEPLUGIN_API FSeqCollectibleOrder
     GENERATED_USTRUCT_BODY()
 
 public:
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Order")
     FSeqTokenMetaData TokenMetadata;
 
@@ -24,7 +23,6 @@ public:
         TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 
         JsonObject->SetObjectField("metadata", TokenMetadata.GetJson());
-
         JsonObject->SetObjectField("order", Order.GetJson());
 
         return JsonObject;

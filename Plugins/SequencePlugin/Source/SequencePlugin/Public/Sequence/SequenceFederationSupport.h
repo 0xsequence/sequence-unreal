@@ -9,7 +9,7 @@ enum ESequenceLoginType
 	Email UMETA(DisplayName = "Email"),
 	OIDC_Google UMETA(DisplayName = "OIDC Google"),
 	OIDC_Apple UMETA(DisplayName = "OIDC Apple"),
-	PlayFab UMETA(DisplayName = "PlayFab"),
+	SequencePlayFab UMETA(DisplayName = "PlayFab"),
 	Guest UMETA(DisplayName = "Guest")
 };
 

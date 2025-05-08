@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
 #include "Util/SequenceSupport.h"
 #include "SeqPropertyFilter.h"  
 #include "Marketplace/Marketplace_Enums.h"
@@ -14,7 +15,7 @@ struct SEQUENCEPLUGIN_API FSeqCollectiblesFilter
 public:
     // Properties
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
-    bool bIncludeEmpty =true;
+    bool bIncludeEmpty = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     FString SearchText;
@@ -36,6 +37,11 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     TArray<FString> OrdersNotCreatedBy;
+
+    static FSeqCollectiblesFilter Empty()
+    {
+        return FSeqCollectiblesFilter{};
+    }
 
     bool ContainsData()
     {

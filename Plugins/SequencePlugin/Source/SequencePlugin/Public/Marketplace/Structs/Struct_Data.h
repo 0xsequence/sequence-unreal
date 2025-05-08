@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Marketplace/Marketplace_Enums.h"
-#include "SeqGetCollectiblesWithLowestListingsArgs.h"
-#include "SeqGetCollectiblesWithLowestListingsReturn.h"
+#include "SeqListCollectiblesArgs.h"
+#include "SeqListCollectiblesReturn.h"
 #include "SeqCollectiblesFilter.h"
 #include "SeqPropertyFilter.h"
 #include "SeqMarketplaceSortBy.h"

@@ -36,6 +36,8 @@ public class SequenceTests : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+				"Json",
+				"JsonUtilities",
 				"Slate",
 				"SlateCore", 
 				"SequencePlugin",

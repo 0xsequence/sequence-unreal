@@ -39,8 +39,8 @@ void FIndexerGetEtherBalanceTest::GetTests(TArray<FString>& OutBeautifiedNames, 
 
 bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
-    const FString& TestAddress = IndexerEndToEndTestsCommon::TestAddress;
+    const int64 PolygonNetworkId = MarketplaceEndToEndTestsCommon::PolygonNetworkId;
+    const FString& TestAddress = MarketplaceEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
     const TSuccessCallback<FSeqEtherBalance> GenericSuccess = [this, IndexerRequestsTestData, TestAddress](const FSeqEtherBalance& Balance)
@@ -62,7 +62,7 @@ bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
 
     AddInfo(FString::Printf(TEXT("Starting GetEtherBalance request")));
 
-    IndexerRequestsTestData->GetIndexer()->GetEtherBalance(PolygonNetworkId, TestAddress, GenericSuccess, GenericFailure);
+    IndexerRequestsTestData->GetIndexer()->GetNativeTokenBalance(PolygonNetworkId, TestAddress, GenericSuccess, GenericFailure);
     
     ADD_LATENT_AUTOMATION_COMMAND(FIsDoneGetEtherBalance(IndexerRequestsTestData, this));
     return true;
