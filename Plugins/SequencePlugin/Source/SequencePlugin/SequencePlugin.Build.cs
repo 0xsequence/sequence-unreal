@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using System.IO;

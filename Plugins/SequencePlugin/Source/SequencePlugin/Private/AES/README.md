@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 ![CI](https://github.com/kokke/tiny-AES-c/workflows/CI/badge.svg)
 ### Tiny AES in C
 

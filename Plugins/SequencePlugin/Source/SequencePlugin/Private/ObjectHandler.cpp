@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #include "ObjectHandler.h"
 #include "TextureResource.h"
 #include "Util/Log.h"

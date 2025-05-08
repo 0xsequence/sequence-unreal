@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 
 #include "Sequence/SequenceWallet.h"
 #include "Dom/JsonObject.h"

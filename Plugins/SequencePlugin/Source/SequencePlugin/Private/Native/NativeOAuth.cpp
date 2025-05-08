@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #include "NativeOAuth.h"
 #include "AppleBridge.h"
 #include "Async/TaskGraphInterfaces.h"

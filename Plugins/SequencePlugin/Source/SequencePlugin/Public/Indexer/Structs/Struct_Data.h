@@ -1,4 +1,4 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
+
 #pragma once
 #include "Indexer/Indexer_Enums.h"
 #include "SeqContractInfo.h"
