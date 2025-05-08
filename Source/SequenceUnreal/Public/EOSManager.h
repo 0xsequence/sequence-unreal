@@ -14,7 +14,7 @@ class SEQUENCEUNREAL_API UEOSManager : public UObject
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCallbackValue, const FString&, SignedMessage);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCallbackValue, const FString&, Value);
 	DECLARE_DYNAMIC_DELEGATE(FOnCallback);
 
 public:
