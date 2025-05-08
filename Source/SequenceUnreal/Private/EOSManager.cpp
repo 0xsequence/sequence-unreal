@@ -57,6 +57,13 @@ void UEOSManager::Initialize()
 
 void UEOSManager::LoginWithEpicAccountServices(FOnCallback OnSuccess, FOnCallback OnFailure)
 {
+	if (!this->EosPlatform)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to login. EOS Platform is null, please Initialize."));
+		OnFailure.ExecuteIfBound();
+		return;
+	}
+	
 	this->EosAuth = EOS_Platform_GetAuthInterface(this->EosPlatform);
 	
 	EOS_Auth_Credentials Credentials = {};
@@ -75,7 +82,7 @@ void UEOSManager::LoginWithEpicAccountServices(FOnCallback OnSuccess, FOnCallbac
 	
 	EOS_Auth_Login(this->EosAuth, &LoginOptions, ClientData,[](const EOS_Auth_LoginCallbackInfo* Data)
 	{
-		FEosLoginContext* Context = static_cast<FEosLoginContext*>(Data->ClientData);
+		const FEosLoginContext* Context = static_cast<FEosLoginContext*>(Data->ClientData);
 		if (Data->ResultCode == EOS_EResult::EOS_Success)
 		{
 			const EOS_EpicAccountId EpicId = Data->LocalUserId;
@@ -105,7 +112,7 @@ void UEOSManager::CopyEpicAccountAccessToken(FOnCallbackValue OnSuccess, FOnCall
 	};
 	
 	EOS_Auth_Token* AuthToken = nullptr;
-	EOS_EResult Result = EOS_Auth_CopyUserAuthToken(this->EosAuth, &TokenOptions, this->EpicAccountId, &AuthToken);
+	const EOS_EResult Result = EOS_Auth_CopyUserAuthToken(this->EosAuth, &TokenOptions, this->EpicAccountId, &AuthToken);
 
 	if (Result == EOS_EResult::EOS_Success && AuthToken)
 	{
