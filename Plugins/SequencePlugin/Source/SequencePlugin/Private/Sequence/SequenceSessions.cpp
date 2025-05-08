@@ -1,5 +1,3 @@
-
-
 #include "Sequence/SequenceSessions.h"
 #include "IWebBrowserCookieManager.h"
 #include "IWebBrowserSingleton.h"

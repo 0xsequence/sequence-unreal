@@ -1,4 +1,3 @@
-
 #include "Types/BinaryData.h"
 #include "VectorTypes.h"
 #include "Util/HexUtility.h"

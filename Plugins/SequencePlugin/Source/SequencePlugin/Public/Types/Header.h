@@ -1,4 +1,3 @@
-
 #pragma once
 #include "BinaryData.h"
 #include "Dom/JsonObject.h"

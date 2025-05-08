@@ -1,4 +1,3 @@
-
 #pragma once
 #include "Types/BinaryData.h"
 #include "Types/Types.h"

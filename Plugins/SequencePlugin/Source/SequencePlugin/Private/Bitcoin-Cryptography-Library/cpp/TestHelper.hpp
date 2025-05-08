@@ -1,4 +1,3 @@
-
 /* 
  * Helper definitions and functions for runnable test suite programs.
  * 

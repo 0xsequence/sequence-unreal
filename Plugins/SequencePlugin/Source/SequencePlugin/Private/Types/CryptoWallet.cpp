@@ -1,4 +1,3 @@
-
 #include "Types/CryptoWallet.h"
 #include "Eth/EthTransaction.h"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"

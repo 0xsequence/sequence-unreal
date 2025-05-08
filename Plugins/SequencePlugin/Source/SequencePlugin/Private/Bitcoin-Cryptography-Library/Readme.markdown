@@ -1,4 +1,3 @@
-
 Nayuki's Bitcoin cryptography library
 =====================================
 

@@ -1,5 +1,3 @@
-
-
 #pragma once
 #include "CoreMinimal.h"
 #include "Sequence/FeeOption.h"

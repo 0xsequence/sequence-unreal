@@ -1,4 +1,3 @@
-
 ![CI](https://github.com/kokke/tiny-AES-c/workflows/CI/badge.svg)
 ### Tiny AES in C
 

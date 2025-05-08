@@ -1,6 +1,4 @@
-﻿
-
-#pragma once
+﻿#pragma once
 
 #if PLATFORM_IOS || PLATFORM_MAC
 

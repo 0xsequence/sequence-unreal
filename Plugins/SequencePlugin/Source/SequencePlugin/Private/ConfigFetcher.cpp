@@ -1,5 +1,3 @@
-
-
 #include "ConfigFetcher.h"
 #include "Misc/ConfigCacheIni.h"
 #include "CoreGlobals.h"

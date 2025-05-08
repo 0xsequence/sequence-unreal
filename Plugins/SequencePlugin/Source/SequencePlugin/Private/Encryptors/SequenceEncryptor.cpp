@@ -1,5 +1,3 @@
-
-
 #include "SequenceEncryptor.h"
 #include "ConfigFetcher.h"
 #include "Util/Log.h"

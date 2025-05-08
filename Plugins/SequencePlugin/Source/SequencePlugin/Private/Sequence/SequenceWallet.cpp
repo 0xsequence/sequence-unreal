@@ -1,5 +1,3 @@
-
-
 #include "Sequence/SequenceWallet.h"
 #include "Dom/JsonObject.h"
 #include "Kismet/GameplayStatics.h"

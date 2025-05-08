@@ -1,5 +1,3 @@
-
-
 #include "ABI/ABI.h"
 #include "ABI/ABIElement.h"
 #include "Eth/Crypto.h"

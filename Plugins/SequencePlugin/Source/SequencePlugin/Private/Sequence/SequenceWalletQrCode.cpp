@@ -1,5 +1,3 @@
-
-
 #include "Sequence/SequenceWalletQrCode.h"
 #include "ObjectHandler.h"
 #include "Misc/Base64.h"

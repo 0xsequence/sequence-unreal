@@ -1,5 +1,3 @@
-
-
 #include "Subsystems/SequenceWalletBP.h"
 #include "Engine/Engine.h"
 #include "Sequence/SequenceWallet.h"

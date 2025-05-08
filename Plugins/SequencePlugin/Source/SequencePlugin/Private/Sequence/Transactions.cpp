@@ -1,5 +1,3 @@
-
-
 #include "Sequence/Transactions.h"
 
 void UTransactions::AddERC20(const FERC20Transaction& Item)

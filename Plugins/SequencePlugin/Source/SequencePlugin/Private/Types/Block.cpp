@@ -1,4 +1,3 @@
-
 #include "Types/Block.h"
 
 FBlock::~FBlock()

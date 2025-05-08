@@ -1,4 +1,3 @@
-
 #include "ObjectHandler.h"
 #include "TextureResource.h"
 #include "Util/Log.h"

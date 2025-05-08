@@ -1,5 +1,4 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4146)
 #pragma warning(disable: 4104)

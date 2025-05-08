@@ -1,5 +1,3 @@
-
-
 #include "Subsystems/SequenceIndexerBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"

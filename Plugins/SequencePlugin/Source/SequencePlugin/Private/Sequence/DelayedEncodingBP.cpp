@@ -1,5 +1,3 @@
-
-
 #include "Sequence/DelayedEncodingBP.h"
 #include "Util/SequenceSupport.h"
 #include "Sequence/DelayedEncodingArgsBP.h"

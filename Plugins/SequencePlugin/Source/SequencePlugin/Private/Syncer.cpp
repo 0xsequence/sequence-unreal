@@ -1,5 +1,3 @@
-
-
 #include "Syncer.h"
 
 #include "Util/Log.h"

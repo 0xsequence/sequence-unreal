@@ -1,4 +1,3 @@
-
 #include "Types/ContractCall.h"
 #include "Util/HexUtility.h"
 #include "Util/JsonBuilder.h"

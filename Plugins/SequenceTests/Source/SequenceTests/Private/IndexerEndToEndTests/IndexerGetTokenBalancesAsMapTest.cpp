@@ -1,5 +1,3 @@
-
-
 #include "CoreMinimal.h"
 #include "Helpers/IndexerEndToEndTestsCommon.h"
 #include "Misc/AutomationTest.h"

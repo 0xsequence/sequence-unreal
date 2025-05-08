@@ -1,4 +1,3 @@
-
 #include "RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"

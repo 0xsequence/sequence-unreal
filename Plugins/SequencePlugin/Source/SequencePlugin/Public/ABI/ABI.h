@@ -1,4 +1,3 @@
-
 #pragma once
 #include "ABIElement.h"
 #include "Types/BinaryData.h"

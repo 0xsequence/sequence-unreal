@@ -1,5 +1,3 @@
-
-
 #pragma once
 #include "CoreMinimal.h"
 #include "AuthenticationDataTypes.generated.h"

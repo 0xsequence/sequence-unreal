@@ -1,5 +1,3 @@
-
-
 #include "CoreMinimal.h"
 #include "Helpers/IndexerEndToEndTestsCommon.h"
 #include "Helpers/IndexerRequestsTestData.h"

@@ -1,5 +1,3 @@
-
-
 #include "Util/SequenceSupport.h"
 
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"

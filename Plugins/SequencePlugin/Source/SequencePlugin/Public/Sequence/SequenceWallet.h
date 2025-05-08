@@ -1,5 +1,3 @@
-
-
 #pragma once
 #include "Credentials.h"
 #include "Indexer/Structs/Struct_Data.h"

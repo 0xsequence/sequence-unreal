@@ -1,4 +1,3 @@
-
 /* 
  * Bitcoin cryptography library
  * Copyright (c) Project Nayuki

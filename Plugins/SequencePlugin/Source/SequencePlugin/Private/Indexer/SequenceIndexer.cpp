@@ -1,5 +1,3 @@
-
-
 #include "Indexer/SequenceIndexer.h"
 #include "ConfigFetcher.h"
 #include "Util/Async.h"

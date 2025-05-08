@@ -1,4 +1,3 @@
-
 /* 
  * A runnable main program that calculates and prints the approximate
  * number of 32-bit arithmetic operations needed to perform

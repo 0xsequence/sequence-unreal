@@ -1,4 +1,3 @@
-
 #include "AppleBridge.h"
 #include <iostream>
 #include <string>

@@ -1,5 +1,3 @@
-
-
 #include "Marketplace/SequenceMarketplace.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"

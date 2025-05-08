@@ -1,4 +1,3 @@
-
 package com.Plugins.SequencePlugin;
 
 import android.app.Activity;

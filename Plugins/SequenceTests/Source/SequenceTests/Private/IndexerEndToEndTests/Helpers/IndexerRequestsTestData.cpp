@@ -1,5 +1,3 @@
-
-
 #include "IndexerRequestsTestData.h"
 #include "SequencePlugin/Public/Indexer/SequenceIndexer.h"
 

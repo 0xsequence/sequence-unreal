@@ -1,4 +1,3 @@
-
 #include "Types/TransactionReceipt.h"
 
 FTransactionReceipt JsonToTransactionReceipt(TSharedPtr<FJsonObject> Json)

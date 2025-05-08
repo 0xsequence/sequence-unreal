@@ -1,4 +1,3 @@
-
 #include "Eth/EthTransaction.h"
 #include "Types/BinaryData.h"
 #include "Eth/Crypto.h"

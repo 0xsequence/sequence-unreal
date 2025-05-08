@@ -1,4 +1,3 @@
-
 #include "Eth/Crypto.h"
 #include "Util/HexUtility.h"
 #include "Eth/RLP.h"

@@ -1,4 +1,3 @@
-
 #pragma once
 #include "Indexer/Indexer_Enums.h"
 #include "SeqContractInfo.h"

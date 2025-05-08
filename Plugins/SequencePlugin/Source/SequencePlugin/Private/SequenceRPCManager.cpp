@@ -1,5 +1,3 @@
-
-
 #include "SequenceRPCManager.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"
