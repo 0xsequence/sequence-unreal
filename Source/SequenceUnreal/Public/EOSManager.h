@@ -30,6 +30,7 @@ public:
 	void Initialize();
 
 private:
+	static char* GetConfigValue(const FString& Key);
 	EOS_HPlatform EosPlatform = nullptr;
 
 #pragma endregion

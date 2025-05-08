@@ -1,6 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 
 #include "EOSManager.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/Paths.h"
 
 struct FEosLoginContext
@@ -31,12 +32,12 @@ void UEOSManager::Initialize()
 
 	EOS_Platform_Options PlatformOptions = {};
 	PlatformOptions.ApiVersion = EOS_PLATFORM_OPTIONS_API_LATEST;
-	PlatformOptions.ProductId = "";
-	PlatformOptions.SandboxId = "";
-	PlatformOptions.DeploymentId = "";
-	PlatformOptions.ClientCredentials.ClientId = "";
-	PlatformOptions.ClientCredentials.ClientSecret = "";
-	PlatformOptions.EncryptionKey = "";
+	PlatformOptions.ProductId = GetConfigValue("ProductId");
+	PlatformOptions.SandboxId = GetConfigValue("SandboxId");
+	PlatformOptions.DeploymentId = GetConfigValue("DeploymentId");
+	PlatformOptions.ClientCredentials.ClientId = GetConfigValue("ClientId");
+	PlatformOptions.ClientCredentials.ClientSecret = GetConfigValue("ClientSecret");
+	PlatformOptions.EncryptionKey = GetConfigValue("EncryptionKey");
 	PlatformOptions.TickBudgetInMilliseconds = 0;
 	PlatformOptions.CacheDirectory = TCHAR_TO_UTF8(*CacheDirectory);
 	PlatformOptions.OverrideCountryCode = nullptr;
@@ -224,4 +225,33 @@ void UEOSManager::CopyConnectIdToken(FOnCallbackValue OnSuccess, FOnCallback OnF
 		UE_LOG(LogTemp, Error, TEXT("Failed to copy ID token: %s"), *FString(EOS_EResult_ToString(Result)));
 		OnFailure.ExecuteIfBound();
 	}
+}
+
+char* UEOSManager::GetConfigValue(const FString& Key)
+{
+	if(!GConfig)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GConfig error"));
+		return const_cast<char*>("");
+	}
+ 
+	FString Value;
+	const FString Section = "/Script/EosConfig.Config";
+	const FString Filename = FConfigCacheIni::NormalizeConfigIniPath(FPaths::ProjectConfigDir() + TEXT("/EosConfig.ini"));
+	
+	GConfig->Flush(true, Filename);
+	if (GConfig->GetString(GetData(Section), GetData(Key),Value,GetData(Filename)))
+	{
+		const FTCHARToUTF8 Converter(*Value);
+		const int32 Length = Converter.Length();
+
+		char* CharBuffer = new char[Length + 1];
+		FMemory::Memcpy(CharBuffer, Converter.Get(), Length);
+		CharBuffer[Length] = '\0';
+		
+		return CharBuffer;
+	}
+	
+	UE_LOG(LogTemp, Error, TEXT("Error reading config file, ensure EosConfig.ini is setup correctly."));
+	return const_cast<char*>("");
 }
