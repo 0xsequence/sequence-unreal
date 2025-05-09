@@ -98,13 +98,12 @@ void UEOSManager::LoginWithEpicAccountServices(FOnCallback OnSuccess, FOnCallbac
 	});	
 }
 
-void UEOSManager::CopyEpicAccountAccessToken(FOnCallbackValue OnSuccess, FOnCallback OnFailure)
+FString UEOSManager::CopyEpicAccountAccessToken()
 {
 	if (!this->EpicAccountId)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to get Access Token. Epic Account Id is null."));
-		OnFailure.ExecuteIfBound();
-		return;
+		return TEXT("");
 	}
 	
 	EOS_Auth_CopyUserAuthTokenOptions TokenOptions
@@ -120,14 +119,12 @@ void UEOSManager::CopyEpicAccountAccessToken(FOnCallbackValue OnSuccess, FOnCall
 		const FString AccessToken = FString(AuthToken->AccessToken);
 		UE_LOG(LogTemp, Log, TEXT("Epic Account Services Access Token: %s"), *AccessToken);
 		
-		OnSuccess.ExecuteIfBound(AccessToken);
 		EOS_Auth_Token_Release(AuthToken);
+		return AccessToken;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to copy user auth token: %s"), *FString(EOS_EResult_ToString(Result)));
-		OnFailure.ExecuteIfBound();
-	}
+	
+	UE_LOG(LogTemp, Error, TEXT("Failed to copy user auth token: %s"), *FString(EOS_EResult_ToString(Result)));
+	return TEXT("");
 }
 
 // EOS Connect Services
@@ -203,7 +200,7 @@ void UEOSManager::LoginWithConnectServices(const FString& ExternalToken, FOnCall
 	});
 }
 
-void UEOSManager::CopyConnectIdToken(FOnCallbackValue OnSuccess, FOnCallback OnFailure)
+FString UEOSManager::CopyConnectIdToken()
 {
 	EOS_Connect_CopyIdTokenOptions Options = {};
 	Options.ApiVersion = EOS_CONNECT_COPYIDTOKEN_API_LATEST;
@@ -217,14 +214,12 @@ void UEOSManager::CopyConnectIdToken(FOnCallbackValue OnSuccess, FOnCallback OnF
 		const FString Jwt = UTF8_TO_TCHAR(IdToken->JsonWebToken);
 		UE_LOG(LogTemp, Log, TEXT("Connect Services Id Token: %s"), *Jwt);
 		
-		OnSuccess.ExecuteIfBound(Jwt);
 		EOS_Connect_IdToken_Release(IdToken);
+		return Jwt;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to copy ID token: %s"), *FString(EOS_EResult_ToString(Result)));
-		OnFailure.ExecuteIfBound();
-	}
+	
+	UE_LOG(LogTemp, Error, TEXT("Failed to copy ID token: %s"), *FString(EOS_EResult_ToString(Result)));
+	return TEXT("");
 }
 
 char* UEOSManager::GetConfigValue(const FString& Key)

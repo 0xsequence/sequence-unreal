@@ -14,7 +14,6 @@ class SEQUENCEUNREAL_API UEOSManager : public UObject
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCallbackValue, const FString&, Value);
 	DECLARE_DYNAMIC_DELEGATE(FOnCallback);
 
 public:
@@ -42,7 +41,7 @@ public:
 	void LoginWithEpicAccountServices(FOnCallback OnSuccess, FOnCallback OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
-	void CopyEpicAccountAccessToken(FOnCallbackValue OnSuccess, FOnCallback OnFailure);
+	FString CopyEpicAccountAccessToken();
 
 private:
 	EOS_HAuth EosAuth = nullptr;
@@ -57,7 +56,7 @@ public:
 	void LoginWithConnectServices(const FString& ExternalToken, FOnCallback OnSuccess, FOnCallback OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
-	void CopyConnectIdToken(FOnCallbackValue OnSuccess, FOnCallback OnFailure);
+	FString CopyConnectIdToken();
 
 private:
 	EOS_HConnect EosConnect = nullptr;
