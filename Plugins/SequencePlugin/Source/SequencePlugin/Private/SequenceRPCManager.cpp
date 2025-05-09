@@ -770,21 +770,7 @@ void USequenceRPCManager::OpenEmailSession(const FString& CodeIn, const bool For
 
 	const FFailureCallback OnResponseFailure = [this, OpenSessionData, OnFailure, OnFederationRequired](const FSequenceError& Error)
 	{
-		const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Error.Message);
-		if (ErrorResponse.IsEmailInUseError())
-		{
-			this->Cached_OpenSessionData = OpenSessionData;
-			const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
-			this->PreserveSessionWallet = true;
-			OnFederationRequired(FederationData);
-
-			SEQ_LOG(Display, TEXT("Federation required for Email"));
-		}
-		else
-		{
-			const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Error.Message);
-			OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
-		}
+		this->CheckErrorResponseForFederation(Error.Message, OpenSessionData, OnFailure, OnFederationRequired);
 	};
 	
 	this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
@@ -835,21 +821,7 @@ void USequenceRPCManager::OpenOIDCSession(const FString& IdTokenIn, const bool F
 
 			const FFailureCallback OnResponseFailure = [this, OpenSessionData, OnFailure, OnFederationRequired](const FSequenceError& Error)
 			{
-				const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Error.Message);
-				if (ErrorResponse.IsEmailInUseError())
-				{
-					this->Cached_OpenSessionData = OpenSessionData;
-					const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
-					this->PreserveSessionWallet = true;
-					OnFederationRequired(FederationData);
-
-					SEQ_LOG(Display, TEXT("Federation required for Email"));
-				}
-				else
-				{
-					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Error.Message);
-					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
-				}
+				this->CheckErrorResponseForFederation(Error.Message, OpenSessionData, OnFailure, OnFederationRequired);
 			};
 			
 			this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
@@ -915,21 +887,7 @@ void USequenceRPCManager::OpenPlayFabSession(const FString& SessionTicketIn, con
 
 			const FFailureCallback OnResponseFailure = [this, OpenSessionData, OnFailure, OnFederationRequired](const FSequenceError& Error)
 			{
-				const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Error.Message);
-				if (ErrorResponse.IsEmailInUseError())
-				{
-					this->Cached_OpenSessionData = OpenSessionData;
-					const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
-					this->PreserveSessionWallet = true;
-					OnFederationRequired(FederationData);
-
-					SEQ_LOG(Display, TEXT("Federation required for Email"));
-				}
-				else
-				{
-					const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Error.Message);
-					OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
-				}
+				this->CheckErrorResponseForFederation(Error.Message, OpenSessionData, OnFailure, OnFederationRequired);
 			};
 
 			this->SendIntent(this->BuildRegisterUrl(), [this, OpenSessionData](TOptional<int64> CurrentTime)
@@ -1209,4 +1167,23 @@ FTimespan USequenceRPCManager::GetTimeShiftFromResponse(const FString& DateHeade
 	
 	UE_LOG(LogTemp, Warning, TEXT("Failed to parse server time from date header: %s"), *DateHeader);
 	return FTimespan::Zero();
+}
+
+void USequenceRPCManager::CheckErrorResponseForFederation(const FString& Error, const FOpenSessionData& SessionData, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired)
+{
+	const FErrorResponse ErrorResponse = USequenceSupport::JSONStringToStruct<FErrorResponse>(Error);
+	if (ErrorResponse.IsEmailInUseError())
+	{
+		this->Cached_OpenSessionData = SessionData;
+		const FFederationSupportData FederationData(ErrorResponse.ParseCauseForRequiredEmail(), ErrorResponse.ParseCauseForAccountUsage());
+		this->PreserveSessionWallet = true;
+		OnFederationRequired(FederationData);
+
+		SEQ_LOG(Display, TEXT("Federation required for Email"));
+	}
+	else
+	{
+		const FString ErrorMessage = FString::Printf(TEXT("Error in validation of Response: %s"), *Error);
+		OnFailure(FSequenceError(EErrorType::RequestFail,ErrorMessage));
+	}
 }

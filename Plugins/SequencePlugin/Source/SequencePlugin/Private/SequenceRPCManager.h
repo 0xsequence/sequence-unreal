@@ -312,6 +312,8 @@ public:
 	//RPC Calls//
 
 private:
+	void CheckErrorResponseForFederation(const FString& Error, const FOpenSessionData& SessionData, const FFailureCallback& OnFailure, const TFunction<void(FFederationSupportData)>& OnFederationRequired);
+	
 	UPROPERTY()
 	UCredentialsStorage* CredentialsStorage;
 };
