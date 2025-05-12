@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void Ping(FOnPing OnSuccess, FOnFailure OnFailure);
 
+	USequenceIndexer* GetSequenceIndexer() const;
+	
+private:
 	UPROPERTY()
 	USequenceIndexer* Indexer;
 };

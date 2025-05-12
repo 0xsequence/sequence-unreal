@@ -78,11 +78,13 @@ public:
 	void SetForceCreateAccount(const bool NewForceCreateAccount);
 	
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
-	
-	UPROPERTY()
-	USequenceSessions* Sessions;
+
+	USequenceSessions* GetSequenceSessions() const;
 
 private:
+	UPROPERTY()
+	USequenceSessions* Sessions;
+	
 	void CallOnSessionCreated() const;
 	void CallFederationRequired(const FFederationSupportData& FederationData) const;
 };

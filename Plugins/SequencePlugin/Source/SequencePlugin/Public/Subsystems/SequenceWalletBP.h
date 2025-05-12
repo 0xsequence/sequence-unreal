@@ -85,10 +85,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Wallet")
 	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure);
+
+	USequenceWallet* GetSequenceWallet() const;
 	
+private:
 	UPROPERTY()
 	USequenceWallet* Wallet;
-
-private:
+	
 	void CallOnSessionClosed() const;
 };

@@ -71,7 +71,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
 	void GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
+
+	USequenceMarketplace* GetSequenceMarketplace() const;
 	
+private:
 	UPROPERTY()
 	USequenceMarketplace* Marketplace;
 };

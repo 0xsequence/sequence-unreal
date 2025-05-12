@@ -40,7 +40,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
 	void GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
+
+	USequencePay* GetSequencePay() const;
 	
+private:
 	UPROPERTY()
 	USequencePay* Pay;
 };

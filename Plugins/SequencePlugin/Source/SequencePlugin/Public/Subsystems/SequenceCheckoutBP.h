@@ -52,10 +52,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "0xSequence - Checkout")
 	UTransactions* StepsToTransactions(const TArray<FTransactionStep>& Steps);
+
+	USequenceCheckout* GetSequenceCheckout() const;
 	
+private:
 	UPROPERTY()
 	USequenceCheckout* Checkout;
 	
-private:
 	UTransactions* CreateTransaction();
 };
