@@ -20,8 +20,8 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 
 	if (ContractId.Chain != NetworkString)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Chain mismatch: ContractId.Chain = %s, Network = %s"), *ContractId.Chain, *NetworkString);
-		return TEXT("Error: Chain mismatch. Transak Checkout object network must match the TransakContractId chain.");
+		FString ChainMismatchError = FString::Printf(TEXT("Chain mismatch: ContractId.Chain = %s, Network = %s"), *ContractId.Chain, *NetworkString);
+		return ChainMismatchError;
 	}
 
 	const FString TransakCallData = FCallDataCompressor::Compress(CallData);
@@ -63,7 +63,7 @@ FString UTransakCheckout::GetNFTCheckoutLink(const FTransakNFTData& Item, const 
 }
 
 
-FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract, const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId, const TArray<uint8>& Data, const TArray<FString>& Proof)
+FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* SaleContract, const FTransakNFTData TransakNFTData, const FTransakContractId& ContractId,  const TArray<FString>& Proof, const FString& Data)
 {
 
 	if (!SaleContract)
@@ -91,7 +91,8 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 		TransakContractAddresses[Network],
 		TokenIds,
 		Amounts,
-		Proof
+		Proof,
+		Data
 	);
 
 	FString callData = result.data;
@@ -99,7 +100,7 @@ FString UTransakCheckout::BuildNFTCheckoutLinkFromERC1155(UERC1155SaleContract* 
 
 	return GetNFTCheckoutLink(TransakNFTData, callData, ContractId);
 }
-void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder order, int64 quantity, ENFTType type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback)
+void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleOrder order, int64 quantity, ENFTType type, FAdditionalFee AdditionalFee, FOnTransakCheckoutGenerated OnSuccessCallback, FOnTransakCheckoutFailure OnFailureCallback)
 {
 	if (quantity <= 0)
 	{
@@ -107,8 +108,12 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 		return;
 	}
 
+	double PriceAmount = FCString::Atod(*order.Order.PriceAmount);
+	double PriceDecimals = static_cast<double>(order.Order.PriceDecimals);
+	float NormalizedPrice = static_cast<float>(PriceAmount / FMath::Pow(10.0, PriceDecimals));
+	TArray<float> Prices = { NormalizedPrice };
+
 	TArray<FString> TokenIds = { FString::FromInt(order.TokenMetadata.tokenId) };
-	TArray<float> Prices = { static_cast<float>(order.Order.PriceUSD) };
 
 	FTransakNFTData NFTData(
 		order.TokenMetadata.image,
@@ -145,9 +150,9 @@ void UTransakCheckout::BuildNFTCheckoutLinkFromCollectibleOrder(FSeqCollectibleO
 			OnSuccessCallback.ExecuteIfBound(URL);
 		},
 
-		[OnSuccessCallback](const FSequenceError& Error)
+		[OnFailureCallback](const FSequenceError& Error)
 		{
-			OnSuccessCallback.ExecuteIfBound(TEXT("Error: Failed to generate buy transaction"));
+			OnFailureCallback.ExecuteIfBound(TEXT("Error: Failed to generate buy transaction"));
 		}
 	);
 }
@@ -197,11 +202,6 @@ FTransakContractId UTransakCheckout::GetTransakContractIdFromCollectibleOrder(FS
 			TransakContractID.PriceTokenSymbol = TEXT("USDC");
 		}
 	}
-
-		*TransakContractID.Id,
-		*TransakContractID.ContractAddress,
-		*TransakContractID.Chain,
-		*TransakContractID.PriceTokenSymbol);
 
 	return TransakContractID;
 }

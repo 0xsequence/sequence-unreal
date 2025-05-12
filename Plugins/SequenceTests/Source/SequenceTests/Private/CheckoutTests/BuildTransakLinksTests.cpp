@@ -19,7 +19,6 @@ bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 	SaleContract->ContractAddress = TEXT("0xe65b75eb7c58ffc0bf0e671d64d0e1c6cd0d3e5b");
 	SaleContract->PaymentToken = TEXT("0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359");
 	SaleContract->MaxTotal = 20000;
-	SaleContract->Data = TEXT("Minted using the Sequence Unreal SDK");
 	
 	FTransakNFTData NFTData;
 	NFTData.ImageURL = TEXT("https://dev-metadata.sequence.app/projects/1010/collections/394/tokens/1/image.png");
@@ -36,10 +35,11 @@ bool FTransakCheckoutLinkPrimarySaleTest::RunTest(const FString& Parameters)
 	ContractId.Chain = UEnum::GetValueAsString(ENetwork::PolygonChain);
 	ContractId.PriceTokenSymbol = "USDC";
 
-	TArray<uint8> data;
+	FString data = TEXT("Minted using the Sequence Unreal SDK");
+
 	TArray<FString> proof;
 	
-	FString Link = Checkout->BuildNFTCheckoutLinkFromERC1155(SaleContract, NFTData, ContractId, data, proof);
+	FString Link = Checkout->BuildNFTCheckoutLinkFromERC1155(SaleContract, NFTData, ContractId, proof, data);
 
 	TestFalse(TEXT("Failed"), Link.IsEmpty());
 
