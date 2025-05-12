@@ -25,6 +25,10 @@ UCredentialsStorage::UCredentialsStorage()
 	{
 		this->SetEncryptor(NewObject<UAppleEncryptor>());
 	}
+	else
+	{
+		SEQ_LOG(Warning, TEXT("You are running on an unsupported platform. If you continue, make sure to define a 'FallbackEncryptionKey' value in your SequenceConfig.ini file to encrypt/decrypt stored credentials."))
+	}
 }
 
 void UCredentialsStorage::SetEncryptor(UGenericNativeEncryptor* NewEncryptor)
