@@ -87,7 +87,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetCollectiblesWithLowestListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Lists all collectible listings with the lowest price listings first
@@ -97,7 +97,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
+	void GetAllCollectiblesWithLowestListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * List collectible offers with the highest priced offer first
@@ -108,7 +108,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
 	 * @param OnFailure	handler for failure, takes in a FSequenceError
 	 */
-	void ListCollectibleOffersWithHighestPricedOfferFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetCollectiblesWithHighestPricedOffersFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Lists all collectible offers with the highest priced offer first

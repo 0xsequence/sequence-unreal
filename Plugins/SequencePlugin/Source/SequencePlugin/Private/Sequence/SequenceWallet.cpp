@@ -22,6 +22,37 @@ USequenceWallet::USequenceWallet()
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
 
+bool USequenceWallet::IsValidSession()
+{
+	switch (this->SessionState)
+	{
+		case ESessionState::Valid:
+			return true;
+		case ESessionState::Invalid:
+			return false;
+		case ESessionState::Unchecked:
+			{
+				const TSuccessCallback<TArray<FSeqListSessions_Session>> OnResponse = [this](TArray<FSeqListSessions_Session> Response)
+				{
+					this->SessionState = ESessionState::Valid;
+				};
+
+				const FFailureCallback GenericFailure = [this](const FSequenceError& Error)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Error recovering session: %s"), *Error.Message);
+					this->SessionState = ESessionState::Invalid;
+					this->GetCredentials().UnRegisterCredentials();
+					this->CredentialsStorage->ClearStoredCredentials();
+				this->SessionState = ESessionState::Checking;
+				};
+				this->ListSessions(OnResponse, GenericFailure);
+				return true;
+			}
+		default:
+			return true;
+	}
+}
+
 FString USequenceWallet::GetWalletAddress() const
 {
 	FString Addr;

@@ -27,7 +27,7 @@ void USequenceIndexerBP::GetNativeTokenBalance(const FString& WalletAddress, FOn
 	this->Indexer->GetNativeTokenBalance(SequenceSdk::GetChainId(), WalletAddress, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FString& ContractAddress, const FSeqPage Page, const bool IncludeMetadata, FOnGetTokenBalances OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTokenBalancesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
 	{
@@ -43,12 +43,13 @@ void USequenceIndexerBP::GetTokenBalances(const FString& WalletAddress, const FS
 	FSeqGetTokenBalancesArgs Args;
 	Args.accountAddress = WalletAddress;
 	Args.contractAddress = ContractAddress;
+	Args.page = Page;
 	Args.includeMetaData = IncludeMetadata;
 	
 	this->Indexer->GetTokenBalances(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const FSeqPage Page, const bool IncludeMetadata, FOnGetTokenSupplies OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTokenSuppliesReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTokenSuppliesReturn& Supplies)
 	{
@@ -63,6 +64,7 @@ void USequenceIndexerBP::GetTokenSupplies(const FString& ContractAddress, const 
 
 	FSeqGetTokenSuppliesArgs Args;
 	Args.contractAddress = ContractAddress;
+	Args.page = Page;
 	Args.includeMetaData = IncludeMetadata;
 		
 	this->Indexer->GetTokenSupplies(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
@@ -88,7 +90,7 @@ void USequenceIndexerBP::GetTokenSuppliesMap(const TMap<FString, FSeqTokenList>&
 	this->Indexer->GetTokenSuppliesMap(SequenceSdk::GetChainId(), Args, OnApiSuccess, OnApiFailure);
 }
 
-void USequenceIndexerBP::GetTransactionHistory(const FSeqTransactionHistoryFilter& Filter, const FSeqPage& Page, const bool IncludeMetadata, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
+void USequenceIndexerBP::GetTransactionHistory(const FSeqTransactionHistoryFilter& Filter, const FSeqPage Page, const bool IncludeMetadata, FOnGetTransactionHistory OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetTransactionHistoryReturn> OnApiSuccess = [this, OnSuccess](const FSeqGetTransactionHistoryReturn& TransactionHistory)
 	{

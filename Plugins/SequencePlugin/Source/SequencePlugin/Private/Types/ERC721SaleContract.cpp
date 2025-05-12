@@ -6,12 +6,19 @@ UERC721SaleContract::UERC721SaleContract()
 {
 }
 
-UERC721SaleContract::UERC721SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal, FString Data)
+UERC721SaleContract* UERC721SaleContract::Create(const FString& ContractAddress, const FString& PaymentToken, int32 MaxTotal, const FString& Data)
 {
-    this->ContractAddress = ContractAddress;
-    this->PaymentToken = PaymentToken;
-    this->MaxTotal = MaxTotal;
-    this->Data = Data;
+    UERC721SaleContract* Contract = NewObject<UERC721SaleContract>();
+    Contract->Init(ContractAddress, PaymentToken, MaxTotal, Data);
+    return Contract;
+}
+
+void UERC721SaleContract::Init(const FString& InContractAddress, const FString& InPaymentToken, int32 InMaxTotal, const FString& InData)
+{
+    this->ContractAddress = InContractAddress;
+    this->PaymentToken = InPaymentToken;
+    this->MaxTotal = InMaxTotal;
+    this->Data = InData;
 }
 
 FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof)

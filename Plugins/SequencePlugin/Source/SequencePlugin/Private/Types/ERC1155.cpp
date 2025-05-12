@@ -5,10 +5,17 @@ UERC1155::UERC1155()
 {
 }
 
-UERC1155::UERC1155(FString ContractAddress, FString Data)
+UERC1155* UERC1155::Create(const FString& ContractAddress, const FString& Data)
 {
-	this->ContractAddress = ContractAddress;
-	this->Data = Data;
+	UERC1155* ERC1155 = NewObject<UERC1155>();
+	ERC1155->Init(ContractAddress, Data);
+	return ERC1155;
+}
+
+void UERC1155::Init(const FString& InContractAddress, const FString& InData)
+{
+	this->ContractAddress = InContractAddress;
+	this->Data = InData;
 }
 
 FRawTransaction UERC1155::MakeGrantRoleTransaction(const FString& role, const FString& ToAddress)

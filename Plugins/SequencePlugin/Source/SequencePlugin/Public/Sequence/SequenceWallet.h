@@ -22,7 +22,17 @@ using FSignature = FUnsizedData;
 using TransactionID = FString;
 
 class UProvider;
+class USequenceIndexer;
 class USequenceRPCManager;
+
+UENUM(Blueprintable)
+enum class ESessionState : uint8
+{
+	Unchecked UMETA(DisplayName = "Unchecked"),
+	Valid UMETA(DisplayName = "Valid"),
+	Invalid UMETA(DisplayName = "Invalid"),
+	Checking UMETA(DisplayName = "Checking"),
+};
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
@@ -31,7 +41,13 @@ class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 
 public:
 	USequenceWallet();
-
+	
+	/**
+	 * Check if the wallet and stored credentials are registered to a valid session with the Sequence API
+	 * @return true if the wallet is signed in to Sequence API
+	 */
+	bool IsValidSession();
+	
 	/**
 	 * Returns the wallet address of the currently signed in user
 	 * @return wallet address of the currently signed in user
@@ -199,4 +215,7 @@ private:
 
 	UPROPERTY()
 	UCredentialsStorage* CredentialsStorage;
+
+	UPROPERTY()
+	ESessionState SessionState = ESessionState::Unchecked;
 };

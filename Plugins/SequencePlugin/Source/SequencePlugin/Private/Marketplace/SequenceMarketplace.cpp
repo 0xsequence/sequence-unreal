@@ -162,7 +162,7 @@ void USequenceMarketplace::ListCurrencies(const int64 ChainID, TSuccessCallback<
 		}, OnFailure);
 }
 
-void USequenceMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress,
+void USequenceMarketplace::GetCollectiblesWithLowestListingsFirst(const int64 ChainID, const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -175,7 +175,7 @@ void USequenceMarketplace::ListCollectibleListingsWithLowestPriceListingsFirst(c
 		}, OnFailure);
 }
 
-void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID,
+void USequenceMarketplace::GetAllCollectiblesWithLowestListingsFirst(const int64 ChainID,
 	const FString& ContractAddress, const FSeqCollectiblesFilter& Filter,
 	TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -193,7 +193,7 @@ void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirs
 	}, OnFailure);
 }
 
-void USequenceMarketplace::ListCollectibleOffersWithHighestPricedOfferFirst(
+void USequenceMarketplace::GetCollectiblesWithHighestPricedOffersFirst(
 	const int64 ChainID,
 	const FString& ContractAddress,
 	const FSeqCollectiblesFilter& Filter,
@@ -353,7 +353,7 @@ void USequenceMarketplace::ListAllCollectibleListingsWithLowestPriceListingsFirs
 	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	ListCollectibleListingsWithLowestPriceListingsFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
+	GetCollectiblesWithLowestListingsFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
 	{
 		if (CollectiblesReturn.Page.More)
 		{
@@ -376,7 +376,7 @@ void USequenceMarketplace::ListAllCollectibleOffersWithHighestPricedOfferFirstHe
 	TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess,
 	const FFailureCallback& OnFailure)
 {
-	ListCollectibleOffersWithHighestPricedOfferFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
+	GetCollectiblesWithHighestPricedOffersFirst(ChainID, ContractAddress, Filter, Page, [ChainID, ContractAddress, Filter, this, OnSuccess, OnFailure](const FSeqListCollectiblesReturn& CollectiblesReturn)
 	{
 		
 		if (CollectiblesReturn.Page.More)

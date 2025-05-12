@@ -12,18 +12,18 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, const TArray<FSeqCurrency>&, Currencies);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Listings, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Listings);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Offers, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Offers);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Orders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Listings, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, const TArray<FSeqCollectibleOrder>&, CollectibleOrders);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Offers, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, CollectibleOrders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Orders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Orders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFloorOrder, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
 

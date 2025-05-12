@@ -39,7 +39,7 @@ void USequenceMarketplaceBP::GetCollectiblesWithLowestListingsFirst(const FStrin
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 	
-	this->Marketplace->ListCollectibleListingsWithLowestPriceListingsFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, Page, OnApiSuccess, OnApiFailure);
+	this->Marketplace->GetCollectiblesWithLowestListingsFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, Page, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceMarketplaceBP::GetAllCollectiblesWithLowestListingsFirst(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetAllCollectiblesWithLowestListingsFirst OnSuccess, FOnFailure OnFailure)
@@ -55,7 +55,7 @@ void USequenceMarketplaceBP::GetAllCollectiblesWithLowestListingsFirst(const FSt
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 	
-	this->Marketplace->ListAllCollectibleListingsWithLowestPriceListingsFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, OnApiSuccess, OnApiFailure);
+	this->Marketplace->GetAllCollectiblesWithLowestListingsFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceMarketplaceBP::GetCollectiblesWithHighestPricedOffersFirst(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, const FSeqMarketplacePage Page, FOnGetCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure)
@@ -71,7 +71,7 @@ void USequenceMarketplaceBP::GetCollectiblesWithHighestPricedOffersFirst(const F
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 	
-	this->Marketplace->ListCollectibleOffersWithHighestPricedOfferFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, Page, OnApiSuccess, OnApiFailure);
+	this->Marketplace->GetCollectiblesWithHighestPricedOffersFirst(SequenceSdk::GetChainId(), ContractAddress, Filter, Page, OnApiSuccess, OnApiFailure);
 }
 
 void USequenceMarketplaceBP::GetAllCollectiblesWithHighestPricedOffersFirst(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetAllCollectiblesWithHighestPricedOffersFirst OnSuccess, FOnFailure OnFailure)

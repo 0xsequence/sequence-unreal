@@ -50,7 +50,7 @@ private:
 	 */
 	bool PreserveSessionWallet = false;
 	
-	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal 2.0.0)"));
+	inline const static FString WaaSVersion = FString(TEXT("1.0.0 (Unreal 2.0.1)"));
 
 	inline const static FString WaaSAuthenticatorIntentsUrlPath = TEXT("/rpc/WaasAuthenticator/SendIntent");
 	inline const static FString WaaSAuthenticatorRegisterUrlPath = TEXT("/rpc/WaasAuthenticator/RegisterSession");

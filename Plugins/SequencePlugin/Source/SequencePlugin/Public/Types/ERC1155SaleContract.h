@@ -16,6 +16,9 @@ public:
 
     UERC1155SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal);
 
+    UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
+    static UERC1155SaleContract* Create(const FString& ContractAddress, const FString& PaymentToken, int32 MaxTotal);
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")
     FString ContractAddress;
 
@@ -28,10 +31,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof, const FString Data);
 
-
     FContractCall GetPaymentToken();
 
     FContractCall GetGlobalSaleDetails();
+    
+private:
+    void Init(const FString& InContractAddress, const FString& InPaymentToken, int32 InMaxTotal);
 
 };
 
