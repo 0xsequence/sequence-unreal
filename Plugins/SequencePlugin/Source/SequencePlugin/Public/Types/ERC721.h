@@ -12,7 +12,7 @@ class SEQUENCEPLUGIN_API UERC721 : public UObject
 public:
 	UERC721();
 	
-	UFUNCTION(BlueprintCallable, Category = "ERC721")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721")
 	static UERC721* Create(const FString& ContractAddress);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC721")
