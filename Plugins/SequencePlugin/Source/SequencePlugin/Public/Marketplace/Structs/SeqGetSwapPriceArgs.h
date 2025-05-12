@@ -25,7 +25,7 @@ public:
     FString BuyAmount;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    int ChainID;
+    int64 ChainID;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     int SlippagePercentage;
