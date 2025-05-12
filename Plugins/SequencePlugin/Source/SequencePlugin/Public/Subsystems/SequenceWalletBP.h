@@ -16,6 +16,7 @@ class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSignMessage, const FString&, SignedMessage);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnValidateMessageSignature, bool, isValid);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetFilteredFeeOptions, const TArray<FFeeOption>&, FeeOptions);
@@ -32,7 +33,6 @@ class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	
-public:
 	USequenceWalletBP();
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Wallet")
@@ -85,10 +85,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Wallet")
 	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure);
-
-private:
+	
 	UPROPERTY()
 	USequenceWallet* Wallet;
-	
+
+private:
 	void CallOnSessionClosed() const;
 };

@@ -10,7 +10,8 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
+	
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, const TArray<FSeqCurrency>&, Currencies);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders);
@@ -26,8 +27,7 @@ class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Orders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFloorOrder, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
-
-public:
+	
 	USequenceMarketplaceBP();
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
@@ -72,7 +72,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
 	void GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
 	
-private:
 	UPROPERTY()
 	USequenceMarketplace* Marketplace;
 };

@@ -10,11 +10,11 @@ class SEQUENCEPLUGIN_API USequenceCheckoutBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCheckoutOptionsResponseSuccess, FCheckoutOptions, Options);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, TArray<FTransactionStep>, Steps);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCheckoutFailure, FString, Error);
-
-public:
+	
 	USequenceCheckoutBP();
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence - Checkout")
@@ -53,9 +53,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence - Checkout")
 	UTransactions* StepsToTransactions(const TArray<FTransactionStep>& Steps);
 	
-private:
 	UPROPERTY()
 	USequenceCheckout* Checkout;
-
+	
+private:
 	UTransactions* CreateTransaction();
 };
