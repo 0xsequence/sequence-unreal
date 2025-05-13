@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Provider.h"
-#include "Eth/Crypto.h"
-#include "Eth/EthTransaction.h"
+#include "Ethereum"
+#include "Ethereum"
 #include "Types/BinaryData.h"
 #include "Util/HexUtility.h"
 #include "Util/JsonBuilder.h"

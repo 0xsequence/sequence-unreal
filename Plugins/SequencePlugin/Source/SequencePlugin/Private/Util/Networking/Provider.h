@@ -6,7 +6,7 @@
 #include "Types/Header.h"
 #include "Dom/JsonObject.h"
 #include "Types/TransactionReceipt.h"
-#include "Eth/EthTransaction.h"
+#include "Ethereum"
 #include "RPCCaller.h"
 #include "Types/ContractCall.h"
 #include "ProviderEnum.h"

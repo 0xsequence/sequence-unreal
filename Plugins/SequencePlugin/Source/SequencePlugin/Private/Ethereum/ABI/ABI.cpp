@@ -2,7 +2,7 @@
 
 #include "ABI/ABI.h"
 #include "ABI/ABIElement.h"
-#include "Eth/Crypto.h"
+#include "..\Ethereum"
 #include "Internationalization/Regex.h"
 #include "Types/BinaryData.h"
 #include "Util/Log.h"

@@ -1,7 +1,7 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-#include "Eth/Crypto.h"
+#include "..\Ethereum"
 #include "Util/HexUtility.h"
-#include "Eth/RLP.h"
+#include "..\Ethereum"
 #include "Types/BinaryData.h"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/CurvePoint.hpp"

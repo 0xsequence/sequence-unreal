@@ -1,12 +1,12 @@
 // Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Types/CryptoWallet.h"
-#include "Eth/EthTransaction.h"
+#include "..\Ethereum"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Keccak256.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256Hash.hpp"
 #include "Bitcoin-Cryptography-Library/cpp/Uint256.hpp"
 #include "Util/HexUtility.h"
-#include "Eth/Crypto.h"
+#include "..\Ethereum"
 #include "Bitcoin-Cryptography-Library/cpp/Sha256.hpp"
 #include "Util/Log.h"
 
