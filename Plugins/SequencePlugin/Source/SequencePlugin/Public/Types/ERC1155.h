@@ -13,7 +13,7 @@ class SEQUENCEPLUGIN_API UERC1155 : public UObject
 public: 
 	UERC1155();
 
-	UFUNCTION(BlueprintCallable, Category = "ERC1155")
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155")
 	static UERC1155* Create(const FString& ContractAddress, const FString& Data);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155")

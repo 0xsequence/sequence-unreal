@@ -75,7 +75,7 @@ void USequencePay::GetSwapPrice(const int64 ChainID, const FString& SellCurrency
 		BuyCurrency,
 		SellCurrency,
 		BuyAmount,
-		static_cast<int>(ChainID),
+		ChainID,
 		SlippagePercentage		
 	};
 	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)

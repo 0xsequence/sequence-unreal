@@ -34,8 +34,8 @@ void FIndexerGetTransactionHistoryTest::GetTests(TArray<FString>& OutBeautifiedN
 
 bool FIndexerGetTransactionHistoryTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = MarketplaceEndToEndTestsCommon::PolygonNetworkId;
-    const FString TestAddress = MarketplaceEndToEndTestsCommon::TestAddress;
+    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData* IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
     const TSuccessCallback<FSeqGetTransactionHistoryReturn> GenericSuccess = [this, IndexerRequestsTestData](const FSeqGetTransactionHistoryReturn& History)

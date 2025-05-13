@@ -224,3 +224,7 @@ UTransactions* USequenceCheckoutBP::CreateTransaction()
 	return NewObject<UTransactions>(this);
 }
 
+USequenceCheckout* USequenceCheckoutBP::GetSequenceCheckout() const
+{
+	return this->Checkout;
+}

@@ -156,3 +156,8 @@ void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
 	
 	this->Indexer->Ping(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
 }
+
+USequenceIndexer* USequenceIndexerBP::GetSequenceIndexer() const
+{
+	return this->Indexer;
+}

@@ -234,3 +234,9 @@ void USequenceWalletBP::CallOnSessionClosed() const
 	}
 }
 
+USequenceWallet* USequenceWalletBP::GetSequenceWallet() const
+{
+	return this->Wallet;
+}
+
+
