@@ -92,14 +92,14 @@ public:
 		ReturnArgs += "\"collectionAddress\":\"" + CollectionAddress + "\",";
 		ReturnArgs += "\"seller\":\"" + Seller + "\",";
 		ReturnArgs += "\"marketplace\":\"" + UMarketplaceEnumsExtensions::AsString(Marketplace) + "\",";
-		ReturnArgs += "\"OrdersData\":[" + GetOrdersDataArgs() + "],";
+		ReturnArgs += "\"ordersData\":[" + GetOrdersDataArgs() + "],";
 
 		if (this->AdditionalFees.IsEmpty() == false)
 		{
-			ReturnArgs += "\"AdditionalFees\":[" + GetAdditionalFeesArgs() + "],";
+			ReturnArgs += "\"additionalFees\":[" + GetAdditionalFeesArgs() + "],";
 		}
 		
-		ReturnArgs += "\"WalletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
+		ReturnArgs += "\"walletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

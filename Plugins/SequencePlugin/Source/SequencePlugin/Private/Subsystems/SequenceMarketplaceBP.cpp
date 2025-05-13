@@ -233,3 +233,8 @@ void USequenceMarketplaceBP::GetFloorOrder(const FString& ContractAddress, const
 
 	this->Marketplace->GetFloorOrder(SequenceSdk::GetChainId(), ContractAddress, Filter, OnApiSuccess, OnApiFailure);
 }
+
+USequenceMarketplace* USequenceMarketplaceBP::GetSequenceMarketplace() const
+{
+	return this->Marketplace;
+}

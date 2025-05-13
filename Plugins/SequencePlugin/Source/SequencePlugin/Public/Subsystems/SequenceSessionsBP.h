@@ -14,7 +14,8 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, public INativeAuthCallback
 {
 	GENERATED_BODY()
-
+	
+public:
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBrowserRequired, const FString&, SignInUrl);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
@@ -23,7 +24,6 @@ class SEQUENCEPLUGIN_API USequenceSessionsBP : public UGameInstanceSubsystem, pu
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIdTokenReceived, const FString&, IdToken);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFederationRequired, const FFederationSupportData&, FederationData);
 	
-public:
 	USequenceSessionsBP();
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Sessions Events")
@@ -78,6 +78,8 @@ public:
 	void SetForceCreateAccount(const bool NewForceCreateAccount);
 	
 	virtual void HandleNativeIdToken(const FString& IdToken) override;
+
+	USequenceSessions* GetSequenceSessions() const;
 
 private:
 	UPROPERTY()

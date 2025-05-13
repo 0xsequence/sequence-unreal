@@ -83,3 +83,8 @@ void USequencePayBP::GetSwapQuote(const FString& UserWallet, const FString& BuyC
 
 	this->Pay->GetSwapQuote(SequenceSdk::GetChainId(), UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, OnApiSuccess, OnApiFailure, SlippagePercentage);
 }
+
+USequencePay* USequencePayBP::GetSequencePay() const
+{
+	return this->Pay;
+}

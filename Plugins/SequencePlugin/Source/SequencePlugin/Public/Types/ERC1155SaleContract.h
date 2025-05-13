@@ -14,7 +14,7 @@ class SEQUENCEPLUGIN_API UERC1155SaleContract : public UObject
 public:
     UERC1155SaleContract();
 
-    UFUNCTION(BlueprintCallable, Category = "ERC1155 Sale")
+    UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     static UERC1155SaleContract* Create(const FString& ContractAddress, const FString& PaymentToken, int32 MaxTotal, const FString& Data);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "0xSequence - ERC1155 Sale")

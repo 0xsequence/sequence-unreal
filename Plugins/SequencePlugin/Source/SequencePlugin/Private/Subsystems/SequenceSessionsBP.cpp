@@ -231,3 +231,8 @@ void USequenceSessionsBP::CallFederationRequired(const FFederationSupportData& F
 	else
 		SEQ_LOG(Warning, TEXT("Federation is required but no event listener was found for FederationRequired"));
 }
+
+USequenceSessions* USequenceSessionsBP::GetSequenceSessions() const
+{
+	return this->Sessions;
+}
