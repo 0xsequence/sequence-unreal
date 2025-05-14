@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 #include "CoreMinimal.h"
 #include "Sequence/FeeOption.h"

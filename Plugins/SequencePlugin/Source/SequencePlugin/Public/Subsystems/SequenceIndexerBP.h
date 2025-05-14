@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,7 +9,8 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
+	
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetNativeTokenBalance, int64, Balance);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTokenBalances, const TArray<FSeqTokenBalance>&, Balances, FSeqPage, Page);
 	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnGetTokenSupplies, const TArray<FSeqTokenSupply>&, Tokens, EContractType, ContractType, FSeqPage, Page);
@@ -22,7 +21,6 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPing, bool, Success);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
-public:
 	USequenceIndexerBP();
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
@@ -48,6 +46,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Indexer")
 	void Ping(FOnPing OnSuccess, FOnFailure OnFailure);
+
+	USequenceIndexer* GetSequenceIndexer() const;
 	
 private:
 	UPROPERTY()

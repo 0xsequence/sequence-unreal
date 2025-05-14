@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "SequenceRPCManager.h"
 #include "RequestHandler.h"
 #include "ConfigFetcher.h"

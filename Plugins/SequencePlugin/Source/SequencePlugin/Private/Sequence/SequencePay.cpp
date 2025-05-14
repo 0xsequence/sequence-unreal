@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Sequence/SequencePay.h"
 #include "HttpModule.h"
 #include "Http.h"
@@ -77,7 +75,7 @@ void USequencePay::GetSwapPrice(const int64 ChainID, const FString& SellCurrency
 		BuyCurrency,
 		SellCurrency,
 		BuyAmount,
-		static_cast<int>(ChainID),
+		ChainID,
 		SlippagePercentage		
 	};
 	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)

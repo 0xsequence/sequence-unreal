@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceSdkBP.h"
 #include "ConfigFetcher.h"
 #include "Sequence/SequenceSdk.h"

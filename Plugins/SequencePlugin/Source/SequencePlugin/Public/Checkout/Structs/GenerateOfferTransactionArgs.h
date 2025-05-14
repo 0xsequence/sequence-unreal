@@ -55,7 +55,7 @@ public:
 		ReturnArgs += "\"contractType\":\"" + UEnum::GetValueAsString(ContractType) + "\",";
 		ReturnArgs += "\"orderbook\":\"" + UMarketplaceEnumsExtensions::AsString(Orderbook) + "\",";
 		ReturnArgs += "\"offer\":" + Offer.GetArgs() + ",";
-		ReturnArgs += "\"WalletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
+		ReturnArgs += "\"walletType\":\"" + UMarketplaceWalletKindExtensions::AsString(WalletType) + "\"";
 
 		ReturnArgs.Append("}"); // Close the JSON object
 		

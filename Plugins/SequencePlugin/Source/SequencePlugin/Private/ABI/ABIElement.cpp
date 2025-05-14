@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "ABI/ABIElement.h"
 
 #include "ABI/ABI.h"

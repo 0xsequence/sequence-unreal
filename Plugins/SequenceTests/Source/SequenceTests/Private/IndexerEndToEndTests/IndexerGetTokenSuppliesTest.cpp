@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "CoreMinimal.h"
 #include "Helpers/IndexerEndToEndTestsCommon.h"
 #include "Misc/AutomationTest.h"
@@ -39,8 +37,8 @@ void FIndexerGetTokenSuppliesTest::GetTests(TArray<FString>& OutBeautifiedNames,
 
 bool FIndexerGetTokenSuppliesTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = MarketplaceEndToEndTestsCommon::PolygonNetworkId;
-    const FString TestAddress = MarketplaceEndToEndTestsCommon::TestContractAddress_Skyweaver;
+    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString TestAddress = IndexerEndToEndTestsCommon::TestContractAddress_Skyweaver;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
     const TSuccessCallback<FSeqGetTokenSuppliesReturn> GenericSuccess = [this, IndexerRequestsTestData](const FSeqGetTokenSuppliesReturn& TokenSupplies)

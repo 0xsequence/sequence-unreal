@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
 #include "ConfigFetcher.h"
@@ -413,9 +412,9 @@ struct SEQUENCEPLUGIN_API FGetIdTokenData : public FGenericData
         FString JsonString = "{\"sessionId\":\"" + SessionId + "\",\"walletAddress\":\"" + WalletAddress + "\"";
 
         if (!Nonce.IsEmpty())
-            JsonString += ",\"nonce\":\"" + Nonce + "\""; 
-        else
-            JsonString += "}";
+            JsonString += ",\"nonce\":\"" + Nonce + "\"";
+    	
+    	JsonString += "}";
 
         return JsonString;
     }

@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 
 #include "Credentials.h"
@@ -24,6 +22,6 @@ private:
 	UPROPERTY()
 	UGenericNativeEncryptor* Encryptor = nullptr;
 	
-	const FString SaveSlot = "Cr";
+	const FString SaveSlot = "SequenceCredentials";
 	const uint32 UserIndex = 0;
 };
