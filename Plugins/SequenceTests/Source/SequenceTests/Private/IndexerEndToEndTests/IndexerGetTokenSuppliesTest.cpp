@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "CoreMinimal.h"
 #include "Helpers/IndexerEndToEndTestsCommon.h"
 #include "Misc/AutomationTest.h"

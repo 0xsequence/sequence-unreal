@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Marketplace/SequenceMarketplace.h"
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"

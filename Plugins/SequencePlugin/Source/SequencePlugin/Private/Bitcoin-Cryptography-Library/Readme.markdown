@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 Nayuki's Bitcoin cryptography library
 =====================================
 

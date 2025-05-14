@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Types/ContractCall.h"
 #include "Util/HexUtility.h"
 #include "Util/JsonBuilder.h"

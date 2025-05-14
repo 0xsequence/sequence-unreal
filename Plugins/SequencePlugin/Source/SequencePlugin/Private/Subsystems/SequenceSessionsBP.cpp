@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceSessionsBP.h"
 #include "SequenceRPCManager.h"
 #include "Errors.h"

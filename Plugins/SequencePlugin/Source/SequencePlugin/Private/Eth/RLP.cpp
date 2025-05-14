@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma warning(disable: 4018)
 #include "Eth/RLP.h"
 #include "Types/BinaryData.h"

@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "MarketplaceRequestsTestData.h"
 
 UMarketplaceRequestsTestData * UMarketplaceRequestsTestData::Make(const int32 PendingRequestsIn)

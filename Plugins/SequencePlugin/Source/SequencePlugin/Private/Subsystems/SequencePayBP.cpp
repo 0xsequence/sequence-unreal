@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequencePayBP.h"
 #include "Marketplace/Structs/SeqGetSwapPriceResponse.h"
 #include "Marketplace/Structs/SeqGetSwapQuoteResponse.h"
