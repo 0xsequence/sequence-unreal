@@ -2,6 +2,7 @@
 
 #include "Subsystems/SequenceUtilityBP.h"
 #include "Engine/Engine.h"
+#include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
 
@@ -101,4 +102,36 @@ TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
 TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
 {
 	return USequenceSupport::GetAllNetworkIds();
+}
+
+void USequenceUtilityBP::MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message)
+{
+	switch (Verbosity)
+	{
+	case ESeqLogVerbosity::Display:
+		SEQ_LOG(Display, TEXT("%s"), *Message);
+		break;
+	case ESeqLogVerbosity::Warning:
+		SEQ_LOG(Warning, TEXT("%s"), *Message);
+		break;
+	case ESeqLogVerbosity::Error:
+		SEQ_LOG(Error, TEXT("%s"), *Message);
+		break;
+	}
+}
+
+void USequenceUtilityBP::MakeSequenceEditorLog(const ESeqLogVerbosity Verbosity, const FString& Message)
+{
+	switch (Verbosity)
+	{
+		case ESeqLogVerbosity::Display:
+			SEQ_LOG_EDITOR(Display, TEXT("%s"), *Message);
+			break;
+		case ESeqLogVerbosity::Warning:
+			SEQ_LOG_EDITOR(Warning, TEXT("%s"), *Message);
+			break;
+		case ESeqLogVerbosity::Error:
+			SEQ_LOG_EDITOR(Error, TEXT("%s"), *Message);
+			break;
+	}
 }

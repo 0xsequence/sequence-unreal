@@ -4,6 +4,7 @@
 
 #include "Sequence/Transactions.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
 
 UCLASS(Blueprintable)
@@ -52,4 +53,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<int64> GetAllNetworkIds();
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void MakeSequenceEditorLog(const ESeqLogVerbosity Verbosity, const FString& Message);
 };

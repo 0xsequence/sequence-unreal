@@ -4,6 +4,8 @@ Content/StarterContent/
 # Unreal dotSettings.user
 SequenceUnreal.uproject.DotSettings.user
 
+Config/EosConfig.ini
+
 # Idea
 .idea
 
