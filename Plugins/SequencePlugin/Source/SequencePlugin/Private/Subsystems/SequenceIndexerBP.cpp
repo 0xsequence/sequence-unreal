@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceIndexerBP.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
@@ -157,4 +155,9 @@ void USequenceIndexerBP::Ping(FOnPing OnSuccess, FOnFailure OnFailure)
 	};
 	
 	this->Indexer->Ping(SequenceSdk::GetChainId(), OnApiSuccess, OnApiFailure);
+}
+
+USequenceIndexer* USequenceIndexerBP::GetSequenceIndexer() const
+{
+	return this->Indexer;
 }

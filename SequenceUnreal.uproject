@@ -64,6 +64,14 @@
 		{
 			"Name": "AutomationDriverTests",
 			"Enabled": true
+		},
+		{
+			"Name": "OnlineServicesEOS",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemEOS",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
