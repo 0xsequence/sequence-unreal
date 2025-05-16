@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Provider.h"
 #include "Eth/Crypto.h"
 #include "Eth/EthTransaction.h"

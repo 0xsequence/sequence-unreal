@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #import "NativeAppleEncryptor.h"
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>

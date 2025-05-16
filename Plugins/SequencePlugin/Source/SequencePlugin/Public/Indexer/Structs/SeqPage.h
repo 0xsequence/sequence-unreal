@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,8 +11,10 @@ struct SEQUENCEPLUGIN_API FSeqPage
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
+    UE_DEPRECATED(0, "Page number is now deprecated. Instead, simply provide the page you are given to fetch the next page.")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (DeprecatedProperty, DeprecationMessage = "Page number is now deprecated. Instead, simply provide the page you are given to fetch the next page."))
     int32 page = -1;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString column = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
@@ -32,7 +33,7 @@ public:
     /// IE) Arrays => Not Empty, int32 != -1, FString => Not Empty
     /// </summary>
     /// <returns>true if there existed non zero data, else returns false</returns>
-    bool containsData()
+    bool containsData() const
     {
         bool ret = false;//assume nothing & look for true states!
         ret |= (page != -1 || pageSize != -1);//int32 data
@@ -46,7 +47,7 @@ public:
     /// Used to get custom arguments for cases where we don't need all these datums!
     /// </summary>
     /// <returns>empty string if it doesn't contain non zero data, else it'll contain parsed json string!</returns>
-    FString GetArgs()
+    FString GetArgs() const
     {
         FString ret = "";
         if (containsData())

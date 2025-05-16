@@ -1,10 +1,9 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 
 #include "Sequence/Transactions.h"
 #include "Types/SaleDetails.h"
 #include "Util/Structs/BE_Structs.h"
+#include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
 
 UCLASS(Blueprintable)
@@ -57,9 +56,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<int64> GetAllNetworkIds();
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static FSaleDetails DeserializeSaleDetails(const FString& Json);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static void Decode(const FString& EncodedData, const FString& Abi, FOnDecodeResponse OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void MakeSequenceEditorLog(const ESeqLogVerbosity Verbosity, const FString& Message);
 };

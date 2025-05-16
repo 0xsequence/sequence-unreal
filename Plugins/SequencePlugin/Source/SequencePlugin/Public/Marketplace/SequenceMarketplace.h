@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once 
 
 #include "CoreMinimal.h"
@@ -9,11 +7,7 @@
 #include "Structs/SeqListCollectibleListingsReturn.h"
 #include "Structs/SeqListCollectibleOffersReturn.h"
 #include "Structs/SeqListCurrenciesReturn.h"
-#include "Structs/SeqSwapPrice.h"
-#include "Structs/SeqSwapQuote.h"
 #include "SequenceMarketplace.generated.h"
-
-constexpr int DefaultSlippagePercentage = 5;
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceMarketplace : public UObject
@@ -45,7 +39,7 @@ private:
 	                         TSuccessCallback<FSeqCollectibleOrder> OnSuccess, const FFailureCallback& OnFailure);
 	void ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
 	void ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
-	void AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
+	
 public:
 	
 	/*
@@ -53,10 +47,6 @@ public:
 		@return the content of the post response
 	*/
 	void HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-
-	void HTTPPostSwapAPI(const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-	
-
 
 	//public functions
 
@@ -95,7 +85,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetCollectiblesWithLowestListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Lists all collectible listings with the lowest price listings first
@@ -105,7 +95,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListAllCollectibleListingsWithLowestPriceListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
+	void GetAllCollectiblesWithLowestListingsFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * List collectible offers with the highest priced offer first
@@ -116,7 +106,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqListCollectiblesReturn
 	 * @param OnFailure	handler for failure, takes in a FSequenceError
 	 */
-	void ListCollectibleOffersWithHighestPricedOfferFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
+	void GetCollectiblesWithHighestPricedOffersFirst(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TSuccessCallback<FSeqListCollectiblesReturn> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Lists all collectible offers with the highest priced offer first
@@ -227,46 +217,5 @@ public:
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
 	void GetFloorOrder(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const TSuccessCallback<FSeqCollectibleOrder>& OnSuccess, const FFailureCallback& OnFailure);
-
-	/**
-	 * 
-	 * @param ChainID the id of the chain
-	 * @param SellCurrency the address of the currency to sell
-	 * @param BuyCurrency the address of the currency to buy
-	 * @param BuyAmount the amount to buy
-	 * @param OnSuccess handler for success, takes in a FSeqSwapPrice
-	 * @param OnFailure handler for failure, takes in a FSequenceError
-	 * @param SlippagePercentage the slippage percentage
-	 */
-	void GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
-
-	/**
-	 * 
-	 * @param ChainID the id of the chain
-	 * @param UserWallet the address of the user wallet
-	 * @param BuyCurrency the address of the currency to buy
-	 * @param BuyAmount the amount to buy
-	 * @param OnSuccess handler for success, takes in a TArray of FSeqSwapPrice
-	 * @param OnFailure handler for failure, takes in a FSequenceError
-	 * @param SlippagePercentage the slippage percentage
-	 */
-	void GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
-
-	/**
-	 * 
-	 * @param ChainID the id of the chain
-	 * @param UserWallet the address of the user wallet
-	 * @param BuyCurrency the address of the currency to buy
-	 * @param SellCurrency the address of the currency to sell
-	 * @param BuyAmount the amount to buy
-	 * @param IncludeApprove whether to include approve
-	 * @param OnSuccess handler for success, takes in a FSeqSwapQuote
-	 * @param OnFailure handler for failure, takes in a FSequenceError
-	 * @param SlippagePercentage the slippage percentage
-	 */
-	void GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage = DefaultSlippagePercentage);
-
-	
-	
 };
 

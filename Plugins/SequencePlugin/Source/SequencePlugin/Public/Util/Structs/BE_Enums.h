@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -65,4 +64,5 @@ enum ENetwork
 	EtherlinkTestnet   UMETA(DisplayName = "Etherlink Testnet"),
 	MonadTestnet		UMETA(DisplayName = "Monad Testnet"),
 	SomniaTestnet 		UMETA(DisplayName = "Somnia Testnet"),
+	FrequencyTestnet    UMETA(DisplayName = "Frequency Testnet"),
 };

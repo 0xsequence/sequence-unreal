@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 #include "CoreMinimal.h"
 #include "Sequence/FeeOption.h"
@@ -71,7 +69,7 @@ struct SEQUENCEPLUGIN_API FErrorResponse
 				}
 				else if (PostParsed[0].Equals(TEXT("PlayFab"), ESearchCase::IgnoreCase))
 				{
-					AccountTypes.Add(ESequenceLoginType::PlayFab);
+					AccountTypes.Add(ESequenceLoginType::SequencePlayFab);
 				}
 				else if (PostParsed[0].Equals(TEXT("OIDC"),ESearchCase::IgnoreCase) && PostParsed.Num() >= 3)
 				{

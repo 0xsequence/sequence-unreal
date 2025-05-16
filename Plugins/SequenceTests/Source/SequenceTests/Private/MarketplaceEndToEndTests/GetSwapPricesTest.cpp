@@ -1,15 +1,12 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include <cstdlib>
 
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
-#include "SequencePlugin/Public/Marketplace/SequenceMarketplace.h"
+#include "SequencePlugin/Public/Sequence/SequencePay.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
-#include "JsonObjectConverter.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetSwapPricesTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetSwapPricesTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -69,8 +66,9 @@ bool FGetSwapPricesTest::RunTest(const FString& Parameters)
                 MarketplaceTestData->DecrementPendingRequests()));
             MarketplaceTestData->RequestFailed();
         };
-		    
-        MarketplaceTestData->GetMarketplace()->GetSwapPrices(
+
+        USequencePay* Pay = NewObject<USequencePay>();
+        Pay->GetSwapPrices(
             Support->GetNetworkId(ENetwork::ArbitrumOne),
             USDC,
             USDCe,

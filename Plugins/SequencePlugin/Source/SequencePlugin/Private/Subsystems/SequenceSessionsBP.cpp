@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceSessionsBP.h"
 #include "SequenceRPCManager.h"
 #include "Errors.h"
@@ -230,4 +228,9 @@ void USequenceSessionsBP::CallFederationRequired(const FFederationSupportData& F
 		this->FederationRequired.Broadcast(FederationData);
 	else
 		SEQ_LOG(Warning, TEXT("Federation is required but no event listener was found for FederationRequired"));
+}
+
+USequenceSessions* USequenceSessionsBP::GetSequenceSessions() const
+{
+	return this->Sessions;
 }

@@ -1,4 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
 #include "Types/CryptoWallet.h"
 #include "Eth/EthTransaction.h"
 #include "Bitcoin-Cryptography-Library/cpp/Ecdsa.hpp"

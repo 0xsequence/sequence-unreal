@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -19,18 +17,18 @@ class SEQUENCEPLUGIN_API USequenceSdkBP : public UGameInstanceSubsystem
 public:
 	USequenceSdkBP();
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	void SetChainById(const int64 NewChainId);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	void SetChainByName(const FString& NewChainName);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	void SetChainByType(const ENetwork& NewChainType);
 	
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	void SetRedirectUrl(const FString& NewRedirectUrl);
 
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	int64 GetChainId();
 };

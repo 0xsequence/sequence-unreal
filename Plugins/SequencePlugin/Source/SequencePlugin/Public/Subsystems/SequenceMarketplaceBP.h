@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Marketplace/SequenceMarketplace.h"
-#include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
-#include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Marketplace/Structs/SeqListCollectibleListingsArgs.h"
 #include "SequenceMarketplaceBP.generated.h"
@@ -12,27 +10,24 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceMarketplaceBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
+	
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListCurrencies, const TArray<FSeqCurrency>&, Currencies);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Listings, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Listings);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Offers, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Offers);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithLowestListingsFirst, const TArray<FSeqCollectibleOrder>&, Orders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetAllCollectiblesWithHighestPricedOffersFirst, const TArray<FSeqCollectibleOrder>&, Orders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceOfferForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetLowestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetHighestPriceListingForCollectible, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Listings, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, const TArray<FSeqCollectibleOrder>&, CollectibleOrders);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Offers, FSeqMarketplacePage, Page);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, CollectibleOrders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllListingsForCollectible, const TArray<FSeqCollectibleOrder>&, Orders);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnListOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Orders, FSeqMarketplacePage, Page);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnListAllOffersForCollectible, const TArray<FSeqCollectibleOrder>&, Orders);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetFloorOrder, FSeqTokenMetaData, TokenMetadata, FSeqOrder, Order);
-	DECLARE_DYNAMIC_DELEGATE_FiveParams(FOnGetSwapPrice, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, TransactionValue);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, const TArray<FSeqSwapPrice>&, SwapPrices);
-	DECLARE_DYNAMIC_DELEGATE_EightParams(FOnGetSwapQuote, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, To, FString, TransactionData, FString, TransactionValue, FString, ApproveData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, FString, Error);
-
-public:
+	
 	USequenceMarketplaceBP();
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
@@ -77,14 +72,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
 	void GetFloorOrder(const FString& ContractAddress, const FSeqCollectiblesFilter Filter, FOnGetFloorOrder OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapPrices(const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
-
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Marketplace")
-	void GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
+	USequenceMarketplace* GetSequenceMarketplace() const;
 	
 private:
 	UPROPERTY()

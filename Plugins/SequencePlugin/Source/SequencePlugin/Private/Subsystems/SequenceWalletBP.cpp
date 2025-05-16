@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceWalletBP.h"
 #include "Engine/Engine.h"
 #include "Sequence/SequenceWallet.h"
@@ -251,4 +249,10 @@ void USequenceWalletBP::CallOnSessionClosed() const
 		this->OnSessionClosed.Broadcast();
 	}
 }
+
+USequenceWallet* USequenceWalletBP::GetSequenceWallet() const
+{
+	return this->Wallet;
+}
+
 

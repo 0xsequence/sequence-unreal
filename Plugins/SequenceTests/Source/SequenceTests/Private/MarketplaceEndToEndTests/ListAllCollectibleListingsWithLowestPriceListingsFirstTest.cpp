@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/World.h"
@@ -81,7 +79,7 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
             MarketplaceTestData->RequestFailed();
         };
 		    
-        MarketplaceTestData->GetMarketplace()->ListAllCollectibleListingsWithLowestPriceListingsFirst(
+        MarketplaceTestData->GetMarketplace()->GetAllCollectiblesWithLowestListingsFirst(
             Support->GetNetworkId(ENetwork::PolygonChain),
             "0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
             FSeqCollectiblesFilter::Empty(),

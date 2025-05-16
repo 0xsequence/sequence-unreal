@@ -1,7 +1,6 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Subsystems/SequenceUtilityBP.h"
 #include "Engine/Engine.h"
+#include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
 #include "Types/BinaryData.h"
@@ -133,4 +132,36 @@ void USequenceUtilityBP::Decode(const FString& EncodedData, const FString& Abi, 
 	};
 	
 	USequenceSupport::Decode(EncodedData, Abi, OnApiSuccess, OnApiFailure);
+}
+
+void USequenceUtilityBP::MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message)
+{
+	switch (Verbosity)
+	{
+	case ESeqLogVerbosity::Display:
+		SEQ_LOG(Display, TEXT("%s"), *Message);
+		break;
+	case ESeqLogVerbosity::Warning:
+		SEQ_LOG(Warning, TEXT("%s"), *Message);
+		break;
+	case ESeqLogVerbosity::Error:
+		SEQ_LOG(Error, TEXT("%s"), *Message);
+		break;
+	}
+}
+
+void USequenceUtilityBP::MakeSequenceEditorLog(const ESeqLogVerbosity Verbosity, const FString& Message)
+{
+	switch (Verbosity)
+	{
+		case ESeqLogVerbosity::Display:
+			SEQ_LOG_EDITOR(Display, TEXT("%s"), *Message);
+			break;
+		case ESeqLogVerbosity::Warning:
+			SEQ_LOG_EDITOR(Warning, TEXT("%s"), *Message);
+			break;
+		case ESeqLogVerbosity::Error:
+			SEQ_LOG_EDITOR(Error, TEXT("%s"), *Message);
+			break;
+	}
 }
