@@ -68,7 +68,7 @@ bool UCredentialsStorage::GetStoredCredentials(FCredentials_BE* Credentials) con
 
 	if (SaveGame == nullptr)
 	{
-		UGameplayStatics::LoadGameFromSlot(this->OldSaveSlot, this->UserIndex);
+		SaveGame = UGameplayStatics::LoadGameFromSlot(this->OldSaveSlot, this->UserIndex);
 	}
 
 	if (SaveGame != nullptr)
