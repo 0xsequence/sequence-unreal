@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SequenceRPCManager.h"
 #include "Indexer/SequenceIndexer.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceIndexerBP.generated.h"
