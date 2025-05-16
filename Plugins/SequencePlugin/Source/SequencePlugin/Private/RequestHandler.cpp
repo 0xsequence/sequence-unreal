@@ -126,7 +126,7 @@ void URequestHandler::ProcessAndThen(const TSuccessCallback<FHttpResponsePtr>& O
 		}
 
 		const FString Content = Response->GetContentAsString();
-		OnFailure(FSequenceError(RequestFail, Response, "Request failed: " + Content));
+		OnFailure(FSequenceError(RequestFail, Response, Content));
 	});
 }
 
