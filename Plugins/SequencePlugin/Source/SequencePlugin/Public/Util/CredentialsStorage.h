@@ -22,6 +22,6 @@ private:
 	UPROPERTY()
 	UGenericNativeEncryptor* Encryptor = nullptr;
 	
-	const FString SaveSlot = "SequenceCredentials";
+	const FString SaveSlot = "Cr";
 	const uint32 UserIndex = 0;
 };
