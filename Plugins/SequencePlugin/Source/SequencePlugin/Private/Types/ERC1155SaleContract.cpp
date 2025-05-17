@@ -6,22 +6,28 @@ UERC1155SaleContract::UERC1155SaleContract()
 {
 }
 
-UERC1155SaleContract* UERC1155SaleContract::Create(const FString& ContractAddress, const FString& PaymentToken, int32 MaxTotal, const FString& Data)
+UERC1155SaleContract::UERC1155SaleContract(FString ContractAddress, FString PaymentToken, int32 MaxTotal)
+{
+	this->ContractAddress = ContractAddress;
+	this->PaymentToken = PaymentToken;
+	this->MaxTotal = MaxTotal;
+}
+
+UERC1155SaleContract* UERC1155SaleContract::Create(const FString& ContractAddress, const FString& PaymentToken, int32 MaxTotal)
 {
 	UERC1155SaleContract* Contract = NewObject<UERC1155SaleContract>();
-	Contract->Init(ContractAddress, PaymentToken, MaxTotal, Data);
+	Contract->Init(ContractAddress, PaymentToken, MaxTotal);
 	return Contract;
 }
 
-void UERC1155SaleContract::Init(const FString& InContractAddress, const FString& InPaymentToken, int32 InMaxTotal, const FString& InData)
+void UERC1155SaleContract::Init(const FString& InContractAddress, const FString& InPaymentToken, int32 InMaxTotal)
 {
 	this->ContractAddress = InContractAddress;
 	this->PaymentToken = InPaymentToken;
 	this->MaxTotal = InMaxTotal;
-	this->Data = InData;
 }
 
-FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof)
+FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof, const FString Data)
 {
 	FString FunctionSignature = "mint(address,uint256[],uint256[],bytes,address,uint256,bytes32[])";
 	

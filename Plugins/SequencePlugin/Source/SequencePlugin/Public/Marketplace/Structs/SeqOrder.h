@@ -156,6 +156,7 @@ public:
 
     void Setup(FJsonObject& json_in)
     {
+
         OrderId = json_in.GetStringField(TEXT("orderId"));
 
         if (json_in.TryGetField(TEXT("marketplace")))
@@ -220,17 +221,17 @@ public:
         QuantityDecimals = json_in.GetNumberField(TEXT("quantityDecimals"));
         FeeBps = json_in.GetNumberField(TEXT("feeBps"));
 
-        if (json_in.HasField(TEXT("feeBreakdown"))) 
+        if (json_in.HasField(TEXT("feeBreakdown")))
         {
-            const TArray<TSharedPtr<FJsonValue>>& feeBreakdownArray = json_in.GetArrayField(TEXT("feeBreakdown")); 
+            const TArray<TSharedPtr<FJsonValue>>& feeBreakdownArray = json_in.GetArrayField(TEXT("feeBreakdown"));
             FeeBreakdown.Empty();
-            for (int32 i = 0; i < feeBreakdownArray.Num(); ++i) 
+            for (int32 i = 0; i < feeBreakdownArray.Num(); ++i)
             {
                 TSharedPtr<FJsonValue> feeValue = feeBreakdownArray[i];
                 if (feeValue->Type == EJson::Object)
                 {
-                    FSeqFeeBreakdown fee; 
-                    fee.Setup(*feeValue->AsObject()); 
+                    FSeqFeeBreakdown fee;
+                    fee.Setup(*feeValue->AsObject());
                     FeeBreakdown.Add(fee);
                 }
             }
@@ -242,6 +243,6 @@ public:
         OrderUpdatedAt = json_in.GetStringField(TEXT("orderUpdatedAt"));
         CreatedAt = json_in.GetStringField(TEXT("createdAt"));
         UpdatedAt = json_in.GetStringField(TEXT("updatedAt"));
-        json_in.TryGetStringField(TEXT("deletedAt"), DeletedAt);
+        DeletedAt = json_in.GetStringField(TEXT("deletedAt"));
     }
 };

@@ -96,7 +96,6 @@ public:
     */
     void Setup(FJsonObject json_in)
     {//the json object we expect here will be a mirror of what is above EXCEPT we will be snipping out what we need!
-
         FString tokenIdString;
         if (json_in.TryGetStringField(TEXT("tokenId"), tokenIdString))
         {

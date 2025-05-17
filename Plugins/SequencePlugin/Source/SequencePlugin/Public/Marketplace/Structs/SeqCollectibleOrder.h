@@ -30,16 +30,19 @@ public:
 
     void Setup(FJsonObject json_in)
     {
-        const TSharedPtr<FJsonObject>* item;
-        if (json_in.TryGetObjectField(TEXT("metadata"), item))
+        UE_LOG(LogTemp, Warning, TEXT("seq collectible setup start"));
+
+        const TSharedPtr<FJsonObject>* metadataJsonIn;
+        if (json_in.TryGetObjectField(TEXT("metadata"), metadataJsonIn))
         {
-            TokenMetadata.Setup(*item->Get());
+            TokenMetadata.Setup(*metadataJsonIn->Get());
         }
 
-        const TSharedPtr<FJsonObject>* orderItem;
-        if (json_in.TryGetObjectField(TEXT("order"), orderItem))
+        const TSharedPtr<FJsonObject>* orderJsonIn;
+        if (json_in.TryGetObjectField(TEXT("order"), orderJsonIn))
         {
-            Order.Setup(*orderItem->Get());
+            Order.Setup(*orderJsonIn->Get());
         }
+        UE_LOG(LogTemp, Warning, TEXT("seq collectible setup done"));
     }
 };
