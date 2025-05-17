@@ -32,6 +32,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const int32& Amount, const TArray<FString>& Proof);
 
+    UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC721 Sale")
     FContractCall GetSaleDetails();
 
 private:

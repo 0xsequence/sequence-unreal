@@ -80,8 +80,8 @@ FContractCall UERC721SaleContract::GetSaleDetails()
     FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
     FContractCall CallData;
-    CallData.Data = TOptional(EncodedData.ToHex());
-    CallData.To = FAddress::From(ContractAddress);
+    CallData.Data = EncodedData.ToHex();
+    CallData.To = ContractAddress;
 
     return CallData;
 }

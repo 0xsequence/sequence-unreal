@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sequence/Transactions.h"
+#include "Types/SaleDetails.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
@@ -9,6 +10,9 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceUtilityBP : public UObject
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnDecodeResponse, const FString&, Json);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
 	USequenceUtilityBP();
@@ -51,6 +55,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<int64> GetAllNetworkIds();
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static FSaleDetails DeserializeSaleDetails(const FString& Json);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void Decode(const FString& EncodedData, const FString& Abi, FOnDecodeResponse OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static void MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message);

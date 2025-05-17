@@ -4,6 +4,7 @@
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Util/JsonBuilder.h"
+#include "Util/Log.h"
 
 URPCCaller::URPCCaller()
 {
@@ -35,6 +36,7 @@ TResult<TSharedPtr<FJsonObject>> URPCCaller::ExtractJsonObjectResult(const FStri
 
 TResult<FString> URPCCaller::ExtractStringResult(const FString& JsonRaw)
 {
+	SEQ_LOG(Display, TEXT("%s"), *JsonRaw);
 	const TSharedPtr<FJsonObject> Json = Parse(JsonRaw);
 	
 	if(!Json)
@@ -63,8 +65,9 @@ TResult<uint64> URPCCaller::ExtractUIntResult(const FString& JsonRaw)
 
 void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnError, bool bUseValidator)
 {
-
 	URequestHandler* RequestHandler = NewObject<URequestHandler>();
+
+	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
 
 	RequestHandler->PrepareRequest()
 		->WithUrl(Url)

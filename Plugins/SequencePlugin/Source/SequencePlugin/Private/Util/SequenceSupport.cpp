@@ -1,10 +1,13 @@
 #include "Util/SequenceSupport.h"
 
+#include "ConfigFetcher.h"
+#include "Provider.h"
+#include "RequestHandler.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
-#include "Indexer/SequenceIndexer.h"
 #include "Misc/Base64.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
 
 FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
@@ -585,3 +588,25 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 	FDateTime::ParseIso8601(*Iso8601,ParsedDate);
 	return ParsedDate.ToUnixTimestamp();
 }
+
+void USequenceSupport::Decode(const FString& EncodedData, const FString& Abi, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Encoded = FEthAbiBridge::EncodeFunctionCall("[{\"name\": \"transfer\",\"type\": \"function\",\"inputs\": [{\"name\": \"to\", \"type\": \"address\" },{ \"name\": \"amount\", \"type\": \"uint256\" }],\"outputs\": [{\"name\": \"\", \"type\": \"bool\" }]}]", "transfer", "[\"0x000000000000000000000000000000000000dead\",1000000000000000000]");
+	SEQ_LOG_EDITOR(Display, TEXT("Encoded Bridge Result %s"), *Encoded);
+	
+	const FString Url = "https://remote-abi-encoding.pages.dev/decode";
+	const FString Content = "{\"abi\":" + Abi + ",\"decodedInput\":\"" + EncodedData + "\"}";
+	
+	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
+	
+	NewObject<URequestHandler>()
+	->PrepareRequest()
+	->WithUrl(Url)
+	->WithHeader("Content-type", "application/json")
+	->WithHeader("Accept", "application/json")
+	->WithHeader("X-Access-Key", UConfigFetcher::GetConfigVar("ProjectAccessKey"))
+	->WithVerb("POST")
+	->WithContentAsString(Content)
+	->ProcessAndThen(OnSuccess, OnFailure);
+}
+
