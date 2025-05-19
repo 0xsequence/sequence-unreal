@@ -5,10 +5,12 @@
 #include "Util/SequenceSupport.h"
 #include "ConfigFetcher.h"
 #include "Indexer/SequenceIndexer.h"
-#include "Marketplace/Structs/SeqGetSwapPriceArgs.h"
+#include "Marketplace/Structs/SeqGetLifiChainsResponse.h"
+#include "Marketplace/Structs/SeqGetLifiSwapRoutesResponse.h"
 #include "Marketplace/Structs/SeqGetSwapPricesArgs.h"
-#include "Marketplace/Structs/SeqGetSwapPricesResponse.h"
 #include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
+#include "Marketplace/Structs/SeqGetSwapQuoteResponse.h"
+#include "Marketplace/Structs/SeqLifiSwapRoute.h"
 #include "Marketplace/Structs/SeqSwapPrice.h"
 #include "Marketplace/Structs/SeqSwapQuote.h"
 
@@ -66,102 +68,101 @@ void USequencePay::OpenOnRampInExternalBrowser(const FString& WalletAddress, con
 	}
 }
 
-void USequencePay::GetSwapPrice(const int64 ChainID, const FString& SellCurrency, const FString& BuyCurrency,
-	const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure,
-	const int SlippagePercentage)
+void USequencePay::GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChainsResponse>& OnSuccess, const FFailureCallback& OnFailure) const
 {
-	const FString EndPoint = "GetSwapPermit2Price";
-	FGetSwapPriceArgs Args {
-		BuyCurrency,
-		SellCurrency,
-		BuyAmount,
-		ChainID,
-		SlippagePercentage		
-	};
-	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+	const FString EndPoint = "GetLifiChains";
+	HTTPPostSwapAPI(EndPoint, "", [this, OnSuccess](const FString& Content)
+	{
+		FSeqGetLifiChainsResponse Chains = USequenceSupport::JSONStringToStruct<FSeqGetLifiChainsResponse>(Content);
+		OnSuccess(Chains);
+	}, OnFailure);
+}
+
+void USequencePay::GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString EndPoint = "GetLifiTokens";
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+	{
+		const FSeqGetLifiTokensResponse Response = USequenceSupport::JSONStringToStruct<FSeqGetLifiTokensResponse>(Content);
+		OnSuccess(Response);
+	}, OnFailure);
+}
+
+void USequencePay::GetSwapPrice(const int64 ChainID, const FString& UserWallet, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->GetSwapPrices(ChainID, UserWallet, BuyCurrency, BuyAmount, [SellCurrency, OnSuccess, OnFailure](TArray<FSeqSwapPrice> Prices)
+	{
+		for (const FSeqSwapPrice Price : Prices)
 		{
-			FSeqSwapPrice Response;
-			
-			if(!Response.FromResponse(Content))
+			if (Price.CurrencyAddress == SellCurrency)
 			{
-				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
+				OnSuccess(Price);
 				return;
 			}
-			
-			OnSuccess(Response);
-		}, OnFailure);
+		}
+
+		OnFailure(FSequenceError { ResponseParseError, "The given sell currency is not available as a swap option for this user." });
+	}, OnFailure);
 }
 
 void USequencePay::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
-	const FFailureCallback& OnFailure, const int SlippagePercentage)
+	const FFailureCallback& OnFailure)
 {
-	const FString EndPoint = "GetSwapPermit2Prices";
+	const FString EndPoint = "GetLifiSwapRoutes";
 	FGetSwapPricesArgs Args {
-		UserWallet,
+		ChainID,
 		BuyCurrency,
 		BuyAmount,
-		static_cast<int>(ChainID),
-		SlippagePercentage
+		UserWallet
 	};
-	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
+	
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, BuyCurrency, OnSuccess](const FString& Content)
+	{
+		const FSeqGetLifiSwapRoutesResponse Response = USequenceSupport::JSONStringToStruct<FSeqGetLifiSwapRoutesResponse>(Content);
+		const TArray<FSeqLifiSwapRoute> SwapRoutes = Response.Routes;
+
+		TArray<FSeqSwapPrice> SwapPrices;
+		for (const FSeqLifiSwapRoute& Route : SwapRoutes)
 		{
-			TArray<FSeqSwapPrice> Response;
-			TSharedPtr<FJsonObject> Json;
-
-			if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Content), Json) || !Json->HasField(TEXT("swapPermit2Prices")))
+			if (!Route.ContainsToken(BuyCurrency))
 			{
-				OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-				return;
+				continue;
 			}
 
-			TArray<TSharedPtr<FJsonValue>> Array = Json->GetArrayField(TEXT("swapPermit2Prices"));
-
-			for (TSharedPtr<FJsonValue> Value : Array)
+			for (const FSeqSwapToken& FromToken : Route.FromTokens)
 			{
-				FSeqSwapPrice SwapPrice;
-				if (!SwapPrice.FromJson(Value->AsObject()))
-				{
-					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-					return;
-				}
-				Response.Add(SwapPrice);
+				SwapPrices.Add(FSeqSwapPrice(FromToken.Contract, FromToken.Price));
 			}
+		}
 		
-			OnSuccess(Response);
-		}, OnFailure);
+		OnSuccess(SwapPrices);
+	}, OnFailure);
 }
 
-void USequencePay::GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
-	const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove,
-	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure, const int SlippagePercentage)
+void USequencePay::GetSwapQuote(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency,
+	const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove,
+	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString EndPoint = "GetSwapQuoteV2";
+	const FString EndPoint = "GetLifiSwapQuote";
 
-	AssertWeHaveSufficientBalance(ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, SlippagePercentage](void)
+	AssertWeHaveSufficientBalance(ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, SellAmount, IncludeApprove](void)
 	{
 		FGetSwapQuoteArgs Args {
-			UserWallet,
+			ChainID,
+			WalletAddress,
 			BuyCurrency,
 			SellCurrency,
 			BuyAmount,
-			static_cast<int>(ChainID),
-			IncludeApprove,
-			SlippagePercentage
+			SellAmount,
+			IncludeApprove
 		};
 		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
-			{
-				FSeqSwapQuote Response;
-			
-				if(!Response.FromResponse(Content))
-				{
-					OnFailure(FSequenceError { ResponseParseError, "Failed to parse response" });
-					return;
-				}
-				
-				OnSuccess(Response);
-			}, OnFailure);
-	}, OnFailure, SlippagePercentage);
+		{
+			const FGetSwapQuoteResponse Response = USequenceSupport::JSONStringToStruct<FGetSwapQuoteResponse>(Content);
+			OnSuccess(Response.Quote);
+		}, OnFailure);
+	}, OnFailure);
 }
 
 template < typename T> FString USequencePay::BuildArgs(T StructIn)
@@ -236,18 +237,18 @@ void USequencePay::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 
 void USequencePay::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
 	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
-	const FFailureCallback& OnFailure, const int SlippagePercentage)
+	const FFailureCallback& OnFailure)
 {
-	GetSwapPrice(ChainID, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess, SlippagePercentage](const FSeqSwapPrice& SwapPrice)
+	GetSwapPrice(ChainID, UserWallet, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess](const FSeqSwapPrice& SwapPrice)
 	{
-		long Required = FCString::Atoi64(*SwapPrice.MaxPrice);
+		long Required = FCString::Atoi64(*SwapPrice.Price);
 		
 		USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
 		FSeqGetTokenBalancesArgs Args;
 		Args.accountAddress = UserWallet;
 		Args.contractAddress = SellCurrency;
 
-		Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess, SlippagePercentage](const FSeqGetTokenBalancesReturn& TokenBalances)
+		Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
 			{
 				TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
 				long Have = 0;
@@ -270,5 +271,5 @@ void USequencePay::AssertWeHaveSufficientBalance(const int64 ChainID, const FStr
 					OnSuccess();
 				}
 			}, OnFailure);
-	}, OnFailure, SlippagePercentage);
+	}, OnFailure);
 }

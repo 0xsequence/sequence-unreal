@@ -70,4 +70,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString ApproveData;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
+    FString Amount;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
+    FString AmountMin;
 };

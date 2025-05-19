@@ -15,25 +15,28 @@ public:
     static inline bool customConstructor = false; // Flag to determine the constructor used
     static inline bool customGetter = false;
     static FString GetArgs() { return ""; }
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
+    int64 ChainId;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    FString UserAddress;
+    FString WalletAddress;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    FString BuyCurrencyAddress;
+    FString FromTokenAddress;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    FString SellCurrencyAddress;
+    FString ToTokenAddress;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    FString BuyAmount;
-
+    FString FromTokenAmount;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    int ChainID;
+    FString ToTokenAmount;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     bool IncludeApprove;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-    int SlippagePercentage;
+    float SlippageBps;
 };
