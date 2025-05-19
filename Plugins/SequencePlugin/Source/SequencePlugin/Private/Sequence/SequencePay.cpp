@@ -208,28 +208,28 @@ void USequencePay::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 	SEQ_LOG(Display, TEXT("request: %s"), *RequestURL);  
 	
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
+	{
+		if (bWasSuccessful)
 		{
-			if (bWasSuccessful)
+			const FString Content = Response->GetContentAsString();
+			SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
+			OnSuccess(Content);
+		}
+		else
+		{
+			if (Request.IsValid() && Response.IsValid())
 			{
-				const FString Content = Response->GetContentAsString();
-				SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
-				OnSuccess(Content);
+				const FString ErrorMessage = Response->GetContentAsString();
+				SEQ_LOG(Error, TEXT("Request failed: %s"), *ErrorMessage);  
+				OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
 			}
 			else
 			{
-				if (Request.IsValid() && Response.IsValid())
-				{
-					const FString ErrorMessage = Response->GetContentAsString();
-					SEQ_LOG(Error, TEXT("Request failed: %s"), *ErrorMessage);  
-					OnFailure(FSequenceError(RequestFail, "Request failed: " + ErrorMessage));
-				}
-				else
-				{
-					SEQ_LOG(Error, TEXT("Request failed: Invalid Request Pointer")); 
-					OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
-				}
+				SEQ_LOG(Error, TEXT("Request failed: Invalid Request Pointer")); 
+				OnFailure(FSequenceError(RequestFail, "Request failed: Invalid Request Pointer"));
 			}
-		});
+		}
+	});
 
 	// Process the request
 	HTTP_Post_Req->ProcessRequest();
@@ -241,7 +241,7 @@ void USequencePay::AssertWeHaveSufficientBalance(const int64 ChainID, const FStr
 {
 	GetSwapPrice(ChainID, UserWallet, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess](const FSeqSwapPrice& SwapPrice)
 	{
-		long Required = FCString::Atoi64(*SwapPrice.Price);
+		long Required = SwapPrice.Price;
 		
 		USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
 		FSeqGetTokenBalancesArgs Args;
@@ -249,27 +249,25 @@ void USequencePay::AssertWeHaveSufficientBalance(const int64 ChainID, const FStr
 		Args.contractAddress = SellCurrency;
 
 		Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
+		{
+			TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
+			long Have = 0;
+				
+			if(SellCurrencies.Num() > 0)
 			{
-				TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
-				long Have = 0;
+				Have = SellCurrencies[0].balance;
+			}
 				
-				if(SellCurrencies.Num() > 0)
-				{
-					Have = SellCurrencies[0].balance;
-				}
-				
-				SEQ_LOG(Display, TEXT("Have: %ld, Required: %ld"), Have, Required);
-
-				if(Have < Required)
-				{
-					const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
-																{ *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
-					OnFailure(FSequenceError(InsufficientBalance, ErrorString));
-				}
-				else
-				{
-					OnSuccess();
-				}
-			}, OnFailure);
+			if(Have < Required)
+			{
+				const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
+															{ *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
+				OnFailure(FSequenceError(InsufficientBalance, ErrorString));
+			}
+			else
+			{
+				OnSuccess();
+			}
+		}, OnFailure);
 	}, OnFailure);
 }

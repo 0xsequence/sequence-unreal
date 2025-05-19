@@ -34,11 +34,11 @@ void USequencePayBP::GetSupportedOnRampCountries(FOnSupportedTransakCountries On
 	this->Pay->GetSupportedOnRampCountries(SuccessCallback,FailureCallback);
 }
 
-void USequencePayBP::GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure)
+void USequencePayBP::GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FSeqSwapPrice> OnApiSuccess = [this, OnSuccess](const FSeqSwapPrice& Response)
+	const TSuccessCallback<FSeqGetLifiChainsResponse> OnApiSuccess = [this, OnSuccess](const FSeqGetLifiChainsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response.CurrencyAddress, Response.CurrencyBalance, Response.Price, Response.MaxPrice, Response.TransactionValue);
+		OnSuccess.ExecuteIfBound(Response.ChainIds);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -47,10 +47,42 @@ void USequencePayBP::GetSwapPrice(const FString& SellCurrency, const FString& Bu
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Pay->GetSwapPrice(SequenceSdk::GetChainId(), SellCurrency, BuyCurrency, BuyAmount, OnApiSuccess, OnApiFailure, SlippagePercentage);
+	this->Pay->GetSupportedSwapChains(OnApiSuccess, OnApiFailure);
 }
 
-void USequencePayBP::GetSwapPrices(const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure)
+void USequencePayBP::GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FSeqGetLifiTokensResponse> OnApiSuccess = [this, OnSuccess](const FSeqGetLifiTokensResponse& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response.Tokens);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Swap Price: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+
+	this->Pay->GetSupportedSwapTokens(Args, OnApiSuccess, OnApiFailure);
+}
+
+void USequencePayBP::GetSwapPrice(const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FSeqSwapPrice> OnApiSuccess = [this, OnSuccess](const FSeqSwapPrice& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response.CurrencyAddress, Response.Price);
+	};
+
+	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error getting Swap Price: %s"), *Error.Message);
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+
+	this->Pay->GetSwapPrice(SequenceSdk::GetChainId(), WalletAddress, SellCurrency, BuyCurrency, BuyAmount, OnApiSuccess, OnApiFailure);
+}
+
+void USequencePayBP::GetSwapPrices(const FString& WalletAddress, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<TArray<FSeqSwapPrice>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqSwapPrice>& SwapPrices)
 	{
@@ -63,10 +95,10 @@ void USequencePayBP::GetSwapPrices(const FString& UserWallet, const FString& Buy
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Pay->GetSwapPrices(SequenceSdk::GetChainId(), UserWallet, BuyCurrency, BuyAmount, OnApiSuccess, OnApiFailure, SlippagePercentage);
+	this->Pay->GetSwapPrices(SequenceSdk::GetChainId(), WalletAddress, BuyCurrency, BuyAmount, OnApiSuccess, OnApiFailure);
 }
 
-void USequencePayBP::GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure)
+void USequencePayBP::GetSwapQuote(const FString& WalletAddress, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqSwapQuote> OnApiSuccess = [this, OnSuccess](const FSeqSwapQuote& Response)
 	{
@@ -79,7 +111,7 @@ void USequencePayBP::GetSwapQuote(const FString& UserWallet, const FString& BuyC
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
 
-	this->Pay->GetSwapQuote(SequenceSdk::GetChainId(), UserWallet, BuyCurrency, SellCurrency, BuyAmount, IncludeApprove, OnApiSuccess, OnApiFailure, SlippagePercentage);
+	this->Pay->GetSwapQuote(SequenceSdk::GetChainId(), WalletAddress, BuyCurrency, SellCurrency, BuyAmount, SellAmount, IncludeApprove, OnApiSuccess, OnApiFailure);
 }
 
 USequencePay* USequencePayBP::GetSequencePay() const

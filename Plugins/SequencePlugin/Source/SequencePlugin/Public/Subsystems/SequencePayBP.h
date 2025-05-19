@@ -14,7 +14,9 @@ class SEQUENCEPLUGIN_API USequencePayBP : public UGameInstanceSubsystem
 	
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
-	DECLARE_DYNAMIC_DELEGATE_FiveParams(FOnGetSwapPrice, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, TransactionValue);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapChains, const TArray<int64>&, ChainIds);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapTokens, const TArray<FSeqSwapToken>&, Tokens);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetSwapPrice, FString, CurrencyAddress, int64, Price);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, const TArray<FSeqSwapPrice>&, SwapPrices);
 	DECLARE_DYNAMIC_DELEGATE_EightParams(FOnGetSwapQuote, FString, CurrencyAddress, FString, CurrencyBalance, FString, Price, FString, MaxPrice, FString, To, FString, TransactionData, FString, TransactionValue, FString, ApproveData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
@@ -30,14 +32,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Pay")
 	void GetSupportedOnRampCountries(FOnSupportedTransakCountries OnSuccess, FOnFailure OnFailure);
 
-	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
-	void GetSwapPrice(const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Pay")
+	void GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Pay")
+	void GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
-	void GetSwapPrices(const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const int SlippagePercentage, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
+	void GetSwapPrice(const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
-	void GetSwapQuote(const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const bool IncludeApprove, const int SlippagePercentage, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
+	void GetSwapPrices(const FString& WalletAddress, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrices OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
+	void GetSwapQuote(const FString& WalletAddress, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, FOnGetSwapQuote OnSuccess, FOnFailure OnFailure);
 
 	USequencePay* GetSequencePay() const;
 	

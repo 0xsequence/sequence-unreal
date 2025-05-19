@@ -2,10 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "TransakDataTypes.h"
-#include "..\Marketplace\Structs\SeqGetLifiChainsResponse.h"
+#include "Marketplace/Structs/SeqGetLifiChainsResponse.h"
 #include "Marketplace/Structs/SeqGetLifiTokensArgs.h"
 #include "Marketplace/Structs/SeqGetLifiTokensResponse.h"
-#include "Marketplace/Structs/SeqLifiSwapRoute.h"
 #include "Marketplace/Structs/SeqSwapPrice.h"
 #include "Marketplace/Structs/SeqSwapQuote.h"
 #include "UObject/Object.h"
@@ -27,7 +26,6 @@ public:
 	void GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChainsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	void GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
-
 	
 	/**
 	 * 

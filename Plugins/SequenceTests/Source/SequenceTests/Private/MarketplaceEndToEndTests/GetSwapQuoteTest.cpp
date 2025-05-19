@@ -50,7 +50,8 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
         USequenceSupport* Support = NewObject<USequenceSupport>();
         const FString USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
         const FString USDCe = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
-        const FString Amount = "1000";
+        const FString BuyAmount = "1000";
+        const FString SellAmount = "1000";
         const FString UserAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
 
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
@@ -76,7 +77,8 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
             UserAddress,
             USDC,
             USDCe,
-            Amount,
+            BuyAmount,
+            SellAmount,
             true,
             GenericSuccess,
             GenericFailure
