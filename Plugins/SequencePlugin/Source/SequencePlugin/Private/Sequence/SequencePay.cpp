@@ -11,6 +11,7 @@
 #include "Marketplace/Structs/SeqGetSwapQuoteArgs.h"
 #include "Marketplace/Structs/SeqGetSwapQuoteResponse.h"
 #include "Marketplace/Structs/SeqLifiSwapRoute.h"
+#include "Marketplace/Structs/SeqGetLifiTokensArgs.h"
 #include "Marketplace/Structs/SeqSwapPrice.h"
 #include "Marketplace/Structs/SeqSwapQuote.h"
 
@@ -148,11 +149,15 @@ void USequencePay::GetSwapQuote(const int64 ChainID, const FString& WalletAddres
 	const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove,
 	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	const FString EndPoint = "GetLifiSwapQuote";
-
-	AssertWeHaveSufficientBalance(ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, EndPoint, OnSuccess, ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, SellAmount, IncludeApprove](void)
+	if (!BuyAmount.IsEmpty() && !SellAmount.IsEmpty())
 	{
-		FGetSwapQuoteArgs Args {
+		OnFailure(FSequenceError {InvalidArgument, "Please only define either BuyAmount OR SellAmount."});
+		return;
+	}
+
+	AssertWeHaveSufficientBalance(ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, OnSuccess, ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, SellAmount, IncludeApprove](void)
+	{
+		const FSeqGetSwapQuoteParams Params {
 			ChainID,
 			WalletAddress,
 			BuyCurrency,
@@ -161,6 +166,12 @@ void USequencePay::GetSwapQuote(const int64 ChainID, const FString& WalletAddres
 			SellAmount,
 			IncludeApprove
 		};
+		
+		const FSeqGetSwapQuoteArgs Args {
+			Params
+		};
+
+		const FString EndPoint = "GetLifiSwapQuote";
 		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
 		{
 			const FGetSwapQuoteResponse Response = USequenceSupport::JSONStringToStruct<FGetSwapQuoteResponse>(Content);
@@ -208,8 +219,7 @@ void USequencePay::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 	HTTP_Post_Req->SetURL(RequestURL);
 	HTTP_Post_Req->SetContentAsString(Args);
 	 
-	SEQ_LOG(Display, TEXT("body: %s"), *Args);  
-	SEQ_LOG(Display, TEXT("request: %s"), *RequestURL);  
+	SEQ_LOG(Display, TEXT("Requesting %s with payload %s"), *RequestURL, *Args);  
 	
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, FHttpResponsePtr Response, const bool bWasSuccessful)
 	{
