@@ -73,13 +73,17 @@ void USequencePay::GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChai
 	const FString EndPoint = "GetLifiChains";
 	HTTPPostSwapAPI(EndPoint, "", [this, OnSuccess](const FString& Content)
 	{
-		FSeqGetLifiChainsResponse Chains = USequenceSupport::JSONStringToStruct<FSeqGetLifiChainsResponse>(Content);
+		const FSeqGetLifiChainsResponse Chains = USequenceSupport::JSONStringToStruct<FSeqGetLifiChainsResponse>(Content);
 		OnSuccess(Chains);
 	}, OnFailure);
 }
 
-void USequencePay::GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequencePay::GetSupportedSwapTokens(const TArray<int64>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
+	const FSeqGetLifiTokensArgs Args {
+		ChainIds
+	};
+	
 	const FString EndPoint = "GetLifiTokens";
 	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
 	{

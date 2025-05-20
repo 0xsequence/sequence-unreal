@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SeqSwapToken.h"
+#include "SeqLifiToken.h"
 #include "SeqGetLifiTokensResponse.generated.h"
 
 USTRUCT(BlueprintType)
@@ -10,5 +10,5 @@ struct SEQUENCEPLUGIN_API FSeqGetLifiTokensResponse
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "tokens"))
-    TArray<FSeqSwapToken> Tokens;
+    TArray<FSeqLifiToken> Tokens;
 };

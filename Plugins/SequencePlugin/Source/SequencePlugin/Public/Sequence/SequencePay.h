@@ -25,7 +25,7 @@ public:
 
 	void GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChainsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
-	void GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSupportedSwapTokens(const TArray<int64>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/**
 	 * 

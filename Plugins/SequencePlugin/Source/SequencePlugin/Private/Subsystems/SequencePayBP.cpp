@@ -38,7 +38,7 @@ void USequencePayBP::GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess,
 {
 	const TSuccessCallback<FSeqGetLifiChainsResponse> OnApiSuccess = [this, OnSuccess](const FSeqGetLifiChainsResponse& Response)
 	{
-		OnSuccess.ExecuteIfBound(Response.ChainIds);
+		OnSuccess.ExecuteIfBound(Response.Chains);
 	};
 
 	const FFailureCallback OnApiFailure = [this, OnFailure](const FSequenceError& Error)
@@ -50,7 +50,7 @@ void USequencePayBP::GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess,
 	this->Pay->GetSupportedSwapChains(OnApiSuccess, OnApiFailure);
 }
 
-void USequencePayBP::GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure)
+void USequencePayBP::GetSupportedSwapTokens(const TArray<int64>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetLifiTokensResponse> OnApiSuccess = [this, OnSuccess](const FSeqGetLifiTokensResponse& Response)
 	{
@@ -62,8 +62,8 @@ void USequencePayBP::GetSupportedSwapTokens(const FSeqGetLifiTokensArgs& Args, F
 		SEQ_LOG(Error, TEXT("Error getting Swap Price: %s"), *Error.Message);
 		OnFailure.ExecuteIfBound(Error.Message);
 	};
-
-	this->Pay->GetSupportedSwapTokens(Args, OnApiSuccess, OnApiFailure);
+	
+	this->Pay->GetSupportedSwapTokens(ChainIds, OnApiSuccess, OnApiFailure);
 }
 
 void USequencePayBP::GetSwapPrice(const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure)
