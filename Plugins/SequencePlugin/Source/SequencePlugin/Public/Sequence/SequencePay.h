@@ -30,30 +30,30 @@ public:
 	/**
 	 * 
 	 * @param ChainID the id of the chain
-	 * @param UserWallet the address of the user wallet
+	 * @param WalletAddress the address of the user wallet
 	 * @param SellCurrency the address of the currency to sell
 	 * @param BuyCurrency the address of the currency to buy
 	 * @param BuyAmount the amount to buy
 	 * @param OnSuccess handler for success, takes in a FSeqSwapPrice
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapPrice(const int64 ChainID, const FString& UserWallet, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapPrice(const int64 ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/**
 	 * 
 	 * @param ChainID the id of the chain
-	 * @param UserWallet the address of the user wallet
+	 * @param WalletAddress the address of the user wallet
 	 * @param BuyCurrency the address of the currency to buy
 	 * @param BuyAmount the amount to buy
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqSwapPrice
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapPrices(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * 
 	 * @param ChainID the id of the chain
-	 * @param UserWallet the address of the user wallet
+	 * @param WalletAddress the address of the user wallet
 	 * @param BuyCurrency the address of the currency to buy
 	 * @param SellCurrency the address of the currency to sell
 	 * @param BuyAmount the amount to buy
@@ -62,7 +62,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqSwapQuote
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapQuote(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapQuote(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure);
 	
 private:
 	/*

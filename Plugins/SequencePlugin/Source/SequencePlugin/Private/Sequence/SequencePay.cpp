@@ -92,9 +92,9 @@ void USequencePay::GetSupportedSwapTokens(const TArray<int64>& ChainIds, const T
 	}, OnFailure);
 }
 
-void USequencePay::GetSwapPrice(const int64 ChainID, const FString& UserWallet, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure)
+void USequencePay::GetSwapPrice(const int64 ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	this->GetSwapPrices(ChainID, UserWallet, BuyCurrency, BuyAmount, [SellCurrency, OnSuccess, OnFailure](TArray<FSeqSwapPrice> Prices)
+	this->GetSwapPrices(ChainID, WalletAddress, BuyCurrency, BuyAmount, [SellCurrency, OnSuccess, OnFailure](TArray<FSeqSwapPrice> Prices)
 	{
 		for (const FSeqSwapPrice Price : Prices)
 		{
@@ -109,7 +109,7 @@ void USequencePay::GetSwapPrice(const int64 ChainID, const FString& UserWallet, 
 	}, OnFailure);
 }
 
-void USequencePay::GetSwapPrices(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
+void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -118,7 +118,7 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& UserWallet,
 		ChainID,
 		BuyCurrency,
 		BuyAmount,
-		UserWallet
+		WalletAddress
 	};
 	
 	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, BuyCurrency, OnSuccess](const FString& Content)
@@ -136,7 +136,7 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& UserWallet,
 
 			for (const FSeqSwapToken& FromToken : Route.FromTokens)
 			{
-				SwapPrices.Add(FSeqSwapPrice(FromToken.Contract, FromToken.Price));
+				SwapPrices.Add(FSeqSwapPrice(FromToken.Address, FromToken.Price));
 			}
 		}
 		

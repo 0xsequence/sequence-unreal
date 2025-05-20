@@ -25,7 +25,7 @@ public:
 	{
 		for (const FSeqSwapToken& Token : ToTokens)
 		{
-			if (Token.Contract == Contract)
+			if (Token.Address.ToLower() == Contract.ToLower())
 			{
 				return true;
 			}
