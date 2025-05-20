@@ -16,14 +16,54 @@ class SEQUENCEPLUGIN_API USequencePay : public UObject
 	GENERATED_BODY()
 
 public:
+	/**
+	 * Generates a URL for initiating an on-ramp (fiat-to-crypto) transaction with the specified parameters.
+	 *
+	 * @param WalletAddress The user's wallet address to be used as the destination for the crypto funds.
+	 * @param FiatCurrencyIn The fiat currency code (e.g., "USD", "EUR") to be used for the transaction.
+	 * @param DefaultFiatAmountIn The default fiat amount to pre-fill in the on-ramp service.
+	 * @param DefaultCryptoCurrencyIn The default cryptocurrency to receive (e.g., "ETH", "USDC").
+	 * @param NetworksIn A comma-separated list of supported blockchain networks (e.g., "ethereum,polygon").
+	 * @param DisableWalletAddressFormIn If true, the wallet address input will be disabled in the on-ramp UI.
+	 * @return A pre-configured URL to launch the on-ramp flow in an external browser or webview.
+	 */
 	FString GetOnRampLink(const FString& WalletAddress, const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn);
-	
+
+	/**
+	 * Opens an external browser window to initiate an on-ramp (fiat-to-crypto) transaction with pre-filled parameters.
+	 *
+	 * @param WalletAddress The user's wallet address to be used as the crypto destination.
+	 * @param FiatCurrencyIn The fiat currency code (e.g., "USD", "EUR") for the transaction.
+	 * @param DefaultFiatAmountIn The default amount in fiat currency to pre-fill in the on-ramp interface.
+	 * @param DefaultCryptoCurrencyIn The default cryptocurrency to receive (e.g., "ETH", "BTC").
+	 * @param NetworksIn A comma-separated list of blockchain networks to include (e.g., "ethereum,polygon").
+	 * @param DisableWalletAddressFormIn If true, the wallet address field will be disabled in the on-ramp UI.
+	 */
 	void OpenOnRampInExternalBrowser(const FString& WalletAddress, const FString& FiatCurrencyIn, const FString& DefaultFiatAmountIn, const FString& DefaultCryptoCurrencyIn, const FString& NetworksIn, bool DisableWalletAddressFormIn);
 
+	/**
+	 * Retrieves the list of countries supported for on-ramp services (e.g., fiat-to-crypto conversions).
+	 *
+	 * @param OnSuccess Callback invoked upon successful retrieval. Receives an array of FSupportedCountry objects.
+	 * @param OnFailure Callback invoked if the request fails, providing error information or diagnostics.
+	 */
 	void GetSupportedOnRampCountries(TSuccessCallback<TArray<FSupportedCountry>> OnSuccess, FFailureCallback OnFailure);
 
+	/**
+	 * Retrieves the list of supported blockchain networks (chains) for token swaps.
+	 *
+	 * @param OnSuccess Callback invoked upon successful retrieval of chain data. Receives a FSeqGetLifiChainsResponse object.
+	 * @param OnFailure Callback invoked if the request fails, providing error context or diagnostics.
+	 */
 	void GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChainsResponse>& OnSuccess, const FFailureCallback& OnFailure) const;
 
+	/**
+	 * Retrieves the list of supported swap tokens for the specified blockchain networks.
+	 *
+	 * @param ChainIds An array of blockchain chain IDs for which to fetch the supported tokens.
+	 * @param OnSuccess Callback invoked upon successful retrieval of token data. Receives a FSeqGetLifiTokensResponse object.
+	 * @param OnFailure Callback invoked if the request fails, typically providing error context or logging.
+	 */
 	void GetSupportedSwapTokens(const TArray<int64>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/**
