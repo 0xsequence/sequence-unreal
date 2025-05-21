@@ -117,21 +117,14 @@ FSaleDetails USequenceUtilityBP::DeserializeSaleDetails(const FString& Json)
 	return SaleDetails;
 }
 
-void USequenceUtilityBP::Decode(const FString& EncodedData, const FString& Abi, FOnDecodeResponse OnSuccess, FOnFailure OnFailure)
+FString USequenceUtilityBP::EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values)
 {
-	const TSuccessCallback<FHttpResponsePtr>& OnApiSuccess = [OnSuccess](FHttpResponsePtr Response)
-	{
-		const FString Content = UTF8ToString(FUnsizedData(Response.Get()->GetContent()));
-		OnSuccess.ExecuteIfBound(Content);
-	};
+	return USequenceSupport::EncodeFunctionCall(Abi, FunctionName, Values);
+}
 
-	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Error)
-	{
-		SEQ_LOG(Error, TEXT("Failed to decode: %s"), *Error.Message);
-		OnFailure.ExecuteIfBound(Error.Message);
-	};
-	
-	USequenceSupport::Decode(EncodedData, Abi, OnApiSuccess, OnApiFailure);
+FString USequenceUtilityBP::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)
+{
+	return USequenceSupport::DecodeFunctionResult(Abi, EncodedData);
 }
 
 void USequenceUtilityBP::MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message)

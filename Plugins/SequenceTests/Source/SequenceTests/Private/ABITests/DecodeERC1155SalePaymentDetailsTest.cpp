@@ -81,7 +81,7 @@ bool FABIDecodeERC1155SalePaymentDetailsTest::RunTest(const FString& Parameters)
     const TFunction<void(FString)> OnSuccess = [this, TestData, AbiJson](const FString& EncodedReturn)
     {
     	AddInfo(FString::Printf(TEXT("Received Encoded Data: %s"), *EncodedReturn));
-      const FString Decoded = FEthAbiBridge::DecodeFunctionResult(AbiJson, EncodedReturn);
+      const FString Decoded = USequenceSupport::DecodeFunctionResult(AbiJson, EncodedReturn);
     	AddInfo(FString::Printf(TEXT("Decoded Data: %s"), *Decoded));
       TestData->IsDone = true;
     };

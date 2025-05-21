@@ -521,7 +521,9 @@ public:
 
 	static int64 StringDateToUnixDate(const FString& Iso8601);
 
-	static void Decode(const FString& EncodedData, const FString& Abi, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure);
+	static FString EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values);
+	
+	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
 	
 private:
 	/*

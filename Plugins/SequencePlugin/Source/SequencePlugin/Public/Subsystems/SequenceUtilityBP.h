@@ -60,7 +60,10 @@ public:
 	static FSaleDetails DeserializeSaleDetails(const FString& Json);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static void Decode(const FString& EncodedData, const FString& Abi, FOnDecodeResponse OnSuccess, FOnFailure OnFailure);
+	static FString EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static void MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message);

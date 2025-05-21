@@ -589,24 +589,13 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 	return ParsedDate.ToUnixTimestamp();
 }
 
-void USequenceSupport::Decode(const FString& EncodedData, const FString& Abi, const TSuccessCallback<FHttpResponsePtr>& OnSuccess, const FFailureCallback& OnFailure)
+FString USequenceSupport::EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values)
 {
-	const FString Encoded = FEthAbiBridge::EncodeFunctionCall("[{\"name\": \"transfer\",\"type\": \"function\",\"inputs\": [{\"name\": \"to\", \"type\": \"address\" },{ \"name\": \"amount\", \"type\": \"uint256\" }],\"outputs\": [{\"name\": \"\", \"type\": \"bool\" }]}]", "transfer", "[\"0x000000000000000000000000000000000000dead\",1000000000000000000]");
-	SEQ_LOG_EDITOR(Display, TEXT("Encoded Bridge Result %s"), *Encoded);
-	
-	const FString Url = "https://remote-abi-encoding.pages.dev/decode";
-	const FString Content = "{\"abi\":" + Abi + ",\"decodedInput\":\"" + EncodedData + "\"}";
-	
-	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
-	
-	NewObject<URequestHandler>()
-	->PrepareRequest()
-	->WithUrl(Url)
-	->WithHeader("Content-type", "application/json")
-	->WithHeader("Accept", "application/json")
-	->WithHeader("X-Access-Key", UConfigFetcher::GetConfigVar("ProjectAccessKey"))
-	->WithVerb("POST")
-	->WithContentAsString(Content)
-	->ProcessAndThen(OnSuccess, OnFailure);
+	return FEthAbiBridge::EncodeFunctionCall(Abi, FunctionName, Values);
+}
+
+FString USequenceSupport::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)
+{
+	return FEthAbiBridge::DecodeFunctionResult(Abi, EncodedData);
 }
 
