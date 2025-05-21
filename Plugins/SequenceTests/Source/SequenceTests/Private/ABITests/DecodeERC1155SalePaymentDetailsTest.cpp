@@ -1,12 +1,11 @@
 #include "CoreMinimal.h"
 #include "ABITestData.h"
-#include "SequencePlugin/Public/EthAbi/EthAbiBridge.h"
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
 #include "Sequence/SequenceWallet.h"
 #include "Types/ERC1155SaleContract.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FABIDecodeERC1155SalePaymentDetailsTest, "SequencePlugin.EndToEnd.IndexerTests.DecodeERC1155SalePaymentDetailsTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FABIDecodeERC1155SalePaymentDetailsTest, "SequencePlugin.EndToEnd.ABITests.DecodeERC1155SalePaymentDetailsTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /* Latent command used to poll off main thread to see if our requests are done */
 DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FIsDoneDecodeSaleDetails, UABITestData*, Data, FAutomationTestBase*, DecodeSaleDetailsTest);
@@ -80,8 +79,9 @@ bool FABIDecodeERC1155SalePaymentDetailsTest::RunTest(const FString& Parameters)
 
     const TFunction<void(FString)> OnSuccess = [this, TestData, AbiJson](const FString& EncodedReturn)
     {
-    	AddInfo(FString::Printf(TEXT("Received Encoded Data: %s"), *EncodedReturn));
       const FString Decoded = USequenceSupport::DecodeFunctionResult(AbiJson, EncodedReturn);
+      
+    	AddInfo(FString::Printf(TEXT("Received Encoded Data: %s"), *EncodedReturn));
     	AddInfo(FString::Printf(TEXT("Decoded Data: %s"), *Decoded));
       TestData->IsDone = true;
     };

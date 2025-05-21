@@ -1,5 +1,5 @@
-use ethabi::{Address, Function, Token, ParamType};
-use serde_json::{json, Value};
+use ethabi::{Address, Function, Token, Param, ParamType};
+use serde_json::{json, Map, Value};
 use hex::FromHex;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -63,29 +63,39 @@ pub extern "C" fn encode_function_call(abi_json: *const c_char, function_name: *
 
 #[no_mangle]
 pub extern "C" fn decode_function_result(abi_json: *const c_char, result_hex: *const c_char) -> *mut c_char {
+    // Convert C strings to Rust strings
     let abi_json = unsafe {
-        if abi_json.is_null() {
-            return CString::new("").unwrap().into_raw();
-        }
+        if abi_json.is_null() { return empty_cstring(); }
         CStr::from_ptr(abi_json).to_str().unwrap_or("")
     };
-
     let result_hex = unsafe {
-        if result_hex.is_null() {
-            return CString::new("").unwrap().into_raw();
-        }
+        if result_hex.is_null() { return empty_cstring(); }
         CStr::from_ptr(result_hex).to_str().unwrap_or("")
     };
 
-    let result = decode_result_to_array_impl(abi_json, result_hex);
+    // Decode and handle errors
+    let function: Function = match serde_json::from_str(abi_json) {
+        Ok(f) => f,
+        Err(_) => return empty_cstring(),
+    };
 
-    match result {
-        Ok(arr) => {
-            let json_string = serde_json::to_string(&arr).unwrap_or("[]".to_string());
-            CString::new(json_string).unwrap().into_raw()
-        }
-        Err(_) => CString::new("[]").unwrap().into_raw(),
-    }
+    let result_bytes = match decode(result_hex.strip_prefix("0x").unwrap_or(result_hex)) {
+        Ok(b) => b,
+        Err(_) => return empty_cstring(),
+    };
+
+    let output_tokens = match function.decode_output(&result_bytes) {
+        Ok(t) => t,
+        Err(_) => return empty_cstring(),
+    };
+
+    let json_obj = tokens_to_array_json(&output_tokens, &function.outputs);
+    let json_string = match serde_json::to_string(&json_obj) {
+        Ok(s) => s,
+        Err(_) => return empty_cstring(),
+    };
+
+    CString::new(json_string).unwrap().into_raw()
 }
 
 #[no_mangle]
@@ -97,27 +107,18 @@ pub extern "C" fn free_string(s: *mut c_char) {
     }
 }
 
-pub fn decode_result_to_array_impl(abi_json: &str, result_hex: &str) -> Result<Vec<Value>, String> {
-    // Step 1: Parse ABI JSON into ethabi::Function
-    let function: Function = serde_json::from_str(abi_json)
-        .map_err(|e| format!("Invalid ABI JSON: {}", e))?;
+fn empty_cstring() -> *mut c_char {
+    CString::new("").unwrap().into_raw()
+}
 
-    // Step 2: Decode the result hex string into raw bytes
-    let result_bytes = decode(result_hex.strip_prefix("0x").unwrap_or(result_hex))
-        .map_err(|e| format!("Invalid hex input: {}", e))?;
-
-    // Step 3: Decode the output using ethabi
-    let decoded = function.decode_output(&result_bytes)
-        .map_err(|e| format!("Failed to decode output: {}", e))?;
-
-    // Step 4: Convert each Token into a serde_json::Value
-    let values = decoded
+fn tokens_to_array_json(tokens: &[Token], params: &[Param]) -> Value {
+    let values: Vec<Value> = tokens
         .iter()
-        .zip(function.outputs.iter())
-        .map(|(token, param)| token_to_json(token, &param.kind))
+        .zip(params.iter())
+        .map(|(t, ty)| token_to_json(t, &ty.kind))
         .collect();
-
-    Ok(values)
+        
+    Value::Array(values)
 }
 
 fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
@@ -126,28 +127,32 @@ fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
         (Token::Int(n), ParamType::Int(_)) => {
             let as_str = n.to_string();
             match as_str.parse::<u64>() {
-                Ok(u) => json!(u),
-                Err(_) => json!(as_str),
+                Ok(u) => Value::from(u),
+                Err(_) => Value::String(as_str),
             }
         }
         (Token::Address(addr), ParamType::Address) => {
-            json!(format!("0x{}", hex::encode(addr)))
+            Value::String(format!("0x{}", hex::encode(addr)))
         }
-        (Token::Bool(b), ParamType::Bool) => json!(*b),
-        (Token::String(s), ParamType::String) => json!(s),
+        (Token::Bool(b), ParamType::Bool) => Value::Bool(*b),
+        (Token::String(s), ParamType::String) => Value::String(s.clone()),
         (Token::Bytes(ref b), ParamType::Bytes) |
         (Token::FixedBytes(ref b), ParamType::FixedBytes(_)) => {
-            json!(format!("0x{}", hex::encode(b)))
-        },
-        (Token::Array(arr), ParamType::Array(inner)) |
+            Value::String(format!("0x{}", hex::encode(b)))
+        }
+        (Token::Array(arr), ParamType::Array(inner)) => {
+            Value::Array(arr.iter().map(|t| token_to_json(t, inner)).collect())
+        }
         (Token::FixedArray(arr), ParamType::FixedArray(inner, _)) => {
             Value::Array(arr.iter().map(|t| token_to_json(t, inner)).collect())
         }
         (Token::Tuple(tokens), ParamType::Tuple(types)) => {
-            let items: Vec<Value> = tokens.iter().zip(types.iter())
-                .map(|(t, ty)| token_to_json(t, ty)).collect();
-            json!(items)
+            let elements: Vec<Value> = tokens.iter()
+                .zip(types.iter())
+                .map(|(t, ty)| token_to_json(t, ty))
+                .collect();
+            Value::Array(elements)
         }
-        _ => json!(null),
+        _ => Value::Null,
     }
 }
