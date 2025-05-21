@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async.h"
 #include "JsonObjectConverter.h"
 #include "Log.h"
 #include "Containers/Union.h"
@@ -519,6 +520,10 @@ public:
 	static FString JsonToSimpleString(const TSharedPtr<FJsonObject>& JsonData);
 
 	static int64 StringDateToUnixDate(const FString& Iso8601);
+
+	static FString EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values);
+	
+	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
 	
 private:
 	/*

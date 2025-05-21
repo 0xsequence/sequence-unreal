@@ -32,8 +32,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     FRawTransaction MakePurchaseTransaction(const FString& ToAddress, const TArray<int32>& TokenIds, const TArray<int32>& Amounts, const TArray<FString>& Proof);
 
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     FContractCall GetPaymentToken();
 
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
     FContractCall GetGlobalSaleDetails();
 
 private:

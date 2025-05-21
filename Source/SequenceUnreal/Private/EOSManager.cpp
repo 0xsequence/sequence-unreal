@@ -39,7 +39,6 @@ void UEOSManager::Initialize()
 	PlatformOptions.ClientCredentials.ClientSecret = GetConfigValue("ClientSecret");
 	PlatformOptions.EncryptionKey = GetConfigValue("EncryptionKey");
 	PlatformOptions.TickBudgetInMilliseconds = 0;
-	PlatformOptions.CacheDirectory = TCHAR_TO_UTF8(*CacheDirectory);
 	PlatformOptions.OverrideCountryCode = nullptr;
 	PlatformOptions.OverrideLocaleCode = nullptr;
 	PlatformOptions.Flags = 0;

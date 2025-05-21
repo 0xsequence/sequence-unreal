@@ -95,8 +95,8 @@ FContractCall UERC1155SaleContract::GetPaymentToken()
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
-	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.Data = EncodedData.ToHex();
+	CallData.To = ContractAddress;
 
 	return CallData;
 }
@@ -108,8 +108,8 @@ FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
-	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.Data = EncodedData.ToHex();
+	CallData.To = ContractAddress;
 
 	return CallData;
 }
