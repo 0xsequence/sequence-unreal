@@ -28,9 +28,10 @@ private:
 	void HeaderByNumberHelper(const FString& Number, TSuccessCallback<FHeader> OnSuccess, const FFailureCallback& OnFailure);
 	void NonceAtHelper(const FString& Number, TSuccessCallback<FBlockNonce> OnSuccess, const FFailureCallback& OnFailure);
 	void CallHelper(FContractCall ContractCall, const FString& Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
-	void Init(const FString& UrlIn);
 public:
-	static UProvider* Make(const FString& UrlIn);
+	UProvider();
+	
+	void UpdateUrlFromConfig();
 	void UpdateUrl(const FString& UrlIn);
 	void BlockByNumber(const uint64 Number, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);
 	void BlockByNumber(const EBlockTag Tag, const TSuccessCallback<TSharedPtr<FJsonObject>>& OnSuccess, const FFailureCallback& OnFailure);

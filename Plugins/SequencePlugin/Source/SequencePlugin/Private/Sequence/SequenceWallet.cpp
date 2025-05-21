@@ -15,7 +15,7 @@
 USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<USequenceIndexer>();
-	this->Provider = UProvider::Make("https://nodes.sequence.app/arbitrum-sepolia/oesk7yu5tjNfQElu5HjuUunAAAAAAAAAA");
+	this->Provider = NewObject<UProvider>();
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
