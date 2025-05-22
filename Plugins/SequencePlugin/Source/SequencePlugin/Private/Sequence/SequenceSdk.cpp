@@ -3,6 +3,12 @@
 
 void SequenceSdk::SetChainId(int64 NewChainId)
 {
+	if (!USequenceSupport::IsNetworkIdSupported(NewChainId))
+	{
+		SEQ_LOG(Error, TEXT("Invalid ChainId when calling 'SequenceSdk::SetChainId(int64 NewChainId)'"));
+		return;
+	}
+	
 	ChainId = NewChainId;
 }
 

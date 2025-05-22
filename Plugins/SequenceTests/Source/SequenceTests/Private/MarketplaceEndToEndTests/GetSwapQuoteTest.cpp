@@ -48,16 +48,21 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
         USequenceSupport* Support = NewObject<USequenceSupport>();
+        const FString WalletAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
         const FString USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
         const FString USDCe = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
-        const FString Amount = "1000";
-        const FString UserAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
+
+        // Only one is accepted for this request
+        const FString BuyAmount = "";
+        const FString SellAmount = "1000";
 
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
-        const TSuccessCallback<FSeqSwapQuote> GenericSuccess = [this, MarketplaceTestData](FSeqSwapQuote SwapQuote)
+        const TSuccessCallback<FSeqSwapQuote> GenericSuccess = [this, MarketplaceTestData](const FSeqSwapQuote SwapQuote)
         {
-            AddInfo(FString::Printf(TEXT("ID: %s. Remaining tests: %d"), *SwapQuote.Price, MarketplaceTestData->DecrementPendingRequests()));
+            AddInfo(FString::Printf(TEXT("CurrencyAddress: %s, CurrencyBalance: %s, Price: %s, MaxPrice: %s"), *SwapQuote.CurrencyAddress, *SwapQuote.CurrencyBalance, *SwapQuote.Price, *SwapQuote.MaxPrice));
+            AddInfo(FString::Printf(TEXT("TransactionData: %s, TransactionValue: %s, ApproveData: %s, Amount: %s, AmountMin: %s"), *SwapQuote.TransactionData, *SwapQuote.TransactionValue, *SwapQuote.ApproveData, *SwapQuote.Amount, *SwapQuote.AmountMin));
+            AddInfo(FString::Printf(TEXT("Remaining tests: %d"), MarketplaceTestData->DecrementPendingRequests()));
         };
 
         const FFailureCallback GenericFailure = [this, MarketplaceTestData](const FSequenceError& Error)
@@ -73,10 +78,11 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
         USequencePay* Pay = NewObject<USequencePay>();
         Pay->GetSwapQuote(
             Support->GetNetworkId(ENetwork::ArbitrumOne),
-            UserAddress,
+            WalletAddress,
             USDC,
             USDCe,
-            Amount,
+            BuyAmount,
+            SellAmount,
             true,
             GenericSuccess,
             GenericFailure
