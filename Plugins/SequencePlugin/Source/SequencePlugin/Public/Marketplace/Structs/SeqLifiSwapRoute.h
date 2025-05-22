@@ -13,7 +13,7 @@ public:
     int64 ToChainId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "fromChainId"))
-    float FromChainId;
+    int64 FromChainId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "fromTokens"))
     TArray<FSeqSwapToken> FromTokens;

@@ -112,5 +112,4 @@ private:
 	template < typename T> FString BuildArgs(T StructIn);
 	
 	void HTTPPostSwapAPI(const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
-	void AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess, const FFailureCallback& OnFailure);
 };

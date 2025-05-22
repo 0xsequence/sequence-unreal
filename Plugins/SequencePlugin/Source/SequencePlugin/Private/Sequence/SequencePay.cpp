@@ -122,7 +122,7 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddre
 		WalletAddress
 	};
 	
-	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, BuyCurrency, OnSuccess](const FString& Content)
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, ChainID, BuyCurrency, OnSuccess](const FString& Content)
 	{
 		const FSeqGetLifiSwapRoutesResponse Response = USequenceSupport::JSONStringToStruct<FSeqGetLifiSwapRoutesResponse>(Content);
 		const TArray<FSeqLifiSwapRoute> SwapRoutes = Response.Routes;
@@ -130,7 +130,9 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddre
 		TArray<FSeqSwapPrice> SwapPrices;
 		for (const FSeqLifiSwapRoute& Route : SwapRoutes)
 		{
-			if (!Route.ContainsToken(BuyCurrency))
+			if (Route.FromChainId != ChainID ||
+				Route.ToChainId != ChainID ||
+				!Route.ContainsToken(BuyCurrency))
 			{
 				continue;
 			}
@@ -155,28 +157,25 @@ void USequencePay::GetSwapQuote(const int64 ChainID, const FString& WalletAddres
 		return;
 	}
 
-	AssertWeHaveSufficientBalance(ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, [this, OnFailure, OnSuccess, ChainID, WalletAddress, BuyCurrency, SellCurrency, BuyAmount, SellAmount, IncludeApprove](void)
-	{
-		const FSeqGetSwapQuoteParams Params {
-			ChainID,
-			WalletAddress,
-			BuyCurrency,
-			SellCurrency,
-			BuyAmount,
-			SellAmount,
-			IncludeApprove
-		};
+	const FSeqGetSwapQuoteParams Params {
+		ChainID,
+		WalletAddress,
+		BuyCurrency,
+		SellCurrency,
+		BuyAmount,
+		SellAmount,
+		IncludeApprove
+	};
 		
-		const FSeqGetSwapQuoteArgs Args {
-			Params
-		};
+	const FSeqGetSwapQuoteArgs Args {
+		Params
+	};
 
-		const FString EndPoint = "GetLifiSwapQuote";
-		HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess, OnFailure](const FString& Content)
-		{
-			const FGetSwapQuoteResponse Response = USequenceSupport::JSONStringToStruct<FGetSwapQuoteResponse>(Content);
-			OnSuccess(Response.Quote);
-		}, OnFailure);
+	const FString EndPoint = "GetLifiSwapQuote";
+	HTTPPostSwapAPI(EndPoint, BuildArgs(Args), [this, OnSuccess](const FString& Content)
+	{
+		const FGetSwapQuoteResponse Response = USequenceSupport::JSONStringToStruct<FGetSwapQuoteResponse>(Content);
+		OnSuccess(Response.Quote);
 	}, OnFailure);
 }
 
@@ -245,43 +244,5 @@ void USequencePay::HTTPPostSwapAPI(const FString& Endpoint, const FString& Args,
 		}
 	});
 
-	// Process the request
 	HTTP_Post_Req->ProcessRequest();
-}
-
-void USequencePay::AssertWeHaveSufficientBalance(const int64 ChainID, const FString& UserWallet, const FString& BuyCurrency,
-	const FString& SellCurrency, const FString& BuyAmount, const TFunction<void ()>& OnSuccess,
-	const FFailureCallback& OnFailure)
-{
-	GetSwapPrice(ChainID, UserWallet, SellCurrency, BuyCurrency, BuyAmount, [this, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, OnSuccess](const FSeqSwapPrice& SwapPrice)
-	{
-		long Required = SwapPrice.Price;
-		
-		USequenceIndexer* Indexer = NewObject<USequenceIndexer>();
-		FSeqGetTokenBalancesArgs Args;
-		Args.accountAddress = UserWallet;
-		Args.contractAddress = SellCurrency;
-
-		Indexer->GetTokenBalances(ChainID, Args, [this, Required, OnFailure, ChainID, UserWallet, BuyCurrency, SellCurrency, BuyAmount, SwapPrice, OnSuccess](const FSeqGetTokenBalancesReturn& TokenBalances)
-		{
-			TArray<FSeqTokenBalance> SellCurrencies = TokenBalances.balances;
-			long Have = 0;
-				
-			if(SellCurrencies.Num() > 0)
-			{
-				Have = SellCurrencies[0].balance;
-			}
-				
-			if(Have < Required)
-			{
-				const FString ErrorString = FString::Format(TEXT("Insufficient balance of {0} to buy {1} of {2}, have {3}, need {4}"), 
-															{ *SellCurrency, *BuyAmount, *BuyCurrency, FString::Printf(TEXT("%ld"), Have), FString::Printf(TEXT("%ld"), Required) });
-				OnFailure(FSequenceError(InsufficientBalance, ErrorString));
-			}
-			else
-			{
-				OnSuccess();
-			}
-		}, OnFailure);
-	}, OnFailure);
 }
