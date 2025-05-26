@@ -103,20 +103,6 @@ TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
 	return USequenceSupport::GetAllNetworkIds();
 }
 
-FSaleDetails USequenceUtilityBP::DeserializeSaleDetails(const FString& Json)
-{
-	const TSharedPtr<FJsonObject> Ret = USequenceSupport::JsonStringToObject(Json);
-	
-	FSaleDetails SaleDetails;
-	SaleDetails.Cost = Ret.Get()->GetNumberField(TEXT("cost"));
-	SaleDetails.SupplyCap = Ret.Get()->GetNumberField(TEXT("supplyCap"));
-	SaleDetails.StartTime = Ret.Get()->GetNumberField(TEXT("startTime"));
-	SaleDetails.EndTime = Ret.Get()->GetNumberField(TEXT("endTime"));
-	SaleDetails.MerkleRoot = Ret.Get()->GetStringField(TEXT("merkleRoot"));
-	
-	return SaleDetails;
-}
-
 FString USequenceUtilityBP::EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values)
 {
 	return USequenceSupport::EncodeFunctionCall(Abi, FunctionName, Values);

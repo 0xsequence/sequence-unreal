@@ -19,5 +19,11 @@ bool FDecodeSimpleFunctionReturnTest::RunTest(const FString& Parameters)
 	const FString Decoded = USequenceSupport::DecodeFunctionResult(AbiJson, EncodedData);
 
 	AddInfo(FString::Printf(TEXT("Decoded Data: %s"), *Decoded));
+
+	if (const FString ExpectedResult = "[5000]"; Decoded == ExpectedResult)
+		AddInfo(FString::Printf(TEXT("Test was successful.")));
+	else
+		AddInfo(FString::Printf(TEXT("Decoded result '%s' is not what was expected. Expected '%s'"), *Decoded, *ExpectedResult));
+	
     return true;
 } 

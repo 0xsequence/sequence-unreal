@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Sequence/Transactions.h"
-#include "Types/SaleDetails.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
 
@@ -55,9 +53,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<int64> GetAllNetworkIds();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static FSaleDetails DeserializeSaleDetails(const FString& Json);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static FString EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values);
