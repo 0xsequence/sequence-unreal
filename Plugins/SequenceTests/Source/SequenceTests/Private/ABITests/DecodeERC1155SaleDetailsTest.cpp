@@ -1,8 +1,7 @@
 #include "CoreMinimal.h"
 #include "ABITestData.h"
 #include "Misc/AutomationTest.h"
-#include "Util/Async.h"
-#include "Sequence/SequenceWallet.h"
+#include "SequencePlugin/Private/Provider.h"
 #include "Types/ERC1155GlobalSaleDetails.h"
 #include "Types/ERC1155SaleContract.h"
 
@@ -35,7 +34,7 @@ bool FABIDecodeERC1155SaleDetailsTest::RunTest(const FString& Parameters)
     TestNotNull("Sale should not be null", Sale);
     TestEqual("Contract address should match", Sale->ContractAddress, ContractAddress);
 
-    const FContractCall CallGlobalSaleDetails = Sale->GetGlobalSaleDetails();
+    const FContractCall CallGlobalSaleDetails = Sale->GetGlobalSaleDetailsCallData();
 
     const TFunction<void(FString)> OnSuccess = [this, TestData](const FString& EncodedReturn)
     {
@@ -64,8 +63,8 @@ bool FABIDecodeERC1155SaleDetailsTest::RunTest(const FString& Parameters)
       TestData->IsDone = true;
     };
     
-    const USequenceWallet* Wallet = NewObject<USequenceWallet>();
-    Wallet->Call(CallGlobalSaleDetails, OnSuccess, OnFailure);
+	UProvider* Provider = NewObject<UProvider>();
+	Provider->Call(CallGlobalSaleDetails, EBlockTag::ELatest, OnSuccess, OnFailure);
     
     ADD_LATENT_AUTOMATION_COMMAND(FIsDoneDecodeERC1155SaleDetails(TestData, this));
     return true;

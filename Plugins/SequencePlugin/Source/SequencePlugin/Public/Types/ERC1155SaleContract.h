@@ -4,6 +4,7 @@
 #include "UObject/Object.h"
 #include "Sequence/Transactions.h"
 #include "ContractCall.h"
+#include "ERC1155GlobalSaleDetails.h"
 #include "ERC1155SaleContract.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
@@ -12,6 +13,9 @@ class SEQUENCEPLUGIN_API UERC1155SaleContract : public UObject
 	GENERATED_BODY()
 
 public:
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetGlobalSaleDetails, const FERC1155GlobalSaleDetails&, SaleDetails);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
+	
     UERC1155SaleContract();
 
     UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
@@ -36,7 +40,10 @@ public:
     FContractCall GetPaymentToken();
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
-    FContractCall GetGlobalSaleDetails();
+	FContractCall GetGlobalSaleDetailsCallData();
+
+	UFUNCTION(BlueprintCallable, Category = "0xSequence - ERC1155 Sale")
+	void GetGlobalSaleDetails(FOnGetGlobalSaleDetails OnSuccess, FOnFailure OnFailure);
 
 private:
     void Init(const FString& InContractAddress, const FString& InPaymentToken, int32 InMaxTotal, const FString& InData);

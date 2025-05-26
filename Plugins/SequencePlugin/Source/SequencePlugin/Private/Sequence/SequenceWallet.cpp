@@ -1,6 +1,5 @@
 #include "Sequence/SequenceWallet.h"
 #include "Dom/JsonObject.h"
-#include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
 #include "Engine/Engine.h"
