@@ -10,22 +10,22 @@ struct SEQUENCEPLUGIN_API FERC721SaleDetails
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	int32 SupplyCap;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	FString Cost;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	FString PaymentToken;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	int32 StartTime;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	int32 EndTime;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	FString MerkleRoot;
 
 	/*
