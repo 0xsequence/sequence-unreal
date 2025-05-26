@@ -103,9 +103,9 @@ TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
 	return USequenceSupport::GetAllNetworkIds();
 }
 
-FString USequenceUtilityBP::EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values)
+FString USequenceUtilityBP::EncodeFunctionData(const FString& FunctionSignature, const FString& Values)
 {
-	return USequenceSupport::EncodeFunctionCall(Abi, FunctionName, Values);
+	return USequenceSupport::EncodeFunctionCall(FunctionSignature, Values);
 }
 
 FString USequenceUtilityBP::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)

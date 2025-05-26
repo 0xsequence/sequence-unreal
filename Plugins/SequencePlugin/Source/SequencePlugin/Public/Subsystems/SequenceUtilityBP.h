@@ -55,7 +55,7 @@ public:
 	static TArray<int64> GetAllNetworkIds();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static FString EncodeFunctionData(const FString& Abi, const FString& FunctionName, const FString& Values);
+	static FString EncodeFunctionData(const FString& FunctionSignature, const FString& Values);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);

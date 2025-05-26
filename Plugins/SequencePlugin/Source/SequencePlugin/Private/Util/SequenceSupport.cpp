@@ -589,9 +589,9 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 	return ParsedDate.ToUnixTimestamp();
 }
 
-FString USequenceSupport::EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values)
+FString USequenceSupport::EncodeFunctionCall(const FString& FunctionSignature, const FString& Values)
 {
-	return FEthAbiBridge::EncodeFunctionCall(Abi, FunctionName, Values);
+	return FEthAbiBridge::EncodeFunctionCall(FunctionSignature, Values);
 }
 
 FString USequenceSupport::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)

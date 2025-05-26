@@ -5,6 +5,6 @@
 class FEthAbiBridge
 {
 public:
-	static FString EncodeFunctionCall(const FString& Abi, const FString& FunctionName, const FString& Values);
+	static FString EncodeFunctionCall(const FString& FunctionSignature, const FString& Values);
 	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
 };
