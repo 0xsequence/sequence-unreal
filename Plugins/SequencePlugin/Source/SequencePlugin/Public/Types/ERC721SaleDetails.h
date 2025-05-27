@@ -28,9 +28,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence - ERC721 Sale")
 	FString MerkleRoot;
 
-	/*
-	 * The decoded data represents the ABI structure. In this case, its an array of values in the array of 'outputs'
-	 * Example: [[10000,0,"0x0000000000000000000000000000000000000000000000000000000000000000",1747809900,1905662700,"0x0000000000000000000000000000000000000000000000000000000000000000"]]
+	/**
+	 * Fill this struct from an encoded JSON array.
+	 * @param EncodedFunctionResult The encoded data you receive when reading the chain using SequenceWallet::Call();
 	 */
 	void DecodeFromFunctionReturn(const FString& EncodedFunctionResult)
 	{

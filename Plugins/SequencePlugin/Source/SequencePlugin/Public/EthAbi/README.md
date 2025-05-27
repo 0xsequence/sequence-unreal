@@ -8,11 +8,9 @@ The `libethabi_bridge.a` files is about 18MB large.
 
 ## Installation
 
-Run this command to install cargo:
+Run the installation steps from the official website:
 
-```shell
-curl https://sh.rustup.rs -sSf | sh
-```
+https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 ## Updating Library
 

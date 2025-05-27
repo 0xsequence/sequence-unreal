@@ -1,5 +1,3 @@
-// Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "EOSManager.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/Paths.h"

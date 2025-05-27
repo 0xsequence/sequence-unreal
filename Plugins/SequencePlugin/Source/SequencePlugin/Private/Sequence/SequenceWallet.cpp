@@ -466,7 +466,15 @@ void USequenceWallet::Call(const FContractCall& ContractCall, const TSuccessCall
 	}
 }
 
-void USequenceWallet::Call(const FContractCall& ContractCall, EBlockTag Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->Provider)
+	{
+		this->Provider->Call(ContractCall,Number,OnSuccess,OnFailure);
+	}
+}
+
+void USequenceWallet::Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)
 	{
