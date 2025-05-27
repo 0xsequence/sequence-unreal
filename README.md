@@ -11,18 +11,12 @@ The Sequence Unreal Embedded Wallet SDK provides full Sequence Embedded Wallet a
 
 ## Supported Platforms
 
-- Unreal Engine 5.2, 5.3, or 5.4
+- Unreal Engine 5.2 or later
 - PC Standalone
 - Mac Standalone
 - Android
 - iOS
 
-## Samples
+## Boilerplates
 
-The SDK comes with a number of samples that can be imported used from the `SequencePlugin Content/Core` directory.
-
-## Upgrading to Unreal 5.4
-
-If your project is currently on 5.2 or 5.3, then for this version you'll want to upgrade to 5.4. To do this close the Unreal Editor, Close your Code Editor. Right-click on your Unreal Project file. Then select Switch Unreal Engine Version, Choose 5.4 and click okay. Once done. Open your code editor and rebuild your source code.
-
-As a way of future proofing we recommend installing visual studio 2022 in accordance with these docs as Unreal 5.4 and onward will be dropping support for visual studio 2019.
+The SDK comes with a number of Boilerplates that can be imported from the `SequencePlugin Content/Boilerplates/` directory. [Learn more about our Boilerplates here.](https://docs.sequence.xyz/sdk/unreal/bootstrap_game)

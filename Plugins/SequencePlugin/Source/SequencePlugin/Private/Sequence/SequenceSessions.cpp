@@ -15,7 +15,7 @@ USequenceSessions::USequenceSessions()
 	this->RPCManager = USequenceRPCManager::Make(false);
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 	this->StateToken = FGuid::NewGuid().ToString();
-	this->ForceCreateAccount = true;
+	this->ForceCreateAccount = false;
 
 #if PLATFORM_ANDROID || PLATFORM_IOS
 	this->IsBrowserRequired = false;

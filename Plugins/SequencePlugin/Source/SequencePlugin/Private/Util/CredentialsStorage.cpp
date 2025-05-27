@@ -66,6 +66,11 @@ bool UCredentialsStorage::GetStoredCredentials(FCredentials_BE* Credentials) con
 	bool ret = false;
 	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
 
+	if (SaveGame == nullptr)
+	{
+		SaveGame = UGameplayStatics::LoadGameFromSlot(this->OldSaveSlot, this->UserIndex);
+	}
+
 	if (SaveGame != nullptr)
 	{
 		if (const UStorableCredentials* LoadedCredentials = Cast<UStorableCredentials>(SaveGame))
@@ -88,6 +93,7 @@ bool UCredentialsStorage::GetStoredCredentials(FCredentials_BE* Credentials) con
 			{
 				SEQ_LOG(Error, TEXT("[System Failure: Unable to read save file or file is corrupted]"));
 				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
+				UGameplayStatics::DeleteGameInSlot(this->OldSaveSlot, this->UserIndex);
 			}
 		}
 	}
