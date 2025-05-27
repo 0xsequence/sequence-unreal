@@ -45,16 +45,19 @@ bool FGetSwapPricesTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-        const FString USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
-        const FString USDCe = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
-        const FString amount = "1000";
+        const USequenceSupport* Support = NewObject<USequenceSupport>();
+        const FString WalletAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
+        const FString BuyUSDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+        const FString BuyAmount = "1000";
 
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
-        const TSuccessCallback<TArray<FSeqSwapPrice>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqSwapPrice> SwapPrices)
+        const TSuccessCallback<TArray<FSeqSwapPrice>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqSwapPrice> PricesResponse)
         {
-            AddInfo(FString::Printf(TEXT("ID: %d. Remaining tests: %d"), SwapPrices.Num(), MarketplaceTestData->DecrementPendingRequests()));
+            for (const FSeqSwapPrice SwapPrice : PricesResponse)
+            {
+                AddInfo(FString::Printf(TEXT("CurrencyAddress: %s, Price: %d, Remaining tests: %d"), *SwapPrice.CurrencyAddress, SwapPrice.Price, MarketplaceTestData->DecrementPendingRequests()));
+            }
         };
 
         const FFailureCallback GenericFailure = [this, MarketplaceTestData](const FSequenceError& Error)
@@ -70,9 +73,9 @@ bool FGetSwapPricesTest::RunTest(const FString& Parameters)
         USequencePay* Pay = NewObject<USequencePay>();
         Pay->GetSwapPrices(
             Support->GetNetworkId(ENetwork::ArbitrumOne),
-            USDC,
-            USDCe,
-            amount,
+            WalletAddress,
+            BuyUSDC,
+            BuyAmount,
             GenericSuccess,
             GenericFailure
         );
