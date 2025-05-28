@@ -226,6 +226,22 @@ void USequenceWalletBP::RemoveLinkedWallet(const FString& LinkedWalletAddress, F
 	this->Wallet->RemoveLinkedWallet(LinkedWalletAddress, OnApiSuccess, OnApiFailure);
 }
 
+void USequenceWalletBP::Call(const FContractCall& ContractCall, FOnCallResponse OnSuccess, FOnLinkedWalletsFailure OnFailure)
+{
+	const TFunction<void(FString)> OnApiSuccess = [OnSuccess](const FString& EncodedData)
+	{
+		OnSuccess.ExecuteIfBound(EncodedData);
+	};
+
+	const TFunction<void (FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Err)
+	{
+		SEQ_LOG(Error, TEXT("Failed to call node: %s"), *Err.Message);
+		OnFailure.ExecuteIfBound(Err.Message);
+	};
+	
+	this->Wallet->Call(ContractCall, OnApiSuccess, OnApiFailure);
+}
+
 void USequenceWalletBP::CallOnSessionClosed() const
 {
 	if (this->OnSessionClosed.IsBound())

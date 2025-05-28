@@ -1,6 +1,5 @@
 #include "Sequence/SequenceWallet.h"
 #include "Dom/JsonObject.h"
-#include "Kismet/GameplayStatics.h"
 #include "Types/ContractCall.h"
 #include "Misc/Base64.h"
 #include "Engine/Engine.h"
@@ -15,7 +14,7 @@
 USequenceWallet::USequenceWallet()
 {
 	this->Indexer = NewObject<USequenceIndexer>();
-	this->Provider = UProvider::Make("");
+	this->Provider = NewObject<UProvider>();
 	this->SequenceRPCManager = USequenceRPCManager::Make(false);
 	this->CredentialsStorage = NewObject<UCredentialsStorage>();
 }
@@ -459,7 +458,15 @@ void USequenceWallet::ChainId(const TSuccessCallback<uint64>& OnSuccess, const F
 	}
 }
 
-void USequenceWallet::Call(const FContractCall& ContractCall, uint64 Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::Call(const FContractCall& ContractCall, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+{
+	if (this->Provider)
+	{
+		this->Provider->Call(ContractCall,EBlockTag::ELatest,OnSuccess,OnFailure);
+	}
+}
+
+void USequenceWallet::Call(const FContractCall& ContractCall, const uint64 Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)
 	{
@@ -467,7 +474,7 @@ void USequenceWallet::Call(const FContractCall& ContractCall, uint64 Number, con
 	}
 }
 
-void USequenceWallet::Call(const FContractCall& ContractCall, EBlockTag Number, const TSuccessCallback<FUnsizedData>& OnSuccess, const FFailureCallback& OnFailure) const
+void USequenceWallet::Call(const FContractCall& ContractCall, const EBlockTag Number, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	if (this->Provider)
 	{
