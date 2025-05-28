@@ -10,6 +10,12 @@ public class SequencePlugin : ModuleRules
 		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
+		string lib = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/libethabi_bridge.a");
+		string includes = Path.Combine(ModuleDirectory, "Public/EthAbi/");
+
+		PublicSystemLibraryPaths.Add(includes);
+		PublicAdditionalLibraries.Add(lib);
+		
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...

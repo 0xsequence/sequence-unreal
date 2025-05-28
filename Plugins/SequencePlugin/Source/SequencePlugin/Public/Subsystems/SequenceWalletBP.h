@@ -26,6 +26,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSessionAuthProof, const FSeqGetSessionAuthProof_Data, Response);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWallets, const FSeqLinkedWalletsResponse&, LinkedWallets);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnLinkedWalletsFailure, const FString&, Error);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCallResponse, const FString&, EncodedData);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
@@ -83,6 +84,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Wallet")
 	void RemoveLinkedWallet(const FString& LinkedWalletAddress, FOnSuccess OnSuccess, FOnLinkedWalletsFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
+	void Call(const FContractCall& ContractCall, FOnCallResponse OnSuccess, FOnLinkedWalletsFailure OnFailure);
 
 	USequenceWallet* GetSequenceWallet() const;
 	

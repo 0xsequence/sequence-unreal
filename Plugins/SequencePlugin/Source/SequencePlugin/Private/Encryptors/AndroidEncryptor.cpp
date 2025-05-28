@@ -1,6 +1,4 @@
-﻿//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
-#include "Encryptors/AndroidEncryptor.h"
+﻿#include "Encryptors/AndroidEncryptor.h"
 #include "Native/Android/Support/AndroidSupport.h"
 
 #if PLATFORM_ANDROID

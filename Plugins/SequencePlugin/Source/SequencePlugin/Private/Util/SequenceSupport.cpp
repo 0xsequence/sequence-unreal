@@ -1,10 +1,13 @@
 #include "Util/SequenceSupport.h"
 
+#include "ConfigFetcher.h"
+#include "Provider.h"
+#include "RequestHandler.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
 #include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
-#include "Indexer/SequenceIndexer.h"
 #include "Misc/Base64.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
 
 FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
@@ -585,3 +588,14 @@ int64 USequenceSupport::StringDateToUnixDate(const FString& Iso8601)
 	FDateTime::ParseIso8601(*Iso8601,ParsedDate);
 	return ParsedDate.ToUnixTimestamp();
 }
+
+FString USequenceSupport::EncodeFunctionCall(const FString& FunctionSignature, const FString& Values)
+{
+	return FEthAbiBridge::EncodeFunctionCall(FunctionSignature, Values);
+}
+
+FString USequenceSupport::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)
+{
+	return FEthAbiBridge::DecodeFunctionResult(Abi, EncodedData);
+}
+

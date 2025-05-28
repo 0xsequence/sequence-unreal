@@ -1,0 +1,3 @@
+/target/
+Cargo.lock
+!libethabi_bridge.a

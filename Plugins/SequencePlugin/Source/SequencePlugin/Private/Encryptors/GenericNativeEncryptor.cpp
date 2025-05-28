@@ -1,6 +1,4 @@
-﻿//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
-#include "Encryptors/GenericNativeEncryptor.h"
+﻿#include "Encryptors/GenericNativeEncryptor.h"
 
 FString UGenericNativeEncryptor::Encrypt(const FString& StringIn)
 {

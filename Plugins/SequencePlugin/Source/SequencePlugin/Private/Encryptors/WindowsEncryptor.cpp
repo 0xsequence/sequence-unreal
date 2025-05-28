@@ -1,5 +1,3 @@
-//Copyright 2024 Horizon Blockchain Games Inc. All rights reserved.
-
 #include "Encryptors/WindowsEncryptor.h"
 #include "Misc/Base64.h"
 #include "Internationalization/Regex.h"

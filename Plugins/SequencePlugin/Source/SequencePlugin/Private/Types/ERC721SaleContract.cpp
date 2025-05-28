@@ -1,4 +1,5 @@
 #include "Types/ERC721SaleContract.h"
+#include "Provider.h"
 #include "ABI/ABI.h"
 #include "Util/Log.h"
 
@@ -73,15 +74,35 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
 }
 
 
-FContractCall UERC721SaleContract::GetSaleDetails()
+FContractCall UERC721SaleContract::GetSaleDetailsCallData()
 {
     FString FunctionSignature = "saleDetails()";
     TArray<ABIElement*> Arr;
     FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
     FContractCall CallData;
-    CallData.Data = TOptional(EncodedData.ToHex());
-    CallData.To = FAddress::From(ContractAddress);
+    CallData.Data = EncodedData.ToHex();
+    CallData.To = ContractAddress;
 
     return CallData;
+}
+
+void UERC721SaleContract::GetSaleDetails(FOnGetSaleDetails OnSuccess, FOnFailure OnFailure)
+{
+    const FContractCall CallData = this->GetSaleDetailsCallData();
+
+    const TFunction<void(FString)> OnApiSuccess = [OnSuccess](const FString& EncodedReturn)
+    {
+        FERC721SaleDetails SaleDetails;
+        SaleDetails.DecodeFromFunctionReturn(EncodedReturn);
+        OnSuccess.ExecuteIfBound(SaleDetails);
+    };
+
+    const TFunction<void(FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Error)
+    {
+        OnFailure.ExecuteIfBound(Error.Message);
+    };
+
+    UProvider* Provider = NewObject<UProvider>();
+    Provider->Call(CallData, EBlockTag::ELatest, OnApiSuccess, OnApiFailure);
 }

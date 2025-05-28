@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Sequence/Transactions.h"
-#include "Util/Structs/BE_Structs.h"
 #include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
 
@@ -9,6 +8,9 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API USequenceUtilityBP : public UObject
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnDecodeResponse, const FString&, Json);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	
 public:
 	USequenceUtilityBP();
@@ -51,6 +53,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<int64> GetAllNetworkIds();
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils", meta = (ToolTip = "Encode function parameters based on the function signature. Such as 'balanceOf(address,uint256)' with '[\"0x6615e4e985bf0d137196897dfa182dbd7127f54f\", 2]'"))
+	static FString EncodeFunctionData(const FString& FunctionSignature, const FString& Values);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils", meta = (ToolTip = "Decode any encoded data you receive from a Call() function. ABI Example: '{\"type\": \"function\", ...}'"))
+	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static void MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message);

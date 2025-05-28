@@ -1,4 +1,5 @@
 #include "Types/ERC1155SaleContract.h"
+#include "Provider.h"
 #include "ABI/ABI.h"
 #include "Util/Log.h"
 
@@ -95,21 +96,41 @@ FContractCall UERC1155SaleContract::GetPaymentToken()
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
-	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.Data = EncodedData.ToHex();
+	CallData.To = ContractAddress;
 
 	return CallData;
 }
 
-FContractCall UERC1155SaleContract::GetGlobalSaleDetails()
+FContractCall UERC1155SaleContract::GetGlobalSaleDetailsCallData()
 {
 	FString FunctionSignature = "globalSaleDetails()";
 	TArray<ABIElement*> Arr;
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
-	CallData.Data = TOptional(EncodedData.ToHex());
-	CallData.To = FAddress::From(ContractAddress);
+	CallData.Data = EncodedData.ToHex();
+	CallData.To = ContractAddress;
 
 	return CallData;
+}
+
+void UERC1155SaleContract::GetGlobalSaleDetails(FOnGetGlobalSaleDetails OnSuccess, FOnFailure OnFailure)
+{
+	const FContractCall CallData = this->GetGlobalSaleDetailsCallData();
+
+	const TFunction<void(FString)> OnApiSuccess = [OnSuccess](const FString& EncodedReturn)
+	{
+		FERC1155GlobalSaleDetails SaleDetails;
+		SaleDetails.DecodeFromFunctionReturn(EncodedReturn);
+		OnSuccess.ExecuteIfBound(SaleDetails);
+	};
+
+	const TFunction<void(FSequenceError)> OnApiFailure = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);
+	};
+
+	UProvider* Provider = NewObject<UProvider>();
+	Provider->Call(CallData, EBlockTag::ELatest, OnApiSuccess, OnApiFailure);
 }

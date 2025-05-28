@@ -3,6 +3,7 @@
 #include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
+#include "Types/BinaryData.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
 
@@ -100,6 +101,16 @@ TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
 TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
 {
 	return USequenceSupport::GetAllNetworkIds();
+}
+
+FString USequenceUtilityBP::EncodeFunctionData(const FString& FunctionSignature, const FString& Values)
+{
+	return USequenceSupport::EncodeFunctionCall(FunctionSignature, Values);
+}
+
+FString USequenceUtilityBP::DecodeFunctionResult(const FString& Abi, const FString& EncodedData)
+{
+	return USequenceSupport::DecodeFunctionResult(Abi, EncodedData);
 }
 
 void USequenceUtilityBP::MakeSequenceLog(const ESeqLogVerbosity Verbosity, const FString& Message)
