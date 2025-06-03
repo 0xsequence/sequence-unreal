@@ -83,6 +83,7 @@ private:
 		FIdName(2730,TEXT("xr-sepolia")),
 		FIdName(7672,TEXT("rootnet-porcini")),
 		FIdName(10143,TEXT("monad-testnet")),
+		FIdName(11690,TEXT("incentiv-testnet")),
 		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(33111,TEXT("apechain-testnet")),
 		FIdName(40875,TEXT("homeverse-testnet")),
@@ -152,6 +153,7 @@ private:
 		FIdName(10143,TEXT("Monad Testnet")),
 		FIdName(50312,TEXT("Somnia Testnet")),
 		FIdName(53716,TEXT("Frequency Testnet")),
+		FIdName(11690, TEXT("Incentiv Testnet"))
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -205,6 +207,7 @@ private:
 		FNameId(TEXT("monad-testnet"),10143),
 		FNameId(TEXT("somnia-testnet"),50312),
 		FNameId(TEXT("frequency-testnet"),53716),
+		FNameId(TEXT("incentiv-testnet"), 11690)
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -258,6 +261,7 @@ private:
 		{ENetwork::MonadTestnet, 10143},
 		{ENetwork::SomniaTestnet, 50312},
 		{ENetwork::FrequencyTestnet, 53716},
+		{ENetwork::IncentivTestnet, 11690}
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -311,6 +315,7 @@ private:
 		{ENetwork::MonadTestnet, TEXT("Monad Testnet")},
 		{ENetwork::SomniaTestnet, TEXT("Somnia Testnet")},
 		{ENetwork::FrequencyTestnet, TEXT("Frequency Testnet")},
+		{ENetwork::IncentivTestnet, TEXT("Incentiv Testnet")}
 	};
 
 public:

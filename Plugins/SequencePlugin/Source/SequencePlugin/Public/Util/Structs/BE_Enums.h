@@ -65,4 +65,5 @@ enum ENetwork
 	MonadTestnet		UMETA(DisplayName = "Monad Testnet"),
 	SomniaTestnet 		UMETA(DisplayName = "Somnia Testnet"),
 	FrequencyTestnet    UMETA(DisplayName = "Frequency Testnet"),
+	IncentivTestnet     UMETA(DisplayName = "Incentiv Testnet"),
 };
