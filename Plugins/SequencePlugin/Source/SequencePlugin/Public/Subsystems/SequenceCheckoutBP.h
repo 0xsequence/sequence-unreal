@@ -12,7 +12,7 @@ class SEQUENCEPLUGIN_API USequenceCheckoutBP : public UGameInstanceSubsystem
 
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetCheckoutOptionsResponseSuccess, FCheckoutOptions, Options);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, TArray<FTransactionStep>, Steps);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGenerateTransactionResponseSuccess, const TArray<FTransactionStep>&, Steps);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnCheckoutFailure, FString, Error);
 	
 	USequenceCheckoutBP();
