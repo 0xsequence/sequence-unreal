@@ -5,7 +5,7 @@
 /*
  * Central class for any SDK configuration information.
  */
-class SequenceSdk
+class SEQUENCEPLUGIN_API SequenceSdk
 {
 public:
 	/**
