@@ -66,7 +66,7 @@ FRawTransaction UERC721SaleContract::MakePurchaseTransaction(const FString& ToAd
         return T;
     }
 
-    T.data = "0x" + EncodedData.GetValue().ToHex();
+    T.data = EncodedData.GetValue().ToHexWithPrefix();
     T.to = ContractAddress;
     T.value = "0";
    
@@ -81,7 +81,7 @@ FContractCall UERC721SaleContract::GetSaleDetailsCallData()
     FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
     FContractCall CallData;
-    CallData.Data = EncodedData.ToHex();
+    CallData.Data = EncodedData.ToHexWithPrefix();
     CallData.To = ContractAddress;
 
     return CallData;

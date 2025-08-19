@@ -11,10 +11,6 @@ struct SEQUENCEPLUGIN_API FSeqPage
 {
     GENERATED_USTRUCT_BODY()
 public:
-    UE_DEPRECATED(0, "Page number is now deprecated. Instead, simply provide the page you are given to fetch the next page.")
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (DeprecatedProperty, DeprecationMessage = "Page number is now deprecated. Instead, simply provide the page you are given to fetch the next page."))
-    int32 page = -1;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
     FString column = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
@@ -36,7 +32,6 @@ public:
     bool containsData() const
     {
         bool ret = false;//assume nothing & look for true states!
-        ret |= (page != -1 || pageSize != -1);//int32 data
         ret |= (column.Len() > 0 || before.Len() > 0 || after.Len() > 0);//FString data
         ret |= (sort.Num() > 0);//TArray data
         ret |= more;//bool data
@@ -53,12 +48,6 @@ public:
         if (containsData())
         {
             ret.Append("{");
-
-            if (page != -1)
-            {
-                ret.Append("\"page\":");
-                ret.AppendInt(page);
-            }
 
             if (column.Len() > 0)
                 ret += ",\"column\":\""+column+"\"";
@@ -102,7 +91,6 @@ public:
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
-        ret.Get()->SetNumberField("page", page);
         ret.Get()->SetStringField("column", column);
         ret.Get()->SetStringField("before", before);
         ret.Get()->SetStringField("after", after);

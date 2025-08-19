@@ -21,7 +21,17 @@ FString FBinaryData::ToHex() const
 		return "";
 	}
 	
-	return "0x" + BytesToHex(Ptr(),GetLength()).ToLower();
+	return BytesToHex(Ptr(),GetLength()).ToLower();
+}
+
+FString FBinaryData::ToHexWithPrefix() const
+{
+	if(Arr == nullptr)
+	{
+		return "";
+	}
+	
+	return "0x" + ToHex();
 }
 
 void FBinaryData::Renew()
