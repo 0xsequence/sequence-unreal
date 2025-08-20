@@ -9,13 +9,9 @@ public class SequencePlugin : ModuleRules
 	{
 		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		string lib = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/libethabi_bridge.a");
-		string includes = Path.Combine(ModuleDirectory, "Public/EthAbi/");
 
-		PublicSystemLibraryPaths.Add(includes);
-		PublicAdditionalLibraries.Add(lib);
-		
+		AddEthAbiLibraries();
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
@@ -141,4 +137,47 @@ public class SequencePlugin : ModuleRules
 			);//Public Frameworks
 		}//IOS Frameworks
 	}//SequencePlugin
+
+	public void AddEthAbiLibraries()
+	{
+		string PluginDir = Path.GetFullPath(Path.Combine(ModuleDirectory, "..", ".."));
+        string ThirdPartyDir = Path.Combine(PluginDir, "ThirdParty", "EthAbiBridge");
+        string IncludeDir = Path.Combine(ThirdPartyDir, "Include");
+
+        PublicIncludePaths.Add(IncludeDir);
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public", "EthAbi"));
+
+        if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+            string archFolder = (Target.Architecture == UnrealArch.Arm64) ? "arm64" : "x64";
+            string libDir = Path.Combine(ThirdPartyDir, "Lib", "Win64", archFolder);
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "ethabi_bridge.lib"));
+
+            // Add extra MSVC libs here
+            // PublicSystemLibraries.AddRange(new string[] { "advapi32", "bcrypt" });
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Mac)
+        {
+            string archFolder = (Target.Architecture == UnrealArch.Arm64) ? "arm64" : "x64";
+            string libDir = Path.Combine(ThirdPartyDir, "Lib", "Mac", archFolder);
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.a"));
+        }
+        else if (Target.Platform == UnrealTargetPlatform.IOS)
+        {
+            if (Target.Architecture == UnrealArch.IOSSimulator)
+            {
+                PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyDir, "Lib", "iOS", "simulator", "libethabi_bridge.a"));
+            }
+            else
+            {
+                PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyDir, "Lib", "iOS", "device", "libethabi_bridge.a"));
+            }
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Android)
+        {
+            string abi = "arm64-v8a"; // add others if we build them
+            string libDir = Path.Combine(ThirdPartyDir, "Lib", "Android", abi);
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.a"));
+        }
+	}
 }//namespace
