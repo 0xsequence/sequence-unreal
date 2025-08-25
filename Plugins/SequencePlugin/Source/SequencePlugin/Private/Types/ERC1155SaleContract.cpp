@@ -84,7 +84,7 @@ FRawTransaction UERC1155SaleContract::MakePurchaseTransaction(const FString& ToA
 	}
 
 	T.to = ContractAddress;
-	T.data = "0x" + EncodedData.GetValue().ToHex();
+	T.data = EncodedData.GetValue().ToHexWithPrefix();
 	T.value = "0";
     return T;
 }
@@ -96,7 +96,7 @@ FContractCall UERC1155SaleContract::GetPaymentToken()
 	FUnsizedData EncodedData = ABI::Encode(FunctionSignature, Arr);
 
 	FContractCall CallData;
-	CallData.Data = EncodedData.ToHex();
+	CallData.Data = EncodedData.ToHexWithPrefix();
 	CallData.To = ContractAddress;
 
 	return CallData;

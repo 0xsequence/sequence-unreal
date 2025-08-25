@@ -16,7 +16,10 @@ struct SEQUENCEPLUGIN_API FBinaryData
 	virtual ByteLength GetLength() const = 0;
 	
 	// String hex representation of the binary data
-	FString ToHex() const; 
+	FString ToHex() const;
+
+	// String hex representation of the binary data with "0x" prefix
+	FString ToHexWithPrefix() const;
 
 	// Clear data, replacing it with a new blank array
 	void Renew();
