@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Util/Async.h"
+#include "CoreMinimal.h"
 #include "SequenceConnect.generated.h"
 
 class UEcosystemClient;
