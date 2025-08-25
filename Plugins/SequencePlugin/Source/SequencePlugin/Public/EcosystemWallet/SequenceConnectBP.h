@@ -17,7 +17,7 @@ public:
 	USequenceConnectBP();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignInWithGoogle();
+	void SignInWithGoogle(FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	USequenceConnect* GetSequenceConnect() const;
 	

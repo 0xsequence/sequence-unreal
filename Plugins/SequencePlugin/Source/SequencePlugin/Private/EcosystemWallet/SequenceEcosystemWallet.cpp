@@ -2,7 +2,7 @@
 
 #include "EcosystemWallet/SequenceEcosystemWallet.h"
 
-void USequenceEcosystemWallet::SignMessage(const FString& Message)
+void USequenceEcosystemWallet::SignMessage(const FString& Message, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
 {
 	
 }

@@ -1,13 +1,25 @@
 #include "EcosystemWallet/SequenceConnectBP.h"
 
+#include "Util/Async.h"
+
 USequenceConnectBP::USequenceConnectBP()
 {
 	this->SequenceConnect = NewObject<USequenceConnect>();
 }
 
-void USequenceConnectBP::SignInWithGoogle()
+void USequenceConnectBP::SignInWithGoogle(FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	this->SequenceConnect->SignInWithGoogle();
+	const TSuccessCallback<bool> SuccessCallback = [OnSuccess](bool Result)
+	{
+		OnSuccess.ExecuteIfBound();
+	};
+	
+	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);	
+	};
+	
+	this->SequenceConnect->SignInWithGoogle(SuccessCallback, FailureCallback);
 }
 
 USequenceConnect* USequenceConnectBP::GetSequenceConnect() const

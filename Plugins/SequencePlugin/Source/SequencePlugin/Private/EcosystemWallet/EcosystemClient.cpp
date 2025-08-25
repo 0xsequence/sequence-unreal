@@ -1,63 +1,58 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "EcosystemClient.h"
-
+#include "Authentication/RedirectHandler/IRedirectHandler.h"
+#include "Authentication/RedirectHandler/RedirectFactory.h"
 #include "Requests/ConnectArgs.h"
+#include "Requests/ConnectResponse.h"
+#include "Types/CryptoWallet.h"
 
 void UEcosystemClient::CreateNewSession(
     ESessionCreationType Type,
-    const TOptional<FSessionPermissions>& Permissions,
     const FString& PreferredLoginMethod,
-    const TOptional<FString>& Email)
+    const TOptional<FString>& Email,
+    const TSuccessCallback<bool>& OnSuccess,
+    const FFailureCallback& OnFailure)
 {
-    // chainId
-    const FString ChainIdStr = ToChainIdString(Permissions);
+    const FString ChainIdStr = "421614"; // Arbitrum Sepolia
+    UCryptoWallet* SessionWallet = UCryptoWallet::Make();
 
-    // temp EOA wallet for the session
-    FEOAWallet SessionWallet;
-
-    // origin & implicit flag
-    const FString Origin = RedirectOrigin::GetOriginString();
+    const FString Origin = "http://localhost:4444/";
     const bool bIncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
 
-    // build payload
     FConnectArgs Payload;
-    Payload.SessionAddress           = SessionWallet.GetAddress();
+    Payload.SessionAddress           = SessionWallet->GetWalletAddress();
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
     Payload.Origin                   = Origin;
     Payload.bIncludeImplicitSession  = bIncludeImplicitSession;
-    Payload.Permissions              = Permissions;
 
-    // endpoint/action
     const FString Action = (Type == ESessionCreationType::AddExplicit)
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
-    const FString EcosystemUrl = EcosystemBindings::GetUrl(Ecosystem);
+    
+    const FString EcosystemUrl = "https://v3.sequence-dev.app";
     const FString Url = FString::Printf(TEXT("%s/request/connect"), *EcosystemUrl);
 
-    // redirect handler
-    TSharedRef<IRedirectHandler> Handler = RedirectFactory::CreateHandler();
+    const TSharedPtr<IRedirectHandler> HandlerPtr = FRedirectFactory::CreateHandler();
+    IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    // request/response (blocking here to mirror `await`)
-    const FConnectResponse Response =
+    const TTuple<bool, FConnectResponse> Response =
         Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
 
-    if (!Response.Result)
+    if (!Response.Get<bool>())
     {
         throw std::runtime_error("Error during request");
     }
 
-    const bool bImplicitWithPermissions = bIncludeImplicitSession && Permissions.IsSet();
+    //const bool bImplicitWithPermissions = bIncludeImplicitSession && Permissions.IsSet();
 
-    const int32 CredentialsLen = bImplicitWithPermissions ? 2 : 1;
+    /*const int32 CredentialsLen = bImplicitWithPermissions ? 2 : 1;
     TArray<FSessionCredentials> Credentials;
     Credentials.Reserve(CredentialsLen);
 
     // Primary (explicit if not including implicit)
     Credentials.Emplace(
-        /*bIsImplicit*/ !bIncludeImplicitSession,
+        !bIncludeImplicitSession,
         SessionWallet.GetPrivateKeyAsHex(),
         Response.Data.WalletAddress,
         Response.Data.Attestation,
@@ -71,11 +66,11 @@ void UEcosystemClient::CreateNewSession(
     if (bImplicitWithPermissions)
     {
         Credentials.Emplace(
-            /*bIsImplicit*/ true,
+            true,
             SessionWallet.GetPrivateKeyAsHex(),
             Response.Data.WalletAddress,
-            /*Attestation*/ TOptional<FString>(),
-            /*Signature*/   TOptional<FString>(),
+            TOptional<FString>(), // Attestation
+            TOptional<FString>(), // Signature
             static_cast<int32>(Ecosystem),
             ChainIdStr,
             Response.Data.LoginMethod,
@@ -92,5 +87,5 @@ void UEcosystemClient::CreateNewSession(
         SessionStorage::AddSession(Cred);
     }
 
-    return Signers;
+    return Signers;*/
 }
