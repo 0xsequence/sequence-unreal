@@ -14,7 +14,7 @@ class SEQUENCEPLUGIN_API USequenceConnect : public UObject
 public:
 	USequenceConnect();
 	
-	void SignInWithGoogle(TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithGoogle(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
 
 private:
 	UPROPERTY()

@@ -5,7 +5,9 @@
 #include "Util/Async.h"
 #include "EcosystemClient.generated.h"
 
-enum class ESessionCreationType : uint8
+class FSessionPermissions;
+
+enum class SEQUENCEPLUGIN_API ESessionCreationType : uint8
 {
 	CreateNewSession UMETA(DisplayName = "Create New Session"),
 	IncludeImplicit  UMETA(DisplayName = "Include Implicit"),
@@ -21,6 +23,7 @@ public:
 	void CreateNewSession(ESessionCreationType Type,
 		const FString& PreferredLoginMethod,
 		const TOptional<FString>& Email,
+		const TOptional<FSessionPermissions>& Permissions,
 		const TSuccessCallback<bool>& OnSuccess,
 		const FFailureCallback& OnFailure);
 };

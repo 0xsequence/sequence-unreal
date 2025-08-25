@@ -4,12 +4,6 @@
 #include "ConnectArgs.generated.h"
 
 USTRUCT()
-struct FSessionPermissions
-{
-	GENERATED_USTRUCT_BODY()
-};
-
-USTRUCT()
 struct FConnectArgs
 {
 	GENERATED_USTRUCT_BODY()

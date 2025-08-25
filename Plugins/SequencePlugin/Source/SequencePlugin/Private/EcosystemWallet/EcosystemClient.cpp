@@ -1,6 +1,7 @@
 #include "EcosystemClient.h"
 #include "Authentication/RedirectHandler/IRedirectHandler.h"
 #include "Authentication/RedirectHandler/RedirectFactory.h"
+#include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
 #include "Types/CryptoWallet.h"
@@ -9,6 +10,7 @@ void UEcosystemClient::CreateNewSession(
     ESessionCreationType Type,
     const FString& PreferredLoginMethod,
     const TOptional<FString>& Email,
+    const TOptional<FSessionPermissions>& Permissions,
     const TSuccessCallback<bool>& OnSuccess,
     const FFailureCallback& OnFailure)
 {
@@ -23,6 +25,7 @@ void UEcosystemClient::CreateNewSession(
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
     Payload.Origin                   = Origin;
+    Payload.Permissions              = Permissions;
     Payload.bIncludeImplicitSession  = bIncludeImplicitSession;
 
     const FString Action = (Type == ESessionCreationType::AddExplicit)
