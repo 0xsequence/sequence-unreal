@@ -5,7 +5,7 @@
 #include "Logging/LogMacros.h"
 #include "Util/Log.h"
 
-TTuple<bool, FString> FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl)
+TOptional<FString> FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl)
 {
     FPlatformProcess::LaunchURL(*FullUrl, nullptr, nullptr);
 
@@ -61,5 +61,5 @@ TTuple<bool, FString> FLocalhostRedirectHandler::WaitForResponseImpl(const FStri
 
     SEQ_LOG_EDITOR(Display, TEXT("Response JSON: %s"), *ResponseJson);*/
 
-    return MakeTuple(true, TEXT(""));
+    return TOptional<FString>("");
 }

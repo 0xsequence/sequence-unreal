@@ -10,5 +10,5 @@ class ULocalhostServer;
 class SEQUENCEPLUGIN_API FLocalhostRedirectHandler final : public IRedirectHandler
 {
 protected:
-	virtual TTuple<bool, FString> WaitForResponseImpl(const FString& FullUrl) override;
+	virtual TOptional<FString> WaitForResponseImpl(const FString& FullUrl) override;
 };

@@ -8,6 +8,7 @@
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectConverter.h"
+#include "Util/SequenceSupport.h"
 
 class SEQUENCEPLUGIN_API IRedirectHandler
 {
@@ -33,42 +34,36 @@ public:
      * and block here, or change the signature to use futures/delegates in your codebase.
      */
     template<typename TPayload, typename TResponse>
-    TTuple<bool, TResponse> WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload)
+    TOptional<TResponse> WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload)
     {
-        FString PayloadJson;
-        if (!FJsonObjectConverter::UStructToJsonObjectString(TPayload::StaticStruct(), &Payload, PayloadJson, 0, 0))
+        const FString& PayloadJson = USequenceSupport::StructToString(Payload);
+        if (PayloadJson.IsEmpty())
         {
             UE_LOG(LogTemp, Error, TEXT("Failed to serialize payload to JSON"));
-            return MakeTuple(false, TResponse{});
+            return TOptional<TResponse>(TResponse{});
         }
 
         // Build full URL (adds Base64-encoded payload, id, mode=redirect, redirectUrl)
         const FString FullUrl = ConstructUrl(Url, Action, PayloadJson);
 
         // Call platform-specific implementation to get (success, response-json)
-        const TTuple<bool, FString> Raw = WaitForResponseImpl(FullUrl);
+        const TOptional<FString> Raw = WaitForResponseImpl(FullUrl);
 
         // If impl failed, return default response
-        if (!Raw.Get<0>())
+        if (Raw->IsEmpty())
         {
-            return MakeTuple(false, TResponse{});
+            return TOptional<TResponse>(TResponse{});
         }
 
         // Deserialize response JSON back into TResponse
-        TResponse Response{};
-        if (!FJsonObjectConverter::JsonObjectStringToUStruct<TResponse>(Raw.Get<1>(), &Response, 0, 0))
-        {
-            UE_LOG(LogTemp, Error, TEXT("Failed to deserialize response JSON"));
-            return MakeTuple(false, TResponse{});
-        }
-
-        return MakeTuple(true, Response);
+        TResponse Response = USequenceSupport::JSONStringToStruct<TResponse>(Raw.Get(TEXT("")));
+        return TOptional<TResponse>(Response);
     }
 
 protected:
     // Implement this in your platform-specific handler:
     // Given the fully constructed URL, perform the actual wait/IO and return (bSuccess, ResponseJsonString).
-    virtual TTuple<bool, FString> WaitForResponseImpl(const FString& FullUrl) = 0;
+    virtual TOptional<FString> WaitForResponseImpl(const FString& FullUrl) = 0;
 
     // Helper to build the full URL with Base64-encoded UTF-8 JSON payload
     FString ConstructUrl(const FString& Url, const FString& Action, const FString& PayloadJson) const

@@ -1,7 +1,12 @@
 #pragma once
 
+#include "ConnectResponse.generated.h"
+
+USTRUCT()
 struct FConnectResponseData
 {
+	GENERATED_USTRUCT_BODY()
+
 	FString WalletAddress;
 	FString LoginMethod;
 	TOptional<FString> Attestation;
@@ -9,9 +14,11 @@ struct FConnectResponseData
 	TOptional<FString> Email;
 };
 
-
+USTRUCT()
 struct FConnectResponse
 {
-	bool Result = false;
+	GENERATED_USTRUCT_BODY()
+
+	bool Result;
 	FConnectResponseData Data;
 };

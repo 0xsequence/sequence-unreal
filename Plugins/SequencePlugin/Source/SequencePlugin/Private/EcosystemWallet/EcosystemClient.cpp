@@ -36,10 +36,10 @@ void UEcosystemClient::CreateNewSession(
     IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    const TTuple<bool, FConnectResponse> Response =
-        Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
-
-    if (!Response.Get<bool>())
+    const TOptional<FConnectResponse> Response =
+            Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
+    
+    if (!Response.IsSet())
     {
         throw std::runtime_error("Error during request");
     }
