@@ -73,6 +73,7 @@ private:
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
+		FIdName(5031,TEXT("somnia")),
 		FIdName(1482601649,TEXT("skale-nebula")),
 		
 		FIdName(41,TEXT("telos-testnet")),
@@ -127,6 +128,7 @@ private:
 		FIdName(1284,TEXT("Moonbeam")),
 		FIdName(42793, TEXT("Etherlink")),
 		FIdName(273, TEXT("XR1")),
+		FIdName(5031, TEXT("Somnia")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -181,6 +183,7 @@ private:
 		FNameId(TEXT("moonbeam"),1284),
 		FNameId(TEXT("etherlink"),42793),
 		FNameId(TEXT("xr1"),273),
+		FNameId(TEXT("somnia"),5031),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -235,6 +238,7 @@ private:
 		{ENetwork::Moonbeam, 1284},
 		{ENetwork::Etherlink, 42793},
 		{ENetwork::XR1, 273},
+		{ENetwork::Somnia, 5031},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -289,6 +293,7 @@ private:
 		{ENetwork::Moonbeam, TEXT("Moonbeam")},
 		{ENetwork::Etherlink, TEXT("Etherlink")},
 		{ENetwork::XR1, TEXT("XR1")},
+		{ENetwork::Somnia, TEXT("Somnia")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
