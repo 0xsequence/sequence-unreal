@@ -34,43 +34,36 @@ public:
      * and block here, or change the signature to use futures/delegates in your codebase.
      */
     template<typename TPayload, typename TResponse>
-    TOptional<TResponse> WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload)
+    void WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload, TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
     {
         const FString& PayloadJson = USequenceSupport::StructToString(Payload);
         if (PayloadJson.IsEmpty())
         {
             UE_LOG(LogTemp, Error, TEXT("Failed to serialize payload to JSON"));
-            return TOptional<TResponse>(TResponse{});
+            OnFailure(FSequenceError(EErrorType::ResponseParseError, TEXT("Failed to serialize payload to JSON")));
         }
 
-        // Build full URL (adds Base64-encoded payload, id, mode=redirect, redirectUrl)
         const FString FullUrl = ConstructUrl(Url, Action, PayloadJson);
 
-        // Call platform-specific implementation to get (success, response-json)
-        const TOptional<FString> Raw = WaitForResponseImpl(FullUrl);
-
-        // If impl failed, return default response
-        if (Raw->IsEmpty())
+        const TSuccessCallback<FString> OnHandlerSuccess = [OnSuccess](const FString& Response)
         {
-            return TOptional<TResponse>(TResponse{});
-        }
+            TResponse ResponseData = USequenceSupport::JSONStringToStruct<TResponse>(Response);
+            OnSuccess(ResponseData);
+        };
 
-        // Deserialize response JSON back into TResponse
-        TResponse Response = USequenceSupport::JSONStringToStruct<TResponse>(Raw.Get(TEXT("")));
-        return TOptional<TResponse>(Response);
+        WaitForResponseImpl(FullUrl, OnHandlerSuccess, OnFailure);
     }
 
 protected:
     // Implement this in your platform-specific handler:
     // Given the fully constructed URL, perform the actual wait/IO and return (bSuccess, ResponseJsonString).
-    virtual TOptional<FString> WaitForResponseImpl(const FString& FullUrl) = 0;
+    virtual void WaitForResponseImpl(const FString& FullUrl, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) = 0;
 
     // Helper to build the full URL with Base64-encoded UTF-8 JSON payload
     FString ConstructUrl(const FString& Url, const FString& Action, const FString& PayloadJson) const
     {
         const FString EncodedPayload = Base64EncodeUtf8(PayloadJson);
 
-        // NOTE: If your Action/RedirectUrl can contain reserved chars, consider URL-encoding them.
         return FString::Printf(
             TEXT("%s?action=%s&payload=%s&id=%s&mode=redirect&redirectUrl=%s"),
             *Url,

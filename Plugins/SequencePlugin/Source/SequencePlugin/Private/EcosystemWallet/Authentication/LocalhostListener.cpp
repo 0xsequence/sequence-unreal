@@ -6,7 +6,7 @@
 #include "HttpServerResponse.h"
 #include "Util/SequenceSupport.h"
 
-void ULocalhostListener::Start()
+void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	FHttpServerModule& HttpModule = FHttpServerModule::Get();
 
@@ -21,33 +21,32 @@ void ULocalhostListener::Start()
 	RouteHandle = Router->BindRoute(
 		RootPath,
 		EHttpServerRequestVerbs::VERB_GET,
-		FHttpRequestHandler::CreateLambda([this](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
+		FHttpRequestHandler::CreateLambda([this, OnSuccess, OnFailure](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
 		{
-			return this->HandleAnyRequest(Request, OnComplete);
+			return this->HandleAnyRequest(Request, OnComplete, OnSuccess, OnFailure);
 		})
 	);
 
 	HttpModule.StartAllListeners();
 }
 
-bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete)
+bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	for (const auto& Kvp : Request.QueryParams)
-	{
-		UE_LOG(LogTemp, Log, TEXT("[HTTP] %s, %s"), *Kvp.Key, *Kvp.Value);
-	}
-
 	const FString Id = Request.QueryParams["id"];
 
 	if (Request.QueryParams.Contains("error"))
 	{
-		return true;
+		OnFailure(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
 	}
-	
-	const FString EncodedPayload = Request.QueryParams["payload"];
-	const FString PayloadJson = USequenceSupport::DecodeBase64ToString(EncodedPayload);
+	else
+	{
+		const FString EncodedPayload = Request.QueryParams["payload"];
+		const FString PayloadJson = USequenceSupport::DecodeBase64ToString(EncodedPayload);
 
-	UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
+		UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
+
+		OnSuccess(PayloadJson);	
+	}
 
 	const FString Body = TEXT("{}");
 	TUniquePtr<FHttpServerResponse> Response = FHttpServerResponse::Create(

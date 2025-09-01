@@ -7,6 +7,7 @@
 #include "HttpRouteHandle.h"
 #include "IHttpRouter.h"
 #include "UObject/Object.h"
+#include "Util/Async.h"
 #include "LocalhostListener.generated.h"
 
 UCLASS()
@@ -15,12 +16,10 @@ class SEQUENCEPLUGIN_API ULocalhostListener : public UObject
 	GENERATED_BODY()
 
 public:
-	void Start();
-
-	
+	void WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 private:
-	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
 
 private:
 	TSharedPtr<IHttpRouter> Router;

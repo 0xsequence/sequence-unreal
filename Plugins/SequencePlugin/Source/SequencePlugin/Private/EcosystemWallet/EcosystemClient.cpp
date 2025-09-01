@@ -43,12 +43,14 @@ void UEcosystemClient::CreateNewSession(
     IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    const TOptional<FConnectResponse> Response = Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
-    
-    if (!Response.IsSet())
+    const TSuccessCallback<FConnectResponse> OnHandlerSuccess = [OnSuccess](FConnectResponse Response)
     {
-        throw std::runtime_error("Error during request");
-    }
+        // Store session data here
+        UE_LOG(LogTemp, Display, TEXT("Wallet Address %s"), *Response.Data.WalletAddress);
+        OnSuccess(true);
+    };
+
+    Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload, OnHandlerSuccess, OnFailure);
 
     //const bool bImplicitWithPermissions = bIncludeImplicitSession && Permissions.IsSet();
 
