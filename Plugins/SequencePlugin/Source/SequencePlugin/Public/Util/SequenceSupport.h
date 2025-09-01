@@ -420,6 +420,7 @@ public:
 		FString Ret;
 		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
 		StringReplace(&Ret, "\n", "");
+		StringReplace(&Ret, "\"None\"", "null");
 		return Ret;
 	}
 
@@ -493,6 +494,20 @@ public:
 		}
 
 		return Ret;
+	}
+
+	static FString DecodeBase64ToString(const FString& Base64Input)
+	{
+		TArray<uint8> Bytes;
+		if (FBase64::Decode(Base64Input, Bytes))
+		{
+			FString Out;
+			FUTF8ToTCHAR Converter(reinterpret_cast<const ANSICHAR*>(Bytes.GetData()), Bytes.Num());
+			Out = FString(Converter.Length(), Converter.Get());
+			return Out;
+		}
+
+		return FString();
 	}
 
 	static FString StringListToSimpleString(TArray<FString> StringData);

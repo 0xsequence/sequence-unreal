@@ -3,9 +3,8 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
+#include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "EcosystemClient.generated.h"
-
-class FSessionPermissions;
 
 enum class SEQUENCEPLUGIN_API ESessionCreationType : uint8
 {
@@ -22,8 +21,8 @@ class SEQUENCEPLUGIN_API UEcosystemClient : public UObject
 public:
 	void CreateNewSession(ESessionCreationType Type,
 		const FString& PreferredLoginMethod,
-		const TOptional<FString>& Email,
-		const TOptional<FSessionPermissions>& Permissions,
+		const FString& Email,
+		FSessionPermissions Permissions,
 		const TSuccessCallback<bool>& OnSuccess,
 		const FFailureCallback& OnFailure);
 };

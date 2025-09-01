@@ -1,5 +1,6 @@
 #include "LocalhostRedirectHandler.h"
 //#include "LocalhostServer.h"
+#include "EcosystemWallet/Authentication/LocalhostListener.h"
 #include "Engine/Engine.h"
 #include "Misc/ScopeExit.h"
 #include "Logging/LogMacros.h"
@@ -8,6 +9,9 @@
 TOptional<FString> FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl)
 {
     FPlatformProcess::LaunchURL(*FullUrl, nullptr, nullptr);
+
+    ULocalhostListener* Listener = NewObject<ULocalhostListener>();
+    Listener->Start();
 
     /*ULocalhostServer* Server = ULocalhostServer::GetOrCreate();
     if (!Server)

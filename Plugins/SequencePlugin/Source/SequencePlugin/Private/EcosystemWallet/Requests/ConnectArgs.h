@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Types/BinaryData.h"
+#include "CoreMinimal.h"
+#include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "ConnectArgs.generated.h"
 
 USTRUCT()
@@ -8,10 +9,22 @@ struct FConnectArgs
 {
 	GENERATED_USTRUCT_BODY()
 
-	FAddress SessionAddress;
+public:
+	UPROPERTY()
+	FString SessionAddress;
+
+	UPROPERTY()
 	FString PreferredLoginMethod;
-	TOptional<FString> Email;
+
+	UPROPERTY()
+	FString Email;
+
+	UPROPERTY()
 	FString Origin;
+	
+	UPROPERTY()
 	bool bIncludeImplicitSession = false;
-	TOptional<FSessionPermissions> Permissions;
+
+	UPROPERTY()
+	FSessionPermissions Permissions;
 };

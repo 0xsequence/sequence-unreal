@@ -9,25 +9,29 @@
 void UEcosystemClient::CreateNewSession(
     ESessionCreationType Type,
     const FString& PreferredLoginMethod,
-    const TOptional<FString>& Email,
-    const TOptional<FSessionPermissions>& Permissions,
+    const FString& Email,
+    FSessionPermissions Permissions,
     const TSuccessCallback<bool>& OnSuccess,
     const FFailureCallback& OnFailure)
 {
     const FString ChainIdStr = "421614"; // Arbitrum Sepolia
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
+    FString WalletAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
-    const FString Origin = "http://localhost:4444/";
+    const FString Origin = "http://localhost:4444/api";
     const bool bIncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
 
     FConnectArgs Payload;
-    Payload.SessionAddress           = SessionWallet->GetWalletAddress();
+    Payload.SessionAddress           = WalletAddress;
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
     Payload.Origin                   = Origin;
     Payload.Permissions              = Permissions;
     Payload.bIncludeImplicitSession  = bIncludeImplicitSession;
 
+    const FString& PayloadJson = USequenceSupport::StructToString(Payload);
+    UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *PayloadJson);
+    
     const FString Action = (Type == ESessionCreationType::AddExplicit)
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
@@ -39,8 +43,7 @@ void UEcosystemClient::CreateNewSession(
     IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    const TOptional<FConnectResponse> Response =
-            Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
+    const TOptional<FConnectResponse> Response = Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload);
     
     if (!Response.IsSet())
     {

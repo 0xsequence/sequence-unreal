@@ -1,9 +1,18 @@
 #pragma once
-#include "ParameterRule.h"
 
-class SEQUENCEPLUGIN_API Permission
+#include "CoreMinimal.h"
+#include "ParameterRule.h"
+#include "Permission.generated.h"
+
+USTRUCT()
+struct SEQUENCEPLUGIN_API FPermission
 {
+	GENERATED_BODY()
+	
 public:
+	UPROPERTY()
 	FString Target;
-	TArray<ParameterRule*> Rules;
+
+	UPROPERTY()
+	TArray<FParameterRule> Rules;
 };
