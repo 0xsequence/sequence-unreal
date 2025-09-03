@@ -7,10 +7,20 @@ struct FConnectResponseData
 {
 	GENERATED_USTRUCT_BODY()
 
+public:
+	UPROPERTY()
 	FString WalletAddress;
+	
+	UPROPERTY()
 	FString LoginMethod;
+	
+	UPROPERTY()
 	FString Attestation;
+	
+	UPROPERTY()
 	FString Signature;
+	
+	UPROPERTY()
 	FString Email;
 };
 
@@ -19,6 +29,10 @@ struct FConnectResponse
 {
 	GENERATED_USTRUCT_BODY()
 
+public:
+	UPROPERTY()
 	bool Result;
+	
+	UPROPERTY()
 	FConnectResponseData Data;
 };

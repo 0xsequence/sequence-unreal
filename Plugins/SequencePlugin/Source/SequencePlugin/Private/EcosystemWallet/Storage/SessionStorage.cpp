@@ -59,7 +59,6 @@ bool USessionStorage::GetStoredSessions(FWalletSessions* Sessions)
 
 			if (ret == false)
 			{
-				SEQ_LOG(Error, TEXT("System Failure: Unable to read save file or file is corrupted."));
 				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
 			}
 		}
@@ -103,7 +102,7 @@ void USessionStorage::StoreSessions(const FWalletSessions& WalletSessions)
 
 		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
 		{
-			SEQ_LOG(Display, TEXT("Data Saved Correctly!"));
+			SEQ_LOG(Display, TEXT("Session stored successfully."));
 		}
 	}
 }

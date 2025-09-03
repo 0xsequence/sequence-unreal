@@ -50,20 +50,20 @@ void UEcosystemClient::CreateNewSession(
     IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    const TSuccessCallback<FConnectResponse> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FConnectResponse Response)
+    const TSuccessCallback<FConnectResponseData> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FConnectResponseData Response)
     {
         FSessionCredentials Credentials;
-        Credentials.Address = Response.Data.WalletAddress;
+        Credentials.Address = Response.WalletAddress;
         Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
         Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
-        Credentials.LoginMethod = Response.Data.LoginMethod;
-        Credentials.Email = Response.Data.Email;
+        Credentials.LoginMethod = Response.LoginMethod;
+        Credentials.Email = Response.Email;
 
         this->Storage->AddSession(Credentials);
         
-        UE_LOG(LogTemp, Display, TEXT("Wallet Address %s"), *Response.Data.WalletAddress);
+        UE_LOG(LogTemp, Display, TEXT("Wallet Address %s"), *Response.WalletAddress);
         OnSuccess(true);
     };
 
-    Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload, OnHandlerSuccess, OnFailure);
+    Handler->WaitForResponse<FConnectArgs, FConnectResponseData>(Url, Action, Payload, OnHandlerSuccess, OnFailure);
 }

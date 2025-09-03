@@ -6,6 +6,12 @@ USequenceConnect::USequenceConnect()
 	this->Client = NewObject<UEcosystemClient>();
 }
 
+void USequenceConnect::SignInWithEmail(const FString& Email, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->Client->CreateNewSession(ESessionCreationType::CreateNewSession, "email",
+		Email, FSessionPermissions(), OnSuccess, OnFailure);
+}
+
 void USequenceConnect::SignInWithGoogle(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	FPermission ContractPermission;
@@ -22,4 +28,22 @@ void USequenceConnect::SignInWithGoogle(const TSuccessCallback<bool>& OnSuccess,
 	
 	this->Client->CreateNewSession(ESessionCreationType::CreateNewSession, "google",
 		"", Permissions, OnSuccess, OnFailure);
+}
+
+void USequenceConnect::SignInWithApple(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->Client->CreateNewSession(ESessionCreationType::CreateNewSession, "apple",
+	"", FSessionPermissions(), OnSuccess, OnFailure);
+}
+
+void USequenceConnect::SignInWithPasskey(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->Client->CreateNewSession(ESessionCreationType::CreateNewSession, "passkey",
+	"", FSessionPermissions(), OnSuccess, OnFailure);
+}
+
+void USequenceConnect::SignInWithMnemonic(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	this->Client->CreateNewSession(ESessionCreationType::CreateNewSession, "mnemonic",
+	"", FSessionPermissions(), OnSuccess, OnFailure);
 }
