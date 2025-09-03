@@ -4,21 +4,18 @@
 #include "GameFramework/SaveGame.h"
 #include "StorableCredentials.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SEQUENCEPLUGIN_API UStorableCredentials : public USaveGame
 {
 	GENERATED_BODY()
 public:
-		//Encrypted Key
-		UPROPERTY(VisibleAnywhere, Category = Basic)
-			FString EK = "";
+	//Encrypted Key
+	UPROPERTY(VisibleAnywhere, Category = Basic)
+	FString EK = "";
 
-		//Key Length
-		UPROPERTY(VisibleAnywhere, Category = Basic)
-			int32 KL = 0;
+	//Key Length
+	UPROPERTY(VisibleAnywhere, Category = Basic)
+	int32 KL = 0;
 
-		UStorableCredentials();
+	UStorableCredentials();
 };

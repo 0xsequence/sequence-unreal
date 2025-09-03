@@ -4,7 +4,14 @@
 #include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
+#include "Signers/SessionCredentials.h"
+#include "Storage/SessionStorage.h"
 #include "Types/CryptoWallet.h"
+
+UEcosystemClient::UEcosystemClient()
+{
+    this->Storage = NewObject<USessionStorage>();
+}
 
 void UEcosystemClient::CreateNewSession(
     ESessionCreationType Type,
@@ -43,57 +50,20 @@ void UEcosystemClient::CreateNewSession(
     IRedirectHandler* Handler = HandlerPtr.Get();
     Handler->SetRedirectUrl(Origin);
 
-    const TSuccessCallback<FConnectResponse> OnHandlerSuccess = [OnSuccess](FConnectResponse Response)
+    const TSuccessCallback<FConnectResponse> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FConnectResponse Response)
     {
-        // Store session data here
+        FSessionCredentials Credentials;
+        Credentials.Address = Response.Data.WalletAddress;
+        Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
+        Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
+        Credentials.LoginMethod = Response.Data.LoginMethod;
+        Credentials.Email = Response.Data.Email;
+
+        this->Storage->AddSession(Credentials);
+        
         UE_LOG(LogTemp, Display, TEXT("Wallet Address %s"), *Response.Data.WalletAddress);
         OnSuccess(true);
     };
 
     Handler->WaitForResponse<FConnectArgs, FConnectResponse>(Url, Action, Payload, OnHandlerSuccess, OnFailure);
-
-    //const bool bImplicitWithPermissions = bIncludeImplicitSession && Permissions.IsSet();
-
-    /*const int32 CredentialsLen = bImplicitWithPermissions ? 2 : 1;
-    TArray<FSessionCredentials> Credentials;
-    Credentials.Reserve(CredentialsLen);
-
-    // Primary (explicit if not including implicit)
-    Credentials.Emplace(
-        !bIncludeImplicitSession,
-        SessionWallet.GetPrivateKeyAsHex(),
-        Response.Data.WalletAddress,
-        Response.Data.Attestation,
-        Response.Data.Signature,
-        static_cast<int32>(Ecosystem),
-        ChainIdStr,
-        Response.Data.LoginMethod,
-        Response.Data.Email);
-
-    // Optional implicit-with-permissions credential
-    if (bImplicitWithPermissions)
-    {
-        Credentials.Emplace(
-            true,
-            SessionWallet.GetPrivateKeyAsHex(),
-            Response.Data.WalletAddress,
-            TOptional<FString>(), // Attestation
-            TOptional<FString>(), // Signature
-            static_cast<int32>(Ecosystem),
-            ChainIdStr,
-            Response.Data.LoginMethod,
-            Response.Data.Email);
-    }
-
-    // Build signers & persist sessions
-    TArray<FSessionSigner> Signers;
-    Signers.Reserve(Credentials.Num());
-
-    for (const FSessionCredentials& Cred : Credentials)
-    {
-        Signers.Emplace(Cred);
-        SessionStorage::AddSession(Cred);
-    }
-
-    return Signers;*/
 }

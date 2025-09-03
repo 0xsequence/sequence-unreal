@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "EcosystemWallet/SequenceEcosystemWalletBP.h"
 #include "Util/Async.h"
 
-USequenceEcosystemWalletBP::USequenceEcosystemWalletBP() { }
+USequenceEcosystemWalletBP::USequenceEcosystemWalletBP()
+{
+	this->Wallet = NewObject<USequenceEcosystemWallet>();
+}
 
 void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
@@ -20,7 +21,12 @@ void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSuccess 
 	this->GetSequenceEcosystemWallet()->SignMessage(Message, SuccessCallback, FailureCallback);	
 }
 
+bool USequenceEcosystemWalletBP::CheckIfWalletExists()
+{
+	return this->GetSequenceEcosystemWallet()->CheckIfWalletExists();	
+}
+
 USequenceEcosystemWallet* USequenceEcosystemWalletBP::GetSequenceEcosystemWallet() const
 {
-	return NewObject<USequenceEcosystemWallet>();
+	return this->Wallet;
 }

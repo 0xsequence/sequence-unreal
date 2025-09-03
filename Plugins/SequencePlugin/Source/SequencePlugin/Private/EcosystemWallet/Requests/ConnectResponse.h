@@ -9,9 +9,9 @@ struct FConnectResponseData
 
 	FString WalletAddress;
 	FString LoginMethod;
-	TOptional<FString> Attestation;
-	TOptional<FString> Signature;
-	TOptional<FString> Email;
+	FString Attestation;
+	FString Signature;
+	FString Email;
 };
 
 USTRUCT()

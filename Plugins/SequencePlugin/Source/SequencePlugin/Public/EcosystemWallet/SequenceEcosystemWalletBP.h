@@ -18,6 +18,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	void SignMessage(const FString& Message, FOnSuccess OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
+	bool CheckIfWalletExists();
 	
 	USequenceEcosystemWallet* GetSequenceEcosystemWallet() const;
+
+private:
+	UPROPERTY()
+	USequenceEcosystemWallet* Wallet = nullptr;
 };

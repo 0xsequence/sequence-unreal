@@ -12,4 +12,5 @@ class SEQUENCEPLUGIN_API USequenceEcosystemWallet : public UObject
 
 public:
 	void SignMessage(const FString& Message, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure);
+	bool CheckIfWalletExists();
 };
