@@ -1,5 +1,4 @@
 #include "EcosystemWallet/SequenceConnectBP.h"
-
 #include "Util/Async.h"
 #include "Util/Log.h"
 
@@ -8,7 +7,7 @@ USequenceConnectBP::USequenceConnectBP()
 	this->SequenceConnect = NewObject<USequenceConnect>();
 }
 
-void USequenceConnectBP::SignInWithEmail(const FString& Email, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -21,10 +20,10 @@ void USequenceConnectBP::SignInWithEmail(const FString& Email, FOnSuccess OnSucc
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	this->SequenceConnect->SignInWithEmail(Email, SuccessCallback, FailureCallback);
+	this->SequenceConnect->SignInWithEmail(Email, Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithGoogle(FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithGoogle(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -37,10 +36,10 @@ void USequenceConnectBP::SignInWithGoogle(FOnSuccess OnSuccess, FOnFailure OnFai
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	this->SequenceConnect->SignInWithGoogle(SuccessCallback, FailureCallback);
+	this->SequenceConnect->SignInWithGoogle(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithApple(FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithApple(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -53,10 +52,10 @@ void USequenceConnectBP::SignInWithApple(FOnSuccess OnSuccess, FOnFailure OnFail
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	this->SequenceConnect->SignInWithApple(SuccessCallback, FailureCallback);
+	this->SequenceConnect->SignInWithApple(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithPasskey(FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithPasskey(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -69,10 +68,10 @@ void USequenceConnectBP::SignInWithPasskey(FOnSuccess OnSuccess, FOnFailure OnFa
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	this->SequenceConnect->SignInWithPasskey(SuccessCallback, FailureCallback);
+	this->SequenceConnect->SignInWithPasskey(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithMnemonic(FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithMnemonic(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -85,7 +84,7 @@ void USequenceConnectBP::SignInWithMnemonic(FOnSuccess OnSuccess, FOnFailure OnF
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
-	this->SequenceConnect->SignInWithMnemonic(SuccessCallback, FailureCallback);
+	this->SequenceConnect->SignInWithMnemonic(Permissions, SuccessCallback, FailureCallback);
 }
 
 USequenceConnect* USequenceConnectBP::GetSequenceConnect() const

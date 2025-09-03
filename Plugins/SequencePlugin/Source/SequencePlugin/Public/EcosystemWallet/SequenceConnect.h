@@ -2,6 +2,7 @@
 
 #include "Util/Async.h"
 #include "CoreMinimal.h"
+#include "Permissions/Permissions.h"
 #include "SequenceConnect.generated.h"
 
 class UEcosystemClient;
@@ -14,11 +15,11 @@ class SEQUENCEPLUGIN_API USequenceConnect : public UObject
 public:
 	USequenceConnect();
 	
-	void SignInWithEmail(const FString& Email, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
-	void SignInWithGoogle(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
-	void SignInWithApple(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
-	void SignInWithPasskey(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
-	void SignInWithMnemonic(const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithGoogle(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithApple(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithPasskey(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+	void SignInWithMnemonic(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
 
 private:
 	UPROPERTY()
