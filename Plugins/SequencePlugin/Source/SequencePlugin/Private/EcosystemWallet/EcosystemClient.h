@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Authentication/RedirectHandler/RedirectFactory.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
 #include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
@@ -22,14 +23,25 @@ class SEQUENCEPLUGIN_API UEcosystemClient : public UObject
 public:
 	UEcosystemClient();
 	
-	void CreateNewSession(ESessionCreationType Type,
-		const FString& PreferredLoginMethod,
-		const FString& Email,
-		FSessionPermissions Permissions,
-		const TSuccessCallback<bool>& OnSuccess,
-		const FFailureCallback& OnFailure);
+	void CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
+		FSessionPermissions Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+
+	template<typename TPayload, typename TResponse>
+	void SendRequest(const FString& Path, const FString& Action, const TPayload& Payload,
+		TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
+	{
+		const FString EcosystemUrl = "https://v3.sequence-dev.app";
+		const FString Url = FString::Printf(TEXT("%s/request/%s"), *EcosystemUrl, *Path);
+		
+		const TSharedPtr<IRedirectHandler> HandlerPtr = FRedirectFactory::CreateHandler();
+		IRedirectHandler* Handler = HandlerPtr.Get();
+		Handler->SetRedirectUrl(this->Origin);
+		Handler->WaitForResponse<TPayload, TResponse>(Url, Action, Payload, OnSuccess, OnFailure);
+	}
 
 private:
 	UPROPERTY()
 	USessionStorage* Storage = nullptr;
+
+	FString Origin;
 };

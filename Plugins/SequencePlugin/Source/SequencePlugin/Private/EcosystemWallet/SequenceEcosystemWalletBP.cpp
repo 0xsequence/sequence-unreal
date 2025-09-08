@@ -7,9 +7,9 @@ USequenceEcosystemWalletBP::USequenceEcosystemWalletBP()
 	this->Wallet = NewObject<USequenceEcosystemWallet>();
 }
 
-void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceEcosystemWalletBP::AddSession(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<bool> SuccessCallback = [OnSuccess](bool Result)
+	const TSuccessCallback<bool> SuccessCallback = [OnSuccess](const bool& Result)
 	{
 		OnSuccess.ExecuteIfBound();
 	};
@@ -19,7 +19,52 @@ void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSuccess 
 		OnFailure.ExecuteIfBound(Error.Message);	
 	};
 	
+	this->GetSequenceEcosystemWallet()->AddSession(Permissions, SuccessCallback, FailureCallback);	
+}
+
+void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSignature OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
+	{
+		OnSuccess.ExecuteIfBound(Signature);
+	};
+	
+	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);	
+	};
+	
 	this->GetSequenceEcosystemWallet()->SignMessage(Message, SuccessCallback, FailureCallback);	
+}
+
+void USequenceEcosystemWalletBP::SendTransaction(FOnTransaction OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
+	{
+		OnSuccess.ExecuteIfBound(Signature);
+	};
+	
+	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);	
+	};
+	
+	this->GetSequenceEcosystemWallet()->SendTransaction(SuccessCallback, FailureCallback);	
+}
+
+void USequenceEcosystemWalletBP::SendTransactionThroughEcosystem(FOnTransaction OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
+	{
+		OnSuccess.ExecuteIfBound(Signature);
+	};
+	
+	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);	
+	};
+	
+	this->GetSequenceEcosystemWallet()->SendTransactionThroughEcosystem(SuccessCallback, FailureCallback);	
 }
 
 void USequenceEcosystemWalletBP::ClearSessions()

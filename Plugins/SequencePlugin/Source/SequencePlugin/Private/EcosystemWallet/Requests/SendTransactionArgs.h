@@ -1,0 +1,39 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "SendTransactionArgs.generated.h"
+
+USTRUCT()
+struct FTransactionRequest
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY()
+	FString To;
+
+	UPROPERTY()
+	FString Data;
+	
+	UPROPERTY()
+	int64 Value;
+	
+	UPROPERTY()
+	int64 GasLimit;
+};
+
+USTRUCT()
+struct FSendTransactionArgs
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	UPROPERTY()
+	int64 ChainId;
+	
+	UPROPERTY()
+	FString Address;
+
+	UPROPERTY()
+	FTransactionRequest TransactionRequest;
+};

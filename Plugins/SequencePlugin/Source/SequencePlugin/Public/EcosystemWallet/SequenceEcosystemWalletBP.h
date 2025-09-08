@@ -14,6 +14,8 @@ class SEQUENCEPLUGIN_API USequenceEcosystemWalletBP : public UGameInstanceSubsys
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSignature, const FString&, Signature);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnTransaction, const FString&, Signature);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
@@ -23,8 +25,17 @@ public:
 	FOnSession OnSessionClosed;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignMessage(const FString& Message, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void AddSession(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
+	void SignMessage(const FString& Message, FOnSignature OnSuccess, FOnFailure OnFailure);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
+	void SendTransaction(FOnTransaction OnSuccess, FOnFailure OnFailure);
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
+	void SendTransactionThroughEcosystem(FOnTransaction OnSuccess, FOnFailure OnFailure);
+	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	void ClearSessions();
 

@@ -1,6 +1,5 @@
 #include "EcosystemClient.h"
 #include "Authentication/RedirectHandler/IRedirectHandler.h"
-#include "Authentication/RedirectHandler/RedirectFactory.h"
 #include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
@@ -11,28 +10,23 @@
 UEcosystemClient::UEcosystemClient()
 {
     this->Storage = NewObject<USessionStorage>();
+    this->Origin = "http://localhost:4444/api"; // Define this for each platform
 }
 
-void UEcosystemClient::CreateNewSession(
-    ESessionCreationType Type,
-    const FString& PreferredLoginMethod,
-    const FString& Email,
-    FSessionPermissions Permissions,
-    const TSuccessCallback<bool>& OnSuccess,
-    const FFailureCallback& OnFailure)
+void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
+		FSessionPermissions Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
 {
     const FString ChainIdStr = "421614"; // Arbitrum Sepolia
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
     FString WalletAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
-    const FString Origin = "http://localhost:4444/api";
     const bool bIncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
 
     FConnectArgs Payload;
     Payload.SessionAddress           = WalletAddress;
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
-    Payload.Origin                   = Origin;
+    Payload.Origin                   = this->Origin;
     Payload.Permissions              = Permissions;
     Payload.bIncludeImplicitSession  = bIncludeImplicitSession;
 
@@ -42,13 +36,6 @@ void UEcosystemClient::CreateNewSession(
     const FString Action = (Type == ESessionCreationType::AddExplicit)
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
-    
-    const FString EcosystemUrl = "https://v3.sequence-dev.app";
-    const FString Url = FString::Printf(TEXT("%s/request/connect"), *EcosystemUrl);
-
-    const TSharedPtr<IRedirectHandler> HandlerPtr = FRedirectFactory::CreateHandler();
-    IRedirectHandler* Handler = HandlerPtr.Get();
-    Handler->SetRedirectUrl(Origin);
 
     const TSuccessCallback<FConnectResponseData> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FConnectResponseData Response)
     {
@@ -65,5 +52,5 @@ void UEcosystemClient::CreateNewSession(
         OnSuccess(true);
     };
 
-    Handler->WaitForResponse<FConnectArgs, FConnectResponseData>(Url, Action, Payload, OnHandlerSuccess, OnFailure);
+    this->SendRequest<FConnectArgs, FConnectResponseData>("connect", Action, Payload, OnHandlerSuccess, OnFailure);
 }
