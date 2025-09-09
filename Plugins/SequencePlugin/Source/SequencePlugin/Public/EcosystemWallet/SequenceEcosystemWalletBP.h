@@ -4,6 +4,7 @@
 #include "WalletInfo.h"
 #include "SequenceEcosystemWallet.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Transactions/Transaction.h"
 #include "SequenceEcosystemWalletBP.generated.h"
 
 UCLASS(Blueprintable)
@@ -31,10 +32,10 @@ public:
 	void SignMessage(const FString& Message, FOnSignature OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SendTransaction(FOnTransaction OnSuccess, FOnFailure OnFailure);
+	void SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SendTransactionThroughEcosystem(FOnTransaction OnSuccess, FOnFailure OnFailure);
+	void SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	void ClearSessions();

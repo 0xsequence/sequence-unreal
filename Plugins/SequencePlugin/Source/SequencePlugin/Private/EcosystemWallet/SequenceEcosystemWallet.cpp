@@ -1,5 +1,5 @@
 #include "EcosystemWallet/SequenceEcosystemWallet.h"
-
+#include "Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
 #include "Requests/SendTransactionResponse.h"
 #include "Requests/SignMessageArgs.h"
@@ -35,19 +35,21 @@ void USequenceEcosystemWallet::SignMessage(const FString& Message, TSuccessCallb
 	this->Client->SendRequest<FSignMessageArgs, FSignMessageResponse>("sign", "signMessage", Payload, OnClientSuccess, OnFailure);	
 }
 
-void USequenceEcosystemWallet::SendTransaction(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceEcosystemWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
 	// TODO
 	OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 }
 
-void USequenceEcosystemWallet::SendTransactionThroughEcosystem(TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceEcosystemWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
+	FCall Call = Transaction.GetInterface()->GetCall();
+	
 	FTransactionRequest Request;
-	Request.To = "";
-	Request.Data = "";
-	Request.Value = 0;
-	Request.GasLimit = 0;
+	Request.To = Call.To;
+	Request.Data = Call.Data;
+	Request.Value = Call.Value;
+	Request.GasLimit = Call.GasLimit;
 	
 	FSendTransactionArgs Payload;
 	Payload.ChainId = SequenceSdk::GetChainId();
@@ -59,7 +61,7 @@ void USequenceEcosystemWallet::SendTransactionThroughEcosystem(TSuccessCallback<
 		OnSuccess(Response.TransactionHash);
 	};
 	
-	this->Client->SendRequest<FSendTransactionArgs, FSendTransactionResponse>("sign", "signMessage", Payload, OnClientSuccess, OnFailure);	
+	this->Client->SendRequest<FSendTransactionArgs, FSendTransactionResponse>("transaction", "sendWalletTransaction", Payload, OnClientSuccess, OnFailure);	
 }
 
 void USequenceEcosystemWallet::ClearSessions()

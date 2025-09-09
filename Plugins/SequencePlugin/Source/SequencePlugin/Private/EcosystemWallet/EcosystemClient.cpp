@@ -3,6 +3,7 @@
 #include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
+#include "Sequence/SequenceSdk.h"
 #include "Signers/SessionCredentials.h"
 #include "Storage/SessionStorage.h"
 #include "Types/CryptoWallet.h"
@@ -16,7 +17,7 @@ UEcosystemClient::UEcosystemClient()
 void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
 		FSessionPermissions Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
 {
-    const FString ChainIdStr = "421614"; // Arbitrum Sepolia
+    const FString ChainIdStr = SequenceSdk::GetChainIdString();
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
     FString WalletAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
