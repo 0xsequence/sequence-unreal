@@ -24,15 +24,6 @@ public:
         RedirectUrl = InRedirectUrl;
     }
 
-    /**
-     * High-level API that mirrors: Task<(bool Result, TResponse Data)> WaitForResponse<TPayload,TResponse>(...)
-     * - TPayload and TResponse should be UStruct types.
-     * - This wrapper serializes payload -> JSON -> Base64, constructs the URL,
-     *   calls the virtual impl to obtain response JSON, and deserializes into TResponse.
-     *
-     * Note: This is synchronous. If you need async, have your derived impl run work on a thread
-     * and block here, or change the signature to use futures/delegates in your codebase.
-     */
     template<typename TPayload, typename TResponse>
     void WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload, TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
     {
@@ -55,11 +46,8 @@ public:
     }
 
 protected:
-    // Implement this in your platform-specific handler:
-    // Given the fully constructed URL, perform the actual wait/IO and return (bSuccess, ResponseJsonString).
     virtual void WaitForResponseImpl(const FString& FullUrl, TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure) = 0;
 
-    // Helper to build the full URL with Base64-encoded UTF-8 JSON payload
     FString ConstructUrl(const FString& Url, const FString& Action, const FString& PayloadJson) const
     {
         const FString EncodedPayload = Base64EncodeUtf8(PayloadJson);
@@ -74,7 +62,6 @@ protected:
         );
     }
 
-    // Base64-encode a UTF-8 view of the input string
     static FString Base64EncodeUtf8(const FString& In)
     {
         FTCHARToUTF8 Utf8(*In);

@@ -1,5 +1,6 @@
 #include "EcosystemClient.h"
-#include "Authentication/RedirectHandler/IRedirectHandler.h"
+#include "Authentication/RedirectHandler/BrowserRedirectHandler.h"
+#include "Authentication/RedirectHandler/LocalhostRedirectHandler.h"
 #include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
@@ -12,6 +13,14 @@ UEcosystemClient::UEcosystemClient()
 {
     this->Storage = NewObject<USessionStorage>();
     this->Origin = "http://localhost:4444/api"; // Define this for each platform
+
+#if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_MAC
+    this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
+#elif PLATFORM_WINDOWS || PLATFORM_MAC
+    this->RedirectHandler = MakeShared<FBrowserRedirectHandler>();
+#else
+    this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
+#endif
 }
 
 void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,

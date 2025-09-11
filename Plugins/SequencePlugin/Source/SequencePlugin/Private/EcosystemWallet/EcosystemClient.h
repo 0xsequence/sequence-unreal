@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Authentication/RedirectHandler/RedirectFactory.h"
+#include "Authentication/RedirectHandler/IRedirectHandler.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
 #include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
@@ -32,16 +32,15 @@ public:
 	{
 		const FString EcosystemUrl = "https://v3.sequence-dev.app";
 		const FString Url = FString::Printf(TEXT("%s/request/%s"), *EcosystemUrl, *Path);
-		
-		const TSharedPtr<IRedirectHandler> HandlerPtr = FRedirectFactory::CreateHandler();
-		IRedirectHandler* Handler = HandlerPtr.Get();
-		Handler->SetRedirectUrl(this->Origin);
-		Handler->WaitForResponse<TPayload, TResponse>(Url, Action, Payload, OnSuccess, OnFailure);
+
+		this->RedirectHandler->WaitForResponse(Url, Action, Payload, OnSuccess, OnFailure);
 	}
 
 private:
 	UPROPERTY()
 	USessionStorage* Storage = nullptr;
+
+	TSharedPtr<IRedirectHandler> RedirectHandler = nullptr;
 
 	FString Origin;
 };
