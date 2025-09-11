@@ -1,13 +1,13 @@
-#include "EcosystemWallet/SequenceEcosystemWalletBP.h"
+#include "EcosystemWallet/SequenceWalletBP.h"
 #include "Util/Async.h"
 #include "Util/Log.h"
 
-USequenceEcosystemWalletBP::USequenceEcosystemWalletBP()
+USequenceWalletBP::USequenceWalletBP()
 {
-	this->Wallet = NewObject<USequenceEcosystemWallet>();
+	this->Wallet = NewObject<USequenceWallet>();
 }
 
-void USequenceEcosystemWalletBP::AddSession(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::AddSession(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [OnSuccess](const bool& Result)
 	{
@@ -22,7 +22,7 @@ void USequenceEcosystemWalletBP::AddSession(const TScriptInterface<IPermissions>
 	this->GetSequenceEcosystemWallet()->AddSession(Permissions, SuccessCallback, FailureCallback);	
 }
 
-void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSignature OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::SignMessage(const FString& Message, FOnSignature OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
 	{
@@ -37,7 +37,7 @@ void USequenceEcosystemWalletBP::SignMessage(const FString& Message, FOnSignatur
 	this->GetSequenceEcosystemWallet()->SignMessage(Message, SuccessCallback, FailureCallback);	
 }
 
-void USequenceEcosystemWalletBP::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
 	{
@@ -52,7 +52,7 @@ void USequenceEcosystemWalletBP::SendTransaction(const TScriptInterface<ISeqTran
 	this->GetSequenceEcosystemWallet()->SendTransaction(Transaction, SuccessCallback, FailureCallback);
 }
 
-void USequenceEcosystemWalletBP::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure)
+void USequenceWalletBP::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
 	{
@@ -67,28 +67,28 @@ void USequenceEcosystemWalletBP::SendTransactionWithoutPermissions(const TScript
 	this->GetSequenceEcosystemWallet()->SendTransactionWithoutPermissions(Transaction, SuccessCallback, FailureCallback);	
 }
 
-void USequenceEcosystemWalletBP::ClearSessions()
+void USequenceWalletBP::ClearSessions()
 {
 	this->GetSequenceEcosystemWallet()->ClearSessions();
 	this->CallOnSessionClosed();
 }
 
-FWalletInfo USequenceEcosystemWalletBP::GetWalletInfo()
+FWalletInfo USequenceWalletBP::GetWalletInfo()
 {
 	return this->GetSequenceEcosystemWallet()->GetWalletInfo();
 }
 
-bool USequenceEcosystemWalletBP::CheckIfWalletExists()
+bool USequenceWalletBP::CheckIfWalletExists()
 {
 	return this->GetSequenceEcosystemWallet()->CheckIfWalletExists();	
 }
 
-USequenceEcosystemWallet* USequenceEcosystemWalletBP::GetSequenceEcosystemWallet() const
+USequenceWallet* USequenceWalletBP::GetSequenceEcosystemWallet() const
 {
 	return this->Wallet;
 }
 
-void USequenceEcosystemWalletBP::CallOnSessionClosed() const
+void USequenceWalletBP::CallOnSessionClosed() const
 {
 	if (this->OnSessionClosed.IsBound())
 		this->OnSessionClosed.Broadcast();

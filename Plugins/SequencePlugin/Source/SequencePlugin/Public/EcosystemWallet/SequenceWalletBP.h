@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "WalletInfo.h"
-#include "SequenceEcosystemWallet.h"
+#include "SequenceWallet.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Transactions/Transaction.h"
-#include "SequenceEcosystemWalletBP.generated.h"
+#include "SequenceWalletBP.generated.h"
 
 UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API USequenceEcosystemWalletBP : public UGameInstanceSubsystem
+class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
@@ -20,7 +20,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
-	USequenceEcosystemWalletBP();
+	USequenceWalletBP();
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnSession OnSessionClosed;
@@ -46,11 +46,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	bool CheckIfWalletExists();
 	
-	USequenceEcosystemWallet* GetSequenceEcosystemWallet() const;
+	USequenceWallet* GetSequenceEcosystemWallet() const;
 
 private:
 	UPROPERTY()
-	USequenceEcosystemWallet* Wallet = nullptr;
+	USequenceWallet* Wallet = nullptr;
 
 	void CallOnSessionClosed() const;
 };

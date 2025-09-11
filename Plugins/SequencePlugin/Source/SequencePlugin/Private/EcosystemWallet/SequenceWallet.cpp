@@ -1,4 +1,4 @@
-#include "EcosystemWallet/SequenceEcosystemWallet.h"
+#include "EcosystemWallet/SequenceWallet.h"
 #include "Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
 #include "Requests/SendTransactionResponse.h"
@@ -7,20 +7,20 @@
 #include "Sequence/SequenceSdk.h"
 #include "Storage/SessionStorage.h"
 
-USequenceEcosystemWallet::USequenceEcosystemWallet()
+USequenceWallet::USequenceWallet()
 {
 	this->Client = NewObject<UEcosystemClient>();
 	this->SessionStorage = NewObject<USessionStorage>();
 }
 
-void USequenceEcosystemWallet::AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
 {
 	FSessionPermissions SessionPermissions = Permissions.GetInterface()->GetSessionPermissions();
 	this->Client->CreateNewSession(ESessionCreationType::AddExplicit, "",
 		"", SessionPermissions, OnSuccess, OnFailure);
 }
 
-void USequenceEcosystemWallet::SignMessage(const FString& Message, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SignMessage(const FString& Message, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
 	FSignMessageArgs Payload;
 	Payload.ChainId = SequenceSdk::GetChainId();
@@ -35,13 +35,13 @@ void USequenceEcosystemWallet::SignMessage(const FString& Message, TSuccessCallb
 	this->Client->SendRequest<FSignMessageArgs, FSignMessageResponse>("sign", "signMessage", Payload, OnClientSuccess, OnFailure);	
 }
 
-void USequenceEcosystemWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
 	// TODO
 	OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 }
 
-void USequenceEcosystemWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
 	FCall Call = Transaction.GetInterface()->GetCall();
 	
@@ -64,12 +64,12 @@ void USequenceEcosystemWallet::SendTransactionWithoutPermissions(const TScriptIn
 	this->Client->SendRequest<FSendTransactionArgs, FSendTransactionResponse>("transaction", "sendWalletTransaction", Payload, OnClientSuccess, OnFailure);	
 }
 
-void USequenceEcosystemWallet::ClearSessions()
+void USequenceWallet::ClearSessions()
 {
 	this->SessionStorage->ClearSessions();
 }
 
-FWalletInfo USequenceEcosystemWallet::GetWalletInfo()
+FWalletInfo USequenceWallet::GetWalletInfo()
 {
 	const FWalletSessions WalletSessions = this->SessionStorage->GetStoredSessions();
 	if (!WalletSessions.HasSessions())
@@ -86,7 +86,7 @@ FWalletInfo USequenceEcosystemWallet::GetWalletInfo()
 	return Info;
 }
 
-bool USequenceEcosystemWallet::CheckIfWalletExists()
+bool USequenceWallet::CheckIfWalletExists()
 {
 	const FWalletSessions WalletSessions = this->SessionStorage->GetStoredSessions();
 	return WalletSessions.HasSessions();	

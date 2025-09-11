@@ -7,17 +7,17 @@
 #include "Transactions/Transaction.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
-#include "SequenceEcosystemWallet.generated.h"
+#include "SequenceWallet.generated.h"
 
 class USessionStorage;
 
 UCLASS()
-class SEQUENCEPLUGIN_API USequenceEcosystemWallet : public UObject
+class SEQUENCEPLUGIN_API USequenceWallet : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	USequenceEcosystemWallet();
+	USequenceWallet();
 
 	void AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure);
 	void SignMessage(const FString& Message, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
