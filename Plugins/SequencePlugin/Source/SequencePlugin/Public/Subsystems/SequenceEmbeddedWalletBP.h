@@ -7,10 +7,10 @@
 #include "Sequence/SequenceResponseIntent.h"
 #include "Sequence/SequenceEmbeddedWallet.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "SequenceWalletBP.generated.h"
+#include "SequenceEmbeddedWalletBP.generated.h"
 
 UCLASS(Blueprintable)
-class SEQUENCEPLUGIN_API USequenceWalletBP : public UGameInstanceSubsystem
+class SEQUENCEPLUGIN_API USequenceEmbeddedWalletBP : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ public:
 	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	
-	USequenceWalletBP();
+	USequenceEmbeddedWalletBP();
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Wallet")
 	FOnSession OnSessionClosed;
