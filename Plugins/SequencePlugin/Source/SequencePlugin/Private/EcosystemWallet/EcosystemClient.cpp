@@ -21,6 +21,8 @@ UEcosystemClient::UEcosystemClient()
 #else
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
 #endif
+
+    this->RedirectHandler->SetRedirectUrl(this->Origin);
 }
 
 void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
