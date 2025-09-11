@@ -6,7 +6,7 @@
 #include "Types/BinaryData.h"
 #include "Misc/Base64.h"
 #include "Interfaces/IPluginManager.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Sequence/SequenceAuthResponseIntent.h"
 #include "Misc/DateTime.h"
 #include "Util/Log.h"

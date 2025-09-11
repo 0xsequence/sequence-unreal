@@ -1,10 +1,10 @@
 #include "Subsystems/SequenceWalletBP.h"
 #include "Engine/Engine.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 
 USequenceWalletBP::USequenceWalletBP()
 {
-	this->Wallet = NewObject<USequenceWallet>();
+	this->Wallet = NewObject<USequenceEmbeddedWallet>();
 }
 
 FString USequenceWalletBP::GetWalletAddress()
@@ -250,7 +250,7 @@ void USequenceWalletBP::CallOnSessionClosed() const
 	}
 }
 
-USequenceWallet* USequenceWalletBP::GetSequenceWallet() const
+USequenceEmbeddedWallet* USequenceWalletBP::GetSequenceWallet() const
 {
 	return this->Wallet;
 }

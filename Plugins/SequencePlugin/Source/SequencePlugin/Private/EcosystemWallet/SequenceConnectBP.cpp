@@ -1,7 +1,4 @@
 #include "EcosystemWallet/SequenceConnectBP.h"
-
-#include "Authentication/RedirectHandler/BrowserOverlay.h"
-#include "Kismet/GameplayStatics.h"
 #include "Util/Async.h"
 #include "Util/Log.h"
 

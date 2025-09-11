@@ -5,7 +5,7 @@
 #include "Checkout/Structs/GenerateTransactionResponse.h"
 #include "Checkout/Structs/GetCheckoutOptionsResponse.h"
 #include "Marketplace/SequenceMarketplace.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Sequence/Wallet_Enums.h"
 #include "Types/ERC1155SaleContract.h"
 #include "Types/ERC721SaleContract.h"

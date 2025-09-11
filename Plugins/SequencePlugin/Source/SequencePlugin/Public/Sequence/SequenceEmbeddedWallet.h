@@ -14,7 +14,7 @@
 #include "Indexer/SequenceIndexer.h"
 #include "Sequence/FeeOption.h"
 #include "Util/CredentialsStorage.h"
-#include "SequenceWallet.generated.h"
+#include "SequenceEmbeddedWallet.generated.h"
  
 using FSignature = FUnsizedData;
 using TransactionID = FString;
@@ -33,12 +33,12 @@ enum class ESessionState : uint8
 };
 
 UCLASS()
-class SEQUENCEPLUGIN_API USequenceWallet : public UObject
+class SEQUENCEPLUGIN_API USequenceEmbeddedWallet : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	USequenceWallet();
+	USequenceEmbeddedWallet();
 	
 	/**
 	 * Check if the wallet and stored credentials are registered to a valid session with the Sequence API

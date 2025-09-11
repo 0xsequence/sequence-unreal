@@ -4,7 +4,7 @@
 #include "Dom/JsonObject.h"
 #include "TransactionSignature.h"
 #include "Checkout/Enums/StepType.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Sequence/Transactions.h"
 
 #include "TransactionStep.generated.h"

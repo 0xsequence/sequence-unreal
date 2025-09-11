@@ -1,6 +1,5 @@
 #include "BrowserRedirectHandler.h"
-
-#include "BrowserOverlay.h"
+#include "EcosystemWallet/Authentication/Browser/BrowserOverlay.h"
 #include "Kismet/GameplayStatics.h"
 
 void FBrowserRedirectHandler::WaitForResponseImpl(const FString& FullUrl, TSuccessCallback<FString> OnSuccess,

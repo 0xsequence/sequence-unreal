@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Sequence/SequenceSessions.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "FederateAuthTest.generated.h"
 
 class FWaaSFederatedAuthTests;

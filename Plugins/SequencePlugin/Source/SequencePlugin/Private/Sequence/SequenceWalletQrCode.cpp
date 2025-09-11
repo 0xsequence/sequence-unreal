@@ -2,11 +2,11 @@
 #include "ObjectHandler.h"
 #include "Misc/Base64.h"
 #include "Util/Log.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 
 void USequenceWalletQrCode::LoadQrImage()
 {
-	const USequenceWallet* Wallet = NewObject<USequenceWallet>();
+	const USequenceEmbeddedWallet* Wallet = NewObject<USequenceEmbeddedWallet>();
 	UObjectHandler* ObjectHandler = NewObject<UObjectHandler>();
 	ObjectHandler->SetupCustomFormat(true, EImageFormat::GrayscaleJPEG);
 

@@ -1,6 +1,6 @@
 #include "SignInOutRepeatedlyTest.h"
 #include "Engine/World.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 
@@ -65,7 +65,7 @@ void USignInOutRepeatedlyTestHelper::OnAuthSuccess()
     if (Repetitions < MaxRepetitions)
     {
         Repetitions++;
-        const USequenceWallet* Wallet = NewObject<USequenceWallet>();
+        const USequenceEmbeddedWallet* Wallet = NewObject<USequenceEmbeddedWallet>();
         TSet<FString> UniqueSessionIds(SessionIds);
         bool bAllSessionIdsUnique = UniqueSessionIds.Num() == SessionIds.Num();
         if (!bAllSessionIdsUnique)

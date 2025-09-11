@@ -5,7 +5,7 @@
 #include "Sequence/SequenceWalletBPTypes.h"
 #include "Sequence/Transactions.h"
 #include "Sequence/SequenceResponseIntent.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceWalletBP.generated.h"
 
@@ -88,11 +88,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Functions")
 	void Call(const FContractCall& ContractCall, FOnCallResponse OnSuccess, FOnLinkedWalletsFailure OnFailure);
 
-	USequenceWallet* GetSequenceWallet() const;
+	USequenceEmbeddedWallet* GetSequenceWallet() const;
 	
 private:
 	UPROPERTY()
-	USequenceWallet* Wallet;
+	USequenceEmbeddedWallet* Wallet;
 	
 	void CallOnSessionClosed() const;
 };

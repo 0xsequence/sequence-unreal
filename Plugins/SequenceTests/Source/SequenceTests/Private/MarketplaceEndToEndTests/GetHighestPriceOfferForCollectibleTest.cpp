@@ -1,6 +1,6 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/Sequence/SequenceWallet.h"
+#include "SequencePlugin/Public/Sequence/SequenceEmbeddedWallet.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
 #include "Marketplace/SequenceMarketplace.h"
