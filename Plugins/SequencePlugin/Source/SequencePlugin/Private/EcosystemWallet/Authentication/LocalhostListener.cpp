@@ -6,6 +6,24 @@
 #include "HttpServerResponse.h"
 #include "Util/SequenceSupport.h"
 
+ULocalhostListener* ULocalhostListener::Instance = nullptr;
+
+void ULocalhostListener::ClearInstance()
+{
+	Instance->StopListening();
+	Instance = nullptr;
+}
+
+ULocalhostListener* ULocalhostListener::GetInstance()
+{
+	if (Instance == nullptr)
+	{
+		Instance = NewObject<ULocalhostListener>();
+	}
+
+	return Instance;
+}
+
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	this->CurrentOnSuccess = OnSuccess;
@@ -18,13 +36,15 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 	
 	FHttpServerModule& HttpModule = FHttpServerModule::Get();
 
-	Router = HttpModule.GetHttpRouter(Port);
+	Router = HttpModule.GetHttpRouter(Port, true);
 	if (!Router.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HTTP Router could not be created for port %u"), Port);
+		OnFailure(FSequenceError(EErrorType::InvalidArgument, TEXT("Router could not be created")));
 		return;
 	}
 
+	
 	const FHttpPath RootPath(TEXT("/api"));
 	RouteHandle = Router->BindRoute(
 		RootPath,
@@ -36,6 +56,24 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 	);
 
 	HttpModule.StartAllListeners();
+	this->bServerStarted = true;
+}
+
+void ULocalhostListener::StopListening()
+{
+	if (Router.IsValid() && RouteHandle.IsSet())
+	{
+		Router->UnbindRoute(RouteHandle.GetValue());
+		RouteHandle.Reset();
+	}
+
+	if (bServerStarted)
+	{
+		FHttpServerModule::Get().StopAllListeners();
+		bServerStarted = false;
+	}
+
+	Router.Reset();
 }
 
 bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete)

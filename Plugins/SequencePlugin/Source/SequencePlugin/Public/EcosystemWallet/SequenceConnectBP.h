@@ -19,6 +19,8 @@ public:
 	
 	USequenceConnectBP();
 
+	virtual void Deinitialize() override;
+
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnSession OnSessionCreated;
 

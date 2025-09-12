@@ -8,6 +8,6 @@ void FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl, TSuc
 {
     FPlatformProcess::LaunchURL(*FullUrl, nullptr, nullptr);
 
-    ULocalhostListener* Listener = NewObject<ULocalhostListener>();
+    ULocalhostListener* Listener = ULocalhostListener::GetInstance();
     Listener->WaitForResponse(OnSuccess, OnFailure);
 }

@@ -1,10 +1,16 @@
 #include "EcosystemWallet/SequenceConnectBP.h"
+#include "Authentication/LocalhostListener.h"
 #include "Util/Async.h"
 #include "Util/Log.h"
 
 USequenceConnectBP::USequenceConnectBP()
 {
 	this->SequenceConnect = NewObject<USequenceConnect>();
+}
+
+void USequenceConnectBP::Deinitialize()
+{
+	ULocalhostListener::ClearInstance();	
 }
 
 void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
