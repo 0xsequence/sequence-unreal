@@ -19,11 +19,14 @@ public:
 	void WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 
 private:
-	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure);
+	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
 
 private:
 	TSharedPtr<IHttpRouter> Router;
 	TOptional<FHttpRouteHandle> RouteHandle;
 	uint32 Port = 4444;
 	bool bServerStarted = false;
+
+	TSuccessCallback<FString> CurrentOnSuccess;
+	FFailureCallback CurrentOnFailure;
 };

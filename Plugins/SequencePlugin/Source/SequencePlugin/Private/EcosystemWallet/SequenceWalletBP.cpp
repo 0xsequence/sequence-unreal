@@ -54,9 +54,9 @@ void USequenceWalletBP::SendTransaction(const TScriptInterface<ISeqTransactionBa
 
 void USequenceWalletBP::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, FOnTransaction OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Signature)
+	const TSuccessCallback<FString> SuccessCallback = [OnSuccess](const FString& Hash)
 	{
-		OnSuccess.ExecuteIfBound(Signature);
+		OnSuccess.ExecuteIfBound(Hash);
 	};
 	
 	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)

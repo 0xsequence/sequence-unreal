@@ -8,6 +8,14 @@
 
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
+	this->CurrentOnSuccess = OnSuccess;
+	this->CurrentOnFailure = OnFailure;
+	
+	if (this->bServerStarted)
+	{
+		return;
+	}
+	
 	FHttpServerModule& HttpModule = FHttpServerModule::Get();
 
 	Router = HttpModule.GetHttpRouter(Port);
@@ -21,22 +29,22 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 	RouteHandle = Router->BindRoute(
 		RootPath,
 		EHttpServerRequestVerbs::VERB_GET,
-		FHttpRequestHandler::CreateLambda([this, OnSuccess, OnFailure](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
+		FHttpRequestHandler::CreateLambda([this](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
 		{
-			return this->HandleAnyRequest(Request, OnComplete, OnSuccess, OnFailure);
+			return this->HandleAnyRequest(Request, OnComplete);
 		})
 	);
 
 	HttpModule.StartAllListeners();
 }
 
-bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete)
 {
 	const FString Id = Request.QueryParams["id"];
 
 	if (Request.QueryParams.Contains("error"))
 	{
-		OnFailure(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
+		this->CurrentOnFailure(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
 	}
 	else
 	{
@@ -45,7 +53,7 @@ bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, con
 
 		UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
 
-		OnSuccess(PayloadJson);	
+		this->CurrentOnSuccess(PayloadJson);	
 	}
 
 	const FString Body = TEXT("{}");

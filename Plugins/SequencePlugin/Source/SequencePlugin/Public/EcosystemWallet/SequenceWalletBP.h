@@ -16,7 +16,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSignature, const FString&, Signature);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnTransaction, const FString&, Signature);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnTransaction, const FString&, Hash);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
