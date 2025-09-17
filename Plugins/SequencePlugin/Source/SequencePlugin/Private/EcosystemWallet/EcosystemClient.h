@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ConfigFetcher.h"
 #include "Authentication/RedirectHandler/IRedirectHandler.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
@@ -30,7 +31,7 @@ public:
 	void SendRequest(const FString& Path, const FString& Action, const TPayload& Payload,
 		TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
 	{
-		const FString EcosystemUrl = "https://v3.sequence-dev.app";
+		const FString EcosystemUrl = UConfigFetcher::GetConfigVar(UConfigFetcher::WalletAppUrl);
 		const FString Url = FString::Printf(TEXT("%s/request/%s"), *EcosystemUrl, *Path);
 
 		this->RedirectHandler->WaitForResponse(Url, Action, Payload, OnSuccess, OnFailure);

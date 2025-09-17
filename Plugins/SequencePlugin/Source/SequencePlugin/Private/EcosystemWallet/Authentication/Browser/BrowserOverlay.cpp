@@ -40,7 +40,7 @@ bool UBrowserOverlay::Initialize()
 void UBrowserOverlay::LoadUrl(const FString& Url)
 {
 	UE_LOG(LogTemp, Log, TEXT("Loading URL: %s"), *Url);
-	this->Browser->LoadURL(TEXT("https://v3.sequence-dev.app/"));
+	this->Browser->LoadURL(Url);
 }
 
 void UBrowserOverlay::HandleConsoleMessage(const FString& Message, const FString& Source, int32 Line)

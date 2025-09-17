@@ -3,16 +3,13 @@
 #include "CoreMinimal.h"
 #include "ConfigFetcher.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SEQUENCEPLUGIN_API UConfigFetcher : public UObject
 {
 	GENERATED_BODY()
 public:
-	//Config keys
 	static inline FString DefaultChain = "DefaultChain";
+	static inline FString WalletAppUrl = "WalletAppUrl";
 	static inline FString FallbackEncryptionKey = "FallbackEncryptionKey";
 	static inline FString WaaSConfigKey = "WaaSConfigKey";
 	static inline FString ProjectAccessKey = "ProjectAccessKey";
@@ -21,7 +18,6 @@ public:
 	static inline FString FacebookClientID = "FacebookClientID";
 	static inline FString DiscordClientID = "DiscordClientID";
 	static inline FString PlayFabTitleID = "PlayFabTitleID";
-	//Config Keys
 	
 	static FString GetConfigVar(const FString& ConfigKey);
 };
