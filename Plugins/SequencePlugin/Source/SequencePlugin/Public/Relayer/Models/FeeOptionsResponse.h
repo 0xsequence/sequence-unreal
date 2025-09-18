@@ -4,18 +4,18 @@
 #include "Relayer/Models/FeeOption.h"
 #include "FeeOptionsResponse.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFeeOptionsResponse
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Quote;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	bool Sponsored;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	TArray<FFeeOption> Options;
 };

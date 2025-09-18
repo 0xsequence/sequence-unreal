@@ -3,18 +3,18 @@
 #include "CoreMinimal.h"
 #include "MetaTxnReceiptLog.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FMetaTxnReceiptLog
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Address;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Data;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	TArray<FString> Topics;
 };

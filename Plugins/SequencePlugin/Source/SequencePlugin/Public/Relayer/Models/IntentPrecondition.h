@@ -3,18 +3,18 @@
 #include "CoreMinimal.h"
 #include "IntentPrecondition.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FIntentPrecondition
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Type;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString ChainId;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Data;
 };

@@ -4,33 +4,33 @@
 #include "MetaTxnReceiptLog.h"
 #include "MetaTxnReceipt.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FMetaTxnReceipt
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Id;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Status;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString RevertReason;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	int32 Index;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString TxnReceipt;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString TxnHash;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString BlockNumber;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	TArray<FMetaTxnReceiptLog> Logs;
 };

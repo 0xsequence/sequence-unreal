@@ -3,18 +3,18 @@
 #include "CoreMinimal.h"
 #include "MetaTxn.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FMetaTxn
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString WalletAddress;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Contract;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Input;
 };

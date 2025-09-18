@@ -3,15 +3,15 @@
 #include "CoreMinimal.h"
 #include "SendMetaTxnResponse.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSendMetaTxnResponse
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	bool Status;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString TxnHash;
 };

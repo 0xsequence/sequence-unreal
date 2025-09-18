@@ -5,21 +5,21 @@
 #include "MetaTxn.h"
 #include "SendMetaTxnArgs.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSendMetaTxnArgs
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FMetaTxn Call;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	FString Quote;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	int32 ProjectID;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence SDK")
 	TArray<FIntentPrecondition> Preconditions;
 };
