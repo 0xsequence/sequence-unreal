@@ -1,25 +1,70 @@
 #include "Relayer/SequenceRelayer.h"
+
+#include "Relayer/Models/GetMetaTxnReceiptArgs.h"
 #include "Sequence/SequenceSdk.h"
 #include "Util/HttpHandler.h"
 
-void USequenceRelayer::Relay(const FString& WalletAddress, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void USequenceRelayer::Relay(const FString& To, const FString& Data, const FString& Quote, const TArray<FIntentPrecondition>& Preconditions, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
+	const FMetaTxn Call = {
+		To,
+		To,
+		Data
+	};
 	
+	const FSendMetaTxnArgs Args = {
+		Call,
+		Quote,
+		-1,
+		Preconditions
+	};
+
+	TSuccessCallback<FSendMetaTxnResponse> OnTxnSuccess = [OnSuccess](const FSendMetaTxnResponse& Response)
+	{
+		OnSuccess(Response.TxnHash);	
+	};
+	
+	this->SendMetaTxn(Args, OnTxnSuccess, OnFailure);
 }
 
-void USequenceRelayer::GetFeeOptions(const FString& Wallet, const FString& To, const FString& Data, const bool Simulate, TSuccessCallback<FFeeOptionsResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void USequenceRelayer::GetFeeOptions(const FFeeOptionsArgs& Args, TSuccessCallback<FFeeOptionsResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
-	
+	TSuccessCallback<FString> OnRawSuccess = [OnSuccess](const FString& Response)
+	{
+		const FFeeOptionsResponse Data = USequenceSupport::JSONStringToStruct<FFeeOptionsResponse>(Response);
+		OnSuccess(Data);
+	};
+
+	const FString Payload = USequenceSupport::StructToString(Args);
+	this->SendRequest("FeeOptions", Payload, OnRawSuccess, OnFailure);
 }
 
 void USequenceRelayer::GetMetaTxnReceipt(const FString& MetaTxID, TSuccessCallback<FGetMetaTxnReceiptResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
+	const FGetMetaTxnReceiptArgs Args = {
+		MetaTxID,
+	};
 	
+	TSuccessCallback<FString> OnRawSuccess = [OnSuccess](const FString& Response)
+	{
+		const FGetMetaTxnReceiptResponse Data = USequenceSupport::JSONStringToStruct<FGetMetaTxnReceiptResponse>(Response);
+		OnSuccess(Data);
+	};
+
+	const FString Payload = USequenceSupport::StructToString(Args);
+	this->SendRequest("GetMetaTxnReceipt", Payload, OnRawSuccess, OnFailure);
 }
 
 void USequenceRelayer::SendMetaTxn(const FSendMetaTxnArgs& Args, TSuccessCallback<FSendMetaTxnResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
-	
+	TSuccessCallback<FString> OnRawSuccess = [OnSuccess](const FString& Response)
+	{
+		const FSendMetaTxnResponse Data = USequenceSupport::JSONStringToStruct<FSendMetaTxnResponse>(Response);
+		OnSuccess(Data);
+	};
+
+	const FString Payload = USequenceSupport::StructToString(Args);
+	this->SendRequest("SendMetaTxn", Payload, OnRawSuccess, OnFailure);
 }
 
 void USequenceRelayer::SendRequest(const FString& Endpoint, const FString& Payload, TSuccessCallback<FString> OnSuccess, TFunction<void(FString)> OnFailure) const

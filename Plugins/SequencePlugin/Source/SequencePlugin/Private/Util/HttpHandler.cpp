@@ -3,7 +3,7 @@
 
 void UHttpHandler::SetRequestUrl(const FString& Url)
 {
-	this->RequestUrl = Url;	
+	this->RequestUrl = Url;
 }
 
 void UHttpHandler::SendPostRequest(const FString& Endpoint, const FString& Payload, TSuccessCallback<FString> OnSuccess, TFunction<void(FString)> OnFailure) const
