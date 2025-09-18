@@ -10,6 +10,7 @@
 #include "SequenceWallet.generated.h"
 
 class USessionStorage;
+class UWalletState;
 
 UCLASS()
 class SEQUENCEPLUGIN_API USequenceWallet : public UObject
@@ -34,4 +35,7 @@ private:
 	
 	UPROPERTY()
 	USessionStorage* SessionStorage;
+
+	UPROPERTY()
+	UWalletState* WalletState;
 };

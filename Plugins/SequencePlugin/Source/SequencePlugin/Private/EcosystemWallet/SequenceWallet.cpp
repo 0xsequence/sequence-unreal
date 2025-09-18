@@ -1,4 +1,6 @@
 #include "EcosystemWallet/SequenceWallet.h"
+
+#include "WalletState.h"
 #include "Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
 #include "Requests/SendTransactionResponse.h"
@@ -11,6 +13,7 @@ USequenceWallet::USequenceWallet()
 {
 	this->Client = NewObject<UEcosystemClient>();
 	this->SessionStorage = NewObject<USessionStorage>();
+	this->WalletState = NewObject<UWalletState>();
 }
 
 void USequenceWallet::AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
@@ -37,8 +40,12 @@ void USequenceWallet::SignMessage(const FString& Message, TSuccessCallback<FStri
 
 void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
-	// TODO
-	OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
+	const TFunction<void()> OnWalletStateUpdated = [OnFailure]()
+	{
+		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
+	};
+	
+	this->WalletState->UpdateState(this->GetWalletInfo().Address, OnWalletStateUpdated);
 }
 
 void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
