@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "FeeOption.h"
+#include "Relayer/Models/FeeOption.h"
 #include "Types/Types.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Transactions.generated.h"

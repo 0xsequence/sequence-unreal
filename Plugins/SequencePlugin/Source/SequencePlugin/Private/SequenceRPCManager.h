@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Credentials.h"
-#include "Sequence/FeeOption.h"
+#include "Relayer/Models/FeeOption.h"
 #include "Sequence/SequenceSendIntent.h"
 #include "Sequence/SequenceResponseIntent.h"
 #include "UObject/Object.h"

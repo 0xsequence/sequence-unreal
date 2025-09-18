@@ -12,7 +12,7 @@
 #include "ProviderEnum.h"
 #include "SequenceResponseIntent.h"
 #include "Indexer/SequenceIndexer.h"
-#include "Sequence/FeeOption.h"
+#include "Relayer/Models/FeeOption.h"
 #include "Util/CredentialsStorage.h"
 #include "SequenceEmbeddedWallet.generated.h"
  

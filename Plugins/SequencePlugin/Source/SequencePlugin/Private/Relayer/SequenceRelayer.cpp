@@ -7,17 +7,17 @@ void USequenceRelayer::Relay(const FString& WalletAddress, TSuccessCallback<FStr
 	
 }
 
-void USequenceRelayer::GetFeeOptions(const FString& WalletAddress, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void USequenceRelayer::GetFeeOptions(const FString& Wallet, const FString& To, const FString& Data, const bool Simulate, TSuccessCallback<FFeeOptionsResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
 	
 }
 
-void USequenceRelayer::GetMetaTxnReceipt(const FString& WalletAddress, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void USequenceRelayer::GetMetaTxnReceipt(const FString& MetaTxID, TSuccessCallback<FGetMetaTxnReceiptResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
 	
 }
 
-void USequenceRelayer::SendMetaTxn(const FString& WalletAddress, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void USequenceRelayer::SendMetaTxn(const FSendMetaTxnArgs& Args, TSuccessCallback<FSendMetaTxnResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
 	
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "Sequence/FeeOption.h"
+#include "Relayer/Models/FeeOption.h"
 #include "Sequence/SequenceFederationSupport.h"
 #include "SequenceResponseIntent.generated.h"
 

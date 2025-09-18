@@ -21,21 +21,29 @@ USTRUCT(BlueprintType)
 struct FFeeToken
 {
 	GENERATED_USTRUCT_BODY()
+	
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int64 ChainID = 0;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString ContractAddress = "";
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	int32 Decimals = 0;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString LogoURL = "";
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Name = "";
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString Symbol = "";
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString TokenID = "";
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	TEnumAsByte<EFeeType> Type = Unknown;
 
@@ -60,19 +68,26 @@ USTRUCT(BlueprintType)
 struct FFeeOption
 {
 	GENERATED_USTRUCT_BODY()
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	int64 GasLimit = 0;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString To = "";
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FFeeToken Token;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString Value = "";
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-	int64 ValueNumber = 0;//Used for making easy comparisons
+	int64 ValueNumber = 0;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	bool bCanAfford = false;
+	
 	FFeeOption(){}
 
 	FFeeOption(const FSeqEtherBalance& EtherBalance)
