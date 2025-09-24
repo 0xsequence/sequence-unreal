@@ -29,3 +29,13 @@ void UWalletState::UpdateDeployContext(const TFunction<void()>& Callback)
 	
 	this->KeyMachine->GetDeployHash(this->Address, OnSuccess, OnFailure);
 }
+
+void UWalletState::UpdateConfig()
+{
+	
+}
+
+void UWalletState::UpdateSessionsTopology()
+{
+	
+}

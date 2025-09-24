@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "Transaction.generated.h"
 
 struct FCall;
@@ -17,5 +18,5 @@ class SEQUENCEPLUGIN_API ISeqTransactionBase
 	GENERATED_BODY()
 
 public:
-	virtual FCall GetCall();
+	virtual FCalls GetCalls();
 };

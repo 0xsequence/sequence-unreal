@@ -1,5 +1,6 @@
 #include "EcosystemWallet/Transactions/ContractTransaction.h"
 #include "EcosystemWallet/Primitives/Calls//Call.h"
+#include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "Util/SequenceSupport.h"
 
 UContractTransaction* UContractTransaction::CreateContractTransaction(const FString& To, const int64 Value, const FString& FunctionSignature, const TArray<FString> Values)
@@ -13,7 +14,7 @@ UContractTransaction* UContractTransaction::CreateContractTransaction(const FStr
 	return Permissions;
 }
 
-FCall UContractTransaction::GetCall()
+FCalls UContractTransaction::GetCalls()
 {
 	TArray<TSharedPtr<FJsonValue>> Values;
 	for (const auto& Value : this->Values)
@@ -33,5 +34,8 @@ FCall UContractTransaction::GetCall()
 	Call.DelegateCall = false;
 	Call.OnlyFallback = false;
 
-	return Call;
+	FCalls Calls;
+	Calls.Calls.Add(Call);
+
+	return Calls;
 }

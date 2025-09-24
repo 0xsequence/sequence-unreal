@@ -4,6 +4,7 @@
 #include "KeyMachine/KeyMachine.h"
 #include "KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "KeyMachine/Models/DeployHashResponse.h"
+#include "Primitives/Config/SeqConfig.h"
 #include "UObject/Object.h"
 #include "WalletState.generated.h"
 
@@ -22,9 +23,6 @@ public:
 	FDeployHashContext DeployContext = FDeployHashContext();
 	TArray<FConfigUpdate> ConfigUpdates;
 
-	// Add Config
-	// Add Sessions Topology
-
 	UWalletState();
 	
 	void UpdateState(const FString& Address, const TFunction<void()>& Callback);
@@ -33,5 +31,10 @@ private:
 	UPROPERTY()
 	UKeyMachine* KeyMachine;
 
+	UPROPERTY()
+	USeqConfig* Config;
+
 	void UpdateDeployContext(const TFunction<void()>& Callback);
+	void UpdateConfig();
+	void UpdateSessionsTopology();
 };

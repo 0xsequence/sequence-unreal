@@ -50,7 +50,7 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 
 void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
 {
-	FCall Call = Transaction.GetInterface()->GetCall();
+	FCall Call = Transaction.GetInterface()->GetCalls().Calls[0];
 	
 	FTransactionRequest Request;
 	Request.To = Call.To;

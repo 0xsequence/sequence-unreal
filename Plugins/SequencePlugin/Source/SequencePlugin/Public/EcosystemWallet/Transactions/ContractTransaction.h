@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Transaction.h"
+#include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "UObject/Object.h"
 #include "ContractTransaction.generated.h"
 
@@ -14,7 +15,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Transactions")
 	static UContractTransaction* CreateContractTransaction(const FString& To, const int64 Value, const FString& FunctionSignature, const TArray<FString> Values);
 	
-	virtual FCall GetCall() override;
+	virtual FCalls GetCalls() override;
 
 	FString To;
 	int64 Value;
