@@ -302,7 +302,6 @@ void UProvider::DeployContract(const FString& Bytecode, const FPrivateKey& PrivK
 	}, OnFailure);
 }
 
-//call method
 void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (FTransactionReceipt)>& OnSuccess, const FFailureCallback& OnFailure)
 {	
 	const FString Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
@@ -325,6 +324,30 @@ void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (F
 			return Res;
 		},
 		OnFailure);
+}
+
+void UProvider::CodeAt(const FString& Address, const EBlockTag BlockTag, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Content = RPCBuilder("eth_getCode").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddString(Address)
+			->AddString(UEnum::GetDisplayValueAsText(BlockTag).ToString())
+			->EndArray()
+		->ToString();
+
+	this->SendRPC(Url, Content,[this, OnSuccess](const FString& Result)
+	{
+		const TSharedPtr<FJsonObject> Json = Parse(Result);
+
+		if(Json == nullptr)
+		{
+			OnSuccess("Error parsing Json");
+			return;
+		}
+		
+		OnSuccess(Json->GetStringField(TEXT("result")));
+	},
+	OnFailure);
 }
 
 void UProvider::NonceAt(const uint64 Number, const TSuccessCallback<FBlockNonce>& OnSuccess, const FFailureCallback& OnFailure)

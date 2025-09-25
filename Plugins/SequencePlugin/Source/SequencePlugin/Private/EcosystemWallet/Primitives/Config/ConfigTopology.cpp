@@ -6,7 +6,7 @@
 
 FConfigTopology FromServiceConfigTree(const FString& Input)
 {
-    if (Input.StartsWith("["))
+    /*if (Input.StartsWith("["))
     {
         TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Input);
         TArray<TSharedPtr<FJsonValue>> List;
@@ -101,5 +101,6 @@ FConfigTopology FromServiceConfigTree(const FString& Input)
     }
 
     FString Err = FString::Printf(TEXT("Unknown config tree '%s'"), *Input);
-    throw std::runtime_error(TCHAR_TO_UTF8(*Err));
+    throw std::runtime_error(TCHAR_TO_UTF8(*Err));*/
+    return FConfigTopology();
 }

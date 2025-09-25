@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Provider.h"
 #include "KeyMachine/KeyMachine.h"
 #include "KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "KeyMachine/Models/DeployHashResponse.h"
@@ -32,9 +33,16 @@ private:
 	UKeyMachine* KeyMachine;
 
 	UPROPERTY()
+	UProvider* Provider;
+	
+	UPROPERTY()
 	USeqConfig* Config;
 
+	int32 UpdateProgress;
+
 	void UpdateDeployContext(const TFunction<void()>& Callback);
+	void UpdateDeployedState(const TFunction<void()>& Callback);
+	void UpdateNonce(const TFunction<void()>& Callback);
 	void UpdateConfig();
 	void UpdateSessionsTopology();
 };
