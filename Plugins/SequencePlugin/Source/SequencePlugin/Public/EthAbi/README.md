@@ -1,4 +1,4 @@
-# Sequence Unreal <> Rust Bridge
+ec# Sequence Unreal <> Rust Bridge
 
 We bridge Rust code into C++ to leverage an encoding and decoding library.
 
@@ -12,12 +12,46 @@ Run the installation steps from the official website:
 
 https://doc.rust-lang.org/cargo/getting-started/installation.html
 
-## Updating Library
+## Compiling Library
 
 Navigate to the `SequencePlugin/Source/SequencePlugin/Public/EthAbi/` directory in your terminal and run the following code to compile:
 
 ```shell
 cargo build --release
+```
+
+## Platforms Builds
+
+### MacOS
+
+```shell
+cargo build --release --target x86_64-apple-darwin
+cargo build --release --target aarch64-apple-darwin
+```
+
+```shell
+lipo -create \
+  ./target/x86_64-apple-darwin/release/libethabi_bridge.a \
+  ./target/aarch64-apple-darwin/release/libethabi_bridge.a \
+  -output ./macos/libethabi_bridge.a
+```
+
+### Android
+
+```shell
+cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
+```
+
+### iOS
+
+```shell
+cargo lipo --release
+```
+
+### Windows
+
+```shell
+cargo build --release --target x86_64-pc-windows-msvc
 ```
 
 Now, take the `libethabi_bridge.a` file from the `./target/release/` directory and move it to `EthAbi/`
