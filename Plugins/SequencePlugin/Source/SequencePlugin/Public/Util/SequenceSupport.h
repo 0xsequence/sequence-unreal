@@ -73,6 +73,7 @@ private:
 		FIdName(43114,TEXT("avalanche")),
 		FIdName(81457,TEXT("blast")),
 		FIdName(660279,TEXT("xai")),
+		FIdName(5031,TEXT("somnia")),
 		FIdName(1482601649,TEXT("skale-nebula")),
 		
 		FIdName(41,TEXT("telos-testnet")),
@@ -84,6 +85,7 @@ private:
 		FIdName(7672,TEXT("rootnet-porcini")),
 		FIdName(10143,TEXT("monad-testnet")),
 		FIdName(11690,TEXT("incentiv-testnet")),
+		FIdName(28802,TEXT("incentiv-testnet-v2")),
 		FIdName(13473,TEXT("immutable-zkevm-testnet")),
 		FIdName(33111,TEXT("apechain-testnet")),
 		FIdName(40875,TEXT("homeverse-testnet")),
@@ -127,6 +129,7 @@ private:
 		FIdName(1284,TEXT("Moonbeam")),
 		FIdName(42793, TEXT("Etherlink")),
 		FIdName(273, TEXT("XR1")),
+		FIdName(5031, TEXT("Somnia")),
 		
 		FIdName(13473,TEXT("Immutable Testnet")),
 		FIdName(97,TEXT("BNB Smart Chain Testnet")),
@@ -153,7 +156,8 @@ private:
 		FIdName(10143,TEXT("Monad Testnet")),
 		FIdName(50312,TEXT("Somnia Testnet")),
 		FIdName(53716,TEXT("Frequency Testnet")),
-		FIdName(11690, TEXT("Incentiv Testnet"))
+		FIdName(11690, TEXT("Incentiv Testnet")),
+		FIdName(28802, TEXT("Incentiv Testnet v2"))
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -181,6 +185,7 @@ private:
 		FNameId(TEXT("moonbeam"),1284),
 		FNameId(TEXT("etherlink"),42793),
 		FNameId(TEXT("xr1"),273),
+		FNameId(TEXT("somnia"),5031),
 		
 		FNameId(TEXT("immutable-testnet"),13473),
 		FNameId(TEXT("bnbsmartchaintestnet"),97),
@@ -207,7 +212,8 @@ private:
 		FNameId(TEXT("monad-testnet"),10143),
 		FNameId(TEXT("somnia-testnet"),50312),
 		FNameId(TEXT("frequency-testnet"),53716),
-		FNameId(TEXT("incentiv-testnet"), 11690)
+		FNameId(TEXT("incentiv-testnet"), 11690),
+		FNameId(TEXT("incentiv-testnet-v2"), 28802)
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -235,6 +241,7 @@ private:
 		{ENetwork::Moonbeam, 1284},
 		{ENetwork::Etherlink, 42793},
 		{ENetwork::XR1, 273},
+		{ENetwork::Somnia, 5031},
 		
 		{ENetwork::ImmutableTestnet, 13473},
 		{ENetwork::BNBSmartChainTestnet, 97},
@@ -261,7 +268,8 @@ private:
 		{ENetwork::MonadTestnet, 10143},
 		{ENetwork::SomniaTestnet, 50312},
 		{ENetwork::FrequencyTestnet, 53716},
-		{ENetwork::IncentivTestnet, 11690}
+		{ENetwork::IncentivTestnet, 11690},
+		{ENetwork::IncentivTestnetV2, 28802}
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -289,6 +297,7 @@ private:
 		{ENetwork::Moonbeam, TEXT("Moonbeam")},
 		{ENetwork::Etherlink, TEXT("Etherlink")},
 		{ENetwork::XR1, TEXT("XR1")},
+		{ENetwork::Somnia, TEXT("Somnia")},
 		
 		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
 		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
@@ -315,7 +324,8 @@ private:
 		{ENetwork::MonadTestnet, TEXT("Monad Testnet")},
 		{ENetwork::SomniaTestnet, TEXT("Somnia Testnet")},
 		{ENetwork::FrequencyTestnet, TEXT("Frequency Testnet")},
-		{ENetwork::IncentivTestnet, TEXT("Incentiv Testnet")}
+		{ENetwork::IncentivTestnet, TEXT("Incentiv Testnet")},
+		{ENetwork::IncentivTestnetV2, TEXT("Incentiv Testnet v2")}
 	};
 
 public:
