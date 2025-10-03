@@ -34,7 +34,6 @@ Config/EosConfig.ini
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
