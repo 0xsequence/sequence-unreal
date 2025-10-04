@@ -146,8 +146,7 @@ public class SequencePlugin : ModuleRules
 
         if (Target.Platform == UnrealTargetPlatform.Win64)
         {
-            string archFolder = (Target.Architecture == UnrealArch.Arm64) ? "arm64" : "x64";
-            string libDir = Path.Combine(EthAbiDirectory, archFolder);
+            string libDir = Path.Combine(EthAbiDirectory, "windows");
             PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.lib"));
 
             // Add extra MSVC libs here

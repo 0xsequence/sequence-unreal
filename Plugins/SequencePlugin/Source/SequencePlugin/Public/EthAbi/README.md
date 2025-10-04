@@ -1,4 +1,4 @@
-ec# Sequence Unreal <> Rust Bridge
+# Sequence Unreal <> Rust Bridge
 
 We bridge Rust code into C++ to leverage an encoding and decoding library.
 
@@ -20,7 +20,11 @@ Navigate to the `SequencePlugin/Source/SequencePlugin/Public/EthAbi/` directory 
 cargo build --release
 ```
 
+Now, take the `libethabi_bridge.a` file from the `./target/release/` directory and move it to `EthAbi/`
+
 ## Platforms Builds
+
+MacOS, iOS and Android files can be build on MacOS and Windows. Windows' .lib file can only be installed on a Windows machine.
 
 ### MacOS
 
@@ -50,11 +54,19 @@ cargo lipo --release
 
 ### Windows
 
+Building .lib files only works on Windows machines.
+Run the following install commands on Windows.
+
+```shell
+winget install --id Rustlang.Rustup -e --source winget
+rustup default stable-x86_64-pc-windows-msvc
+```
+
+Build command:
+
 ```shell
 cargo build --release --target x86_64-pc-windows-msvc
 ```
-
-Now, take the `libethabi_bridge.a` file from the `./target/release/` directory and move it to `EthAbi/`
 
 ## Decoding:
 

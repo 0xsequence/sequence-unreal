@@ -97,7 +97,7 @@ void USequencePay::GetSwapPrice(const int64 ChainID, const FString& WalletAddres
 {
 	this->GetSwapPrices(ChainID, WalletAddress, BuyCurrency, BuyAmount, [SellCurrency, OnSuccess, OnFailure](TArray<FSeqSwapPrice> Prices)
 	{
-		for (const FSeqSwapPrice Price : Prices)
+		for (const FSeqSwapPrice& Price : Prices)
 		{
 			if (Price.CurrencyAddress == SellCurrency)
 			{
@@ -139,7 +139,10 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddre
 
 			for (const FSeqSwapToken& FromToken : Route.FromTokens)
 			{
-				SwapPrices.Add(FSeqSwapPrice(FromToken.Address, FromToken.Price));
+				SwapPrices.Add(FSeqSwapPrice {
+					FromToken.Address,
+					FromToken.Price
+				});
 			}
 		}
 		
