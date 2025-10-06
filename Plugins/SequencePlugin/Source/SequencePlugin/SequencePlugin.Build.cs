@@ -9,13 +9,9 @@ public class SequencePlugin : ModuleRules
 	{
 		bUseUnity = false;
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		string lib = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/libethabi_bridge.a");
-		string includes = Path.Combine(ModuleDirectory, "Public/EthAbi/");
 
-		PublicSystemLibraryPaths.Add(includes);
-		PublicAdditionalLibraries.Add(lib);
-		
+		AddEthAbiLibraries();
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
@@ -141,4 +137,35 @@ public class SequencePlugin : ModuleRules
 			);//Public Frameworks
 		}//IOS Frameworks
 	}//SequencePlugin
+
+	public void AddEthAbiLibraries()
+	{
+		string EthAbiDirectory = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/");
+
+		PublicSystemLibraryPaths.Add(EthAbiDirectory);
+
+        if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+            string libDir = Path.Combine(EthAbiDirectory, "windows");
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.lib"));
+
+            // Add extra MSVC libs here
+            // PublicSystemLibraries.AddRange(new string[] { "advapi32", "bcrypt" });
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Mac)
+        {
+            string libDir = Path.Combine(EthAbiDirectory, "macos");
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.a"));
+        }
+        else if (Target.Platform == UnrealTargetPlatform.IOS)
+        {
+            PublicAdditionalLibraries.Add(Path.Combine(EthAbiDirectory, "ios", "libethabi_bridge.a"));
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Android)
+        {
+            string libDir = Path.Combine(EthAbiDirectory, "android");
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "arm64", "libethabi_bridge.a"));
+            PublicAdditionalLibraries.Add(Path.Combine(libDir, "x86", "libethabi_bridge.a"));
+        }
+	}
 }//namespace
