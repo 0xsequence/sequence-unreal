@@ -599,3 +599,7 @@ FString USequenceSupport::DecodeFunctionResult(const FString& Abi, const FString
 	return FEthAbiBridge::DecodeFunctionResult(Abi, EncodedData);
 }
 
+TArray<uint8> USequenceSupport::EncodeBigInteger(const FString& Value)
+{
+	return FEthAbiBridge::EncodeBigInteger(Value);
+}

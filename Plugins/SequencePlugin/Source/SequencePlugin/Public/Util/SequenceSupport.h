@@ -567,6 +567,13 @@ public:
 	 * @return Decoded data as an unnamed JSON array of values.
 	 */
 	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
+
+	/**
+	 * Encode the given big integer into a byte array.
+	 * @param Value The BigInteger value as a string type.
+	 * @return The encoded byte array.
+	 */
+	static TArray<uint8> EncodeBigInteger(const FString& Value);
 	
 private:
 	/*

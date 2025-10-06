@@ -26,6 +26,7 @@ public class SequenceTests : ModuleRules
 			new string[]
 			{
 				"Core",
+				"SequencePlugin"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

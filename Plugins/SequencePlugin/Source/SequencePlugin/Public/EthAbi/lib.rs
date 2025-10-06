@@ -2,9 +2,12 @@ use ethabi::{Address, Function, Token, Param, ParamType, StateMutability};
 use serde_json::{json, Map, Value};
 use hex::FromHex;
 use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
 use hex::decode;
 use std::collections::HashMap;
+use num_bigint::BigUint;
+use num_traits::Num;
+use std::os::raw::{c_char, c_uchar, c_int};
+use std::ptr;
 
 #[no_mangle]
 pub extern "C" fn encode_function_call(signature: *const c_char, args_json: *const c_char) -> *mut c_char {
@@ -85,6 +88,61 @@ pub extern "C" fn decode_function_result(abi_json: *const c_char, result_hex: *c
     };
 
     CString::new(json_string).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern "C" fn encode_bigint_to_bytes(
+    num_str: *const c_char,
+    out_len: *mut c_int,
+) -> *mut c_uchar {
+if num_str.is_null() || out_len.is_null() {
+        return ptr::null_mut();
+    }
+
+    // SAFETY: We checked that num_str is non-null.
+    let c_str = unsafe { CStr::from_ptr(num_str) };
+
+    let num_str = match c_str.to_str() {
+        Ok(s) => s,
+        Err(_) => return ptr::null_mut(),
+    };
+
+    let bigint = match BigUint::from_str_radix(num_str, 10) {
+        Ok(n) => n,
+        Err(_) => return ptr::null_mut(),
+    };
+
+    let bytes = bigint.to_bytes_be();
+    let len = bytes.len() as c_int;
+
+    // SAFETY: We checked that out_len is non-null.
+    unsafe {
+        *out_len = len;
+    }
+
+    // SAFETY: Allocating a buffer with libc::malloc for C compatibility.
+    let buf = unsafe { libc::malloc(len as usize) as *mut c_uchar };
+    if buf.is_null() {
+        return ptr::null_mut();
+    }
+
+    // SAFETY: buf is valid, bytes is valid, len is correct.
+    unsafe {
+        std::ptr::copy_nonoverlapping(bytes.as_ptr(), buf, len as usize);
+    }
+
+    buf
+}
+
+#[no_mangle]
+pub extern "C" fn free_encoded_bytes(ptr: *mut c_uchar) {
+    if ptr.is_null() {
+        return;
+    }
+
+    unsafe {
+        libc::free(ptr as *mut libc::c_void);
+    }
 }
 
 #[no_mangle]
