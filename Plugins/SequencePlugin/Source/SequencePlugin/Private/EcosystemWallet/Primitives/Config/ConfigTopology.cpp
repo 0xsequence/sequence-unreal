@@ -1,12 +1,73 @@
 #include "ConfigTopology.h"
-
 #include "Dom/JsonObject.h"
+#include "Leafs/ConfigAnyAddressSubdigestLeaf.h"
+#include "Leafs/ConfigNestedLeaf.h"
+#include "Leafs/ConfigNodeLeaf.h"
+#include "Leafs/ConfigSapientSignerLeaf.h"
+#include "Leafs/ConfigSignerLeaf.h"
+#include "Leafs/ConfigSubdigestLeaf.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonReader.h"
+#include "ConfigNode.h"
+#include "ConfigLeaf.h"
 
-FConfigTopology FromServiceConfigTree(const FString& Input)
+FConfigLeaf* FConfigTopology::FindSignerLeaf(const FString& Address) const
 {
-    /*if (Input.StartsWith("["))
+    if (IsNode())
+    {
+        if (Node == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (Node->Left->IsLeaf() || Node->Left->IsNode())
+        {
+            FConfigLeaf* LeftResult = Node->Left->FindSignerLeaf(Address);
+            if (LeftResult != nullptr)
+            {
+                return LeftResult;
+            }
+        }
+
+        if (Node->Right->IsLeaf() || Node->Right->IsNode())
+        {
+            return Node->Right->FindSignerLeaf(Address);
+        }
+    }
+
+    if (IsLeaf() && Leaf != nullptr)
+    {
+        if (const FConfigNestedLeaf* NestedLeaf = static_cast<FConfigNestedLeaf*>(Leaf))
+        {
+            if (NestedLeaf->Tree)
+            {
+                return NestedLeaf->Tree->FindSignerLeaf(Address);
+            }
+        }
+
+        if (const FConfigSignerLeaf* SignerLeaf = static_cast<FConfigSignerLeaf*>(Leaf))
+        {
+            if (SignerLeaf->Address.Equals(Address))
+            {
+                return Leaf;
+            }
+        }
+
+        if (const FConfigSapientSignerLeaf* SapientLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf))
+        {
+            if (SapientLeaf->Address.Equals(Address))
+            {
+                return Leaf;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+TSharedPtr<FConfigTopology> FConfigTopology::FromServiceConfigTree(const FString& Input)
+{
+    if (Input.StartsWith("["))
     {
         TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Input);
         TArray<TSharedPtr<FJsonValue>> List;
@@ -16,23 +77,15 @@ FConfigTopology FromServiceConfigTree(const FString& Input)
             throw std::runtime_error("Invalid node structure in JSON");
         }
 
-        return FConfigTopology(
-            MakeShared<Node>(
-                FromServiceConfigTree(List[0]->AsString()),
-                FromServiceConfigTree(List[1]->AsString())
-            )
-        );
+        return MakeShared<FConfigTopology>(FConfigTopology(FConfigNode(FromServiceConfigTree(List[0]->AsString()),
+                FromServiceConfigTree(List[1]->AsString()))));
     }
 
-    // Handle hex string "0x..."
     if (Input.StartsWith("0x"))
     {
-        NodeLeaf Leaf;
-        Leaf.Value = HexStringToByteArray(Input); // you’ll need to implement HexStringToByteArray
-        return Leaf.ToTopology();
+        return MakeShared<FConfigTopology>(FConfigTopology(FConfigNodeLeaf(Input)));
     }
 
-    // Handle JSON object
     TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Input);
     TSharedPtr<FJsonObject> Obj;
     if (!FJsonSerializer::Deserialize(Reader, Obj) || !Obj.IsValid())
@@ -40,67 +93,47 @@ FConfigTopology FromServiceConfigTree(const FString& Input)
         throw std::runtime_error("Invalid JSON object");
     }
 
-    // "weight" case
-    if (Obj->HasField("weight"))
+    if (Obj->HasField(TEXT("weight")))
     {
-        FString WeightStr = Obj->GetStringField("weight");
-        BigInt Weight = ParseBigInt(WeightStr); // You’ll need to wrap BigInteger equivalent in C++
+        FString WeightStr = Obj->GetStringField(TEXT("weight"));
 
-        if (Obj->HasField("address"))
+        if (Obj->HasField(TEXT("address")))
         {
-            FString AddressStr = Obj->GetStringField("address");
+            FString AddressStr = Obj->GetStringField(TEXT("address"));
 
-            if (Obj->HasField("imageHash"))
+            if (Obj->HasField(TEXT("imageHash")))
             {
-                FString ImageHash = Obj->GetStringField("imageHash");
-                SapientSignerLeaf Leaf;
-                Leaf.address = Address(AddressStr);
-                Leaf.weight = Weight;
-                Leaf.imageHash = ImageHash;
-                return Leaf.ToTopology();
+                FString ImageHash = Obj->GetStringField(TEXT("imageHash"));
+                return MakeShared<FConfigTopology>(FConfigTopology(FConfigSapientSignerLeaf(AddressStr, WeightStr, ImageHash)));
             }
 
-            SignerLeaf Leaf;
-            Leaf.address = Address(AddressStr);
-            Leaf.weight = Weight;
-            return Leaf.ToTopology();
+            return MakeShared<FConfigTopology>(FConfigTopology(FConfigSignerLeaf(AddressStr, WeightStr)));
         }
 
-        if (Obj->HasField("tree"))
+        if (Obj->HasField(TEXT("tree")))
         {
-            NestedLeaf Leaf;
-            Leaf.weight = Weight;
-            Leaf.threshold = ParseBigInt(Obj->GetStringField("threshold"));
-            Leaf.tree = FromServiceConfigTree(Obj->GetStringField("tree"));
-            return Leaf.ToTopology();
+            return MakeShared<FConfigTopology>(FConfigNestedLeaf(WeightStr, Obj->GetStringField(TEXT("threshold")), FromServiceConfigTree(Obj->GetStringField(TEXT("tree")))));
         }
     }
 
-    // "subdigest" case
-    if (Obj->HasField("subdigest"))
+    if (Obj->HasField(TEXT("subdigest")))
     {
-        FString SubdigestStr = Obj->GetStringField("subdigest");
-        TArray<uint8> Subdigest = HexStringToByteArray(SubdigestStr);
+        const FString Subdigest = Obj->GetStringField(TEXT("subdigest"));
 
         bool bIsAny = false;
-        if (Obj->HasField("isAnyAddress"))
+        if (Obj->HasField(TEXT("isAnyAddress")))
         {
-            bIsAny = Obj->GetBoolField("isAnyAddress");
+            bIsAny = Obj->GetBoolField(TEXT("isAnyAddress"));
         }
 
         if (bIsAny)
         {
-            AnyAddressSubdigestLeaf Leaf;
-            Leaf.digest = Subdigest;
-            return Leaf.ToTopology();
+            return MakeShared<FConfigTopology>(FConfigTopology(FConfigAnyAddressSubdigestLeaf(Subdigest)));
         }
 
-        SubdigestLeaf Leaf;
-        Leaf.digest = Subdigest;
-        return Leaf.ToTopology();
+        return MakeShared<FConfigTopology>(FConfigTopology(FConfigSubdigestLeaf(Subdigest)));
     }
 
     FString Err = FString::Printf(TEXT("Unknown config tree '%s'"), *Input);
-    throw std::runtime_error(TCHAR_TO_UTF8(*Err));*/
-    return FConfigTopology();
+    return MakeShared<FConfigTopology>(FConfigTopology());
 }

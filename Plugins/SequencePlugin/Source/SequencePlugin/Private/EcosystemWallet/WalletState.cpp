@@ -1,4 +1,6 @@
 #include "WalletState.h"
+
+#include "Primitives/Config/Leafs/ConfigSapientSignerLeaf.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -8,22 +10,65 @@ UWalletState::UWalletState()
 	this->Provider = NewObject<UProvider>();
 }
 
-void UWalletState::UpdateState(const FString& Address, const TFunction<void()>& Callback)
+void UWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure)
 {
-	UpdateProgress = 0;
-	
-	const TFunction<void()> InnerCallback = [this, Callback]() {
-		UpdateProgress++;
-		if (this->UpdateProgress >= 3)
-		{
-			Callback();
-		}
-	};
-	
 	this->Address = Address;
-	this->UpdateDeployContext(InnerCallback);
-	this->UpdateDeployedState(InnerCallback);
-	this->UpdateNonce(InnerCallback);
+	
+	UpdateDeployedState([this, OnSuccess, OnFailure]() {
+		this->GetImplementation([this, OnSuccess, OnFailure](const FString& Implementation) {
+			const TFunction<void(FString)> GetConfig = [this, OnSuccess, OnFailure](const FString& WalletImageHash)
+			{
+				this->KeyMachine->GetConfigUpdates(this->Address, WalletImageHash, [this, OnSuccess, OnFailure, WalletImageHash](const FConfigUpdatesResponse& Updates)
+				{
+					FString ConfigImageHash = WalletImageHash;
+					if (Updates.Updates.Num() > 0)
+					{
+						ConfigImageHash = Updates.Updates[Updates.Updates.Num() - 1].ToImageHash;
+					}
+					
+					this->UpdateConfig(ConfigImageHash, [this, OnSuccess, OnFailure]()
+					{
+						const FString SessionsManagerAddress = TEXT("0x0000000000CC58810c33F3a0D78aA1Ed80FaDcD8");
+						FConfigLeaf* Leaf = this->Config->Topology.Get()->FindSignerLeaf(SessionsManagerAddress);
+						
+						if (Leaf == nullptr)
+						{
+							OnFailure();
+							return;
+						}
+
+						const FConfigSapientSignerLeaf* SapientSignerLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf);
+						const FString SessionsLeafImageHash = SapientSignerLeaf->ImageHash;
+						
+						this->UpdateSessionsTopology(SessionsLeafImageHash, [this, OnSuccess]()
+						{
+							this->UpdateNonce(OnSuccess);
+						});
+					});
+				},
+				[OnFailure](const FString& Error)
+				{
+					SEQ_LOG(Error, TEXT("Error while getting config updates: %s"), *Error);
+					OnFailure();
+				});
+			};
+			
+			if (this->IsDeployed && Implementation == "0x7438718F9E4b9B834e305A620EEeCf2B9E6eBE79")
+			{
+				this->GetOnchainImageHash([this, GetConfig](const FString& ImageHash)
+				{
+					GetConfig(ImageHash);
+				});
+			}
+			else
+			{
+				this->UpdateDeployContext([this, GetConfig]()
+				{
+					GetConfig(this->DeployHash);
+				});
+			}
+		});
+	});
 }
 
 void UWalletState::UpdateDeployContext(const TFunction<void()>& Callback)
@@ -86,12 +131,84 @@ void UWalletState::UpdateNonce(const TFunction<void()>& Callback)
 	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateConfig()
+void UWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback)
 {
+	const TSuccessCallback<FConfigResponse> OnSuccess = [this, Callback](const FConfigResponse& Response)
+	{
+		this->Config = NewObject<USeqConfig>();
+		this->Config->Checkpoint = Response.Config.Checkpoint;
+		this->Config->Threshold = Response.Config.Threshold;
+		this->Config->Topology = FConfigTopology::FromServiceConfigTree(Response.Config.Tree);
+		
+		Callback();
+	};
+
+	const TFunction<void(FString)> OnFailure = [this, Callback](const FString& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error while updating wallet config: %s"), *Error);
+		Callback();
+	};
 	
+	KeyMachine->GetConfiguration(ImageHash, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateSessionsTopology()
+void UWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback)
 {
+	const TSuccessCallback<FTreeResponse> OnSuccess = [this, Callback](const FTreeResponse& Response)
+	{
+		Callback();
+	};
+
+	const TFunction<void(FString)> OnFailure = [this, Callback](const FString& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error while updating sessions topology: %s"), *Error);
+		Callback();
+	};
 	
+	KeyMachine->GetTree(ImageHash, OnSuccess, OnFailure);
 }
+
+void UWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
+{
+	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
+	{
+		Callback(Response);
+	};
+
+	const FFailureCallback OnFailure = [this, Callback](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error while getting implementation: %s"), *Error.Message);
+		Callback("");
+	};
+
+	const FString EncodedFunctionData = USequenceSupport::EncodeFunctionCall("getImplementation()", "[]");
+
+	FContractCall Call;
+	Call.To = this->Address;
+	Call.Data = EncodedFunctionData;
+	
+	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
+}
+
+void UWalletState::GetOnchainImageHash(const TFunction<void(FString)>& Callback)
+{
+	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
+	{
+		Callback(Response);
+	};
+
+	const FFailureCallback OnFailure = [this, Callback](const FSequenceError& Error)
+	{
+		SEQ_LOG(Error, TEXT("Error while getting onchain image hash: %s"), *Error.Message);
+		Callback(TEXT(""));
+	};
+
+	const FString EncodedFunctionData = USequenceSupport::EncodeFunctionCall("imageHash()", "[]");
+
+	FContractCall Call;
+	Call.To = this->Address;
+	Call.Data = EncodedFunctionData;
+	
+	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
+}
+

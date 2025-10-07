@@ -12,7 +12,7 @@ class SEQUENCEPLUGIN_API USeqConfig : public UObject
 	
 public:
 	int64 Threshold;
-	int64 Checkpointer;
-	FConfigTopology* Topology;
+	FString Checkpoint;
+	TSharedPtr<FConfigTopology> Topology;
 	FString Address;
 };

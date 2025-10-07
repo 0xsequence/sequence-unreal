@@ -1,5 +1,4 @@
 #include "EcosystemWallet/SequenceWallet.h"
-
 #include "WalletState.h"
 #include "Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
@@ -44,8 +43,13 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 	{
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 	};
+
+	const TFunction<void()> OnWalletStateFailed = [OnFailure]()
+	{
+		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
+	};
 	
-	this->WalletState->UpdateState(this->GetWalletInfo().Address, OnWalletStateUpdated);
+	this->WalletState->UpdateState(this->GetWalletInfo().Address, OnWalletStateUpdated, OnWalletStateFailed);
 }
 
 void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)

@@ -26,7 +26,7 @@ public:
 
 	UWalletState();
 	
-	void UpdateState(const FString& Address, const TFunction<void()>& Callback);
+	void UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure);
 
 private:
 	UPROPERTY()
@@ -36,13 +36,15 @@ private:
 	UProvider* Provider;
 	
 	UPROPERTY()
-	USeqConfig* Config;
+	USeqConfig* Config = nullptr;
 
-	int32 UpdateProgress;
+	int32 UpdateProgress = 0;
 
 	void UpdateDeployContext(const TFunction<void()>& Callback);
 	void UpdateDeployedState(const TFunction<void()>& Callback);
 	void UpdateNonce(const TFunction<void()>& Callback);
-	void UpdateConfig();
-	void UpdateSessionsTopology();
+	void UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback);
+	void UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback);
+	void GetImplementation(const TFunction<void(FString)>& Callback);
+	void GetOnchainImageHash(const TFunction<void(FString)>& Callback);
 };
