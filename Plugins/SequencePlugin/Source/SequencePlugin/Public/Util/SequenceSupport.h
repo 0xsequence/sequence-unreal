@@ -520,6 +520,63 @@ public:
 		return FString();
 	}
 
+	static FString JsonArrayToString(const TArray<TSharedPtr<FJsonValue>>& JsonValues)
+	{
+		FString OutputString;
+		const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+
+		FJsonSerializer::Serialize(JsonValues, Writer);
+		return OutputString;
+	}
+
+	static TSharedPtr<FJsonValue> ParseJsonValue(const FString& JsonString)
+	{
+		TSharedPtr<FJsonValue> JsonValue;
+		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonString);
+
+		if (!FJsonSerializer::Deserialize(Reader, JsonValue))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse JSON value: %s"), *JsonString);
+			return nullptr;
+		}
+
+		return JsonValue;
+	}
+
+	static FString JsonValueToString(const TSharedPtr<FJsonValue>& JsonValue)
+	{
+		if (!JsonValue.IsValid())
+		{
+			return TEXT("null");
+		}
+
+		switch (JsonValue->Type)
+		{
+		case EJson::String:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::String"));
+			return JsonValue->AsString();
+
+		case EJson::Number:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Number"));
+			return FString::SanitizeFloat(JsonValue->AsNumber());
+
+		case EJson::Boolean:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Boolean"));
+			return JsonValue->AsBool() ? TEXT("true") : TEXT("false");
+
+		case EJson::Array:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Array"));
+			return USequenceSupport::JsonArrayToString(JsonValue->AsArray());
+
+		case EJson::Object:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Object"));
+			return USequenceSupport::JsonToString(JsonValue->AsObject());
+
+		default:
+			return "";
+		}
+	}
+
 	static FString StringListToSimpleString(TArray<FString> StringData);
 
 	//for maintaining valid json for args in RPC calls

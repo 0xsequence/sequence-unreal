@@ -28,12 +28,12 @@ void UKeyMachine::GetDeployHash(const FString& WalletAddress, TSuccessCallback<F
 	this->HttpHandler->SendPostRequest("DeployHash", Payload, OnRequestSuccess, OnFailure);
 }
 
-void UKeyMachine::GetTree(const FString& ImageHash, TSuccessCallback<FTreeResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void UKeyMachine::GetTree(const FString& ImageHash, TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
-	const TSuccessCallback<FString> OnRequestSuccess = [OnSuccess](const FString& Response)
+	const TSuccessCallback<FString> OnRequestSuccess = [this, OnSuccess](const FString& Response)
 	{
-		const FTreeResponse Data = USequenceSupport::JSONStringToStruct<FTreeResponse>(Response);
-		OnSuccess(Data);
+		const TSharedPtr<FJsonValue> TreeData = ParseSessionsTreeFromJson(Response);
+		OnSuccess(TreeData);
 	};
 	
 	const FTreeArgs Args = {
@@ -61,11 +61,11 @@ void UKeyMachine::GetConfigUpdates(const FString& WalletAddress, const FString& 
 	this->HttpHandler->SendPostRequest("ConfigUpdates", Payload, OnRequestSuccess, OnFailure);
 }
 
-void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FConfigResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
+void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FSeqConfigContext> OnSuccess, const TFunction<void(FString)>& OnFailure) const
 {
-	const TSuccessCallback<FString> OnRequestSuccess = [OnSuccess](const FString& Response)
+	const TSuccessCallback<FString> OnRequestSuccess = [this, OnSuccess](const FString& Response)
 	{
-		const FConfigResponse Data = USequenceSupport::JSONStringToStruct<FConfigResponse>(Response);
+		const FSeqConfigContext Data = ParseConfigFromJson(Response);
 		OnSuccess(Data);
 	};
 	
@@ -75,4 +75,50 @@ void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FC
 
 	const FString Payload = USequenceSupport::StructToString(Args);
 	this->HttpHandler->SendPostRequest("Config", Payload, OnRequestSuccess, OnFailure);
+}
+
+FSeqConfigContext UKeyMachine::ParseConfigFromJson(const FString& Json)
+{
+	TSharedPtr<FJsonObject> Root;
+	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+
+	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid JSON for FSeqConfigContext"));
+		return FSeqConfigContext();
+	}
+
+	TSharedPtr<FJsonObject> ConfigObject = Root->GetObjectField(TEXT("config"));
+
+	FSeqConfigContext Context;
+	Context.Checkpoint = ConfigObject->GetStringField(TEXT("checkpoint"));
+	Context.Threshold = ConfigObject->GetIntegerField(TEXT("threshold"));
+
+	TSharedPtr<FJsonValue> TreeValue = ConfigObject->TryGetField(TEXT("tree"));
+	if (TreeValue.IsValid())
+	{
+		Context.Tree = TreeValue;
+	}
+
+	return Context;
+}
+
+TSharedPtr<FJsonValue> UKeyMachine::ParseSessionsTreeFromJson(const FString& Json)
+{
+	TSharedPtr<FJsonObject> Root;
+	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
+
+	if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid JSON for ParseSessionsTreeFromJson"));
+		return TSharedPtr<FJsonValue>();
+	}
+
+	TSharedPtr<FJsonValue> TreeValue = Root->TryGetField(TEXT("tree"));
+	if (TreeValue.IsValid())
+	{
+		return TreeValue;
+	}
+
+	return TSharedPtr<FJsonValue>();
 }

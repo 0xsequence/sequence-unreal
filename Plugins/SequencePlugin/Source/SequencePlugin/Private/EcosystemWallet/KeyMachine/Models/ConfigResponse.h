@@ -15,8 +15,7 @@ public:
 	UPROPERTY()
 	int32 Threshold;
 	
-	UPROPERTY()
-	FString Tree;
+	TSharedPtr<FJsonValue> Tree;
 };
 
 USTRUCT()

@@ -7,10 +7,10 @@ class SEQUENCEPLUGIN_API FConfigNode
 public:
 	FConfigNode(const TSharedPtr<FConfigTopology>& Left, const TSharedPtr<FConfigTopology>& Right)
 	{
-		this->Left = Left.Get();
-		this->Right = Right.Get();
+		this->Left = Left;
+		this->Right = Right;
 	}
 	
-	const FConfigTopology* Left;
-	const FConfigTopology* Right;
+	TSharedPtr<FConfigTopology> Left;
+	TSharedPtr<FConfigTopology> Right;
 };

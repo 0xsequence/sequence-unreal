@@ -2,12 +2,13 @@
 
 #include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
 
-class SEQUENCEPLUGIN_API FConfigNodeLeaf final : public FConfigLeaf
+class SEQUENCEPLUGIN_API FConfigSubdigestLeaf final : public FConfigLeaf
 {
 public:
-	explicit FConfigNodeLeaf(const FString& InValue)
+	explicit FConfigSubdigestLeaf(const FString& InSubdigest)
 	{
-		this->Value = InValue;
+		this->Type = EConfigLeafType::Subdigest;
+		this->Subdigest = InSubdigest;
 	}
 	
 	virtual TArray<uint8> Encode(const bool NoChainId, const TArray<uint8>& CheckpointerData) override
@@ -20,5 +21,5 @@ public:
 		return FConfigLeaf::HashConfiguration();
 	}
 
-	FString Value;
+	FString Subdigest;
 };

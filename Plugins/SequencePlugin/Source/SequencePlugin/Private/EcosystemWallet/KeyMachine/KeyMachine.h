@@ -20,11 +20,14 @@ public:
 	UKeyMachine();
 	
 	void GetDeployHash(const FString& WalletAddress, TSuccessCallback<FDeployHashResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
-	void GetTree(const FString& ImageHash, TSuccessCallback<FTreeResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
+	void GetTree(const FString& ImageHash, TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
 	void GetConfigUpdates(const FString& WalletAddress, const FString& FromImageHash, TSuccessCallback<FConfigUpdatesResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
-	void GetConfiguration(const FString& ImageHash, TSuccessCallback<FConfigResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
+	void GetConfiguration(const FString& ImageHash, TSuccessCallback<FSeqConfigContext> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
 	
 private:
+	static FSeqConfigContext ParseConfigFromJson(const FString& Json);
+	static TSharedPtr<FJsonValue> ParseSessionsTreeFromJson(const FString& Json);
+	
 	UPROPERTY()
 	UHttpHandler* HttpHandler;
 	

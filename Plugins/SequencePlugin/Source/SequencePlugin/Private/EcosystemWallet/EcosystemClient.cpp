@@ -1,7 +1,7 @@
 #include "EcosystemClient.h"
 #include "Authentication/RedirectHandler/BrowserRedirectHandler.h"
 #include "Authentication/RedirectHandler/LocalhostRedirectHandler.h"
-#include "Primitives/Permission/SessionPermissions.h"
+#include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
 #include "Requests/SessionArgs.h"

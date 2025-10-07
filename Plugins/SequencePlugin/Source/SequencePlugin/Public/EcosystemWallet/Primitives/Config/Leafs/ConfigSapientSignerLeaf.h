@@ -7,6 +7,7 @@ class SEQUENCEPLUGIN_API FConfigSapientSignerLeaf final : public FConfigLeaf
 public:
 	explicit FConfigSapientSignerLeaf(const FString& Address, const FString& Weight, const FString& ImageHash)
 	{
+		this->Type = EConfigLeafType::SapientSigner;
 		this->Address = Address;
 		this->Weight = Weight;
 		this->ImageHash = ImageHash;

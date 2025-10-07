@@ -2,11 +2,12 @@
 
 #include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
 
-class SEQUENCEPLUGIN_API FConfigSubdigestLeaf final : public FConfigLeaf
+class SEQUENCEPLUGIN_API FConfigAnyAddressSubdigestLeaf final : public FConfigLeaf
 {
 public:
-	explicit FConfigSubdigestLeaf(const FString& InSubdigest)
+	explicit FConfigAnyAddressSubdigestLeaf(const FString& InSubdigest)
 	{
+		this->Type = EConfigLeafType::AnyAddressSubdigest;
 		this->Subdigest = InSubdigest;
 	}
 	
@@ -19,6 +20,6 @@ public:
 	{
 		return FConfigLeaf::HashConfiguration();
 	}
-
+	
 	FString Subdigest;
 };

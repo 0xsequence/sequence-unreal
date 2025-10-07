@@ -1,5 +1,15 @@
 #pragma once
 
+enum EConfigLeafType
+{
+	Node,
+	Nested,
+	Signer,
+	SapientSigner,
+	Subdigest,
+	AnyAddressSubdigest
+};
+
 class SEQUENCEPLUGIN_API FConfigLeaf
 {
 public:
@@ -14,4 +24,6 @@ public:
 	{
 		return TArray<uint8>();
 	}
+
+	EConfigLeafType Type;
 };

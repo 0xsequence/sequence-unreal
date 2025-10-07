@@ -5,7 +5,7 @@
 #include "KeyMachine/KeyMachine.h"
 #include "KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "KeyMachine/Models/DeployHashResponse.h"
-#include "Primitives/Config/SeqConfig.h"
+#include "EcosystemWallet/Primitives/Config/SeqConfig.h"
 #include "UObject/Object.h"
 #include "WalletState.generated.h"
 

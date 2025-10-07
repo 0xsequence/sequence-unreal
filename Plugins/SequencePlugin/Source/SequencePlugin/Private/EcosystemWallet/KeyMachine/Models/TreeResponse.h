@@ -12,6 +12,5 @@ public:
 	UPROPERTY()
 	int32 Version;
 
-	UPROPERTY()
-	FString Tree;
+	TSharedPtr<FJsonValue> Tree;
 };

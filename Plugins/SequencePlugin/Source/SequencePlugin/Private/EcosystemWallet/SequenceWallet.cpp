@@ -1,6 +1,6 @@
 #include "EcosystemWallet/SequenceWallet.h"
 #include "WalletState.h"
-#include "Primitives/Calls/Call.h"
+#include "EcosystemWallet/Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
 #include "Requests/SendTransactionResponse.h"
 #include "Requests/SignMessageArgs.h"

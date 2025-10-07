@@ -1,6 +1,5 @@
 #include "WalletState.h"
-
-#include "Primitives/Config/Leafs/ConfigSapientSignerLeaf.h"
+#include "EcosystemWallet/Primitives/Config/Leafs/ConfigSapientSignerLeaf.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -29,15 +28,15 @@ void UWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 					this->UpdateConfig(ConfigImageHash, [this, OnSuccess, OnFailure]()
 					{
 						const FString SessionsManagerAddress = TEXT("0x0000000000CC58810c33F3a0D78aA1Ed80FaDcD8");
-						FConfigLeaf* Leaf = this->Config->Topology.Get()->FindSignerLeaf(SessionsManagerAddress);
+						TSharedPtr<FConfigLeaf> Leaf = this->Config->Topology.Get()->FindSignerLeaf(SessionsManagerAddress);
 						
-						if (Leaf == nullptr)
+						if (!Leaf.IsValid())
 						{
 							OnFailure();
 							return;
 						}
 
-						const FConfigSapientSignerLeaf* SapientSignerLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf);
+						const FConfigSapientSignerLeaf* SapientSignerLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf.Get());
 						const FString SessionsLeafImageHash = SapientSignerLeaf->ImageHash;
 						
 						this->UpdateSessionsTopology(SessionsLeafImageHash, [this, OnSuccess]()
@@ -133,12 +132,12 @@ void UWalletState::UpdateNonce(const TFunction<void()>& Callback)
 
 void UWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback)
 {
-	const TSuccessCallback<FConfigResponse> OnSuccess = [this, Callback](const FConfigResponse& Response)
+	const TSuccessCallback<FSeqConfigContext> OnSuccess = [this, Callback](const FSeqConfigContext& Response)
 	{
 		this->Config = NewObject<USeqConfig>();
-		this->Config->Checkpoint = Response.Config.Checkpoint;
-		this->Config->Threshold = Response.Config.Threshold;
-		this->Config->Topology = FConfigTopology::FromServiceConfigTree(Response.Config.Tree);
+		this->Config->Checkpoint = Response.Checkpoint;
+		this->Config->Threshold = Response.Threshold;
+		this->Config->Topology = FConfigTopology::FromServiceConfigTree(Response.Tree);
 		
 		Callback();
 	};
@@ -154,7 +153,7 @@ void UWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()
 
 void UWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback)
 {
-	const TSuccessCallback<FTreeResponse> OnSuccess = [this, Callback](const FTreeResponse& Response)
+	const TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess = [this, Callback](const TSharedPtr<FJsonValue>& Tree)
 	{
 		Callback();
 	};
