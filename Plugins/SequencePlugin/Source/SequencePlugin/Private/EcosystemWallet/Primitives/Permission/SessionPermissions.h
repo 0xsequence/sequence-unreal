@@ -14,7 +14,7 @@ public:
 	int64 ChainId;
 
 	UPROPERTY()
-	FString Signer;
+	FString SessionAddress;
 
 	UPROPERTY()
 	int64 ValueLimit;

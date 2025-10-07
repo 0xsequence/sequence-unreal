@@ -22,5 +22,5 @@ public:
 	FString LoginMethod;
 	
 	UPROPERTY()
-	FString Email;
+	FString UserEmail;
 };

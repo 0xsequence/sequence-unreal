@@ -4,6 +4,7 @@
 #include "Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
 #include "Requests/ConnectResponse.h"
+#include "Requests/SessionArgs.h"
 #include "Sequence/SequenceSdk.h"
 #include "Signers/SessionCredentials.h"
 #include "Storage/SessionStorage.h"
@@ -30,17 +31,33 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
 {
     const FString ChainIdStr = SequenceSdk::GetChainIdString();
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
-    FString WalletAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
+    FString SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
-    const bool bIncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
+    Permissions.SessionAddress = SessionAddress;
+
+    FSessionArgs SessionArgs;
+    if (Permissions.Permissions.Num() == 0)
+    {
+        SessionArgs = FSessionArgs(SessionAddress);
+    }
+    else
+    {
+        SessionArgs = FSessionArgs(
+            Permissions.SessionAddress,
+            Permissions.ChainId,
+            Permissions.ValueLimit,
+            Permissions.Deadline,
+            Permissions.Permissions);
+    }
+
+    const bool IncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
 
     FConnectArgs Payload;
-    Payload.SessionAddress           = WalletAddress;
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
     Payload.Origin                   = this->Origin;
-    Payload.Permissions              = Permissions;
-    Payload.bIncludeImplicitSession  = bIncludeImplicitSession;
+    Payload.Session                 = SessionArgs;
+    Payload.IncludeImplicitSession  = IncludeImplicitSession;
 
     const FString& PayloadJson = USequenceSupport::StructToString(Payload);
     UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *PayloadJson);
@@ -56,7 +73,7 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
         Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
         Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
         Credentials.LoginMethod = Response.LoginMethod;
-        Credentials.Email = Response.Email;
+        Credentials.UserEmail = Response.UserEmail;
 
         this->Storage->AddSession(Credentials);
         

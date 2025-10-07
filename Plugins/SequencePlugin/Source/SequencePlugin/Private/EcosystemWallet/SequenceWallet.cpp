@@ -92,7 +92,7 @@ FWalletInfo USequenceWallet::GetWalletInfo()
 	
 	FWalletInfo Info;
 	Info.Address = Session.Address;
-	Info.Email = Session.Email;
+	Info.Email = Session.UserEmail;
 
 	return Info;
 }

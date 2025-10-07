@@ -21,7 +21,7 @@ public:
 	FString Signature;
 	
 	UPROPERTY()
-	FString Email;
+	FString UserEmail;
 };
 
 USTRUCT()
