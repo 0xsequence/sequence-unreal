@@ -1,4 +1,4 @@
-#include "RSY.h"
+#include "EcosystemWallet/Primitives/Signatures/RSY.h"
 #include "EthAbi/EthAbiBridge.h"
 #include "Util/ByteArrayUtils.h"
 
@@ -56,8 +56,8 @@ TSharedPtr<FRSY> FRSY::Unpack(const TArray<uint8>& RSY)
     int32 YParity = (SBytes[0] & 0x80) ? 1 : 0;
     SBytes[0] &= 0x7F;
 
-    FString RStr = FByteArrayUtils::BytesToHexString(RBytes);
-    FString SStr = FByteArrayUtils::BytesToHexString(SBytes);
+    FString RStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(RBytes));
+    FString SStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(SBytes));
 
     return MakeShared<FRSY>(RStr, SStr, YParity);
 }
@@ -79,8 +79,8 @@ TSharedPtr<FRSY> FRSY::UnpackFrom65(const TArray<uint8>& Sig65)
     uint8 V = Sig65[64];
     int32 Y = VToYParity(V);
 
-    FString RStr = FByteArrayUtils::BytesToHexString(RBytes);
-    FString SStr = FByteArrayUtils::BytesToHexString(SBytes);
+    FString RStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(RBytes));
+    FString SStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(SBytes));
 
     return MakeShared<FRSY>(RStr, SStr, Y);
 }

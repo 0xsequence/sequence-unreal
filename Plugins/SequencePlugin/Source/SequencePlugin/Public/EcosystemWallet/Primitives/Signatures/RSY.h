@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-class FRSY : public TSharedFromThis<FRSY>
+class SEQUENCEPLUGIN_API FRSY
 {
 public:
     FString R;

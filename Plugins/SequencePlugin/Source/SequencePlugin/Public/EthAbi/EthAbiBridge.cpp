@@ -42,20 +42,12 @@ TArray<uint8> FEthAbiBridge::EncodeBigInteger(const FString& Value)
 		TArray<uint8> Bytes;
 		Bytes.Append(reinterpret_cast<const uint8*>(data), len);
 		free_encoded_bytes(data);
-
-		UE_LOG(LogTemp, Log, TEXT("Encoded %d bytes"), len);
-		for (uint8 B : Bytes)
-		{
-			UE_LOG(LogTemp, Log, TEXT("%02x"), B);
-		}
-
+		
 		return Bytes;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to encode bigint"));
-		return TArray<uint8>();
-	}
+	
+	UE_LOG(LogTemp, Error, TEXT("Failed to encode bigint"));
+	return TArray<uint8>();
 }
 
 FString FEthAbiBridge::HexToBigIntString(const FString& Value)
