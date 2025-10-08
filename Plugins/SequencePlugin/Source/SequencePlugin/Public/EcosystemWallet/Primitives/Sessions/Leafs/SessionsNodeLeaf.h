@@ -6,7 +6,7 @@ class SEQUENCEPLUGIN_API FSessionsNodeLeaf final : public FSessionsLeaf
 public:
 	explicit FSessionsNodeLeaf(const FString& InValue)
 	{
-		this->Type = ESessionsLeafType::Node;
+		this->Type = ESessionsLeafType::SessionsNode;
 		this->Value = InValue;
 	}
 	

@@ -20,19 +20,10 @@ FString FSessionsTopology::FindIdentitySigner() const
 		return "";
 	}
 
-	if (IsLeaf())
+	if (IsLeaf() && Leaf->Type == ESessionsLeafType::IdentitySigner)
 	{
-		switch (Leaf->Type)
-		{
-		case ESessionsLeafType::IdentitySigner:
-			{
-				auto* IdentitySignerLeaf = static_cast<FSessionsIdentitySignerLeaf*>(Leaf.Get());
-				return IdentitySignerLeaf->IdentitySigner;
-			}
-
-		default:
-			return "";
-		}
+		auto* IdentitySignerLeaf = static_cast<FSessionsIdentitySignerLeaf*>(Leaf.Get());
+		return IdentitySignerLeaf->IdentitySigner;
 	}
 
 	return "";

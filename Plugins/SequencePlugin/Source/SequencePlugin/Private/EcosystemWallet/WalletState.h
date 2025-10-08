@@ -6,6 +6,7 @@
 #include "KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "KeyMachine/Models/DeployHashResponse.h"
 #include "EcosystemWallet/Primitives/Config/SeqConfig.h"
+#include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
 #include "UObject/Object.h"
 #include "WalletState.generated.h"
 
@@ -20,7 +21,7 @@ public:
 	FString SessionsImageHash = "";
 	FString DeployHash = "";
 	bool IsDeployed = false;
-	int64 Nonce = 0;
+	FString Nonce = "0";
 	FDeployHashContext DeployContext = FDeployHashContext();
 	TArray<FConfigUpdate> ConfigUpdates;
 
@@ -37,6 +38,8 @@ private:
 	
 	UPROPERTY()
 	USeqConfig* Config = nullptr;
+
+	TSharedPtr<FSessionsTopology> SessionsTopology;
 
 	int32 UpdateProgress = 0;
 

@@ -28,4 +28,11 @@ public:
 	 * @return The encoded byte array.
 	 */
 	static TArray<uint8> EncodeBigInteger(const FString& Value);
+
+	/**
+	 * Convert a hex such as '0x0000000000000000000000000000000000000000000000000000000000000020' to a Big Int '32'
+	 * @param Hex The encoded BigInt as a hex
+	 * @return The converted BigInt as a string
+	 */
+	static FString HexToBigIntString(const FString& Hex);
 };

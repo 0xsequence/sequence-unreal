@@ -2,7 +2,7 @@
 
 enum ESessionsLeafType
 {
-	Node,
+	SessionsNode,
 	IdentitySigner,
 	ImplicitBlacklist,
 	Permissions

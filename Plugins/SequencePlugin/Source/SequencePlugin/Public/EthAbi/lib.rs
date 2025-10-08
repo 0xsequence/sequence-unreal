@@ -135,6 +135,40 @@ if num_str.is_null() || out_len.is_null() {
 }
 
 #[no_mangle]
+pub extern "C" fn hex_to_bigint_decimal(hex_cstr: *const c_char) -> *mut c_char {
+    // Safety: only unsafe part is reading the C string.
+    // The function itself has no unsafe logic beyond that.
+    if hex_cstr.is_null() {
+        return std::ptr::null_mut();
+    }
+
+    let hex_str = unsafe {
+        match CStr::from_ptr(hex_cstr).to_str() {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        }
+    };
+
+    // Strip optional 0x prefix
+    let cleaned = hex_str.trim_start_matches("0x").trim_start_matches("0X");
+
+    // Parse hex → BigUint
+    let value = match BigUint::from_str_radix(cleaned, 16) {
+        Ok(v) => v,
+        Err(_) => return std::ptr::null_mut(),
+    };
+
+    // Convert to decimal string
+    let decimal_str = value.to_str_radix(10);
+
+    // Convert Rust string → C string
+    match CString::new(decimal_str) {
+        Ok(c_string) => c_string.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn free_encoded_bytes(ptr: *mut c_uchar) {
     if ptr.is_null() {
         return;
@@ -149,7 +183,7 @@ pub extern "C" fn free_encoded_bytes(ptr: *mut c_uchar) {
 pub extern "C" fn free_string(s: *mut c_char) {
     if !s.is_null() {
         unsafe {
-            CString::from_raw(s);
+            drop(CString::from_raw(s));
         }
     }
 }

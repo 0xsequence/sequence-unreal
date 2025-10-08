@@ -1,5 +1,7 @@
 #include "WalletState.h"
 #include "EcosystemWallet/Primitives/Config/Leafs/ConfigSapientSignerLeaf.h"
+#include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -109,7 +111,7 @@ void UWalletState::UpdateNonce(const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
-		this->IsDeployed = Response != "0x";
+		this->Nonce = FEthAbiBridge::HexToBigIntString(Response);
 		Callback();
 	};
 
@@ -155,6 +157,7 @@ void UWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunct
 {
 	const TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess = [this, Callback](const TSharedPtr<FJsonValue>& Tree)
 	{
+		this->SessionsTopology = FSessionsTopology::FromServiceConfigTree(Tree);
 		Callback();
 	};
 
