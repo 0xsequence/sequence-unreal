@@ -1,4 +1,8 @@
 #include "SessionsTopology.h"
+#include "Leafs/SessionsIdentitySignerLeaf.h"
+#include "Leafs/SessionsImplicitBlacklistLeaf.h"
+#include "Leafs/SessionsPermissionsLeaf.h"
+#include "Util/ByteArrayUtils.h"
 
 TSharedPtr<FSessionsLeaf> FSessionsTopology::FindIdentitySigner(const FString& Address) const
 {
@@ -31,4 +35,60 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSh
 	}
 	
 	return MakeShareable(new FSessionsTopology());
+}
+
+TSharedPtr<FSessionsLeaf> FSessionsTopology::DecodeLeaf(const FString& Value)
+{
+	TArray<uint8> Data;
+	if (FByteArrayUtils::HexStringToBytes(Value, Data))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to convert hex to byte array"));
+		return nullptr;
+	}
+
+	uint8 Flag = Data[0];
+
+	if (Flag == FlagBlacklist)
+	{
+		TArray<FString> Blacklist;
+		for (int32 i = 1; i < Data.Num(); i += 20)
+		{
+			if (i + 20 > Data.Num())
+				break;
+
+			TArray<uint8> Slice;
+			Slice.Append(&Data[i], 20);
+			FString Hex = FByteArrayUtils::BytesToHexString(Slice);
+			Blacklist.Add(Hex);
+		}
+
+		return MakeShared<FSessionsImplicitBlacklistLeaf>(FSessionsImplicitBlacklistLeaf(Blacklist));
+	}
+
+	if (Flag == FlagIdentitySigner)
+	{
+		if (Data.Num() < 21)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid identity signer data"));
+			return nullptr;
+		}
+
+		TArray<uint8> Slice;
+		Slice.Append(&Data[1], 20);
+		const FString IdentitySignerValue = FByteArrayUtils::BytesToHexString(Slice);
+
+		return MakeShared<FSessionsIdentitySignerLeaf>(FSessionsIdentitySignerLeaf(IdentitySignerValue));
+	}
+
+	if (Flag == FlagPermissions)
+	{
+		TArray<uint8> Slice;
+		Slice.Append(&Data[1], Data.Num() - 1);
+
+		FSessionPermissions Permissions = FSessionPermissions::Decode(Slice);
+		return MakeShared<FSessionsPermissionsLeaf>(FSessionsPermissionsLeaf(Permissions));
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Invalid leaf"));
+	return nullptr;
 }

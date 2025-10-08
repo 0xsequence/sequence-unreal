@@ -13,6 +13,24 @@ FString FByteArrayUtils::BytesToHexString(const TArray<uint8>& Bytes)
 	return HexString;
 }
 
+FString FByteArrayUtils::BytesToBigIntHexString(const TArray<uint8>& Bytes)
+{
+	FString Out;
+	for (uint8 Byte : Bytes)
+	{
+		Out += FString::Printf(TEXT("%02x"), Byte);
+	}
+
+	// Strip leading zeros
+	int32 FirstNonZero = 0;
+	while (FirstNonZero < Out.Len() && Out[FirstNonZero] == '0')
+		++FirstNonZero;
+
+	FString Trimmed = (FirstNonZero < Out.Len()) ? Out.Mid(FirstNonZero) : TEXT("0");
+
+	return TEXT("0x") + Trimmed;
+}
+
 bool FByteArrayUtils::HexStringToBytes(const FString& HexString, TArray<uint8>& OutBytes)
 {
 	FString CleanHex = HexString;

@@ -23,9 +23,9 @@ FSessionPermissions UContractPermissions::GetSessionPermissions()
 	Things.Add(ContractPermission);
 
 	FSessionPermissions Permissions;
-	Permissions.ChainId = this->ChainId;
-	Permissions.Deadline = this->Deadline;
-	Permissions.ValueLimit = this->ValueLimit;
+	Permissions.ChainId = FString::Printf(TEXT("%lld"), this->ChainId);
+	Permissions.Deadline = FString::Printf(TEXT("%lld"), this->Deadline);
+	Permissions.ValueLimit = FString::Printf(TEXT("%lld"), this->ValueLimit);
 	Permissions.Permissions = Things; 
 
 	return Permissions;

@@ -4,6 +4,8 @@ class SEQUENCEPLUGIN_API FByteArrayUtils
 {
 public:
 	static FString BytesToHexString(const TArray<uint8>& Bytes);
+
+	static FString BytesToBigIntHexString(const TArray<uint8>& Bytes);
 	
 	static bool HexStringToBytes(const FString& HexString, TArray<uint8>& OutBytes);
 
