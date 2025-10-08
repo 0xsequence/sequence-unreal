@@ -4,9 +4,38 @@
 #include "Leafs/SessionsPermissionsLeaf.h"
 #include "Util/ByteArrayUtils.h"
 
-TSharedPtr<FSessionsLeaf> FSessionsTopology::FindIdentitySigner(const FString& Address) const
+FString FSessionsTopology::FindIdentitySigner() const
 {
-	return MakeShareable(new FSessionsLeaf);
+	if (IsBranch())
+	{
+		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
+		{
+			FString ChildResult = Child.Get()->FindIdentitySigner();
+			if (ChildResult != "")
+			{
+				return ChildResult;
+			}
+		}
+
+		return "";
+	}
+
+	if (IsLeaf())
+	{
+		switch (Leaf->Type)
+		{
+		case ESessionsLeafType::IdentitySigner:
+			{
+				auto* IdentitySignerLeaf = static_cast<FSessionsIdentitySignerLeaf*>(Leaf.Get());
+				return IdentitySignerLeaf->IdentitySigner;
+			}
+
+		default:
+			return "";
+		}
+	}
+
+	return "";
 }
 
 TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSharedPtr<FJsonValue>& Input)
@@ -33,14 +62,21 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSh
 		UE_LOG(LogTemp, Error, TEXT("Invalid JSON object"));
 		return MakeShared<FSessionsTopology>(FSessionsTopology());
 	}
-	
-	return MakeShareable(new FSessionsTopology());
+
+	const TSharedPtr<FJsonObject> JsonObject = Input->AsObject();
+	if (JsonObject->HasField(TEXT("data")))
+	{
+		const FString DataValue = JsonObject->GetStringField(TEXT("data"));
+		return MakeShareable(new FSessionsTopology(DecodeLeaf(DataValue)));
+	}
+
+	return MakeShared<FSessionsTopology>(FSessionsTopology());
 }
 
 TSharedPtr<FSessionsLeaf> FSessionsTopology::DecodeLeaf(const FString& Value)
 {
 	TArray<uint8> Data;
-	if (FByteArrayUtils::HexStringToBytes(Value, Data))
+	if (!FByteArrayUtils::HexStringToBytes(Value, Data))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to convert hex to byte array"));
 		return nullptr;
@@ -76,7 +112,7 @@ TSharedPtr<FSessionsLeaf> FSessionsTopology::DecodeLeaf(const FString& Value)
 		TArray<uint8> Slice;
 		Slice.Append(&Data[1], 20);
 		const FString IdentitySignerValue = FByteArrayUtils::BytesToHexString(Slice);
-
+		
 		return MakeShared<FSessionsIdentitySignerLeaf>(FSessionsIdentitySignerLeaf(IdentitySignerValue));
 	}
 
