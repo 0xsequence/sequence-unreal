@@ -1,17 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/BigInt.h"
 
 class SEQUENCEPLUGIN_API FRSY
 {
 public:
-    FString R;
-    FString S;
+    FBigInt R;
+    FBigInt S;
     int32 YParity = 0;
 
-    FRSY() = default;
-
-    FRSY(const FString& InR, const FString& InS, int32 InYParity)
+    FRSY(const FBigInt& InR, const FBigInt& InS, int32 InYParity)
         : R(InR), S(InS), YParity(InYParity) {}
 
     TArray<uint8> Pack() const;
@@ -34,7 +33,7 @@ public:
 
     FString ToString() const
     {
-        return FString::Printf(TEXT("R: %s, S: %s, Y: %d"), *R, *S, YParity);
+        return FString::Printf(TEXT("R: %s, S: %s, Y: %d"), *R.Value, *S.Value, YParity);
     }
 
 private:

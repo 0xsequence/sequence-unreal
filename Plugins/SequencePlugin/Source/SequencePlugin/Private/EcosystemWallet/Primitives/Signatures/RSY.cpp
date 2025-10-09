@@ -6,8 +6,8 @@ TArray<uint8> FRSY::Pack() const
 {
     checkf(YParity == 0 || YParity == 1, TEXT("YParity must be 0 or 1"));
 
-    TArray<uint8> RBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(R), 32);
-    TArray<uint8> SBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(S), 32);
+    TArray<uint8> RBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(R.Value), 32);
+    TArray<uint8> SBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(S.Value), 32);
 
     if (YParity % 2 == 1)
     {
@@ -31,11 +31,11 @@ TSharedPtr<FRSY> FRSY::FromString(const FString& Input)
         return nullptr;
     }
 
-    FString RPart = FEthAbiBridge::HexToBigIntString(Parts[0].TrimStartAndEnd());
-    FString SPart = FEthAbiBridge::HexToBigIntString(Parts[1].TrimStartAndEnd());
-    FString VPart = FEthAbiBridge::HexToBigIntString(Parts[2].TrimStartAndEnd());
+    FBigInt RPart = FBigInt::FromHex(Parts[0].TrimStartAndEnd());
+    FBigInt SPart = FBigInt::FromHex(Parts[1].TrimStartAndEnd());
+    FBigInt VPart = FBigInt::FromHex(Parts[2].TrimStartAndEnd());
 
-    int32 Y = VToYParity(BigIntMod2(VPart));
+    int32 Y = VToYParity(BigIntMod2(VPart.Value));
     return MakeShared<FRSY>(RPart, SPart, Y);
 }
 
@@ -56,8 +56,8 @@ TSharedPtr<FRSY> FRSY::Unpack(const TArray<uint8>& RSY)
     int32 YParity = (SBytes[0] & 0x80) ? 1 : 0;
     SBytes[0] &= 0x7F;
 
-    FString RStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(RBytes));
-    FString SStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(SBytes));
+    FBigInt RStr = FBigInt::FromHex(FByteArrayUtils::BytesToHexString(RBytes));
+    FBigInt SStr = FBigInt::FromHex(FByteArrayUtils::BytesToHexString(SBytes));
 
     return MakeShared<FRSY>(RStr, SStr, YParity);
 }
@@ -79,8 +79,8 @@ TSharedPtr<FRSY> FRSY::UnpackFrom65(const TArray<uint8>& Sig65)
     uint8 V = Sig65[64];
     int32 Y = VToYParity(V);
 
-    FString RStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(RBytes));
-    FString SStr = FEthAbiBridge::HexToBigIntString(FByteArrayUtils::BytesToHexString(SBytes));
+    FBigInt RStr = FBigInt::FromHex(FByteArrayUtils::BytesToHexString(RBytes));
+    FBigInt SStr = FBigInt::FromHex(FByteArrayUtils::BytesToHexString(SBytes));
 
     return MakeShared<FRSY>(RStr, SStr, Y);
 }
