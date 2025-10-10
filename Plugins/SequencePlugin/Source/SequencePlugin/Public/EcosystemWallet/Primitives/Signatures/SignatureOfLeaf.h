@@ -2,8 +2,8 @@
 
 enum EConfigSignatureType
 {
-	Signer,
-	SapientSigner
+	SignatureOfSigner,
+	SignatureOfSapientSigner
 };
 
 class SEQUENCEPLUGIN_API FSignatureOfLeaf

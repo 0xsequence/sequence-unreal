@@ -41,4 +41,16 @@ public:
 
 	TSharedPtr<FConfigNode> Node;
 	TSharedPtr<FConfigLeaf> Leaf;
+
+	static constexpr uint8 FlagSignatureHash = 0;
+	static constexpr uint8 FlagAddress = 1;
+	static constexpr uint8 FlagSignatureErc1271 = 2;
+	static constexpr uint8 FlagNode = 3;
+	static constexpr uint8 FlagBranch = 4;
+	static constexpr uint8 FlagSubdigest = 5;
+	static constexpr uint8 FlagNested = 6;
+	static constexpr uint8 FlagSignatureEthSign = 7;
+	static constexpr uint8 FlagSignatureAnyAddressSubdigest = 8;
+	static constexpr uint8 FlagSignatureSapient = 9;
+	static constexpr uint8 FlagSignatureSapientCompact = 10;
 };

@@ -4,7 +4,10 @@
 class SEQUENCEPLUGIN_API FSignatureOfSignerLeafHash : public FSignatureOfLeaf
 {
 public:
-	explicit FSignatureOfSignerLeafHash();
+	explicit FSignatureOfSignerLeafHash()
+	{
+		this->Type = EConfigSignatureType::SignatureOfSigner;
+	}
 
 	virtual TArray<uint8> Encode(const int32& Weight) override
 	{
