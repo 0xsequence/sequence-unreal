@@ -7,7 +7,9 @@ enum EConfigLeafType
 	Signer,
 	SapientSigner,
 	Subdigest,
-	AnyAddressSubdigest
+	AnyAddressSubdigest,
+	SignedSigner,
+	SignedSapientSigner,
 };
 
 class SEQUENCEPLUGIN_API FConfigLeaf

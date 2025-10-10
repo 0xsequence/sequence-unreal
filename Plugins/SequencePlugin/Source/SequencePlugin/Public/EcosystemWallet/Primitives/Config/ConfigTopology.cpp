@@ -6,8 +6,6 @@
 #include "Leafs/ConfigSapientSignerLeaf.h"
 #include "Leafs/ConfigSignerLeaf.h"
 #include "Leafs/ConfigSubdigestLeaf.h"
-#include "Serialization/JsonSerializer.h"
-#include "Serialization/JsonReader.h"
 #include "ConfigNode.h"
 #include "ConfigLeaf.h"
 
