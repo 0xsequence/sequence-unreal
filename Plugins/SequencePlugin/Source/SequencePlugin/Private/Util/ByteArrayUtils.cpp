@@ -66,6 +66,26 @@ bool FByteArrayUtils::HexStringToBytes(const FString& HexString, TArray<uint8>& 
 	return true;
 }
 
+TArray<uint8> FByteArrayUtils::ByteArrayFromNumber(const int32 Value, const int32 Size)
+{
+	if (Size < 1 || Size > 4)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Size must be between 1 and 4 bytes for an int."));
+		return {};
+	}
+
+	uint8 Bytes[4];
+	Bytes[0] = static_cast<uint8>((Value >> 24) & 0xFF);
+	Bytes[1] = static_cast<uint8>((Value >> 16) & 0xFF);
+	Bytes[2] = static_cast<uint8>((Value >> 8) & 0xFF);
+	Bytes[3] = static_cast<uint8>(Value & 0xFF);
+
+	int32 StartIndex = 4 - Size;
+
+	TArray<uint8> Out;
+	Out.Append(Bytes + StartIndex, Size);
+	return Out;
+}
 
 TArray<uint8> FByteArrayUtils::ConcatBytes(const TArray<TArray<uint8>>& Arrays)
 {

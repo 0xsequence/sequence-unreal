@@ -14,5 +14,5 @@ public:
 	int64 Threshold;
 	FString Checkpoint;
 	TSharedPtr<FConfigTopology> Topology;
-	FString Address;
+	TOptional<FString> Checkpointer;
 };

@@ -9,6 +9,8 @@ public:
 	
 	static bool HexStringToBytes(const FString& HexString, TArray<uint8>& OutBytes);
 
+	static TArray<uint8> ByteArrayFromNumber(const int32 Value, const int32 Size);
+
 	static TArray<uint8> ConcatBytes(const TArray<TArray<uint8>>& Arrays);
 
 	static TArray<uint8> PadLeft(const TArray<uint8>& Data, int32 TotalLength);
