@@ -68,4 +68,5 @@ enum ENetwork
 	FrequencyTestnet    UMETA(DisplayName = "Frequency Testnet"),
 	IncentivTestnet     UMETA(DisplayName = "Incentiv Testnet"),
 	IncentivTestnetV2     UMETA(DisplayName = "Incentiv Testnet v2"),
+	SandboxTestnet     UMETA(DisplayName = "Sandbox Testnet"),
 };
