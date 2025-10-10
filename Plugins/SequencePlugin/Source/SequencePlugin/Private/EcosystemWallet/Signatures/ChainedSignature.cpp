@@ -21,10 +21,9 @@ TArray<uint8> FChainedSignature::Encode()
 	Output.Add(Flag);
 
 	TArray<uint8> CheckpointerBytes;
-	if (SigForCheckpointer.Configuration->Checkpointer.IsSet() &&
-		FByteArrayUtils::HexStringToBytes(SigForCheckpointer.Configuration->Checkpointer.GetValue(), CheckpointerBytes))
+	if (SigForCheckpointer.Configuration->Checkpointer.IsSet())
 	{
-		TArray<uint8> Checkpointer = FByteArrayUtils::PadLeft(CheckpointerBytes, 20);
+		TArray<uint8> Checkpointer = FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(SigForCheckpointer.Configuration->Checkpointer.GetValue()), 20);
 		Output.Append(Checkpointer);
 
 		int32 CheckpointerDataSize = SigForCheckpointer.CheckpointerData.Num();

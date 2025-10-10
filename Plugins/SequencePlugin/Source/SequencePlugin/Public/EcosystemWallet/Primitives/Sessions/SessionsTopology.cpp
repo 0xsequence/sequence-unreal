@@ -66,13 +66,7 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSh
 
 TSharedPtr<FSessionsLeaf> FSessionsTopology::DecodeLeaf(const FString& Value)
 {
-	TArray<uint8> Data;
-	if (!FByteArrayUtils::HexStringToBytes(Value, Data))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to convert hex to byte array"));
-		return nullptr;
-	}
-
+	TArray<uint8> Data = FByteArrayUtils::HexStringToBytes(Value);
 	uint8 Flag = Data[0];
 
 	if (Flag == FlagBlacklist)

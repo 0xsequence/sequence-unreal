@@ -7,13 +7,7 @@ bool FHexStringToBytes::RunTest(const FString& Parameters)
 {
     const FString HexString = "0x1234567890123456789012345678901234567890";
 
-    TArray<uint8> Bytes;
-    const bool Result = FByteArrayUtils::HexStringToBytes(HexString, Bytes);
-    if (!Result)
-    {
-        UE_LOG(LogTemp, Error, TEXT("HexStringToBytes returned false"));
-        return false;
-    }
+    TArray<uint8> Bytes = FByteArrayUtils::HexStringToBytes(HexString);
 
     const FString NewHexString = FByteArrayUtils::BytesToHexString(Bytes);
 

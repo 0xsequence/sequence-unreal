@@ -33,12 +33,7 @@ bool FRSYUnpack64::RunTest(const FString& Parameters)
     const FString ExpectedS = "46727757965692218362764576115656173708633952338423148573322458993345607589319";
     constexpr int32 ExpectedY = 0;
 
-    TArray<uint8> RsyBytes;
-    if (!FByteArrayUtils::HexStringToBytes(EncodedRsy, RsyBytes))
-    {
-        UE_LOG(LogTemp, Log, TEXT("HexStringToBytes failed"));
-        return false;
-    }
+    TArray<uint8> RsyBytes = FByteArrayUtils::HexStringToBytes(EncodedRsy);
     
     TSharedPtr<FRSY> RSY = FRSY::Unpack(RsyBytes);
 

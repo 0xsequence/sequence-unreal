@@ -1,5 +1,6 @@
-use ethabi::{Address, Function, Token, Param, ParamType, StateMutability};
+use ethabi::{encode, decode as abi_decode, Address, Function, Token, Param, ParamType, StateMutability};
 use serde_json::{json, Map, Value};
+use serde::Deserialize;
 use hex::FromHex;
 use std::ffi::{CStr, CString};
 use hex::decode;
@@ -8,6 +9,14 @@ use num_bigint::BigUint;
 use num_traits::Num;
 use std::os::raw::{c_char, c_uchar, c_int};
 use std::ptr;
+use std::slice;
+
+#[derive(Deserialize)]
+struct AbiValue {
+    #[serde(rename = "type")]
+    kind: String,
+    value: String,
+}
 
 #[no_mangle]
 pub extern "C" fn encode_function_call(signature: *const c_char, args_json: *const c_char) -> *mut c_char {
@@ -169,6 +178,125 @@ pub extern "C" fn hex_to_bigint_decimal(hex_cstr: *const c_char) -> *mut c_char 
 }
 
 #[no_mangle]
+pub extern "C" fn abi_encode_json(
+    json_ptr: *const c_char,
+    out_len: *mut usize,
+) -> *mut c_uchar {
+    // Convert C string from Unreal
+    let json_str = unsafe {
+        assert!(!json_ptr.is_null());
+        CStr::from_ptr(json_ptr).to_str().unwrap()
+    };
+
+    // Parse JSON array of ABI values
+    let values: Vec<AbiValue> = serde_json::from_str(json_str).unwrap();
+
+    // Convert to ethabi Tokens
+    let mut tokens = Vec::new();
+    for v in values {
+        match v.kind.as_str() {
+            "address" => {
+                let addr: Address = v.value.parse().unwrap();
+                tokens.push(Token::Address(addr));
+            }
+            "bytes" => {
+                let s = v.value.strip_prefix("0x").unwrap_or(&v.value);
+                let bytes = hex::decode(s).unwrap();
+                tokens.push(Token::Bytes(bytes));
+            }
+            "string" => {
+                tokens.push(Token::String(v.value));
+            }
+            "uint256" => {
+                use ethabi::ethereum_types::U256;
+                let num = U256::from_dec_str(&v.value).unwrap();
+                tokens.push(Token::Uint(num));
+            }
+            "bool" => {
+                let b = match v.value.as_str() {
+                    "true" | "1" => true,
+                    "false" | "0" => false,
+                    _ => panic!("Invalid bool value"),
+                };
+                tokens.push(Token::Bool(b));
+            }
+            other => panic!("Unsupported type: {}", other),
+        }
+    }
+
+    // Encode via ethabi (standard ABI encoding)
+    let encoded = encode(&tokens);
+    let len = encoded.len();
+    unsafe { *out_len = len };
+
+    // Return heap-allocated buffer to Unreal
+    let buf = encoded.into_boxed_slice();
+    Box::into_raw(buf) as *mut c_uchar
+}
+
+#[no_mangle]
+pub extern "C" fn abi_decode_types_json(
+    raw_ptr: *const c_uchar,
+    raw_len: usize,
+    types_json_ptr: *const c_char,
+) -> *mut c_char {
+    // Safety: convert pointers to Rust types
+    let raw = unsafe { slice::from_raw_parts(raw_ptr, raw_len) };
+    let types_json = unsafe {
+        assert!(!types_json_ptr.is_null());
+        CStr::from_ptr(types_json_ptr).to_str().unwrap()
+    };
+
+    // Parse ["address","bytes","bytes"]
+    let type_list: Vec<String> = serde_json::from_str(types_json).unwrap();
+
+    // Convert to ParamType
+    let param_types: Vec<ParamType> = type_list
+        .iter()
+        .map(|t| match t.as_str() {
+            "address" => ParamType::Address,
+            "bytes" => ParamType::Bytes,
+            "string" => ParamType::String,
+            "uint256" => ParamType::Uint(256),
+            "bool" => ParamType::Bool,
+            other => panic!("Unsupported type: {}", other),
+        })
+        .collect();
+
+    // Decode ABI-encoded data
+    let tokens = abi_decode(&param_types, raw).expect("Failed to decode data");
+
+    // Convert each token → hex string
+    let mut hex_values = Vec::new();
+    for token in tokens {
+        let hex_str = match token {
+            Token::Address(addr) => format!("0x{:x}", addr),
+            Token::Bytes(b) => format!("0x{}", hex::encode(b)),
+            Token::Uint(u) => {
+                // ABI uint256 → 32-byte big-endian
+                let mut buf = [0u8; 32];
+                u.to_big_endian(&mut buf);
+                format!("0x{}", hex::encode(buf))
+            }
+            Token::Bool(b) => {
+                let v = if b { "01" } else { "00" };
+                format!("0x{}", v)
+            }
+            Token::String(s) => {
+                format!("0x{}", hex::encode(s.as_bytes()))
+            }
+            _ => "0x".to_string(),
+        };
+        hex_values.push(hex_str);
+    }
+
+    // Return JSON array of hex strings
+    let json_out = serde_json::to_string(&hex_values).unwrap();
+    let cstring = CString::new(json_out).unwrap();
+    cstring.into_raw()
+}
+
+#[no_mangle]
 pub extern "C" fn free_encoded_bytes(ptr: *mut c_uchar) {
     if ptr.is_null() {
         return;
@@ -176,6 +304,15 @@ pub extern "C" fn free_encoded_bytes(ptr: *mut c_uchar) {
 
     unsafe {
         libc::free(ptr as *mut libc::c_void);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn free_encoded_bytes_raw(ptr: *mut c_uchar, len: usize) {
+    if !ptr.is_null() {
+        unsafe {
+            let _ = Vec::from_raw_parts(ptr, len, len);
+        }
     }
 }
 

@@ -31,7 +31,7 @@ FString FByteArrayUtils::BytesToBigIntHexString(const TArray<uint8>& Bytes)
 	return TEXT("0x") + Trimmed;
 }
 
-bool FByteArrayUtils::HexStringToBytes(const FString& HexString, TArray<uint8>& OutBytes)
+TArray<uint8> FByteArrayUtils::HexStringToBytes(const FString& HexString)
 {
 	FString CleanHex = HexString;
 
@@ -43,9 +43,10 @@ bool FByteArrayUtils::HexStringToBytes(const FString& HexString, TArray<uint8>& 
 	if (CleanHex.Len() % 2 != 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid hex string length"));
-		return false;
+		return TArray<uint8>();
 	}
 
+	TArray<uint8> OutBytes;
 	OutBytes.Empty(CleanHex.Len() / 2);
 	OutBytes.Reserve(CleanHex.Len() / 2);
 
@@ -57,13 +58,13 @@ bool FByteArrayUtils::HexStringToBytes(const FString& HexString, TArray<uint8>& 
 		if (Byte == 0 && !(ByteString.Equals(TEXT("00"))))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Invalid hex digit in input: %s"), *ByteString);
-			return false;
+			return TArray<uint8>();
 		}
 
 		OutBytes.Add(Byte);
 	}
 
-	return true;
+	return OutBytes;
 }
 
 TArray<uint8> FByteArrayUtils::ByteArrayFromNumber(const int32 Value, const int32 Size)

@@ -35,4 +35,8 @@ public:
 	 * @return The converted BigInt as a string
 	 */
 	static FString HexToBigIntString(const FString& Hex);
+
+	static TArray<uint8> EncodeAbiPacked(const FString& JsonInput);
+	
+	static TArray<FString> DecodeAbiJson(const TArray<uint8>& Raw, const FString& TypesJson);
 };

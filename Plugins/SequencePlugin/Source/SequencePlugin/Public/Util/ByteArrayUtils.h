@@ -7,7 +7,7 @@ public:
 
 	static FString BytesToBigIntHexString(const TArray<uint8>& Bytes);
 	
-	static bool HexStringToBytes(const FString& HexString, TArray<uint8>& OutBytes);
+	static TArray<uint8> HexStringToBytes(const FString& HexString);
 
 	static TArray<uint8> ByteArrayFromNumber(const int32 Value, const int32 Size);
 

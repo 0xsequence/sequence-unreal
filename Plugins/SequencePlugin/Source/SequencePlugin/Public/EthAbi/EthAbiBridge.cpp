@@ -6,7 +6,10 @@ extern "C" {
 	char* decode_function_result(const char* abi_json, const char* encoded_data);
 	char* encode_bigint_to_bytes(const char* num_str, int* out_len);
 	char* hex_to_bigint_decimal(const char* num_str);
+	uint8* abi_encode_json(const char* JsonPtr, size_t* OutLen);
+	char* abi_decode_types_json(const uint8* RawPtr, size_t RawLen, const char* TypesJson);
 	void free_encoded_bytes(char* ptr);
+	void free_encoded_bytes_raw(uint8* Ptr, size_t Len);
 	void free_string(char* ptr);
 }
 
@@ -64,4 +67,53 @@ FString FEthAbiBridge::HexToBigIntString(const FString& Value)
 	free_string(ResultPtr);
 
 	return Result;
+}
+
+TArray<uint8> FEthAbiBridge::EncodeAbiPacked(const FString& JsonInput)
+{
+	FTCHARToUTF8 JsonUtf8(*JsonInput);
+
+	size_t OutLen = 0;
+	uint8* EncodedPtr = abi_encode_json(JsonUtf8.Get(), &OutLen);
+
+	TArray<uint8> Result;
+	if (EncodedPtr && OutLen > 0)
+	{
+		Result.Append(EncodedPtr, OutLen);
+		free_encoded_bytes_raw(EncodedPtr, OutLen);
+	}
+
+	return Result;
+}
+
+TArray<FString> FEthAbiBridge::DecodeAbiJson(const TArray<uint8>& Raw, const FString& TypesJson)
+{
+	FTCHARToUTF8 TypesUtf8(*TypesJson);
+
+	char* JsonPtr = abi_decode_types_json(Raw.GetData(), Raw.Num(), TypesUtf8.Get());
+	TArray<FString> ResultArray;
+
+	if (!JsonPtr)
+	{
+		return ResultArray;
+	}
+
+	FString JsonOut = UTF8_TO_TCHAR(JsonPtr);
+	free_string(JsonPtr);
+
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonOut);
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+
+	if (FJsonSerializer::Deserialize(Reader, JsonValues))
+	{
+		for (const TSharedPtr<FJsonValue>& Val : JsonValues)
+		{
+			if (Val->Type == EJson::String)
+			{
+				ResultArray.Add(Val->AsString());
+			}
+		}
+	}
+
+	return ResultArray;
 }
