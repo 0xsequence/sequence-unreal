@@ -7,10 +7,10 @@ enum ESapientSignatureType
 	SapientSignatureCompact
 };
 
-class SEQUENCEPLUGIN_API FSignatureOfSignerLeafHash : public FSignatureOfLeaf
+class SEQUENCEPLUGIN_API FSignatureOfSapientSignerLeaf final : public FSignatureOfLeaf
 {
 public:
-	explicit FSignatureOfSignerLeafHash(const ESapientSignatureType& SapientType)
+	explicit FSignatureOfSapientSignerLeaf(const ESapientSignatureType& SapientType)
 	{
 		this->Type = EConfigSignatureType::SignatureOfSapientSigner;
 		this->SapientType = SapientType;
