@@ -8,13 +8,9 @@
 #include "EcosystemWallet/Primitives/Config/SeqConfig.h"
 #include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
 #include "UObject/Object.h"
-#include "WalletState.generated.h"
 
-UCLASS()
-class SEQUENCEPLUGIN_API UWalletState : public UObject
+class SEQUENCEPLUGIN_API FWalletState
 {
-	GENERATED_BODY()
-
 public:
 	FString Address = "";
 	FString ImageHash = "";
@@ -24,20 +20,16 @@ public:
 	FString Nonce = "0";
 	FDeployHashContext DeployContext = FDeployHashContext();
 	TArray<FConfigUpdate> ConfigUpdates;
+	TSharedPtr<FSeqConfig> Config;
 
-	UWalletState();
+	FWalletState();
 	
 	void UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure);
 
 private:
-	UPROPERTY()
 	UKeyMachine* KeyMachine;
 
-	UPROPERTY()
 	UProvider* Provider;
-	
-	UPROPERTY()
-	USeqConfig* Config = nullptr;
 
 	TSharedPtr<FSessionsTopology> SessionsTopology;
 

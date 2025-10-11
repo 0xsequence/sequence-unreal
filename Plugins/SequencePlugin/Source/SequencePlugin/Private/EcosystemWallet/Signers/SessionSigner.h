@@ -3,17 +3,12 @@
 #include "CoreMinimal.h"
 #include "SessionCredentials.h"
 #include "UObject/Object.h"
-#include "SessionSigner.generated.h"
 
-UCLASS()
-class SEQUENCEPLUGIN_API USessionSigner : public UObject
+class SEQUENCEPLUGIN_API FSessionSigner
 {
-	GENERATED_BODY()
-
 public:
 	void Initialize(const FSessionCredentials& NewCredentials);
 
 private:
-	UPROPERTY()
 	FSessionCredentials Credentials;
 };

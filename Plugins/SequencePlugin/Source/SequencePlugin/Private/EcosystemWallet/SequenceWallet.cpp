@@ -12,7 +12,7 @@ USequenceWallet::USequenceWallet()
 {
 	this->Client = NewObject<UEcosystemClient>();
 	this->SessionStorage = NewObject<USessionStorage>();
-	this->WalletState = NewObject<UWalletState>();
+	this->WalletState = MakeShared<FWalletState>(FWalletState());
 }
 
 void USequenceWallet::AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)

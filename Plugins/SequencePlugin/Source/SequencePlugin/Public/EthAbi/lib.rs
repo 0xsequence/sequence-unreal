@@ -342,12 +342,20 @@ fn tokens_to_array_json(tokens: &[Token], params: &[Param]) -> Value {
 fn parse_token(value: &Value, param_type: &ParamType) -> Result<Token, ()> {
     use ethabi::ParamType::*;
     match (value, param_type) {
+        // address
         (Value::String(s), Address) => {
             let clean = s.trim_start_matches("0x");
             let bytes = hex::decode(clean).map_err(|_| ())?;
+            if bytes.len() != 20 {
+                return Err(());
+            }
             Ok(Token::Address(ethabi::Address::from_slice(&bytes)))
         }
+
+        // string
         (Value::String(s), String) => Ok(Token::String(s.clone())),
+
+        // uint / int
         (Value::Number(n), Uint(_)) => {
             let u = n.as_u64().ok_or(())?;
             Ok(Token::Uint(u.into()))
@@ -356,7 +364,60 @@ fn parse_token(value: &Value, param_type: &ParamType) -> Result<Token, ()> {
             let i = n.as_i64().ok_or(())?;
             Ok(Token::Int(i.into()))
         }
+
+        // bool
         (Value::Bool(b), Bool) => Ok(Token::Bool(*b)),
+
+        // dynamic bytes (bytes)
+        (Value::String(s), Bytes) => {
+            let clean = s.trim_start_matches("0x");
+            let bytes = hex::decode(clean).map_err(|_| ())?;
+            Ok(Token::Bytes(bytes))
+        }
+
+        // fixed bytes (bytes32, bytes4, etc.)
+        (Value::String(s), FixedBytes(size)) => {
+            let clean = s.trim_start_matches("0x");
+            let mut bytes = hex::decode(clean).map_err(|_| ())?;
+            if bytes.len() > *size {
+                bytes.truncate(*size); // cut extra bytes
+            } else if bytes.len() < *size {
+                bytes.resize(*size, 0u8); // pad with zeros
+            }
+            Ok(Token::FixedBytes(bytes))
+        }
+
+        // arrays
+        (Value::Array(values), Array(inner)) => {
+            let tokens = values
+                .iter()
+                .map(|v| parse_token(v, inner))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Token::Array(tokens))
+        }
+
+        // fixed arrays
+        (Value::Array(values), FixedArray(inner, size)) => {
+            let tokens = values
+                .iter()
+                .map(|v| parse_token(v, inner))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Token::FixedArray(tokens))
+        }
+
+        // tuples
+        (Value::Array(values), Tuple(types)) => {
+            if values.len() != types.len() {
+                return Err(());
+            }
+            let tokens = values
+                .iter()
+                .zip(types)
+                .map(|(v, t)| parse_token(v, t))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(Token::Tuple(tokens))
+        }
+
         _ => Err(()),
     }
 }
@@ -365,19 +426,16 @@ fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
     match (token, param_type) {
         (Token::Uint(n), ParamType::Uint(_)) |
         (Token::Int(n), ParamType::Int(_)) => {
-            let as_str = n.to_string();
-            match as_str.parse::<u64>() {
-                Ok(u) => Value::from(u),
-                Err(_) => Value::String(as_str),
-            }
+            // Always return as string to preserve full 256-bit precision
+            Value::String(n.to_string())
         }
         (Token::Address(addr), ParamType::Address) => {
             Value::String(format!("0x{}", hex::encode(addr)))
         }
         (Token::Bool(b), ParamType::Bool) => Value::Bool(*b),
         (Token::String(s), ParamType::String) => Value::String(s.clone()),
-        (Token::Bytes(ref b), ParamType::Bytes) |
-        (Token::FixedBytes(ref b), ParamType::FixedBytes(_)) => {
+        (Token::Bytes(b), ParamType::Bytes) |
+        (Token::FixedBytes(b), ParamType::FixedBytes(_)) => {
             Value::String(format!("0x{}", hex::encode(b)))
         }
         (Token::Array(arr), ParamType::Array(inner)) => {
@@ -387,11 +445,10 @@ fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
             Value::Array(arr.iter().map(|t| token_to_json(t, inner)).collect())
         }
         (Token::Tuple(tokens), ParamType::Tuple(types)) => {
-            let elements: Vec<Value> = tokens.iter()
+            Value::Array(tokens.iter()
                 .zip(types.iter())
                 .map(|(t, ty)| token_to_json(t, ty))
-                .collect();
-            Value::Array(elements)
+                .collect())
         }
         _ => Value::Null,
     }

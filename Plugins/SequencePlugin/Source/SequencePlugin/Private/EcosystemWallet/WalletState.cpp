@@ -5,13 +5,13 @@
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
-UWalletState::UWalletState()
+FWalletState::FWalletState()
 {
 	this->KeyMachine = NewObject<UKeyMachine>();
 	this->Provider = NewObject<UProvider>();
 }
 
-void UWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure)
+void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure)
 {
 	this->Address = Address;
 	
@@ -72,7 +72,7 @@ void UWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 	});
 }
 
-void UWalletState::UpdateDeployContext(const TFunction<void()>& Callback)
+void FWalletState::UpdateDeployContext(const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FDeployHashResponse> OnSuccess = [this, Callback](const FDeployHashResponse& Response)
 	{
@@ -90,7 +90,7 @@ void UWalletState::UpdateDeployContext(const TFunction<void()>& Callback)
 	this->KeyMachine->GetDeployHash(this->Address, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateDeployedState(const TFunction<void()>& Callback)
+void FWalletState::UpdateDeployedState(const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
@@ -107,7 +107,7 @@ void UWalletState::UpdateDeployedState(const TFunction<void()>& Callback)
 	this->Provider->CodeAt(this->Address, EBlockTag::EPending, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateNonce(const TFunction<void()>& Callback)
+void FWalletState::UpdateNonce(const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
@@ -132,11 +132,11 @@ void UWalletState::UpdateNonce(const TFunction<void()>& Callback)
 	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback)
+void FWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FSeqConfigContext> OnSuccess = [this, Callback](const FSeqConfigContext& Response)
 	{
-		this->Config = NewObject<USeqConfig>();
+		this->Config = MakeShared<FSeqConfig>();
 		this->Config->Checkpoint = Response.Checkpoint;
 		this->Config->Threshold = Response.Threshold;
 		this->Config->Topology = FConfigTopology::FromServiceConfigTree(Response.Tree);
@@ -153,7 +153,7 @@ void UWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()
 	KeyMachine->GetConfiguration(ImageHash, OnSuccess, OnFailure);
 }
 
-void UWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback)
+void FWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess = [this, Callback](const TSharedPtr<FJsonValue>& Tree)
 	{
@@ -170,7 +170,7 @@ void UWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunct
 	KeyMachine->GetTree(ImageHash, OnSuccess, OnFailure);
 }
 
-void UWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
+void FWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
@@ -192,7 +192,7 @@ void UWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
 	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
 }
 
-void UWalletState::GetOnchainImageHash(const TFunction<void(FString)>& Callback)
+void FWalletState::GetOnchainImageHash(const TFunction<void(FString)>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{

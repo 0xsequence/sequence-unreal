@@ -11,7 +11,7 @@ public:
 
 	bool NoChainId;
 	TArray<uint8> CheckpointerData;
-	USeqConfig* Configuration;
+	TSharedPtr<FSeqConfig> Configuration;
 	TArray<FRawSignature> Suffix;
 	TSharedPtr<FErc6492> Erc6492;
 };

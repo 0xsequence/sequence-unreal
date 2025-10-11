@@ -36,7 +36,19 @@ public:
 	 */
 	static FString HexToBigIntString(const FString& Hex);
 
+
+	/**
+	 * Encode an array of values.
+	 * @param JsonInput ["0x00", "0x00", "0x00"]
+	 * @return Encoded data. 
+	 */
 	static TArray<uint8> EncodeAbiPacked(const FString& JsonInput);
-	
+
+	/**
+	 * Decode encoded data with multiple types.
+	 * @param Raw Encoded data
+	 * @param TypesJson Json array of types: ["address", "bytes", "bytes"] 
+	 * @return Array of strings. Bytes are represented as hex strings 
+	 */
 	static TArray<FString> DecodeAbiJson(const TArray<uint8>& Raw, const FString& TypesJson);
 };
