@@ -14,6 +14,10 @@ public:
 	void FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)> OnSuccess, TFunction<void()> OnFailure);
 
 private:
+	TArray<FSessionSigner> GetValidImplicitSigners(const FString& IdentitySigner, const TArray<FString>& Blacklist);
+	TArray<FSessionSigner> GetValidExplicitSigners();
+	void FindSignerForEachCallAsync(const TArray<FSessionSigner>& AvailableSigners, const TFunction<void(TArray<FSessionSigner>)>& OnCompleted);
+	
 	FBigInt ChainId;
 	TArray<FCall> Calls;
 	TArray<FSessionSigner> Signers;

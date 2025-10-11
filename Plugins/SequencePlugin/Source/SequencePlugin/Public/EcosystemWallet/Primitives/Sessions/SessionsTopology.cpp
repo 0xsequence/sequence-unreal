@@ -4,13 +4,13 @@
 #include "Leafs/SessionsPermissionsLeaf.h"
 #include "Util/ByteArrayUtils.h"
 
-FString FSessionsTopology::FindIdentitySigner() const
+FString FSessionsTopology::GetIdentitySigner() const
 {
 	if (IsBranch())
 	{
 		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
 		{
-			FString ChildResult = Child.Get()->FindIdentitySigner();
+			FString ChildResult = Child.Get()->GetIdentitySigner();
 			if (ChildResult != "")
 			{
 				return ChildResult;
@@ -27,6 +27,65 @@ FString FSessionsTopology::FindIdentitySigner() const
 	}
 
 	return "";
+}
+
+TArray<FString> FSessionsTopology::GetImplicitBlacklist() const
+{
+	if (IsBranch())
+	{
+		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
+		{
+			TArray<FString> ChildResult = Child.Get()->GetImplicitBlacklist();
+			if (ChildResult.Num() > 0)
+			{
+				return ChildResult;
+			}
+		}
+
+		return TArray<FString>();
+	}
+
+	if (IsLeaf() && Leaf->Type == ESessionsLeafType::ImplicitBlacklist)
+	{
+		auto* IdentitySignerLeaf = static_cast<FSessionsImplicitBlacklistLeaf*>(Leaf.Get());
+		return IdentitySignerLeaf->Blacklist;
+	}
+
+	return TArray<FString>();
+}
+
+TArray<FString> FSessionsTopology::GetExplicitSigners() const
+{
+	TArray<FString> Empty;
+	return GetExplicitSigners(Empty);
+}
+
+TArray<FString> FSessionsTopology::GetExplicitSigners(const TArray<FString>& Current) const
+{
+	TArray<FString> Result = Current;
+	
+	if (IsBranch())
+	{
+		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
+		{
+			TArray<FString> ChildResult = Child.Get()->GetExplicitSigners();
+			if (ChildResult.Num() > 0)
+			{
+				return ChildResult;
+			}
+		}
+
+		return Result;
+	}
+
+	if (IsLeaf() && Leaf->Type == ESessionsLeafType::Permissions)
+	{
+		auto* PermissionsLeaf = static_cast<FSessionsPermissionsLeaf*>(Leaf.Get());
+		Result.Add(PermissionsLeaf->Permissions.SessionAddress);
+		return Result;
+	}
+
+	return Result;
 }
 
 TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSharedPtr<FJsonValue>& Input)

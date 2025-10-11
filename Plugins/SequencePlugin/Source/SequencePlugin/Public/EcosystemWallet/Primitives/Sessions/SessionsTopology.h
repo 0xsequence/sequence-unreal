@@ -33,7 +33,10 @@ public:
 		return this->Leaf != nullptr && this->Leaf.IsValid();
 	}
 
-	FString FindIdentitySigner() const;
+	FString GetIdentitySigner() const;
+	TArray<FString> GetImplicitBlacklist() const;
+	TArray<FString> GetExplicitSigners() const;
+	TArray<FString> GetExplicitSigners(const TArray<FString>& Current) const;
 	
 	static TSharedPtr<FSessionsTopology> FromServiceConfigTree(const TSharedPtr<FJsonValue>& Input);
 	static TSharedPtr<FSessionsLeaf> DecodeLeaf(const FString& Input);

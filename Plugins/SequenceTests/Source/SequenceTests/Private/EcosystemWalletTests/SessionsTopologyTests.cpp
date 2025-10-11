@@ -19,7 +19,7 @@ bool FSessionsTopologyFromTree::RunTest(const FString& Parameters)
         return false;
     }
 
-    const FString IdentitySigner = SessionsTopology.Get()->FindIdentitySigner();
+    const FString IdentitySigner = SessionsTopology.Get()->GetIdentitySigner();
 
     if (IdentitySigner == "")
     {
