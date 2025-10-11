@@ -10,7 +10,8 @@ public:
 	explicit FTransactionService(const TArray<TSharedPtr<FSessionSigner>>& InSigners, const TSharedPtr<FWalletState>& InWalletState)
 		: Signers(InSigners), WalletState(InWalletState) {};
 	
-	TTuple<FString, TArray<uint8>> SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed);
+	void SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed,
+		TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void()> OnFailure);
 
 private:
 	TArray<TSharedPtr<FSessionSigner>> Signers;

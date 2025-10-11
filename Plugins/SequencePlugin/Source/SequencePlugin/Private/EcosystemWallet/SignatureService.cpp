@@ -37,9 +37,11 @@ void FSignatureService::SignSapient(TFunction<void(FSignatureOfSapientSignerLeaf
 				ImplicitSigners.Add(Signer.Address);
 			}
 		}
+
+		const TArray<uint8> Data = FSessionCallSignature::EncodeSignatures(Signatures, SessionsTopology, ImplicitSigners, ExplicitSigners);
 		
 		const FString SessionsAddress = "0x0000000000CC58810c33F3a0D78aA1Ed80FaDcD8";
-		const FSignatureOfSapientSignerLeaf Signature = FSignatureOfSapientSignerLeaf(SessionsAddress, TArray<uint8>());
+		const FSignatureOfSapientSignerLeaf Signature = FSignatureOfSapientSignerLeaf(SessionsAddress, Data);
 		
 		OnSuccess(Signature);
 	}, OnFailure);

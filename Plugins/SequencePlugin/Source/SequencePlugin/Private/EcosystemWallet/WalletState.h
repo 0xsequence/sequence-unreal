@@ -21,6 +21,7 @@ public:
 	FDeployHashContext DeployContext = FDeployHashContext();
 	TArray<FConfigUpdate> ConfigUpdates;
 	TSharedPtr<FSeqConfig> Config;
+	TSharedPtr<FSessionsTopology> SessionsTopology;
 
 	FWalletState();
 	
@@ -30,8 +31,6 @@ private:
 	UKeyMachine* KeyMachine;
 
 	UProvider* Provider;
-
-	TSharedPtr<FSessionsTopology> SessionsTopology;
 
 	int32 UpdateProgress = 0;
 
