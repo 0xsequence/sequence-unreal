@@ -35,9 +35,9 @@ TArray<FSessionSigner> FSignerService::GetValidImplicitSigners(const FString& Id
 
 	for (FSessionSigner& Signer : this->Signers)
 	{
-		if (!Signer.IsExplicit &&
+		if (!Signer.Credentials.IsExplicit &&
 			Signer.GetIdentitySigner().Equals(IdentitySigner) &&
-			!Blacklist.Contains(Signer.Address))
+			!Blacklist.Contains(Signer.Credentials.SessionAddress))
 		{
 			Result.Add(Signer);
 		}
@@ -53,7 +53,7 @@ TArray<FSessionSigner> FSignerService::GetValidExplicitSigners()
 
 	for (const FSessionSigner& Signer : Signers)
 	{
-		if (Signer.IsExplicit && ExplicitSigners.Contains(Signer.Address))
+		if (Signer.Credentials.IsExplicit && ExplicitSigners.Contains(Signer.Credentials.SessionAddress))
 		{
 			Result.Add(Signer);
 		}

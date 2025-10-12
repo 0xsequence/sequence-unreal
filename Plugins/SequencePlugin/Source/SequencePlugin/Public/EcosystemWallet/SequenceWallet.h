@@ -9,7 +9,7 @@
 #include "Util/Async.h"
 #include "SequenceWallet.generated.h"
 
-class USessionStorage;
+class FSessionStorage;
 class FWalletState;
 
 UCLASS()
@@ -33,8 +33,5 @@ private:
 	UPROPERTY()
 	UEcosystemClient* Client = nullptr;
 	
-	UPROPERTY()
-	USessionStorage* SessionStorage;
-
 	TSharedPtr<FWalletState> WalletState;
 };

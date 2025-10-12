@@ -3,7 +3,10 @@
 
 void FSignatureService::SignCalls(TFunction<void(FRawSignature)> OnSuccess, TFunction<void()> OnFailure)
 {
-	
+	SignSapient([](FSignatureOfSapientSignerLeaf Signature)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Got sapient signature"));
+	}, OnFailure);
 }
 
 void FSignatureService::SignSapient(TFunction<void(FSignatureOfSapientSignerLeaf)> OnSuccess,
@@ -28,13 +31,13 @@ void FSignatureService::SignSapient(TFunction<void(FSignatureOfSapientSignerLeaf
 			FSessionCallSignature CallSignature = Signer.SignCall(ChainId, Calls[i], i, SessionsTopology, Space, Nonce);
 			Signatures.Add(CallSignature);
 			
-			if (Signer.IsExplicit)
+			if (Signer.Credentials.IsExplicit)
 			{
-				ExplicitSigners.Add(Signer.Address);
+				ExplicitSigners.Add(Signer.Credentials.SessionAddress);
 			}
 			else
 			{
-				ImplicitSigners.Add(Signer.Address);
+				ImplicitSigners.Add(Signer.Credentials.SessionAddress);
 			}
 		}
 

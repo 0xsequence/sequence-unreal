@@ -1,4 +1,6 @@
 #include "EcosystemWallet/SequenceWallet.h"
+
+#include "TransactionService.h"
 #include "WalletState.h"
 #include "EcosystemWallet/Primitives/Calls/Call.h"
 #include "Requests/SendTransactionArgs.h"
@@ -11,7 +13,6 @@
 USequenceWallet::USequenceWallet()
 {
 	this->Client = NewObject<UEcosystemClient>();
-	this->SessionStorage = NewObject<USessionStorage>();
 	this->WalletState = MakeShared<FWalletState>(FWalletState());
 }
 
@@ -43,12 +44,24 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 	};
 
-	const TFunction<void()> OnWalletStateFailed = [OnFailure]()
+	const TFunction<void()> OnInternalFailure = [OnFailure]()
 	{
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 	};
 	
-	this->WalletState->UpdateState(this->GetWalletInfo().Address, OnWalletStateUpdated, OnWalletStateFailed);
+	this->WalletState->UpdateState(this->GetWalletInfo().Address, [this, Transaction, OnInternalFailure]()
+	{
+		const FCalls Calls = Transaction.GetInterface()->GetCalls();
+
+		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
+
+		FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
+		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [](TTuple<FString, TArray<uint8>> Result)
+		{
+				
+		}, OnInternalFailure);
+	}, OnInternalFailure);
 }
 
 void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
@@ -76,12 +89,12 @@ void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<I
 
 void USequenceWallet::ClearSessions()
 {
-	this->SessionStorage->ClearSessions();
+	FSessionStorage::ClearSessions();
 }
 
 FWalletInfo USequenceWallet::GetWalletInfo()
 {
-	const FWalletSessions WalletSessions = this->SessionStorage->GetStoredSessions();
+	const FWalletSessions WalletSessions = FSessionStorage::GetStoredSessions();
 	if (!WalletSessions.HasSessions())
 	{
 		return FWalletInfo();
@@ -98,6 +111,6 @@ FWalletInfo USequenceWallet::GetWalletInfo()
 
 bool USequenceWallet::CheckIfWalletExists()
 {
-	const FWalletSessions WalletSessions = this->SessionStorage->GetStoredSessions();
+	const FWalletSessions WalletSessions = FSessionStorage::GetStoredSessions();
 	return WalletSessions.HasSessions();	
 }

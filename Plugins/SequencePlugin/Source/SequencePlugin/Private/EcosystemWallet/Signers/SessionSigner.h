@@ -11,7 +11,7 @@
 class SEQUENCEPLUGIN_API FSessionSigner
 {
 public:
-	void Initialize(const FSessionCredentials& NewCredentials);
+	explicit FSessionSigner(const FSessionCredentials& NewCredentials) : Credentials(NewCredentials) { }
 
 	FString GetIdentitySigner();
 	
@@ -20,9 +20,5 @@ public:
 	FSessionCallSignature SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
 		const TSharedPtr<FSessionsTopology> SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
 
-	bool IsExplicit;
-	FString Address;
-
-private:
 	FSessionCredentials Credentials;
 };

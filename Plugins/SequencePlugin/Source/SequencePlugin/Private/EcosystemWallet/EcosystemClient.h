@@ -38,10 +38,6 @@ public:
 	}
 
 private:
-	UPROPERTY()
-	USessionStorage* Storage = nullptr;
-
 	TSharedPtr<IRedirectHandler> RedirectHandler = nullptr;
-
 	FString Origin;
 };

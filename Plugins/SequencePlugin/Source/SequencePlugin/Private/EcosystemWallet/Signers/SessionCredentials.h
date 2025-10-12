@@ -13,6 +13,7 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 {
 	GENERATED_USTRUCT_BODY()
 
+	bool IsExplicit;
 	FString PrivateKey;
 	FString SessionAddress;
 	
@@ -29,6 +30,7 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 	{
 		TSharedPtr<FJsonObject> Root = MakeShared<FJsonObject>();
 
+		Root->SetBoolField(TEXT("isExplicit"), IsExplicit);
 		Root->SetStringField(TEXT("privateKey"), PrivateKey);
 		Root->SetStringField(TEXT("sessionAddress"), SessionAddress);
 		Root->SetStringField(TEXT("walletAddress"), WalletAddress);
@@ -47,6 +49,12 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 		FGuardConfig GuardConfig = FGuardConfig();
 		FAttestation Attestation = FAttestation();
 		FRSY Signature = FRSY();
+
+		bool IsExplicit = false;
+		if (Json->HasField(TEXT("isExplicit")))
+		{
+			IsExplicit = Json->GetBoolField(TEXT("isExplicit"));
+		}
 
 		FString PrivateKey = "";
 		if (Json->HasField(TEXT("privateKey")))
@@ -74,6 +82,7 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 		UE_LOG(LogTemp, Display, TEXT("UserEmail: %s"), *UserEmail);
 		
 		return FSessionCredentials {
+			IsExplicit,
 			PrivateKey,
 			SessionAddress,
 			WalletAddress,

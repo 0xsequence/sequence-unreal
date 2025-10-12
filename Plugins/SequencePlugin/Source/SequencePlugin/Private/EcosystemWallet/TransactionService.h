@@ -7,13 +7,13 @@
 class SEQUENCEPLUGIN_API FTransactionService
 {
 public:
-	explicit FTransactionService(const TArray<TSharedPtr<FSessionSigner>>& InSigners, const TSharedPtr<FWalletState>& InWalletState)
+	explicit FTransactionService(const TArray<FSessionSigner>& InSigners, const TSharedPtr<FWalletState>& InWalletState)
 		: Signers(InSigners), WalletState(InWalletState) {};
 	
 	void SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed,
 		TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void()> OnFailure);
 
 private:
-	TArray<TSharedPtr<FSessionSigner>> Signers;
+	TArray<FSessionSigner> Signers;
 	TSharedPtr<FWalletState> WalletState;
 };

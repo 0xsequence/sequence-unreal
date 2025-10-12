@@ -1,5 +1,4 @@
 #include "SessionStorage.h"
-
 #include "StorableCredentials.h"
 #include "Encryptors/AndroidEncryptor.h"
 #include "Encryptors/AppleEncryptor.h"
@@ -9,34 +8,23 @@
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
-USessionStorage::USessionStorage()
+TArray<FSessionSigner> FSessionStorage::GetStoredSigners()
 {
-	if constexpr (PLATFORM_ANDROID)
+	const FWalletSessions Sessions = GetStoredSessions();
+	
+	TArray<FSessionSigner> Signers;
+	for (FSessionCredentials Session : Sessions.Sessions)
 	{
-		this->Encryptor = NewObject<UAndroidEncryptor>();
+		Signers.Add(FSessionSigner(Session));
 	}
-	else if constexpr (PLATFORM_MAC)
-	{
-		this->Encryptor = NewObject<UAppleEncryptor>();
-	}
-	else if constexpr (PLATFORM_WINDOWS)
-	{
-		this->Encryptor = NewObject<UWindowsEncryptor>();
-	}
-	else if constexpr (PLATFORM_IOS)
-	{
-		this->Encryptor = NewObject<UAppleEncryptor>();
-	}
-	else
-	{
-		SEQ_LOG(Warning, TEXT("You are running on an unsupported platform. If you continue, make sure to define a 'FallbackEncryptionKey' value in your SequenceConfig.ini file to encrypt/decrypt stored credentials."))
-	}
+
+	return Signers;
 }
 
-FWalletSessions USessionStorage::GetStoredSessions()
+FWalletSessions FSessionStorage::GetStoredSessions()
 {
 	TArray<FSessionCredentials> Sessions;
-	if (!this->GetStoredSessions(Sessions))
+	if (!GetStoredSessions(Sessions))
 	{
 		FWalletSessions EmptySessions;
 		EmptySessions.Sessions.Empty();
@@ -48,9 +36,9 @@ FWalletSessions USessionStorage::GetStoredSessions()
 	};
 }
 
-bool USessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
+bool FSessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
 {
-	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
+	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(SaveSlot, UserIndex);
 
 	if (SaveGame != nullptr)
 	{
@@ -58,7 +46,7 @@ bool USessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
 		{
 			FString CtrJson = "";
 
-			if (Encryptor)
+			if (UGenericNativeEncryptor* Encryptor = GetEncryptor())
 			{
 				CtrJson = Encryptor->Decrypt(LoadedCredentials->EK);
 			}
@@ -88,7 +76,7 @@ bool USessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
 	return true;
 }
 
-void USessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
+void FSessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
 {
 	TArray<TSharedPtr<FJsonObject>> SessionsJson;
 	for (FSessionCredentials Session : Sessions)
@@ -103,9 +91,9 @@ void USessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
 
 		UE_LOG(LogTemp, Display, TEXT("Storing sessions Json %s"), *CtsJson);
 
-		if (Encryptor)
+		if (UGenericNativeEncryptor* Encryptor = GetEncryptor())
 		{
-			StorableCredentials->EK = this->Encryptor->Encrypt(CtsJson);
+			StorableCredentials->EK = Encryptor->Encrypt(CtsJson);
 			StorableCredentials->KL = CtsJsonLength;
 		}
 		else
@@ -114,30 +102,55 @@ void USessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
 			StorableCredentials->KL = CtsJsonLength;
 		}
 
-		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, this->SaveSlot, this->UserIndex))
+		if (UGameplayStatics::SaveGameToSlot(StorableCredentials, SaveSlot, UserIndex))
 		{
 			SEQ_LOG(Display, TEXT("Session stored successfully."));
 		}
 	}
 }
 
-void USessionStorage::AddSession(const FSessionCredentials& Credentials)
+void FSessionStorage::AddSession(const FSessionCredentials& Credentials)
 {
 	TArray<FSessionCredentials> Sessions;
-	if (!this->GetStoredSessions(Sessions))
+	if (!GetStoredSessions(Sessions))
 	{
-		UE_LOG(LogTemp, Error, TEXT("USessionStorage::AddSession, error getting stored credentials."))
+		UE_LOG(LogTemp, Error, TEXT("FSessionStorage::AddSession, error getting stored credentials."))
 		return;
 	}
 	
 	Sessions.Add(Credentials);
-	this->StoreSessions(Sessions);
+	StoreSessions(Sessions);
 }
 
-void USessionStorage::ClearSessions()
+void FSessionStorage::ClearSessions()
 {
 	FWalletSessions EmptySessions;
 	EmptySessions.Sessions.Empty();
-	this->StoreSessions(TArray<FSessionCredentials>());
+	StoreSessions(TArray<FSessionCredentials>());
+}
+
+UGenericNativeEncryptor* FSessionStorage::GetEncryptor()
+{
+	if constexpr (PLATFORM_ANDROID)
+	{
+		return NewObject<UAndroidEncryptor>();
+	}
+	else if constexpr (PLATFORM_MAC)
+	{
+		return NewObject<UAppleEncryptor>();
+	}
+	else if constexpr (PLATFORM_WINDOWS)
+	{
+		return NewObject<UWindowsEncryptor>();
+	}
+	else if constexpr (PLATFORM_IOS)
+	{
+		return NewObject<UAppleEncryptor>();
+	}
+	else
+	{
+		SEQ_LOG(Warning, TEXT("You are running on an unsupported platform. If you continue, make sure to define a 'FallbackEncryptionKey' value in your SequenceConfig.ini file to encrypt/decrypt stored credentials."))
+		return nullptr;
+	}
 }
 

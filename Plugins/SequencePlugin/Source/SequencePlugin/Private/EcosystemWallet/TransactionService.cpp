@@ -1,8 +1,6 @@
 #include "TransactionService.h"
 #include "SignatureService.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
-#include "Signers/WalletSessions.h"
-#include "Storage/SessionStorage.h"
 
 void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed, TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void()> OnFailure)
 {
@@ -10,19 +8,8 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 	TSharedPtr<FCalls> Payload = MakeShared<FCalls>(Calls, FBigInt("0"), FBigInt(CurrentWalletState->Nonce));
 	TSharedPtr<FEnvelope> Envelope = MakeShared<FEnvelope>(ChainId, CurrentWalletState->Address, CurrentWalletState->Config, Payload);
 
-	USessionStorage* Storage = NewObject<USessionStorage>();
-	TArray<FSessionCredentials> Credentials = Storage->GetStoredSessions().Sessions;
-	
-	TArray<FSessionSigner> Signers;
-	for (FSessionCredentials Credential : Credentials)
-	{
-		FSessionSigner Signer = FSessionSigner();
-		Signer.Initialize(Credential);
-		Signers.Add(Signer);
-	}
-	
 	FSignatureService SignatureService = FSignatureService(ChainId, CurrentWalletState->SessionsImageHash, Envelope,
-		CurrentWalletState->ConfigUpdates, Signers, CurrentWalletState->SessionsTopology);
+		CurrentWalletState->ConfigUpdates, this->Signers, CurrentWalletState->SessionsTopology);
 
 	SignatureService.SignCalls([OnSuccess](const FRawSignature& Signature)
 	{

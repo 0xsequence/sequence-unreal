@@ -7,12 +7,10 @@
 #include "Requests/SessionArgs.h"
 #include "Sequence/SequenceSdk.h"
 #include "Signers/SessionCredentials.h"
-#include "Storage/SessionStorage.h"
 #include "Types/CryptoWallet.h"
 
 UEcosystemClient::UEcosystemClient()
 {
-    this->Storage = NewObject<USessionStorage>();
     this->Origin = "http://localhost:4445/api"; // Define this for each platform
 
 #if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_MAC
@@ -78,12 +76,13 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
 
-    const TFunction<void(FSessionCredentials)> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FSessionCredentials Credentials)
+    const TFunction<void(FSessionCredentials)> OnHandlerSuccess = [this, SessionWallet, IsImplicit, OnSuccess](FSessionCredentials Credentials)
     {
+        Credentials.IsExplicit = !IsImplicit;
         Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
         Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
-        this->Storage->AddSession(Credentials);
+        FSessionStorage::AddSession(Credentials);
         
         OnSuccess(true);
     };

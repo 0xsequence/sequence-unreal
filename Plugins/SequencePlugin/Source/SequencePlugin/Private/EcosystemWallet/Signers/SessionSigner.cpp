@@ -2,16 +2,9 @@
 
 #include "EcosystemWallet/Primitives/Signatures/ExplicitSessionCallSignature.h"
 
-void FSessionSigner::Initialize(const FSessionCredentials& NewCredentials)
-{
-	this->Credentials = NewCredentials;
-	this->Address = NewCredentials.SessionAddress;
-	this->IsExplicit = true;
-}
-
 FString FSessionSigner::GetIdentitySigner()
 {
-	if (IsExplicit)
+	if (Credentials.IsExplicit)
 	{
 		return "";
 	}

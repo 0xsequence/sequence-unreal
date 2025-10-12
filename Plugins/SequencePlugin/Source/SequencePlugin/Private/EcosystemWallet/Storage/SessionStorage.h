@@ -1,29 +1,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EcosystemWallet/Signers/SessionSigner.h"
 #include "EcosystemWallet/Signers/WalletSessions.h"
 #include "Encryptors/GenericNativeEncryptor.h"
 #include "UObject/Object.h"
-#include "SessionStorage.generated.h"
 
-UCLASS()
-class SEQUENCEPLUGIN_API USessionStorage : public UObject
+class SEQUENCEPLUGIN_API FSessionStorage
 {
-	GENERATED_BODY()
-
 public:
-	USessionStorage();
-
-	FWalletSessions GetStoredSessions();
-	bool GetStoredSessions(TArray<FSessionCredentials>& Sessions);
-	void StoreSessions(const TArray<FSessionCredentials>& Sessions);
-	void AddSession(const FSessionCredentials& Credentials);
-	void ClearSessions();
+	static TArray<FSessionSigner> GetStoredSigners();
+	static FWalletSessions GetStoredSessions();
+	static bool GetStoredSessions(TArray<FSessionCredentials>& Sessions);
+	static void StoreSessions(const TArray<FSessionCredentials>& Sessions);
+	static void AddSession(const FSessionCredentials& Credentials);
+	static void ClearSessions();
 
 private:
-	UPROPERTY()
-	UGenericNativeEncryptor* Encryptor = nullptr;
+	inline static UGenericNativeEncryptor* GetEncryptor();
 
-	const FString SaveSlot = "SequenceCredentials";
-	const uint32 UserIndex = 0;
+	static inline const FString SaveSlot = "SequenceCredentials";
+	static inline const uint32 UserIndex = 0;
 };
