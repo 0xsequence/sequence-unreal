@@ -10,7 +10,8 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 	TSharedPtr<FCalls> Payload = MakeShared<FCalls>(Calls, FBigInt("0"), FBigInt(CurrentWalletState->Nonce));
 	TSharedPtr<FEnvelope> Envelope = MakeShared<FEnvelope>(ChainId, CurrentWalletState->Address, CurrentWalletState->Config, Payload);
 
-	TArray<FSessionCredentials> Credentials = USessionStorage::GetStoredSessions().Sessions;
+	USessionStorage* Storage = NewObject<USessionStorage>();
+	TArray<FSessionCredentials> Credentials = Storage->GetStoredSessions().Sessions;
 	
 	TArray<FSessionSigner> Signers;
 	for (FSessionCredentials Credential : Credentials)

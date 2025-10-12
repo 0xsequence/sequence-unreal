@@ -24,4 +24,27 @@ public:
 
 	UPROPERTY()
 	FSessionArgs Session;
+
+	bool CustomJson = true;
+
+	FString ToJson() const
+	{
+		TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+
+		JsonObject->SetStringField(TEXT("preferredLoginMethod"), PreferredLoginMethod);
+		JsonObject->SetStringField(TEXT("email"), Email);
+		JsonObject->SetStringField(TEXT("origin"), Origin);
+		JsonObject->SetBoolField(TEXT("includeImplicitSession"), IncludeImplicitSession);
+
+		TSharedPtr<FJsonObject> SessionObject = Session.ToJson();
+		JsonObject->SetObjectField(TEXT("session"), SessionObject);
+
+		FString OutputString;
+		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(JsonObject, Writer);
+
+		UE_LOG(LogTemp, Display, TEXT("Connect Args: %s"), *OutputString);
+
+		return OutputString;
+	}
 };

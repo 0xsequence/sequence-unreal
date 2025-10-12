@@ -1,9 +1,9 @@
 #include "EcosystemClient.h"
 #include "Authentication/RedirectHandler/BrowserRedirectHandler.h"
 #include "Authentication/RedirectHandler/LocalhostRedirectHandler.h"
+#include "EcosystemWallet/Permissions/Permissions.h"
 #include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
-#include "Requests/ConnectResponse.h"
 #include "Requests/SessionArgs.h"
 #include "Sequence/SequenceSdk.h"
 #include "Signers/SessionCredentials.h"
@@ -13,7 +13,7 @@
 UEcosystemClient::UEcosystemClient()
 {
     this->Storage = NewObject<USessionStorage>();
-    this->Origin = "http://localhost:4444/api"; // Define this for each platform
+    this->Origin = "http://localhost:4445/api"; // Define this for each platform
 
 #if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_MAC
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
@@ -27,30 +27,42 @@ UEcosystemClient::UEcosystemClient()
 }
 
 void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
-		FSessionPermissions Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
+		const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
 {
     const FString ChainIdStr = SequenceSdk::GetChainIdString();
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
     FString SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
-    Permissions.SessionAddress = SessionAddress;
+    FSessionPermissions SessionPermissions;
+    if (Permissions.GetObject() == nullptr)
+    {
+        SessionPermissions = FSessionPermissions();
+    }
+    else
+    {
+        SessionPermissions = Permissions->GetSessionPermissions();
+    }
+
+    SessionPermissions.SessionAddress = SessionAddress;
+
+    const bool IsImplicit = SessionPermissions.Permissions.Num() == 0;
 
     FSessionArgs SessionArgs;
-    if (Permissions.Permissions.Num() == 0)
+    if (IsImplicit)
     {
         SessionArgs = FSessionArgs(SessionAddress);
     }
     else
     {
         SessionArgs = FSessionArgs(
-            Permissions.SessionAddress,
-            Permissions.ChainId,
-            Permissions.ValueLimit,
-            Permissions.Deadline,
-            Permissions.Permissions);
+            SessionPermissions.SessionAddress,
+            SessionPermissions.ChainId,
+            SessionPermissions.ValueLimit,
+            SessionPermissions.Deadline,
+            SessionPermissions.Permissions);
     }
 
-    const bool IncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit);
+    const bool IncludeImplicitSession = (Type == ESessionCreationType::IncludeImplicit || IsImplicit);
 
     FConnectArgs Payload;
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
@@ -66,20 +78,15 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
 
-    const TSuccessCallback<FConnectResponseData> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FConnectResponseData Response)
+    const TFunction<void(FSessionCredentials)> OnHandlerSuccess = [this, SessionWallet, OnSuccess](FSessionCredentials Credentials)
     {
-        FSessionCredentials Credentials;
-        Credentials.Address = Response.WalletAddress;
-        Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
         Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
-        Credentials.LoginMethod = Response.LoginMethod;
-        Credentials.UserEmail = Response.UserEmail;
+        Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 
         this->Storage->AddSession(Credentials);
         
-        UE_LOG(LogTemp, Display, TEXT("Wallet Address %s"), *Response.WalletAddress);
         OnSuccess(true);
     };
 
-    this->SendRequest<FConnectArgs, FConnectResponseData>("connect", Action, Payload, OnHandlerSuccess, OnFailure);
+    this->SendRequest<FConnectArgs, FSessionCredentials>("connect", Action, Payload, OnHandlerSuccess, OnFailure);
 }

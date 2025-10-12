@@ -17,4 +17,8 @@ public:
 
 	UPROPERTY()
 	FString Message;
+
+	bool CustomJson = false;
+
+	FString ToJson() const { return ""; }
 };

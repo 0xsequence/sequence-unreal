@@ -29,7 +29,7 @@ void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInte
 	this->SequenceConnect->SignInWithEmail(Email, Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithGoogle(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithGoogle(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{

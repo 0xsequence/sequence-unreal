@@ -9,8 +9,6 @@ struct SEQUENCEPLUGIN_API FWalletSessions
 {
 	GENERATED_USTRUCT_BODY()
 
-public:
-	UPROPERTY()
 	TArray<FSessionCredentials> Sessions;
 
 	bool HasSessions() const

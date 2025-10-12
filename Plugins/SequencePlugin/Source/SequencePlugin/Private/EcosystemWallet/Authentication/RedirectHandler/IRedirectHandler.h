@@ -7,7 +7,6 @@
 #include "Serialization/JsonSerializer.h"
 #include "Policies/CondensedJsonPrintPolicy.h"
 #include "Dom/JsonObject.h"
-#include "JsonObjectConverter.h"
 #include "Util/SequenceSupport.h"
 
 class SEQUENCEPLUGIN_API IRedirectHandler
@@ -25,9 +24,18 @@ public:
     }
 
     template<typename TPayload, typename TResponse>
-    void WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload, TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
+    void WaitForResponse(const FString& Url, const FString& Action, const TPayload& Payload, TFunction<void(TResponse)> OnSuccess, FFailureCallback OnFailure)
     {
-        const FString& PayloadJson = USequenceSupport::StructToString(Payload);
+        FString PayloadJson;
+        if (Payload.CustomJson)
+        {
+            PayloadJson = Payload.ToJson();
+        }
+        else
+        {
+            PayloadJson = USequenceSupport::StructToString(Payload);
+        }
+        
         if (PayloadJson.IsEmpty())
         {
             UE_LOG(LogTemp, Error, TEXT("Failed to serialize payload to JSON"));
@@ -38,7 +46,17 @@ public:
 
         const TSuccessCallback<FString> OnHandlerSuccess = [OnSuccess](const FString& Response)
         {
-            TResponse ResponseData = USequenceSupport::JSONStringToStruct<TResponse>(Response);
+            TResponse ResponseData;
+            if (TResponse::CustomJson)
+            {
+                TSharedPtr<FJsonObject> JsonObject = USequenceSupport::JsonStringToObject(Response);
+                ResponseData = TResponse::FromJson(JsonObject);
+            }
+            else
+            {
+                ResponseData = USequenceSupport::JSONStringToStruct<TResponse>(Response);    
+            }
+            
             OnSuccess(ResponseData);
         };
 

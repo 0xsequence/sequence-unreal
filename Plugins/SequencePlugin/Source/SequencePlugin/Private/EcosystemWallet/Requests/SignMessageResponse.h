@@ -17,4 +17,11 @@ public:
 
 	UPROPERTY()
 	FString ManagerRequestId;
+
+	inline static bool CustomJson = false;
+
+	static FSignMessageResponse FromJson(const TSharedPtr<FJsonObject>& Json)
+	{
+		return FSignMessageResponse();
+	}
 };

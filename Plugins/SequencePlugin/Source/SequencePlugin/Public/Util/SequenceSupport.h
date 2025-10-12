@@ -512,6 +512,19 @@ public:
 		return Ret;
 	}
 
+	static bool ParseJsonStringToObjectArray(const FString& JsonString, TArray<TSharedPtr<FJsonValue>>& OutArray)
+	{
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonString);
+		
+		if (FJsonSerializer::Deserialize(Reader, OutArray) && OutArray.Num() > 0)
+		{
+			return true;
+		}
+		
+		OutArray.Empty();
+		return false;
+	}
+
 	static FString DecodeBase64ToString(const FString& Base64Input)
 	{
 		TArray<uint8> Bytes;

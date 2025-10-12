@@ -17,9 +17,8 @@ USequenceWallet::USequenceWallet()
 
 void USequenceWallet::AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure)
 {
-	FSessionPermissions SessionPermissions = Permissions.GetInterface()->GetSessionPermissions();
 	this->Client->CreateNewSession(ESessionCreationType::AddExplicit, "",
-		"", SessionPermissions, OnSuccess, OnFailure);
+		"", Permissions, OnSuccess, OnFailure);
 }
 
 void USequenceWallet::SignMessage(const FString& Message, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
@@ -29,7 +28,7 @@ void USequenceWallet::SignMessage(const FString& Message, TSuccessCallback<FStri
 	Payload.Address = this->GetWalletInfo().Address;
 	Payload.Message = Message;
 
-	const TSuccessCallback<FSignMessageResponse> OnClientSuccess = [OnSuccess](const FSignMessageResponse& Response)
+	const TFunction<void(FSignMessageResponse)> OnClientSuccess = [OnSuccess](const FSignMessageResponse& Response)
 	{
 		OnSuccess(Response.Signature);
 	};
@@ -67,7 +66,7 @@ void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<I
 	Payload.Address = this->GetWalletInfo().Address;
 	Payload.TransactionRequest = Request;
 
-	const TSuccessCallback<FSendTransactionResponse> OnClientSuccess = [OnSuccess](const FSendTransactionResponse& Response)
+	const TFunction<void(FSendTransactionResponse)> OnClientSuccess = [OnSuccess](const FSendTransactionResponse& Response)
 	{
 		OnSuccess(Response.TransactionHash);
 	};
@@ -91,7 +90,7 @@ FWalletInfo USequenceWallet::GetWalletInfo()
 	FSessionCredentials Session = WalletSessions.Sessions[0];
 	
 	FWalletInfo Info;
-	Info.Address = Session.Address;
+	Info.Address = Session.WalletAddress;
 	Info.Email = Session.UserEmail;
 
 	return Info;

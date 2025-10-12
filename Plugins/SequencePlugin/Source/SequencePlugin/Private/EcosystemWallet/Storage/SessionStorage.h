@@ -13,11 +13,11 @@ class SEQUENCEPLUGIN_API USessionStorage : public UObject
 
 public:
 	USessionStorage();
-	
-	bool GetStoredSessions(FWalletSessions* Sessions);
+
 	FWalletSessions GetStoredSessions();
-	void StoreSessions(const FWalletSessions& WalletSessions);
-	void AddSession(const FSessionCredentials& WalletSessions);
+	bool GetStoredSessions(TArray<FSessionCredentials>& Sessions);
+	void StoreSessions(const TArray<FSessionCredentials>& Sessions);
+	void AddSession(const FSessionCredentials& Credentials);
 	void ClearSessions();
 
 private:

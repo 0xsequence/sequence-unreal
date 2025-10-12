@@ -3,24 +3,6 @@
 #include "CoreMinimal.h"
 #include "SignWith.generated.h"
 
-UENUM()
-enum class EGuardPayloadType : uint8
-{
-    Calls                UMETA(DisplayName = "Calls"),
-    Message              UMETA(DisplayName = "Message"),
-    ConfigUpdate         UMETA(DisplayName = "ConfigUpdate"),
-    SessionImplicitAuthorize UMETA(DisplayName = "SessionImplicitAuthorize")
-};
-
-UENUM()
-enum class EGuardSignatureType : uint8
-{
-    Hash    UMETA(DisplayName = "Hash"),
-    Sapient UMETA(DisplayName = "Sapient"),
-    EthSign UMETA(DisplayName = "EthSign"),
-    Erc1271 UMETA(DisplayName = "Erc1271")
-};
-
 USTRUCT()
 struct FGuardSignatureArgs
 {
@@ -30,7 +12,7 @@ struct FGuardSignatureArgs
     FString Address;
 
     UPROPERTY()
-    EGuardSignatureType Type;
+    FString Type;
 
     UPROPERTY()
     FString ImageHash;
@@ -57,7 +39,7 @@ struct FSignRequest
     FString Wallet;
 
     UPROPERTY()
-    EGuardPayloadType PayloadType;
+    FString PayloadType;
 
     UPROPERTY()
     FString PayloadData;

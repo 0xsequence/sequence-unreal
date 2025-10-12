@@ -33,9 +33,23 @@ USessionStorage::USessionStorage()
 	}
 }
 
-bool USessionStorage::GetStoredSessions(FWalletSessions* Sessions)
+FWalletSessions USessionStorage::GetStoredSessions()
 {
-	bool ret = false;
+	TArray<FSessionCredentials> Sessions;
+	if (!this->GetStoredSessions(Sessions))
+	{
+		FWalletSessions EmptySessions;
+		EmptySessions.Sessions.Empty();
+		return EmptySessions;
+	}
+
+	return {
+		Sessions
+	};
+}
+
+bool USessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
+{
 	const USaveGame * SaveGame = UGameplayStatics::LoadGameFromSlot(this->SaveSlot, this->UserIndex);
 
 	if (SaveGame != nullptr)
@@ -53,41 +67,41 @@ bool USessionStorage::GetStoredSessions(FWalletSessions* Sessions)
 				CtrJson = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 			}
 
-			UE_LOG(LogTemp, Display, TEXT("Sessions Json %s"), *CtrJson);
-			ret = USequenceSupport::JSONStringToStruct<FWalletSessions>(CtrJson, Sessions);
-			ret &= Sessions->HasSessions();
+			UE_LOG(LogTemp, Display, TEXT("Stored sessions Json %s"), *CtrJson);
 
-			if (ret == false)
+			TArray<TSharedPtr<FJsonValue>> SessionsJson;
+			USequenceSupport::ParseJsonStringToObjectArray(CtrJson, SessionsJson);
+
+			for (TSharedPtr<FJsonValue> JsonObject : SessionsJson)
+			{
+				UE_LOG(LogTemp, Display, TEXT("JsonObject"));
+				Sessions.Add(FSessionCredentials::FromJson(JsonObject->AsObject()));
+			}
+
+			/*if (ret == false)
 			{
 				UGameplayStatics::DeleteGameInSlot(this->SaveSlot, this->UserIndex);
-			}
+			}*/
 		}
 	}
 	
-	return ret;
+	return true;
 }
 
-FWalletSessions USessionStorage::GetStoredSessions()
+void USessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
 {
-	FWalletSessions CredData;
-	FWalletSessions* Credentials = &CredData;
-	
-	if (this->GetStoredSessions(Credentials))
+	TArray<TSharedPtr<FJsonObject>> SessionsJson;
+	for (FSessionCredentials Session : Sessions)
 	{
-		return *Credentials;
+		SessionsJson.Add(Session.ToJson());
 	}
-
-	FWalletSessions EmptySessions;
-	EmptySessions.Sessions.Empty();
-	return EmptySessions;
-}
-
-void USessionStorage::StoreSessions(const FWalletSessions& WalletSessions)
-{
+	
 	if (UStorableCredentials* StorableCredentials = Cast<UStorableCredentials>(UGameplayStatics::CreateSaveGameObject(UStorableCredentials::StaticClass())))
 	{
-		const FString CtsJson = USequenceSupport::StructToString<FWalletSessions>(WalletSessions);
+		const FString CtsJson = USequenceSupport::JsonObjListToParsableString(SessionsJson);
 		const int32 CtsJsonLength = CtsJson.Len();
+
+		UE_LOG(LogTemp, Display, TEXT("Storing sessions Json %s"), *CtsJson);
 
 		if (Encryptor)
 		{
@@ -107,17 +121,23 @@ void USessionStorage::StoreSessions(const FWalletSessions& WalletSessions)
 	}
 }
 
-void USessionStorage::AddSession(const FSessionCredentials& Session)
+void USessionStorage::AddSession(const FSessionCredentials& Credentials)
 {
-	FWalletSessions WalletSessions = this->GetStoredSessions();
-	WalletSessions.Sessions.Add(Session);
-	this->StoreSessions(WalletSessions);
+	TArray<FSessionCredentials> Sessions;
+	if (!this->GetStoredSessions(Sessions))
+	{
+		UE_LOG(LogTemp, Error, TEXT("USessionStorage::AddSession, error getting stored credentials."))
+		return;
+	}
+	
+	Sessions.Add(Credentials);
+	this->StoreSessions(Sessions);
 }
 
 void USessionStorage::ClearSessions()
 {
 	FWalletSessions EmptySessions;
 	EmptySessions.Sessions.Empty();
-	this->StoreSessions(EmptySessions);
+	this->StoreSessions(TArray<FSessionCredentials>());
 }
 

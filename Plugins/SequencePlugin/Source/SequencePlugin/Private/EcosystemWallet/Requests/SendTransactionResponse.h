@@ -14,4 +14,11 @@ public:
 
 	UPROPERTY()
 	FString WalletAddress;
+
+	inline static bool CustomJson = false;
+
+	static FSendTransactionResponse FromJson(const TSharedPtr<FJsonObject>& Json)
+	{
+		return FSendTransactionResponse();
+	}
 };

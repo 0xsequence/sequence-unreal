@@ -10,6 +10,9 @@ public:
     FBigInt S;
     int32 YParity = 0;
 
+    FRSY()
+        : R(FBigInt("0")), S(FBigInt("0")), YParity(0) {}
+
     FRSY(const FBigInt& InR, const FBigInt& InS, int32 InYParity)
         : R(InR), S(InS), YParity(InYParity) {}
 

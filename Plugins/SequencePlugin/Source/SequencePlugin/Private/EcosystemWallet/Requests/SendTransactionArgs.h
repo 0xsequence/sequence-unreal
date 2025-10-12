@@ -36,4 +36,8 @@ public:
 
 	UPROPERTY()
 	FTransactionRequest TransactionRequest;
+
+	bool CustomJson = false;
+
+	FString ToJson() const { return ""; }
 };

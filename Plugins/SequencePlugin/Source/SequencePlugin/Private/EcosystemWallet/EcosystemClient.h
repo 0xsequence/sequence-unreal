@@ -3,9 +3,9 @@
 #include "CoreMinimal.h"
 #include "ConfigFetcher.h"
 #include "Authentication/RedirectHandler/IRedirectHandler.h"
+#include "EcosystemWallet/Permissions/Permissions.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
-#include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "Storage/SessionStorage.h"
 #include "EcosystemClient.generated.h"
 
@@ -25,11 +25,11 @@ public:
 	UEcosystemClient();
 	
 	void CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
-		FSessionPermissions Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
+		const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
 
 	template<typename TPayload, typename TResponse>
 	void SendRequest(const FString& Path, const FString& Action, const TPayload& Payload,
-		TSuccessCallback<TResponse> OnSuccess, FFailureCallback OnFailure)
+		TFunction<void(TResponse)> OnSuccess, FFailureCallback OnFailure)
 	{
 		const FString EcosystemUrl = UConfigFetcher::GetConfigVar(UConfigFetcher::WalletAppUrl);
 		const FString Url = FString::Printf(TEXT("%s/request/%s"), *EcosystemUrl, *Path);
