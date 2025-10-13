@@ -14,10 +14,10 @@ public:
 		const TArray<FConfigUpdate>& InConfigUpdates, const TArray<FSessionSigner>& InSigners, const TSharedPtr<FSessionsTopology>& InSessionsTopology)
 		: ChainId(InChainId), ImageHash(InImageHash), Envelope(InEnvelope), ConfigUpdates(InConfigUpdates), Signers(InSigners), SessionsTopology(InSessionsTopology) { }
 	
-	void SignCalls(TFunction<void(FRawSignature)> OnSuccess, TFunction<void()> OnFailure);
+	void SignCalls(const TFunction<void(FRawSignature)>& OnSuccess, const TFunction<void(FString)>& OnFailure);
 
 private:
-	void SignSapient( TFunction<void(FSignatureOfSapientSignerLeaf)> OnSuccess, TFunction<void()> OnFailure);
+	void SignSapient(const TFunction<void(TSharedPtr<FSignatureOfSapientSignerLeaf>)>& OnSuccess, const TFunction<void(FString)>& OnFailure);
 
 	FBigInt ChainId;
 	FString ImageHash;

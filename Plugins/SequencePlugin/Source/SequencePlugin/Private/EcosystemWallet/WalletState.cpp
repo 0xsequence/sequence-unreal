@@ -11,7 +11,7 @@ FWalletState::FWalletState()
 	this->Provider = NewObject<UProvider>();
 }
 
-void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure)
+void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
 	this->Address = Address;
 	
@@ -34,7 +34,7 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 						
 						if (!Leaf.IsValid())
 						{
-							OnFailure();
+							OnFailure("");
 							return;
 						}
 
@@ -50,7 +50,7 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 				[OnFailure](const FString& Error)
 				{
 					SEQ_LOG(Error, TEXT("Error while getting config updates: %s"), *Error);
-					OnFailure();
+					OnFailure("");
 				});
 			};
 			

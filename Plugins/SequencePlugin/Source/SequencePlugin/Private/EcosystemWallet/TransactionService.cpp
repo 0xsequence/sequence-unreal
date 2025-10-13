@@ -2,7 +2,7 @@
 #include "SignatureService.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 
-void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed, TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void()> OnFailure)
+void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed, TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void(FString)> OnFailure)
 {
 	FWalletState* CurrentWalletState = this->WalletState.Get();
 	TSharedPtr<FCalls> Payload = MakeShared<FCalls>(Calls, FBigInt("0"), FBigInt(CurrentWalletState->Nonce));

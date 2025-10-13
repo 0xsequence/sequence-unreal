@@ -1,6 +1,6 @@
 #include "SignerService.h"
 
-void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)> OnSuccess, TFunction<void()> OnFailure)
+void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)> OnSuccess, TFunction<void(FString)> OnFailure)
 {
 	const FString IdentitySigner = this->SessionsTopology.Get()->GetIdentitySigner();
 	const TArray<FString> ImplicitBlacklist = this->SessionsTopology.Get()->GetImplicitBlacklist();
@@ -24,7 +24,7 @@ void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)>
 		}
 		else
 		{
-			OnFailure();
+			OnFailure(TEXT(""));
 		}
 	});
 }

@@ -9,10 +9,10 @@ struct FGuardSignatureArgs
     GENERATED_BODY()
 
     UPROPERTY()
-    FString Address;
-
-    UPROPERTY()
     FString Type;
+    
+    UPROPERTY()
+    FString Address;
 
     UPROPERTY()
     FString ImageHash;
@@ -27,13 +27,10 @@ struct FSignRequest
     GENERATED_BODY()
 
     UPROPERTY()
-    FString ChainId;
+    int64 ChainId;
 
     UPROPERTY()
     FString Msg;
-
-    UPROPERTY()
-    FString AuxData;
 
     UPROPERTY()
     FString Wallet;

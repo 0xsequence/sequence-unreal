@@ -603,3 +603,8 @@ TArray<uint8> USequenceSupport::EncodeBigInteger(const FString& Value)
 {
 	return FEthAbiBridge::EncodeBigInteger(Value);
 }
+
+TArray<uint8> USequenceSupport::EncodeAndHashTypedData(const FString& DomainJson)
+{
+	return FEthAbiBridge::EncodeAndHashTypedData(DomainJson);
+}

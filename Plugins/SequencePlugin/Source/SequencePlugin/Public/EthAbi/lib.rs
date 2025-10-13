@@ -3,6 +3,8 @@ use secp256k1::{
     ecdsa::RecoveryId,
     Message, Secp256k1, SecretKey,
 };
+use ethers::types::transaction::eip712::{Eip712, TypedData};
+use ethers::utils::keccak256;
 use ethabi::{encode, decode as abi_decode, Address, Function, Token, Param, ParamType, StateMutability};
 use serde_json::{json, Map, Value};
 use serde::Deserialize;
@@ -23,6 +25,31 @@ struct AbiValue {
     value: String,
 }
 
+#[no_mangle]
+pub extern "C" fn encode_and_hash_typed_data(
+    domain_json: *const c_char,
+    out_hash: *mut c_uchar, // pointer to 32-byte buffer allocated by caller
+) {
+    // Convert C string to Rust string
+    let domain_json = unsafe {
+        assert!(!domain_json.is_null());
+        CStr::from_ptr(domain_json)
+            .to_str()
+            .expect("Invalid UTF-8 in domain_json")
+    };
+
+    // Parse EIP-712 TypedData from JSON
+    let typed_data: TypedData = serde_json::from_str(domain_json)
+        .expect("Invalid EIP-712 JSON");
+
+    // encode_eip712() already returns a [u8; 32] struct hash
+    let hash_struct = typed_data.encode_eip712().expect("EIP712 encoding failed");
+
+    // Copy the 32-byte result into Unreal’s output buffer
+    unsafe {
+        std::ptr::copy_nonoverlapping(hash_struct.as_ptr(), out_hash, 32);
+    }
+}
 
 #[no_mangle]
 pub extern "C" fn sign_recoverable(

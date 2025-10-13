@@ -44,9 +44,9 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
 	};
 
-	const TFunction<void()> OnInternalFailure = [OnFailure]()
+	const TFunction<void(FString)> OnInternalFailure = [OnFailure](const FString& Error)
 	{
-		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
+		OnFailure(FSequenceError(EErrorType::EmptyResponse, Error));
 	};
 	
 	this->WalletState->UpdateState(this->GetWalletInfo().Address, [this, Transaction, OnInternalFailure]()

@@ -11,7 +11,7 @@ struct SEQUENCEPLUGIN_API FCall
 	FBigInt GasLimit;
 	bool DelegateCall;
 	bool OnlyFallback;
-	FString BehaviourOnError;
+	FString BehaviorOnError;
 
 	TArray<uint8> Hash() const;
 	

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GuardService.h"
+#include "EcosystemWallet/Primitives/Envelope/Envelope.h"
+#include "EcosystemWallet/Primitives/Signatures/RSY.h"
 #include "UObject/Object.h"
 #include "GuardSigner.generated.h"
 
@@ -13,14 +15,13 @@ class SEQUENCEPLUGIN_API UGuardSigner : public UObject
 public:
 	void WithHost(const FString& Host);
 
-	void SignEnvelope();
+	void SignEnvelope(
+		const TSharedPtr<FEnvelope>& Envelope,
+		const FString& SessionsImageHash,
+		const TFunction<void(TSharedPtr<FRSY>)>& OnSuccess,
+		const TFunction<void(FString)>& OnFailure);
 
 private:
-	
-	void SignPayload(const FString& Wallet, const FString& ChainId, const TArray<uint8>& Digest,
-		const TArray<uint8>& Message, const TArray<FGuardSignatureArgs>& Signatures,
-		TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
-	
 	UPROPERTY()
 	UGuardService* GuardService;
 };

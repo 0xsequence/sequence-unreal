@@ -11,7 +11,7 @@ TArray<uint8> FCall::Hash() const
 	const TArray<uint8> GasLimitHash = FSequenceCoder::EncodeSignedInt(GasLimit.Value);
 	const TArray<uint8> DelegateCallHash = FSequenceCoder::EncodeBoolean(DelegateCall);
 	const TArray<uint8> OnlyFallbackHash = FSequenceCoder::EncodeBoolean(OnlyFallback);
-	const TArray<uint8> BehaviorOnErrorHash = FSequenceCoder::EncodeSignedInt(BehaviourOnError);
+	const TArray<uint8> BehaviorOnErrorHash = FSequenceCoder::EncodeSignedInt(BehaviorOnError);
 
 	TArray<uint8> Encoded;
 	Encoded.Append(TypeHash);

@@ -650,6 +650,8 @@ public:
 	 * @return The encoded byte array.
 	 */
 	static TArray<uint8> EncodeBigInteger(const FString& Value);
+
+	static TArray<uint8> EncodeAndHashTypedData(const FString& DomainJson);
 	
 private:
 	/*

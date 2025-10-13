@@ -25,7 +25,7 @@ public:
 
 	FWalletState();
 	
-	void UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void()>& OnFailure);
+	void UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure);
 
 private:
 	UKeyMachine* KeyMachine;

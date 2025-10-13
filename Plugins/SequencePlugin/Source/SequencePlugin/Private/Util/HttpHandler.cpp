@@ -14,6 +14,7 @@ void UHttpHandler::SendPostRequest(const FString& Endpoint, const FString& Paylo
 	HTTP_Post_Req->SetVerb("POST");
 	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	HTTP_Post_Req->SetHeader(TEXT("Accept-Signature"), TEXT("sig=()"));
 	
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(FinalUrl);

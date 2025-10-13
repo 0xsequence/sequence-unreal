@@ -11,7 +11,7 @@ public:
 		const TArray<FSessionSigner>& InSigners, const TSharedPtr<FSessionsTopology>& InSessionsTopology)
 		: ChainId(InChainId), Calls(InCalls), Signers(InSigners), SessionsTopology(InSessionsTopology) { }
 	
-	void FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)> OnSuccess, TFunction<void()> OnFailure);
+	void FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)> OnSuccess, TFunction<void(FString)> OnFailure);
 
 private:
 	TArray<FSessionSigner> GetValidImplicitSigners(const FString& IdentitySigner, const TArray<FString>& Blacklist);

@@ -15,7 +15,8 @@ void UGuardService::SignWith(const FSignWithArgs& Args, TSuccessCallback<FSignWi
 		const FSignWithResponse Data = USequenceSupport::JSONStringToStruct<FSignWithResponse>(Response);
 		OnSuccess(Data);
 	};
-	
+
 	const FString Payload = USequenceSupport::StructToString(Args);
-	this->HttpHandler->SendPostRequest("DeployHash", Payload, OnRequestSuccess, OnFailure);
+	
+	this->HttpHandler->SendPostRequest("rpc/Guard/SignWith", Payload, OnRequestSuccess, OnFailure);
 }

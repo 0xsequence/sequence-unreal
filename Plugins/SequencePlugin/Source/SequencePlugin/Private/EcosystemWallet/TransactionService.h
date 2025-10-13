@@ -11,7 +11,7 @@ public:
 		: Signers(InSigners), WalletState(InWalletState) {};
 	
 	void SignAndBuild(FBigInt ChainId, const TArray<FCall>& Calls, const bool CheckDeployed,
-		TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void()> OnFailure);
+		TFunction<void(TTuple<FString, TArray<uint8>>)> OnSuccess, TFunction<void(FString)> OnFailure);
 
 private:
 	TArray<FSessionSigner> Signers;

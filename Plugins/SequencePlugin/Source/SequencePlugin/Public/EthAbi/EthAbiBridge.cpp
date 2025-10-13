@@ -3,6 +3,7 @@
 #include "Util/ByteArrayUtils.h"
 
 extern "C" {
+	void encode_and_hash_typed_data(const char* domain_json, uint8_t* out_hash);
 	char* sign_recoverable(const uint8* hash_ptr, size_t hash_len, const uint8* priv_ptr, size_t priv_len);
 	char* encode_function_call(const char* signature, const char* args_json);
 	char* decode_function_result(const char* abi_json, const char* encoded_data);
@@ -13,6 +14,18 @@ extern "C" {
 	void free_encoded_bytes(char* ptr);
 	void free_encoded_bytes_raw(uint8* Ptr, size_t Len);
 	void free_string(char* ptr);
+}
+
+TArray<uint8> FEthAbiBridge::EncodeAndHashTypedData(const FString& DomainJson)
+{
+	FTCHARToUTF8 JsonUtf8(*DomainJson);
+
+	TArray<uint8> HashBytes;
+	HashBytes.SetNumUninitialized(32);
+
+	encode_and_hash_typed_data(JsonUtf8.Get(), HashBytes.GetData());
+
+	return HashBytes;
 }
 
 TArray<uint8> FEthAbiBridge::SignRecoverable(const TArray<uint8>& Hash32, const TArray<uint8>& PrivateKey32)
