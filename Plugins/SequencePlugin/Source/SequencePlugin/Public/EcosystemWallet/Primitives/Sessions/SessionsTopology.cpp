@@ -146,6 +146,7 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::Minimise(const TArray<FString>&
     	FSessionsPermissionsLeaf* PermissionLeaf = static_cast<FSessionsPermissionsLeaf*>(Leaf.Get());
         if (ExplicitSigners.Contains(PermissionLeaf->Permissions.SessionAddress))
         {
+        	UE_LOG(LogTemp, Display, TEXT("Not hashing permissions leaf %s"), *PermissionLeaf->Permissions.SessionAddress);
         	return MakeShared<FSessionsTopology>(*this);
         }
 

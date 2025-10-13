@@ -24,6 +24,16 @@ public:
 	
 	UPROPERTY()
 	TArray<uint8> Mask;
+
+	TArray<uint8> Encode()
+	{
+		const uint8 OperationCumulative = static_cast<uint8>((static_cast<uint8>(Operation) << 1) | (Cumulative ? 1 : 0));
+		return FByteArrayUtils::ConcatBytes({
+			TArray<uint8> {OperationCumulative},
+			FByteArrayUtils::PadLeft(Value, 32),
+			FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(Offset), 32),
+			FByteArrayUtils::PadLeft(Mask, 32)});
+	}
 	
 	static bool Decode(const TArray<uint8>& Data, FParameterRule& OutRule)
 	{
@@ -37,16 +47,13 @@ public:
 		bool bCumulative = (OperationCumulative & 1) == 1;
 		int32 Operation = OperationCumulative >> 1;
 
-		// --- Value (bytes 1–32) ---
 		TArray<uint8> Value;
 		Value.Append(&Data[1], 32);
 
-		// --- Offset (bytes 33–64) as BigInt hex string ---
 		TArray<uint8> OffsetBytes;
 		OffsetBytes.Append(&Data[33], 32);
 		FString OffsetHex = FByteArrayUtils::BytesToBigIntHexString(OffsetBytes);
 
-		// --- Mask (bytes 65–96) ---
 		TArray<uint8> Mask;
 		Mask.Append(&Data[65], 32);
 

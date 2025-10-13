@@ -71,7 +71,7 @@ TArray<uint8> FEthAbiBridge::EncodeBigInteger(const FString& Value)
 		return Bytes;
 	}
 	
-	UE_LOG(LogTemp, Error, TEXT("Failed to encode bigint"));
+	UE_LOG(LogTemp, Error, TEXT("Failed to encode bigint, %s"), *Value);
 	return TArray<uint8>();
 }
 

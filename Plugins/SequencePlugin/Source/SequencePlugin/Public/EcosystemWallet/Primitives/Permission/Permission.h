@@ -17,6 +17,23 @@ public:
 	UPROPERTY()
 	TArray<FParameterRule> Rules;
 
+	TArray<uint8> Encode()
+	{
+		TArray<uint8> EncodedTarget = FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(Target), 20);
+		TArray<uint8> EncodedPermissionsLen = TArray<uint8> { static_cast<uint8>(Rules.Num()) };
+
+		TArray<TArray<uint8>> EncodedRulesParts;
+		for (FParameterRule Rule : Rules)
+		{
+			EncodedRulesParts.Add(Rule.Encode());
+		}
+
+		TArray<uint8> EncodedRules = FByteArrayUtils::ConcatBytes(EncodedRulesParts);
+		
+		return FByteArrayUtils::ConcatBytes({EncodedTarget, EncodedPermissionsLen, EncodedRules});
+	
+	}
+
 	static bool Decode(const TArray<uint8>& Data, int32 Offset, FPermission& OutPermission, int32& OutConsumed)
 	{
 		if (Data.Num() < Offset + 21)

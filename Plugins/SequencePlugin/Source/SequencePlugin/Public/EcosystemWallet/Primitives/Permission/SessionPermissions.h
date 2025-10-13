@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Permission.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Util/ByteArrayUtils.h"
 #include "SessionPermissions.generated.h"
 
@@ -28,7 +29,21 @@ public:
 
 	TArray<uint8> Encode()
 	{
-		return TArray<uint8>();
+		TArray<uint8> EncodedAddress = FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(SessionAddress), 20);
+		TArray<uint8> EncodedChainId = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(FEthAbiBridge::HexToBigIntString(ChainId)), 32);
+		TArray<uint8> EncodedValueLimit = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(FEthAbiBridge::HexToBigIntString(ValueLimit)), 32);
+		TArray<uint8> EncodedDeadline = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(FEthAbiBridge::HexToBigIntString(Deadline)), 8);
+		TArray<uint8> EncodedPermissionsLen = TArray<uint8> { static_cast<uint8>(Permissions.Num()) };
+
+		TArray<TArray<uint8>> EncodedPermissionsParts;
+		for (FPermission Permission : Permissions)
+		{
+			EncodedPermissionsParts.Add(Permission.Encode());
+		}
+
+		TArray<uint8> EncodedPermissions = FByteArrayUtils::ConcatBytes(EncodedPermissionsParts);
+		
+		return FByteArrayUtils::ConcatBytes({EncodedAddress, EncodedChainId, EncodedValueLimit, EncodedDeadline, EncodedPermissionsLen, EncodedPermissions});
 	}
 
 	static FSessionPermissions Decode(const TArray<uint8>& Data)
@@ -39,27 +54,22 @@ public:
 			return FSessionPermissions();
 		}
 
-		// --- Signer (Address) ---
 		TArray<uint8> SignerBytes;
 		SignerBytes.Append(&Data[0], 20);
 		FString Signer = FByteArrayUtils::BytesToHexString(SignerBytes);
 
-		// --- ChainId (BigInt as FString) ---
 		TArray<uint8> ChainIdBytes;
 		ChainIdBytes.Append(&Data[20], 32);
 		FString ChainId = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
 
-		// --- ValueLimit (BigInt as FString) ---
 		TArray<uint8> ValueLimitBytes;
 		ValueLimitBytes.Append(&Data[52], 32);
 		FString ValueLimit = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
 
-		// --- Deadline (BigInt as FString) ---
 		TArray<uint8> DeadlineBytes;
 		DeadlineBytes.Append(&Data[84], 8);
 		FString Deadline = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
 
-		// --- Permissions ---
 		if (Data.Num() <= 92)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Invalid data: missing permissions length byte"));

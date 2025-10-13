@@ -42,8 +42,7 @@ TArray<uint8> FByteArrayUtils::HexStringToBytes(const FString& HexString)
 
 	if (CleanHex.Len() % 2 != 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid hex string length"));
-		return TArray<uint8>();
+		CleanHex = FString::Printf(TEXT("0%s"), *CleanHex);
 	}
 
 	TArray<uint8> OutBytes;
