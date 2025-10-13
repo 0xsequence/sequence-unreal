@@ -1,7 +1,9 @@
 #include "EthAbiBridge.h"
 #include "Containers/StringConv.h"
+#include "Util/ByteArrayUtils.h"
 
 extern "C" {
+	char* sign_recoverable(const uint8* hash_ptr, size_t hash_len, const uint8* priv_ptr, size_t priv_len);
 	char* encode_function_call(const char* signature, const char* args_json);
 	char* decode_function_result(const char* abi_json, const char* encoded_data);
 	char* encode_bigint_to_bytes(const char* num_str, int* out_len);
@@ -11,6 +13,26 @@ extern "C" {
 	void free_encoded_bytes(char* ptr);
 	void free_encoded_bytes_raw(uint8* Ptr, size_t Len);
 	void free_string(char* ptr);
+}
+
+TArray<uint8> FEthAbiBridge::SignRecoverable(const TArray<uint8>& Hash32, const TArray<uint8>& PrivateKey32)
+{
+	if (Hash32.Num() != 32 || PrivateKey32.Num() != 32)
+	{
+		UE_LOG(LogTemp, Error, TEXT("FEthAbiBridge::SignRecoverable: expected 32-byte hash and 32-byte private key."));
+		return TArray<uint8>();
+	}
+
+	char* Out = sign_recoverable(Hash32.GetData(), 32, PrivateKey32.GetData(), 32);
+	if (!Out)
+	{
+		return TArray<uint8>();
+	}
+
+	FString Sig(UTF8_TO_TCHAR(Out));
+	free_string(Out);
+	
+	return FByteArrayUtils::HexStringToBytes(Sig);
 }
 
 FString FEthAbiBridge::EncodeFunctionCall(const FString& FunctionSignature, const FString& Values)

@@ -142,3 +142,23 @@ TArray<uint8> FByteArrayUtils::PadRight(const TArray<uint8>& Data, int32 TotalLe
 
 	return Result;
 }
+
+uint32 FByteArrayUtils::MinBytesFor(const uint64& Value)
+{
+	if (Value <= 0xFFULL)
+		return 1;
+	if (Value <= 0xFFFFULL)
+		return 2;
+	if (Value <= 0xFFFFFFULL)
+		return 3;
+	if (Value <= 0xFFFFFFFFULL)
+		return 4;
+	if (Value <= 0xFFFFFFFFFFULL)
+		return 5;
+	if (Value <= 0xFFFFFFFFFFFFULL)
+		return 6;
+	if (Value <= 0xFFFFFFFFFFFFFFULL)
+		return 7;
+	
+	return 8;
+}

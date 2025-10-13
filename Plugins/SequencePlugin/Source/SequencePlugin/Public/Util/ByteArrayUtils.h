@@ -16,4 +16,6 @@ public:
 	static TArray<uint8> PadLeft(const TArray<uint8>& Data, int32 TotalLength);
 	
 	static TArray<uint8> PadRight(const TArray<uint8>& Data, int32 TotalLength);
+
+	static uint32 MinBytesFor(const uint64& Value);
 };

@@ -26,6 +26,11 @@ public:
 	UPROPERTY()
 	TArray<FPermission> Permissions;
 
+	TArray<uint8> Encode()
+	{
+		return TArray<uint8>();
+	}
+
 	static FSessionPermissions Decode(const TArray<uint8>& Data)
 	{
 		if (Data.Num() < 85)

@@ -12,13 +12,43 @@ public:
 	
 	virtual TArray<uint8> Encode() override
 	{
-		return FSessionsLeaf::Encode();
+		TArray<uint8> EncodedBlacklist = EncodeBlacklist();
+		
+		int32 BlacklistSize = this->Blacklist.Num();
+		if (BlacklistSize >= 0x0f)
+		{
+			if (BlacklistSize > 0xFFFF)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Blacklist too large (count=%d)"), BlacklistSize);
+				return {};
+			}
+
+			constexpr uint64 Flag = (static_cast<uint64>(FSessionsTopology::FlagBlacklist) << 4) | 0x0f;
+			TArray<uint8> FlagBytes   = FByteArrayUtils::ByteArrayFromNumber(Flag, 1);
+			TArray<uint8> CountBytes  = FByteArrayUtils::ByteArrayFromNumber(BlacklistSize, 1);
+			return FByteArrayUtils::ConcatBytes({FlagBytes, CountBytes, EncodedBlacklist});
+		}
+		
+		constexpr uint32 Flag = FSessionsTopology::FlagBlacklist << 4;
+		return FByteArrayUtils::ConcatBytes({ FByteArrayUtils::ByteArrayFromNumber(Flag, 1), EncodedBlacklist });
 	}
 	
 	virtual TArray<uint8> EncodeForHash() override
 	{
-		return FSessionsLeaf::EncodeForHash();
+		return FByteArrayUtils::ConcatBytes({ FByteArrayUtils::ByteArrayFromNumber(FSessionsTopology::FlagBlacklist, 1), EncodeBlacklist() });
 	}
 
 	TArray<FString> Blacklist;
+
+private:
+	TArray<uint8> EncodeBlacklist()
+	{
+		TArray<TArray<uint8>> EncodedAddresses;
+		for (FString Address : Blacklist)
+		{
+			EncodedAddresses.Add(FByteArrayUtils::HexStringToBytes(Address));
+		}
+
+		return FByteArrayUtils::ConcatBytes(EncodedAddresses);
+	}
 };

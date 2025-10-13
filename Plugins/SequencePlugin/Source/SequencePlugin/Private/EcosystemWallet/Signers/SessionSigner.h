@@ -17,8 +17,12 @@ public:
 	
 	void IsSupportedCall(const FCall& Call, TFunction<void(bool)> OnCompleted);
 	
-	FSessionCallSignature SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
-		const TSharedPtr<FSessionsTopology> SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
+	TSharedPtr<FSessionCallSignature> SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
+		const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
 
 	FSessionCredentials Credentials;
+
+private:
+	uint32 FindSupportedPermission(const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology);
+	TArray<uint8> HashCallWithReplayProtection(const FBigInt& ChainId, const FCall&, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce);
 };

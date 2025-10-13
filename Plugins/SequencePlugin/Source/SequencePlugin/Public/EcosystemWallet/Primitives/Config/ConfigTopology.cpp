@@ -45,13 +45,13 @@ TSharedPtr<FConfigLeaf> FConfigTopology::FindSignerLeaf(const FString& Address) 
         case EConfigLeafType::Signer:
             {
                 const auto* SignerLeaf = static_cast<const FConfigSignerLeaf*>(Leaf.Get());
-                return SignerLeaf->Address.Equals(Address) ? Leaf : nullptr;
+                return SignerLeaf->Address.Equals(Address, ESearchCase::IgnoreCase) ? Leaf : nullptr;
             }
 
         case EConfigLeafType::SapientSigner:
             {
                 const auto* SapientSignerLeaf = static_cast<const FConfigSapientSignerLeaf*>(Leaf.Get());
-                return SapientSignerLeaf->Address.Equals(Address) ? Leaf : nullptr;
+                return SapientSignerLeaf->Address.Equals(Address, ESearchCase::IgnoreCase) ? Leaf : nullptr;
             }
 
         default:

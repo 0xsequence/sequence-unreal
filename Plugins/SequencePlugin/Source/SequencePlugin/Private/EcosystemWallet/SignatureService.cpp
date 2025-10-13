@@ -5,7 +5,7 @@ void FSignatureService::SignCalls(TFunction<void(FRawSignature)> OnSuccess, TFun
 {
 	SignSapient([](FSignatureOfSapientSignerLeaf Signature)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Got sapient signature"));
+		UE_LOG(LogTemp, Display, TEXT("Got sapient signature, %s"), *FByteArrayUtils::BytesToHexString(Signature.Data));
 	}, OnFailure);
 }
 
@@ -24,11 +24,11 @@ void FSignatureService::SignSapient(TFunction<void(FSignatureOfSapientSignerLeaf
 		TArray<FString> ImplicitSigners;
 		TArray<FString> ExplicitSigners;
 
-		TArray<FSessionCallSignature> Signatures;
+		TArray<TSharedPtr<FSessionCallSignature>> Signatures;
 		for (int i = 0; i < SupportedSigners.Num(); i++)
 		{
 			FSessionSigner Signer = SupportedSigners[i];
-			FSessionCallSignature CallSignature = Signer.SignCall(ChainId, Calls[i], i, SessionsTopology, Space, Nonce);
+			TSharedPtr<FSessionCallSignature> CallSignature = Signer.SignCall(ChainId, Calls[i], i, SessionsTopology, Space, Nonce);
 			Signatures.Add(CallSignature);
 			
 			if (Signer.Credentials.IsExplicit)

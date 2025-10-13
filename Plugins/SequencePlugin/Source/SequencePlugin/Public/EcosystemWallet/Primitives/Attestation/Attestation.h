@@ -17,6 +17,11 @@ public:
 		return TArray<uint8>();
 	}
 
+	FString ToJsonString()
+	{
+		return FString();
+	}
+
 	FString ApprovedSigner;
 	TArray<uint8> IdentityType;
 	TArray<uint8> IssuerHash;

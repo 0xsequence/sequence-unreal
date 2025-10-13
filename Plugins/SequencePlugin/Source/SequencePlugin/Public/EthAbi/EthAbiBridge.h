@@ -5,6 +5,8 @@
 class FEthAbiBridge
 {
 public:
+	static TArray<uint8> SignRecoverable(const TArray<uint8>& Hash32, const TArray<uint8>& PrivKey32);
+	
 	/**
 	 * Encode function parameters based on the function signature.
 	 * @param FunctionSignature such as balanceOf(address,uint256)

@@ -1,3 +1,8 @@
+use secp256k1::{
+    ecdsa::RecoverableSignature,
+    ecdsa::RecoveryId,
+    Message, Secp256k1, SecretKey,
+};
 use ethabi::{encode, decode as abi_decode, Address, Function, Token, Param, ParamType, StateMutability};
 use serde_json::{json, Map, Value};
 use serde::Deserialize;
@@ -16,6 +21,50 @@ struct AbiValue {
     #[serde(rename = "type")]
     kind: String,
     value: String,
+}
+
+
+#[no_mangle]
+pub extern "C" fn sign_recoverable(
+    hash_ptr: *const c_uchar,
+    hash_len: usize,           // must be 32
+    priv_ptr: *const c_uchar,  // 32
+    priv_len: usize,
+) -> *mut c_char {
+    // Safety: treat pointers as slices
+    let hash = unsafe { std::slice::from_raw_parts(hash_ptr, hash_len) };
+    let sk_bytes = unsafe { std::slice::from_raw_parts(priv_ptr, priv_len) };
+
+    if hash.len() != 32 || sk_bytes.len() != 32 {
+        return CString::new("").unwrap().into_raw();
+    }
+
+    let secp = Secp256k1::new();
+
+    let msg = match Message::from_digest_slice(hash) {
+        Ok(m) => m,
+        Err(_) => return CString::new("").unwrap().into_raw(),
+    };
+
+    let sk = match SecretKey::from_slice(sk_bytes) {
+        Ok(k) => k,
+        Err(_) => return CString::new("").unwrap().into_raw(),
+    };
+
+    // Sign (recoverable)
+    let sig: RecoverableSignature = secp.sign_ecdsa_recoverable(&msg, &sk);
+
+    // Serialize compact (64 bytes) + recid
+    let (rec_id, sig64) = sig.serialize_compact();
+    let v: u8 = 27 + rec_id.to_i32() as u8;
+
+    // r || s || v (65 bytes) as 0x hex
+    let mut out = Vec::with_capacity(65);
+    out.extend_from_slice(&sig64[..]);
+    out.push(v);
+
+    let hex_str = format!("0x{}", hex::encode(out));
+    CString::new(hex_str).unwrap().into_raw()
 }
 
 #[no_mangle]

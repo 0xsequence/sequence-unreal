@@ -1,17 +1,18 @@
 #pragma once
 #include "SessionCallSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
-#include "Types/BigInt.h"
 
 class SEQUENCEPLUGIN_API FExplicitSessionCallSignature final : public FSessionCallSignature
 {
 public:
-	explicit FExplicitSessionCallSignature(const FBigInt& InPermissionIndex, const FRSY& InSessionSignature):
-		Type(ESessionCallSignatureType::Explicit), PermissionIndex(InPermissionIndex), SessionSignature(InSessionSignature) { }
+	explicit FExplicitSessionCallSignature(const uint8& InPermissionIndex, const TSharedPtr<FRSY>& InSessionSignature):
+		PermissionIndex(InPermissionIndex), SessionSignature(InSessionSignature)
+	{
+		Type = ESessionCallSignatureType::Explicit;
+	}
 
 	static TArray<uint8> EncodeSignatures();
 
-	ESessionCallSignatureType Type;
-	FBigInt PermissionIndex;
-	FRSY SessionSignature;
+	uint8 PermissionIndex;
+	TSharedPtr<FRSY> SessionSignature;
 };

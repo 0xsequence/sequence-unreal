@@ -13,12 +13,13 @@ public:
 	
 	virtual TArray<uint8> Encode() override
 	{
-		return FSessionsLeaf::Encode();
+		constexpr uint32 Flag = FSessionsTopology::FlagPermissions << 4;
+		return FByteArrayUtils::ConcatBytes({ FByteArrayUtils::ByteArrayFromNumber(Flag, 1), Permissions.Encode() });
 	}
 	
 	virtual TArray<uint8> EncodeForHash() override
 	{
-		return FSessionsLeaf::EncodeForHash();
+		return FByteArrayUtils::ConcatBytes({ FByteArrayUtils::ByteArrayFromNumber(FSessionsTopology::FlagPermissions, 1), Permissions.Encode() });
 	}
 
 	FSessionPermissions Permissions;

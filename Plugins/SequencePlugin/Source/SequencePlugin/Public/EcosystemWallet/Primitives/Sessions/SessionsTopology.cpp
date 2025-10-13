@@ -1,8 +1,14 @@
 #include "SessionsTopology.h"
+
+#include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
+#include "Eth/Crypto.h"
 #include "Leafs/SessionsIdentitySignerLeaf.h"
 #include "Leafs/SessionsImplicitBlacklistLeaf.h"
+#include "Leafs/SessionsNodeLeaf.h"
 #include "Leafs/SessionsPermissionsLeaf.h"
 #include "Util/ByteArrayUtils.h"
+#include "Util/SequenceCoder.h"
+#include "Util/SequenceSupport.h"
 
 FString FSessionsTopology::GetIdentitySigner() const
 {
@@ -68,10 +74,10 @@ TArray<FString> FSessionsTopology::GetExplicitSigners(const TArray<FString>& Cur
 	{
 		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
 		{
-			TArray<FString> ChildResult = Child.Get()->GetExplicitSigners();
+			TArray<FString> ChildResult = Child.Get()->GetExplicitSigners(Current);
 			if (ChildResult.Num() > 0)
 			{
-				return ChildResult;
+				Result.Append(ChildResult);
 			}
 		}
 
@@ -86,6 +92,169 @@ TArray<FString> FSessionsTopology::GetExplicitSigners(const TArray<FString>& Cur
 	}
 
 	return Result;
+}
+
+TSharedPtr<FSessionsTopology> FSessionsTopology::Minimise(const TArray<FString>& ExplicitSigners, const TArray<FString>& ImplicitSigners, const FString& IdentitySigner) const
+{
+	if (IsBranch())
+    {
+        TArray<TSharedPtr<FSessionsTopology>> BranchList;
+        BranchList.Reserve(Branch->Children.Num());
+
+        for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
+        {
+            TSharedPtr<FSessionsTopology> MinChild = Child->Minimise(ExplicitSigners, ImplicitSigners, IdentitySigner);
+            BranchList.Add(MinChild);
+        }
+
+        bool bAllLeaves = true;
+        for (TSharedPtr<FSessionsTopology> Child : BranchList)
+        {
+            if (!(Child->IsLeaf() && Child->Leaf->Type == ESessionsLeafType::SessionsNode))
+            {
+                bAllLeaves = false;
+                break;
+            }
+        }
+
+        if (bAllLeaves)
+        {
+            TArray<TArray<uint8>> NodeValues;
+            for (TSharedPtr<FSessionsTopology> Child : BranchList)
+            {
+            	if (Child->IsLeaf() && Child->Leaf->Type == ESessionsLeafType::SessionsNode)
+            	{
+            		FSessionsNodeLeaf* LeafNode = static_cast<FSessionsNodeLeaf*>(Leaf.Get());
+            		if (!LeafNode)
+            			continue;
+            	
+            		NodeValues.Add(FByteArrayUtils::HexStringToBytes(LeafNode->Value));
+            	}
+            }
+
+            TArray<uint8> Concatenated = FByteArrayUtils::ConcatBytes(NodeValues);
+            TArray<uint8> Hashed = FSequenceCoder::KeccakHash(Concatenated);
+
+            return MakeShared<FSessionsTopology>(FSessionsTopology(MakeShared<FSessionsNodeLeaf>(FSessionsNodeLeaf(FByteArrayUtils::BytesToHexString(Hashed)))));
+        }
+
+		return MakeShared<FSessionsTopology>(FSessionsTopology(MakeShared<FSessionsBranch>(FSessionsBranch(BranchList))));
+    }
+
+    if (Leaf->Type == ESessionsLeafType::Permissions)
+    {
+    	FSessionsPermissionsLeaf* PermissionLeaf = static_cast<FSessionsPermissionsLeaf*>(Leaf.Get());
+        if (ExplicitSigners.Contains(PermissionLeaf->Permissions.SessionAddress))
+        {
+        	return MakeShared<FSessionsTopology>(*this);
+        }
+
+    	return MakeShared<FSessionsTopology>(FSessionsTopology(MakeShared<FSessionsNodeLeaf>(FSessionsNodeLeaf(FByteArrayUtils::BytesToHexString(Hash(true))))));
+    }
+
+    if (Leaf->Type == ESessionsLeafType::ImplicitBlacklist)
+    {
+    	FSessionsImplicitBlacklistLeaf* BlacklistLeaf = static_cast<FSessionsImplicitBlacklistLeaf*>(Leaf.Get());
+        if (ImplicitSigners.Num() == 0)
+        {
+        	return MakeShared<FSessionsTopology>(FSessionsTopology(MakeShared<FSessionsNodeLeaf>(FSessionsNodeLeaf(FByteArrayUtils::BytesToHexString(Hash(true))))));
+        }
+
+        return MakeShared<FSessionsTopology>(*this);
+    }
+
+    if (Leaf->Type == ESessionsLeafType::IdentitySigner)
+    {
+    	FSessionsIdentitySignerLeaf* IdentitySignerLeaf = static_cast<FSessionsIdentitySignerLeaf*>(Leaf.Get());
+        if (IdentitySignerLeaf->IdentitySigner.Equals(IdentitySigner, ESearchCase::IgnoreCase))
+        {
+        	return MakeShared<FSessionsTopology>(*this);
+        }
+
+        return MakeShared<FSessionsTopology>(FSessionsTopology(MakeShared<FSessionsNodeLeaf>(FSessionsNodeLeaf(FByteArrayUtils::BytesToHexString(Hash(true))))));
+    }
+
+    if (Leaf->Type == ESessionsLeafType::SessionsNode)
+    {
+    	return MakeShared<FSessionsTopology>(*this);
+    }
+
+    UE_LOG(LogTemp, Error, TEXT("Invalid topology"));
+	return MakeShared<FSessionsTopology>(*this);
+}
+
+TArray<uint8> FSessionsTopology::Encode() const
+{
+	if (IsBranch())
+	{
+		TArray<TArray<uint8>> EncodedChildren;
+		for (TSharedPtr<FSessionsTopology> SessionsTopology : Branch.Get()->Children)
+		{
+			EncodedChildren.Add(SessionsTopology->Encode());
+		}
+
+		return FByteArrayUtils::ConcatBytes(EncodedChildren);
+	}
+
+	if (IsLeaf())
+	{
+		return Leaf.Get()->Encode();
+	}
+
+	return TArray<uint8>();
+}
+
+TArray<uint8> FSessionsTopology::Hash(const bool Raw) const
+{
+	if (IsBranch())
+	{
+		TArray<TSharedPtr<FSessionsTopology>> Children = Branch.Get()->Children;
+		if (Children.Num() == 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Empty branch"));
+			throw std::runtime_error("Empty branch");
+		}
+
+		TArray<TArray<uint8>> HashedChildren;
+		HashedChildren.Reserve(Children.Num());
+		for (TSharedPtr<FSessionsTopology> Child : Children)
+		{
+			HashedChildren.Add(Child->Hash(Raw));
+		}
+
+		TArray<uint8> ChildBytes = HashedChildren[0];
+
+		for (int32 i = 1; i < HashedChildren.Num(); ++i)
+		{
+			TArray<uint8> Concatenated = FByteArrayUtils::ConcatBytes({
+				ChildBytes,
+				HashedChildren[i]
+			});
+
+			ChildBytes = FSequenceCoder::KeccakHash(Concatenated);
+		}
+
+		return ChildBytes;
+	}
+
+	if (IsLeaf())
+	{
+		TArray<uint8> EncodedLeaf;
+
+		if (Raw)
+		{
+			EncodedLeaf = Leaf->EncodeForHash();
+		}
+		else
+		{
+			EncodedLeaf = Leaf->Encode();
+		}
+
+		return FSequenceCoder::KeccakHash(EncodedLeaf);
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Invalid tree structure"));
+	return TArray<uint8>();
 }
 
 TSharedPtr<FSessionsTopology> FSessionsTopology::FromServiceConfigTree(const TSharedPtr<FJsonValue>& Input)

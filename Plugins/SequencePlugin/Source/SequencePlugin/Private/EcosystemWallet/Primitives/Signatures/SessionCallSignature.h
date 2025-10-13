@@ -13,7 +13,7 @@ public:
 	virtual ~FSessionCallSignature() = default;
 	
 	static TArray<uint8> EncodeSignatures(
-		const TArray<FSessionCallSignature>& Signatures,
+		const TArray<TSharedPtr<FSessionCallSignature>>& Signatures,
 		const TSharedPtr<FSessionsTopology>& SessionsTopology,
 		const TArray<FString>& ImplicitSigners,
 		const TArray<FString>& ExplicitSigners);
