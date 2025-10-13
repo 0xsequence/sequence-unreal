@@ -4,14 +4,14 @@
 
 TArray<uint8> FCall::Hash() const
 {
-	TArray<uint8> TypeHash = TArray<uint8>(); // FStaticBytesCoder::Encode(FString(CallTypeHash));
-	TArray<uint8> ToHash = TArray<uint8>(); // FAddressCoder::Encode(To);
-	TArray<uint8> ValueHash = TArray<uint8>(); // FEthAbiBridge::EncodeBigInteger(std::to_string(Value));
-	TArray<uint8> DataHash = FSequenceCoder::KeccakHash(FByteArrayUtils::HexStringToBytes(Data));
-	TArray<uint8> GasLimitHash = TArray<uint8>(); // FEthAbiBridge::EncodeBigInteger(FString::Printf(TEXT("%i"), GasLimit));
-	TArray<uint8> DelegateCallHash = TArray<uint8>(); // FBooleanCoder::Encode(bDelegateCall);
-	TArray<uint8> OnlyFallbackHash = TArray<uint8>(); // FBooleanCoder::Encode(bOnlyFallback);
-	TArray<uint8> BehaviorOnErrorHash = TArray<uint8>(); // FNumberCoder::Encode(BehaviorOnError);
+	const TArray<uint8> TypeHash = FSequenceCoder::KeccakHash(FByteArrayUtils::StringToBytes(CallTypeHash));
+	const TArray<uint8> ToHash = FSequenceCoder::EncodeAddress(To);
+	const TArray<uint8> ValueHash = FSequenceCoder::EncodeSignedInt(Value.Value);
+	const TArray<uint8> DataHash = FSequenceCoder::KeccakHash(FByteArrayUtils::HexStringToBytes(Data));
+	const TArray<uint8> GasLimitHash = FSequenceCoder::EncodeSignedInt(GasLimit.Value);
+	const TArray<uint8> DelegateCallHash = FSequenceCoder::EncodeBoolean(DelegateCall);
+	const TArray<uint8> OnlyFallbackHash = FSequenceCoder::EncodeBoolean(OnlyFallback);
+	const TArray<uint8> BehaviorOnErrorHash = FSequenceCoder::EncodeSignedInt(BehaviourOnError);
 
 	TArray<uint8> Encoded;
 	Encoded.Append(TypeHash);

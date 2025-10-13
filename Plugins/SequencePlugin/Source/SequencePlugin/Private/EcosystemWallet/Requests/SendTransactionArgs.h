@@ -16,10 +16,10 @@ public:
 	FString Data;
 	
 	UPROPERTY()
-	int64 Value;
+	FString Value;
 	
 	UPROPERTY()
-	int64 GasLimit;
+	FString GasLimit;
 };
 
 USTRUCT()

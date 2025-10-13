@@ -3,7 +3,7 @@
 #include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "Util/SequenceSupport.h"
 
-UContractTransaction* UContractTransaction::CreateContractTransaction(const FString& To, const int64 Value, const FString& FunctionSignature, const TArray<FString> Values)
+UContractTransaction* UContractTransaction::CreateContractTransaction(const FString& To, const FString& Value, const FString& FunctionSignature, const TArray<FString> Values)
 {
 	UContractTransaction* Permissions = NewObject<UContractTransaction>();
 	Permissions->To = To;
@@ -26,14 +26,16 @@ FCalls UContractTransaction::GetCalls()
 	const FString JsonValues = USequenceSupport::JsonValueListToParsableString(Values);
 	FString Data = USequenceSupport::EncodeFunctionCall(this->FunctionSignature, JsonValues);
 	
-	FCall Call;
-	Call.To = this->To;
-	Call.Data = Data;
-	Call.Value = this->Value;
-	Call.GasLimit = 0;
-	Call.DelegateCall = false;
-	Call.OnlyFallback = false;
-
+	FCall Call {
+		this->To,
+		Data,
+		FBigInt(this->Value),
+		FBigInt("0"),
+		false,
+		false,
+		"1"
+	};
+	
 	FCalls Calls;
 	Calls.Calls.Add(Call);
 

@@ -1,5 +1,13 @@
 #include "Util/ByteArrayUtils.h"
 
+TArray<uint8> FByteArrayUtils::StringToBytes(const FString& InString)
+{
+	FTCHARToUTF8 Converter(*InString);
+	TArray<uint8> Bytes;
+	Bytes.Append((uint8*)Converter.Get(), Converter.Length());
+	return Bytes;
+}
+
 FString FByteArrayUtils::BytesToHexString(const TArray<uint8>& Bytes)
 {
 	FString HexString = TEXT("0x");

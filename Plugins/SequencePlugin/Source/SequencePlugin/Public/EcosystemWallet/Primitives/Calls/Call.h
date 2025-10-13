@@ -1,31 +1,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Call.generated.h"
+#include "Types/BigInt.h"
 
-USTRUCT()
 struct SEQUENCEPLUGIN_API FCall
 {
-	GENERATED_BODY()
-	
-public:
-	UPROPERTY()
 	FString To;
-
-	UPROPERTY()
 	FString Data;
-	
-	UPROPERTY()
-	int64 Value;
-
-	UPROPERTY()
-	int64 GasLimit;
-
-	UPROPERTY()
+	FBigInt Value;
+	FBigInt GasLimit;
 	bool DelegateCall;
-	
-	UPROPERTY()
 	bool OnlyFallback;
+	FString BehaviourOnError;
 
 	TArray<uint8> Hash() const;
 	

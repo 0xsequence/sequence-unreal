@@ -13,12 +13,12 @@ class SEQUENCEPLUGIN_API UContractTransaction : public UObject, public ISeqTrans
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Transactions")
-	static UContractTransaction* CreateContractTransaction(const FString& To, const int64 Value, const FString& FunctionSignature, const TArray<FString> Values);
+	static UContractTransaction* CreateContractTransaction(const FString& To, const FString& Value, const FString& FunctionSignature, const TArray<FString> Values);
 	
 	virtual FCalls GetCalls() override;
 
 	FString To;
-	int64 Value;
+	FString Value;
 	FString FunctionSignature;
 	TArray<FString> Values;
 };

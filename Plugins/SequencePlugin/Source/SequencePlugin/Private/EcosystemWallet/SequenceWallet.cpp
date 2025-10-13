@@ -71,8 +71,8 @@ void USequenceWallet::SendTransactionWithoutPermissions(const TScriptInterface<I
 	FTransactionRequest Request;
 	Request.To = Call.To;
 	Request.Data = Call.Data;
-	Request.Value = Call.Value;
-	Request.GasLimit = Call.GasLimit;
+	Request.Value = Call.Value.Value;
+	Request.GasLimit = Call.GasLimit.Value;
 	
 	FSendTransactionArgs Payload;
 	Payload.ChainId = SequenceSdk::GetChainId();
