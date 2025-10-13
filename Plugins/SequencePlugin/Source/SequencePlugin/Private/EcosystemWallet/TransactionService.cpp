@@ -8,10 +8,10 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 	TSharedPtr<FCalls> Payload = MakeShared<FCalls>(Calls, FBigInt("0"), FBigInt(CurrentWalletState->Nonce));
 	TSharedPtr<FEnvelope> Envelope = MakeShared<FEnvelope>(ChainId, CurrentWalletState->Address, CurrentWalletState->Config, Payload);
 
-	FSignatureService SignatureService = FSignatureService(ChainId, CurrentWalletState->SessionsImageHash, Envelope,
-		CurrentWalletState->ConfigUpdates, this->Signers, CurrentWalletState->SessionsTopology);
+	TSharedPtr<FSignatureService> SignatureService = MakeShared<FSignatureService>(FSignatureService(ChainId, CurrentWalletState->SessionsImageHash, Envelope,
+		CurrentWalletState->ConfigUpdates, this->Signers, CurrentWalletState->SessionsTopology));
 
-	SignatureService.SignCalls([OnSuccess](const FRawSignature& Signature)
+	SignatureService->SignCalls([OnSuccess](const FRawSignature& Signature)
 	{
 		
 	}, OnFailure);

@@ -11,7 +11,7 @@ class SEQUENCEPLUGIN_API FSignatureOfLeaf
 public:
 	virtual ~FSignatureOfLeaf() = default;
 
-	virtual TArray<uint8> Encode(const int32& Weight)
+	virtual TArray<uint8> Encode(const FString& Weight)
 	{
 		return TArray<uint8>();
 	}

@@ -1,6 +1,8 @@
 #include "SignatureService.h"
 #include "SignerService.h"
+#include "Extensions/ExtensionsFactory.h"
 #include "Guard/GuardSigner.h"
+#include "Signatures/SignatureHandler.h"
 
 void FSignatureService::SignCalls(const TFunction<void(FRawSignature)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
@@ -12,10 +14,14 @@ void FSignatureService::SignCalls(const TFunction<void(FRawSignature)>& OnSucces
 		
 		UGuardSigner* Guard = NewObject<UGuardSigner>();
 		Guard->WithHost(Signers[0].Credentials.Guard.Url);
-		
-		Guard->SignEnvelope(Envelope, ImageHash, [](const TSharedPtr<FRSY>& RSY)
+
+		Guard->SignEnvelope(Envelope, ImageHash, [this](const TSharedPtr<FEnvelope>& Envelope, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Got RSY from Guard, %s"), *FByteArrayUtils::BytesToHexString(RSY.Get()->Pack()));
+			UE_LOG(LogTemp, Display, TEXT("Got RSY from Guard, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Signature->Pack()));
+
+			Envelope->Signatures.Add(Signature);
+
+			TSharedPtr<FRawSignature> RawSignature = FSignatureHandler::EncodeSignature(Envelope, ImageHash);
 		}, OnFailure);
 	}, OnFailure);
 }
@@ -53,7 +59,7 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 
 		const TArray<uint8> Data = FSessionCallSignature::EncodeSignatures(Signatures, SessionsTopology, ImplicitSigners, ExplicitSigners);
 		
-		const FString SessionsAddress = "0x0000000000CC58810c33F3a0D78aA1Ed80FaDcD8";
+		const FString SessionsAddress = FExtensionsFactory::GetCurrent().Sessions;
 		const TSharedPtr<FSignatureOfSapientSignerLeaf> Signature = MakeShared<FSignatureOfSapientSignerLeaf>(FSignatureOfSapientSignerLeaf(SessionsAddress, Data));
 		
 		OnSuccess(Signature);

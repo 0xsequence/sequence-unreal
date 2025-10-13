@@ -4,6 +4,7 @@
 #include "GuardService.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
+#include "EcosystemWallet/Primitives/Signatures/SignatureOfSignerLeafHash.h"
 #include "UObject/Object.h"
 #include "GuardSigner.generated.h"
 
@@ -18,7 +19,7 @@ public:
 	void SignEnvelope(
 		const TSharedPtr<FEnvelope>& Envelope,
 		const FString& SessionsImageHash,
-		const TFunction<void(TSharedPtr<FRSY>)>& OnSuccess,
+		const TFunction<void(TSharedPtr<FEnvelope>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
 		const TFunction<void(FString)>& OnFailure);
 
 private:

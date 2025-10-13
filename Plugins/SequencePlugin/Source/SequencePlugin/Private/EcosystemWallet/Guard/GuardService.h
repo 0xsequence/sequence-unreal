@@ -21,6 +21,4 @@ public:
 private:
 	UPROPERTY()
 	UHttpHandler* HttpHandler;
-
-	FString SignerAddress = TEXT("0x18002Fc09deF9A47437cc64e270843dE094f5984");
 };

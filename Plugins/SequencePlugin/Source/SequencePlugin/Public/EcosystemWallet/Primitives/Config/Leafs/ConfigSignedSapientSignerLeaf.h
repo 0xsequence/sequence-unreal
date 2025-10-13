@@ -3,12 +3,12 @@
 #include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
 #include "EcosystemWallet/Primitives/Signatures/SignatureOfLeaf.h"
 
-class SEQUENCEPLUGIN_API FConfigSignedSignerLeaf final : public FConfigLeaf
+class SEQUENCEPLUGIN_API FConfigSignedSapientSignerLeaf final : public FConfigLeaf
 {
 public:
-	explicit FConfigSignedSignerLeaf(const FString& InAddress, const int32& InWeight, const FString& ImageHash, const TSharedPtr<FSignatureOfLeaf>& InSignature)
+	explicit FConfigSignedSapientSignerLeaf(const FString& InAddress, const FString& InWeight, const FString& ImageHash, const TSharedPtr<FSignatureOfLeaf>& InSignature)
 	{
-		this->Type = EConfigLeafType::SignedSigner;
+		this->Type = EConfigLeafType::SignedSapientSigner;
 		this->Address = InAddress;
 		this->Weight = InWeight;
 		this->ImageHash = ImageHash;
@@ -26,7 +26,7 @@ public:
 	}
 
 	FString Address;
-	int32 Weight;
+	FString Weight;
 	FString ImageHash;
 	TSharedPtr<FSignatureOfLeaf> Signature;
 };

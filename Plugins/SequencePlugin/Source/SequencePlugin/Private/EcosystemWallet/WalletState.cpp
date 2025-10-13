@@ -2,6 +2,7 @@
 #include "EcosystemWallet/Primitives/Config/Leafs/ConfigSapientSignerLeaf.h"
 #include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
 #include "EthAbi/EthAbiBridge.h"
+#include "Extensions/ExtensionsFactory.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -29,8 +30,7 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 					
 					this->UpdateConfig(ConfigImageHash, [this, OnSuccess, OnFailure]()
 					{
-						const FString SessionsManagerAddress = TEXT("0x0000000000CC58810c33F3a0D78aA1Ed80FaDcD8");
-						TSharedPtr<FConfigLeaf> Leaf = this->Config->Topology.Get()->FindSignerLeaf(SessionsManagerAddress);
+						TSharedPtr<FConfigLeaf> Leaf = this->Config->Topology.Get()->FindSignerLeaf(FExtensionsFactory::GetCurrent().Sessions);
 						
 						if (!Leaf.IsValid())
 						{

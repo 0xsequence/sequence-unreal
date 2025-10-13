@@ -1,8 +1,11 @@
 #include "GuardSigner.h"
+
+#include "EcosystemWallet/Extensions/ExtensionsFactory.h"
 #include "EcosystemWallet/Primitives/Calls/CallTypedDataFactory.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
 #include "EcosystemWallet/Primitives/Signatures/SignatureOfSapientSignerLeaf.h"
+#include "EcosystemWallet/Primitives/Signatures/SignatureOfSignerLeafHash.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceSupport.h"
 
@@ -15,11 +18,10 @@ void UGuardSigner::WithHost(const FString& Host)
 void UGuardSigner::SignEnvelope(
 	const TSharedPtr<FEnvelope>& Envelope,
 	const FString& SessionsImageHash,
-	const TFunction<void(TSharedPtr<FRSY>)>& OnSuccess,
+	const TFunction<void(TSharedPtr<FEnvelope>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
 	const TFunction<void(FString)>& OnFailure)
 {
-	FEnvelope* EnvelopePtr = Envelope.Get();
-	FString DomainJson = FCallTypedDataFactory::FromCalls(EnvelopePtr->Wallet, EnvelopePtr->ChainId, EnvelopePtr->Payload);
+	FString DomainJson = FCallTypedDataFactory::FromCalls(Envelope->Wallet, Envelope->ChainId, Envelope->Payload);
 	DomainJson = DomainJson.Replace(TEXT("\n"), TEXT(""));
 	DomainJson = DomainJson.Replace(TEXT("\t"), TEXT(""));
 	
@@ -27,7 +29,7 @@ void UGuardSigner::SignEnvelope(
 	const FString HashedHex = FByteArrayUtils::BytesToHexString(HashedData);
 
 	TArray<FGuardSignatureArgs> Signatures;
-	for (TSharedPtr<FSignatureOfLeaf> SignatureOfLeaf : EnvelopePtr->Signatures)
+	for (TSharedPtr<FSignatureOfLeaf> SignatureOfLeaf : Envelope->Signatures)
 	{
 		if (SignatureOfLeaf->Type == EConfigSignatureType::SignatureOfSapientSigner)
 		{
@@ -42,19 +44,23 @@ void UGuardSigner::SignEnvelope(
 	}
 	
 	FSignWithArgs Args {
-		TEXT("0x18002Fc09deF9A47437cc64e270843dE094f5984"),
+		FExtensionsFactory::GetCurrent().Guard,
 		FSignRequest {
-			FCString::Atoi64(*EnvelopePtr->ChainId.Value),
+			FCString::Atoi64(*Envelope->ChainId.Value),
 			HashedHex,
-			EnvelopePtr->Wallet,
+			Envelope->Wallet,
 			"Calls",
 			FByteArrayUtils::BytesToHexString(FByteArrayUtils::StringToBytes(DomainJson)),
 			Signatures
 		}
 	};
 
-	this->GuardService->SignWith(Args, [OnSuccess](const FSignWithResponse& Response)
+	this->GuardService->SignWith(Args, [Envelope, OnSuccess](const FSignWithResponse& Response)
 	{
-		OnSuccess(FRSY::UnpackFrom65(FByteArrayUtils::HexStringToBytes(Response.Sig)));
+		const TSharedPtr<FRSY> Signature = FRSY::UnpackFrom65(FByteArrayUtils::HexStringToBytes(Response.Sig));
+		const TSharedPtr<FSignatureOfSignerLeafHash> SignatureOfSignerLeafHash = MakeShared<FSignatureOfSignerLeafHash>(FSignatureOfSignerLeafHash());
+		SignatureOfSignerLeafHash->Signature = Signature;
+		
+		OnSuccess(Envelope, SignatureOfSignerLeafHash);
 	}, OnFailure);
 }

@@ -12,7 +12,7 @@ public:
 		this->Signature = InSignature;
 	}
 
-	virtual TArray<uint8> Encode(const int32& Weight) override
+	virtual TArray<uint8> Encode(const FString& Weight) override
 	{
 		return TArray<uint8>();
 	}

@@ -6,7 +6,7 @@
 class SEQUENCEPLUGIN_API FConfigSignedSignerLeaf final : public FConfigLeaf
 {
 public:
-	explicit FConfigSignedSignerLeaf(const FString& InAddress, const int32& InWeight, const TSharedPtr<FSignatureOfLeaf>& InSignature)
+	explicit FConfigSignedSignerLeaf(const FString& InAddress, const FString& InWeight, const TSharedPtr<FSignatureOfLeaf>& InSignature)
 	{
 		this->Type = EConfigLeafType::SignedSigner;
 		this->Address = InAddress;
@@ -25,6 +25,6 @@ public:
 	}
 
 	FString Address;
-	int32 Weight;
+	FString Weight;
 	TSharedPtr<FSignatureOfLeaf> Signature;
 };
