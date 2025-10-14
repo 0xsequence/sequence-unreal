@@ -60,10 +60,10 @@ public:
 		}
 
 		const int32 NestedSize = Nested.Num();
-		TArray<uint8> NestedSizeBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::ByteArrayFromNumber(NestedSize, 1), 3);
+		TArray<uint8> NestedSizeBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::ByteArrayFromNumber(NestedSize, FByteArrayUtils::MinBytesFor(NestedSize)), 3);
 		TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(Flag, 1);
 
-		return FByteArrayUtils::ConcatBytes({WeightBytes, ThresholdBytes, NestedSizeBytes, Nested});
+		return FByteArrayUtils::ConcatBytes({FlagBytes, WeightBytes, ThresholdBytes, NestedSizeBytes, Nested});
 	}
 	
 	virtual TArray<uint8> HashConfiguration() override

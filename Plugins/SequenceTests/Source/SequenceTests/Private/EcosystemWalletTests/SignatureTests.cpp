@@ -1,5 +1,6 @@
 #include "CoreMinimal.h"
 #include "EcosystemWallet/Primitives/Signatures/Erc6492.h"
+#include "EcosystemWallet/Primitives/Signatures/RawSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
 #include "Misc/AutomationTest.h"
 #include "Util/ByteArrayUtils.h"
@@ -85,6 +86,22 @@ bool FDecodeErc6492::RunTest(const FString& Parameters)
     UE_LOG(LogTemp, Log, TEXT("DecodedSignatureHex: %s"), *DecodedSignatureHex);
 
     TestEqual("Deploy data hex should match", DecodedSignatureHex, Erc6492SignatureHex);
+    
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDecodeRawSignature, "SequencePlugin.UnitTests.EcosystemWallet.DecodeRawSignature", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FDecodeRawSignature::RunTest(const FString& Parameters)
+{
+    const FString ConfigUpdateSig = "0x061902118a261c1c227f653f26b468615afa440c6f70637601563941f41c2c424334601c1a283d5668dd41ebcdb83d943a8e711e02b1ae38fb5313d4cd267e4bf32701a3c332ceb8d428234ae1254b78b3c7bd871c31e050da6500004101b2ff250ab138f510fc33f7a3b32eec71b85663d1184e8d5cd59374c43d01dfaec61f3c8f83068f40dc5a5d39ee1f3e998e4477c86d3dc3e0f906eca27d7c272c416062ff00003a30bf3a81c77c768d877d9cb46558300d6bae59d96b273a5bb7bd6d0dfddb574e5b650000151118002fc09def9a47437cc64e270843de094f598430ec392c0ac580a8ce28adb765a25fabb17ccc651b7c73f8f14b2d7fb63d2f8bed";
+    
+    const TSharedPtr<FRawSignature> Signature = FRawSignature::Decode(FByteArrayUtils::HexStringToBytes(ConfigUpdateSig));
+    const TArray<uint8> EncodedSignature = Signature->Encode();
+    const FString EncodedHex = FByteArrayUtils::BytesToHexString(EncodedSignature);
+    
+    UE_LOG(LogTemp, Log, TEXT("Decoded RawSignature: %s = %s"), *EncodedHex, *ConfigUpdateSig);
+
+    TestEqual("Deploy data hex should match", EncodedHex, ConfigUpdateSig);
     
     return true;
 }

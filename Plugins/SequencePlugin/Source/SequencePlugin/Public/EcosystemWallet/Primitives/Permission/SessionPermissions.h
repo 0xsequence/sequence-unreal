@@ -60,15 +60,15 @@ public:
 
 		TArray<uint8> ChainIdBytes;
 		ChainIdBytes.Append(&Data[20], 32);
-		FString ChainId = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
+		FString ChainId = FByteArrayUtils::BytesToBigIntHexString(ChainIdBytes);
 
 		TArray<uint8> ValueLimitBytes;
 		ValueLimitBytes.Append(&Data[52], 32);
-		FString ValueLimit = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
+		FString ValueLimit = FByteArrayUtils::BytesToBigIntHexString(ValueLimitBytes);
 
 		TArray<uint8> DeadlineBytes;
 		DeadlineBytes.Append(&Data[84], 8);
-		FString Deadline = FByteArrayUtils::BytesToBigIntHexString(SignerBytes);
+		FString Deadline = FByteArrayUtils::BytesToBigIntHexString(DeadlineBytes);
 
 		if (Data.Num() <= 92)
 		{

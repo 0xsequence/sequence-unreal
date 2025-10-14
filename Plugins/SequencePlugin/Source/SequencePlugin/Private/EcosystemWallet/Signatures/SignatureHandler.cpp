@@ -23,8 +23,6 @@ TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(const TSharedPtr<FE
 		Envelope->Config->Checkpoint,
 		Topology));
 
-	RawSignature.Configuration->Checkpointer = Envelope->Config->Checkpointer;
-	
 	return MakeShared<FRawSignature>(RawSignature);
 }
 

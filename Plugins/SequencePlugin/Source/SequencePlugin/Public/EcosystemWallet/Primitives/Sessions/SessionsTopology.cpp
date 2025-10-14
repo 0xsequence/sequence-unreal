@@ -124,7 +124,7 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::Minimise(const TArray<FString>&
             {
             	if (Child->IsLeaf() && Child->Leaf->Type == ESessionsLeafType::SessionsNode)
             	{
-            		FSessionsNodeLeaf* LeafNode = static_cast<FSessionsNodeLeaf*>(Leaf.Get());
+            		FSessionsNodeLeaf* LeafNode = static_cast<FSessionsNodeLeaf*>(Child->Leaf.Get());
             		if (!LeafNode)
             			continue;
             	
@@ -146,7 +146,6 @@ TSharedPtr<FSessionsTopology> FSessionsTopology::Minimise(const TArray<FString>&
     	FSessionsPermissionsLeaf* PermissionLeaf = static_cast<FSessionsPermissionsLeaf*>(Leaf.Get());
         if (ExplicitSigners.Contains(PermissionLeaf->Permissions.SessionAddress))
         {
-        	UE_LOG(LogTemp, Display, TEXT("Not hashing permissions leaf %s"), *PermissionLeaf->Permissions.SessionAddress);
         	return MakeShared<FSessionsTopology>(*this);
         }
 
@@ -194,11 +193,27 @@ TArray<uint8> FSessionsTopology::Encode() const
 			EncodedChildren.Add(SessionsTopology->Encode());
 		}
 
-		return FByteArrayUtils::ConcatBytes(EncodedChildren);
+		const TArray<uint8> ChildrenBytes = FByteArrayUtils::ConcatBytes(EncodedChildren);
+		const uint64 EncodedSize = FByteArrayUtils::MinBytesFor(ChildrenBytes.Num());
+		const int32 Flag = FSessionsTopology::FlagBranch << 4 | EncodedSize;
+
+		return FByteArrayUtils::ConcatBytes({
+			FByteArrayUtils::ByteArrayFromNumber(Flag, 1),
+			FByteArrayUtils::ByteArrayFromNumber(ChildrenBytes.Num(), EncodedSize),
+			ChildrenBytes
+		});
 	}
 
 	if (IsLeaf())
 	{
+		if (Leaf->Type != ESessionsLeafType::SessionsNode)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Encoded sessions leaf %s"), *FByteArrayUtils::BytesToHexString(Leaf.Get()->Encode()));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Encoded sessions node %s"), *FByteArrayUtils::BytesToHexString(Leaf.Get()->Encode()));
+		}
 		return Leaf.Get()->Encode();
 	}
 
@@ -250,7 +265,7 @@ TArray<uint8> FSessionsTopology::Hash(const bool Raw) const
 		{
 			EncodedLeaf = Leaf->Encode();
 		}
-
+		
 		return FSequenceCoder::KeccakHash(EncodedLeaf);
 	}
 

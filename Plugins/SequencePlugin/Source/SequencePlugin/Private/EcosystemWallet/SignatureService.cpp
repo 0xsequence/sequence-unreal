@@ -73,7 +73,7 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 		const TArray<uint8> Data = FSessionCallSignature::EncodeSignatures(Signatures, SessionsTopology, ImplicitSigners, ExplicitSigners);
 		
 		const FString SessionsAddress = FExtensionsFactory::GetCurrent().Sessions;
-		const TSharedPtr<FSignatureOfSapientSignerLeaf> Signature = MakeShared<FSignatureOfSapientSignerLeaf>(FSignatureOfSapientSignerLeaf(ESapientSignatureType::SapientSignatureCompact, SessionsAddress, Data));
+		const TSharedPtr<FSignatureOfSapientSignerLeaf> Signature = MakeShared<FSignatureOfSapientSignerLeaf>(FSignatureOfSapientSignerLeaf(ESapientSignatureType::SapientSignature, SessionsAddress, Data));
 		
 		OnSuccess(Signature);
 	}, OnFailure);

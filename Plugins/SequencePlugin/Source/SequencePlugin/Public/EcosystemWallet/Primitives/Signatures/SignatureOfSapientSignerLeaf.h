@@ -51,7 +51,9 @@ public:
 			UE_LOG(LogTemp, Error, TEXT("Weight too large"));
 		}
 
-		TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(Flag, FByteArrayUtils::MinBytesFor(Flag));
+		TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(Flag, 1);
+
+		UE_LOG(LogTemp, Log, TEXT("FlagBytes %s %d %d"), *FByteArrayUtils::BytesToHexString(FlagBytes), Data.Num(), BytesForSignatureSize);
 
 		TArray<uint8> AddressBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(Address), 20);
 

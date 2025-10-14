@@ -56,7 +56,7 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 				});
 			};
 			
-			if (this->IsDeployed && Implementation == "0x7438718F9E4b9B834e305A620EEeCf2B9E6eBE79")
+			if (this->IsDeployed && Implementation.Equals("0x7438718F9E4b9B834e305A620EEeCf2B9E6eBE79", ESearchCase::IgnoreCase))
 			{
 				this->GetOnchainImageHash([this, GetConfig](const FString& ImageHash)
 				{
@@ -114,6 +114,7 @@ void FWalletState::UpdateNonce(const TFunction<void()>& Callback)
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
 		this->Nonce = FEthAbiBridge::HexToBigIntString(Response);
+		UE_LOG(LogTemp, Display, TEXT("Nonce %s"), *Nonce)
 		Callback();
 	};
 
@@ -139,8 +140,8 @@ void FWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()
 	const TSuccessCallback<FSeqConfigContext> OnSuccess = [this, Callback](const FSeqConfigContext& Response)
 	{
 		this->Config = MakeShared<FSeqConfig>(FSeqConfig(
+		FBigInt(FString::Printf(TEXT("%d"), Response.Threshold)),
 			FBigInt(Response.Checkpoint),
-			FBigInt(FString::Printf(TEXT("%d"), Response.Threshold)),
 			FConfigTopology::FromServiceConfigTree(Response.Tree)));
 		
 		Callback();
@@ -176,7 +177,9 @@ void FWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
-		Callback(Response);
+		const FString Code = FByteArrayUtils::BytesToHexString(FByteArrayUtils::SliceBytesFrom(FByteArrayUtils::HexStringToBytes(Response), 12));
+		UE_LOG(LogTemp, Display, TEXT("Implementation %s"), *Code);
+		Callback(Code);
 	};
 
 	const FFailureCallback OnFailure = [this, Callback](const FSequenceError& Error)

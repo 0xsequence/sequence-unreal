@@ -45,7 +45,6 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
     if (BytesForCheckpoint > 7)
     {
         UE_LOG(LogTemp, Error, TEXT("Checkpoint too large"));
-        checkNoEntry();
     }
     
     Flag |= static_cast<uint8>(BytesForCheckpoint << 2);
@@ -55,8 +54,8 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
     if (BytesForThreshold > 2)
     {
         UE_LOG(LogTemp, Error, TEXT("Threshold too large"));
-        checkNoEntry();
     }
+    
     if (BytesForThreshold == 2)
     {
         Flag |= 0x20;
@@ -70,9 +69,12 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
     TArray<uint8> Output;
     Output.Add(Flag);
 
+    UE_LOG(LogTemp, Display, TEXT("##2 Flag %s"), *FByteArrayUtils::BytesToHexString(Output))
+
     if (Configuration->Checkpointer.IsSet() && !SkipCheckpointerAddress)
     {
         TArray<uint8> CheckpointerBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::HexStringToBytes(Configuration->Checkpointer.GetValue()), 20);
+        UE_LOG(LogTemp, Display, TEXT("CheckpointerBytes %s"), *FByteArrayUtils::BytesToHexString(CheckpointerBytes))
         Output = FByteArrayUtils::ConcatBytes({Output, CheckpointerBytes});
 
         if (!SkipCheckpointerData)
@@ -81,7 +83,6 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
             if (CheckpointerDataSize > 16777215)
             {
                 UE_LOG(LogTemp, Error, TEXT("Checkpointer data too large"));
-                checkNoEntry();
             }
 
             TArray<uint8> SizeBytes = FByteArrayUtils::ByteArrayFromNumber(CheckpointerDataSize, 3);
@@ -91,9 +92,13 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
 
     TArray<uint8> CheckpointBytes = Configuration->Checkpoint.Encode();
     Output = FByteArrayUtils::ConcatBytes({Output, CheckpointBytes});
+    
+    UE_LOG(LogTemp, Display, TEXT("##2 CheckpointBytes %s"), *FByteArrayUtils::BytesToHexString(CheckpointBytes))
 
     TArray<uint8> ThresholdBytes = Configuration->Threshold.Encode();
     Output = FByteArrayUtils::ConcatBytes({Output, ThresholdBytes});
+
+    UE_LOG(LogTemp, Display, TEXT("##2 ThresholdBytes %s"), *FByteArrayUtils::BytesToHexString(ThresholdBytes))
 
     TArray<uint8> TopologyBytes = Configuration->Topology->Encode(NoChainId, CheckpointerData);
     Output = FByteArrayUtils::ConcatBytes({Output, TopologyBytes});
@@ -121,7 +126,7 @@ TSharedPtr<FRawSignature> FRawSignature::Decode(const TArray<uint8>& Erc6492Sign
     uint8 Flag = Signature[0];
     bool bNoChainId = (Flag & 0x02) == 0x02;
 
-    FString CheckpointerAddress = "";
+    TOptional<FString> CheckpointerAddress;
     TArray<uint8> CheckpointerData;
 
     // 2. Parse checkpointer data
@@ -178,8 +183,10 @@ TSharedPtr<FRawSignature> FRawSignature::Decode(const TArray<uint8>& Erc6492Sign
         TArray<TSharedPtr<FRawSignature>> NewSubSignatures;
         for (int32 i = 1; i < SubSignatures.Num(); i++)
         {
-            NewSubSignatures.Add(SubSignatures[0]);
+            NewSubSignatures.Add(SubSignatures[i]);
         }
+
+        UE_LOG(LogTemp, Error, TEXT("Chained signature has no subsignatures %d"), NewSubSignatures.Num());
 
         FRawSignature Result;
         Result.NoChainId = SubSignatures[0]->NoChainId;

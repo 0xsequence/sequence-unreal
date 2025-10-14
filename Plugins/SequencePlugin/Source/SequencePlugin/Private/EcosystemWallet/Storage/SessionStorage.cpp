@@ -62,7 +62,6 @@ bool FSessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
 
 			for (TSharedPtr<FJsonValue> JsonObject : SessionsJson)
 			{
-				UE_LOG(LogTemp, Display, TEXT("JsonObject"));
 				Sessions.Add(FSessionCredentials::FromJson(JsonObject->AsObject()));
 			}
 

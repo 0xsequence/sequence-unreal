@@ -14,6 +14,7 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
     const FString IdentitySigner = SessionsTopology->GetIdentitySigner();
     const TSharedPtr<FSessionsTopology> MinTopology = SessionsTopology->Minimise(ExplicitSigners, ImplicitSigners, IdentitySigner);
 
+    UE_LOG(LogTemp, Error, TEXT("++ Encoding minimised topology"));
     TArray<uint8> EncodedTopology = MinTopology.Get()->Encode();
     if (FByteArrayUtils::MinBytesFor(EncodedTopology.Num()) > 3)
     {

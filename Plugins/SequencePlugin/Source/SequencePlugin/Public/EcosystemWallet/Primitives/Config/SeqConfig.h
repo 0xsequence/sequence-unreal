@@ -9,7 +9,7 @@ class SEQUENCEPLUGIN_API FSeqConfig
 {
 public:
 	explicit FSeqConfig(const FBigInt& Threshold, const FBigInt& Checkpoint, const TSharedPtr<FConfigTopology>& Topology)
-		: Threshold(Threshold), Checkpoint(Checkpoint), Topology(Topology), Checkpointer("") { }
+		: Threshold(Threshold), Checkpoint(Checkpoint), Topology(Topology) { }
 	
 	FBigInt Threshold;
 	FBigInt Checkpoint;

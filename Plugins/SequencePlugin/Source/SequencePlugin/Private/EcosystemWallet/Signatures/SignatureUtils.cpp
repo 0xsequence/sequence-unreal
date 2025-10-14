@@ -44,7 +44,6 @@ TTuple<TArray<TSharedPtr<FConfigTopology>>, TArray<uint8>> FSignatureUtils::Pars
                 HashSig->Signature = Rsy;
 
                 FConfigSignedSignerLeaf Leaf = FConfigSignedSignerLeaf("", FValueUtils::Int32ToString(Weight), HashSig);
-
                 Leafs.Add(MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigSignedSignerLeaf>(Leaf))));
                 break;
             }
@@ -87,7 +86,6 @@ TTuple<TArray<TSharedPtr<FConfigTopology>>, TArray<uint8>> FSignatureUtils::Pars
                 TSharedPtr<FSignatureOfSignerLeafErc1271> Sig = MakeShared<FSignatureOfSignerLeafErc1271>(FSignatureOfSignerLeafErc1271(SignerHex, Data));
 
                 FConfigSignedSignerLeaf Leaf = FConfigSignedSignerLeaf("", FValueUtils::Int32ToString(Weight), Sig);
-
                 Leafs.Add(MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigSignedSignerLeaf>(Leaf))));
                 break;
             }
@@ -98,7 +96,6 @@ TTuple<TArray<TSharedPtr<FConfigTopology>>, TArray<uint8>> FSignatureUtils::Pars
                 Index += 32;
 
                 FConfigNodeLeaf Leaf = FConfigNodeLeaf(FByteArrayUtils::BytesToHexString(NodeHash));
-
                 Leafs.Add(MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigNodeLeaf>(Leaf))));
                 break;
             }
@@ -128,7 +125,7 @@ TTuple<TArray<TSharedPtr<FConfigTopology>>, TArray<uint8>> FSignatureUtils::Pars
                 Index += 32;
 
                 FConfigSubdigestLeaf Leaf = FConfigSubdigestLeaf(FByteArrayUtils::BytesToHexString(Digest));
-
+                    
                 Leafs.Add(MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigSubdigestLeaf>(Leaf))));
                 break;
             }
@@ -195,7 +192,7 @@ TTuple<TArray<TSharedPtr<FConfigTopology>>, TArray<uint8>> FSignatureUtils::Pars
                 Index += 32;
 
                 FConfigAnyAddressSubdigestLeaf Leaf = FConfigAnyAddressSubdigestLeaf(FByteArrayUtils::BytesToHexString(Digest));
-
+                    
                 Leafs.Add(MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigAnyAddressSubdigestLeaf>(Leaf))));
                 break;
             }

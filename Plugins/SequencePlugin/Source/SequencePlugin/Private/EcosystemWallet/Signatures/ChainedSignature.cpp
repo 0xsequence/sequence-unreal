@@ -34,8 +34,7 @@ TArray<uint8> FChainedSignature::Encode()
 		}
 
 		Output.Append(FByteArrayUtils::ByteArrayFromNumber(CheckpointerDataSize, 3));
-		if (CheckpointerDataSize > 0)
-			Output.Append(SigForCheckpointer->CheckpointerData);
+		Output.Append(SigForCheckpointer->CheckpointerData);
 	}
 
 	for (int32 i = 0; i < Signatures.Num(); i++)
