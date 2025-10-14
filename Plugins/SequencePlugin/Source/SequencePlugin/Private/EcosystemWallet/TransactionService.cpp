@@ -11,8 +11,9 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 	TSharedPtr<FSignatureService> SignatureService = MakeShared<FSignatureService>(FSignatureService(ChainId, CurrentWalletState->SessionsImageHash, Envelope,
 		CurrentWalletState->ConfigUpdates, this->Signers, CurrentWalletState->SessionsTopology));
 
-	SignatureService->SignCalls([OnSuccess](const FRawSignature& Signature)
+	SignatureService->SignCalls([OnSuccess](const TSharedPtr<FRawSignature>& Signature)
 	{
-		
+		const TArray<uint8> EncodedSignature = Signature->Encode();
+		UE_LOG(LogTemp, Display, TEXT("Received signature: %s"), *FByteArrayUtils::BytesToHexString(EncodedSignature));
 	}, OnFailure);
 }

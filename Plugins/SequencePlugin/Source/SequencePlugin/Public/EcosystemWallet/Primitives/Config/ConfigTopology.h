@@ -35,6 +35,7 @@ public:
 		return this->Leaf != nullptr && this->Leaf.IsValid();
 	}
 
+	TArray<uint8> Encode(const bool bNoChainId, const TArray<uint8>& CheckpointerData);
 	TSharedPtr<FConfigLeaf> FindSignerLeaf(const FString& Address) const;
 	
 	static TSharedPtr<FConfigTopology> FromServiceConfigTree(const TSharedPtr<FJsonValue>& Input);

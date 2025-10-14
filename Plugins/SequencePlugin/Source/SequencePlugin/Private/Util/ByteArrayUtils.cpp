@@ -169,3 +169,48 @@ uint32 FByteArrayUtils::MinBytesFor(const uint64& Value)
 	
 	return 8;
 }
+
+FString FByteArrayUtils::BytesToHexString(const TArray<uint8>& Bytes, int32 Start, int32 Size)
+{
+	FString Out;
+	for (int32 i = 0; i < Size; ++i)
+		Out += FString::Printf(TEXT("%02x"), Bytes[Start + i]);
+	return TEXT("0x") + Out;
+}
+
+int32 FByteArrayUtils::BytesToInt(const TArray<uint8>& Bytes, int32 Start, int32 Size)
+{
+	int32 Value = 0;
+	for (int32 i = 0; i < Size; ++i)
+	{
+		Value = (Value << 8) | Bytes[Start + i];
+	}
+	return Value;
+}
+
+void FByteArrayUtils::CopyBytes(const TArray<uint8>& Src, int32 Start, int32 Size, TArray<uint8>& Dest)
+{
+	Dest.SetNum(Size);
+	FMemory::Memcpy(Dest.GetData(), Src.GetData() + Start, Size);
+}
+
+TArray<uint8> FByteArrayUtils::SliceBytes(const TArray<uint8>& Src, int32 Start, int32 Size)
+{
+	TArray<uint8> Out;
+	Out.Append(Src.GetData() + Start, Size);
+	return Out;
+}
+
+TArray<uint8> FByteArrayUtils::SliceBytesFrom(const TArray<uint8>& Bytes, int32 Start)
+{
+	TArray<uint8> Out;
+
+	if (Start < 0 || Start >= Bytes.Num())
+	{
+		return Out;
+	}
+
+	const int32 Size = Bytes.Num() - Start;
+	Out.Append(Bytes.GetData() + Start, Size);
+	return Out;
+}

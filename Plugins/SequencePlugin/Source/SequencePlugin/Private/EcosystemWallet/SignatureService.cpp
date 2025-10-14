@@ -4,9 +4,9 @@
 #include "Guard/GuardSigner.h"
 #include "Signatures/SignatureHandler.h"
 
-void FSignatureService::SignCalls(const TFunction<void(FRawSignature)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
+void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
-	SignSapient([this, OnFailure](const TSharedPtr<FSignatureOfSapientSignerLeaf>& Signature)
+	SignSapient([this, OnSuccess, OnFailure](const TSharedPtr<FSignatureOfSapientSignerLeaf>& Signature)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Got sapient signature, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Data));
 
@@ -15,13 +15,26 @@ void FSignatureService::SignCalls(const TFunction<void(FRawSignature)>& OnSucces
 		UGuardSigner* Guard = NewObject<UGuardSigner>();
 		Guard->WithHost(Signers[0].Credentials.Guard.Url);
 
-		Guard->SignEnvelope(Envelope, ImageHash, [this](const TSharedPtr<FEnvelope>& Envelope, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
+		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess](const TSharedPtr<FEnvelope>& Envelope, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Got RSY from Guard, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Signature->Pack()));
 
 			Envelope->Signatures.Add(Signature);
 
 			TSharedPtr<FRawSignature> RawSignature = FSignatureHandler::EncodeSignature(Envelope, ImageHash);
+
+			TArray<FConfigUpdate> ReversedConfigUpdated = Updates;
+			Algo::Reverse(ReversedConfigUpdated);
+
+			TArray<TSharedPtr<FRawSignature>> SignaturesFromConfigUpdates;
+			for (FConfigUpdate ConfigUpdate : ReversedConfigUpdated)
+			{
+				const TSharedPtr<FRawSignature> Sig = FRawSignature::Decode(FByteArrayUtils::HexStringToBytes(ConfigUpdate.Signature));
+				SignaturesFromConfigUpdates.Add(Sig);
+			}
+
+			RawSignature->Suffix = SignaturesFromConfigUpdates;
+			OnSuccess(RawSignature);
 		}, OnFailure);
 	}, OnFailure);
 }
@@ -60,7 +73,7 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 		const TArray<uint8> Data = FSessionCallSignature::EncodeSignatures(Signatures, SessionsTopology, ImplicitSigners, ExplicitSigners);
 		
 		const FString SessionsAddress = FExtensionsFactory::GetCurrent().Sessions;
-		const TSharedPtr<FSignatureOfSapientSignerLeaf> Signature = MakeShared<FSignatureOfSapientSignerLeaf>(FSignatureOfSapientSignerLeaf(SessionsAddress, Data));
+		const TSharedPtr<FSignatureOfSapientSignerLeaf> Signature = MakeShared<FSignatureOfSapientSignerLeaf>(FSignatureOfSapientSignerLeaf(ESapientSignatureType::SapientSignatureCompact, SessionsAddress, Data));
 		
 		OnSuccess(Signature);
 	}, OnFailure);

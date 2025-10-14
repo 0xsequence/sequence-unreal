@@ -4,9 +4,9 @@
 class SEQUENCEPLUGIN_API FChainedSignature
 {
 public:
-	explicit FChainedSignature(const TArray<FRawSignature>& Signatures) : Signatures(Signatures) { }
+	explicit FChainedSignature(const TArray<TSharedPtr<FRawSignature>>& Signatures) : Signatures(Signatures) { }
 	
 	TArray<uint8> Encode();
 	
-	TArray<FRawSignature> Signatures;
+	TArray<TSharedPtr<FRawSignature>> Signatures;
 };

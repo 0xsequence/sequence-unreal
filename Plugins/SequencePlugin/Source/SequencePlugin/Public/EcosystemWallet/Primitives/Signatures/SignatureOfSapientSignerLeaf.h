@@ -10,10 +10,10 @@ enum ESapientSignatureType
 class SEQUENCEPLUGIN_API FSignatureOfSapientSignerLeaf final : public FSignatureOfLeaf
 {
 public:
-	explicit FSignatureOfSapientSignerLeaf(const FString& Address, const TArray<uint8>& Data)
+	explicit FSignatureOfSapientSignerLeaf(const ESapientSignatureType& Type, const FString& Address, const TArray<uint8>& Data)
 	{
 		this->Type = EConfigSignatureType::SignatureOfSapientSigner;
-		this->SapientType = ESapientSignatureType::SapientSignature;
+		this->SapientType = Type;
 		this->Address = Address;
 		this->Data = Data;
 	}

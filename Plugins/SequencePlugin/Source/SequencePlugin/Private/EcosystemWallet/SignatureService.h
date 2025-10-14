@@ -14,7 +14,7 @@ public:
 		const TArray<FConfigUpdate>& InConfigUpdates, const TArray<FSessionSigner>& InSigners, const TSharedPtr<FSessionsTopology>& InSessionsTopology)
 		: ChainId(InChainId), ImageHash(InImageHash), Envelope(InEnvelope), ConfigUpdates(InConfigUpdates), Signers(InSigners), SessionsTopology(InSessionsTopology) { }
 	
-	void SignCalls(const TFunction<void(FRawSignature)>& OnSuccess, const TFunction<void(FString)>& OnFailure);
+	void SignCalls(const TFunction<void(TSharedPtr<FRawSignature>)>& OnSuccess, const TFunction<void(FString)>& OnFailure);
 
 private:
 	void SignSapient(const TFunction<void(TSharedPtr<FSignatureOfSapientSignerLeaf>)>& OnSuccess, const TFunction<void(FString)>& OnFailure);

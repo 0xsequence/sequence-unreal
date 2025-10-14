@@ -1,6 +1,7 @@
 #include "GuardSigner.h"
 
 #include "EcosystemWallet/Extensions/ExtensionsFactory.h"
+#include "EcosystemWallet/KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "EcosystemWallet/Primitives/Calls/CallTypedDataFactory.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
@@ -17,8 +18,9 @@ void UGuardSigner::WithHost(const FString& Host)
 
 void UGuardSigner::SignEnvelope(
 	const TSharedPtr<FEnvelope>& Envelope,
+	const TArray<FConfigUpdate>& ConfigUpdates,
 	const FString& SessionsImageHash,
-	const TFunction<void(TSharedPtr<FEnvelope>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
+	const TFunction<void(TSharedPtr<FEnvelope>, const TArray<FConfigUpdate>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
 	const TFunction<void(FString)>& OnFailure)
 {
 	FString DomainJson = FCallTypedDataFactory::FromCalls(Envelope->Wallet, Envelope->ChainId, Envelope->Payload);
@@ -55,12 +57,12 @@ void UGuardSigner::SignEnvelope(
 		}
 	};
 
-	this->GuardService->SignWith(Args, [Envelope, OnSuccess](const FSignWithResponse& Response)
+	this->GuardService->SignWith(Args, [Envelope, ConfigUpdates, OnSuccess](const FSignWithResponse& Response)
 	{
 		const TSharedPtr<FRSY> Signature = FRSY::UnpackFrom65(FByteArrayUtils::HexStringToBytes(Response.Sig));
 		const TSharedPtr<FSignatureOfSignerLeafHash> SignatureOfSignerLeafHash = MakeShared<FSignatureOfSignerLeafHash>(FSignatureOfSignerLeafHash());
 		SignatureOfSignerLeafHash->Signature = Signature;
 		
-		OnSuccess(Envelope, SignatureOfSignerLeafHash);
+		OnSuccess(Envelope, ConfigUpdates, SignatureOfSignerLeafHash);
 	}, OnFailure);
 }

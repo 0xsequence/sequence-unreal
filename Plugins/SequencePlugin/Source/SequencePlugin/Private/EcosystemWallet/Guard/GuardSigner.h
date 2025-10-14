@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GuardService.h"
+#include "EcosystemWallet/KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
 #include "EcosystemWallet/Primitives/Signatures/SignatureOfSignerLeafHash.h"
@@ -18,8 +19,9 @@ public:
 
 	void SignEnvelope(
 		const TSharedPtr<FEnvelope>& Envelope,
+		const TArray<FConfigUpdate>& ConfigUpdates,
 		const FString& SessionsImageHash,
-		const TFunction<void(TSharedPtr<FEnvelope>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
+		const TFunction<void(TSharedPtr<FEnvelope>, const TArray<FConfigUpdate>, TSharedPtr<FSignatureOfSignerLeafHash>)>& OnSuccess,
 		const TFunction<void(FString)>& OnFailure);
 
 private:

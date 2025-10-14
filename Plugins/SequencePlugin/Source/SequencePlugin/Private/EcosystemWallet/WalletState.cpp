@@ -22,6 +22,8 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 			{
 				this->KeyMachine->GetConfigUpdates(this->Address, WalletImageHash, [this, OnSuccess, OnFailure, WalletImageHash](const FConfigUpdatesResponse& Updates)
 				{
+					this->ConfigUpdates = Updates.Updates;
+					
 					FString ConfigImageHash = WalletImageHash;
 					if (Updates.Updates.Num() > 0)
 					{
@@ -136,10 +138,10 @@ void FWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()
 {
 	const TSuccessCallback<FSeqConfigContext> OnSuccess = [this, Callback](const FSeqConfigContext& Response)
 	{
-		this->Config = MakeShared<FSeqConfig>();
-		this->Config->Checkpoint = Response.Checkpoint;
-		this->Config->Threshold = Response.Threshold;
-		this->Config->Topology = FConfigTopology::FromServiceConfigTree(Response.Tree);
+		this->Config = MakeShared<FSeqConfig>(FSeqConfig(
+			FBigInt(Response.Checkpoint),
+			FBigInt(FString::Printf(TEXT("%d"), Response.Threshold)),
+			FConfigTopology::FromServiceConfigTree(Response.Tree)));
 		
 		Callback();
 	};

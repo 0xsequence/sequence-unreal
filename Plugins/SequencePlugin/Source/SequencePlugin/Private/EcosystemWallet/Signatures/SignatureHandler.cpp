@@ -18,12 +18,12 @@ TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(const TSharedPtr<FE
 	
 	FRawSignature RawSignature;
 	RawSignature.NoChainId = Envelope->ChainId.Value == "0";
-	RawSignature.Configuration = MakeShared<FSeqConfig>(FSeqConfig {
+	RawSignature.Configuration = MakeShared<FSeqConfig>(FSeqConfig(
 		Envelope->Config->Threshold,
 		Envelope->Config->Checkpoint,
-		Topology,
-		Envelope->Config->Checkpointer
-	});
+		Topology));
+
+	RawSignature.Configuration->Checkpointer = Envelope->Config->Checkpointer;
 	
 	return MakeShared<FRawSignature>(RawSignature);
 }

@@ -8,6 +8,39 @@
 #include "Leafs/ConfigSubdigestLeaf.h"
 #include "ConfigNode.h"
 #include "ConfigLeaf.h"
+#include "Util/ByteArrayUtils.h"
+
+TArray<uint8> FConfigTopology::Encode(const bool bNoChainId, const TArray<uint8>& CheckpointerData)
+{
+    if (IsNode())
+    {
+        TArray<uint8> Encoded0 = Node->Left->Encode(bNoChainId, CheckpointerData);
+        TArray<uint8> Encoded1 = Node->Right->Encode(bNoChainId, CheckpointerData);
+
+        const bool bIsBranching = Node->Right->IsNode();
+
+        if (!bIsBranching)
+        {
+            return FByteArrayUtils::ConcatBytes({Encoded0, Encoded1});
+        }
+
+        const int32 Encoded1Size = FByteArrayUtils::MinBytesFor(Encoded1.Num());
+        if (Encoded1Size > 15)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Branch too large"));
+            checkNoEntry();
+        }
+
+        const uint8 Flag = static_cast<uint8>((FlagBranch << 4) | Encoded1Size);
+
+        TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(Flag, FByteArrayUtils::MinBytesFor(Flag));
+        TArray<uint8> SizeBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::ByteArrayFromNumber(Encoded1.Num(), Encoded1Size), Encoded1Size);
+
+        return FByteArrayUtils::ConcatBytes({Encoded0, FlagBytes, SizeBytes, Encoded1});
+    }
+
+    return Leaf->Encode(bNoChainId, CheckpointerData);
+}
 
 TSharedPtr<FConfigLeaf> FConfigTopology::FindSignerLeaf(const FString& Address) const
 {
