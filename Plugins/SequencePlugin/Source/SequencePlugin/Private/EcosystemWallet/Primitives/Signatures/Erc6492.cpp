@@ -49,7 +49,7 @@ TTuple<TArray<uint8>, TSharedPtr<FErc6492>> FErc6492::Decode(const TArray<uint8>
             }
             else
             {
-                return MakeTuple(Signature, MakeShared<FErc6492>());
+                return MakeTuple(Signature, nullptr);
             }
 
             TSharedPtr<FErc6492> Result = MakeShared<FErc6492>(To, Data);
@@ -57,5 +57,5 @@ TTuple<TArray<uint8>, TSharedPtr<FErc6492>> FErc6492::Decode(const TArray<uint8>
         }
     }
 
-    return MakeTuple(Signature, MakeShared<FErc6492>());
+    return MakeTuple(Signature, nullptr);
 }

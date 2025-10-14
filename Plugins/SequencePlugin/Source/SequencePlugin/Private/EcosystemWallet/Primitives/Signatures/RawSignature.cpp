@@ -8,7 +8,6 @@
 
 TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpointerAddress)
 {
-    return TArray<uint8>();
     if (Suffix.Num() > 0)
     {
         FRawSignature Head;
@@ -99,7 +98,7 @@ TArray<uint8> FRawSignature::Encode(bool SkipCheckpointerData, bool SkipCheckpoi
     TArray<uint8> TopologyBytes = Configuration->Topology->Encode(NoChainId, CheckpointerData);
     Output = FByteArrayUtils::ConcatBytes({Output, TopologyBytes});
 
-    if (Erc6492 != nullptr)
+    if (Erc6492 != nullptr && Erc6492.IsValid())
     {
         return FErc6492::Wrap(Erc6492->Address, Erc6492->Data, Output);
     }

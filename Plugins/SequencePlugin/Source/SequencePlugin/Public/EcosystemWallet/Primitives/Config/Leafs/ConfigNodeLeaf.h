@@ -13,7 +13,8 @@ public:
 	
 	virtual TArray<uint8> Encode(const bool NoChainId, const TArray<uint8>& CheckpointerData) override
 	{
-		return FConfigLeaf::Encode(NoChainId, CheckpointerData);
+		constexpr int32 Flag = FConfigTopology::FlagNode << 4;
+		return FByteArrayUtils::ConcatBytes({FByteArrayUtils::ByteArrayFromNumber(Flag, 1), FByteArrayUtils::HexStringToBytes(Value)});
 	}
 	
 	virtual TArray<uint8> HashConfiguration() override
