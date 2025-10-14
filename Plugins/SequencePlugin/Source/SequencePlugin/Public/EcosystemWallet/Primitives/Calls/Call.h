@@ -23,5 +23,5 @@ private:
 	TArray<uint8> GetDataBytes(const uint8& Flag);
 	TArray<uint8> GetGasLimitBytes(const uint8& Flag);
 	
-	static constexpr const TCHAR* CallTypeHash = TEXT("Call(bytes32,address,uint256,bytes,uint256,bool,bool,uint8)");
+	static constexpr const TCHAR* CallTypeHash = TEXT("Call(address to,uint256 value,bytes data,uint256 gasLimit,bool delegateCall,bool onlyFallback,uint256 behaviorOnError)");
 };
