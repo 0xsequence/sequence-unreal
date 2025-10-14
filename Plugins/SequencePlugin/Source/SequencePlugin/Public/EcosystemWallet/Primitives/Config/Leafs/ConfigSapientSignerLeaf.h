@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
+#include "EcosystemWallet/Primitives/Config/ConfigTopology.h"
 #include "Util/ValueUtils.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceCoder.h"

@@ -82,10 +82,10 @@ FString USequenceRelayer::BuildUrl()
 			Name = "v3-optimism";
 			break;
 		case 42161:
-			Name = "dev-arbitrum";
+			Name = "v3-arbitrum";
 			break;
 		case 421614:
-			Name = "dev-arbitrum-sepolia";
+			Name = "v3-arbitrum-sepolia";
 			break;
 		default: ;
 	}

@@ -35,7 +35,6 @@ public:
 		}
 
 		TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(Flag, FByteArrayUtils::MinBytesFor(Flag));
-
 		TArray<uint8> RsyPacked = Signature->Pack();
 
 		return FByteArrayUtils::ConcatBytes({FlagBytes, WeightBytes, RsyPacked});
