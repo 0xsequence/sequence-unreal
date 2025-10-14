@@ -13,10 +13,7 @@ void USequenceRelayer::Relay(const FString& To, const FString& Data, const FStri
 	};
 	
 	const FSendMetaTxnArgs Args = {
-		Call,
-		Quote,
-		-1,
-		Preconditions
+		Call
 	};
 
 	TSuccessCallback<FSendMetaTxnResponse> OnTxnSuccess = [OnSuccess](const FSendMetaTxnResponse& Response)

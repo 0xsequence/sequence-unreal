@@ -11,8 +11,18 @@ struct SEQUENCEPLUGIN_API FCalls
 	
 	explicit FCalls(const TArray<FCall>& Calls, const FBigInt& Space, const FBigInt& Nonce)
 		: Calls(Calls), Space(Space), Nonce(Nonce) { }
+
+	TArray<uint8> Encode();
 	
 	TArray<FCall> Calls;
 	FBigInt Space;
 	FBigInt Nonce;
+
+private:
+	uint8 GetFlag();
+	uint8 GetCallsCountSize();
+	TArray<uint8> GetSpaceBytes();
+	TArray<uint8> GetNonceBytes();
+	TArray<uint8> GetCallsCount();
+	TArray<uint8> GetCallsBytes();
 };
