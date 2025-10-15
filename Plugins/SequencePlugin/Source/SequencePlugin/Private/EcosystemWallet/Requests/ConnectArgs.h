@@ -43,8 +43,6 @@ public:
 		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(JsonObject, Writer);
 
-		UE_LOG(LogTemp, Display, TEXT("Connect Args: %s"), *OutputString);
-
 		return OutputString;
 	}
 };

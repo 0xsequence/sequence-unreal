@@ -14,12 +14,10 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
     const FString IdentitySigner = SessionsTopology->GetIdentitySigner();
     const TSharedPtr<FSessionsTopology> MinTopology = SessionsTopology->Minimise(ExplicitSigners, ImplicitSigners, IdentitySigner);
 
-    UE_LOG(LogTemp, Error, TEXT("++ Encoding minimised topology"));
     TArray<uint8> EncodedTopology = MinTopology.Get()->Encode();
     if (FByteArrayUtils::MinBytesFor(EncodedTopology.Num()) > 3)
     {
         UE_LOG(LogTemp, Error, TEXT("Session topology is too large"));
-        throw std::runtime_error("Session topology is too large");
     }
 
     Parts.Add(FByteArrayUtils::ByteArrayFromNumber(EncodedTopology.Num(), 3));
@@ -87,7 +85,6 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
             if (ExplicitCall->PermissionIndex > 127)
             {
                 UE_LOG(LogTemp, Error, TEXT("Permission index is too large"));
-                throw std::runtime_error("Permission index is too large");
             }
 
             Parts.Add(FByteArrayUtils::ByteArrayFromNumber(ExplicitCall->PermissionIndex, 1));

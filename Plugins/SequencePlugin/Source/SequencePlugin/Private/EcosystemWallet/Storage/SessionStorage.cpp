@@ -55,8 +55,6 @@ bool FSessionStorage::GetStoredSessions(TArray<FSessionCredentials>& Sessions)
 				CtrJson = USequenceEncryptor::Decrypt(LoadedCredentials->EK, LoadedCredentials->KL);
 			}
 
-			UE_LOG(LogTemp, Display, TEXT("Stored sessions Json %s"), *CtrJson);
-
 			TArray<TSharedPtr<FJsonValue>> SessionsJson;
 			USequenceSupport::ParseJsonStringToObjectArray(CtrJson, SessionsJson);
 
@@ -87,8 +85,6 @@ void FSessionStorage::StoreSessions(const TArray<FSessionCredentials>& Sessions)
 	{
 		const FString CtsJson = USequenceSupport::JsonObjListToParsableString(SessionsJson);
 		const int32 CtsJsonLength = CtsJson.Len();
-
-		UE_LOG(LogTemp, Display, TEXT("Storing sessions Json %s"), *CtsJson);
 
 		if (UGenericNativeEncryptor* Encryptor = GetEncryptor())
 		{

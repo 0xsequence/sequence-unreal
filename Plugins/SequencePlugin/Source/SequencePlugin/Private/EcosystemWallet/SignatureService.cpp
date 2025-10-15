@@ -8,8 +8,6 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 {
 	SignSapient([this, OnSuccess, OnFailure](const TSharedPtr<FSignatureOfSapientSignerLeaf>& Signature)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Got sapient signature, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Data));
-
 		Envelope->Sign(Signature);
 		
 		UGuardSigner* Guard = NewObject<UGuardSigner>();

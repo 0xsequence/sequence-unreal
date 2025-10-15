@@ -26,6 +26,7 @@ TSharedPtr<FSessionCallSignature> FSessionSigner::SignCall(const FBigInt& ChainI
 	const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce)
 {
 	TArray<uint8> HashedCall = HashCallWithReplayProtection(ChainId, Call, CallIdx, Space, Nonce);
+	UE_LOG(LogTemp, Display, TEXT("hashedCall %s"), *FByteArrayUtils::BytesToHexString(HashedCall));
 	TArray<uint8> SignedCall = FEthAbiBridge::SignRecoverable(HashedCall, FByteArrayUtils::HexStringToBytes(Credentials.PrivateKey));
 
 	TSharedPtr<FRSY> Signature = FRSY::UnpackFrom65(SignedCall);

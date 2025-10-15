@@ -16,8 +16,6 @@ void URelayerReceiptPoller::PollRecursive(const FString& Hash)
 	Relayer->GetMetaTxnReceipt(Hash, [this, Hash](const FGetMetaTxnReceiptResponse& Response){
 		CurrentStatus = Response.Receipt.Status;
 
-		UE_LOG(LogTemp, Log, TEXT("Polled status: %s"), *CurrentStatus);
-
 		if (CurrentStatus == "SUCCEEDED" || CurrentStatus == "FAILED")
 		{
 			OnSuccess(Response.Receipt.TxnHash);

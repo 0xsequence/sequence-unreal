@@ -1,8 +1,10 @@
 #include "EcosystemWallet/SequenceWallet.h"
 
+#include "RelayerReceiptPoller.h"
 #include "TransactionService.h"
 #include "WalletState.h"
 #include "EcosystemWallet/Primitives/Calls/Call.h"
+#include "Relayer/SequenceRelayer.h"
 #include "Requests/SendTransactionArgs.h"
 #include "Requests/SendTransactionResponse.h"
 #include "Requests/SignMessageArgs.h"
@@ -49,17 +51,30 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, Error));
 	};
 	
-	this->WalletState->UpdateState(this->GetWalletInfo().Address, [this, Transaction, OnInternalFailure]()
+	this->WalletState->UpdateState(this->GetWalletInfo().Address, [this, Transaction, OnSuccess, OnInternalFailure]()
 	{
 		const FCalls Calls = Transaction.GetInterface()->GetCalls();
 
 		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
 
 		FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+		
 		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
-		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [](TTuple<FString, TArray<uint8>> Result)
+		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [OnSuccess, OnInternalFailure](TTuple<FString, FString> Result)
 		{
-				
+			const FString To = Result.Key;
+			const FString Data = Result.Value;
+
+			USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
+			Relayer->Relay(To, Data, "", TArray<FIntentPrecondition>(), [Relayer, OnSuccess, OnInternalFailure](const FString& Receipt)
+			{
+				URelayerReceiptPoller* Poller = NewObject<URelayerReceiptPoller>();
+				Poller->StartPolling(*Relayer, Receipt, [OnSuccess](const FString& TxnHash)
+				{
+					UE_LOG(LogTemp, Display, TEXT("Received transaction: %s"), *TxnHash);
+					OnSuccess(TxnHash);
+				}, OnInternalFailure);
+			}, OnInternalFailure);
 		}, OnInternalFailure);
 	}, OnInternalFailure);
 }

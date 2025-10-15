@@ -1,14 +1,10 @@
 #include "SessionsTopology.h"
-
-#include "EcosystemWallet/Primitives/Config/ConfigLeaf.h"
-#include "Eth/Crypto.h"
 #include "Leafs/SessionsIdentitySignerLeaf.h"
 #include "Leafs/SessionsImplicitBlacklistLeaf.h"
 #include "Leafs/SessionsNodeLeaf.h"
 #include "Leafs/SessionsPermissionsLeaf.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceCoder.h"
-#include "Util/SequenceSupport.h"
 
 FString FSessionsTopology::GetIdentitySigner() const
 {

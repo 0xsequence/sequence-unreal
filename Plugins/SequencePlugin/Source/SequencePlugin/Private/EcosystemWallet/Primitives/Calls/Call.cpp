@@ -35,6 +35,8 @@ TArray<uint8> FCall::Hash() const
 	Encoded.Append(OnlyFallbackHash);
 	Encoded.Append(BehaviorOnErrorHash);
 
+	UE_LOG(LogTemp, Display, TEXT("call data to hash %s"), *FByteArrayUtils::BytesToHexString(Encoded))
+
 	return FSequenceCoder::KeccakHash(Encoded);
 }
 
@@ -99,7 +101,6 @@ TArray<uint8> FCall::GetValueBytes(const uint8& Flag)
 {
 	if ((Flag & 0x02) == 0x02)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Encoding value in call"))
 		return FByteArrayUtils::PadLeft(Value.Encode(), 32);
 	}
 

@@ -76,11 +76,6 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 		ParseAttestation(Json->GetObjectField(TEXT("attestation")), Attestation);
 		ParseSignature(Json->GetObjectField(TEXT("signature")), Signature);
 
-		UE_LOG(LogTemp, Display, TEXT("PrivateKey: %s"), *PrivateKey);
-		UE_LOG(LogTemp, Display, TEXT("SessionAddress: %s"), *SessionAddress);
-		UE_LOG(LogTemp, Display, TEXT("WalletAddress: %s"), *WalletAddress);
-		UE_LOG(LogTemp, Display, TEXT("UserEmail: %s"), *UserEmail);
-		
 		return FSessionCredentials {
 			IsExplicit,
 			PrivateKey,
