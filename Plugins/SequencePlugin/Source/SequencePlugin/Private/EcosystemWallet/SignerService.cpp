@@ -16,7 +16,7 @@ void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)>
 		UE_LOG(LogTemp, Error, TEXT("No valid signers found."));
 	}
 
-	FindSignerForEachCallAsync(AvailableSigners, [this, OnSuccess, OnFailure](TArray<FSessionSigner> SupportedSigners)
+	FindSignerForEachCallAsync(AvailableSigners, [this, OnSuccess, OnFailure](const TArray<FSessionSigner>& SupportedSigners)
 	{
 		if (this->Calls.Num() == SupportedSigners.Num())
 		{
@@ -24,7 +24,7 @@ void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)>
 		}
 		else
 		{
-			OnFailure(TEXT(""));
+			OnFailure(TEXT("No signers available for this call."));
 		}
 	});
 }
@@ -66,14 +66,13 @@ void FSignerService::FindSignerForEachCallAsync(const TArray<FSessionSigner>& Av
 {
 	TSharedRef<TArray<FSessionSigner>, ESPMode::ThreadSafe> Signers = MakeShared<TArray<FSessionSigner>, ESPMode::ThreadSafe>();
 	TSharedRef<int32, ESPMode::ThreadSafe> PendingCount = MakeShared<int32, ESPMode::ThreadSafe>(0);
+	*PendingCount = this->Calls.Num() * AvailableSigners.Num();
 
 	for (const FCall& Call : this->Calls)
 	{
 		for (FSessionSigner Signer : AvailableSigners)
 		{
-			(*PendingCount)++;
-			
-			Signer.IsSupportedCall(Call, [Signer, Signers, PendingCount, OnCompleted](const bool Supported)
+			Signer.IsSupportedCall(ChainId, Call, SessionsTopology, [Signer, Signers, PendingCount, OnCompleted](const bool Supported)
 			{
 				if (Supported)
 				{

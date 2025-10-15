@@ -16,8 +16,6 @@ FCall FFeeOptionService::BuildCallForNativeTokenOption()
 	const FString Values = FString::Printf(TEXT("[\"%s\",%s]"), *FeeOption.To, *FeeOption.Value);
 	const FString EncodedFeeOptionData = FEthAbiBridge::EncodeFunctionCall("forwardValue(address,uint256)", Values);
 
-	UE_LOG(LogTemp, Log, TEXT("FeeOptionService::BuildCallForNativeTokenOption %s %s %s"), *FeeOption.Token.Name, *Values, *EncodedFeeOptionData);
-
 	return FCall(
 		ValueForwarder,
 		EncodedFeeOptionData,

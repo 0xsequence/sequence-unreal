@@ -1,5 +1,4 @@
 #include "EcosystemWallet/SequenceWallet.h"
-
 #include "FeeOptionService.h"
 #include "RelayerReceiptPoller.h"
 #include "TransactionService.h"
@@ -45,6 +44,7 @@ void USequenceWallet::GetFeeOptions(const TScriptInterface<ISeqTransactionBase>&
 {
 	const TFunction<void(FString)> OnInternalFailure = [OnFailure](const FString& Error)
 	{
+		UE_LOG(LogTemp, Error, TEXT("Error while getting fee options: %s"), *Error);
 		OnFailure(FSequenceError(EErrorType::EmptyResponse, Error));
 	};
 	
@@ -98,11 +98,9 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 		Calls.Calls = NewCalls;
 	}
 	
-	const FString LogT = (HasFeeOption ? "true" : "false");
-	UE_LOG(LogTemp, Display, TEXT("Has fee option %s"), *LogT);
-
 	const TFunction<void(FString)> OnInternalFailure = [OnFailure](const FString& Error)
 	{
+		UE_LOG(LogTemp, Error, TEXT("Error while sending transaction: %s"), *Error);
 		OnFailure(FSequenceError(EErrorType::RequestFail, Error));
 	};
 	
@@ -121,6 +119,12 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 			USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
 			Relayer->Relay(To, Data, "", TArray<FIntentPrecondition>(), [OnSuccess, OnInternalFailure](const FString& Receipt)
 			{
+				if (Receipt.Len() == 0)
+				{
+					OnInternalFailure(TEXT("Failed to relay transaction"));
+					return;
+				}
+				
 				URelayerReceiptPoller* Poller = NewObject<URelayerReceiptPoller>();
 				Poller->StartPolling(Receipt, [OnSuccess](const FString& TxnHash)
 				{

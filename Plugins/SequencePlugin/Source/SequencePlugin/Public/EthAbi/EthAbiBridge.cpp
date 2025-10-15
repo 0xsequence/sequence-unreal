@@ -93,13 +93,9 @@ FString FEthAbiBridge::HexToBigIntString(const FString& Value)
 {
 	char* ResultPtr = hex_to_bigint_decimal(TCHAR_TO_UTF8(*Value));
 	if (!ResultPtr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("hex_to_bigint_decimal returned null."));
-		return TEXT("");
-	}
+		return TEXT("0");
 
 	FString Result(UTF8_TO_TCHAR(ResultPtr));
-
 	free_string(ResultPtr);
 
 	return Result;

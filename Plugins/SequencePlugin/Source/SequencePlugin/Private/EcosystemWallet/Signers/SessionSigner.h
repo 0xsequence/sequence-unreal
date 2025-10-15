@@ -15,7 +15,7 @@ public:
 
 	FString GetIdentitySigner();
 	
-	void IsSupportedCall(const FCall& Call, TFunction<void(bool)> OnCompleted);
+	void IsSupportedCall(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology, TFunction<void(bool)> OnCompleted);
 	
 	TSharedPtr<FSessionCallSignature> SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
 		const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
@@ -23,6 +23,6 @@ public:
 	FSessionCredentials Credentials;
 
 private:
-	uint32 FindSupportedPermission(const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology);
+	int32 FindSupportedPermission(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology);
 	TArray<uint8> HashCallWithReplayProtection(const FBigInt& ChainId, const FCall&, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce);
 };

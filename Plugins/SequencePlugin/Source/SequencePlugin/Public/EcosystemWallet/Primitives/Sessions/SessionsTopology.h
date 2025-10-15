@@ -1,6 +1,7 @@
 #pragma once
 #include "SessionsBranch.h"
 #include "SessionsLeaf.h"
+#include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 
 class SEQUENCEPLUGIN_API FSessionsTopology
 {
@@ -35,6 +36,7 @@ public:
 
 	FString GetIdentitySigner() const;
 	TArray<FString> GetImplicitBlacklist() const;
+	TSharedPtr<FSessionPermissions> GetPermissions(const FString& Address) const;
 	TArray<FString> GetExplicitSigners() const;
 	TArray<FString> GetExplicitSigners(const TArray<FString>& Current) const;
 	TSharedPtr<FSessionsTopology> Minimise(const TArray<FString>& ExplicitSigners, const TArray<FString>& ImplicitSigners, const FString& IdentitySigner) const;

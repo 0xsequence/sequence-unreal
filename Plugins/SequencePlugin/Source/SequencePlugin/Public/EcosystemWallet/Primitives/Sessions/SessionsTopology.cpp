@@ -56,6 +56,36 @@ TArray<FString> FSessionsTopology::GetImplicitBlacklist() const
 	return TArray<FString>();
 }
 
+TSharedPtr<FSessionPermissions> FSessionsTopology::GetPermissions(const FString& Address) const
+{
+	if (IsBranch())
+	{
+		for (TSharedPtr<FSessionsTopology> Child : Branch->Children)
+		{
+			TSharedPtr<FSessionPermissions> ChildResult = Child.Get()->GetPermissions(Address);
+			if (ChildResult != nullptr && ChildResult.IsValid())
+			{
+				return ChildResult;
+			}
+		}
+
+		return nullptr;
+	}
+
+	if (IsLeaf() && Leaf->Type == ESessionsLeafType::Permissions)
+	{
+		auto* PermissionsLeaf = static_cast<FSessionsPermissionsLeaf*>(Leaf.Get());
+		if (PermissionsLeaf->Permissions.SessionAddress.Equals(Address, ESearchCase::IgnoreCase))
+		{
+			return MakeShared<FSessionPermissions>(PermissionsLeaf->Permissions);
+		}
+		
+		return nullptr;
+	}
+
+	return nullptr;
+}
+
 TArray<FString> FSessionsTopology::GetExplicitSigners() const
 {
 	TArray<FString> Empty;
