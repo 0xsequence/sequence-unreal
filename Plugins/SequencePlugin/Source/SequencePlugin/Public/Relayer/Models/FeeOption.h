@@ -45,13 +45,13 @@ public:
 	FString TokenID = "";
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
-	TEnumAsByte<EFeeType> Type = Unknown;
+	FString Type = "UNKNOWN";
 
 	FFeeToken(){}
 	
 	FFeeToken(int64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
-		const FString& TokenIDIn, EFeeType TypeIn)
+		const FString& TokenIDIn, FString TypeIn)
 	{
 		ChainID = ChainIDIn;
 		ContractAddress = ContractAddressIn;
@@ -93,7 +93,7 @@ public:
 	FFeeOption(const FSeqEtherBalance& EtherBalance)
 	{
 		ValueNumber = EtherBalance.balanceWei;
-		Token.Type = EFeeType::Unknown;
+		Token.Type = "UNKNOWN";
 	}
 	
 	FFeeOption(const FSeqTokenBalance& BalanceOption)
@@ -111,13 +111,13 @@ public:
 		switch(BalanceOption.contractType)
 		{
 		case EContractType::ERC20:
-			Token.Type = EFeeType::Erc20Token;
+			Token.Type = "ERC20_TOKEN";
 			break;
 		case EContractType::ERC1155:
-			Token.Type = EFeeType::Erc1155Token;
+			Token.Type = "ERC155_TOKEN";
 			break;		
 		default:
-			Token.Type = EFeeType::Unknown;
+			Token.Type = "UNKNOWN";
 			break;
 		}
 	}
@@ -154,25 +154,22 @@ public:
 	TransactionUnion CreateTransaction()
 	{
 		TransactionUnion Transaction;
-		switch(Token.Type)
-		{
-		case EFeeType::Unknown:
+
+		if (Token.Type == "UNKNOWN")
 			Transaction.SetSubtype<FRawTransaction>(FRawTransaction(To,"",Value));
-			break;
-		case EFeeType::Erc20Token:
+		else if (Token.Type == "ERC20_TOKEN")
 			Transaction.SetSubtype<FERC20Transaction>(FERC20Transaction(To,Value,Token.ContractAddress));
-			break;
-		case EFeeType::Erc1155Token:
+		else if (Token.Type == "ERC155_TOKEN")
 			Transaction.SetSubtype<FERC1155Transaction>(FERC1155Transaction(To,"",Token.ContractAddress,{ FERC1155TxnValue(Value,Token.TokenID) }));
-			break;
-		default:
+		else
+		{
 			FRawTransaction FailedOption;
 			FailedOption.to = To;
 			FailedOption.value = Value;
 			FailedOption.data = "";
 			Transaction.SetSubtype<FRawTransaction>(FailedOption);
-			break;
 		}
+		
 		return Transaction;
 	}
 	
@@ -180,18 +177,18 @@ public:
 	{
 		bool IsMatch = true;
 		
-		if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Erc20Token)
+		if (Token.Type == Fee.Token.Type && Token.Type == "ERC20_TOKEN")
 		{
 			IsMatch &= Token.ChainID == Fee.Token.ChainID;
 			IsMatch &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
 		}
-		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Erc1155Token)
+		else if (Token.Type == Fee.Token.Type && Token.Type == "ERC1155_TOKEN")
 		{
 			IsMatch &= Token.ChainID == Fee.Token.ChainID;
 			IsMatch &= Token.ContractAddress.Equals(Fee.Token.ContractAddress,ESearchCase::IgnoreCase);
 			IsMatch &= Token.TokenID.Equals(Fee.Token.TokenID, ESearchCase::IgnoreCase);
 		}
-		else if (Token.Type == Fee.Token.Type && Token.Type == EFeeType::Unknown)
+		else if (Token.Type == Fee.Token.Type && Token.Type == "UNKNOWN")
 		{
 			IsMatch = true;
 		}

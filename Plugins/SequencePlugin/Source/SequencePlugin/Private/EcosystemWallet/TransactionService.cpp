@@ -10,15 +10,29 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 
 	TSharedPtr<FSignatureService> SignatureService = MakeShared<FSignatureService>(FSignatureService(ChainId, CurrentWalletState->SessionsImageHash, Envelope,
 		CurrentWalletState->ConfigUpdates, this->Signers, CurrentWalletState->SessionsTopology));
-
-	SignatureService->SignCalls([Payload, CurrentWalletState, CheckDeployed, OnSuccess](const TSharedPtr<FRawSignature>& Signature)
+	
+	SignatureService->SignCalls([Payload, CurrentWalletState, CheckDeployed, OnSuccess, OnFailure](const TSharedPtr<FRawSignature>& Signature)
 	{
+		if (!Payload.IsValid() || !Signature.IsValid())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Payload or Signature is a null ptr"));
+			OnFailure(TEXT("Payload or Signature is a null ptr"));
+			return;
+		}
+
+		if (CurrentWalletState == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("wallet state is a null ptr"));
+			OnFailure(TEXT("wallet state is a null ptr"));
+			return;
+		}
+		
 		const FString EncodedPayload = FByteArrayUtils::BytesToHexString(Payload->Encode());
 		const FString EncodedSignature = FByteArrayUtils::BytesToHexString(Signature->Encode());
 		
 		const FString ExecuteValues = FString::Printf(TEXT("[\"%s\",\"%s\"]"), *EncodedPayload, *EncodedSignature);
 		const FString EncodedExecute = FEthAbiBridge::EncodeFunctionCall("execute(bytes,bytes)", ExecuteValues);
-
+		
 		if (CurrentWalletState->IsDeployed || !CheckDeployed)
 		{
 			OnSuccess(TTuple<FString, FString>(CurrentWalletState->Address, EncodedExecute));

@@ -7,14 +7,24 @@
 #include "EcosystemWallet/Primitives/Config/Leafs/ConfigSignerLeaf.h"
 #include "EcosystemWallet/Primitives/Signatures/SapientSignature.h"
 
-TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(const TSharedPtr<FEnvelope>& Envelope, const FString& SessionsImageHash)
+TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(
+	const TSharedPtr<FEnvelope>& Envelope,
+	const FString& SessionsImageHash)
 {
-	const TFunction<TSharedPtr<FSignatureOfLeaf>(const TSharedPtr<FConfigLeaf>&)>& SignatureFor = [Envelope, SessionsImageHash](const TSharedPtr<FConfigLeaf>& Leaf)
+	if (Envelope == nullptr || Envelope->Config == nullptr || Envelope->Config->Topology == nullptr ||
+		!Envelope.IsValid() || !Envelope->Config.IsValid() || !Envelope->Config->Topology.IsValid())
 	{
-		return SignatureForLeaf(Envelope, Leaf, SessionsImageHash);
-	};
+		UE_LOG(LogTemp, Error, TEXT("Envelope, config and/or topology is null"));
+		return nullptr;
+	}
+	
+	const TSharedPtr<FConfigTopology> Topology = FillLeaves(Envelope, Envelope->Config->Topology, SessionsImageHash);
 
-	const TSharedPtr<FConfigTopology>& Topology = FillLeaves(Envelope->Config->Topology, SignatureFor);
+	if (Topology == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Topology result is null"));
+		return nullptr;
+	}
 	
 	FRawSignature RawSignature;
 	RawSignature.NoChainId = Envelope->ChainId.Value == "0";
@@ -27,14 +37,15 @@ TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(const TSharedPtr<FE
 }
 
 TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
+	const TSharedPtr<FEnvelope>& Envelope,
 	const TSharedPtr<FConfigTopology>& ConfigTopology,
-	const TFunction<TSharedPtr<FSignatureOfLeaf>(const TSharedPtr<FConfigLeaf>&)>& SignatureFor)
+	const FString& SessionsImageHash)
 {
 	if (ConfigTopology->IsNode())
 	{
 		return MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigNode>(
-			FillLeaves(ConfigTopology->Node->Left, SignatureFor),
-			FillLeaves(ConfigTopology->Node->Right, SignatureFor))));
+			FillLeaves(Envelope, ConfigTopology->Node->Left, SessionsImageHash),
+			FillLeaves(Envelope, ConfigTopology->Node->Right, SessionsImageHash))));
 	}
 
 	if (!ConfigTopology->IsLeaf())
@@ -48,7 +59,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 	{
 		auto* SignerLeaf = static_cast<FConfigSignerLeaf*>(Leaf);
 		
-		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureFor(ConfigTopology->Leaf);
+		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf, SessionsImageHash);
 		if (Signature == nullptr)
 		{
 			return ConfigTopology;
@@ -62,7 +73,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 	{
 		auto* SapientLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf);
 		
-		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureFor(ConfigTopology->Leaf);
+		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf, SessionsImageHash);
 		if (Signature == nullptr)
 		{
 			return ConfigTopology;
@@ -78,7 +89,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 		return MakeShared<FConfigTopology>(FConfigTopology(MakeShared<FConfigNestedLeaf>(
 			NestedLeaf->Weight,
 			NestedLeaf->Threshold,
-			FillLeaves(NestedLeaf->Tree, SignatureFor))));
+			FillLeaves(Envelope, NestedLeaf->Tree, SessionsImageHash))));
 	}
 
 	if (Leaf->Type == EConfigLeafType::Node ||

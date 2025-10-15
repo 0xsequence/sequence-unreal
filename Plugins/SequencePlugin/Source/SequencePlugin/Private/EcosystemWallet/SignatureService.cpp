@@ -13,24 +13,33 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 		UGuardSigner* Guard = NewObject<UGuardSigner>();
 		Guard->WithHost(Signers[0].Credentials.Guard.Url);
 
-		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess](const TSharedPtr<FEnvelope>& Envelope, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
+		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess, OnFailure](const TSharedPtr<FEnvelope>& Envelope, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
 		{
+			if (!Envelope.IsValid() || !Signature.IsValid())
+			{
+				UE_LOG(LogTemp, Error, TEXT("Envelope and/or Signature are nullptrs"));
+				OnFailure(TEXT("Envelope and/or Signature are nullptrs"));
+				return;
+			}
+			
 			UE_LOG(LogTemp, Display, TEXT("Got RSY from Guard, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Signature->Pack()));
-
 			Envelope->Signatures.Add(Signature);
 
 			TSharedPtr<FRawSignature> RawSignature = FSignatureHandler::EncodeSignature(Envelope, ImageHash);
-
-			TArray<FConfigUpdate> ReversedConfigUpdated = Updates;
-			Algo::Reverse(ReversedConfigUpdated);
-
-			TArray<TSharedPtr<FRawSignature>> SignaturesFromConfigUpdates;
-			for (FConfigUpdate ConfigUpdate : ReversedConfigUpdated)
+			if (RawSignature == nullptr || !RawSignature.IsValid())
 			{
-				const TSharedPtr<FRawSignature> Sig = FRawSignature::Decode(FByteArrayUtils::HexStringToBytes(ConfigUpdate.Signature));
-				SignaturesFromConfigUpdates.Add(Sig);
+				UE_LOG(LogTemp, Error, TEXT("RawSignature is null"));
+				OnFailure(TEXT("RawSignature is null"));
+				return;
 			}
 
+			TArray<TSharedPtr<FRawSignature>> SignaturesFromConfigUpdates;
+			for (int i = Updates.Num() - 1; i >= 0; i--)
+			{
+				const TSharedPtr<FRawSignature> Sig = FRawSignature::Decode(FByteArrayUtils::HexStringToBytes(Updates[i].Signature));
+				SignaturesFromConfigUpdates.Add(Sig);
+			}
+			
 			RawSignature->Suffix = SignaturesFromConfigUpdates;
 			OnSuccess(RawSignature);
 		}, OnFailure);

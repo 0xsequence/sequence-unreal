@@ -11,8 +11,12 @@ public:
 
 private:
 	static TSharedPtr<FConfigTopology> FillLeaves(
+		const TSharedPtr<FEnvelope>& Envelope,
 		const TSharedPtr<FConfigTopology>& ConfigTopology,
-		const TFunction<TSharedPtr<FSignatureOfLeaf>(const TSharedPtr<FConfigLeaf>&)>& SignatureFor);
+		const FString& SessionsImageHash);
 	
-	static TSharedPtr<FSignatureOfLeaf> SignatureForLeaf(const TSharedPtr<FEnvelope>& Envelope, const TSharedPtr<FConfigLeaf>& Leaf, const FString& SessionsImageHash);
+	static TSharedPtr<FSignatureOfLeaf> SignatureForLeaf(
+		const TSharedPtr<FEnvelope>& Envelope,
+		const TSharedPtr<FConfigLeaf>& Leaf,
+		const FString& SessionsImageHash);
 };

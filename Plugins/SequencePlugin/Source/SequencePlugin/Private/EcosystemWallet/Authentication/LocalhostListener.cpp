@@ -10,6 +10,9 @@ ULocalhostListener* ULocalhostListener::Instance = nullptr;
 
 void ULocalhostListener::ClearInstance()
 {
+	if (Instance == nullptr)
+		return;
+	
 	Instance->StopListening();
 	Instance = nullptr;
 }

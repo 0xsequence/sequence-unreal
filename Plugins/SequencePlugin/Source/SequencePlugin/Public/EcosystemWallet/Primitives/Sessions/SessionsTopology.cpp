@@ -202,14 +202,6 @@ TArray<uint8> FSessionsTopology::Encode() const
 
 	if (IsLeaf())
 	{
-		if (Leaf->Type != ESessionsLeafType::SessionsNode)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Encoded sessions leaf %s"), *FByteArrayUtils::BytesToHexString(Leaf.Get()->Encode()));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Encoded sessions node %s"), *FByteArrayUtils::BytesToHexString(Leaf.Get()->Encode()));
-		}
 		return Leaf.Get()->Encode();
 	}
 
