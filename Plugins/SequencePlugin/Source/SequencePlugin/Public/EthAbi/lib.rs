@@ -564,23 +564,39 @@ fn parse_signature(signature: &str) -> Result<Function, ()> {
 }
 
 fn parse_param_type(s: &str) -> Result<ParamType, ()> {
+    use ethabi::ParamType;
+
     match s {
         "address" => Ok(ParamType::Address),
-        "uint256" => Ok(ParamType::Uint(256)),
-        "uint8" => Ok(ParamType::Uint(8)),
         "bool" => Ok(ParamType::Bool),
         "string" => Ok(ParamType::String),
         "bytes" => Ok(ParamType::Bytes),
-        other => {
-            if other.starts_with("uint") {
-                let size = other.trim_start_matches("uint").parse::<usize>().map_err(|_| ())?;
-                Ok(ParamType::Uint(size))
-            } else if other.starts_with("int") {
-                let size = other.trim_start_matches("int").parse::<usize>().map_err(|_| ())?;
-                Ok(ParamType::Int(size))
+
+        _ if s.starts_with("uint") => {
+            let size = s.trim_start_matches("uint").parse::<usize>().unwrap_or(256);
+            Ok(ParamType::Uint(size))
+        }
+
+        _ if s.starts_with("int") => {
+            let size = s.trim_start_matches("int").parse::<usize>().unwrap_or(256);
+            Ok(ParamType::Int(size))
+        }
+
+        _ if s.starts_with("bytes") => {
+            // Handles bytes1 .. bytes32
+            let size = s.trim_start_matches("bytes").parse::<usize>().map_err(|_| ())?;
+            if (1..=32).contains(&size) {
+                Ok(ParamType::FixedBytes(size))
             } else {
                 Err(())
             }
         }
+
+        _ if s.starts_with("fixed") => {
+            // optional: for fixed<M>x<N> types (rare)
+            Err(())
+        }
+
+        _ => Err(()),
     }
 }

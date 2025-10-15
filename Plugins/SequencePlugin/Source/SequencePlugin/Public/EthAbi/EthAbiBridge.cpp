@@ -50,11 +50,12 @@ TArray<uint8> FEthAbiBridge::SignRecoverable(const TArray<uint8>& Hash32, const 
 
 FString FEthAbiBridge::EncodeFunctionCall(const FString& FunctionSignature, const FString& Values)
 {
-	const char* EncodedData = encode_function_call(
+	char* EncodedData = encode_function_call(
 		TCHAR_TO_UTF8(*FunctionSignature),
 		TCHAR_TO_UTF8(*Values));
 	
-	FString EncodedHex(UTF8_TO_TCHAR(EncodedData));
+	FString EncodedHex = FString(UTF8_TO_TCHAR(EncodedData));
+	free_string(EncodedData);
 	return EncodedHex;
 }
 

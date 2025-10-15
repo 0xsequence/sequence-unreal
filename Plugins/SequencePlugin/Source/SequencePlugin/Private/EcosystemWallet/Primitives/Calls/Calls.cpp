@@ -1,5 +1,6 @@
 #include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "Util/ByteArrayUtils.h"
+#include "Util/ValueUtils.h"
 
 TArray<uint8> FCalls::Encode()
 {
@@ -42,7 +43,7 @@ uint8 FCalls::GetCallsCountSize()
 	uint8 Size = 0;
 	const uint8 CallsLen = Calls.Num();
 	
-	if (CallsLen != 0)
+	if (CallsLen != 1)
 	{
 		if (CallsLen < 256)
 		{
@@ -69,12 +70,13 @@ TArray<uint8> FCalls::GetSpaceBytes()
 
 TArray<uint8> FCalls::GetNonceBytes()
 {
-	if (Nonce.Value == "0")
+	const int32 NonceBytesNeeded = FByteArrayUtils::MinBytesFor(FValueUtils::StringToInt32(Nonce.Value));
+	if (NonceBytesNeeded > 0)
 	{
-		return TArray<uint8>();
+		return FByteArrayUtils::PadLeft(Nonce.Encode(), NonceBytesNeeded);
 	}
 
-	return Nonce.Encode();
+	return TArray<uint8>();
 }
 
 TArray<uint8> FCalls::GetCallsCount()
@@ -87,7 +89,7 @@ TArray<uint8> FCalls::GetCallsCount()
 			UE_LOG(LogTemp, Error, TEXT("Calls count is invalid"));
 		}
 
-		return FByteArrayUtils::ByteArrayFromNumber(CountSize, 1);
+		return FByteArrayUtils::ByteArrayFromNumber(Calls.Num(), CountSize);
 	}
 
 	return TArray<uint8>();

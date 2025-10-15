@@ -74,22 +74,7 @@ void USequenceRelayer::SendRequest(const FString& Endpoint, const FString& Paylo
 FString USequenceRelayer::BuildUrl()
 {
 	const int64 ChainId = SequenceSdk::GetChainId();
-
-	FString Name = "";
-	switch (ChainId)
-	{
-		case 10:
-			Name = "v3-optimism";
-			break;
-		case 42161:
-			Name = "v3-arbitrum";
-			break;
-		case 421614:
-			Name = "arbitrum-sepolia";
-			break;
-		default: ;
-	}
-
-	return FString::Printf(TEXT("https://%s-relayer.sequence.app/rpc/Relayer"), *Name);
+	const FString Name = USequenceSupport::GetNetworkNameForUrl(ChainId);
+	return FString::Printf(TEXT("https://dev-%s-relayer.sequence.app/rpc/Relayer"), *Name);
 }
 

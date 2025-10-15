@@ -39,7 +39,8 @@ void USequenceWallet::SignMessage(const FString& Message, TSuccessCallback<FStri
 	this->Client->SendRequest<FSignMessageArgs, FSignMessageResponse>("sign", "signMessage", Payload, OnClientSuccess, OnFailure);	
 }
 
-void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceWallet::GetFeeOptions(const TScriptInterface<ISeqTransactionBase>& Transaction,
+	TSuccessCallback<FFeeOptionsResponse> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const TFunction<void()> OnWalletStateUpdated = [OnFailure]()
 	{
@@ -57,7 +58,52 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 
 		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
 
-		FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+				
+		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
+		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [OnSuccess, OnInternalFailure](TTuple<FString, FString> Result)
+		{
+			const FString To = Result.Key;
+			const FString Data = Result.Value;
+
+			FFeeOptionsArgs Args;
+			Args.Wallet = To;
+			Args.To = To;
+			Args.Data = Data;
+			Args.Simulate = false;
+				
+			USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
+			Relayer->GetFeeOptions(Args, [OnSuccess](const FFeeOptionsResponse& Response)
+			{
+				OnSuccess(Response);
+			}, OnInternalFailure);
+		}, OnInternalFailure);
+	}, OnInternalFailure);
+}
+
+void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, const FFeeOption& FeeOption, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure)
+{
+	const bool HasFeeOption = FeeOption.To != "" && FeeOption.Value != "";
+	const FString LogT = (HasFeeOption ? "true" : "false");
+	UE_LOG(LogTemp, Display, TEXT("Has fee option %s"), *LogT);
+	
+	const TFunction<void()> OnWalletStateUpdated = [OnFailure]()
+	{
+		OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("")));
+	};
+
+	const TFunction<void(FString)> OnInternalFailure = [OnFailure](const FString& Error)
+	{
+		OnFailure(FSequenceError(EErrorType::EmptyResponse, Error));
+	};
+	
+	this->WalletState->UpdateState(this->GetWalletInfo().Address, [this, Transaction, OnSuccess, OnInternalFailure]()
+	{
+		const FCalls Calls = Transaction.GetInterface()->GetCalls();
+
+		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
+
+		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
 		
 		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
 		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [OnSuccess, OnInternalFailure](TTuple<FString, FString> Result)
@@ -66,10 +112,10 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 			const FString Data = Result.Value;
 
 			USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
-			Relayer->Relay(To, Data, "", TArray<FIntentPrecondition>(), [Relayer, OnSuccess, OnInternalFailure](const FString& Receipt)
+			Relayer->Relay(To, Data, "", TArray<FIntentPrecondition>(), [OnSuccess, OnInternalFailure](const FString& Receipt)
 			{
 				URelayerReceiptPoller* Poller = NewObject<URelayerReceiptPoller>();
-				Poller->StartPolling(*Relayer, Receipt, [OnSuccess](const FString& TxnHash)
+				Poller->StartPolling(Receipt, [OnSuccess](const FString& TxnHash)
 				{
 					UE_LOG(LogTemp, Display, TEXT("Received transaction: %s"), *TxnHash);
 					OnSuccess(TxnHash);

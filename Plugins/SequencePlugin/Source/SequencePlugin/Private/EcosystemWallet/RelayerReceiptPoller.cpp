@@ -1,9 +1,9 @@
 #include "RelayerReceiptPoller.h"
 #include "Engine/Engine.h"
 
-void URelayerReceiptPoller::StartPolling(USequenceRelayer& InRelayer, const FString& Hash, const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
+void URelayerReceiptPoller::StartPolling(const FString& Hash, const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
-	this->Relayer = &InRelayer;
+	this->Relayer = NewObject<USequenceRelayer>();
 	this->OnSuccess = OnSuccess;
 	this->OnFailure = OnFailure;
 	
@@ -13,6 +13,12 @@ void URelayerReceiptPoller::StartPolling(USequenceRelayer& InRelayer, const FStr
 
 void URelayerReceiptPoller::PollRecursive(const FString& Hash)
 {
+	if (Relayer == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Relayer is null, cannot poll receipt."))
+		return;
+	}
+	
 	Relayer->GetMetaTxnReceipt(Hash, [this, Hash](const FGetMetaTxnReceiptResponse& Response){
 		CurrentStatus = Response.Receipt.Status;
 
