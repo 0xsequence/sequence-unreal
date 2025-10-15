@@ -1,4 +1,6 @@
 #include "TransactionService.h"
+
+#include "RelayerReceiptPoller.h"
 #include "SignatureService.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "Relayer/SequenceRelayer.h"
@@ -23,13 +25,13 @@ void FTransactionService::SignAndBuild(FBigInt ChainId, const TArray<FCall>& Cal
 		const FString ExecuteValues = FString::Printf(TEXT("[\"%s\",\"%s\"]"), *EncodedPayload, *EncodedSignature);
 		const FString EncodedExecute = FEthAbiBridge::EncodeFunctionCall("execute(bytes,bytes)", ExecuteValues);
 
-		const USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
+		USequenceRelayer* Relayer = NewObject<USequenceRelayer>();
 		Relayer->Relay(CurrentWalletState->Address, EncodedExecute, "", TArray<FIntentPrecondition>(), [Relayer, OnSuccess, OnFailure](const FString& Receipt)
 		{
-			Relayer->GetMetaTxnReceipt(Receipt, [](const FGetMetaTxnReceiptResponse& Response)
+			URelayerReceiptPoller* Poller = NewObject<URelayerReceiptPoller>();
+			Poller->StartPolling(*Relayer, Receipt, [OnSuccess](const FString& TxnHash)
 			{
-				const FString TxnHash = Response.Receipt.TxnHash;
-				UE_LOG(LogTemp, Display, TEXT("TxnHash: %s"), *TxnHash);
+				UE_LOG(LogTemp, Display, TEXT("Received transaction: %s"), *TxnHash);
 			}, OnFailure);
 		}, OnFailure);
 	}, OnFailure);
