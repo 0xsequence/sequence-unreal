@@ -9,12 +9,12 @@
 FWalletState::FWalletState()
 {
 	this->KeyMachine = NewObject<UKeyMachine>();
-	this->Provider = NewObject<UProvider>();
 }
 
 void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
 	this->Address = Address;
+	this->Provider = NewObject<UProvider>();
 	
 	UpdateDeployedState([this, OnSuccess, OnFailure]() {
 		this->GetImplementation([this, OnSuccess, OnFailure](const FString& Implementation) {

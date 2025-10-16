@@ -15,18 +15,16 @@ void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)>
 	{
 		UE_LOG(LogTemp, Error, TEXT("No valid signers found."));
 	}
-
-	FindSignerForEachCallAsync(AvailableSigners, [this, OnSuccess, OnFailure](const TArray<FSessionSigner>& SupportedSigners)
+	
+	const TArray<FSessionSigner> SupportedSigners = FindSignerForEachCallAsync(ValidExplicitSigners, ValidImplicitSigners);
+	if (this->Calls.Num() == SupportedSigners.Num())
 	{
-		if (this->Calls.Num() == SupportedSigners.Num())
-		{
-			OnSuccess(SupportedSigners);
-		}
-		else
-		{
-			OnFailure(FString::Printf(TEXT("No signers available for this call. %d %d"), this->Calls.Num(), SupportedSigners.Num()));
-		}
-	});
+		OnSuccess(SupportedSigners);
+	}
+	else
+	{
+		OnFailure(FString::Printf(TEXT("No signers available for this call. %d %d"), this->Calls.Num(), SupportedSigners.Num()));
+	}
 }
 
 TArray<FSessionSigner> FSignerService::GetValidImplicitSigners(const FString& IdentitySigner, const TArray<FString>& Blacklist)
@@ -62,36 +60,33 @@ TArray<FSessionSigner> FSignerService::GetValidExplicitSigners()
 	return Result;
 }
 
-void FSignerService::FindSignerForEachCallAsync(const TArray<FSessionSigner>& AvailableSigners, const TFunction<void(TArray<FSessionSigner>)>& OnCompleted)
+TArray<FSessionSigner> FSignerService::FindSignerForEachCallAsync(const TArray<FSessionSigner>& ExplicitSigners, const TArray<FSessionSigner>& ImplicitSigners)
 {
-	TSharedRef<TArray<FSessionSigner>, ESPMode::ThreadSafe> Signers = MakeShared<TArray<FSessionSigner>, ESPMode::ThreadSafe>();
-	TSharedRef<int32, ESPMode::ThreadSafe> PendingCount = MakeShared<int32, ESPMode::ThreadSafe>(0);
-
-	const int32 CallsLen = this->Calls.Num();
-	const int32 SignersLen = AvailableSigners.Num();
-	*PendingCount = CallsLen * SignersLen;
-
-	UE_LOG(LogTemp, Log, TEXT("*PendingCount: %d %d %d"), CallsLen, SignersLen, *PendingCount);
-
-	for (const FCall& Call : this->Calls)
+	TArray<FSessionSigner> SupportedSigners;
+	
+	for (FSessionSigner ExplicitSigner : ExplicitSigners)
 	{
-		for (FSessionSigner Signer : AvailableSigners)
+		for (const FCall& Call : this->Calls)
 		{
-			Signer.IsSupportedCall(ChainId, Call, SessionsTopology, [Signer, Signers, PendingCount, OnCompleted](const bool Supported)
+			if (ExplicitSigner.IsSupportedCall(ChainId, Call, SupportedSigners, SessionsTopology))
 			{
-				if (Supported)
-				{
-					UE_LOG(LogTemp, Display, TEXT("Adding signer %s"), *Signer.Credentials.SessionAddress)
-					Signers->Add(Signer);
-				}
-
-				(*PendingCount)--;
-
-				if (*PendingCount == 0)
-				{
-					OnCompleted(*Signers);
-				}
-			});
+				UE_LOG(LogTemp, Display, TEXT("Adding explicit signer %s"), *ExplicitSigner.Credentials.SessionAddress)
+				SupportedSigners.Add(ExplicitSigner);
+			}
 		}
 	}
+
+	for (FSessionSigner ImplicitSigner : ImplicitSigners)
+	{
+		for (const FCall& Call : this->Calls)
+		{
+			if (ImplicitSigner.IsSupportedCall(ChainId, Call, SupportedSigners, SessionsTopology))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Adding implicit signer %s"), *ImplicitSigner.Credentials.SessionAddress)
+				SupportedSigners.Add(ImplicitSigner);
+			}
+		}
+	}
+
+	return SupportedSigners;
 }

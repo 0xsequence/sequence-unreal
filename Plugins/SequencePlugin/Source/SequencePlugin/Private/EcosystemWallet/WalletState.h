@@ -30,7 +30,7 @@ public:
 private:
 	UKeyMachine* KeyMachine;
 
-	UProvider* Provider;
+	UProvider* Provider = nullptr;
 
 	int32 UpdateProgress = 0;
 

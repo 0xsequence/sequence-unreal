@@ -15,7 +15,7 @@ public:
 
 	FString GetIdentitySigner();
 	
-	void IsSupportedCall(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology, TFunction<void(bool)> OnCompleted);
+	bool IsSupportedCall(const FBigInt& ChainId, const FCall& Call, const TArray<FSessionSigner>& Signers, const TSharedPtr<FSessionsTopology>& SessionsTopology);
 	
 	TSharedPtr<FSessionCallSignature> SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
 		const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
@@ -30,5 +30,4 @@ private:
 	void GetCurrentUsageLimit(TFunction<void(FBigInt)> OnCompleted);
 	
 	void CheckAcceptImplicitRequest(const FCall& Call, TFunction<void(bool)> OnCompleted);
-	FString EncodeAcceptImplicitRequest(const FCall& Call);
 };

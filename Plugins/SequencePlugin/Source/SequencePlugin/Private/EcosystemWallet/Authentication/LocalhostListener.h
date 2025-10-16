@@ -30,7 +30,7 @@ private:
 	
 	TSharedPtr<IHttpRouter> Router;
 	TOptional<FHttpRouteHandle> RouteHandle;
-	uint32 Port = 4445;
+	uint32 Port = 4444;
 	uint32 FallbackPort = 4445;
 	bool bServerStarted = false;
 

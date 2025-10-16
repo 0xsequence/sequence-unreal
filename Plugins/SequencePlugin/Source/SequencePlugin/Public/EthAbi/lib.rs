@@ -227,39 +227,41 @@ pub extern "C" fn sign_recoverable(
 
 #[no_mangle]
 pub extern "C" fn encode_function_call(signature: *const c_char, args_json: *const c_char) -> *mut c_char {
+    unsafe {
+        if signature.is_null() || args_json.is_null() {
+            return empty_cstring();
+        }
+    }
+
     // Step 1: Read C strings
     let signature = unsafe {
-        if signature.is_null() {
-            return empty_cstring();
-        }
         CStr::from_ptr(signature).to_str().unwrap_or("")
     };
-
     let args_json = unsafe {
-        if args_json.is_null() {
-            return empty_cstring();
-        }
         CStr::from_ptr(args_json).to_str().unwrap_or("")
     };
 
     // Step 2: Parse function signature
-    let function = parse_signature(signature).unwrap();
+    let function = match parse_signature(signature) {
+        Ok(f) => f,
+        Err(_) => return empty_cstring(),
+    };
 
-    // Step 3: Parse arguments from JSON
+    // Step 3: Parse JSON arguments
     let json_args: Vec<Value> = match serde_json::from_str(args_json) {
         Ok(v) => v,
         Err(_) => return empty_cstring(),
     };
 
-    // Step 4: Convert to Tokens
-    let tokens: Vec<Token> = match json_args.iter().zip(function.inputs.iter()).map(|(value, param)| {
-        parse_token(value, &param.kind)
-    }).collect::<Result<_, _>>() {
+    // Step 4: Convert to ABI tokens
+    let tokens: Vec<Token> = match json_args.iter().zip(function.inputs.iter())
+        .map(|(value, param)| parse_token(value, &param.kind))
+        .collect::<Result<_, _>>() {
         Ok(t) => t,
         Err(_) => return empty_cstring(),
     };
 
-    // Step 5: Encode
+    // Step 5: Encode ABI
     let encoded = match function.encode_input(&tokens) {
         Ok(bytes) => bytes,
         Err(_) => return empty_cstring(),
@@ -546,87 +548,138 @@ fn tokens_to_array_json(tokens: &[Token], params: &[Param]) -> Value {
     Value::Array(values)
 }
 
-fn parse_token(value: &Value, param_type: &ParamType) -> Result<Token, ()> {
-    use ethabi::ParamType::*;
-    match (value, param_type) {
-        // address
-        (Value::String(s), Address) => {
-            let clean = s.trim_start_matches("0x");
-            let bytes = hex::decode(clean).map_err(|_| ())?;
-            if bytes.len() != 20 {
+fn parse_token(value: &serde_json::Value, kind: &ethabi::ParamType) -> Result<ethabi::Token, ()> {
+    use ethabi::{ethereum_types::*, ParamType, Token};
+    use serde_json::Value;
+
+    match (kind, value) {
+        // Tuples
+        (ParamType::Tuple(types), Value::Array(vals)) => {
+            if vals.len() != types.len() {
                 return Err(());
             }
-            Ok(Token::Address(ethabi::Address::from_slice(&bytes)))
-        }
-
-        // string
-        (Value::String(s), String) => Ok(Token::String(s.clone())),
-
-        // uint / int
-        (Value::Number(n), Uint(_)) => {
-            let u = n.as_u64().ok_or(())?;
-            Ok(Token::Uint(u.into()))
-        }
-        (Value::Number(n), Int(_)) => {
-            let i = n.as_i64().ok_or(())?;
-            Ok(Token::Int(i.into()))
-        }
-
-        // bool
-        (Value::Bool(b), Bool) => Ok(Token::Bool(*b)),
-
-        // dynamic bytes (bytes)
-        (Value::String(s), Bytes) => {
-            let clean = s.trim_start_matches("0x");
-            let bytes = hex::decode(clean).map_err(|_| ())?;
-            Ok(Token::Bytes(bytes))
-        }
-
-        // fixed bytes (bytes32, bytes4, etc.)
-        (Value::String(s), FixedBytes(size)) => {
-            let clean = s.trim_start_matches("0x");
-            let mut bytes = hex::decode(clean).map_err(|_| ())?;
-            if bytes.len() > *size {
-                bytes.truncate(*size); // cut extra bytes
-            } else if bytes.len() < *size {
-                bytes.resize(*size, 0u8); // pad with zeros
-            }
-            Ok(Token::FixedBytes(bytes))
-        }
-
-        // arrays
-        (Value::Array(values), Array(inner)) => {
-            let tokens = values
-                .iter()
-                .map(|v| parse_token(v, inner))
-                .collect::<Result<Vec<_>, _>>()?;
-            Ok(Token::Array(tokens))
-        }
-
-        // fixed arrays
-        (Value::Array(values), FixedArray(inner, size)) => {
-            let tokens = values
-                .iter()
-                .map(|v| parse_token(v, inner))
-                .collect::<Result<Vec<_>, _>>()?;
-            Ok(Token::FixedArray(tokens))
-        }
-
-        // tuples
-        (Value::Array(values), Tuple(types)) => {
-            if values.len() != types.len() {
-                return Err(());
-            }
-            let tokens = values
-                .iter()
-                .zip(types)
+            let tokens = vals.iter()
+                .zip(types.iter())
                 .map(|(v, t)| parse_token(v, t))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(Token::Tuple(tokens))
         }
 
+        // Arrays
+        (ParamType::Array(inner), Value::Array(vals)) => {
+            let tokens = vals.iter().map(|v| parse_token(v, inner)).collect::<Result<Vec<_>, _>>()?;
+            Ok(Token::Array(tokens))
+        }
+        (ParamType::FixedArray(inner, len), Value::Array(vals)) => {
+            if vals.len() != *len {
+                return Err(());
+            }
+            let tokens = vals.iter().map(|v| parse_token(v, inner)).collect::<Result<Vec<_>, _>>()?;
+            Ok(Token::FixedArray(tokens))
+        }
+
+        // Uint
+        (ParamType::Uint(_), Value::Number(n)) => Ok(Token::Uint(U256::from(n.as_u64().ok_or(())?))),
+        (ParamType::Uint(_), Value::String(s)) => {
+            let s = s.trim_start_matches("0x");
+            U256::from_dec_str(s)
+                .or_else(|_| U256::from_str_radix(s, 16))
+                .map(Token::Uint)
+                .map_err(|_| ())
+        }
+
+        // Int
+        (ParamType::Int(_), Value::Number(n)) => {
+            let v = n.as_i64().ok_or(())?;
+            let u = if v < 0 {
+                U256::MAX - U256::from((-v) as u64) + 1
+            } else {
+                U256::from(v as u64)
+            };
+            Ok(Token::Int(u))
+        }
+        (ParamType::Int(_), Value::String(s)) => {
+            let s = s.trim();
+            let neg = s.starts_with('-');
+            let u = U256::from_dec_str(s.trim_start_matches('-').trim_start_matches("0x"))
+                .or_else(|_| U256::from_str_radix(s.trim_start_matches('-').trim_start_matches("0x"), 16))
+                .map_err(|_| ())?;
+            let val = if neg { U256::MAX - u + 1 } else { u };
+            Ok(Token::Int(val))
+        }
+
+        // Bool
+        (ParamType::Bool, Value::Bool(b)) => Ok(Token::Bool(*b)),
+        (ParamType::Bool, Value::String(s)) => {
+            let s = s.trim().to_ascii_lowercase();
+            match s.as_str() {
+                "true" | "1" => Ok(Token::Bool(true)),
+                "false" | "0" => Ok(Token::Bool(false)),
+                _ => Err(()),
+            }
+        }
+
+        // Address
+        (ParamType::Address, Value::String(s)) => {
+            let s = s.trim_start_matches("0x");
+            let bytes = hex::decode(s).map_err(|_| ())?;
+            if bytes.len() != 20 {
+                return Err(());
+            }
+            Ok(Token::Address(Address::from_slice(&bytes)))
+        }
+
+        // Strings
+        (ParamType::String, Value::String(s)) => Ok(Token::String(s.clone())),
+
+        // Bytes and fixed bytes
+        (ParamType::Bytes, Value::String(s)) => {
+            let s = s.trim();
+            let hex_str = s.strip_prefix("0x").or(s.strip_prefix("0X")).unwrap_or(s);
+            if hex_str.is_empty() {
+                return Ok(Token::Bytes(vec![]));
+            }
+            if hex_str.len() % 2 == 1 {
+                let mut owned = String::with_capacity(hex_str.len() + 1);
+                owned.push('0');
+                owned.push_str(hex_str);
+                let bytes = hex::decode(&owned).map_err(|_| ())?;
+                return Ok(Token::Bytes(bytes));
+            }
+            let bytes = hex::decode(hex_str).map_err(|_| ())?;
+            Ok(Token::Bytes(bytes))
+        }
+        (ParamType::FixedBytes(len), Value::String(s)) => {
+            let bytes = hex::decode(s.trim_start_matches("0x")).map_err(|_| ())?;
+            if bytes.len() != *len {
+                return Err(());
+            }
+            Ok(Token::FixedBytes(bytes))
+        }
+
         _ => Err(()),
     }
+}
+
+
+// Split arguments by commas at top level (handles tuples like (a,b),(c,d))
+fn split_top_level(s: &str, delim: char) -> Result<Vec<String>, ()> {
+    let mut out = Vec::new();
+    let mut depth = 0usize;
+    let mut cur = String::new();
+    for ch in s.chars() {
+        match ch {
+            '(' | '[' => { depth += 1; cur.push(ch); }
+            ')' | ']' => { depth = depth.checked_sub(1).ok_or(())?; cur.push(ch); }
+            _ if ch == delim && depth == 0 => {
+                if !cur.trim().is_empty() { out.push(cur.trim().to_string()); }
+                cur.clear();
+            }
+            _ => cur.push(ch),
+        }
+    }
+    if !cur.trim().is_empty() { out.push(cur.trim().to_string()); }
+    Ok(out)
 }
 
 fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
@@ -662,28 +715,41 @@ fn token_to_json(token: &Token, param_type: &ParamType) -> Value {
 }
 
 fn parse_signature(signature: &str) -> Result<Function, ()> {
-    let open_paren = signature.find('(').ok_or(())?;
-    let close_paren = signature.find(')').ok_or(())?;
+    let open = signature.find('(').ok_or(())?;
+    // find the matching ')' for the first '('
+    let mut depth = 0usize;
+    let mut close = None;
+    for (i, ch) in signature.char_indices().skip(open) {
+        match ch {
+            '(' => depth += 1,
+            ')' => {
+                depth -= 1;
+                if depth == 0 {
+                    close = Some(i);
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    let close = close.ok_or(())?;
 
-    let name = &signature[..open_paren];
-    let args_str = &signature[open_paren + 1..close_paren];
+    let name = &signature[..open];
+    let args_str = &signature[open + 1..close];
     let arg_types: Vec<ParamType> = if args_str.trim().is_empty() {
         vec![]
     } else {
-        args_str.split(',')
+        split_top_level(args_str, ',')?
+            .iter()
             .map(|s| parse_param_type(s.trim()))
             .collect::<Result<_, _>>()?
     };
 
-    let inputs = arg_types
-        .into_iter()
-        .enumerate()
-        .map(|(i, kind)| Param {
-            name: format!("arg{}", i),
-            kind,
-            internal_type: None
-        })
-        .collect();
+    let inputs = arg_types.into_iter().enumerate().map(|(i, kind)| Param {
+        name: format!("arg{}", i),
+        kind,
+        internal_type: None,
+    }).collect();
 
     Ok(Function {
         name: name.to_string(),
@@ -696,36 +762,51 @@ fn parse_signature(signature: &str) -> Result<Function, ()> {
 
 fn parse_param_type(s: &str) -> Result<ParamType, ()> {
     use ethabi::ParamType;
+    let s = s.trim();
 
+    // tuple: ( ... )
+    if s.starts_with('(') && s.ends_with(')') {
+        let inner = &s[1..s.len() - 1];
+        let inner_types = split_top_level(inner, ',')?
+            .into_iter()
+            .map(|t| parse_param_type(&t))
+            .collect::<Result<Vec<_>, _>>()?;
+        return Ok(ParamType::Tuple(inner_types));
+    }
+
+    // arrays: type[], type[3], possibly nested (e.g. (uint,bool)[])
+    if let Some(idx) = s.find('[') {
+        if !s.ends_with(']') { return Err(()); }
+        let inner_ty = parse_param_type(&s[..idx])?;
+        let len_str = &s[idx+1..s.len()-1];
+        return if len_str.is_empty() {
+            Ok(ParamType::Array(Box::new(inner_ty)))
+        } else if let Ok(n) = len_str.parse::<usize>() {
+            Ok(ParamType::FixedArray(Box::new(inner_ty), n))
+        } else {
+            Err(())
+        };
+    }
+
+    // primitives
     match s {
         "address" => Ok(ParamType::Address),
-        "bool" => Ok(ParamType::Bool),
-        "string" => Ok(ParamType::String),
-        "bytes" => Ok(ParamType::Bytes),
+        "bool"    => Ok(ParamType::Bool),
+        "string"  => Ok(ParamType::String),
+        "bytes"   => Ok(ParamType::Bytes),
 
         _ if s.starts_with("uint") => {
-            let size = s.trim_start_matches("uint").parse::<usize>().unwrap_or(256);
+            let size = s[4..].parse::<usize>().unwrap_or(256);
             Ok(ParamType::Uint(size))
         }
-
         _ if s.starts_with("int") => {
-            let size = s.trim_start_matches("int").parse::<usize>().unwrap_or(256);
+            let size = s[3..].parse::<usize>().unwrap_or(256);
             Ok(ParamType::Int(size))
         }
-
         _ if s.starts_with("bytes") => {
-            // Handles bytes1 .. bytes32
-            let size = s.trim_start_matches("bytes").parse::<usize>().map_err(|_| ())?;
-            if (1..=32).contains(&size) {
-                Ok(ParamType::FixedBytes(size))
-            } else {
-                Err(())
-            }
-        }
-
-        _ if s.starts_with("fixed") => {
-            // optional: for fixed<M>x<N> types (rare)
-            Err(())
+            // bytes1..bytes32
+            let n = s[5..].parse::<usize>().map_err(|_| ())?;
+            if (1..=32).contains(&n) { Ok(ParamType::FixedBytes(n)) } else { Err(()) }
         }
 
         _ => Err(()),

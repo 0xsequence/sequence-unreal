@@ -3,8 +3,8 @@
 #include "EcosystemWallet/Primitives/Signatures/Erc6492.h"
 #include "EcosystemWallet/Primitives/Signatures/RawSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
+#include "EcosystemWallet/Signers/ImplicitRequestEncoder.h"
 #include "EcosystemWallet/Signers/SessionCredentialsSerializer.h"
-#include "EthAbi/EthAbiBridge.h"
 #include "Misc/AutomationTest.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceSupport.h"
@@ -177,6 +177,38 @@ bool FAttestationHash::RunTest(const FString& Parameters)
     UE_LOG(LogTemp, Display, TEXT("Hashing attestation %s %s"), *AttestationHash, *ExpectedHash);
     
     TestEqual("Attestation hash should match", AttestationHash, ExpectedHash);
+    
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAcceptImplicitRequest, "SequencePlugin.UnitTests.EcosystemWallet.AcceptImplicitRequest", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FAcceptImplicitRequest::RunTest(const FString& Parameters)
+{
+    const FString AttestationJson = "{\"approvedSigner\":\"0x3761e16647E27956a5BfAdFE507d4c4F9a6f5512\",\"identityType\":{\"_isUint8Array\":true,\"data\":\"0x00000002\"},\"issuerHash\":{\"_isUint8Array\":true,\"data\":\"0x4dcc430b541f16ee48b99ac8df13c9f8fa820c59de2e8bfc834cd295504d50dc\"},\"audienceHash\":{\"_isUint8Array\":true,\"data\":\"0x33f23bc388d939c925129d46379b8a32475568969cb4d9e9f918c9dff965e700\"},\"applicationData\":{\"_isUint8Array\":true,\"data\":\"0x\"},\"authData\":{\"redirectUrl\":\"http://localhost:4444\",\"issuedAt\":{\"_isBigInt\":true,\"data\":\"1760602234\"}}}";
+    const FString ExpectedHex = "0x9d043a66000000000000000000000000bd7f38b943452e0c14d7ba92b9b504a9c9fc3518000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000003761e16647e27956a5bfadfe507d4c4f9a6f551200000002000000000000000000000000000000000000000000000000000000004dcc430b541f16ee48b99ac8df13c9f8fa820c59de2e8bfc834cd295504d50dc33f23bc388d939c925129d46379b8a32475568969cb4d9e9f918c9dff965e70000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000068f0a87a0000000000000000000000000000000000000000000000000000000000000015687474703a2f2f6c6f63616c686f73743a34343434000000000000000000000000000000000000000000000033985d320809e26274a72e03268c8a29927bc6da000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040c0340fc00000000000000000000000000000000000000000000000000000000";
+
+    FAttestation Attestation;
+    const bool Result = FSessionCredentialsSerializer::ParseAttestation(USequenceSupport::JsonStringToObject(AttestationJson), Attestation);
+    
+    if (!Result)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to parse attestation"));
+        return false;
+    }
+
+    FCall Call {
+        "0x33985d320809E26274a72E03268c8a29927Bc6dA",
+        "0x0c0340fc",
+        FBigInt("0"),
+        FBigInt("0"),
+        false, false, "1"
+    };
+
+    const FString Encoded = FImplicitRequestEncoder::EncodeAcceptImplicitRequest(Call, "0xBd7F38B943452e0C14d7BA92b9b504A9C9fc3518", Attestation);
+    
+    UE_LOG(LogTemp, Display, TEXT("Accept implicit request data %s %s"), *Encoded, *ExpectedHex);
+    
+    TestEqual("Attestation hash should match", Encoded, ExpectedHex);
     
     return true;
 }

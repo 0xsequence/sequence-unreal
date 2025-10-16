@@ -11,7 +11,7 @@
 
 UEcosystemClient::UEcosystemClient()
 {
-    this->Origin = "http://localhost:4445/api"; // Define this for each platform
+    this->Origin = "http://localhost:4444/api"; // Define this for each platform
 
 #if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_MAC
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();

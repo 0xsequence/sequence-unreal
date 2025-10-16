@@ -171,7 +171,7 @@ public:
 	{
 		TSharedPtr<FJsonObject> Obj = MakeShared<FJsonObject>();
 		Obj->SetBoolField(TEXT("_isBigInt"), true);
-		Obj->SetStringField(TEXT("data"), FByteArrayUtils::BytesToHexString(In.Encode()));
+		Obj->SetStringField(TEXT("data"), In.Value);
 		return Obj;
 	}
 

@@ -35,6 +35,7 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
         if (ImplicitSignature->Attestation != nullptr)
         {
             FString AttestationStr = ImplicitSignature->Attestation.Get()->ToJsonString();
+            UE_LOG(LogTemp, Display, TEXT("Adding attestation %s"), *AttestationStr)
 
             if (!AttestationMap.Contains(AttestationStr))
             {
