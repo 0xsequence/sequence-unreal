@@ -35,7 +35,6 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
         if (ImplicitSignature->Attestation != nullptr)
         {
             FString AttestationStr = ImplicitSignature->Attestation.Get()->ToJsonString();
-            UE_LOG(LogTemp, Display, TEXT("Adding attestation %s"), *AttestationStr)
 
             if (!AttestationMap.Contains(AttestationStr))
             {
@@ -75,7 +74,8 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
             
             int32 Index = AttestationMap[AttestationStr];
 
-            Parts.Add(FByteArrayUtils::ByteArrayFromNumber(0x80 | Index, 1));
+            const int32 Flag = 0x80 | Index;
+            Parts.Add(FByteArrayUtils::ByteArrayFromNumber(Flag, 1));
             Parts.Add(ImplicitCall->SessionSignature->Pack());
         }
         else if (Signature->Type == ESessionCallSignatureType::Explicit)

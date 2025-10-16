@@ -31,6 +31,9 @@ public:
 
     static int32 VToYParity(int64 V)
     {
+        if (V == 0 || V == 1)
+            return V;
+        
         if (V == 27) return 0;
         if (V == 28) return 1;
         return V % 2;

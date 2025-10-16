@@ -65,7 +65,7 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
     FConnectArgs Payload;
     Payload.PreferredLoginMethod     = PreferredLoginMethod;
     Payload.Email                    = Email;
-    Payload.Origin                   = this->Origin;
+    Payload.Origin                   = this->Origin.Replace(TEXT("/api"), TEXT(""));
     Payload.Session                 = SessionArgs;
     Payload.IncludeImplicitSession  = IncludeImplicitSession;
 
