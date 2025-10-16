@@ -97,6 +97,14 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 
 		Calls.Calls = NewCalls;
 	}
+
+	for (FCall Call : Calls.Calls)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Call.To %s"), *Call.To);
+	}
+
+	const FString LogT = HasFeeOption ? "yes" : "no";
+	UE_LOG(LogTemp, Display, TEXT("%d %s"), Calls.Calls.Num(), *LogT)
 	
 	const TFunction<void(FString)> OnInternalFailure = [OnFailure](const FString& Error)
 	{

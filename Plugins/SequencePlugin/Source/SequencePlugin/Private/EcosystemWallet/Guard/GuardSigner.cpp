@@ -1,6 +1,7 @@
 #include "GuardSigner.h"
 
 #include "EcosystemWallet/Extensions/ExtensionsFactory.h"
+#include "EcosystemWallet/Guard/Models/SignWith.h"
 #include "EcosystemWallet/KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "EcosystemWallet/Primitives/Calls/CallTypedDataFactory.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"

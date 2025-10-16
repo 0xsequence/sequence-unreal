@@ -25,4 +25,10 @@ public:
 private:
 	int32 FindSupportedPermission(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology);
 	TArray<uint8> HashCallWithReplayProtection(const FBigInt& ChainId, const FCall&, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce);
+	FString GenerateImplicitRequestMagic();
+
+	void GetCurrentUsageLimit(TFunction<void(FBigInt)> OnCompleted);
+	
+	void CheckAcceptImplicitRequest(const FCall& Call, TFunction<void(bool)> OnCompleted);
+	FString EncodeAcceptImplicitRequest(const FCall& Call);
 };

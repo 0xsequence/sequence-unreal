@@ -57,6 +57,7 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 	
 	SignerService.FindSignersForCalls([this, Calls, Space, Nonce, OnSuccess](TArray<FSessionSigner> SupportedSigners)
 	{
+		
 		TArray<FString> ImplicitSigners;
 		TArray<FString> ExplicitSigners;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Models/SignWith.h"
+#include "EcosystemWallet/Guard/Models/SignWith.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
 #include "GuardService.generated.h"

@@ -17,6 +17,8 @@ public:
         : R(InR), S(InS), YParity(InYParity) {}
 
     TArray<uint8> Pack() const;
+    
+    TArray<uint8> Pack65() const;
 
     // RSY inside string ("r:s:v")
     static TSharedPtr<FRSY> FromString(const FString& Input);

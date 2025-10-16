@@ -652,6 +652,10 @@ public:
 	static TArray<uint8> EncodeBigInteger(const FString& Value);
 
 	static TArray<uint8> EncodeAndHashTypedData(const FString& DomainJson);
+
+	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
+
+	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);
 	
 private:
 	/*

@@ -5,6 +5,12 @@
 class FEthAbiBridge
 {
 public:
+	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
+	
+	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);
+	
+	static TArray<uint8> EncodeTwoAddresses(const FString& A, const FString& B);
+	
 	static TArray<uint8> EncodeAndHashTypedData(const FString& DomainJson);
 	
 	static TArray<uint8> SignRecoverable(const TArray<uint8>& Hash32, const TArray<uint8>& PrivKey32);

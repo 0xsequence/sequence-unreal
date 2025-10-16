@@ -2,7 +2,10 @@ use secp256k1::{
     ecdsa::RecoverableSignature,
     ecdsa::RecoveryId,
     Message, Secp256k1, SecretKey,
+    PublicKey
 };
+use tiny_keccak::{Hasher, Keccak};
+use ethabi::ethereum_types::H160;
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use ethers::utils::keccak256;
 use ethabi::{encode, decode as abi_decode, Address, Function, Token, Param, ParamType, StateMutability};
@@ -23,6 +26,134 @@ struct AbiValue {
     #[serde(rename = "type")]
     kind: String,
     value: String,
+}
+
+/// Converts a BigInteger (as a decimal or hex string) into big-endian bytes.
+/// Interprets the input as an integer value, not a UTF-8 sequence of digits.
+/// Returns 0 on success, -1 on invalid input, -2 if too large.
+#[no_mangle]
+pub extern "C" fn bigint_to_bytes2(
+    value_ptr: *const u8,
+    value_len: usize,
+    size: usize,
+    out_bytes: *mut u8,
+    out_len: *mut usize,
+) -> i32 {
+    let value_str = match std::str::from_utf8(unsafe { slice::from_raw_parts(value_ptr, value_len) }) {
+        Ok(v) => v.trim(),
+        Err(_) => return -1,
+    };
+
+    // Detect base automatically
+    let value = if let Some(stripped) = value_str.strip_prefix("0x") {
+        BigUint::from_str_radix(stripped, 16)
+    } else {
+        BigUint::from_str_radix(value_str, 10)
+    };
+
+    let value = match value {
+        Ok(v) => v,
+        Err(_) => return -1,
+    };
+
+    let mut raw = value.to_bytes_be();
+
+    // Apply fixed size
+    if size > 0 {
+        if raw.len() > size {
+            return -2;
+        }
+        let mut padded = vec![0u8; size - raw.len()];
+        padded.extend_from_slice(&raw);
+        raw = padded;
+    }
+
+    unsafe {
+        ptr::copy_nonoverlapping(raw.as_ptr(), out_bytes, raw.len());
+        *out_len = raw.len();
+    }
+
+    0
+}
+
+#[no_mangle]
+pub extern "C" fn recover_eth_pub_and_address(
+    sig_ptr: *const u8,
+    sig_len: usize,
+    hash_ptr: *const u8,
+    hash_len: usize,
+    out_pubkey: *mut u8,   // expects 64 bytes (X || Y)
+    out_address: *mut u8,  // expects 20 bytes
+) -> i32 {
+    // Safety wrappers for incoming pointers
+    let sig = unsafe { slice::from_raw_parts(sig_ptr, sig_len) };
+    let hash = unsafe { slice::from_raw_parts(hash_ptr, hash_len) };
+
+    if sig.len() != 65 || hash.len() != 32 {
+        return -1;
+    }
+
+    let secp = Secp256k1::new();
+
+    // Split signature into r,s,v
+    let recovery_id = match sig[64] {
+        27 | 28 => RecoveryId::from_i32((sig[64] - 27) as i32).unwrap(),
+        0 | 1 => RecoveryId::from_i32(sig[64] as i32).unwrap(),
+        _ => return -1,
+    };
+
+    let rec_sig = match RecoverableSignature::from_compact(&sig[0..64], recovery_id) {
+        Ok(s) => s,
+        Err(_) => return -1,
+    };
+
+    let msg = match Message::from_slice(hash) {
+        Ok(m) => m,
+        Err(_) => return -1,
+    };
+
+    let pubkey = match secp.recover_ecdsa(&msg, &rec_sig) {
+        Ok(p) => p,
+        Err(_) => return -1,
+    };
+
+    // Serialize pubkey uncompressed (0x04 + 64 bytes)
+    let pub_uncompressed = pubkey.serialize_uncompressed();
+
+    // Compute Ethereum address
+    let mut keccak = Keccak::v256();
+    let mut hash32 = [0u8; 32];
+    keccak.update(&pub_uncompressed[1..]); // skip 0x04
+    keccak.finalize(&mut hash32);
+
+    let address = &hash32[12..]; // last 20 bytes
+
+    unsafe {
+        ptr::copy_nonoverlapping(pub_uncompressed[1..].as_ptr(), out_pubkey, 64); // X,Y
+        ptr::copy_nonoverlapping(address.as_ptr(), out_address, 20);
+    }
+
+    0 // success
+}
+
+#[no_mangle]
+pub extern "C" fn encode_two_addresses_ethabi(
+    signer_ptr: *const u8, // 20 bytes
+    value_ptr: *const u8,  // 20 bytes
+    out_ptr: *mut u8,      // output buffer (at least 64 bytes)
+) -> usize {
+    unsafe {
+        let signer = H160::from_slice(std::slice::from_raw_parts(signer_ptr, 20));
+        let value  = H160::from_slice(std::slice::from_raw_parts(value_ptr, 20));
+
+        let encoded = encode(&[
+            Token::Address(signer),
+            Token::Address(value),
+        ]);
+
+        std::ptr::copy_nonoverlapping(encoded.as_ptr(), out_ptr, encoded.len());
+        encoded.len()
+    }
 }
 
 #[no_mangle]

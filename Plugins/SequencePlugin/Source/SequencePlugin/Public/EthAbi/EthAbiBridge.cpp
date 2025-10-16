@@ -3,6 +3,9 @@
 #include "Util/ByteArrayUtils.h"
 
 extern "C" {
+	int bigint_to_bytes2(const uint8* value_ptr, size_t value_len, size_t size, uint8* out_bytes, size_t* out_len);
+	int recover_eth_pub_and_address(const uint8* sig_ptr, size_t sig_len, const uint8* hash_ptr, size_t hash_len, uint8* out_pubkey, uint8* out_address);
+	size_t encode_two_addresses_ethabi(const uint8* signer_ptr, const uint8* value_ptr, uint8* out_ptr);
 	void encode_and_hash_typed_data(const char* domain_json, uint8_t* out_hash);
 	char* sign_recoverable(const uint8* hash_ptr, size_t hash_len, const uint8* priv_ptr, size_t priv_len);
 	char* encode_function_call(const char* signature, const char* args_json);
@@ -14,6 +17,74 @@ extern "C" {
 	void free_encoded_bytes(char* ptr);
 	void free_encoded_bytes_raw(uint8* Ptr, size_t Len);
 	void free_string(char* ptr);
+}
+
+bool FEthAbiBridge::BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError)
+{
+	FTCHARToUTF8 Utf8Value(*ValueString);
+	const uint8* ValuePtr = (const uint8*)Utf8Value.Get();
+	size_t ValueLen = Utf8Value.Length();
+
+	OutBytes.SetNumZeroed(FMath::Max(Size, 256));
+	size_t OutLen = 0;
+
+	int result = bigint_to_bytes2(
+		ValuePtr,
+		ValueLen,
+		(size_t)Size,
+		OutBytes.GetData(),
+		&OutLen
+	);
+
+	if (result == 0) {
+		OutBytes.SetNum(OutLen);
+		return true;
+	}
+
+	switch (result) {
+	case -1: OutError = TEXT("Invalid BigInteger string"); break;
+	case -2: OutError = TEXT("Value too large for specified size"); break;
+	default: OutError = TEXT("Unknown error"); break;
+	}
+
+	OutBytes.Empty();
+	return false;
+}
+
+bool FEthAbiBridge::RecoverEthPubAndAddress(
+	const TArray<uint8>& Signature,
+	const TArray<uint8>& AttestationHash,
+	TArray<uint8>& OutPubKey,
+	TArray<uint8>& OutAddress
+) {
+	OutPubKey.SetNumZeroed(64);
+	OutAddress.SetNumZeroed(20);
+
+	int result = recover_eth_pub_and_address(
+		Signature.GetData(),
+		Signature.Num(),
+		AttestationHash.GetData(),
+		AttestationHash.Num(),
+		OutPubKey.GetData(),
+		OutAddress.GetData()
+	);
+
+	return result == 0;
+}
+
+TArray<uint8> FEthAbiBridge::EncodeTwoAddresses(const FString& A, const FString& B)
+{
+	TArray<uint8> Out;
+	Out.SetNumUninitialized(64);
+
+	size_t EncodedLen = encode_two_addresses_ethabi(
+		FByteArrayUtils::HexStringToBytes(A).GetData(),
+		FByteArrayUtils::HexStringToBytes(B).GetData(),
+		Out.GetData()
+	);
+
+	Out.SetNum(EncodedLen);
+	return Out;
 }
 
 TArray<uint8> FEthAbiBridge::EncodeAndHashTypedData(const FString& DomainJson)

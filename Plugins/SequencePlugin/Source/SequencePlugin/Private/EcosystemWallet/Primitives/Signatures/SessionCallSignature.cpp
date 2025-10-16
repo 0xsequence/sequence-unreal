@@ -74,8 +74,7 @@ TArray<uint8> FSessionCallSignature::EncodeSignatures(
             
             int32 Index = AttestationMap[AttestationStr];
 
-            uint8 PackedFlag = static_cast<uint8>(0x80 | Index);
-            Parts.Add(FByteArrayUtils::ByteArrayFromNumber(PackedFlag, 1));
+            Parts.Add(FByteArrayUtils::ByteArrayFromNumber(0x80 | Index, 1));
             Parts.Add(ImplicitCall->SessionSignature->Pack());
         }
         else if (Signature->Type == ESessionCallSignatureType::Explicit)

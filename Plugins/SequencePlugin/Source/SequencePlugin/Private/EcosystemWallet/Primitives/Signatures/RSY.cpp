@@ -20,6 +20,21 @@ TArray<uint8> FRSY::Pack() const
     return Out;
 }
 
+TArray<uint8> FRSY::Pack65() const
+{
+    checkf(YParity == 0 || YParity == 1, TEXT("YParity must be 0 or 1"));
+
+    TArray<uint8> RBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(R.Value), 32);
+    TArray<uint8> SBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(S.Value), 32);
+    TArray<uint8> YParityBytes = FByteArrayUtils::ByteArrayFromNumber(YParity, 1);
+
+    TArray<uint8> Out;
+    Out.Append(RBytes);
+    Out.Append(SBytes);
+    Out.Append(YParityBytes);
+    return Out;
+}
+
 TSharedPtr<FRSY> FRSY::FromString(const FString& Input)
 {
     TArray<FString> Parts;

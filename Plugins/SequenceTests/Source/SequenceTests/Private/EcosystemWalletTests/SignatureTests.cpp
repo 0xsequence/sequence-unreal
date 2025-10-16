@@ -1,11 +1,16 @@
 #include "CoreMinimal.h"
+#include "EcosystemWallet/Primitives/Attestation/Attestation.h"
 #include "EcosystemWallet/Primitives/Signatures/Erc6492.h"
 #include "EcosystemWallet/Primitives/Signatures/RawSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
+#include "EcosystemWallet/Signers/SessionCredentialsSerializer.h"
+#include "EthAbi/EthAbiBridge.h"
 #include "Misc/AutomationTest.h"
 #include "Util/ByteArrayUtils.h"
+#include "Util/SequenceSupport.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRSYEncoding, "SequencePlugin.UnitTests.EcosystemWallet.EncodeRSY", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+
 bool FRSYEncoding::RunTest(const FString& Parameters)
 {
     const FString ExpectedEncodedRsy = "0x5d0d01e6210d46ba256ac6db6750d634d263ba6ff30201c5f4ec9d1d4fe0ffa7674ef9488ab291cd3cd4fb02f64cd7367dd2735421527773b65914ecdb1d5dc7";
@@ -102,6 +107,76 @@ bool FDecodeRawSignature::RunTest(const FString& Parameters)
     UE_LOG(LogTemp, Log, TEXT("Decoded RawSignature: %s = %s"), *EncodedHex, *ConfigUpdateSig);
 
     TestEqual("Deploy data hex should match", EncodedHex, ConfigUpdateSig);
+    
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRecoverImplicitIdentitySigner, "SequencePlugin.UnitTests.EcosystemWallet.RecoverImplicitIdentitySigner", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FRecoverImplicitIdentitySigner::RunTest(const FString& Parameters)
+{
+    const FString SignatureJson = "{\"type\": \"hash\",\"r\": {\"_isBigInt\": true,\"data\": \"3313507648155575330123726678207645170527620921491155233631210854395540284143\"},\"s\": {\"_isBigInt\": true,\"data\": \"12599654210633038267252651539192195082231863727699109387705650514161424877718\"},\"yParity\": 1}";
+    const FString AttestationJson = "{\"approvedSigner\":\"0x3761e16647E27956a5BfAdFE507d4c4F9a6f5512\",\"identityType\":{\"_isUint8Array\":true,\"data\":\"0x00000002\"},\"issuerHash\":{\"_isUint8Array\":true,\"data\":\"0x4dcc430b541f16ee48b99ac8df13c9f8fa820c59de2e8bfc834cd295504d50dc\"},\"audienceHash\":{\"_isUint8Array\":true,\"data\":\"0x33f23bc388d939c925129d46379b8a32475568969cb4d9e9f918c9dff965e700\"},\"applicationData\":{\"_isUint8Array\":true,\"data\":\"0x\"},\"authData\":{\"redirectUrl\":\"http://localhost:4444\",\"issuedAt\":{\"_isBigInt\":true,\"data\":\"1760602234\"}}}";
+    const FString ExpectedAddress = "0x8A261C1C227F653f26b468615Afa440c6f706376";
+
+    FRSY Signature;
+    const bool SignatureResult = FSessionCredentialsSerializer::ParseSignature(USequenceSupport::JsonStringToObject(SignatureJson), Signature);
+
+    FAttestation Attestation;
+    const bool AttestationResult = FSessionCredentialsSerializer::ParseAttestation(USequenceSupport::JsonStringToObject(AttestationJson), Attestation);
+
+    if (!SignatureResult || !AttestationResult)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to parse signature and/or attestation"));
+        return false;
+    }
+
+    TArray<uint8> OutPublicKey;
+    TArray<uint8> OutAddress;
+
+    UE_LOG(LogTemp, Log, TEXT("Sig pack65 %s Attestation %s"), *FByteArrayUtils::BytesToHexString(Signature.Pack65()), *FByteArrayUtils::BytesToHexString(Attestation.Hash()));
+    
+    const bool Result = USequenceSupport::RecoverEthPubAndAddress(
+        Signature.Pack65(),
+        Attestation.Hash(),
+        OutPublicKey,
+        OutAddress);
+    
+    if (!Result)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to recover signature"));
+        return false;
+    }
+
+    const FString PublicKeyHex = FByteArrayUtils::BytesToHexString(OutPublicKey);
+    const FString AddressHex = FByteArrayUtils::BytesToHexString(OutAddress);
+
+    UE_LOG(LogTemp, Display, TEXT("Recover Implicit Identity Signer %s %s"), *PublicKeyHex, *AddressHex);
+    
+    TestEqual("Deploy data hex should match", AddressHex, ExpectedAddress);
+    
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAttestationHash, "SequencePlugin.UnitTests.EcosystemWallet.AttestationHash", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FAttestationHash::RunTest(const FString& Parameters)
+{
+    const FString AttestationJson = "{\"approvedSigner\":\"0xBc68eef2E97d7eBAa528EA2597F9a9bbEaa31013\",\"identityType\":{\"_isUint8Array\":true,\"data\":\"0x00000002\"},\"issuerHash\":{\"_isUint8Array\":true,\"data\":\"0x4dcc430b541f16ee48b99ac8df13c9f8fa820c59de2e8bfc834cd295504d50dc\"},\"audienceHash\":{\"_isUint8Array\":true,\"data\":\"0x33f23bc388d939c925129d46379b8a32475568969cb4d9e9f918c9dff965e700\"},\"applicationData\":{\"_isUint8Array\":true,\"data\":\"0x\"},\"authData\":{\"redirectUrl\":\"http://localhost:4444\",\"issuedAt\":{\"_isBigInt\":true,\"data\":\"1760598705\"}}}";
+    const FString ExpectedHash = "0xd7d858321f87004bd3761ae41aab0762c3f67946a3e2d6892f364aa444484993";
+
+    FAttestation Attestation;
+    const bool Result = FSessionCredentialsSerializer::ParseAttestation(USequenceSupport::JsonStringToObject(AttestationJson), Attestation);
+    
+    if (!Result)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to recover signature"));
+        return false;
+    }
+
+    const FString AttestationHash = FByteArrayUtils::BytesToHexString(Attestation.Hash());
+
+    UE_LOG(LogTemp, Display, TEXT("Hashing attestation %s %s"), *AttestationHash, *ExpectedHash);
+    
+    TestEqual("Attestation hash should match", AttestationHash, ExpectedHash);
     
     return true;
 }

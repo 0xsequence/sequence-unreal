@@ -1,4 +1,6 @@
 #include "GuardService.h"
+
+#include "EcosystemWallet/Guard/Models/SignWith.h"
 #include "Util/HttpHandler.h"
 #include "Util/SequenceSupport.h"
 

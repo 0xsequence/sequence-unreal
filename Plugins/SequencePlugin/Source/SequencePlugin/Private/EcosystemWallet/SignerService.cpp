@@ -24,7 +24,7 @@ void FSignerService::FindSignersForCalls(TFunction<void(TArray<FSessionSigner>)>
 		}
 		else
 		{
-			OnFailure(TEXT("No signers available for this call."));
+			OnFailure(FString::Printf(TEXT("No signers available for this call. %d %d"), this->Calls.Num(), SupportedSigners.Num()));
 		}
 	});
 }
@@ -66,7 +66,12 @@ void FSignerService::FindSignerForEachCallAsync(const TArray<FSessionSigner>& Av
 {
 	TSharedRef<TArray<FSessionSigner>, ESPMode::ThreadSafe> Signers = MakeShared<TArray<FSessionSigner>, ESPMode::ThreadSafe>();
 	TSharedRef<int32, ESPMode::ThreadSafe> PendingCount = MakeShared<int32, ESPMode::ThreadSafe>(0);
-	*PendingCount = this->Calls.Num() * AvailableSigners.Num();
+
+	const int32 CallsLen = this->Calls.Num();
+	const int32 SignersLen = AvailableSigners.Num();
+	*PendingCount = CallsLen * SignersLen;
+
+	UE_LOG(LogTemp, Log, TEXT("*PendingCount: %d %d %d"), CallsLen, SignersLen, *PendingCount);
 
 	for (const FCall& Call : this->Calls)
 	{
@@ -76,6 +81,7 @@ void FSignerService::FindSignerForEachCallAsync(const TArray<FSessionSigner>& Av
 			{
 				if (Supported)
 				{
+					UE_LOG(LogTemp, Display, TEXT("Adding signer %s"), *Signer.Credentials.SessionAddress)
 					Signers->Add(Signer);
 				}
 

@@ -608,3 +608,14 @@ TArray<uint8> USequenceSupport::EncodeAndHashTypedData(const FString& DomainJson
 {
 	return FEthAbiBridge::EncodeAndHashTypedData(DomainJson);
 }
+
+bool USequenceSupport::BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError)
+{
+	return FEthAbiBridge::BigIntToBytes(ValueString, Size, OutBytes, OutError);
+}
+
+bool USequenceSupport::RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash,
+	TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress)
+{
+	return FEthAbiBridge::RecoverEthPubAndAddress(Signature, AttestationHash, OutPubKey, OutAddress);
+}

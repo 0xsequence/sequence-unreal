@@ -1,5 +1,6 @@
 #pragma once
 #include "Types/BigInt.h"
+#include "Util/ByteArrayUtils.h"
 
 class SEQUENCEPLUGIN_API FAttestationAuthData
 {
@@ -8,7 +9,11 @@ public:
 	
 	TArray<uint8> Encode()
 	{
-		return TArray<uint8>();
+		return FByteArrayUtils::ConcatBytes({
+			FByteArrayUtils::ByteArrayFromNumber(RedirectUrl.Len(), 3),
+			FByteArrayUtils::StringToBytes(RedirectUrl),
+			FByteArrayUtils::PadLeft(IssuedAt.Encode(), 8)
+		});
 	}
 
 	FString RedirectUrl;
