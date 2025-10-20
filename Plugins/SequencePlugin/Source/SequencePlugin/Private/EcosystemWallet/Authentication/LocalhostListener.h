@@ -16,6 +16,12 @@ class SEQUENCEPLUGIN_API ULocalhostListener : public UObject
 public:
 	static void ClearInstance();
 	static ULocalhostListener* GetInstance();
+
+	virtual void BeginDestroy() override
+	{
+		StopListening();
+		Super::BeginDestroy();
+	}
 	
 	void WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void StopListening();
