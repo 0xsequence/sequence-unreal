@@ -25,19 +25,19 @@ public:
 	FOnSession OnSessionCreated;
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	void SignInWithGoogle(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignInWithApple(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void SignInWithApple(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignInWithPasskey(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void SignInWithPasskey(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
-	void SignInWithMnemonic(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
+	void SignInWithMnemonic(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
 
 	USequenceConnect* GetSequenceConnect() const;
 	

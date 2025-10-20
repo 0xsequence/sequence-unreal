@@ -13,7 +13,7 @@ void USequenceConnectBP::Deinitialize()
 	ULocalhostListener::ClearInstance();	
 }
 
-void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -45,7 +45,7 @@ void USequenceConnectBP::SignInWithGoogle(const TScriptInterface<IPermissions> P
 	this->SequenceConnect->SignInWithGoogle(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithApple(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithApple(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -61,7 +61,7 @@ void USequenceConnectBP::SignInWithApple(const TScriptInterface<IPermissions>& P
 	this->SequenceConnect->SignInWithApple(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithPasskey(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithPasskey(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
@@ -77,7 +77,7 @@ void USequenceConnectBP::SignInWithPasskey(const TScriptInterface<IPermissions>&
 	this->SequenceConnect->SignInWithPasskey(Permissions, SuccessCallback, FailureCallback);
 }
 
-void USequenceConnectBP::SignInWithMnemonic(const TScriptInterface<IPermissions>& Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
+void USequenceConnectBP::SignInWithMnemonic(const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
 	{
