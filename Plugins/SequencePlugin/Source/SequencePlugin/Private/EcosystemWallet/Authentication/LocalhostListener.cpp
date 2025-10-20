@@ -47,14 +47,20 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 		return;
 	}
 
+	TWeakObjectPtr<ULocalhostListener> WeakThis(this);
 	
 	const FHttpPath RootPath(TEXT("/api"));
 	RouteHandle = Router->BindRoute(
 		RootPath,
 		EHttpServerRequestVerbs::VERB_GET,
-		FHttpRequestHandler::CreateLambda([this](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
+		FHttpRequestHandler::CreateLambda([WeakThis](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
 		{
-			return this->HandleAnyRequest(Request, OnComplete);
+			if (!WeakThis.IsValid())
+			{
+				return false;
+			}
+			
+			return WeakThis->HandleAnyRequest(Request, OnComplete);
 		})
 	);
 
@@ -85,29 +91,42 @@ bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, con
 
 	if (Request.QueryParams.Contains("error"))
 	{
-		if (CurrentOnFailure.IsValid() && *CurrentOnFailure)
-		{
-			(*CurrentOnFailure)(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("CurrentOnFailure is invalid"));
-		}
+        if (TSharedPtr<FFailureCallback> Failure = CurrentOnFailure.Pin())
+        {
+            if (*Failure)
+            {
+            	const FString* Error = Request.QueryParams.Find("error");
+                (*Failure)(FSequenceError(EErrorType::InvalidArgument, *Error));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Failure callback expired"));
+        }
 	}
 	else
 	{
-		const FString EncodedPayload = Request.QueryParams["payload"];
+		const FString* EncodedPayload = Request.QueryParams.Find("payload");
+		if (!EncodedPayload)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Missing payload param"));
+			return false;
+		}
+		
 		const FString PayloadJson = USequenceSupport::DecodeBase64ToString(EncodedPayload);
 
 		UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
 
-		if (CurrentOnSuccess.IsValid() && *CurrentOnSuccess)
+		if (TSharedPtr<TSuccessCallback<FString>> Success = CurrentOnSuccess.Pin())
 		{
-			(*CurrentOnSuccess)(PayloadJson);
+			if (*Success)
+			{
+				(*Success)(PayloadJson);
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("CurrentOnSuccess is invalid"));
+			UE_LOG(LogTemp, Warning, TEXT("Success callback expired"));
 		}
 	}
 

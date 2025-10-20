@@ -32,6 +32,6 @@ private:
 	uint32 FallbackPort = 4445;
 	bool bServerStarted = false;
 
-	TSharedPtr<TSuccessCallback<FString>> CurrentOnSuccess;
-	TSharedPtr<FFailureCallback> CurrentOnFailure;
+	TWeakPtr<TSuccessCallback<FString>> CurrentOnSuccess;
+	TWeakPtr<FFailureCallback> CurrentOnFailure;
 };
