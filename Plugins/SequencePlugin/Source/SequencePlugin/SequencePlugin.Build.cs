@@ -58,7 +58,7 @@ public class SequencePlugin : ModuleRules
 				"Projects",
                 "Json",
                 "JsonUtilities",
-				"ApplicationCore", "WebBrowser", "EngineSettings", "HttpServer", "WebBrowserWidget", "UMG"
+				"ApplicationCore", "WebBrowser", "EngineSettings", "HTTPServer", "WebBrowserWidget", "UMG"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

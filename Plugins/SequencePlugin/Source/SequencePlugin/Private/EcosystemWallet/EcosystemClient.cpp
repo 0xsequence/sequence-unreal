@@ -76,11 +76,12 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
                                ? TEXT("addExplicitSession")
                                : TEXT("createNewSession");
 
-    const TFunction<void(FSessionCredentials)> OnHandlerSuccess = [this, SessionWallet, IsImplicit, OnSuccess](FSessionCredentials Credentials)
+    const TFunction<void(FSessionCredentials)> OnHandlerSuccess = [this, ChainIdStr, SessionWallet, IsImplicit, OnSuccess](FSessionCredentials Credentials)
     {
         Credentials.IsExplicit = !IsImplicit;
         Credentials.PrivateKey = SessionWallet->GetWalletPrivateKeyString();
         Credentials.SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
+        Credentials.ChainId = ChainIdStr;
 
         FSessionStorage::AddSession(Credentials);
         

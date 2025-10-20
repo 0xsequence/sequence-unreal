@@ -25,8 +25,8 @@ bool UBrowserOverlay::Initialize()
 	BGSlot->SetOffsets(FMargin(0.f));
 
 	// --- Web Browser ---
-	UWebBrowser* Browser = WidgetTree->ConstructWidget<UWebBrowser>(UWebBrowser::StaticClass());
-	this->Browser = Browser;
+	UWebBrowser* NewBrowser = WidgetTree->ConstructWidget<UWebBrowser>(UWebBrowser::StaticClass());
+	this->Browser = NewBrowser;
 	Browser->OnConsoleMessage.AddDynamic(this, &UBrowserOverlay::HandleConsoleMessage);
 	Browser->OnUrlChanged.AddDynamic(this, &UBrowserOverlay::HandleUrlChanged);
 

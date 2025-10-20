@@ -13,9 +13,9 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 		UGuardSigner* Guard = NewObject<UGuardSigner>();
 		Guard->WithHost(Signers[0].Credentials.Guard.Url);
 
-		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess, OnFailure](const TSharedPtr<FEnvelope>& Envelope, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
+		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess, OnFailure](const TSharedPtr<FEnvelope>& EnvelopeRef, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
 		{
-			if (!Envelope.IsValid() || !Signature.IsValid())
+			if (!EnvelopeRef.IsValid() || !Signature.IsValid())
 			{
 				UE_LOG(LogTemp, Error, TEXT("Envelope and/or Signature are nullptrs"));
 				OnFailure(TEXT("Envelope and/or Signature are nullptrs"));
@@ -23,9 +23,9 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 			}
 			
 			UE_LOG(LogTemp, Display, TEXT("Got RSY from Guard, %s"), *FByteArrayUtils::BytesToHexString(Signature.Get()->Signature->Pack()));
-			Envelope->Signatures.Add(Signature);
+			EnvelopeRef->Signatures.Add(Signature);
 
-			TSharedPtr<FRawSignature> RawSignature = FSignatureHandler::EncodeSignature(Envelope, ImageHash);
+			TSharedPtr<FRawSignature> RawSignature = FSignatureHandler::EncodeSignature(EnvelopeRef, ImageHash);
 			if (RawSignature == nullptr || !RawSignature.IsValid())
 			{
 				UE_LOG(LogTemp, Error, TEXT("RawSignature is null"));
@@ -70,11 +70,11 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 			
 			if (Signer.Credentials.IsExplicit)
 			{
-				ExplicitSigners.Add(Signer.Credentials.SessionAddress);
+				ExplicitSigners.Add(Signer.GetSessionAddress());
 			}
 			else
 			{
-				ImplicitSigners.Add(Signer.Credentials.SessionAddress);
+				ImplicitSigners.Add(Signer.GetSessionAddress());
 			}
 		}
 

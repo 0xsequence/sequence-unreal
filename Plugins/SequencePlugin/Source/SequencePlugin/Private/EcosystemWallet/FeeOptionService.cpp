@@ -13,15 +13,17 @@ FCall FFeeOptionService::BuildCall()
 FCall FFeeOptionService::BuildCallForNativeTokenOption()
 {
 	const FString ValueForwarder = "0xABAAd93EeE2a569cF0632f39B10A9f5D734777ca";
-	const FString Values = FString::Printf(TEXT("[\"%s\",%s]"), *FeeOption.To, *FeeOption.Value);
+	const FString Values = FString::Printf(TEXT("[\"%s\",\"%s\"]"), *FeeOption.To, *FeeOption.Value);
+	UE_LOG(LogTemp, Display, TEXT("FeeOptionService::BuildCallForNativeTokenOption %s"), *Values);
 	const FString EncodedFeeOptionData = FEthAbiBridge::EncodeFunctionCall("forwardValue(address,uint256)", Values);
 
-	return FCall(
+	return FCall {
 		ValueForwarder,
 		EncodedFeeOptionData,
 		FBigInt(FeeOption.Value),
 		FBigInt(FValueUtils::Int32ToString(FeeOption.GasLimit)),
-		false, false, "1");
+		false, false, "1"
+	};
 }
 
 FCall FFeeOptionService::BuildCallForCustomTokenOption()
@@ -29,10 +31,11 @@ FCall FFeeOptionService::BuildCallForCustomTokenOption()
 	const FString Values = FString::Printf(TEXT("[\"%s\",%s]"), *FeeOption.To, *FeeOption.Value);
 	const FString EncodedFeeOptionData = FEthAbiBridge::EncodeFunctionCall("transfer(address,uint256)", Values);
 
-	return FCall(
+	return FCall {
 		FeeOption.Token.ContractAddress,
 		EncodedFeeOptionData,
 		FBigInt("0"),
 		FBigInt(FValueUtils::Int32ToString(FeeOption.GasLimit)),
-		false, false, "1");
+		false, false, "1"
+	};
 }

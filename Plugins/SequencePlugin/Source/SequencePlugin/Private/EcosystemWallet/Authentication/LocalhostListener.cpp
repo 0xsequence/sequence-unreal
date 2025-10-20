@@ -29,8 +29,8 @@ ULocalhostListener* ULocalhostListener::GetInstance()
 
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	this->CurrentOnSuccess = OnSuccess;
-	this->CurrentOnFailure = OnFailure;
+	this->CurrentOnSuccess = MakeShared<TSuccessCallback<FString>>(OnSuccess);
+	this->CurrentOnFailure = MakeShared<FFailureCallback>(OnFailure);
 	
 	if (this->bServerStarted)
 	{
@@ -85,7 +85,14 @@ bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, con
 
 	if (Request.QueryParams.Contains("error"))
 	{
-		this->CurrentOnFailure(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
+		if (CurrentOnFailure.IsValid() && *CurrentOnFailure)
+		{
+			(*CurrentOnFailure)(FSequenceError(EErrorType::InvalidArgument, Request.QueryParams["error"]));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CurrentOnFailure is invalid"));
+		}
 	}
 	else
 	{
@@ -94,7 +101,14 @@ bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, con
 
 		UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
 
-		this->CurrentOnSuccess(PayloadJson);	
+		if (CurrentOnSuccess.IsValid() && *CurrentOnSuccess)
+		{
+			(*CurrentOnSuccess)(PayloadJson);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CurrentOnSuccess is invalid"));
+		}
 	}
 
 	const FString Body = TEXT("{}");

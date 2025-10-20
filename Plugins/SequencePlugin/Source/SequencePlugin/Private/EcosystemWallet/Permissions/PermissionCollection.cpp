@@ -44,11 +44,11 @@ FSessionPermissions UPermissionCollection::GetSessionPermissions()
 
 	FSessionPermissions RootPermissions = Permissions[0]->GetSessionPermissions();
 
-	FSessionPermissions Permissions;
-	Permissions.ChainId = RootPermissions.ChainId;
-	Permissions.Deadline = RootPermissions.Deadline;
-	Permissions.ValueLimit = RootPermissions.ValueLimit;
-	Permissions.Permissions = AllPermissions; 
+	FSessionPermissions SessionPermissions;
+	SessionPermissions.ChainId = RootPermissions.ChainId;
+	SessionPermissions.Deadline = RootPermissions.Deadline;
+	SessionPermissions.ValueLimit = RootPermissions.ValueLimit;
+	SessionPermissions.Permissions = AllPermissions; 
 
-	return Permissions;
+	return SessionPermissions;
 }

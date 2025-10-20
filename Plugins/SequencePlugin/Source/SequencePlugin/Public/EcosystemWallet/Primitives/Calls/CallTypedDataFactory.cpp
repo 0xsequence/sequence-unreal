@@ -71,7 +71,7 @@ FString FCallTypedDataFactory::FromCalls(const FString& Wallet, const FBigInt& C
     Data.Message.Nonce = Calls2->Nonce.Value;
     Data.Message.Wallets = {};
 
-	for (const FCall OriginalCall : Calls2->Calls)
+	for (const FCall& OriginalCall : Calls2->Calls)
 	{
 		FTypedCall Call;
 		Call.To = OriginalCall.To;

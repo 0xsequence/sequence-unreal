@@ -1,6 +1,7 @@
 #pragma once
 #include "WalletState.h"
 #include "EcosystemWallet/Primitives/Calls/Call.h"
+#include "EcosystemWallet/Signers/UsageLimit.h"
 #include "Signers/SessionSigner.h"
 #include "Types/BigInt.h"
 
@@ -14,6 +15,18 @@ public:
 		TFunction<void(TTuple<FString, FString>)> OnSuccess, TFunction<void(FString)> OnFailure);
 
 private:
+	void PrepareIncrement(
+		const TSharedPtr<FTransactionService>& Service,
+		const FBigInt& ChainId,
+		const TArray<FCall>& Calls,
+		const TFunction<void(TSharedPtr<FTransactionService>, TSharedPtr<FCall>)>& OnCompleted);
+
+	static void WaitForAllIncrements(
+		const FBigInt& ChainId,
+		const TSharedPtr<FSessionsTopology>& SessionsTopology,
+		const TMap<TSharedPtr<FSessionSigner>, TArray<FCall>>& SignersToCallsMap,
+		TFunction<void(const TArray<TSharedPtr<FUsageLimit>>&)> OnAllComplete);
+	
 	TArray<FSessionSigner> Signers;
 	TSharedPtr<FWalletState> WalletState;
 };

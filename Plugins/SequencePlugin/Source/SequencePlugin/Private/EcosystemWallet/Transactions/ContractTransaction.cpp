@@ -6,10 +6,10 @@
 UContractTransaction* UContractTransaction::CreateContractTransaction(const FString& To, const FString& Value, const FString& FunctionSignature, const TArray<FString> Values)
 {
 	UContractTransaction* Permissions = NewObject<UContractTransaction>();
-	Permissions->To = To;
-	Permissions->Value = Value;
-	Permissions->FunctionSignature = FunctionSignature;
-	Permissions->Values = Values;
+	Permissions->TxnTo = To;
+	Permissions->TxnValue = Value;
+	Permissions->TxnFunctionSignature = FunctionSignature;
+	Permissions->TxnValues = Values;
 
 	return Permissions;
 }
@@ -17,19 +17,19 @@ UContractTransaction* UContractTransaction::CreateContractTransaction(const FStr
 FCalls UContractTransaction::GetCalls()
 {
 	TArray<TSharedPtr<FJsonValue>> Values;
-	for (const auto& Value : this->Values)
+	for (const auto& Value : this->TxnValues)
 	{
 		// Convert each string value to its correct type
 		Values.Add(MakeShareable(new FJsonValueString(Value)));
 	}
 
 	const FString JsonValues = USequenceSupport::JsonValueListToParsableString(Values);
-	FString Data = USequenceSupport::EncodeFunctionCall(this->FunctionSignature, JsonValues);
+	FString Data = USequenceSupport::EncodeFunctionCall(this->TxnFunctionSignature, JsonValues);
 	
 	FCall Call {
-		this->To,
+		this->TxnTo,
 		Data,
-		FBigInt(this->Value),
+		FBigInt(this->TxnValue),
 		FBigInt("0"),
 		false,
 		false,

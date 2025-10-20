@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 enum ESessionsLeafType
 {
 	SessionsNode,
@@ -7,7 +9,6 @@ enum ESessionsLeafType
 	ImplicitBlacklist,
 	Permissions
 };
-
 
 class SEQUENCEPLUGIN_API FSessionsLeaf
 {

@@ -2,6 +2,9 @@
 #include "AttestationAuthData.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceCoder.h"
+#include "Serialization/JsonWriter.h"
+#include "Serialization/JsonSerializer.h"
+#include "Dom/JsonObject.h"
 
 class SEQUENCEPLUGIN_API FAttestation
 {

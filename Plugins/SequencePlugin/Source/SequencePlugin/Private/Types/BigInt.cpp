@@ -18,6 +18,11 @@ TArray<uint8> FBigInt::Encode() const
 	return FEthAbiBridge::EncodeBigInteger(this->Value);
 }
 
+void FBigInt::Add(const FBigInt& InBigInt)
+{
+	Value = FEthAbiBridge::CombineTwoBigInts(Value, InBigInt.Value);
+}
+
 FBigInt FBigInt::FromHex(const FString& Value)
 {
 	return FBigInt(FEthAbiBridge::HexToBigIntString(Value));

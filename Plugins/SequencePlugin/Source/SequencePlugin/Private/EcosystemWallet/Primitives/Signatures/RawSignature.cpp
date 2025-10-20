@@ -1,8 +1,6 @@
 #include "EcosystemWallet/Primitives/Signatures/RawSignature.h"
-
 #include "EcosystemWallet/Signatures/ChainedSignature.h"
 #include "EcosystemWallet/Signatures/SignatureUtils.h"
-#include "EthAbi/EthAbiBridge.h"
 #include "Types/BigInt.h"
 #include "Util/ByteArrayUtils.h"
 

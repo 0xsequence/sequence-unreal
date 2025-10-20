@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 class SEQUENCEPLUGIN_API FByteArrayUtils
 {
 public:

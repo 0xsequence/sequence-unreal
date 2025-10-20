@@ -17,8 +17,8 @@ public:
 	
 	virtual FCalls GetCalls() override;
 
-	FString To;
-	FString Value;
-	FString FunctionSignature;
-	TArray<FString> Values;
+	FString TxnTo;
+	FString TxnValue;
+	FString TxnFunctionSignature;
+	TArray<FString> TxnValues;
 };

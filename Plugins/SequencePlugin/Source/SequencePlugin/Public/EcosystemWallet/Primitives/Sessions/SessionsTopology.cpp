@@ -5,6 +5,7 @@
 #include "Leafs/SessionsPermissionsLeaf.h"
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceCoder.h"
+#include "Dom/JsonObject.h"
 
 FString FSessionsTopology::GetIdentitySigner() const
 {
@@ -246,7 +247,6 @@ TArray<uint8> FSessionsTopology::Hash(const bool Raw) const
 		if (Children.Num() == 0)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Empty branch"));
-			throw std::runtime_error("Empty branch");
 		}
 
 		TArray<TArray<uint8>> HashedChildren;

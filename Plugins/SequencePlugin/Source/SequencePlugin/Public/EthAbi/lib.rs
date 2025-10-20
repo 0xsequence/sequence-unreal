@@ -16,7 +16,9 @@ use std::ffi::{CStr, CString};
 use hex::decode;
 use std::collections::HashMap;
 use num_bigint::BigUint;
+use num_bigint::BigInt;
 use num_traits::Num;
+use num_traits::Zero;
 use std::os::raw::{c_char, c_uchar, c_int};
 use std::ptr;
 use std::slice;
@@ -26,6 +28,30 @@ struct AbiValue {
     #[serde(rename = "type")]
     kind: String,
     value: String,
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn combine_bigints(
+    a_str: *const c_char,
+    b_str: *const c_char,
+) -> *mut c_char {
+    if a_str.is_null() || b_str.is_null() {
+        return CString::new("0").unwrap().into_raw();
+    }
+
+    let a_cstr = CStr::from_ptr(a_str);
+    let b_cstr = CStr::from_ptr(b_str);
+
+    let a_str = a_cstr.to_string_lossy();
+    let b_str = b_cstr.to_string_lossy();
+
+    let a_big = BigInt::parse_bytes(a_str.as_bytes(), 10).unwrap_or_else(Zero::zero);
+    let b_big = BigInt::parse_bytes(b_str.as_bytes(), 10).unwrap_or_else(Zero::zero);
+
+    let sum = a_big + b_big;
+
+    let result_str = sum.to_string();
+    CString::new(result_str).unwrap().into_raw()
 }
 
 /// Converts a BigInteger (as a decimal or hex string) into big-endian bytes.

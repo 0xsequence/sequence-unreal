@@ -619,3 +619,8 @@ bool USequenceSupport::RecoverEthPubAndAddress(const TArray<uint8>& Signature, c
 {
 	return FEthAbiBridge::RecoverEthPubAndAddress(Signature, AttestationHash, OutPubKey, OutAddress);
 }
+
+TArray<uint8> USequenceSupport::EncodeTwoAddresses(const FString& A, const FString& B)
+{
+	return FEthAbiBridge::EncodeTwoAddresses(A, B);
+}

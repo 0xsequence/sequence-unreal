@@ -25,7 +25,7 @@ public:
 
 	FWalletState();
 	
-	void UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure);
+	void UpdateState(const FString& InAddress, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure);
 
 private:
 	UKeyMachine* KeyMachine;
@@ -37,8 +37,8 @@ private:
 	void UpdateDeployContext(const TFunction<void()>& Callback);
 	void UpdateDeployedState(const TFunction<void()>& Callback);
 	void UpdateNonce(const TFunction<void()>& Callback);
-	void UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback);
-	void UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback);
+	void UpdateConfig(const FString& InImageHash, const TFunction<void()>& Callback);
+	void UpdateSessionsTopology(const FString& InImageHash, const TFunction<void()>& Callback);
 	void GetImplementation(const TFunction<void(FString)>& Callback);
 	void GetOnchainImageHash(const TFunction<void(FString)>& Callback);
 };

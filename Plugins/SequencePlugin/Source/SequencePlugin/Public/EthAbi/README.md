@@ -28,6 +28,8 @@ MacOS, iOS and Android files can be build on MacOS and Windows. Windows' .lib fi
 
 ### MacOS
 
+This will automatically place the build file inside the `/macos/` directory.
+
 ```shell
 cargo build --release --target x86_64-apple-darwin
 cargo build --release --target aarch64-apple-darwin
@@ -42,11 +44,15 @@ lipo -create \
 
 ### Android
 
+Move the build files from `/target/aarch64-linux-android/` and `/target/armv7-linux-androidabi/` into the `/android/` directory.
+
 ```shell
 cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
 ```
 
 ### iOS
+
+Move the build file located inside `/target/universal/release/` to `/ios/`
 
 ```shell
 cargo lipo --release

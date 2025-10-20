@@ -212,3 +212,39 @@ bool FAcceptImplicitRequest::RunTest(const FString& Parameters)
     
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FValueUsageHash, "SequencePlugin.UnitTests.EcosystemWallet.ValueUsageHash", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FValueUsageHash::RunTest(const FString& Parameters)
+{
+    const FString SessionAddress = "0xA52208aacC3b957b0D3C3bD26de868D0117be329";
+    const FString ValueTrackingAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+    const FString ExpectedHex = "0x9ffb3b28b7c679f59495fe57d8fc923f51d6371b43747cbc040169569df844ed";
+
+    const TArray<uint8> Result = FSequenceCoder::KeccakHash(USequenceSupport::EncodeTwoAddresses(SessionAddress, ValueTrackingAddress));
+    const FString ResultHex = FByteArrayUtils::BytesToHexString(Result);
+
+    UE_LOG(LogTemp, Display, TEXT("Value usage hash %s %s"), *ResultHex, *ExpectedHex);
+    
+    TestEqual("Hex should match", ResultHex, ExpectedHex);
+    
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEncodeIncrements, "SequencePlugin.UnitTests.EcosystemWallet.EncodeIncrements", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FEncodeIncrements::RunTest(const FString& Parameters)
+{
+    const FString UsageHash = "0x3e1dca7dc746e9db0bb9655e0bee69b58300d47bdf493663e10ae257fd880a87";
+    const FString UsageAmount = "91816541998676";
+    const FString ExpectedHex = "0x42de1418000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000013e1dca7dc746e9db0bb9655e0bee69b58300d47bdf493663e10ae257fd880a8700000000000000000000000000000000000000000000000000005381b45ece54";
+
+    const FString FunctionAbi = "incrementUsageLimit((bytes32,uint256)[])";
+    const FString Values = FString::Printf(TEXT("[[[\"%s\",%s]]]"), *UsageHash, *UsageAmount);
+    const FString Result = USequenceSupport::EncodeFunctionCall(FunctionAbi, Values);
+
+    UE_LOG(LogTemp, Display, TEXT("Values %s"), *Values);
+    UE_LOG(LogTemp, Display, TEXT("Encoded increments %s %s"), *Result, *ExpectedHex);
+    
+    TestEqual("Hex should match", Result, ExpectedHex);
+    
+    return true;
+}

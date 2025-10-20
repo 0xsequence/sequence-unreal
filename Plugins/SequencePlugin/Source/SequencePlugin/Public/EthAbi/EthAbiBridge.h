@@ -1,10 +1,13 @@
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Misc/Base64.h"
 
-class FEthAbiBridge
+class SEQUENCEPLUGIN_API FEthAbiBridge
 {
 public:
+	static FString CombineTwoBigInts(const FString& A, const FString& B);
+	
 	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
 	
 	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);

@@ -1,4 +1,6 @@
 #pragma once
+
+#include "CoreMinimal.h"
 #include "Erc6492.h"
 #include "EcosystemWallet/Primitives/Config/SeqConfig.h"
 

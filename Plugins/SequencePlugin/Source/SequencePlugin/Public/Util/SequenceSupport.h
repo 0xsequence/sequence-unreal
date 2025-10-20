@@ -6,6 +6,7 @@
 #include "Log.h"
 #include "Containers/Union.h"
 #include "Types/Types.h"
+#include "Misc/Base64.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"
@@ -656,6 +657,8 @@ public:
 	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
 
 	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);
+
+	static TArray<uint8> EncodeTwoAddresses(const FString& A, const FString& B);
 	
 private:
 	/*

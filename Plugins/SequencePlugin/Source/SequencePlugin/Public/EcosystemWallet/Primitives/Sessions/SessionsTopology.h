@@ -1,6 +1,7 @@
 #pragma once
 #include "SessionsBranch.h"
 #include "SessionsLeaf.h"
+#include "Dom/JsonValue.h"
 #include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 
 class SEQUENCEPLUGIN_API FSessionsTopology

@@ -1,8 +1,12 @@
 #include "EthAbiBridge.h"
 #include "Containers/StringConv.h"
 #include "Util/ByteArrayUtils.h"
+#include "Dom/JsonValue.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 extern "C" {
+	char* combine_bigints(const char*, const char*);
 	int bigint_to_bytes2(const uint8* value_ptr, size_t value_len, size_t size, uint8* out_bytes, size_t* out_len);
 	int recover_eth_pub_and_address(const uint8* sig_ptr, size_t sig_len, const uint8* hash_ptr, size_t hash_len, uint8* out_pubkey, uint8* out_address);
 	size_t encode_two_addresses_ethabi(const uint8* signer_ptr, const uint8* value_ptr, uint8* out_ptr);
@@ -17,6 +21,21 @@ extern "C" {
 	void free_encoded_bytes(char* ptr);
 	void free_encoded_bytes_raw(uint8* Ptr, size_t Len);
 	void free_string(char* ptr);
+}
+
+FString FEthAbiBridge::CombineTwoBigInts(const FString& A, const FString& B)
+{
+	FTCHARToUTF8 AUtf8(*A);
+	FTCHARToUTF8 BUtf8(*B);
+
+	char* ResultPtr = combine_bigints(AUtf8.Get(), BUtf8.Get());
+	FString Result(UTF8_TO_TCHAR(ResultPtr));
+
+	UE_LOG(LogTemp, Log, TEXT("Result = %s"), *Result);
+
+	free_string(ResultPtr);
+
+	return Result;
 }
 
 bool FEthAbiBridge::BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError)

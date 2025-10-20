@@ -4,6 +4,7 @@
 #include "EcosystemWallet/Primitives/Signatures/ExplicitSessionCallSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/ImplicitSessionCallSignature.h"
 #include "EcosystemWallet/Signers/ImplicitRequestEncoder.h"
+#include "Math/BigInt.h"
 #include "Util/SequenceCoder.h"
 #include "Util/SequenceSupport.h"
 
@@ -27,10 +28,25 @@ FString FSessionSigner::GetIdentitySigner()
 	return FByteArrayUtils::BytesToHexString(OutAddress);
 }
 
+FString FSessionSigner::GetSessionAddress() const
+{
+	if (Credentials.SessionAddress != "")
+		return Credentials.SessionAddress;
+
+	UE_LOG(LogTemp, Error, TEXT("SessionSigner credentials are invalid"));
+	return "";
+}
+
 bool FSessionSigner::IsSupportedCall(const FBigInt& ChainId, const FCall& Call, const TArray<FSessionSigner>& Signers, const TSharedPtr<FSessionsTopology>& SessionsTopology)
 {
 	if (Credentials.IsExplicit)
 	{
+		if (Credentials.ChainId != ChainId.Value)
+			return false;
+		
+		if (CheckCallForIncrementUsageLimit(Call))
+			return true;
+		
 		const int32 PermissionIndex = FindSupportedPermission(ChainId, Call, SessionsTopology);
 		return PermissionIndex >= 0;
 	}
@@ -48,14 +64,20 @@ bool FSessionSigner::IsSupportedCall(const FBigInt& ChainId, const FCall& Call, 
 
 int32 FSessionSigner::FindSupportedPermission(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology)
 {
-	const TSharedPtr<FSessionPermissions> Permissions = SessionsTopology->GetPermissions(Credentials.SessionAddress);
+	const TSharedPtr<FSessionPermissions> Permissions = SessionsTopology->GetPermissions(GetSessionAddress());
 	
 	if (Permissions == nullptr || !Permissions.IsValid())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Null permissions for address %s"), *GetSessionAddress())
 		return -1;
+	}
 
 	const FBigInt PermissionsChainId = FBigInt::FromHex(Permissions->ChainId);
 	if (PermissionsChainId.Value != ChainId.Value)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Invalid chain id"))
 		return -1;
+	}
 
 	int32 PermissionsIndex = -1;
 	for (int i = 0; i < Permissions->Permissions.Num(); ++i)
@@ -67,8 +89,7 @@ int32 FSessionSigner::FindSupportedPermission(const FBigInt& ChainId, const FCal
 			break;
 		}
 	}
-
-	UE_LOG(LogTemp, Display, TEXT("using permission index %d"), PermissionsIndex)
+	
 	return PermissionsIndex;
 }
 
@@ -82,29 +103,66 @@ TSharedPtr<FSessionCallSignature> FSessionSigner::SignCall(const FBigInt& ChainI
 
 	if (Credentials.IsExplicit)
 	{
-		const int32 PermissionIndex = FindSupportedPermission(ChainId, Call, SessionsTopology);
-		if (PermissionIndex < 0)
+		int32 PermissionIndex = 0;
+		if (!CheckCallForIncrementUsageLimit(Call))
 		{
-			return nullptr;
+			PermissionIndex = FindSupportedPermission(ChainId, Call, SessionsTopology);
+			if (PermissionIndex < 0)
+			{
+				return nullptr;
+			}	
 		}
 	
 		return MakeShared<FExplicitSessionCallSignature>(PermissionIndex, Signature);
 	}
 	
-	/*const FString AttestationJson = "{\"approvedSigner\":\"0x3761e16647E27956a5BfAdFE507d4c4F9a6f5512\",\"identityType\":{\"_isUint8Array\":true,\"data\":\"0x00000002\"},\"issuerHash\":{\"_isUint8Array\":true,\"data\":\"0x4dcc430b541f16ee48b99ac8df13c9f8fa820c59de2e8bfc834cd295504d50dc\"},\"audienceHash\":{\"_isUint8Array\":true,\"data\":\"0x33f23bc388d939c925129d46379b8a32475568969cb4d9e9f918c9dff965e700\"},\"applicationData\":{\"_isUint8Array\":true,\"data\":\"0x\"},\"authData\":{\"redirectUrl\":\"http://localhost:4444\",\"issuedAt\":{\"_isBigInt\":true,\"data\":\"1760602234\"}}}";
-
-	FAttestation Attestation;
-	FSessionCredentialsSerializer::ParseAttestation(USequenceSupport::JsonStringToObject(AttestationJson), Attestation);
-
-	return MakeShared<FImplicitSessionCallSignature>(
-	MakeShared<FAttestation>(Attestation),
-	MakeShared<FRSY>(FRSY(FBigInt("3313507648155575330123726678207645170527620921491155233631210854395540284143"), FBigInt("12599654210633038267252651539192195082231863727699109387705650514161424877718"), 1)),
-	 MakeShared<FRSY>(FRSY(FBigInt("113358184146253349173069315831518691205444013991435955474929158525500465150366"), FBigInt("52937226093596822866607111119139967339373955272133977492702601528047277722022"), 0)));*/
-
 	return MakeShared<FImplicitSessionCallSignature>(
 		MakeShared<FAttestation>(Credentials.Attestation),
 		MakeShared<FRSY>(Credentials.Signature),
 		Signature);
+}
+
+void FSessionSigner::PrepareIncrements(
+	const FBigInt& ChainId,
+	const TArray<FCall>& Calls,
+	const TSharedPtr<FSessionsTopology>& SessionsTopology,
+	const TFunction<void(TSharedPtr<FUsageLimit>)>& OnCompleted)
+{
+	TArray<FCall> ValidCalls;
+	for (FCall Call1 : Calls)
+	{
+		const int32 PermissionIndex = FindSupportedPermission(ChainId, Call1, SessionsTopology);
+		UE_LOG(LogTemp, Display, TEXT("PermissionIndex %d"), PermissionIndex);
+		if (PermissionIndex < 0)
+			continue;
+
+		ValidCalls.Add(Call1);
+	}
+	
+	const FString ValueUsageHash = GetValueUsageHash();
+	GetCurrentUsageLimit(ValueUsageHash, [this, ValueUsageHash, ChainId, ValidCalls, SessionsTopology, OnCompleted](const FBigInt& CurrentUsageLimit)
+	{
+		FBigInt ValueUsed = FBigInt(CurrentUsageLimit.Value);
+		for (FCall Call : ValidCalls)
+		{
+			ValueUsed.Add(Call.Value);
+			UE_LOG(LogTemp, Display, TEXT("Used 2 %s, %s"), *Call.Value.Value, *ValueUsed.Value);
+		}
+		
+		if (ValueUsed.Value == "0")
+		{
+			OnCompleted(nullptr);
+			return;
+		}
+
+		const FUsageLimit UsageLimit = FUsageLimit
+		{
+			ValueUsageHash,
+			ValueUsed
+		};
+		
+		OnCompleted(MakeShared<FUsageLimit>(UsageLimit));
+	});
 }
 
 TArray<uint8> FSessionSigner::HashCallWithReplayProtection(const FBigInt& ChainId, const FCall& Call, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce)
@@ -134,7 +192,7 @@ FString FSessionSigner::GenerateImplicitRequestMagic()
 		})));
 }
 
-void FSessionSigner::GetCurrentUsageLimit(TFunction<void(FBigInt)> OnCompleted)
+void FSessionSigner::GetCurrentUsageLimit(const FString& ValueUsageHash, TFunction<void(FBigInt)> OnCompleted)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, OnCompleted](const FString& Response)
 	{
@@ -146,8 +204,7 @@ void FSessionSigner::GetCurrentUsageLimit(TFunction<void(FBigInt)> OnCompleted)
 		SEQ_LOG(Error, TEXT("Error while getting current usage limit: %s"), *Error.Message);
 		OnCompleted(FBigInt("0"));
 	};
-
-	const FString ValueUsageHash = FByteArrayUtils::BytesToHexString(FSequenceCoder::KeccakHash(FEthAbiBridge::EncodeTwoAddresses(Credentials.SessionAddress, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE")));
+	
 	const FString Values = FString::Printf(TEXT("[\"%s\",\"%s\"]"), *Credentials.WalletAddress, *ValueUsageHash);
 	const FString EncodedFunctionData = USequenceSupport::EncodeFunctionCall("getLimitUsage(address,bytes32)", Values);
 
@@ -157,6 +214,20 @@ void FSessionSigner::GetCurrentUsageLimit(TFunction<void(FBigInt)> OnCompleted)
 
 	UProvider* Provider = NewObject<UProvider>();
 	Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
+}
+
+bool FSessionSigner::CheckCallForIncrementUsageLimit(const FCall& Call)
+{
+	return FByteArrayUtils::BytesToHexString(FByteArrayUtils::SliceBytes(FByteArrayUtils::HexStringToBytes(Call.Data), 0, 4)) == "0x42de1418";
+}
+
+FString FSessionSigner::GetValueUsageHash()
+{
+	return FByteArrayUtils::BytesToHexString(
+		FSequenceCoder::KeccakHash(
+			FEthAbiBridge::EncodeTwoAddresses(
+				GetSessionAddress(),
+				"0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE")));
 }
 
 void FSessionSigner::CheckAcceptImplicitRequest(const FCall& Call, TFunction<void(bool)> OnCompleted)

@@ -35,7 +35,7 @@ TArray<FSessionSigner> FSignerService::GetValidImplicitSigners(const FString& Id
 	{
 		if (!Signer.Credentials.IsExplicit &&
 			Signer.GetIdentitySigner().Equals(IdentitySigner, ESearchCase::IgnoreCase) &&
-			!Blacklist.Contains(Signer.Credentials.SessionAddress))
+			!Blacklist.Contains(Signer.GetSessionAddress()))
 		{
 			Result.Add(Signer);
 		}
@@ -51,7 +51,7 @@ TArray<FSessionSigner> FSignerService::GetValidExplicitSigners()
 
 	for (const FSessionSigner& Signer : Signers)
 	{
-		if (Signer.Credentials.IsExplicit && ExplicitSigners.Contains(Signer.Credentials.SessionAddress))
+		if (Signer.Credentials.IsExplicit && ExplicitSigners.Contains(Signer.GetSessionAddress()))
 		{
 			Result.Add(Signer);
 		}
@@ -70,7 +70,7 @@ TArray<FSessionSigner> FSignerService::FindSignerForEachCallAsync(const TArray<F
 		{
 			if (ExplicitSigner.IsSupportedCall(ChainId, Call, SupportedSigners, SessionsTopology))
 			{
-				UE_LOG(LogTemp, Display, TEXT("Adding explicit signer %s"), *ExplicitSigner.Credentials.SessionAddress)
+				UE_LOG(LogTemp, Display, TEXT("Adding explicit signer %s"), *ExplicitSigner.GetSessionAddress())
 				SupportedSigners.Add(ExplicitSigner);
 			}
 		}
@@ -82,7 +82,7 @@ TArray<FSessionSigner> FSignerService::FindSignerForEachCallAsync(const TArray<F
 		{
 			if (ImplicitSigner.IsSupportedCall(ChainId, Call, SupportedSigners, SessionsTopology))
 			{
-				UE_LOG(LogTemp, Display, TEXT("Adding implicit signer %s"), *ImplicitSigner.Credentials.SessionAddress)
+				UE_LOG(LogTemp, Display, TEXT("Adding implicit signer %s"), *ImplicitSigner.GetSessionAddress())
 				SupportedSigners.Add(ImplicitSigner);
 			}
 		}

@@ -3,6 +3,9 @@
 #include "EcosystemWallet/Primitives/Attestation/Attestation.h"
 #include "EcosystemWallet/Primitives/Attestation/AttestationAuthData.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
+#include "Serialization/JsonWriter.h"
+#include "Serialization/JsonSerializer.h"
+#include "Dom/JsonObject.h"
 
 class SEQUENCEPLUGIN_API FSessionCredentialsSerializer
 {

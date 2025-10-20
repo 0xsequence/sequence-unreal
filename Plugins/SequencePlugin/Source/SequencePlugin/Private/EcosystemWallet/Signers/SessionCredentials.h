@@ -14,6 +14,7 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 	bool IsExplicit;
 	FString PrivateKey;
 	FString SessionAddress;
+	FString ChainId;
 	
 	FString WalletAddress;
 	FString LoginMethod;
@@ -31,6 +32,7 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 		Root->SetBoolField(TEXT("isExplicit"), IsExplicit);
 		Root->SetStringField(TEXT("privateKey"), PrivateKey);
 		Root->SetStringField(TEXT("sessionAddress"), SessionAddress);
+		Root->SetStringField(TEXT("chainId"), ChainId);
 		Root->SetStringField(TEXT("walletAddress"), WalletAddress);
 		Root->SetStringField(TEXT("userEmail"), UserEmail);
 		Root->SetStringField(TEXT("loginMethod"), LoginMethod);
@@ -65,19 +67,37 @@ struct SEQUENCEPLUGIN_API FSessionCredentials
 		{
 			SessionAddress = Json->GetStringField(TEXT("sessionAddress"));
 		}
+
+		FString ChainId = "";
+		if (Json->HasField(TEXT("chainId")))
+		{
+			ChainId = Json->GetStringField(TEXT("chainId"));
+		}
 		
 		FString WalletAddress = Json->GetStringField(TEXT("walletAddress"));
 		FString UserEmail = Json->GetStringField(TEXT("userEmail"));
 		FString LoginMethod = Json->GetStringField(TEXT("loginMethod"));
 
-		FSessionCredentialsSerializer::ParseGuard(Json->GetObjectField(TEXT("guard")), GuardConfig);
-		FSessionCredentialsSerializer::ParseAttestation(Json->GetObjectField(TEXT("attestation")), Attestation);
-		FSessionCredentialsSerializer::ParseSignature(Json->GetObjectField(TEXT("signature")), Signature);
+		if (Json->HasField(TEXT("guard")))
+		{
+			FSessionCredentialsSerializer::ParseGuard(Json->GetObjectField(TEXT("guard")), GuardConfig);
+		}
+
+		if (Json->HasField(TEXT("attestation")))
+		{
+			FSessionCredentialsSerializer::ParseAttestation(Json->GetObjectField(TEXT("attestation")), Attestation);
+		}
+
+		if (Json->HasField(TEXT("signature")))
+		{
+			FSessionCredentialsSerializer::ParseSignature(Json->GetObjectField(TEXT("signature")), Signature);
+		}
 
 		return FSessionCredentials {
 			IsExplicit,
 			PrivateKey,
 			SessionAddress,
+			ChainId,
 			WalletAddress,
 			LoginMethod,
 			UserEmail,

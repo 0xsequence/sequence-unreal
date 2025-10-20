@@ -1,11 +1,14 @@
 #include "RelayerReceiptPoller.h"
 #include "Engine/Engine.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "Async/Async.h"
+#include "Tasks/Task.h"
 
-void URelayerReceiptPoller::StartPolling(const FString& Hash, const TFunction<void(FString)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
+void URelayerReceiptPoller::StartPolling(const FString& Hash, const TFunction<void(FString)>& InOnSuccess, const TFunction<void(FString)>& InOnFailure)
 {
 	this->Relayer = NewObject<USequenceRelayer>();
-	this->OnSuccess = OnSuccess;
-	this->OnFailure = OnFailure;
+	this->OnSuccess = InOnSuccess;
+	this->OnFailure = InOnFailure;
 	
 	CurrentStatus = "Pending";
 	PollRecursive(Hash);

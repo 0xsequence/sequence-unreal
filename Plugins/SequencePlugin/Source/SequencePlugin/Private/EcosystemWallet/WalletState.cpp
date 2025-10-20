@@ -11,9 +11,9 @@ FWalletState::FWalletState()
 	this->KeyMachine = NewObject<UKeyMachine>();
 }
 
-void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure)
+void FWalletState::UpdateState(const FString& InAddress, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
-	this->Address = Address;
+	this->Address = InAddress;
 	this->Provider = NewObject<UProvider>();
 	
 	UpdateDeployedState([this, OnSuccess, OnFailure]() {
@@ -58,9 +58,9 @@ void FWalletState::UpdateState(const FString& Address, const TFunction<void()>& 
 			
 			if (this->IsDeployed && Implementation.Equals("0x7438718F9E4b9B834e305A620EEeCf2B9E6eBE79", ESearchCase::IgnoreCase))
 			{
-				this->GetOnchainImageHash([this, GetConfig](const FString& ImageHash)
+				this->GetOnchainImageHash([this, GetConfig](const FString& OnchainImageHash)
 				{
-					GetConfig(ImageHash);
+					GetConfig(OnchainImageHash);
 				});
 			}
 			else
@@ -135,7 +135,7 @@ void FWalletState::UpdateNonce(const TFunction<void()>& Callback)
 	this->Provider->Call(Call, EBlockTag::EPending, OnSuccess, OnFailure);
 }
 
-void FWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()>& Callback)
+void FWalletState::UpdateConfig(const FString& InImageHash, const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FSeqConfigContext> OnSuccess = [this, Callback](const FSeqConfigContext& Response)
 	{
@@ -153,10 +153,10 @@ void FWalletState::UpdateConfig(const FString& ImageHash, const TFunction<void()
 		Callback();
 	};
 	
-	KeyMachine->GetConfiguration(ImageHash, OnSuccess, OnFailure);
+	KeyMachine->GetConfiguration(InImageHash, OnSuccess, OnFailure);
 }
 
-void FWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunction<void()>& Callback)
+void FWalletState::UpdateSessionsTopology(const FString& InImageHash, const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess = [this, Callback](const TSharedPtr<FJsonValue>& Tree)
 	{
@@ -170,7 +170,7 @@ void FWalletState::UpdateSessionsTopology(const FString& ImageHash, const TFunct
 		Callback();
 	};
 	
-	KeyMachine->GetTree(ImageHash, OnSuccess, OnFailure);
+	KeyMachine->GetTree(InImageHash, OnSuccess, OnFailure);
 }
 
 void FWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
