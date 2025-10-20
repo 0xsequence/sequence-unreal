@@ -29,8 +29,11 @@ ULocalhostListener* ULocalhostListener::GetInstance()
 
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
-	this->CurrentOnSuccess = MakeShared<TSuccessCallback<FString>>(OnSuccess);
-	this->CurrentOnFailure = MakeShared<FFailureCallback>(OnFailure);
+	StrongOnSuccess = MakeShared<TSuccessCallback<FString>>(OnSuccess);
+	StrongOnFailure = MakeShared<FFailureCallback>(OnFailure);
+
+	CurrentOnSuccess = StrongOnSuccess;
+	CurrentOnFailure = StrongOnFailure;
 	
 	if (this->bServerStarted)
 	{
@@ -113,7 +116,7 @@ bool ULocalhostListener::HandleAnyRequest(const FHttpServerRequest& Request, con
 			return false;
 		}
 		
-		const FString PayloadJson = USequenceSupport::DecodeBase64ToString(EncodedPayload);
+		const FString PayloadJson = USequenceSupport::DecodeBase64ToString(*EncodedPayload);
 
 		UE_LOG(LogTemp, Log, TEXT("Response Payload Json %s"), *PayloadJson);
 
