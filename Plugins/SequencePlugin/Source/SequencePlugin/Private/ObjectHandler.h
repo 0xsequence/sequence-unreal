@@ -105,6 +105,8 @@ private:
 	*/
 	bool RequestRawBase(FString URL);
 
+	static FString GetImageMimeType(const FString& URL);
+
 public:
 
 	/*
