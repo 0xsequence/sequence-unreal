@@ -172,7 +172,7 @@ void USequenceMarketplaceBP::ListListingsForCollectible(const FString& ContractA
 
 void USequenceMarketplaceBP::ListAllListingsForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter Filter, FOnListAllListingsForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Listings)
+	const TSuccessCallback<TArray<FSeqOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqOrder>& Listings)
 	{
 		OnSuccess.ExecuteIfBound(Listings);
 	};
@@ -204,7 +204,7 @@ void USequenceMarketplaceBP::ListOffersForCollectible(const FString& ContractAdd
 
 void USequenceMarketplaceBP::ListAllOffersForCollectible(const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter Filter, FOnListAllOffersForCollectible OnSuccess, FOnFailure OnFailure)
 {
-	const TSuccessCallback<TArray<FSeqCollectibleOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqCollectibleOrder>& Offers)
+	const TSuccessCallback<TArray<FSeqOrder>> OnApiSuccess = [this, OnSuccess](const TArray<FSeqOrder>& Offers)
 	{
 		OnSuccess.ExecuteIfBound(Offers);
 	};

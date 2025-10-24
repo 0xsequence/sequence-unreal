@@ -19,6 +19,7 @@ private:
 	const FString PATH = "/rpc/Marketplace/";
 
 	TArray<FSeqCollectibleOrder> OrderArray;
+	TArray<FSeqOrder> RawOrderArray;
 
 	//private functions
 
@@ -37,8 +38,8 @@ private:
 	void ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(const int64 ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
 	void GetCollectibleOrder(int64 ChainID, const FString& Endpoint, const FSeqGetCollectibleOrderArgs& Args,
 	                         TSuccessCallback<FSeqCollectibleOrder> OnSuccess, const FFailureCallback& OnFailure);
-	void ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
-	void ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllListingsForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllOffersForCollectibleHelper(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
 	
 public:
 	
@@ -183,7 +184,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListAllListingsForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllListingsForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqOrder>> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Get offers for a collectible
@@ -206,7 +207,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqCollectibleOrder
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqOrder>> OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * Get the floor order for a collectible
