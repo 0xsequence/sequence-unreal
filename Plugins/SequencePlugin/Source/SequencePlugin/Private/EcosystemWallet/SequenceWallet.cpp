@@ -1,4 +1,5 @@
 #include "EcosystemWallet/SequenceWallet.h"
+#include "EcosystemWallet/EcosystemClient.h"
 #include "FeeOptionService.h"
 #include "RelayerReceiptPoller.h"
 #include "TransactionService.h"

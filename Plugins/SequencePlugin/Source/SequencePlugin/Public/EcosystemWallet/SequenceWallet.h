@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "WalletInfo.h"
-#include "EcosystemWallet/EcosystemClient.h"
 #include "Permissions/Permissions.h"
 #include "Relayer/Models/FeeOptionsResponse.h"
 #include "Transactions/Transaction.h"
@@ -10,6 +9,7 @@
 #include "Util/Async.h"
 #include "SequenceWallet.generated.h"
 
+class UEcosystemClient;
 class FSessionStorage;
 class FWalletState;
 
