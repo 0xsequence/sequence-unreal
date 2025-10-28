@@ -17,5 +17,5 @@ class SEQUENCEPLUGIN_API IPermissions
 	GENERATED_BODY()
 
 public:
-	virtual FSessionPermissions GetSessionPermissions();
+	virtual FSessionPermissions GetSessionPermissions() = 0;
 };

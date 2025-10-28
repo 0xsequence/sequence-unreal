@@ -18,5 +18,5 @@ class SEQUENCEPLUGIN_API ISeqTransactionBase
 	GENERATED_BODY()
 
 public:
-	virtual FCalls GetCalls();
+	virtual FCalls GetCalls() = 0;
 };
