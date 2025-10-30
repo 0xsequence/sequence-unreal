@@ -103,7 +103,8 @@ private:
 		FIdName(37084624,TEXT("skale-nebula-testnet")),
 		FIdName(168587773,TEXT("blast-sepolia")),
 		FIdName(37714555429,TEXT("xai-sepolia")),
-		FIdName(6252,TEXT("sandbox-testnet"))
+		FIdName(6252,TEXT("sandbox-testnet")),
+		FIdName(5042002,TEXT("arc-testnet"))
 	};
 	
 	static inline TMap<int64, FString> NetworkIdToNameMap = {
@@ -160,7 +161,8 @@ private:
 		FIdName(53716,TEXT("Frequency Testnet")),
 		FIdName(11690, TEXT("Incentiv Testnet")),
 		FIdName(28802, TEXT("Incentiv Testnet v2")),
-		FIdName(6252, TEXT("Sandbox Testnet"))
+		FIdName(6252, TEXT("Sandbox Testnet")),
+		FIdName(5042002, TEXT("Arc Testnet"))
 	};
 
 	static inline TMap<FString, int64> NetworkNameToIdMap = {
@@ -217,7 +219,8 @@ private:
 		FNameId(TEXT("frequency-testnet"),53716),
 		FNameId(TEXT("incentiv-testnet"), 11690),
 		FNameId(TEXT("incentiv-testnet-v2"), 28802),
-		FNameId(TEXT("sandbox-testnet"), 6252)
+		FNameId(TEXT("sandbox-testnet"), 6252),
+		FNameId(TEXT("arc-testnet"), 5042002)
 	};
 	
 	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
@@ -274,7 +277,8 @@ private:
 		{ENetwork::FrequencyTestnet, 53716},
 		{ENetwork::IncentivTestnet, 11690},
 		{ENetwork::IncentivTestnetV2, 28802},
-		{ENetwork::SandboxTestnet, 6252}
+		{ENetwork::SandboxTestnet, 6252},
+		{ENetwork::ArcTestnet, 5042002}
 	};
 
 	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
@@ -331,7 +335,8 @@ private:
 		{ENetwork::FrequencyTestnet, TEXT("Frequency Testnet")},
 		{ENetwork::IncentivTestnet, TEXT("Incentiv Testnet")},
 		{ENetwork::IncentivTestnetV2, TEXT("Incentiv Testnet v2")},
-		{ENetwork::SandboxTestnet, TEXT("Sandbox Testnet")}
+		{ENetwork::SandboxTestnet, TEXT("Sandbox Testnet")},
+		{ENetwork::ArcTestnet, TEXT("Arc Testnet")}
 	};
 
 public:
