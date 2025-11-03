@@ -1,6 +1,12 @@
 #include "MobileRedirectHandler.h"
 #include "SourceUri.h"
 
+TSharedPtr<TSuccessCallback<FString>> FMobileRedirectHandler::StrongOnSuccess = nullptr;
+TSharedPtr<FFailureCallback> FMobileRedirectHandler::StrongOnFailure = nullptr;
+
+TWeakPtr<TSuccessCallback<FString>> FMobileRedirectHandler::CurrentOnSuccess;
+TWeakPtr<FFailureCallback> FMobileRedirectHandler::CurrentOnFailure;
+
 #if PLATFORM_IOS
 extern "C" void OpenWalletApp(const char* urlCString);
 
