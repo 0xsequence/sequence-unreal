@@ -6,27 +6,6 @@
 #include "HttpServerResponse.h"
 #include "Util/SequenceSupport.h"
 
-ULocalhostListener* ULocalhostListener::Instance = nullptr;
-
-void ULocalhostListener::ClearInstance()
-{
-	if (Instance == nullptr)
-		return;
-	
-	Instance->StopListening();
-	Instance = nullptr;
-}
-
-ULocalhostListener* ULocalhostListener::GetInstance()
-{
-	if (Instance == nullptr)
-	{
-		Instance = NewObject<ULocalhostListener>();
-	}
-
-	return Instance;
-}
-
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	StrongOnSuccess = MakeShared<TSuccessCallback<FString>>(OnSuccess);

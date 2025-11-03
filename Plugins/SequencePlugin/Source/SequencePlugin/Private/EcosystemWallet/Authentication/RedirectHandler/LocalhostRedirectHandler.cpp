@@ -8,6 +8,11 @@ void FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl, TSuc
 {
     FPlatformProcess::LaunchURL(*FullUrl, nullptr, nullptr);
 
-    ULocalhostListener* Listener = ULocalhostListener::GetInstance();
-    Listener->WaitForResponse(OnSuccess, OnFailure);
+    if (ULocalhostListener* Listener = World->GetGameInstance()->GetSubsystem<ULocalhostListener>())
+    {
+        Listener->WaitForResponse(OnSuccess, OnFailure);
+        return;
+    }
+
+    OnFailure(FSequenceError(EErrorType::EmptyResponse, TEXT("Could not find ULocalhostListener subsystem")));
 }

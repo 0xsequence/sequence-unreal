@@ -1,5 +1,4 @@
 #include "EcosystemClient.h"
-#include "Authentication/RedirectHandler/BrowserRedirectHandler.h"
 #include "Authentication/RedirectHandler/LocalhostRedirectHandler.h"
 #include "Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "EcosystemWallet/Permissions/Permissions.h"
@@ -20,6 +19,7 @@ UEcosystemClient::UEcosystemClient()
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
 #endif
 
+    this->RedirectHandler->SetWorld(GetWorld());
     this->RedirectHandler->SetRedirectUrl(this->Origin);
 }
 

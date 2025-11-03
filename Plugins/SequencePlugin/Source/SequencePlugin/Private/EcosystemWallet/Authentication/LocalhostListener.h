@@ -9,14 +9,11 @@
 #include "LocalhostListener.generated.h"
 
 UCLASS()
-class SEQUENCEPLUGIN_API ULocalhostListener : public UObject
+class SEQUENCEPLUGIN_API ULocalhostListener : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	static void ClearInstance();
-	static ULocalhostListener* GetInstance();
-
 	virtual void BeginDestroy() override
 	{
 		StopListening();
@@ -30,8 +27,6 @@ private:
 	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
 
 private:
-	static ULocalhostListener* Instance;
-	
 	TSharedPtr<IHttpRouter> Router;
 	TOptional<FHttpRouteHandle> RouteHandle;
 	uint32 Port = 4444;

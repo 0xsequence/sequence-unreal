@@ -18,6 +18,11 @@ public:
 
     virtual ~IRedirectHandler() = default;
 
+    void SetWorld(UWorld* InWorld)
+    {
+        this->World = InWorld;
+    }
+
     void SetRedirectUrl(const FString& InRedirectUrl)
     {
         RedirectUrl = InRedirectUrl;
@@ -86,7 +91,7 @@ protected:
         return FBase64::Encode(reinterpret_cast<const uint8*>(Utf8.Get()), Utf8.Length());
     }
 
-protected:
     FString Id;
     FString RedirectUrl;
+    UWorld* World = nullptr;
 };

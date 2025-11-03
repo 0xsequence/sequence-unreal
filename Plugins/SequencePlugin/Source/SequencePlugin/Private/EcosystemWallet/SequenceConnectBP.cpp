@@ -8,11 +8,6 @@ USequenceConnectBP::USequenceConnectBP()
 	this->SequenceConnect = NewObject<USequenceConnect>();
 }
 
-void USequenceConnectBP::Deinitialize()
-{
-	ULocalhostListener::ClearInstance();	
-}
-
 void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
