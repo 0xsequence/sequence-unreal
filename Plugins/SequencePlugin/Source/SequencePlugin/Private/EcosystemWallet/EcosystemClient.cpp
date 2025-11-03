@@ -1,6 +1,7 @@
 #include "EcosystemClient.h"
 #include "Authentication/RedirectHandler/BrowserRedirectHandler.h"
 #include "Authentication/RedirectHandler/LocalhostRedirectHandler.h"
+#include "Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "EcosystemWallet/Permissions/Permissions.h"
 #include "EcosystemWallet/Primitives/Permission/SessionPermissions.h"
 #include "Requests/ConnectArgs.h"
@@ -13,10 +14,8 @@ UEcosystemClient::UEcosystemClient()
 {
     this->Origin = "http://localhost:4444/api"; // Define this for each platform
 
-#if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_MAC
-    this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
-#elif PLATFORM_WINDOWS || PLATFORM_MAC
-    this->RedirectHandler = MakeShared<FBrowserRedirectHandler>();
+#if PLATFORM_IOS || PLATFORM_ANDROID
+    this->RedirectHandler = MakeShared<FMobileRedirectHandler>();
 #else
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
 #endif
