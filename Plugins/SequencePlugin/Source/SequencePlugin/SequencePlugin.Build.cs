@@ -143,7 +143,7 @@ public class SequencePlugin : ModuleRules
 		string EthAbiDirectory = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/");
 		
 		PublicSystemLibraryPaths.Add(EthAbiDirectory);
-		PublicAdditionalLibraries.Add(Path.Combine(EthAbiDirectory, "libethabi_bridge.a"));
+		//PublicAdditionalLibraries.Add(Path.Combine(EthAbiDirectory, "libethabi_bridge.a"));
 
         if (Target.Platform == UnrealTargetPlatform.Win64)
         {

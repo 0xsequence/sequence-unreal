@@ -6,7 +6,7 @@
 
 static SFSafariViewController *safariVC = nil;
 
-extern void IOS_OnDeepLink(const char* link);
+extern "C" void IOS_OnDeepLink(const char* link);
 
 extern "C" {
     void OpenWalletApp(const char *urlCString)
