@@ -1,4 +1,5 @@
 #include "MobileRedirectHandler.h"
+#include "SourceUri.h"
 
 #if PLATFORM_IOS
 extern "C" void OpenWalletApp(const char* urlCString);
@@ -35,7 +36,20 @@ void FMobileRedirectHandler::HandleResponse(const FString& Url)
 	{
 		if (*Success)
 		{
-			(*Success)(Url);
+			UE::DatasmithImporter::FSourceUri Uri = UE::DatasmithImporter::FSourceUri(Url);
+			TMap<FString, FString> QueryParams = Uri.GetQueryMap();
+
+			if (QueryParams.Contains(TEXT("error")))
+			{
+				FString Error = QueryParams[TEXT("error")];
+				FMobileRedirectHandler::HandleError(Error);
+				return;
+			}
+
+			const FString Payload = QueryParams[TEXT("payload")];
+			const FString PayloadJson = USequenceSupport::DecodeBase64ToString(*Payload);
+			
+			(*Success)(PayloadJson);
 		}
 		else
 		{
