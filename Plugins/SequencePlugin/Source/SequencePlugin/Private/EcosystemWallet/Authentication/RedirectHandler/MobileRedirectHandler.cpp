@@ -19,7 +19,7 @@ void IOS_OnDeepLink(const char* link)
 #elif PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidJNI.h"
-#include "Android/JNIHelpers.h"
+#include <jni.h>
 
 extern "C"
 JNIEXPORT void JNICALL

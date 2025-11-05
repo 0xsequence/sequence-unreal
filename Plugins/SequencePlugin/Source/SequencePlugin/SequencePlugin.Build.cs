@@ -32,7 +32,8 @@ public class SequencePlugin : ModuleRules
                 new string[] 
                 {
 					"Engine",
-					"Launch"                    
+					"Launch",
+					"ApplicationCore"
                 }
             );
             AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(ModuleDirectory, "SequencePlugin_UPL_Android.xml"));
