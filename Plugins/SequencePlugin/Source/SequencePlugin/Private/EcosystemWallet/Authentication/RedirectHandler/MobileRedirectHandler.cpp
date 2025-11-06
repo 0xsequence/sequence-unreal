@@ -8,13 +8,7 @@ TWeakPtr<FFailureCallback> FMobileRedirectHandler::CurrentOnFailure;
 
 #if PLATFORM_IOS
 extern "C" void OpenWalletApp(const char* urlCString);
-
-extern "C"
-void IOS_OnDeepLink(const char* link)
-{
-	FString Url(UTF8_TO_TCHAR(link));
-	FMobileRedirectHandler::HandleResponse(Url);
-}
+extern "C" void CloseWalletApp();
 #elif PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidJNI.h"
@@ -40,21 +34,15 @@ Java_com_Plugins_SequencePlugin_ChromeTabsPlugin_OnDeepLinkReceived(JNIEnv* env,
 
 void FMobileRedirectHandler::HandleResponse(const FString& Url)
 {
-	LogMessage(FString::Printf(TEXT("FMobileRedirectHandler::HandleResponse")));
+#if PLATFORM_IOS
+	CloseWalletApp();
+#endif
+	
 	if (TSharedPtr<TSuccessCallback<FString>> Success = FMobileRedirectHandler::CurrentOnSuccess.Pin())
 	{
-		LogMessage(FString::Printf(TEXT("Checking pointer")));
 		if (*Success)
 		{
-			LogMessage(FString::Printf(TEXT("GetQueryMap %s"), *Url));
 			TMap<FString, FString> QueryParams = ConvertUrlToQueryMap(Url);
-
-			LogMessage(FString::Printf(TEXT("Logging query params..")));
-
-			for (const auto& Elem : QueryParams)
-			{
-				LogMessage(FString::Printf(TEXT("%s = %s"), *Elem.Key, *Elem.Value));
-			}
 
 			if (QueryParams.Contains(TEXT("error")))
 			{
@@ -66,19 +54,16 @@ void FMobileRedirectHandler::HandleResponse(const FString& Url)
 
 			const FString Payload = QueryParams[TEXT("payload")];
 			const FString PayloadJson = USequenceSupport::DecodeBase64ToString(*Payload);
-
-			LogMessage(FString::Printf(TEXT("Payload: %s\n"), *PayloadJson));
+			
 			(*Success)(PayloadJson);
 		}
 		else
 		{
-			LogMessage(FString::Printf(TEXT("Invalid success callback pointer")));
 			FMobileRedirectHandler::HandleError(TEXT("Invalid success callback pointer"));
 		}
 	}
 	else
 	{
-		LogMessage(FString::Printf(TEXT("Success callback expired")));
 		FMobileRedirectHandler::HandleError(TEXT("Success callback expired"));
 	}
 }
@@ -89,19 +74,16 @@ void FMobileRedirectHandler::HandleError(const FString& Error)
 	{
 		if (*Failure)
 		{
-			LogMessage(FString::Printf(TEXT("FMobileRedirectHandler::HandleError %s"), *Error));
 			UE_LOG(LogTemp, Error, TEXT("FMobileRedirectHandler::HandleError %s"), *Error);
 			(*Failure)(FSequenceError(EErrorType::RequestFail, Error));
 		}
 		else
 		{
-			LogMessage(FString::Printf(TEXT("Invalid failure callback pointer")));
 			UE_LOG(LogTemp, Error, TEXT("Invalid failure callback pointer"));
 		}
 	}
 	else
 	{
-		LogMessage(FString::Printf(TEXT("Failure callback expired")));
 		UE_LOG(LogTemp, Error, TEXT("Failure callback expired"));
 	}
 }

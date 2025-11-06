@@ -12,7 +12,8 @@
 UEcosystemClient::UEcosystemClient()
 {
 #if PLATFORM_IOS || PLATFORM_ANDROID
-    this->Origin = "sequenceunreal://";
+    const FString& UrlScheme = UConfigFetcher::GetConfigVar(UConfigFetcher::UrlScheme);
+    this->Origin = FString::Printf(TEXT("%s://"), *UrlScheme);
     this->RedirectHandler = MakeShared<FMobileRedirectHandler>();
 #else
     this->Origin = "http://localhost:4444/api";
@@ -69,7 +70,6 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
 
     const FString& PayloadJson = USequenceSupport::StructToString(Payload);
     UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *PayloadJson);
-    FMobileRedirectHandler::LogMessage(PayloadJson);
     
     const FString Action = (Type == ESessionCreationType::AddExplicit)
                                ? TEXT("addExplicitSession")

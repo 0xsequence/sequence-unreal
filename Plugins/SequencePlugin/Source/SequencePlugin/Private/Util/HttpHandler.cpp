@@ -30,7 +30,6 @@ void UHttpHandler::SendPostRequest(const FString& Endpoint, const FString& Paylo
 	);
 
 	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
-	FMobileRedirectHandler::LogMessage(CurlCommand);
 	
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 	{

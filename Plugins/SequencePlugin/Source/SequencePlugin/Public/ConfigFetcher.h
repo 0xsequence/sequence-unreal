@@ -9,6 +9,7 @@ class SEQUENCEPLUGIN_API UConfigFetcher : public UObject
 	GENERATED_BODY()
 public:
 	static inline FString DefaultChain = "DefaultChain";
+	static inline FString UrlScheme = "UrlScheme";
 	static inline FString WalletAppUrl = "WalletAppUrl";
 	static inline FString FallbackEncryptionKey = "FallbackEncryptionKey";
 	static inline FString WaaSConfigKey = "WaaSConfigKey";

@@ -69,7 +69,6 @@ void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSucc
 	URequestHandler* RequestHandler = NewObject<URequestHandler>();
 
 	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
-	FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("%s - %s"), *Url, *Content));
 
 	RequestHandler->PrepareRequest()
 		->WithUrl(Url)

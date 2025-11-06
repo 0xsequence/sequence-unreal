@@ -98,7 +98,6 @@ void FWalletState::UpdateDeployedState(const TFunction<void()>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
-		FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("UpdateDeployedState %s"), *Response));
 		this->IsDeployed = Response != "0x";
 		Callback();
 	};
@@ -180,7 +179,6 @@ void FWalletState::GetImplementation(const TFunction<void(FString)>& Callback)
 {
 	const TSuccessCallback<FString> OnSuccess = [this, Callback](const FString& Response)
 	{
-		FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("Implementation %s"), *Response));
 		const FString Code = FByteArrayUtils::BytesToHexString(FByteArrayUtils::SliceBytesFrom(FByteArrayUtils::HexStringToBytes(Response), 12));
 		UE_LOG(LogTemp, Display, TEXT("Implementation %s"), *Code);
 		Callback(Code);

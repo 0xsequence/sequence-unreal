@@ -35,7 +35,6 @@ public:
 	{
 		SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
 		{
-			FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("<< %s"), *Result));
 			TResult<T> Value = Extractor(Result);
 
 			if(Value.HasValue())
