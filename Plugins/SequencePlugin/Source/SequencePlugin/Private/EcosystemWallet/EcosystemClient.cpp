@@ -11,11 +11,11 @@
 
 UEcosystemClient::UEcosystemClient()
 {
-    this->Origin = "http://localhost:4444/api"; // Define this for each platform
-
 #if PLATFORM_IOS || PLATFORM_ANDROID
+    this->Origin = "sequenceunreal://";
     this->RedirectHandler = MakeShared<FMobileRedirectHandler>();
 #else
+    this->Origin = "http://localhost:4444/api";
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
 #endif
 

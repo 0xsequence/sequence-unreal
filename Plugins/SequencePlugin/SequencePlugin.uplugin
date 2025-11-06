@@ -39,5 +39,13 @@
 			"Name": "WebBrowserWidget",
 			"Enabled": true
 		}
-	]
+	],
+    "Android": {
+      "Package": {
+        "StoreVersion": 1
+      },
+      "Dependencies": [
+        "androidx.browser:browser:1.7.0"
+      ]
+    }
 }

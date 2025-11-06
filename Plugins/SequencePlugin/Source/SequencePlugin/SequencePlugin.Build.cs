@@ -174,8 +174,15 @@ public class SequencePlugin : ModuleRules
         else if (Target.Platform == UnrealTargetPlatform.Android)
         {
             string libDir = Path.Combine(EthAbiDirectory, "android");
-            PublicAdditionalLibraries.Add(Path.Combine(libDir, "arm64", "libethabi_bridge.a"));
-            PublicAdditionalLibraries.Add(Path.Combine(libDir, "x86", "libethabi_bridge.a"));
+            
+            if (Target.Architecture == UnrealArch.Arm64)
+            {
+	            PublicAdditionalLibraries.Add(Path.Combine(libDir, "arm64", "libethabi_bridge.a"));
+            }
+            else if (Target.Architecture == UnrealArch.X64)
+            {
+	            PublicAdditionalLibraries.Add(Path.Combine(libDir, "x86", "libethabi_bridge.a"));
+            }
         }
 	}
 }//namespace
