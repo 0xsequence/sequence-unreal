@@ -25,6 +25,8 @@ public:
 	void GetConfiguration(const FString& ImageHash, TSuccessCallback<FSeqConfigContext> OnSuccess, const TFunction<void(FString)>& OnFailure) const;
 	
 private:
+	static void SendPostRequest(const FString& Endpoint, const FString& Payload, const TSuccessCallback<FString>& OnSuccess, const TFunction<void(FString)>& OnFailure);
+	
 	static FSeqConfigContext ParseConfigFromJson(const FString& Json);
 	static TSharedPtr<FJsonValue> ParseSessionsTreeFromJson(const FString& Json);
 	

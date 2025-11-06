@@ -1,6 +1,7 @@
 #include "RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"
+#include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Util/JsonBuilder.h"
@@ -68,6 +69,7 @@ void URPCCaller::SendRPC(const FString& Url, const FString& Content, const TSucc
 	URequestHandler* RequestHandler = NewObject<URequestHandler>();
 
 	SEQ_LOG_EDITOR(Display, TEXT("%s - %s"), *Url, *Content);
+	FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("%s - %s"), *Url, *Content));
 
 	RequestHandler->PrepareRequest()
 		->WithUrl(Url)

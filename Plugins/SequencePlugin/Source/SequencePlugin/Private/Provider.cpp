@@ -331,7 +331,7 @@ void UProvider::CodeAt(const FString& Address, const EBlockTag BlockTag, const T
 	const FString Content = RPCBuilder("eth_getCode").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddString(Address)
-			->AddString(UEnum::GetDisplayValueAsText(BlockTag).ToString())
+			->AddString("pending")
 			->EndArray()
 		->ToString();
 
@@ -411,7 +411,7 @@ void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, co
 	const FString Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddValue(ContractCall.GetJson())
-			->AddValue(Number)
+			->AddString("pending")
 			->EndArray()
 		->ToString();
 

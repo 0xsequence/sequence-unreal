@@ -18,8 +18,7 @@ UEcosystemClient::UEcosystemClient()
     this->Origin = "http://localhost:4444/api";
     this->RedirectHandler = MakeShared<FLocalhostRedirectHandler>();
 #endif
-
-    this->RedirectHandler->SetWorld(GetWorld());
+    
     this->RedirectHandler->SetRedirectUrl(this->Origin);
 }
 
@@ -70,6 +69,7 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
 
     const FString& PayloadJson = USequenceSupport::StructToString(Payload);
     UE_LOG(LogTemp, Display, TEXT("Payload: %s"), *PayloadJson);
+    FMobileRedirectHandler::LogMessage(PayloadJson);
     
     const FString Action = (Type == ESessionCreationType::AddExplicit)
                                ? TEXT("addExplicitSession")
@@ -87,5 +87,6 @@ void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString
         OnSuccess(true);
     };
 
+    this->RedirectHandler->SetWorld(GetWorld());
     this->SendRequest<FConnectArgs, FSessionCredentials>("connect", Action, Payload, OnHandlerSuccess, OnFailure);
 }

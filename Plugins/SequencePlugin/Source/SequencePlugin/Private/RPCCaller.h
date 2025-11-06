@@ -7,6 +7,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "ResponseSignatureValidator.h"
+#include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "RPCCaller.generated.h"
 
 template<typename T> using Extractor = TFunction<TResult<T> (FString)>;
@@ -34,6 +35,7 @@ public:
 	{
 		SendRPC(Url, Content, [OnSuccess, Extractor](FString Result)
 		{
+			FMobileRedirectHandler::LogMessage(FString::Printf(TEXT("<< %s"), *Result));
 			TResult<T> Value = Extractor(Result);
 
 			if(Value.HasValue())

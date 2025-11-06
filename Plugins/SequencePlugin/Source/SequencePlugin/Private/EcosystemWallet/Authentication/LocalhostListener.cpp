@@ -6,6 +6,18 @@
 #include "HttpServerResponse.h"
 #include "Util/SequenceSupport.h"
 
+ULocalhostListener* ULocalhostListener::Instance = nullptr;
+
+ULocalhostListener::ULocalhostListener()
+{
+	ULocalhostListener::Instance = this;
+}
+
+ULocalhostListener* ULocalhostListener::GetInstance()
+{
+	return ULocalhostListener::Instance;
+}
+
 void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure)
 {
 	StrongOnSuccess = MakeShared<TSuccessCallback<FString>>(OnSuccess);
@@ -22,13 +34,14 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 	FHttpServerModule& HttpModule = FHttpServerModule::Get();
 
 	Router = HttpModule.GetHttpRouter(Port, true);
+	
 	if (!Router.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HTTP Router could not be created for port %u"), Port);
 		OnFailure(FSequenceError(EErrorType::InvalidArgument, TEXT("Router could not be created")));
 		return;
 	}
-
+	
 	TWeakObjectPtr<ULocalhostListener> WeakThis(this);
 	
 	const FHttpPath RootPath(TEXT("/api"));

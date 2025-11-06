@@ -1,4 +1,6 @@
 #include "HttpHandler.h"
+
+#include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "Util/Log.h"
 
 void UHttpHandler::SetRequestUrl(const FString& Url)
@@ -28,13 +30,14 @@ void UHttpHandler::SendPostRequest(const FString& Endpoint, const FString& Paylo
 	);
 
 	SEQ_LOG_EDITOR(Log, TEXT("%s"), *CurlCommand);
+	FMobileRedirectHandler::LogMessage(CurlCommand);
 	
 	HTTP_Post_Req->OnProcessRequestComplete().BindLambda([OnSuccess, OnFailure](const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 	{
 		if (bWasSuccessful)
 		{
 			const FString Content = Response->GetContentAsString();
-			SEQ_LOG(Display, TEXT("Response: %s"), *Content);  
+			SEQ_LOG(Display, TEXT("Response: %s"), *Content);
 			OnSuccess(Content);
 		}
 		else

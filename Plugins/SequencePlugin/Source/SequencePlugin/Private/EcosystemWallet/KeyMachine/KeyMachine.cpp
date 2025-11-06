@@ -9,7 +9,6 @@
 UKeyMachine::UKeyMachine()
 {
 	this->HttpHandler = NewObject<UHttpHandler>();
-	this->HttpHandler->SetRequestUrl(this->Host);
 }
 
 void UKeyMachine::GetDeployHash(const FString& WalletAddress, TSuccessCallback<FDeployHashResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
@@ -25,7 +24,7 @@ void UKeyMachine::GetDeployHash(const FString& WalletAddress, TSuccessCallback<F
 	};
 
 	const FString Payload = USequenceSupport::StructToString(Args);
-	this->HttpHandler->SendPostRequest("DeployHash", Payload, OnRequestSuccess, OnFailure);
+	SendPostRequest("DeployHash", Payload, OnRequestSuccess, OnFailure);
 }
 
 void UKeyMachine::GetTree(const FString& ImageHash, TSuccessCallback<TSharedPtr<FJsonValue>> OnSuccess, const TFunction<void(FString)>& OnFailure) const
@@ -41,7 +40,7 @@ void UKeyMachine::GetTree(const FString& ImageHash, TSuccessCallback<TSharedPtr<
 	};
 
 	const FString Payload = USequenceSupport::StructToString(Args);
-	this->HttpHandler->SendPostRequest("Tree", Payload, OnRequestSuccess, OnFailure);
+	SendPostRequest("Tree", Payload, OnRequestSuccess, OnFailure);
 }
 
 void UKeyMachine::GetConfigUpdates(const FString& WalletAddress, const FString& FromImageHash, TSuccessCallback<FConfigUpdatesResponse> OnSuccess, const TFunction<void(FString)>& OnFailure) const
@@ -58,7 +57,7 @@ void UKeyMachine::GetConfigUpdates(const FString& WalletAddress, const FString& 
 	};
 
 	const FString Payload = USequenceSupport::StructToString(Args);
-	this->HttpHandler->SendPostRequest("ConfigUpdates", Payload, OnRequestSuccess, OnFailure);
+	SendPostRequest("ConfigUpdates", Payload, OnRequestSuccess, OnFailure);
 }
 
 void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FSeqConfigContext> OnSuccess, const TFunction<void(FString)>& OnFailure) const
@@ -74,7 +73,14 @@ void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FS
 	};
 
 	const FString Payload = USequenceSupport::StructToString(Args);
-	this->HttpHandler->SendPostRequest("Config", Payload, OnRequestSuccess, OnFailure);
+	SendPostRequest("Config", Payload, OnRequestSuccess, OnFailure);
+}
+
+void UKeyMachine::SendPostRequest(const FString& Endpoint, const FString& Payload, const TSuccessCallback<FString>& OnSuccess, const TFunction<void(FString)>& OnFailure)
+{
+	UHttpHandler* Handler = NewObject<UHttpHandler>();
+	Handler->SetRequestUrl(TEXT("https://v3-keymachine.sequence-dev.app/rpc/Sessions"));
+	Handler->SendPostRequest(Endpoint, Payload, OnSuccess, OnFailure);
 }
 
 FSeqConfigContext UKeyMachine::ParseConfigFromJson(const FString& Json)

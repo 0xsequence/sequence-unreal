@@ -8,9 +8,9 @@ void FLocalhostRedirectHandler::WaitForResponseImpl(const FString& FullUrl, TSuc
 {
     FPlatformProcess::LaunchURL(*FullUrl, nullptr, nullptr);
 
-    if (ULocalhostListener* Listener = World->GetGameInstance()->GetSubsystem<ULocalhostListener>())
+    if (ULocalhostListener::GetInstance() != nullptr)
     {
-        Listener->WaitForResponse(OnSuccess, OnFailure);
+        ULocalhostListener::GetInstance()->WaitForResponse(OnSuccess, OnFailure);
         return;
     }
 

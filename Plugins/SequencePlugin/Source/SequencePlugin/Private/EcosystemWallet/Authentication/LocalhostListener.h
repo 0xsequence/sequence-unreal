@@ -14,6 +14,10 @@ class SEQUENCEPLUGIN_API ULocalhostListener : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	ULocalhostListener();
+	
+	static ULocalhostListener* GetInstance();
+	
 	virtual void BeginDestroy() override
 	{
 		StopListening();
@@ -23,10 +27,11 @@ public:
 	void WaitForResponse(TSuccessCallback<FString> OnSuccess, FFailureCallback OnFailure);
 	void StopListening();
 
+	static ULocalhostListener* Instance;
+
 private:
 	bool HandleAnyRequest(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
 
-private:
 	TSharedPtr<IHttpRouter> Router;
 	TOptional<FHttpRouteHandle> RouteHandle;
 	uint32 Port = 4444;
