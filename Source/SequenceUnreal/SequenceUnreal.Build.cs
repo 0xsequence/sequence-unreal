@@ -9,7 +9,7 @@ public class SequenceUnreal : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Cpp20;
 		
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "SequencePlugin", "EOSSDK", "HTTPServer", "OnlineServicesEOS" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "SequencePlugin", "HTTPServer", "OnlineServicesEOS" });
         PrivateDependencyModuleNames.AddRange(new string[] { "HTTPServer" });
     }
 }
