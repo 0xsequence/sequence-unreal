@@ -33,5 +33,5 @@ private:
 	UPROPERTY()
 	UHttpHandler* HttpHandler;
 	
-	const FString Host = "https://v3-keymachine.sequence-dev.app/rpc/Sessions";
+	const FString Host = "https://keymachine.sequence.app/rpc/Sessions";
 };

@@ -79,7 +79,7 @@ void UKeyMachine::GetConfiguration(const FString& ImageHash, TSuccessCallback<FS
 void UKeyMachine::SendPostRequest(const FString& Endpoint, const FString& Payload, const TSuccessCallback<FString>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
 	UHttpHandler* Handler = NewObject<UHttpHandler>();
-	Handler->SetRequestUrl(TEXT("https://v3-keymachine.sequence-dev.app/rpc/Sessions"));
+	Handler->SetRequestUrl(TEXT("https://keymachine.sequence.app/rpc/Sessions"));
 	Handler->SendPostRequest(Endpoint, Payload, OnSuccess, OnFailure);
 }
 
