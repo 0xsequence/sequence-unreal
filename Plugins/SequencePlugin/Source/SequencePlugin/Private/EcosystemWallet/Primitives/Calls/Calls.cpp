@@ -1,5 +1,8 @@
 #include "EcosystemWallet/Primitives/Calls/Calls.h"
+
+#include "EcosystemWallet/Primitives/Calls/CallTypedDataFactory.h"
 #include "Util/ByteArrayUtils.h"
+#include "Util/SequenceSupport.h"
 #include "Util/ValueUtils.h"
 
 TArray<uint8> FCalls::Encode()
@@ -11,6 +14,16 @@ TArray<uint8> FCalls::Encode()
 	TArray<uint8> CallsBytes = GetCallsBytes();
 
 	return FByteArrayUtils::ConcatBytes({FlagBytes, SpaceBytes, NonceBytes, CallsCountBytes, CallsBytes});
+}
+
+TArray<uint8> FCalls::Hash(const FString& Wallet, const FBigInt& ChainId) const
+{
+	FCalls Calls = FCalls(this->Calls, this->Space, this->Nonce);
+	FString DomainJson = FCallTypedDataFactory::FromCalls(Wallet, ChainId, MakeShared<FCalls>(Calls));
+	DomainJson = DomainJson.Replace(TEXT("\n"), TEXT(""));
+	DomainJson = DomainJson.Replace(TEXT("\t"), TEXT(""));
+	
+	return USequenceSupport::EncodeAndHashTypedData(DomainJson);
 }
 
 uint8 FCalls::GetFlag()

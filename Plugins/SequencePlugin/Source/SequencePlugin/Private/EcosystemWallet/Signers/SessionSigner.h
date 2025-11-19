@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "SessionCredentials.h"
 #include "EcosystemWallet/Primitives/Calls/Call.h"
+#include "EcosystemWallet/Primitives/Calls/Calls.h"
 #include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
 #include "EcosystemWallet/Primitives/Signatures/SessionCallSignature.h"
 #include "EcosystemWallet/Signers/UsageLimit.h"
@@ -19,8 +20,8 @@ public:
 	
 	bool IsSupportedCall(const FBigInt& ChainId, const FCall& Call, const TArray<FSessionSigner>& Signers, const TSharedPtr<FSessionsTopology>& SessionsTopology);
 	
-	TSharedPtr<FSessionCallSignature> SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
-		const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce);
+	TSharedPtr<FSessionCallSignature> SignCall(const FBigInt& ChainId, const FCalls& Payload, const int32& CallIdx,
+		const TSharedPtr<FSessionsTopology>& SessionsTopology);
 
 	void PrepareIncrements(
 		const FBigInt& ChainId,
@@ -37,7 +38,7 @@ public:
 
 private:
 	int32 FindSupportedPermission(const FBigInt& ChainId, const FCall& Call, const TSharedPtr<FSessionsTopology>& SessionsTopology);
-	TArray<uint8> HashCallWithReplayProtection(const FBigInt& ChainId, const FCall&, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce);
+	TArray<uint8> HashCallWithReplayProtection(const FString& Wallet, const FBigInt& ChainId, const FCalls& Payload, const uint32& CallIdx);
 	FString GenerateImplicitRequestMagic();
 	
 	void GetCurrentUsageLimit(const FString& ValueUsageHash, TFunction<void(FBigInt)> OnCompleted);

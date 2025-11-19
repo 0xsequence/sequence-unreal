@@ -49,13 +49,11 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOfSapientSignerLeaf>)>& OnSuccess, const TFunction<void(FString)>& OnFailure)
 {
 	const FCalls* CallsPayload = Envelope.Get()->Payload.Get();
-	TArray<FCall> Calls = CallsPayload->Calls;
-	FBigInt Space = CallsPayload->Space;
-	FBigInt Nonce = CallsPayload->Nonce;
+	const TArray<FCall> Calls = CallsPayload->Calls;
 	
 	FSignerService SignerService = FSignerService(ChainId, Calls, Signers, SessionsTopology);
 	
-	SignerService.FindSignersForCalls([this, Calls, Space, Nonce, OnSuccess](TArray<FSessionSigner> SupportedSigners)
+	SignerService.FindSignersForCalls([this, CallsPayload, OnSuccess](TArray<FSessionSigner> SupportedSigners)
 	{
 		
 		TArray<FString> ImplicitSigners;
@@ -65,7 +63,7 @@ void FSignatureService::SignSapient(const TFunction<void(TSharedPtr<FSignatureOf
 		for (int i = 0; i < SupportedSigners.Num(); i++)
 		{
 			FSessionSigner Signer = SupportedSigners[i];
-			TSharedPtr<FSessionCallSignature> CallSignature = Signer.SignCall(ChainId, Calls[i], i, SessionsTopology, Space, Nonce);
+			TSharedPtr<FSessionCallSignature> CallSignature = Signer.SignCall(ChainId, *CallsPayload, i, SessionsTopology);
 			Signatures.Add(CallSignature);
 			
 			if (Signer.Credentials.IsExplicit)

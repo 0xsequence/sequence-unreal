@@ -4,7 +4,6 @@
 #include "EcosystemWallet/Primitives/Signatures/ExplicitSessionCallSignature.h"
 #include "EcosystemWallet/Primitives/Signatures/ImplicitSessionCallSignature.h"
 #include "EcosystemWallet/Signers/ImplicitRequestEncoder.h"
-#include "Math/BigInt.h"
 #include "Util/SequenceCoder.h"
 #include "Util/SequenceSupport.h"
 
@@ -93,17 +92,19 @@ int32 FSessionSigner::FindSupportedPermission(const FBigInt& ChainId, const FCal
 	return PermissionsIndex;
 }
 
-TSharedPtr<FSessionCallSignature> FSessionSigner::SignCall(const FBigInt& ChainId, const FCall& Call, const int32& CallIdx,
-	const TSharedPtr<FSessionsTopology>& SessionsTopology, const FBigInt& Space, const FBigInt& Nonce)
+TSharedPtr<FSessionCallSignature> FSessionSigner::SignCall(const FBigInt& ChainId, const FCalls& Payload, const int32& CallIdx,
+	const TSharedPtr<FSessionsTopology>& SessionsTopology)
 {
-	TArray<uint8> HashedCall = HashCallWithReplayProtection(ChainId, Call, CallIdx, Space, Nonce);
+	TArray<uint8> HashedCall = HashCallWithReplayProtection(Credentials.WalletAddress, ChainId, Payload, CallIdx);
 	TArray<uint8> SignedCall = FEthAbiBridge::SignRecoverable(HashedCall, FByteArrayUtils::HexStringToBytes(Credentials.PrivateKey));
 
 	TSharedPtr<FRSY> Signature = FRSY::UnpackFrom65(SignedCall);
 
 	if (Credentials.IsExplicit)
 	{
+		const FCall Call = Payload.Calls[CallIdx];
 		int32 PermissionIndex = 0;
+		
 		if (!CheckCallForIncrementUsageLimit(Call))
 		{
 			PermissionIndex = FindSupportedPermission(ChainId, Call, SessionsTopology);
@@ -165,17 +166,13 @@ void FSessionSigner::PrepareIncrements(
 	});
 }
 
-TArray<uint8> FSessionSigner::HashCallWithReplayProtection(const FBigInt& ChainId, const FCall& Call, const uint32& CallIdx, const FBigInt& Space, const FBigInt& Nonce)
+TArray<uint8> FSessionSigner::HashCallWithReplayProtection(const FString& Wallet, const FBigInt& ChainId, const FCalls& Payload, const uint32& CallIdx)
 {
-	UE_LOG(LogTemp, Log, TEXT("FSessionSigner::HashCallWithReplayProtection %s %s %s %d"), *ChainId.Value, *Space.Value, *Nonce.Value, CallIdx);
-	TArray<uint8> ChainBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(ChainId.Value), 32);
-	TArray<uint8> SpaceBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(Space.Value), 32);
-	TArray<uint8> NonceBytes = FByteArrayUtils::PadLeft(FEthAbiBridge::EncodeBigInteger(Nonce.Value), 32);
+	TArray<uint8> PayloadHash = Payload.Hash(Wallet, ChainId);
 	TArray<uint8> CallIdxBytes = FByteArrayUtils::PadLeft(FByteArrayUtils::ByteArrayFromNumber(CallIdx, FByteArrayUtils::MinBytesFor(CallIdx)), 32);
-	TArray<uint8> CallHashBytes = Call.Hash();
 
 	const TArray<uint8> Concatenated = FByteArrayUtils::ConcatBytes(
-		{ ChainBytes, SpaceBytes, NonceBytes, CallIdxBytes, CallHashBytes });
+		{ PayloadHash, CallIdxBytes });
 
 	return FSequenceCoder::KeccakHash(Concatenated);
 }

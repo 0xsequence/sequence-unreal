@@ -13,6 +13,8 @@ struct SEQUENCEPLUGIN_API FCalls
 		: Calls(Calls), Space(Space), Nonce(Nonce) { }
 
 	TArray<uint8> Encode();
+
+	TArray<uint8> Hash(const FString& Wallet, const FBigInt& ChainId) const;
 	
 	TArray<FCall> Calls;
 	FBigInt Space;
