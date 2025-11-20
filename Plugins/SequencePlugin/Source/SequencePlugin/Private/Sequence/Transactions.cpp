@@ -31,6 +31,21 @@ void UTransactions::SetFee(const FFeeOption& Fee)
 	this->CachedFee = Fee;
 }
 
+TArray<FRawTransaction> UTransactions::GetRawTransactions()
+{
+	TArray<FRawTransaction> RawTransactions;
+	for (TransactionUnion Transaction : this->Transactions)
+	{
+		if (Transaction.HasSubtype<FRawTransaction>())
+		{
+			const auto& RawTransaction = Transaction.GetSubtype<FRawTransaction>();
+			RawTransactions.Add(RawTransaction);
+		}
+	}
+
+	return RawTransactions;
+}
+
 bool UTransactions::IsFeeSet() const
 {
 	return this->FeeSet;

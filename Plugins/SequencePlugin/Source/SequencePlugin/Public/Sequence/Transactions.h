@@ -12,6 +12,7 @@ UCLASS(Blueprintable)
 class SEQUENCEPLUGIN_API UTransactions : public UObject
 {
 	GENERATED_BODY()
+
 private:
 	TArray<TransactionUnion> Transactions;
 
@@ -22,10 +23,9 @@ private:
 	FFeeOption CachedFee;
 
 public:
-
 	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddERC20(const FERC20Transaction& Item);
-	
+
 	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void AddERC721(const FERC721Transaction& Item);
 
@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "0xSequence")
 	void SetFee(const FFeeOption& Fee);
 
+	UFUNCTION(BlueprintCallable, Category = "0xSequence")
+	TArray<FRawTransaction> GetRawTransactions();
+	
 	bool IsFeeSet() const;
 
 	FFeeOption GetFee();

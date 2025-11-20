@@ -1,4 +1,7 @@
 #include "Subsystems/SequenceUtilityBP.h"
+
+#include "EcosystemWallet/Transactions/CallDataTransaction.h"
+#include "EcosystemWallet/Transactions/TransactionBatch.h"
 #include "Engine/Engine.h"
 #include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
@@ -49,6 +52,22 @@ UTransactions* USequenceUtilityBP::ConstructSingleERC1155Transaction(const FStri
 	Transactions->AddERC1155(Transaction);
 	
 	return Transactions;
+}
+
+TScriptInterface<ISeqTransactionBase> USequenceUtilityBP::ConvertToEcosystemWalletTransaction(const FRawTransaction& RawTransaction)
+{
+	return UCallDataTransaction::CreateCallDataTransaction(RawTransaction.to, RawTransaction.value, RawTransaction.data);
+}
+
+TScriptInterface<ISeqTransactionBase> USequenceUtilityBP::ConvertToEcosystemWalletTransactions(const TArray<FRawTransaction>& RawTransactions)
+{
+	TArray<TScriptInterface<ISeqTransactionBase>> ConvertedTransactions;
+	for (FRawTransaction RawTransaction : RawTransactions)
+	{
+		ConvertedTransactions.Add(ConvertToEcosystemWalletTransaction(RawTransaction));
+	}
+	
+	return UTransactionBatch::CreateTransactionBatch(ConvertedTransactions);
 }
 
 void USequenceUtilityBP::ClipboardCopy(const FString& Text)

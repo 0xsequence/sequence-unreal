@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EcosystemWallet/Transactions/Transaction.h"
+#include "Editor/Transactor.h"
 #include "Sequence/Transactions.h"
 #include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
@@ -23,6 +25,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static UTransactions* ConstructSingleERC1155Transaction(const FString& ContractAddress, const FString& RecipientAddress, const FString& TokenId, const FString& Amount);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static TScriptInterface<ISeqTransactionBase> ConvertToEcosystemWalletTransaction(const FRawTransaction& RawTransaction);
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static TScriptInterface<ISeqTransactionBase> ConvertToEcosystemWalletTransactions(const TArray<FRawTransaction>& RawTransactions);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static void ClipboardCopy(const FString& Text);
