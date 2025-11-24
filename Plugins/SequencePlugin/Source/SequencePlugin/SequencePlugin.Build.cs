@@ -150,7 +150,15 @@ public class SequencePlugin : ModuleRules
             PublicAdditionalLibraries.Add(Path.Combine(libDir, "libethabi_bridge.lib"));
 
             // Add extra MSVC libs here
-            // PublicSystemLibraries.AddRange(new string[] { "advapi32", "bcrypt" });
+            PublicSystemLibraries.AddRange(new string[]
+            {
+	            "advapi32.lib",
+	            "bcrypt.lib",
+	            "kernel32.lib",
+	            "userenv.lib",
+	            "ws2_32.lib",
+	            "ntdll.lib"
+            });
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
