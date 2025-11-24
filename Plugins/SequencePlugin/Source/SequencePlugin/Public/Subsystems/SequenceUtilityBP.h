@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EcosystemWallet/Transactions/Transaction.h"
-#include "Editor/Transactor.h"
 #include "Sequence/Transactions.h"
 #include "Util/SeqLogVerbosity.h"
 #include "SequenceUtilityBP.generated.h"
