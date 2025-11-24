@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GuardService.h"
+#include "EcosystemWallet/Guard/Models/GuardConfig.h"
 #include "EcosystemWallet/KeyMachine/Models/ConfigUpdatesResponse.h"
 #include "EcosystemWallet/Primitives/Envelope/Envelope.h"
 #include "EcosystemWallet/Primitives/Signatures/RSY.h"
@@ -15,7 +16,7 @@ class SEQUENCEPLUGIN_API UGuardSigner : public UObject
 	GENERATED_BODY()
 
 public:
-	void WithHost(const FString& Host);
+	void SetConfig(const FGuardConfig& Config);
 
 	void SignEnvelope(
 		const TSharedPtr<FEnvelope>& Envelope,
@@ -27,4 +28,8 @@ public:
 private:
 	UPROPERTY()
 	UGuardService* GuardService;
+
+	FString GuardSigner;
+
+	static FString GetGuardSignerAddress(const FGuardConfig& Config);
 };

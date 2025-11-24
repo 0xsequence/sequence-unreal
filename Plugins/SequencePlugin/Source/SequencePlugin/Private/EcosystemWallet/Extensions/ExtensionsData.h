@@ -9,5 +9,5 @@ struct SEQUENCEPLUGIN_API FExtensionsData
 	FString Stage2;
 	FString CreationCode;
 	FString Sessions;
-	FString Guard;
+	TArray<FString> GuardSigners;
 };

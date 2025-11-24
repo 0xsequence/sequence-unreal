@@ -11,7 +11,7 @@ void FSignatureService::SignCalls(const TFunction<void(TSharedPtr<FRawSignature>
 		Envelope->Sign(Signature);
 		
 		UGuardSigner* Guard = NewObject<UGuardSigner>();
-		Guard->WithHost(Signers[0].Credentials.Guard.Url);
+		Guard->SetConfig(Signers[0].Credentials.Guard);
 
 		Guard->SignEnvelope(Envelope, ConfigUpdates, ImageHash, [this, OnSuccess, OnFailure](const TSharedPtr<FEnvelope>& EnvelopeRef, const TArray<FConfigUpdate>& Updates, const TSharedPtr<FSignatureOfSignerLeafHash>& Signature)
 		{

@@ -1,12 +1,10 @@
 #include "Subsystems/SequenceUtilityBP.h"
-
 #include "EcosystemWallet/Transactions/CallDataTransaction.h"
 #include "EcosystemWallet/Transactions/TransactionBatch.h"
 #include "Engine/Engine.h"
 #include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
-#include "Types/BinaryData.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
 

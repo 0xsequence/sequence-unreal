@@ -40,5 +40,6 @@ public:
 		return FByteArrayUtils::ConcatBytes({FlagBytes, WeightBytes, RsyPacked});
 	}
 
+	FString Address;
 	TSharedPtr<FRSY> Signature;
 };

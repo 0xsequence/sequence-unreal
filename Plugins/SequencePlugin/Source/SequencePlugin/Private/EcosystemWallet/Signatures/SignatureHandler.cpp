@@ -6,6 +6,7 @@
 #include "EcosystemWallet/Primitives/Config/Leafs/ConfigSignedSignerLeaf.h"
 #include "EcosystemWallet/Primitives/Config/Leafs/ConfigSignerLeaf.h"
 #include "EcosystemWallet/Primitives/Signatures/SapientSignature.h"
+#include "EcosystemWallet/Primitives/Signatures/SignatureOfSignerLeafHash.h"
 
 TSharedPtr<FRawSignature> FSignatureHandler::EncodeSignature(
 	const TSharedPtr<FEnvelope>& Envelope,
@@ -59,7 +60,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 	{
 		auto* SignerLeaf = static_cast<FConfigSignerLeaf*>(Leaf);
 		
-		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf, SessionsImageHash);
+		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf);
 		if (Signature == nullptr)
 		{
 			return ConfigTopology;
@@ -73,7 +74,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 	{
 		auto* SapientLeaf = static_cast<FConfigSapientSignerLeaf*>(Leaf);
 		
-		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf, SessionsImageHash);
+		const TSharedPtr<FSignatureOfLeaf> Signature = SignatureForLeaf(Envelope, ConfigTopology->Leaf);
 		if (Signature == nullptr)
 		{
 			return ConfigTopology;
@@ -102,7 +103,7 @@ TSharedPtr<FConfigTopology> FSignatureHandler::FillLeaves(
 	return MakeShareable(new FConfigTopology());
 }
 
-TSharedPtr<FSignatureOfLeaf> FSignatureHandler::SignatureForLeaf(const TSharedPtr<FEnvelope>& Envelope, const TSharedPtr<FConfigLeaf>& Leaf, const FString& SessionsImageHash)
+TSharedPtr<FSignatureOfLeaf> FSignatureHandler::SignatureForLeaf(const TSharedPtr<FEnvelope>& Envelope, const TSharedPtr<FConfigLeaf>& Leaf)
 {
 	if (Leaf->Type == EConfigLeafType::Signer)
 	{
@@ -111,7 +112,8 @@ TSharedPtr<FSignatureOfLeaf> FSignatureHandler::SignatureForLeaf(const TSharedPt
 		{
 			if (Sig->Type == EConfigSignatureType::SignatureOfSigner)
 			{
-				if (SignerLeaf->Address.Equals(FExtensionsFactory::GetCurrent().Guard, ESearchCase::IgnoreCase))
+				auto* Signature = static_cast<FSignatureOfSignerLeafHash*>(Sig.Get());
+				if (SignerLeaf->Address.Equals(Signature->Address, ESearchCase::IgnoreCase))
 				{
 					return Sig;
 				}

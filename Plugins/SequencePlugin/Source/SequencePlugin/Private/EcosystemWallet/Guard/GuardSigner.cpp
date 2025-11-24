@@ -11,10 +11,11 @@
 #include "Util/ByteArrayUtils.h"
 #include "Util/SequenceSupport.h"
 
-void UGuardSigner::WithHost(const FString& Host)
+void UGuardSigner::SetConfig(const FGuardConfig& Config)
 {
 	this->GuardService = NewObject<UGuardService>();
-	this->GuardService->WithHost(Host);
+	this->GuardService->WithHost(Config.Url);
+	this->GuardSigner = GetGuardSignerAddress(Config);
 }
 
 void UGuardSigner::SignEnvelope(
@@ -47,7 +48,7 @@ void UGuardSigner::SignEnvelope(
 	}
 	
 	FSignWithArgs Args {
-		FExtensionsFactory::GetCurrent().Guard,
+		this->GuardSigner,
 		FSignRequest {
 			FCString::Atoi64(*Envelope->ChainId.Value),
 			HashedHex,
@@ -58,12 +59,35 @@ void UGuardSigner::SignEnvelope(
 		}
 	};
 
-	this->GuardService->SignWith(Args, [Envelope, ConfigUpdates, OnSuccess](const FSignWithResponse& Response)
+	this->GuardService->SignWith(Args, [this, Envelope, ConfigUpdates, OnSuccess](const FSignWithResponse& Response)
 	{
 		const TSharedPtr<FRSY> Signature = FRSY::UnpackFrom65(FByteArrayUtils::HexStringToBytes(Response.Sig));
 		const TSharedPtr<FSignatureOfSignerLeafHash> SignatureOfSignerLeafHash = MakeShared<FSignatureOfSignerLeafHash>(FSignatureOfSignerLeafHash());
+		SignatureOfSignerLeafHash->Address = this->GuardSigner;
 		SignatureOfSignerLeafHash->Signature = Signature;
 		
 		OnSuccess(Envelope, ConfigUpdates, SignatureOfSignerLeafHash);
 	}, OnFailure);
+}
+
+FString UGuardSigner::GetGuardSignerAddress(const FGuardConfig& Config)
+{
+	TSet<FString> SetOther;
+
+	for (const FString& Signer : FExtensionsFactory::GetCurrent().GuardSigners)
+	{
+		SetOther.Add(Signer);
+	}
+
+	for (const TPair<FString, FString>& Pair : Config.ModuleAddresses)
+	{
+		const FString& Value = Pair.Value;
+
+		if (SetOther.Contains(Value))
+		{
+			return Value;
+		}
+	}
+
+	return FString();
 }

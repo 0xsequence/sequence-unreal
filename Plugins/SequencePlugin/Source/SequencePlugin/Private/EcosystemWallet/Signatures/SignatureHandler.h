@@ -17,6 +17,5 @@ private:
 	
 	static TSharedPtr<FSignatureOfLeaf> SignatureForLeaf(
 		const TSharedPtr<FEnvelope>& Envelope,
-		const TSharedPtr<FConfigLeaf>& Leaf,
-		const FString& SessionsImageHash);
+		const TSharedPtr<FConfigLeaf>& Leaf);
 };
