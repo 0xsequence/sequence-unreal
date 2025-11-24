@@ -38,6 +38,8 @@ enum ENetwork
 	Etherlink          UMETA(DisplayName = "Etherlink"),
 	XR1				   UMETA(DisplayName = "XR1"),
 	Somnia				UMETA(DisplayName = "Somnia"),
+	Monad				UMETA(DisplayName = "Monad"),
+	Incentiv				UMETA(DisplayName = "Incentiv"),
 
 	ImmutableTestnet  UMETA(DisplayName = "Immutable Testnet"),
     BNBSmartChainTestnet  UMETA(DisplayName = "BNB Smart Chain Testnet"),
@@ -59,6 +61,7 @@ enum ENetwork
     TelosTestnet        UMETA(DisplayName = "Telos Testnet"),
 	MoonbaseAlpha      UMETA(DisplayName = "Moonbase Alpha"),
 	EtherlinkTestnet   UMETA(DisplayName = "Etherlink Testnet"),
+	EtherlinkShadownetTestnet   UMETA(DisplayName = "Etherlink Shadownet Testnet"),
 	MonadTestnet		UMETA(DisplayName = "Monad Testnet"),
 	SomniaTestnet 		UMETA(DisplayName = "Somnia Testnet"),
 	IncentivTestnetV2     UMETA(DisplayName = "Incentiv Testnet v2"),
