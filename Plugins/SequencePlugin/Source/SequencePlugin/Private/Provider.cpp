@@ -269,13 +269,13 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 {
 	const FAddress From = GetAddress(GetPublicKey(PrivKey));
 	
-	TransactionCount(From, EBlockTag::ELatest, [=](uint64 Count)
+	TransactionCount(From, EBlockTag::ELatest, [this, From, Bytecode, PrivKey, ChainId, OnSuccess, OnFailure](uint64 Count)
 	{
 		const FBlockNonce Nonce = FBlockNonce::From(IntToHexString(Count));
 
-		this->GetGasPrice([=](const FUnsizedData& GasPrice)
+		this->GetGasPrice([this, From, Bytecode, PrivKey, ChainId, Nonce, OnSuccess, OnFailure](const FUnsizedData& GasPrice)
 		{
-			this->EstimateDeploymentGas(From, Bytecode, [=](const FUnsizedData& GasLimit)
+			this->EstimateDeploymentGas(From, Bytecode, [this, From, Bytecode, PrivKey, ChainId, Nonce, GasPrice, OnSuccess, OnFailure](const FUnsizedData& GasLimit)
 			{
 				const FAddress To = FAddress::From("");
 				const FUnsizedData Value = HexStringToBinary("");
@@ -285,7 +285,7 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 				const FAddress DeployedAddress = GetContractAddress(From, Nonce);
 				const FUnsizedData SignedTransaction = Transaction.GetSignedTransaction(PrivKey, ChainId);
 
-				this->SendRawTransaction("0x" + SignedTransaction.ToHex(), [=](const FUnsizedData& Hash)
+				this->SendRawTransaction("0x" + SignedTransaction.ToHex(), [OnSuccess, DeployedAddress](const FUnsizedData& Hash)
 				{
 					OnSuccess(DeployedAddress, Hash);
 				}, OnFailure);
@@ -296,7 +296,7 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 
 void UProvider::DeployContract(const FString& Bytecode, const FPrivateKey& PrivKey, const int64 ChainId, const TSuccessCallback<FAddress>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	DeployContractWithHash(Bytecode, PrivKey, ChainId, [=](const FAddress& Address, FUnsizedData Hash)
+	DeployContractWithHash(Bytecode, PrivKey, ChainId, [OnSuccess](const FAddress& Address, FUnsizedData Hash)
 	{
 		OnSuccess(Address);
 	}, OnFailure);
