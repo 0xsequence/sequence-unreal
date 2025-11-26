@@ -6,13 +6,13 @@
 #include "Types/BinaryData.h"
 
 #if PLATFORM_IOS
-extern "C" void OpenExternalBrowser(const char* urlCString);
+extern "C" void OpenExternalBrowserNative(const char* urlCString);
 #endif
 
 void USequenceSupport::OpenExternalBrowser(const FString& Url)
 {
 #if PLATFORM_IOS
-	OpenExternalBrowser(TCHAR_TO_UTF8(*Url));
+	OpenExternalBrowserNative(TCHAR_TO_UTF8(*Url));
 #else
 	FPlatformProcess::LaunchURL(*Url, nullptr, nullptr);
 #endif

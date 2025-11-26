@@ -43,7 +43,7 @@ static NSString* EncodeBase64(NSString* input)
 @end
 
 extern "C" {
-    void OpenExternalBrowser(const char* urlCString)
+    void OpenExternalBrowserNative(const char* urlCString)
     {
         if (!urlCString) return;
 
