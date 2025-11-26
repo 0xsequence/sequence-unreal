@@ -1,14 +1,22 @@
 #include "Util/SequenceSupport.h"
-
-#include "ConfigFetcher.h"
-#include "Provider.h"
-#include "RequestHandler.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
-#include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/Base64.h"
 #include "EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
+
+#if PLATFORM_IOS
+extern "C" void OpenExternalBrowser(const char* urlCString);
+#endif
+
+void USequenceSupport::OpenExternalBrowser(const FString& Url)
+{
+#if PLATFORM_IOS
+	OpenExternalBrowser(TCHAR_TO_UTF8(*Url));
+#else
+	FPlatformProcess::LaunchURL(*Url, nullptr, nullptr);
+#endif
+}
 
 FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
 {

@@ -8,6 +8,11 @@
 
 USequenceUtilityBP::USequenceUtilityBP() { }
 
+void USequenceUtilityBP::OpenExternalBrowser(const FString& Url)
+{
+	USequenceSupport::OpenExternalBrowser(Url);
+}
+
 UTransactions* USequenceUtilityBP::ConstructSingleERC20Transaction(const FString& ContractAddress, const FString& RecipientAddress, const FString& Value)
 {
 	FERC20Transaction Transaction;

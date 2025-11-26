@@ -336,6 +336,7 @@ private:
 	};
 
 public:
+	static void OpenExternalBrowser(const FString& Url);
 	
 	/**
 	 * Pass in a network Id and receive the name associated with that Id

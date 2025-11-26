@@ -15,7 +15,10 @@ class SEQUENCEPLUGIN_API USequenceUtilityBP : public UObject
 	
 public:
 	USequenceUtilityBP();
-
+	
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
+	static void OpenExternalBrowser(const FString& Url);
+	
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static UTransactions* ConstructSingleERC20Transaction(const FString& ContractAddress, const FString& RecipientAddress, const FString& Value);
 

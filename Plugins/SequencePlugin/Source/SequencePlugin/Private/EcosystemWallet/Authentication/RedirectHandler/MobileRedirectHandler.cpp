@@ -7,6 +7,7 @@ TWeakPtr<TSuccessCallback<FString>> FMobileRedirectHandler::CurrentOnSuccess;
 TWeakPtr<FFailureCallback> FMobileRedirectHandler::CurrentOnFailure;
 
 #if PLATFORM_IOS
+extern "C" void OpenExternalBrowser(const char* urlCString);
 extern "C" void OpenWalletApp(const char* urlCString);
 extern "C" void CloseWalletApp();
 #elif PLATFORM_ANDROID
