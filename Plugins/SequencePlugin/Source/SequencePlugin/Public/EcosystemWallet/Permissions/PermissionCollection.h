@@ -5,7 +5,7 @@
 #include "UObject/Object.h"
 #include "PermissionCollection.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class SEQUENCEPLUGIN_API UPermissionCollection : public UObject, public IPermissions
 {
 	GENERATED_BODY()

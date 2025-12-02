@@ -5,7 +5,7 @@
 #include "UObject/Object.h"
 #include "ContractPermissions.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class SEQUENCEPLUGIN_API UContractPermissions : public UObject, public IPermissions
 {
 	GENERATED_BODY()
