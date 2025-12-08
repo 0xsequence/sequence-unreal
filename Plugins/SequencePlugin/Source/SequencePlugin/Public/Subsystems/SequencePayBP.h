@@ -36,7 +36,7 @@ public:
 	void GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Pay")
-	void GetSupportedSwapTokens(const TArray<int64>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure);
+	void GetSupportedSwapTokens(const TArray<FString>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
 	void GetSwapPrice(const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);

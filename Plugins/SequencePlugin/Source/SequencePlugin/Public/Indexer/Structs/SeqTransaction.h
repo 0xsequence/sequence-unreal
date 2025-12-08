@@ -14,11 +14,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString txnHash = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 blockNumber = -1;
+        FString blockNumber = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString blockHash = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 chainId = -1;
+        FString chainId = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString metaTxnID = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
@@ -34,9 +34,9 @@ public:
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
         ret.Get()->SetStringField("txnHash", txnHash);
-        ret.Get()->SetNumberField("blockNumber", blockNumber);
+        ret.Get()->SetStringField("blockNumber", blockNumber);
         ret.Get()->SetStringField("blockHash", blockHash);
-        ret.Get()->SetNumberField("chainId", chainId);
+        ret.Get()->SetStringField("chainId", chainId);
         ret.Get()->SetStringField("metaTxnID", metaTxnID);
 
         TArray<TSharedPtr<FJsonObject>> jList;

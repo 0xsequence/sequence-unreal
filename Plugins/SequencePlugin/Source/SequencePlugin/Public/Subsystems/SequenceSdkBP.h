@@ -18,7 +18,7 @@ public:
 	USequenceSdkBP();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
-	void SetChainById(const int64 NewChainId);
+	void SetChainById(const FString NewChainId);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
 	void SetChainByName(const FString& NewChainName);
@@ -30,5 +30,5 @@ public:
 	void SetRedirectUrl(const FString& NewRedirectUrl);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK")
-	int64 GetChainId();
+	FString GetChainId();
 };

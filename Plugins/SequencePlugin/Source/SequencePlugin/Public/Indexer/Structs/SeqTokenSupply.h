@@ -12,11 +12,11 @@ struct SEQUENCEPLUGIN_API FSeqTokenSupply
     GENERATED_USTRUCT_BODY()
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 tokenID = -1;
+        FString tokenID = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString supply = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 chainId = -1;
+        FString chainId = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FSeqContractInfo contractInfo;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
@@ -29,9 +29,9 @@ public:
     TSharedPtr<FJsonObject> GetJson()
     {
         TSharedPtr<FJsonObject> ret = MakeShareable<FJsonObject>(new FJsonObject);
-        ret.Get()->SetNumberField("tokenID",tokenID);
+        ret.Get()->SetStringField("tokenID",tokenID);
         ret.Get()->SetStringField("supply", supply);
-        ret.Get()->SetNumberField("chainId", chainId);
+        ret.Get()->SetStringField("chainId", chainId);
         ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
         ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.GetJson());
         return ret;
