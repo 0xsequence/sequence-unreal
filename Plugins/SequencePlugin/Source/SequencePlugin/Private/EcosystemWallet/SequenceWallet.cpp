@@ -55,7 +55,7 @@ void USequenceWallet::GetFeeOptions(const TScriptInterface<ISeqTransactionBase>&
 
 		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
 
-		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainId());
 		
 		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
 		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [OnSuccess, OnInternalFailure](TTuple<FString, FString> Result)
@@ -117,7 +117,7 @@ void USequenceWallet::SendTransaction(const TScriptInterface<ISeqTransactionBase
 	{
 		const TArray<FSessionSigner> Signers = FSessionStorage::GetStoredSigners();
 
-		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainIdString());
+		const FBigInt ChainId = FBigInt(SequenceSdk::GetChainId());
 		
 		FTransactionService TransactionService = FTransactionService(Signers, this->WalletState);
 		TransactionService.SignAndBuild(ChainId, Calls.Calls, true, [OnSuccess, OnInternalFailure](TTuple<FString, FString> Result)

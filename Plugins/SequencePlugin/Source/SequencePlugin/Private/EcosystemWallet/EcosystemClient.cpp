@@ -26,7 +26,7 @@ UEcosystemClient::UEcosystemClient()
 void UEcosystemClient::CreateNewSession(ESessionCreationType Type, const FString& PreferredLoginMethod, const FString& Email,
 		const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure)
 {
-    const FString ChainIdStr = SequenceSdk::GetChainIdString();
+    const FString ChainIdStr = SequenceSdk::GetChainId();
     UCryptoWallet* SessionWallet = UCryptoWallet::Make();
     FString SessionAddress = SessionWallet->GetWalletAddress().ToHexWithPrefix();
 

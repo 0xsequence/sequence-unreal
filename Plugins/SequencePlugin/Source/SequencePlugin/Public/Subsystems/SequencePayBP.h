@@ -14,7 +14,7 @@ class SEQUENCEPLUGIN_API USequencePayBP : public UGameInstanceSubsystem
 	
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapChains, const TArray<int64>&, Chains);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapChains, const TArray<FString>&, Chains);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapTokens, const TArray<FSeqLifiToken>&, Tokens);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetSwapPrice, FString, CurrencyAddress, int64, Price);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, const TArray<FSeqSwapPrice>&, SwapPrices);

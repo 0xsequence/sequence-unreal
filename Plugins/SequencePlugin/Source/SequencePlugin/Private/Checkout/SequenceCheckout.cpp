@@ -9,6 +9,7 @@
 #include "Checkout/Structs/GetCheckoutOptionsResponse.h"
 #include "Checkout/Structs/GetPrimarySaleCheckoutOptionsArgs.h"
 #include "Checkout/Structs/OrderData.h"
+#include "Util/ChainCollection.h"
 #include "Util/Log.h"
 
 FString USequenceCheckout::Url(const FString& TargetChainID, const FString& EndPoint) const
@@ -27,7 +28,7 @@ FString USequenceCheckout::HostName(FString TargetChainID)
 {
 	FString Hostname = "https://";
 	Hostname.Append("marketplace-api.sequence.app/");
-	Hostname.Append(USequenceSupport::GetNetworkNameForUrl(TargetChainID));
+	Hostname.Append(FChainCollection::GetNetworkNameForUrl(TargetChainID));
 	return Hostname;
 }
 
@@ -276,7 +277,7 @@ void USequenceCheckout::GenerateListingTransaction(const FString ChainID, const 
 	const FString Endpoint = "GenerateListingTransaction";
 	const FString Args = BuildArgs<FGenerateListingTransactionArgs>(FGenerateListingTransactionArgs {
 		CollectionAddress, WalletAddress, ContractType, OrderbookKind, FCreateReq {
-		TokenId, FString::Printf(TEXT("%lld"), Amount), FString::Printf(TEXT("%lld"), EpochTime), CurrencyTokenAddress, FString::Printf(TEXT("%lld"), PricePerToken)
+		TokenId, FString::Printf(TEXT("%lld"), Amount), FString::Printf(TEXT("%lld"), EpochTime), CurrencyTokenAddress, FString::Printf(TEXT("%s"), *PricePerToken)
 		},  WalletKind
 	});
 
@@ -296,7 +297,7 @@ void USequenceCheckout::GenerateOfferTransaction(const FString ChainID, const FS
 	const FString Endpoint = "GenerateOfferTransaction";
 	const FString Args = BuildArgs<FGenerateOfferTransactionArgs>(FGenerateOfferTransactionArgs {
 		CollectionAddress, WalletAddress, ContractType, OrderbookKind, FCreateReq {
-		TokenId, FString::Printf(TEXT("%lld"), Amount), FString::Printf(TEXT("%lld"), EpochTime), CurrencyTokenAddress, FString::Printf(TEXT("%lld"), PricePerToken)
+		TokenId, FString::Printf(TEXT("%lld"), Amount), FString::Printf(TEXT("%lld"), EpochTime), CurrencyTokenAddress, FString::Printf(TEXT("%s"), *PricePerToken)
 		},  WalletKind
 	});
 

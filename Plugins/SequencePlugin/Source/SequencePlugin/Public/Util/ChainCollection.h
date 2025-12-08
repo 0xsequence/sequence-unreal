@@ -21,13 +21,6 @@ struct SEQUENCEPLUGIN_API FChainConfig
 class SEQUENCEPLUGIN_API FChainCollection
 {
 public:
-	static TArray<FChainConfig> ChainConfigs;
-
-	static TMap<ENetwork, FString> NameOf;
-	static TMap<ENetwork, FString> PathOf;
-	static TMap<ENetwork, FString> ChainIdOf;
-	static TMap<FString, ENetwork> ChainById;
-
 	static void Initialize();
 
 	static FString GetNetworkName(const FString NetworkIdIn);
@@ -37,10 +30,20 @@ public:
 
 	static bool IsNetworkIdSupported(const FString NetworkIdIn);
 
-	static int64 GetNetworkId(const FString& NetworkNameIn);
-	static int64 GetNetworkId(const ENetwork& Network);
+	static FString GetNetworkId(const FString& NetworkNameIn);
+	static FString GetNetworkId(const ENetwork& Network);
 
 	static TArray<FString> GetAllNetworks();
 	static TArray<FString> GetAllNetworkNames();
 	static TArray<FString> GetAllNetworkIds();
+
+private:
+	static bool Initialized;
+	
+	static TArray<FChainConfig> ChainConfigs;
+
+	static TMap<ENetwork, FString> NameOf;
+	static TMap<ENetwork, FString> PathOf;
+	static TMap<ENetwork, FString> ChainIdOf;
+	static TMap<FString, ENetwork> ChainById;
 };

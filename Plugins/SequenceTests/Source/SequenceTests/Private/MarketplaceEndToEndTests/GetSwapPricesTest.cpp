@@ -7,6 +7,7 @@
 #include "SequencePlugin/Public/Sequence/SequencePay.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetSwapPricesTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetSwapPricesTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -45,7 +46,6 @@ bool FGetSwapPricesTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        const USequenceSupport* Support = NewObject<USequenceSupport>();
         const FString WalletAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
         const FString BuyUSDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
         const FString BuyAmount = "1000";
@@ -72,7 +72,7 @@ bool FGetSwapPricesTest::RunTest(const FString& Parameters)
 
         USequencePay* Pay = NewObject<USequencePay>();
         Pay->GetSwapPrices(
-            Support->GetNetworkId(ENetwork::ArbitrumOne),
+            FChainCollection::GetNetworkId(ENetwork::ArbitrumOne),
             WalletAddress,
             BuyUSDC,
             BuyAmount,

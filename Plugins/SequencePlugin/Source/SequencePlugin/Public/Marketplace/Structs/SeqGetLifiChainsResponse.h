@@ -11,5 +11,5 @@ struct SEQUENCEPLUGIN_API FSeqGetLifiChainsResponse
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName="chains"))
-    TArray<int64> Chains;
+    TArray<FString> Chains;
 };

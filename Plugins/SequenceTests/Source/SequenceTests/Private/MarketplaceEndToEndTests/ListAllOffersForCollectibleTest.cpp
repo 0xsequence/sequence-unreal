@@ -7,6 +7,7 @@
 #include "Marketplace/SequenceMarketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllOffersForCollectibleTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllOffersForCollectible", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -45,8 +46,6 @@ bool FListAllOffersForCollectibleTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
         const TSuccessCallback<TArray<FSeqCollectibleOrder>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqCollectibleOrder> Orders)
@@ -81,7 +80,7 @@ bool FListAllOffersForCollectibleTest::RunTest(const FString& Parameters)
         };
 		    
         MarketplaceTestData->GetMarketplace()->ListAllOffersForCollectible(
-            Support->GetNetworkId(ENetwork::PolygonChain),
+            FChainCollection::GetNetworkId(ENetwork::PolygonChain),
             "0x079294e6ffec16234578c672fa3fbfd4b6c48640",
             "1",
             FSeqCollectiblesFilter::Empty(),

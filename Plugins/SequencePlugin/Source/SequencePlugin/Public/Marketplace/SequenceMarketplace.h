@@ -46,7 +46,7 @@ public:
 		Used to send an HTTPPost req to a the sequence app
 		@return the content of the post response
 	*/
-	void HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
+	void HTTPPost(const FString& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const;
 
 	//public functions
 

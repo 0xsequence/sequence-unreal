@@ -2,12 +2,11 @@
 #include "ConfigFetcher.h"
 #include "Sequence/SequenceSdk.h"
 #include "Util/ChainCollection.h"
-#include "Util/SequenceSupport.h"
 
 USequenceSdkBP::USequenceSdkBP()
 {
 	const FString& DefaultChainName = UConfigFetcher::GetConfigVar(UConfigFetcher::DefaultChain);
-	SetChainById(FCString::Atoi64(*DefaultChainName));
+	SetChainById(DefaultChainName);
 	SetRedirectUrl("https://api.sequence.app");
 }
 

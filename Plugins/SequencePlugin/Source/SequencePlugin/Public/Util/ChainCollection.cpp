@@ -60,9 +60,15 @@ TMap<ENetwork, FString> FChainCollection::NameOf;
 TMap<ENetwork, FString> FChainCollection::PathOf;
 TMap<ENetwork, FString> FChainCollection::ChainIdOf;
 TMap<FString, ENetwork> FChainCollection::ChainById;
+bool FChainCollection::Initialized = false;
 
 void FChainCollection::Initialize()
 {
+    if (FChainCollection::Initialized)
+    {
+        return;
+    }
+    
     for (const FChainConfig& Config : ChainConfigs)
     {
         NameOf.Add(Config.Network, Config.Name);
@@ -70,10 +76,14 @@ void FChainCollection::Initialize()
         ChainIdOf.Add(Config.Network, Config.ChainId);
         ChainById.Add(Config.ChainId, Config.Network);
     }
+
+    FChainCollection::Initialized = true;
 }
 
 FString FChainCollection::GetNetworkName(const FString NetworkIdIn)
 {
+    FChainCollection::Initialize();
+    
     if (const ENetwork* Found = ChainById.Find(NetworkIdIn))
     {
         if (const FString* Name = NameOf.Find(*Found))
@@ -86,6 +96,8 @@ FString FChainCollection::GetNetworkName(const FString NetworkIdIn)
 
 FString FChainCollection::GetNetworkName(const ENetwork NetworkIn)
 {
+    FChainCollection::Initialize();
+    
     if (const FString* Name = NameOf.Find(NetworkIn))
     {
         return *Name;
@@ -95,6 +107,8 @@ FString FChainCollection::GetNetworkName(const ENetwork NetworkIn)
 
 FString FChainCollection::GetNetworkNameForUrl(const FString NetworkIdIn)
 {
+    FChainCollection::Initialize();
+    
     if (const ENetwork* Found = ChainById.Find(NetworkIdIn))
     {
         if (const FString* Path = PathOf.Find(*Found))
@@ -107,32 +121,40 @@ FString FChainCollection::GetNetworkNameForUrl(const FString NetworkIdIn)
 
 bool FChainCollection::IsNetworkIdSupported(const FString NetworkIdIn)
 {
+    FChainCollection::Initialize();
+    
     return ChainById.Contains(NetworkIdIn);
 }
 
-int64 FChainCollection::GetNetworkId(const FString& NetworkNameIn)
+FString FChainCollection::GetNetworkId(const FString& NetworkNameIn)
 {
+    FChainCollection::Initialize();
+    
     for (const FChainConfig& Config : ChainConfigs)
     {
         if (Config.Name.Equals(NetworkNameIn, ESearchCase::IgnoreCase))
         {
-            return FCString::Atoi64(*Config.ChainId);
+            return Config.ChainId;
         }
     }
-    return -1;
+    return "";
 }
 
-int64 FChainCollection::GetNetworkId(const ENetwork& Network)
+FString FChainCollection::GetNetworkId(const ENetwork& Network)
 {
+    Initialize();
+    
     if (const FString* Id = ChainIdOf.Find(Network))
     {
-        return FCString::Atoi64(**Id);
+        return *Id;
     }
-    return -1;
+    return "";
 }
 
 TArray<FString> FChainCollection::GetAllNetworks()
 {
+    FChainCollection::Initialize();
+    
     TArray<FString> Out;
     for (const FChainConfig& Config : ChainConfigs)
     {
@@ -143,6 +165,8 @@ TArray<FString> FChainCollection::GetAllNetworks()
 
 TArray<FString> FChainCollection::GetAllNetworkNames()
 {
+    FChainCollection::Initialize();
+    
     TArray<FString> Out;
     for (const FChainConfig& Config : ChainConfigs)
     {
@@ -153,6 +177,8 @@ TArray<FString> FChainCollection::GetAllNetworkNames()
 
 TArray<FString> FChainCollection::GetAllNetworkIds()
 {
+    FChainCollection::Initialize();
+    
     TArray<FString> Out;
     for (const FChainConfig& Config : ChainConfigs)
     {

@@ -37,7 +37,7 @@ void FIndexerGetTokenSuppliesTest::GetTests(TArray<FString>& OutBeautifiedNames,
 
 bool FIndexerGetTokenSuppliesTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     const FString TestAddress = IndexerEndToEndTestsCommon::TestContractAddress_Skyweaver;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 

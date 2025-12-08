@@ -301,7 +301,7 @@ void USequenceMarketplace::ListAllListingsForCollectible(const FString ChainID,
 	}, OnFailure);
 }
 
-void USequenceMarketplace::ListOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID,
+void USequenceMarketplace::ListOffersForCollectible(const FString ChainID, const FString& ContractAddress, const FString& TokenID,
 	const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page,
 	TSuccessCallback<FSeqListCollectibleOffersReturn> OnSuccess, const FFailureCallback& OnFailure)
 {
@@ -314,7 +314,7 @@ void USequenceMarketplace::ListOffersForCollectible(const int64 ChainID, const F
 		}, OnFailure);
 }
 
-void USequenceMarketplace::ListAllOffersForCollectible(const int64 ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
+void USequenceMarketplace::ListAllOffersForCollectible(const FString ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, TSuccessCallback<TArray<FSeqCollectibleOrder>> OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FString Args = BuildArgs<FSeqListCollectibleListingsArgs>(FSeqListCollectibleListingsArgs{ ContractAddress, TokenID, Filter, FSeqMarketplacePage::Empty()});
 	OrderArray.Empty();

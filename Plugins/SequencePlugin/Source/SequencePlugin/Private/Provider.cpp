@@ -9,6 +9,7 @@
 #include "RequestHandler.h"
 #include "Sequence/SequenceSdk.h"
 #include "Types/Header.h"
+#include "Util/ChainCollection.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -19,7 +20,7 @@ UProvider::UProvider()
 
 void UProvider::UpdateUrlFromConfig()
 {
-	const FString ChainPath = USequenceSupport::GetNetworkNameForUrl(SequenceSdk::GetChainId());
+	const FString ChainPath = FChainCollection::GetNetworkNameForUrl(SequenceSdk::GetChainId());
 	const FString ProjectAccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 	const FString ProviderUrl = FString::Printf(TEXT("https://nodes.sequence.app/%s/%s"), *ChainPath, *ProjectAccessKey);
 	this->UpdateUrl(ProviderUrl);

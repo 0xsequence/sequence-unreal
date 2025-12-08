@@ -29,7 +29,7 @@ struct FSendTransactionArgs
 
 public:
 	UPROPERTY()
-	int64 ChainId;
+	FString ChainId;
 	
 	UPROPERTY()
 	FString Address;

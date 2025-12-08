@@ -3,8 +3,8 @@
 #include "Util/Async.h"
 #include "JsonObjectConverter.h"
 #include "Http.h"
-#include "Util/SequenceSupport.h"
 #include "HttpManager.h"
+#include "Util/ChainCollection.h"
 #include "Util/Log.h"
 
 USequenceIndexer::USequenceIndexer(){}
@@ -12,7 +12,7 @@ USequenceIndexer::USequenceIndexer(){}
 /*
 	Combines <see cref="PATH" and name="name" to suffix on to the base address
 */
-FString USequenceIndexer::Url(const int64& ChainID,const FString& EndPoint) const
+FString USequenceIndexer::Url(const FString& ChainID,const FString& EndPoint) const
 {
 	FString Out_URL = HostName(ChainID);
 	Out_URL.Append(this->PATH);
@@ -27,10 +27,10 @@ FString USequenceIndexer::Url(const int64& ChainID,const FString& EndPoint) cons
 /*
 	Get hostname directing to specific chainID
 */
-FString USequenceIndexer::HostName(const int64 ChainID)
+FString USequenceIndexer::HostName(const FString ChainID)
 {
 	FString Hostname = "https://";
-	Hostname.Append(USequenceSupport::GetNetworkNameForUrl(ChainID));
+	Hostname.Append(FChainCollection::GetNetworkNameForUrl(ChainID));
 	Hostname.Append("-indexer.sequence.app");
 	return Hostname;
 }
@@ -38,7 +38,7 @@ FString USequenceIndexer::HostName(const int64 ChainID)
 
 /*
 	Here we construct a post request and parse out a response if valid.
-*/void USequenceIndexer::HTTPPost(const int64& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
+*/void USequenceIndexer::HTTPPost(const FString& ChainID, const FString& Endpoint, const FString& Args, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure) const
 {
 	const FString Url = *this->Url(ChainID, Endpoint);
 	const TSharedRef<IHttpRequest> HTTP_Post_Req = FHttpModule::Get().CreateRequest();

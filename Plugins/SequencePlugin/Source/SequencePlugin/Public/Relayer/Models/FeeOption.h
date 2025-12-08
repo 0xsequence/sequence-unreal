@@ -24,7 +24,7 @@ struct FFeeToken
 	
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
-	int64 ChainID = 0;
+	FString ChainID = "";
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "0xSequence")
 	FString ContractAddress = "";
@@ -49,7 +49,7 @@ public:
 
 	FFeeToken(){}
 	
-	FFeeToken(int64 ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
+	FFeeToken(FString ChainIDIn, const FString& ContractAddressIn, int32 DecimalsIn,
 		const FString& LogoURLIn, const FString& NameIn, const FString& SymbolIn,
 		const FString& TokenIDIn, FString TypeIn)
 	{
@@ -71,7 +71,7 @@ struct FFeeOption
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-	int64 GasLimit = 0;
+	FString GasLimit = "";
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	FString To = "";
@@ -83,30 +83,25 @@ public:
 	FString Value = "";
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-	int64 ValueNumber = 0;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
 	bool bCanAfford = false;
 	
 	FFeeOption(){}
 
 	FFeeOption(const FSeqEtherBalance& EtherBalance)
 	{
-		ValueNumber = EtherBalance.balanceWei;
+		Value = EtherBalance.balanceWei;
 		Token.Type = "UNKNOWN";
 	}
 	
 	FFeeOption(const FSeqTokenBalance& BalanceOption)
 	{
-		Value = "";
-		Value.AppendInt(BalanceOption.balance);
+		Value = BalanceOption.balance;
 		Token.Decimals = BalanceOption.contractInfo.decimals;
 		Token.Name = BalanceOption.contractInfo.name;
 		Token.Symbol = BalanceOption.contractInfo.symbol;
 		Token.ContractAddress = BalanceOption.contractAddress;
 		Token.ChainID = BalanceOption.chainId;
 		Token.LogoURL = BalanceOption.contractInfo.logoURI;
-		ValueNumber = BalanceOption.balance;
 		
 		switch(BalanceOption.contractType)
 		{
@@ -134,7 +129,6 @@ public:
 				To = FeeOptionStruct.To;
 				Token = FeeOptionStruct.Token;
 				Value = FeeOptionStruct.Value;
-				ValueNumber = FCString::Atoi64(*Value);
 			}
 			else
 			{
@@ -143,7 +137,7 @@ public:
 		}
 	}
 	
-	FFeeOption(int64 GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
+	FFeeOption(FString GasLimitIn, const FString& ToIn, const FFeeToken& TokenIn, const FString& ValueIn)
 	{
 		GasLimit = GasLimitIn;
 		To = ToIn;
@@ -207,7 +201,7 @@ public:
 	*/
 	bool CanAfford(const FFeeOption& Fee)
 	{
-		bCanAfford = Equals(Fee) && ValueNumber >= Fee.ValueNumber;
+		bCanAfford = Equals(Fee);
 		return bCanAfford;
 	}
 };

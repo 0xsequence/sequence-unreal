@@ -21,7 +21,7 @@ FCall FFeeOptionService::BuildCallForNativeTokenOption()
 		ValueForwarder,
 		EncodedFeeOptionData,
 		FBigInt(FeeOption.Value),
-		FBigInt(FValueUtils::Int32ToString(FeeOption.GasLimit)),
+		FBigInt(FeeOption.GasLimit),
 		false, false, "1"
 	};
 }
@@ -35,7 +35,7 @@ FCall FFeeOptionService::BuildCallForCustomTokenOption()
 		FeeOption.Token.ContractAddress,
 		EncodedFeeOptionData,
 		FBigInt("0"),
-		FBigInt(FValueUtils::Int32ToString(FeeOption.GasLimit)),
+		FBigInt(FeeOption.GasLimit),
 		false, false, "1"
 	};
 }

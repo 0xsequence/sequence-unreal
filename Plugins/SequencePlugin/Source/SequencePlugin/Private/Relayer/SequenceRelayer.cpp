@@ -2,6 +2,7 @@
 
 #include "Relayer/Models/GetMetaTxnReceiptArgs.h"
 #include "Sequence/SequenceSdk.h"
+#include "Util/ChainCollection.h"
 #include "Util/HttpHandler.h"
 
 void USequenceRelayer::Relay(const FString& To, const FString& Data, const FString& Quote, const TArray<FIntentPrecondition>& Preconditions, TSuccessCallback<FString> OnSuccess, const TFunction<void(FString)>& OnFailure) const
@@ -73,8 +74,8 @@ void USequenceRelayer::SendRequest(const FString& Endpoint, const FString& Paylo
 
 FString USequenceRelayer::BuildUrl()
 {
-	const int64 ChainId = SequenceSdk::GetChainId();
-	const FString Name = USequenceSupport::GetNetworkNameForUrl(ChainId);
+	const FString ChainId = SequenceSdk::GetChainId();
+	const FString Name = FChainCollection::GetNetworkNameForUrl(ChainId);
 	return FString::Printf(TEXT("https://dev-%s-relayer.sequence.app/rpc/Relayer"), *Name);
 }
 
