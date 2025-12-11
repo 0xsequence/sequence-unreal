@@ -170,9 +170,39 @@ bool UObjectHandler::RequestRawBase(FString URL)
 	http_post_req->SetVerb("GET");
 	http_post_req->SetURL(URL);
 	http_post_req->SetTimeout(15);
+	http_post_req->SetHeader(TEXT("Accept"), GetImageMimeType(URL));
 	http_post_req->OnProcessRequestComplete().BindUObject(this, &UObjectHandler::HandleRequestRaw);
 	http_post_req->ProcessRequest();
 	return http_post_req.Get().GetStatus() == EHttpRequestStatus::Processing || http_post_req.Get().GetStatus() == EHttpRequestStatus::Succeeded;
+}
+
+FString UObjectHandler::GetImageMimeType(const FString& URL)
+{
+	FString Extension;
+	if (URL.Split(TEXT("."), nullptr, &Extension, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+	{
+		Extension = Extension.ToLower();
+
+		if (Extension.StartsWith(TEXT("jpg")) || Extension.StartsWith(TEXT("jpeg")))
+			return TEXT("image/jpeg");
+		if (Extension == TEXT("png"))
+			return TEXT("image/png");
+		if (Extension == TEXT("bmp"))
+			return TEXT("image/bmp");
+		if (Extension == TEXT("gif"))
+			return TEXT("image/gif");
+		if (Extension == TEXT("tga"))
+			return TEXT("image/x-tga");
+		if (Extension == TEXT("webp"))
+			return TEXT("image/webp");
+		if (Extension == TEXT("heic") || Extension == TEXT("heif"))
+			return TEXT("image/heic");
+		if (Extension == TEXT("avif"))
+			return TEXT("image/avif");
+	}
+
+	// Default fallback if unknown or missing extension
+	return TEXT("application/octet-stream");
 }
 
 void UObjectHandler::RequestImage(FString URL)

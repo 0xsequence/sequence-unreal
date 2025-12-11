@@ -14,7 +14,7 @@ struct SEQUENCEPLUGIN_API FSeqListCollectibleOffersReturn
 public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
-    TArray<FSeqCollectibleOrder> Offers;
+    TArray<FSeqOrder> Offers;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collectibles")
     FSeqMarketplacePage Page;
@@ -36,7 +36,7 @@ public:
 
         // Convert CollectibleOrders array to JSON
         TArray<TSharedPtr<FJsonObject>> collectibleOrdersList;
-        for (FSeqCollectibleOrder order : Offers)
+        for (FSeqOrder order : Offers)
         {
             collectibleOrdersList.Add(order.GetJson());
         }

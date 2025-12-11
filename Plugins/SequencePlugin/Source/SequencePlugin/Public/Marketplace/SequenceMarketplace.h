@@ -19,6 +19,7 @@ private:
 	const FString PATH = "/rpc/Marketplace/";
 
 	TArray<FSeqCollectibleOrder> OrderArray;
+	TArray<FSeqOrder> RawOrderArray;
 
 	//private functions
 
@@ -37,8 +38,8 @@ private:
 	void ListAllCollectibleOffersWithHighestPricedOfferFirstHelper(const FString ChainID, const FString& ContractAddress, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
 	void GetCollectibleOrder(FString ChainID, const FString& Endpoint, const FSeqGetCollectibleOrderArgs& Args,
 	                         TSuccessCallback<FSeqCollectibleOrder> OnSuccess, const FFailureCallback& OnFailure);
-	void ListAllListingsForCollectibleHelper(const FString ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
-	void ListAllOffersForCollectibleHelper(const FString ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqCollectibleOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllListingsForCollectibleHelper(const FString ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
+	void ListAllOffersForCollectibleHelper(const FString ChainID, const FString& ContractAddress, const FString& TokenID, const FSeqCollectiblesFilter& Filter, const FSeqMarketplacePage& Page, TFunction<void(TArray<FSeqOrder>, bool)> OnSuccess, const FFailureCallback& OnFailure);
 	
 public:
 	

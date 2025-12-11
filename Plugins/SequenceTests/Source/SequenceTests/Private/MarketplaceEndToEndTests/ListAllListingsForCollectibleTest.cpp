@@ -48,7 +48,7 @@ bool FListAllListingsForCollectible::RunTest(const FString& Parameters)
     {      
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
-        const TSuccessCallback<TArray<FSeqCollectibleOrder>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqCollectibleOrder> Orders)
+        const TSuccessCallback<TArray<FSeqOrder>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqOrder> Orders)
         {
             if(Orders.Num() == 0)
             {
@@ -61,7 +61,7 @@ bool FListAllListingsForCollectible::RunTest(const FString& Parameters)
             else
             {
                 FString Message;
-                for(FSeqCollectibleOrder Order : Orders)
+                for(FSeqOrder Order : Orders)
                 {
                     Message += USequenceSupport::StructToString(Order) + "\n";
                 }
