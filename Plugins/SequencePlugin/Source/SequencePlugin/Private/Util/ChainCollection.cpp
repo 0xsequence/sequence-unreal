@@ -1,4 +1,4 @@
-#include "ChainCollection.h"
+#include "Util/ChainCollection.h"
 
 TArray<FChainConfig> FChainCollection::ChainConfigs = {
     FChainConfig(ENetwork::Ethereum, TEXT("1"), TEXT("Ethereum"), TEXT("mainnet")),
@@ -18,14 +18,14 @@ TArray<FChainConfig> FChainCollection::ChainConfigs = {
     FChainConfig(ENetwork::Avalanche, TEXT("43114"), TEXT("Avalanche"), TEXT("avalanche")),
     FChainConfig(ENetwork::Blast, TEXT("81457"), TEXT("Blast"), TEXT("blast")),
     FChainConfig(ENetwork::Xai, TEXT("660279"), TEXT("Xai"), TEXT("xai")),
-    FChainConfig(ENetwork::LAOS, TEXT("6283"), TEXT("LAOS"), TEXT("laos")),
-    FChainConfig(ENetwork::Root, TEXT("7668"), TEXT("Root Network"), TEXT("rootnet")),
     FChainConfig(ENetwork::Soneium, TEXT("1868"), TEXT("Soneium"), TEXT("soneium")),
     FChainConfig(ENetwork::Telos, TEXT("40"), TEXT("Telos"), TEXT("telos")),
     FChainConfig(ENetwork::Moonbeam, TEXT("1284"), TEXT("Moonbeam"), TEXT("moonbeam")),
     FChainConfig(ENetwork::Etherlink, TEXT("42793"), TEXT("Etherlink"), TEXT("etherlink")),
     FChainConfig(ENetwork::XR1, TEXT("273"), TEXT("XR1"), TEXT("xr1")),
     FChainConfig(ENetwork::Somnia, TEXT("5031"), TEXT("Somnia"), TEXT("somnia")),
+    FChainConfig(ENetwork::Monad, TEXT("143"), TEXT("Monad"), TEXT("monad")),
+    FChainConfig(ENetwork::Incentiv, TEXT("24101"), TEXT("Incentiv"), TEXT("incentiv")),
 
     // --- TESTNETS ---
     FChainConfig(ENetwork::Sepolia, TEXT("11155111"), TEXT("Sepolia"), TEXT("sepolia")),
@@ -50,10 +50,10 @@ TArray<FChainConfig> FChainCollection::ChainConfigs = {
     FChainConfig(ENetwork::EtherlinkTestnet, TEXT("128123"), TEXT("Etherlink Testnet"), TEXT("etherlink-testnet")),
     FChainConfig(ENetwork::MonadTestnet, TEXT("10143"), TEXT("Monad Testnet"), TEXT("monad-testnet")),
     FChainConfig(ENetwork::SomniaTestnet, TEXT("50312"), TEXT("Somnia Testnet"), TEXT("somnia-testnet")),
-    FChainConfig(ENetwork::FrequencyTestnet, TEXT("53716"), TEXT("Frequency Testnet"), TEXT("frequency-testnet")),
-    FChainConfig(ENetwork::IncentivTestnet, TEXT("11690"), TEXT("Incentiv Testnet"), TEXT("incentiv-testnet")),
     FChainConfig(ENetwork::IncentivTestnetV2, TEXT("28802"), TEXT("Incentiv v2 Testnet"), TEXT("incentiv-testnet-v2")),
-    FChainConfig(ENetwork::SandboxTestnet, TEXT("6252"), TEXT("Sandbox Testnet"), TEXT("sandbox-testnet"))
+    FChainConfig(ENetwork::SandboxTestnet, TEXT("6252"), TEXT("Sandbox Testnet"), TEXT("sandbox-testnet")),
+    FChainConfig(ENetwork::ArcTestnet, TEXT("5042002"), TEXT("Arc Testnet"), TEXT("arc-testnet")),
+    FChainConfig(ENetwork::EtherlinkShadownetTestnet, TEXT("127823"), TEXT("Etherlink Shadownet Testnet"), TEXT("etherlink-shadownet-testnet"))
 };
 
 TMap<ENetwork, FString> FChainCollection::NameOf;
