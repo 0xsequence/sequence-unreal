@@ -42,20 +42,13 @@ void ULocalhostListener::WaitForResponse(TSuccessCallback<FString> OnSuccess, FF
 		return;
 	}
 	
-	TWeakObjectPtr<ULocalhostListener> WeakThis(this);
-	
 	const FHttpPath RootPath(TEXT("/api"));
 	RouteHandle = Router->BindRoute(
 		RootPath,
 		EHttpServerRequestVerbs::VERB_GET,
-		FHttpRequestHandler::CreateLambda([WeakThis](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
+		FHttpRequestHandler::CreateLambda([this](const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete) -> bool
 		{
-			if (!WeakThis.IsValid())
-			{
-				return false;
-			}
-			
-			return WeakThis->HandleAnyRequest(Request, OnComplete);
+			return this->HandleAnyRequest(Request, OnComplete);
 		})
 	);
 

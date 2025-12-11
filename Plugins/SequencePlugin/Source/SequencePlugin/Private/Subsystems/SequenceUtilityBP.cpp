@@ -5,6 +5,7 @@
 #include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
+#include "Util/ChainCollection.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
 
@@ -90,39 +91,34 @@ int64 USequenceUtilityBP::GetTransactionReadableAmountIntDecimals(float Amount, 
 	return USequenceSupport::GetSystemReadableAmount(Amount,Decimals);
 }
 
-int64 USequenceUtilityBP::GetNetworkIdFromName(const FString& NetworkNameIn)
+FString USequenceUtilityBP::GetNetworkIdFromName(const FString& NetworkNameIn)
 {
-	return USequenceSupport::GetNetworkId(NetworkNameIn);
+	return FChainCollection::GetNetworkId(NetworkNameIn);
 }
 
-int64 USequenceUtilityBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
+FString USequenceUtilityBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
 {
-	return USequenceSupport::GetNetworkId(NetworkEnumIn);
+	return FChainCollection::GetNetworkId(NetworkEnumIn);
 }
 
-FString USequenceUtilityBP::GetNetworkNameFromId(const int64 NetworkIdIn)
+FString USequenceUtilityBP::GetNetworkNameFromId(const FString NetworkIdIn)
 {
-	return USequenceSupport::GetNetworkName(NetworkIdIn);
+	return FChainCollection::GetNetworkName(NetworkIdIn);
 }
 
 FString USequenceUtilityBP::GetNetworkNameFromEnum(const ENetwork NetworkIn)
 {
-	return USequenceSupport::GetNetworkName(NetworkIn);
-}
-
-TArray<FIdNamePair> USequenceUtilityBP::GetAllNetworks()
-{
-	return USequenceSupport::GetAllNetworks();
+	return FChainCollection::GetNetworkName(NetworkIn);
 }
 
 TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
 {
-	return USequenceSupport::GetAllNetworkNames();
+	return FChainCollection::GetAllNetworkNames();
 }
 
-TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
+TArray<FString> USequenceUtilityBP::GetAllNetworkIds()
 {
-	return USequenceSupport::GetAllNetworkIds();
+	return FChainCollection::GetAllNetworkIds();
 }
 
 FString USequenceUtilityBP::EncodeFunctionData(const FString& FunctionSignature, const FString& Values)

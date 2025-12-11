@@ -38,7 +38,7 @@ void FIndexerGetTokenBalancesTest::GetTests(TArray<FString>& OutBeautifiedNames,
 
 bool FIndexerGetTokenBalancesTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     const FString& TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 

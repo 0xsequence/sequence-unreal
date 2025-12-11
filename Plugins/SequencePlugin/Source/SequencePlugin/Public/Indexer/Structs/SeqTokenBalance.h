@@ -21,17 +21,17 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString accountAddress = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 tokenID = -1;
+        FString tokenID = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 balance = -1;
+        FString balance = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString blockHash = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 blockNumber = -1;
+        FString blockNumber = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         int64 updateID = -1;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 chainId = -1;
+        FString chainId = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FSeqContractInfo contractInfo;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
@@ -48,12 +48,12 @@ public:
         ret.Get()->SetStringField("contractAddress", contractAddress);
         ret.Get()->SetStringField("contractType", UEnum::GetValueAsString(contractType.GetValue()));
         ret.Get()->SetStringField("accountAddress", accountAddress);
-        ret.Get()->SetNumberField("tokenID", tokenID);
-        ret.Get()->SetNumberField("balance", balance);
+        ret.Get()->SetStringField("tokenID", tokenID);
+        ret.Get()->SetStringField("balance", balance);
         ret.Get()->SetStringField("blockHash",blockHash);
-        ret.Get()->SetNumberField("blockNumber", blockNumber);
+        ret.Get()->SetStringField("blockNumber", blockNumber);
         ret.Get()->SetNumberField("updateID", updateID);
-        ret.Get()->SetNumberField("chainId", chainId);
+        ret.Get()->SetStringField("chainId", chainId);
         ret.Get()->SetObjectField("contractInfo", contractInfo.GetJson());
         ret.Get()->SetObjectField("tokenMetaData", tokenMetaData.GetJson());
         return ret;

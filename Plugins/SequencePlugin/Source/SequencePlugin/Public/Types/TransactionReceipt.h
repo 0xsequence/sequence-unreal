@@ -5,13 +5,13 @@
 struct SEQUENCEPLUGIN_API FTransactionReceipt
 {
 	FHash256 BlockHash;
-	uint64 BlockNumber;
+	FString BlockNumber;
 	FHash256 TransactionHash;
 	uint64 TransactionIndex;
 	FAddress From;
 	FAddress To;
-	uint64 CumulativeGasUsed;
-	uint64 GasUsed;
+	FString CumulativeGasUsed;
+	FString GasUsed;
 	FAddress ContractAddress;
 	FString Status;
 };

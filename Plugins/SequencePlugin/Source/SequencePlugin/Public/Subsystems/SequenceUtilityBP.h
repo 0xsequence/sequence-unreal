@@ -44,25 +44,22 @@ public:
 	static int64 GetTransactionReadableAmountIntDecimals(float Amount, int64 Decimals);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static int64 GetNetworkIdFromName(const FString& NetworkNameIn);
+	static FString GetNetworkIdFromName(const FString& NetworkNameIn);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Utils")
-	static int64 GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn);
+	static FString GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static FString GetNetworkNameFromId(const int64 NetworkIdIn);
+	static FString GetNetworkNameFromId(const FString NetworkIdIn);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Utils")
 	static FString GetNetworkNameFromEnum(const ENetwork NetworkIdIn);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static TArray<FIdNamePair> GetAllNetworks();
-
-	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
 	static TArray<FString> GetAllNetworkNames();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils")
-	static TArray<int64> GetAllNetworkIds();
+	static TArray<FString> GetAllNetworkIds();
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Utils", meta = (ToolTip = "Encode function parameters based on the function signature. Such as 'balanceOf(address,uint256)' with '[\"0x6615e4e985bf0d137196897dfa182dbd7127f54f\", 2]'"))
 	static FString EncodeFunctionData(const FString& FunctionSignature, const FString& Values);

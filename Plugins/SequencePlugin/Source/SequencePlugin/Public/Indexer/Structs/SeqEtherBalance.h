@@ -11,5 +11,5 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString accountAddress = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 balanceWei = -1;
+        FString balanceWei = "";
 };

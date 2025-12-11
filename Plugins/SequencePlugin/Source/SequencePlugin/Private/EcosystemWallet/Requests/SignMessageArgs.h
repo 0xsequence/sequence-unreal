@@ -10,7 +10,7 @@ struct FSignMessageArgs
 
 public:
 	UPROPERTY()
-	int64 ChainId;
+	FString ChainId;
 	
 	UPROPERTY()
 	FString Address;

@@ -79,7 +79,7 @@ void USequencePay::GetSupportedSwapChains(const TSuccessCallback<FSeqGetLifiChai
 	}, OnFailure);
 }
 
-void USequencePay::GetSupportedSwapTokens(const TArray<int64>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure)
+void USequencePay::GetSupportedSwapTokens(const TArray<FString>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	const FSeqGetLifiTokensArgs Args {
 		ChainIds
@@ -93,7 +93,7 @@ void USequencePay::GetSupportedSwapTokens(const TArray<int64>& ChainIds, const T
 	}, OnFailure);
 }
 
-void USequencePay::GetSwapPrice(const int64 ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure)
+void USequencePay::GetSwapPrice(const FString ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure)
 {
 	this->GetSwapPrices(ChainID, WalletAddress, BuyCurrency, BuyAmount, [SellCurrency, OnSuccess, OnFailure](TArray<FSeqSwapPrice> Prices)
 	{
@@ -110,7 +110,7 @@ void USequencePay::GetSwapPrice(const int64 ChainID, const FString& WalletAddres
 	}, OnFailure);
 }
 
-void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency,
+void USequencePay::GetSwapPrices(const FString ChainID, const FString& WalletAddress, const FString& BuyCurrency,
 	const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess,
 	const FFailureCallback& OnFailure)
 {
@@ -150,7 +150,7 @@ void USequencePay::GetSwapPrices(const int64 ChainID, const FString& WalletAddre
 	}, OnFailure);
 }
 
-void USequencePay::GetSwapQuote(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency,
+void USequencePay::GetSwapQuote(const FString ChainID, const FString& WalletAddress, const FString& BuyCurrency,
 	const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove,
 	const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure)
 {

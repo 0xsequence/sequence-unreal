@@ -278,9 +278,8 @@ void USequenceEmbeddedWallet::GetLinkedWallets(const TSuccessCallback<FSeqLinked
 
 	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
 	{
-		const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
 		FSeqLinkedWalletRequest Request;
-		Request.SignatureChainId = ChainId;
+		Request.SignatureChainId = SequenceSdk::GetChainId();
 		Request.ParentWalletAddress = WalletAddress;
 		Request.ParentWalletMessage = MessageToSign;
 		Request.ParentWalletSignature = SignatureResponse.Data.Signature;
@@ -303,9 +302,8 @@ void USequenceEmbeddedWallet::RemoveLinkedWallet(const FString& LinkedWalletAddr
 
 	const TSuccessCallback<FSeqSignMessageResponse_Response> OnSignatureSuccess = [this, LinkedWalletAddress, WalletAddress, MessageToSign, OnSuccess, OnFailure](FSeqSignMessageResponse_Response SignatureResponse)
 	{
-		const FString& ChainId = FString::FromInt(SequenceSdk::GetChainId());
 		FSeqLinkedWalletRequest Request;
-		Request.SignatureChainId = ChainId;
+		Request.SignatureChainId = SequenceSdk::GetChainId();
 		Request.ParentWalletAddress = WalletAddress;
 		Request.ParentWalletMessage = MessageToSign;
 		Request.ParentWalletSignature = SignatureResponse.Data.Signature;

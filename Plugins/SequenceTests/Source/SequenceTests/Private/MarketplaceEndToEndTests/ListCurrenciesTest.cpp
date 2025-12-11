@@ -7,6 +7,7 @@
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListCurrenciesTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListCurrenciesTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -46,8 +47,6 @@ bool FListCurrenciesTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
         USequenceMarketplace* Marketplace = NewObject<USequenceMarketplace>();
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
         const TSuccessCallback<FString> GenericSuccess = [this, MarketplaceTestData](const FString Message)
@@ -65,7 +64,7 @@ bool FListCurrenciesTest::RunTest(const FString& Parameters)
             MarketplaceTestData->RequestFailed();
         };
 
-        Marketplace->ListCurrencies(Support->GetNetworkId(PolygonChain), [this, MarketplaceTestData, GenericSuccess](FSeqListCurrenciesReturn Response)
+        Marketplace->ListCurrencies(FChainCollection::GetNetworkId(PolygonChain), [this, MarketplaceTestData, GenericSuccess](FSeqListCurrenciesReturn Response)
         {
             FString Currencies = "Currencies: \n";
 

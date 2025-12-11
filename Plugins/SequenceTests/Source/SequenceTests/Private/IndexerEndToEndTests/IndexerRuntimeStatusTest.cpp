@@ -6,6 +6,7 @@
 #include "Util/SequenceSupport.h"
 #include "Helpers/IndexerRequestsTestData.h"
 #include "Helpers/BatchTestBuilder.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerRuntimeStatusTest, "SequencePlugin.EndToEnd.IndexerTests.RuntimeStatusTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -22,11 +23,11 @@ bool FProcessRuntimeRequests::Update()
         return false;
     }
 
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     
     for (int i = WatchIndex; i <= FinishIndex; i++)
     {
-        UE_LOG(LogTemp, Display, TEXT("Index: %d, Testing Network: %lld"), i, Networks[i]);
+        UE_LOG(LogTemp, Display, TEXT("Index: %d, Testing Network: %s"), i, *Networks[i]);
         IndexerRequestsTestData->GetIndexer()->RuntimeStatus(Networks[i], SuccessCallback, FailureCallback);
     }
     
@@ -60,7 +61,7 @@ void FIndexerRuntimeStatusTest::GetTests(TArray<FString>& OutBeautifiedNames, TA
 
 bool FIndexerRuntimeStatusTest::RunTest(const FString& Parameters)
 {
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(Networks.Num());
 
     const TSuccessCallback<FSeqRuntimeStatus> GenericSuccess = [this, IndexerRequestsTestData](const FSeqRuntimeStatus& Status)
@@ -71,7 +72,7 @@ bool FIndexerRuntimeStatusTest::RunTest(const FString& Parameters)
         TestFalse(TEXT("StartTime should not be empty"), Status.startTime.IsEmpty());
         TestFalse(TEXT("Branch should not be empty"), Status.branch.IsEmpty());
         TestFalse(TEXT("CommitHash should not be empty"), Status.commitHash.IsEmpty());
-        TestTrue(TEXT("ChainID should be supported"), USequenceSupport::IsNetworkIdSupported(Status.chainID));
+        TestTrue(TEXT("ChainID should be supported"), FChainCollection::IsNetworkIdSupported(Status.chainID));
         TestTrue(TEXT("Uptime should be greater than 0"), Status.uptime > 0);
         TestNotNull(TEXT("Checks should not be null"), &Status.checks);
         TestTrue(TEXT("Checks should be running"), Status.checks.running);

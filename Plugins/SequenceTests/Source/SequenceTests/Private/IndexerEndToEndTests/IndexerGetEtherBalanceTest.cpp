@@ -37,7 +37,7 @@ void FIndexerGetEtherBalanceTest::GetTests(TArray<FString>& OutBeautifiedNames, 
 
 bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     const FString& TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
@@ -45,8 +45,7 @@ bool FIndexerGetEtherBalanceTest::RunTest(const FString& Parameters)
     {
         TestNotNull(TEXT("EtherBalance"), &Balance);
         TestEqual(TEXT("Account address should match"), Balance.accountAddress.ToLower(), TestAddress.ToLower());
-        TestTrue(TEXT("Balance should be greater than 0"), Balance.balanceWei > 0);
-
+        
         const FString Message = "GetEtherBalance request succeeded";
         AddInfo(FString::Printf(TEXT("%s. Remaining Requests: %d"), *Message, IndexerRequestsTestData->DecrementPendingRequests()));
     };

@@ -10,10 +10,10 @@ struct SEQUENCEPLUGIN_API FSeqLifiSwapRoute
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "toChainId"))
-    int64 ToChainId;
+    FString ToChainId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "fromChainId"))
-    int64 FromChainId;
+    FString FromChainId;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "fromTokens"))
     TArray<FSeqSwapToken> FromTokens;

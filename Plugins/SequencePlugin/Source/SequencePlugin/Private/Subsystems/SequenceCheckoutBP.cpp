@@ -133,7 +133,7 @@ void USequenceCheckoutBP::GenerateSellTransaction(const FString& WalletAddress, 
 
 void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
-	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
+	const FString PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)
@@ -152,7 +152,7 @@ void USequenceCheckoutBP::GenerateListingTransaction(const FString& WalletAddres
 
 void USequenceCheckoutBP::GenerateOfferTransaction(const FString& WalletAddress, const FString& CollectionAddress,
 	const FString& TokenId, const int64 Amount, const EContractType ContractType, const FString& CurrencyTokenAddress,
-	const int64 PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
+	const FString PricePerToken, const FDateTime Expiry, const EOrderbookKind OrderbookKind, const EWalletKind WalletKind,
 	const FOnGenerateTransactionResponseSuccess OnSuccess, const FOnCheckoutFailure OnFailure)
 {
 	const TSuccessCallback<FGenerateTransactionResponse> OnApiSuccess = [this, OnSuccess](const FGenerateTransactionResponse& Response)

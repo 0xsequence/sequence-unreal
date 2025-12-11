@@ -37,7 +37,7 @@ void FIndexerGetTokenBalancesOrganizedInMapTest::GetTests(TArray<FString>& OutBe
 
 bool FIndexerGetTokenBalancesOrganizedInMapTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     const FString& TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
@@ -48,7 +48,7 @@ bool FIndexerGetTokenBalancesOrganizedInMapTest::RunTest(const FString& Paramete
         TestNotNull(TEXT("TokenBalances.balances"), &TokenBalances.balances);
         TestTrue(TEXT("TokenBalances.balances should not be empty"), TokenBalances.balances.Num() > 0);
 
-        TMap<int64, FSeqTokenBalance> TokenBalanceMap = USequenceIndexer::GetTokenBalancesAsMap(TokenBalances.balances);
+        TMap<FString, FSeqTokenBalance> TokenBalanceMap = USequenceIndexer::GetTokenBalancesAsMap(TokenBalances.balances);
         
         TestNotNull(TEXT("TokenBalanceMap"), &TokenBalanceMap);
         TestTrue(TEXT("TokenBalanceMap should not be empty"), TokenBalanceMap.Num() > 0);

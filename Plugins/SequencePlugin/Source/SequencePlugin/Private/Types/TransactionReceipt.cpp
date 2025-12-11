@@ -2,16 +2,16 @@
 
 FTransactionReceipt JsonToTransactionReceipt(TSharedPtr<FJsonObject> Json)
 {
-	uint64 BlockNumber;
+	FString BlockNumber;
 	uint64 TransactionIndex;
-	uint64 CumulativeGasUsed;
-	uint64 GasUsed;
+	FString CumulativeGasUsed;
+	FString GasUsed;
 	FString ToAddress;
 	FAddress To = FAddress::From("");
-	bool bIsValid = Json->TryGetNumberField(TEXT("blockNumber"), BlockNumber);
+	bool bIsValid = Json->TryGetStringField(TEXT("blockNumber"), BlockNumber);
 	bIsValid = Json->TryGetNumberField(TEXT("TransactionIndex"), TransactionIndex);
-	bIsValid = Json->TryGetNumberField(TEXT("CumulativeGasUsed"), CumulativeGasUsed);
-	bIsValid = Json->TryGetNumberField(TEXT("GasUsed"), GasUsed);
+	bIsValid = Json->TryGetStringField(TEXT("CumulativeGasUsed"), CumulativeGasUsed);
+	bIsValid = Json->TryGetStringField(TEXT("GasUsed"), GasUsed);
 	bool bIsContract = !(Json->TryGetStringField(TEXT("to"), ToAddress));
 	if(!bIsContract) To = FAddress::From(ToAddress);
 	FHash256 BlockHash = FHash256::From(Json->GetStringField(TEXT("blockHash")));

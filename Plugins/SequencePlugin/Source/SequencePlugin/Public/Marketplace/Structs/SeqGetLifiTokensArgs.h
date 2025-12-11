@@ -12,5 +12,5 @@ public:
 	static FString GetArgs() { return ""; }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "chainIds"))
-    TArray<int64> ChainIds;
+    TArray<FString> ChainIds;
 };

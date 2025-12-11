@@ -1,10 +1,9 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Util/Async.h"
-#include "Util/SequenceSupport.h"
 #include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
-#include "Helpers/BatchTestBuilder.h" // Include the BatchTestBuilder header
-#include "Helpers/IndexerRequestsTestData.h"
+#include "Helpers/BatchTestBuilder.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerVersionTest, "SequencePlugin.EndToEnd.IndexerTests.VersionTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -21,11 +20,11 @@ bool FProcessVersionRequestBatch::Update()
         return false;
     }
 
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     
     for (int i = WatchIndex; i <= FinishIndex; i++)
     {
-        UE_LOG(LogTemp, Display, TEXT("Index: %d, Testing Network: %lld"), i, Networks[i]);
+        UE_LOG(LogTemp, Display, TEXT("Index: %d, Testing Network: %s"), i, *Networks[i]);
         IndexerRequestsTestData->GetIndexer()->Version(Networks[i], SuccessCallback, FailureCallback);
     }
     
@@ -59,7 +58,7 @@ void FIndexerVersionTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<F
 
 bool FIndexerVersionTest::RunTest(const FString& Parameters)
 {
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     UIndexerRequestsTestData * IndexerRequestsTestData = UIndexerRequestsTestData::Make(Networks.Num());
 
     const TSuccessCallback<FSeqVersion> GenericSuccess = [this, IndexerRequestsTestData](const FSeqVersion& Version)

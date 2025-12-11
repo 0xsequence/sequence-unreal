@@ -7,6 +7,7 @@
 #include "Marketplace/SequenceMarketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetFloorOrderTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetFloorOrder", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -45,8 +46,6 @@ bool FGetFloorOrderTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
         const TSuccessCallback<FSeqCollectibleOrder> GenericSuccess = [this, MarketplaceTestData](FSeqCollectibleOrder Order)
@@ -65,7 +64,7 @@ bool FGetFloorOrderTest::RunTest(const FString& Parameters)
         };
 		    
         MarketplaceTestData->GetMarketplace()->GetFloorOrder(
-            Support->GetNetworkId(ENetwork::PolygonChain),
+            FChainCollection::GetNetworkId(ENetwork::PolygonChain),
             "0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
             FSeqCollectiblesFilter::Empty(),
             GenericSuccess,

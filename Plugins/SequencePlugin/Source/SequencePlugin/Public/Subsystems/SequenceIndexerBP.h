@@ -11,7 +11,7 @@ class SEQUENCEPLUGIN_API USequenceIndexerBP : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetNativeTokenBalance, int64, Balance);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetNativeTokenBalance, FString, Balance);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetTokenBalances, const TArray<FSeqTokenBalance>&, Balances, FSeqPage, Page);
 	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnGetTokenSupplies, const TArray<FSeqTokenSupply>&, Tokens, EContractType, ContractType, FSeqPage, Page);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetTokenSuppliesMap, FSeqGetTokenSuppliesMapReturn, Return);
