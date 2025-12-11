@@ -23,7 +23,6 @@ void FSequencePluginModule::StartupModule()
 #if PLATFORM_IOS
 	FIOSCoreDelegates::OnOpenURL.AddLambda([](UIApplication* App, NSURL* Url, NSString* SourceApp, id Annotation)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Received deep link: %s"), *Url.absoluteString);
 		FMobileRedirectHandler::HandleResponse(Url.absoluteString);
 	});
 #endif

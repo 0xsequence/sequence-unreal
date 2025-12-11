@@ -1,4 +1,6 @@
 #include "MobileRedirectHandler.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "Async/Async.h"
 
 TSharedPtr<TSuccessCallback<FString>> FMobileRedirectHandler::StrongOnSuccess = nullptr;
 TSharedPtr<FFailureCallback> FMobileRedirectHandler::StrongOnFailure = nullptr;

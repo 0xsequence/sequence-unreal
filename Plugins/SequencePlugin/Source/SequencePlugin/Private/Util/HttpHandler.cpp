@@ -1,5 +1,6 @@
 #include "HttpHandler.h"
 
+#include "ConfigFetcher.h"
 #include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "Util/Log.h"
 
@@ -17,6 +18,9 @@ void UHttpHandler::SendPostRequest(const FString& Endpoint, const FString& Paylo
 	HTTP_Post_Req->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	HTTP_Post_Req->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	HTTP_Post_Req->SetHeader(TEXT("Accept-Signature"), TEXT("sig=()"));
+
+	const FString AccessKey = UConfigFetcher::GetConfigVar("ProjectAccessKey");
+	HTTP_Post_Req->SetHeader(TEXT("X-Access-Key"), *AccessKey);
 	
 	HTTP_Post_Req->SetTimeout(30);
 	HTTP_Post_Req->SetURL(FinalUrl);
