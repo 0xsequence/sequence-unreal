@@ -76,6 +76,6 @@ FString USequenceRelayer::BuildUrl()
 {
 	const FString ChainId = SequenceSdk::GetChainId();
 	const FString Name = FChainCollection::GetNetworkNameForUrl(ChainId);
-	return FString::Printf(TEXT("https://dev-%s-relayer.sequence.app/rpc/Relayer"), *Name);
+	return FString::Printf(TEXT("https://%s-relayer.sequence.app/rpc/Relayer"), *Name);
 }
 

@@ -6,6 +6,7 @@
 #include "IHttpRouter.h"
 #include "UObject/Object.h"
 #include "Util/Async.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "LocalhostListener.generated.h"
 
 UCLASS()
