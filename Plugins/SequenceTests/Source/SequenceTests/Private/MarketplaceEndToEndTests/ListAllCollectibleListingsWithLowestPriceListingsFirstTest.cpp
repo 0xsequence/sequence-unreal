@@ -6,6 +6,7 @@
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FListAllCollectibleListingsWithLowestPriceListingsFirstTest, "SequencePlugin.EndToEnd.MarketplaceTests.ListAllCollectibleListingsWithLowestPriceListingsFirstTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -44,8 +45,6 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
         const TSuccessCallback<TArray<FSeqCollectibleOrder>> GenericSuccess = [this, MarketplaceTestData](TArray<FSeqCollectibleOrder> Orders)
@@ -80,7 +79,7 @@ bool FListAllCollectibleListingsWithLowestPriceListingsFirstTest::RunTest(const 
         };
 		    
         MarketplaceTestData->GetMarketplace()->GetAllCollectiblesWithLowestListingsFirst(
-            Support->GetNetworkId(ENetwork::PolygonChain),
+            FChainCollection::GetNetworkId(ENetwork::PolygonChain),
             "0x44b3f42e2BF34F62868Ff9e9dAb7C2F807ba97Cb",
             FSeqCollectiblesFilter::Empty(),
             GenericSuccess,

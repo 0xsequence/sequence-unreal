@@ -49,9 +49,9 @@ bool FGetSupportedSwapChainsTest::RunTest(const FString& Parameters)
         
         const TSuccessCallback<FSeqGetLifiChainsResponse> GenericSuccess = [this, MarketplaceTestData](const FSeqGetLifiChainsResponse& Response)
         {
-            for (const int64 ChainId : Response.Chains)
+            for (const FString ChainId : Response.Chains)
             {
-                AddInfo(FString::Printf(TEXT("Supported ChainId: %d"), ChainId));
+                AddInfo(FString::Printf(TEXT("Supported ChainId: %s"), *ChainId));
             }
             
             AddInfo(FString::Printf(TEXT("Remaining tests: %d"), MarketplaceTestData->DecrementPendingRequests()));

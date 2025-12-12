@@ -34,7 +34,7 @@ void FIndexerGetTransactionHistoryTest::GetTests(TArray<FString>& OutBeautifiedN
 
 bool FIndexerGetTransactionHistoryTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     const FString TestAddress = IndexerEndToEndTestsCommon::TestAddress;
     UIndexerRequestsTestData* IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 

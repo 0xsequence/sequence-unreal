@@ -1,10 +1,23 @@
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Misc/Base64.h"
 
-class FEthAbiBridge
+class SEQUENCEPLUGIN_API FEthAbiBridge
 {
 public:
+	static FString CombineTwoBigInts(const FString& A, const FString& B);
+	
+	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
+	
+	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);
+	
+	static TArray<uint8> EncodeTwoAddresses(const FString& A, const FString& B);
+	
+	static TArray<uint8> EncodeAndHashTypedData(const FString& DomainJson);
+	
+	static TArray<uint8> SignRecoverable(const TArray<uint8>& Hash32, const TArray<uint8>& PrivKey32);
+	
 	/**
 	 * Encode function parameters based on the function signature.
 	 * @param FunctionSignature such as balanceOf(address,uint256)
@@ -21,4 +34,34 @@ public:
 	 * @return Decoded data as an unnamed JSON array of values.
 	 */
 	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
+
+	/**
+	 * Encode the given big integer into a byte array.
+	 * @param Value The BigInteger value as a string type.
+	 * @return The encoded byte array.
+	 */
+	static TArray<uint8> EncodeBigInteger(const FString& Value);
+
+	/**
+	 * Convert a hex such as '0x0000000000000000000000000000000000000000000000000000000000000020' to a Big Int '32'
+	 * @param Hex The encoded BigInt as a hex
+	 * @return The converted BigInt as a string
+	 */
+	static FString HexToBigIntString(const FString& Hex);
+
+
+	/**
+	 * Encode an array of values.
+	 * @param JsonInput ["0x00", "0x00", "0x00"]
+	 * @return Encoded data. 
+	 */
+	static TArray<uint8> EncodeAbiPacked(const FString& JsonInput);
+
+	/**
+	 * Decode encoded data with multiple types.
+	 * @param Raw Encoded data
+	 * @param TypesJson Json array of types: ["address", "bytes", "bytes"] 
+	 * @return Array of strings. Bytes are represented as hex strings 
+	 */
+	static TArray<FString> DecodeAbiJson(const TArray<uint8>& Raw, const FString& TypesJson);
 };

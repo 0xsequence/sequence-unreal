@@ -8,8 +8,14 @@ crate-type = ["staticlib"]
 path = "lib.rs"
 
 [dependencies]
+ethers = { version = "2", features = ["eip712"] }
+secp256k1 = { version = "0.28", features = ["recovery", "global-context"] }
 cxx = "1.0"
 ethabi = "16"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 hex = "0.4"
+num-bigint = "0.4"
+tiny-keccak = "2.0"
+num-traits = "0.2"
+libc = "0.2"

@@ -1,6 +1,6 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "Sequence/SequenceWallet.h"
+#include "Sequence/SequenceEmbeddedWallet.h"
 #include "Engine/World.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
@@ -21,7 +21,7 @@ bool FGetWalletAddressTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {
-        const USequenceWallet* SequenceWallet = NewObject<USequenceWallet>();
+        const USequenceEmbeddedWallet* SequenceWallet = NewObject<USequenceEmbeddedWallet>();
         const FString WalletAddress = SequenceWallet->GetWalletAddress();
         if (WalletAddress.Len() > 0)
         {

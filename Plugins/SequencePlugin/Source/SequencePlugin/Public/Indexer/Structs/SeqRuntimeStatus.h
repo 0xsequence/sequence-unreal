@@ -24,7 +24,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FString commitHash = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
-        int64 chainID = -1;
+        FString chainID = "";
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence")
         FSeqRuntimeChecks checks;
 };

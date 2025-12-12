@@ -8,6 +8,7 @@
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetSwapQuoteTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetSwapQuoteTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -47,7 +48,6 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
         const FString WalletAddress = "0xe8db071f698aBA1d60babaE8e08F5cBc28782108";
         const FString USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
         const FString USDCe = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
@@ -77,7 +77,7 @@ bool FGetSwapQuoteTest::RunTest(const FString& Parameters)
         
         USequencePay* Pay = NewObject<USequencePay>();
         Pay->GetSwapQuote(
-            Support->GetNetworkId(ENetwork::ArbitrumOne),
+            FChainCollection::GetNetworkId(ENetwork::ArbitrumOne),
             WalletAddress,
             USDC,
             USDCe,

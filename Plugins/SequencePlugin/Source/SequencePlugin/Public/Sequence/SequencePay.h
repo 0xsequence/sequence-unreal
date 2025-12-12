@@ -64,7 +64,7 @@ public:
 	 * @param OnSuccess Callback invoked upon successful retrieval of token data. Receives a FSeqGetLifiTokensResponse object.
 	 * @param OnFailure Callback invoked if the request fails, typically providing error context or logging.
 	 */
-	void GetSupportedSwapTokens(const TArray<int64>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSupportedSwapTokens(const TArray<FString>& ChainIds, const TSuccessCallback<FSeqGetLifiTokensResponse>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/**
 	 * 
@@ -76,7 +76,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqSwapPrice
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapPrice(const int64 ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapPrice(const FString ChainID, const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<FSeqSwapPrice>& OnSuccess, const FFailureCallback& OnFailure);
 	
 	/**
 	 * 
@@ -87,7 +87,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a TArray of FSeqSwapPrice
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapPrices(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapPrices(const FString ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& BuyAmount, const TSuccessCallback<TArray<FSeqSwapPrice>>& OnSuccess, const FFailureCallback& OnFailure);
 
 	/**
 	 * 
@@ -101,7 +101,7 @@ public:
 	 * @param OnSuccess handler for success, takes in a FSeqSwapQuote
 	 * @param OnFailure handler for failure, takes in a FSequenceError
 	 */
-	void GetSwapQuote(const int64 ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure);
+	void GetSwapQuote(const FString ChainID, const FString& WalletAddress, const FString& BuyCurrency, const FString& SellCurrency, const FString& BuyAmount, const FString& SellAmount, const bool IncludeApprove, const TSuccessCallback<FSeqSwapQuote>& OnSuccess, const FFailureCallback& OnFailure);
 	
 private:
 	/*

@@ -1,12 +1,13 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
-#include "SequencePlugin/Public/Sequence/SequenceWallet.h"
+#include "SequencePlugin/Public/Sequence/SequenceEmbeddedWallet.h"
 #include "Engine/World.h"
 #include "Helpers/MarketplaceRequestsTestData.h"
 #include "Marketplace/SequenceMarketplace.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
 #include "JsonObjectConverter.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FGetHighestPriceOfferForCollectibleTest, "SequencePlugin.EndToEnd.MarketplaceTests.GetHighestPriceOfferForCollectibleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter | EAutomationTestFlags::ClientContext)
 
@@ -45,8 +46,6 @@ bool FGetHighestPriceOfferForCollectibleTest::RunTest(const FString& Parameters)
     ADD_LATENT_AUTOMATION_COMMAND(FEngineWaitLatentCommand(1.0f));
     ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this]()
     {      
-        USequenceSupport* Support = NewObject<USequenceSupport>();
-
         UMarketplaceRequestsTestData* MarketplaceTestData = UMarketplaceRequestsTestData::Make(1);
         
         const TSuccessCallback<FSeqCollectibleOrder> GenericSuccess = [this, MarketplaceTestData](FSeqCollectibleOrder Order)
@@ -65,7 +64,7 @@ bool FGetHighestPriceOfferForCollectibleTest::RunTest(const FString& Parameters)
         };
 		    
         MarketplaceTestData->GetMarketplace()->GetHighestPriceOfferForCollectible(
-            Support->GetNetworkId(ENetwork::PolygonChain),
+            FChainCollection::GetNetworkId(ENetwork::PolygonChain),
             "0x079294e6ffec16234578c672fa3fbfd4b6c48640",
             "1",
             FSeqCollectiblesFilter::Empty(),

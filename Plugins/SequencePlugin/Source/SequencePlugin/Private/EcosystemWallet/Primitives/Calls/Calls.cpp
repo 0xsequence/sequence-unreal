@@ -1,0 +1,120 @@
+#include "EcosystemWallet/Primitives/Calls/Calls.h"
+
+#include "EcosystemWallet/Primitives/Calls/CallTypedDataFactory.h"
+#include "Util/ByteArrayUtils.h"
+#include "Util/SequenceSupport.h"
+#include "Util/ValueUtils.h"
+
+TArray<uint8> FCalls::Encode()
+{
+	TArray<uint8> FlagBytes = FByteArrayUtils::ByteArrayFromNumber(GetFlag(), 1);
+	TArray<uint8> SpaceBytes = GetSpaceBytes();
+	TArray<uint8> NonceBytes = GetNonceBytes();
+	TArray<uint8> CallsCountBytes = GetCallsCount();
+	TArray<uint8> CallsBytes = GetCallsBytes();
+
+	return FByteArrayUtils::ConcatBytes({FlagBytes, SpaceBytes, NonceBytes, CallsCountBytes, CallsBytes});
+}
+
+TArray<uint8> FCalls::Hash(const FString& Wallet, const FBigInt& ChainId) const
+{
+	FCalls Calls = FCalls(this->Calls, this->Space, this->Nonce);
+	FString DomainJson = FCallTypedDataFactory::FromCalls(Wallet, ChainId, MakeShared<FCalls>(Calls));
+	DomainJson = DomainJson.Replace(TEXT("\n"), TEXT(""));
+	DomainJson = DomainJson.Replace(TEXT("\t"), TEXT(""));
+	
+	return USequenceSupport::EncodeAndHashTypedData(DomainJson);
+}
+
+uint8 FCalls::GetFlag()
+{
+	uint8 GlobalFlag = 0;
+
+	if (Space.Value == "0")
+	{
+		GlobalFlag |= 0x01;
+	}
+
+	constexpr uint8 NonceBytesNeeded = 1;
+	GlobalFlag |= static_cast<uint8>(NonceBytesNeeded << 1);
+
+	if (Calls.Num() == 1)
+	{
+		GlobalFlag |= 0x10;
+	}
+
+	if (GetCallsCountSize() > 1)
+	{
+		GlobalFlag |= 0x20;
+	}
+
+	return GlobalFlag;
+}
+
+uint8 FCalls::GetCallsCountSize()
+{
+	uint8 Size = 0;
+	const uint8 CallsLen = Calls.Num();
+	
+	if (CallsLen != 1)
+	{
+		if (CallsLen < 256)
+		{
+			Size = 1;
+		}
+		else if (CallsLen < 65536)
+		{
+			Size = 2;
+		}
+	}
+
+	return Size;
+}
+
+TArray<uint8> FCalls::GetSpaceBytes()
+{
+	if (Space.Value == "0")
+	{
+		return TArray<uint8>();
+	}
+
+	return Space.Encode();
+}
+
+TArray<uint8> FCalls::GetNonceBytes()
+{
+	const int32 NonceBytesNeeded = FByteArrayUtils::MinBytesFor(FValueUtils::StringToInt32(Nonce.Value));
+	if (NonceBytesNeeded > 0)
+	{
+		return FByteArrayUtils::PadLeft(Nonce.Encode(), NonceBytesNeeded);
+	}
+
+	return TArray<uint8>();
+}
+
+TArray<uint8> FCalls::GetCallsCount()
+{
+	const uint8 CountSize = GetCallsCountSize();
+	if (Calls.Num() != 1)
+	{
+		if (CountSize > 2 || CountSize <= 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calls count is invalid"));
+		}
+
+		return FByteArrayUtils::ByteArrayFromNumber(Calls.Num(), CountSize);
+	}
+
+	return TArray<uint8>();
+}
+
+TArray<uint8> FCalls::GetCallsBytes()
+{
+	TArray<TArray<uint8>> CallsBytes;
+	for (FCall Call : Calls)
+	{
+		CallsBytes.Add(Call.Encode());
+	}
+	
+	return FByteArrayUtils::ConcatBytes(CallsBytes);
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SequenceWallet.h"
+#include "SequenceEmbeddedWallet.h"
 #include "Wallet_Enums.generated.h"
 
 UENUM(BlueprintType)
@@ -20,7 +20,7 @@ public:
 	template<typename WalletType>
 		static EWalletKind GetWalletKind(WalletType)
 	{
-		if (std::is_same_v<WalletType, USequenceWallet>)
+		if (std::is_same_v<WalletType, USequenceEmbeddedWallet>)
 		{
 			return EWalletKind::Sequence;
 		}

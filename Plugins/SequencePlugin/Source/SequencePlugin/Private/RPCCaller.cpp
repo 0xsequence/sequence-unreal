@@ -1,6 +1,7 @@
 #include "RPCCaller.h"
 #include "Util/HexUtility.h"
 #include "RequestHandler.h"
+#include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "Templates/SharedPointer.h"
 #include "Serialization/JsonReader.h"
 #include "Util/JsonBuilder.h"

@@ -14,7 +14,7 @@ class SEQUENCEPLUGIN_API USequencePayBP : public UGameInstanceSubsystem
 	
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSupportedTransakCountries, const TArray<FSupportedCountry>&, SupportedCountries);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapChains, const TArray<int64>&, Chains);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapChains, const TArray<FString>&, Chains);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSupportedSwapTokens, const TArray<FSeqLifiToken>&, Tokens);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnGetSwapPrice, FString, CurrencyAddress, int64, Price);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetSwapPrices, const TArray<FSeqSwapPrice>&, SwapPrices);
@@ -36,7 +36,7 @@ public:
 	void GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Pay")
-	void GetSupportedSwapTokens(const TArray<int64>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure);
+	void GetSupportedSwapTokens(const TArray<FString>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category = "0xSequence SDK - Pay")
 	void GetSwapPrice(const FString& WalletAddress, const FString& SellCurrency, const FString& BuyCurrency, const FString& BuyAmount, FOnGetSwapPrice OnSuccess, FOnFailure OnFailure);

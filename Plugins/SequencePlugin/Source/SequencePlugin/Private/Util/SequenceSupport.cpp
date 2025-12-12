@@ -1,98 +1,21 @@
 #include "Util/SequenceSupport.h"
-
-#include "ConfigFetcher.h"
-#include "Provider.h"
-#include "RequestHandler.h"
 #include "Indexer/Structs/SeqGetTransactionHistoryReturn.h"
-#include "Indexer/Structs/Struct_Data.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Misc/Base64.h"
 #include "EthAbi/EthAbiBridge.h"
 #include "Types/BinaryData.h"
 
-FString USequenceSupport::GetNetworkName(const int64 NetworkIdIn)
+#if PLATFORM_IOS
+extern "C" void OpenExternalBrowserNative(const char* urlCString);
+#endif
+
+void USequenceSupport::OpenExternalBrowser(const FString& Url)
 {
-	if (NetworkIdToNameMap.Contains(NetworkIdIn))
-	{
-		return *NetworkIdToNameMap.Find(NetworkIdIn);
-	}
-	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
-	return TEXT("");
-}
-
-FString USequenceSupport::GetNetworkName(const ENetwork NetworkIn)
-{
-	if (NetworkIdToNameMap.Contains(NetworkIn))
-	{
-		return *NetworkEnumToNameMap.Find(NetworkIn);
-	}
-
-	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIn);
-	return TEXT("");
-}
-
-FString USequenceSupport::GetNetworkNameForUrl(const int64 NetworkIdIn)
-{
-	if (NetworkIdToUrlMap.Contains(NetworkIdIn))
-	{
-		return *NetworkIdToUrlMap.Find(NetworkIdIn);
-	}
-	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), NetworkIdIn);
-	return TEXT("");
-}
-
-bool USequenceSupport::IsNetworkIdSupported(const int64 NetworkIdIn)
-{
-	return NetworkIdToNameMap.Contains(NetworkIdIn);
-}
-
-int64 USequenceSupport::GetNetworkId(const FString& NetworkNameIn)
-{
-	FString SearchKey = NetworkNameIn.ToLower();
-	SearchKey.RemoveSpacesInline();
-	if (NetworkNameToIdMap.Contains(SearchKey))
-	{
-		return *NetworkNameToIdMap.Find(SearchKey);
-	}
-	SEQ_LOG(Warning, TEXT("Id not found for Name: %s"), *NetworkNameIn);
-	return -1;
-}
-
-int64 USequenceSupport::GetNetworkId(const ENetwork& Network)
-{
-	if (NetworkEnumToIdMap.Contains(Network))
-	{
-		return *NetworkEnumToIdMap.Find(Network);
-	}
-
-	SEQ_LOG(Warning, TEXT("Name not found for Id: %lld"), Network);
-	return 0;
-}
-
-TArray<FIdNamePair> USequenceSupport::GetAllNetworks()
-{
-	TArray<FIdNamePair> Networks;
-
-	for (FIdName IdName : NetworkIdToNameMap.Array())
-	{
-		Networks.Add(FIdNamePair(IdName));
-	}
-	
-	return Networks;
-}
-
-TArray<FString> USequenceSupport::GetAllNetworkNames()
-{
-	TArray<FString> NetworkNames;
-	NetworkNameToIdMap.GetKeys(NetworkNames);
-	return NetworkNames;
-}
-
-TArray<int64> USequenceSupport::GetAllNetworkIds()
-{
-	TArray<int64> NetworkIds;
-	NetworkIdToNameMap.GetKeys(NetworkIds);
-	return NetworkIds;
+#if PLATFORM_IOS
+	OpenExternalBrowserNative(TCHAR_TO_UTF8(*Url));
+#else
+	FPlatformProcess::LaunchURL(*Url, nullptr, nullptr);
+#endif
 }
 
 float USequenceSupport::GetUserReadableAmount(const int64 Amount, const int64 Decimals)
@@ -599,3 +522,28 @@ FString USequenceSupport::DecodeFunctionResult(const FString& Abi, const FString
 	return FEthAbiBridge::DecodeFunctionResult(Abi, EncodedData);
 }
 
+TArray<uint8> USequenceSupport::EncodeBigInteger(const FString& Value)
+{
+	return FEthAbiBridge::EncodeBigInteger(Value);
+}
+
+TArray<uint8> USequenceSupport::EncodeAndHashTypedData(const FString& DomainJson)
+{
+	return FEthAbiBridge::EncodeAndHashTypedData(DomainJson);
+}
+
+bool USequenceSupport::BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError)
+{
+	return FEthAbiBridge::BigIntToBytes(ValueString, Size, OutBytes, OutError);
+}
+
+bool USequenceSupport::RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash,
+	TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress)
+{
+	return FEthAbiBridge::RecoverEthPubAndAddress(Signature, AttestationHash, OutPubKey, OutAddress);
+}
+
+TArray<uint8> USequenceSupport::EncodeTwoAddresses(const FString& A, const FString& B)
+{
+	return FEthAbiBridge::EncodeTwoAddresses(A, B);
+}

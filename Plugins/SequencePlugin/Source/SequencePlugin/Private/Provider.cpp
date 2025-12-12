@@ -9,6 +9,7 @@
 #include "RequestHandler.h"
 #include "Sequence/SequenceSdk.h"
 #include "Types/Header.h"
+#include "Util/ChainCollection.h"
 #include "Util/Log.h"
 #include "Util/SequenceSupport.h"
 
@@ -19,7 +20,7 @@ UProvider::UProvider()
 
 void UProvider::UpdateUrlFromConfig()
 {
-	const FString ChainPath = USequenceSupport::GetNetworkNameForUrl(SequenceSdk::GetChainId());
+	const FString ChainPath = FChainCollection::GetNetworkNameForUrl(SequenceSdk::GetChainId());
 	const FString ProjectAccessKey = UConfigFetcher::GetConfigVar(UConfigFetcher::ProjectAccessKey);
 	const FString ProviderUrl = FString::Printf(TEXT("https://nodes.sequence.app/%s/%s"), *ChainPath, *ProjectAccessKey);
 	this->UpdateUrl(ProviderUrl);
@@ -269,13 +270,13 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 {
 	const FAddress From = GetAddress(GetPublicKey(PrivKey));
 	
-	TransactionCount(From, EBlockTag::ELatest, [=](uint64 Count)
+	TransactionCount(From, EBlockTag::ELatest, [this, From, Bytecode, PrivKey, ChainId, OnSuccess, OnFailure](uint64 Count)
 	{
 		const FBlockNonce Nonce = FBlockNonce::From(IntToHexString(Count));
 
-		this->GetGasPrice([=](const FUnsizedData& GasPrice)
+		this->GetGasPrice([this, From, Bytecode, PrivKey, ChainId, Nonce, OnSuccess, OnFailure](const FUnsizedData& GasPrice)
 		{
-			this->EstimateDeploymentGas(From, Bytecode, [=](const FUnsizedData& GasLimit)
+			this->EstimateDeploymentGas(From, Bytecode, [this, From, Bytecode, PrivKey, ChainId, Nonce, GasPrice, OnSuccess, OnFailure](const FUnsizedData& GasLimit)
 			{
 				const FAddress To = FAddress::From("");
 				const FUnsizedData Value = HexStringToBinary("");
@@ -285,7 +286,7 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 				const FAddress DeployedAddress = GetContractAddress(From, Nonce);
 				const FUnsizedData SignedTransaction = Transaction.GetSignedTransaction(PrivKey, ChainId);
 
-				this->SendRawTransaction("0x" + SignedTransaction.ToHex(), [=](const FUnsizedData& Hash)
+				this->SendRawTransaction("0x" + SignedTransaction.ToHex(), [OnSuccess, DeployedAddress](const FUnsizedData& Hash)
 				{
 					OnSuccess(DeployedAddress, Hash);
 				}, OnFailure);
@@ -296,13 +297,12 @@ void UProvider::DeployContractWithHash(const FString& Bytecode, const FPrivateKe
 
 void UProvider::DeployContract(const FString& Bytecode, const FPrivateKey& PrivKey, const int64 ChainId, const TSuccessCallback<FAddress>& OnSuccess, const FFailureCallback& OnFailure)
 {
-	DeployContractWithHash(Bytecode, PrivKey, ChainId, [=](const FAddress& Address, FUnsizedData Hash)
+	DeployContractWithHash(Bytecode, PrivKey, ChainId, [OnSuccess](const FAddress& Address, FUnsizedData Hash)
 	{
 		OnSuccess(Address);
 	}, OnFailure);
 }
 
-//call method
 void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (FTransactionReceipt)>& OnSuccess, const FFailureCallback& OnFailure)
 {	
 	const FString Content = RPCBuilder("eth_getTransactionReceipt").ToPtr()
@@ -325,6 +325,30 @@ void UProvider::TransactionReceipt(const FHash256& Hash, const TFunction<void (F
 			return Res;
 		},
 		OnFailure);
+}
+
+void UProvider::CodeAt(const FString& Address, const EBlockTag BlockTag, const TSuccessCallback<FString>& OnSuccess, const FFailureCallback& OnFailure)
+{
+	const FString Content = RPCBuilder("eth_getCode").ToPtr()
+		->AddArray("params").ToPtr()
+			->AddString(Address)
+			->AddString("pending")
+			->EndArray()
+		->ToString();
+
+	this->SendRPC(Url, Content,[this, OnSuccess](const FString& Result)
+	{
+		const TSharedPtr<FJsonObject> Json = Parse(Result);
+
+		if(Json == nullptr)
+		{
+			OnSuccess("Error parsing Json");
+			return;
+		}
+		
+		OnSuccess(Json->GetStringField(TEXT("result")));
+	},
+	OnFailure, false);
 }
 
 void UProvider::NonceAt(const uint64 Number, const TSuccessCallback<FBlockNonce>& OnSuccess, const FFailureCallback& OnFailure)
@@ -388,7 +412,7 @@ void UProvider::CallHelper(FContractCall ContractCall, const FString& Number, co
 	const FString Content = RPCBuilder("eth_call").ToPtr()
 		->AddArray("params").ToPtr()
 			->AddValue(ContractCall.GetJson())
-			->AddValue(Number)
+			->AddString("pending")
 			->EndArray()
 		->ToString();
 

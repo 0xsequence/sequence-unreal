@@ -11,9 +11,9 @@ public:
 	/**
 	 * Sets the chain ID for the current blockchain network context.
 	 *
-	 * @param NewChainId A 64-bit integer representing the new chain ID to be used (e.g., 1 for Ethereum, 137 for Polygon).
+	 * @param NewChainId A BigInteger as an FString representing the new chain ID to be used (e.g., "1" for Ethereum, "137" for Polygon).
 	 */
-	static void SetChainId(int64 NewChainId);
+	static void SetChainId(FString NewChainId);
 
 	/**
 	 * Sets the redirect URL to be used after completing an on-ramp transaction.
@@ -27,14 +27,7 @@ public:
 	 *
 	 * @return A 64-bit integer representing the chain ID (e.g., 1 for Ethereum Mainnet, 137 for Polygon).
 	 */
-	static int64 GetChainId();
-
-	/**
-	 * Retrieves the chain ID of the currently configured blockchain network as a string.
-	 *
-	 * @return A string representing the chain ID (e.g., "1" for Ethereum Mainnet, "137" for Polygon).
-	 */
-	static FString GetChainIdString();
+	static FString GetChainId();
 
 	/**
 	 * Retrieves the name of the currently configured blockchain network.
@@ -50,6 +43,6 @@ public:
 	 */
 	static FString GetRedirectUrl();
 private:
-	inline static int64 ChainId = -1;
+	inline static FString ChainId = "-1";
 	inline static FString RedirectUrl = "";
 };

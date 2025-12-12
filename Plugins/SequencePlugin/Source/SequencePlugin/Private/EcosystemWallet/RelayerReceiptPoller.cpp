@@ -1,0 +1,43 @@
+#include "RelayerReceiptPoller.h"
+#include "Engine/Engine.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "Async/Async.h"
+#include "Tasks/Task.h"
+
+void URelayerReceiptPoller::StartPolling(const FString& Hash, const TFunction<void(FString)>& InOnSuccess, const TFunction<void(FString)>& InOnFailure)
+{
+	this->Relayer = NewObject<USequenceRelayer>();
+	this->OnSuccess = InOnSuccess;
+	this->OnFailure = InOnFailure;
+	
+	CurrentStatus = "Pending";
+	PollRecursive(Hash);
+}
+
+void URelayerReceiptPoller::PollRecursive(const FString& Hash)
+{
+	if (Relayer == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Relayer is null, cannot poll receipt."))
+		return;
+	}
+	
+	Relayer->GetMetaTxnReceipt(Hash, [this, Hash](const FGetMetaTxnReceiptResponse& Response){
+		CurrentStatus = Response.Receipt.Status;
+
+		if (CurrentStatus == "SUCCEEDED" || CurrentStatus == "FAILED")
+		{
+			OnSuccess(Response.Receipt.TxnHash);
+			return;
+		}
+
+		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [this, Hash]()
+		{
+			FPlatformProcess::Sleep(2.0f);
+			AsyncTask(ENamedThreads::GameThread, [this, Hash]()
+			{
+				PollRecursive(Hash);
+			});
+		});
+	}, OnFailure);
+}

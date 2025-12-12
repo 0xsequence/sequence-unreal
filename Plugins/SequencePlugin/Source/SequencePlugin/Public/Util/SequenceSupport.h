@@ -6,6 +6,7 @@
 #include "Log.h"
 #include "Containers/Union.h"
 #include "Types/Types.h"
+#include "Misc/Base64.h"
 #include "Util/Structs/BE_Structs.h"
 #include "Util/Structs/BE_Enums.h"
 #include "SequenceSupport.generated.h"
@@ -15,8 +16,8 @@ struct FTokenBalanceExtractorReturn;
 struct FSeqGetTransactionHistoryReturn;
 struct FUpdatableItemDataArgs;
 
-typedef TPair<FString, int64> FNameId;
-typedef TPair<int64, FString> FIdName;
+typedef TPair<FString, FString> FNameId;
+typedef TPair<FString, FString> FIdName;
 
 USTRUCT(Blueprintable)
 struct SEQUENCEPLUGIN_API FIdNamePair
@@ -24,7 +25,7 @@ struct SEQUENCEPLUGIN_API FIdNamePair
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence")
-	int64 NetworkId = -1;
+	FString NetworkId = "-1";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="0xSequence")
 	FString NetworkName = "";
 
@@ -45,328 +46,8 @@ class SEQUENCEPLUGIN_API USequenceSupport : public UObject
 {
 	GENERATED_BODY()
 
-private:
-	//Conversion maps for Network Id's and names
-	//when indexing on names compress spaces and to lower
-
-	static inline TMap<int64, FString> NetworkIdToUrlMap = {
-		FIdName(1,TEXT("mainnet")),
-		FIdName(10,TEXT("optimism")),
-		FIdName(40,TEXT("telos")),
-		FIdName(56,TEXT("bsc")),
-		FIdName(100,TEXT("gnosis")),
-		FIdName(137,TEXT("polygon")),
-		FIdName(273,TEXT("xr1")),
-		FIdName(1101,TEXT("polygon-zkevm")),
-		FIdName(1284,TEXT("moonbeam")),
-		FIdName(1868,TEXT("soneium")),
-		FIdName(8333,TEXT("b3")),
-		FIdName(8453,TEXT("base")),
-		FIdName(13371,TEXT("immutable-zkevm")),
-		FIdName(19011,TEXT("homeverse")),
-		FIdName(33139,TEXT("apechain")),
-		FIdName(42161,TEXT("arbitrum")),
-		FIdName(42170,TEXT("arbitrum-nova")),
-		FIdName(42793,TEXT("etherlink")),
-		FIdName(43114,TEXT("avalanche")),
-		FIdName(81457,TEXT("blast")),
-		FIdName(660279,TEXT("xai")),
-		FIdName(5031,TEXT("somnia")),
-		FIdName(1482601649,TEXT("skale-nebula")),
-		FIdName(143,TEXT("monad")),
-		FIdName(24101,TEXT("incentiv")),
-		
-		FIdName(41,TEXT("telos-testnet")),
-		FIdName(97,TEXT("bsc-testnet")),
-		FIdName(1287,TEXT("moonbase-alpha")),
-		FIdName(1946,TEXT("soneium-minato")),
-		FIdName(1993,TEXT("b3-sepolia")),
-		FIdName(2730,TEXT("xr-sepolia")),
-		FIdName(10143,TEXT("monad-testnet")),
-		FIdName(28802,TEXT("incentiv-testnet-v2")),
-		FIdName(13473,TEXT("immutable-zkevm-testnet")),
-		FIdName(33111,TEXT("apechain-testnet")),
-		FIdName(40875,TEXT("homeverse-testnet")),
-		FIdName(43113,TEXT("avalanche-testnet")),
-		FIdName(50312,TEXT("somnia-testnet")),
-		FIdName(80002,TEXT("amoy")),
-		FIdName(84532,TEXT("base-sepolia")),
-		FIdName(128123,TEXT("etherlink-testnet")),
-		FIdName(127823,TEXT("etherlink-shadownet-testnet")),
-		FIdName(421614,TEXT("arbitrum-sepolia")),
-		FIdName(11155111,TEXT("sepolia")),
-		FIdName(11155420,TEXT("optimism-sepolia")),
-		FIdName(21000000,TEXT("toy-testnet")),
-		FIdName(37084624,TEXT("skale-nebula-testnet")),
-		FIdName(168587773,TEXT("blast-sepolia")),
-		FIdName(37714555429,TEXT("xai-sepolia")),
-		FIdName(6252,TEXT("sandbox-testnet")),
-		FIdName(5042002,TEXT("arc-testnet"))
-	};
-	
-	static inline TMap<int64, FString> NetworkIdToNameMap = {
-		FIdName(1,TEXT("Ethereum")),
-		FIdName(13371,TEXT("Immutable")),
-		FIdName(1482601649,TEXT("SKALE Nebula")),
-		FIdName(10,TEXT("Optimism")),
-		FIdName(56,TEXT("BNB Smart Chain")),
-		FIdName(100,TEXT("Gnosis Chain")),
-		FIdName(137,TEXT("Polygon")),
-		FIdName(1101,TEXT("Polygon zkEVM")),
-		FIdName(8333,TEXT("B3")),
-		FIdName(8453,TEXT("Base (Coinbase)")),
-		FIdName(19011,TEXT("Oasys Homeverse")),
-		FIdName(33139,TEXT("APE Chain")),
-		FIdName(42161,TEXT("Arbitrum One")),
-		FIdName(42170,TEXT("Arbitrum Nova")),
-		FIdName(43114,TEXT("Avalanche")),
-		FIdName(81457,TEXT("Blast")),
-		FIdName(660279,TEXT("Xai")),
-		FIdName(1868,TEXT("Soneium")),
-		FIdName(40,TEXT("Telos")),
-		FIdName(1284,TEXT("Moonbeam")),
-		FIdName(42793, TEXT("Etherlink")),
-		FIdName(273, TEXT("XR1")),
-		FIdName(5031, TEXT("Somnia")),
-		FIdName(143, TEXT("Monad")),
-		FIdName(24101, TEXT("Incentiv")),
-		
-		FIdName(13473,TEXT("Immutable Testnet")),
-		FIdName(97,TEXT("BNB Smart Chain Testnet")),
-		FIdName(1946,TEXT("Soneium Minato Testnet")),
-		FIdName(1993,TEXT("B3 Sepolia")),
-		FIdName(2730,TEXT("XR Sepolia")),
-		FIdName(33111,TEXT("APE Chain Testnet")),
-		FIdName(40875,TEXT("Oasys Homeverse Testnet")),
-		FIdName(43113,TEXT("Avalanche Testnet")),
-		FIdName(80002,TEXT("Polygon Amoy")),
-		FIdName(84532,TEXT("Base Sepolia")),
-		FIdName(421614,TEXT("Arbitrum Sepolia")),
-		FIdName(11155111,TEXT("Sepolia")),
-		FIdName(11155420,TEXT("Optimism Sepolia")),
-		FIdName(21000000,TEXT("TOY Testnet")),
-		FIdName(37084624,TEXT("SKALE Nebula Gaming Hub Testnet")),
-		FIdName(168587773,TEXT("Blast Sepolia")),
-		FIdName(37714555429,TEXT("Xai Sepolia")),
-		FIdName(41,TEXT("Telos Testnet")),
-		FIdName(1287,TEXT("Moonbase Alpha")),
-		FIdName(128123,TEXT("Etherlink Testnet")),
-		FIdName(127823,TEXT("Etherlink Shadownet Testnet")),
-		FIdName(10143,TEXT("Monad Testnet")),
-		FIdName(50312,TEXT("Somnia Testnet")),
-		FIdName(11690, TEXT("Incentiv Testnet")),
-		FIdName(28802, TEXT("Incentiv Testnet v2")),
-		FIdName(6252, TEXT("Sandbox Testnet")),
-		FIdName(5042002, TEXT("Arc Testnet"))
-	};
-
-	static inline TMap<FString, int64> NetworkNameToIdMap = {
-		FNameId(TEXT("ethereum"),1),
-		FNameId(TEXT("immutable"),13371),
-		FNameId(TEXT("skale-nebula"),1482601649),
-		FNameId(TEXT("optimism"),10),
-		FNameId(TEXT("bnbsmartchain"),56),
-		FNameId(TEXT("gnosischain"),100),
-		FNameId(TEXT("polygon"),137),
-		FNameId(TEXT("polygonzkevm"),1101),
-		FNameId(TEXT("b3"),8333),
-		FNameId(TEXT("base"),8453),
-		FNameId(TEXT("oasyshomeverse"),19011),
-		FNameId(TEXT("apechain"),33139),
-		FNameId(TEXT("arbitrumone"),42161),
-		FNameId(TEXT("arbitrumnova"),42170),
-		FNameId(TEXT("avalanche"),43114),
-		FNameId(TEXT("blast"),81457),
-		FNameId(TEXT("xai"),660279),
-		FNameId(TEXT("soneium"),1868),
-		FNameId(TEXT("telos"),40),
-		FNameId(TEXT("moonbeam"),1284),
-		FNameId(TEXT("etherlink"),42793),
-		FNameId(TEXT("xr1"),273),
-		FNameId(TEXT("somnia"),5031),
-		FNameId(TEXT("monad"),143),
-		FNameId(TEXT("incentiv"),24101),
-		
-		FNameId(TEXT("immutable-testnet"),13473),
-		FNameId(TEXT("bnbsmartchaintestnet"),97),
-		FNameId(TEXT("soneiumminato"),1946),
-		FNameId(TEXT("b3sepolia"),1993),
-		FNameId(TEXT("xrsepolia"),2730),
-		FNameId(TEXT("apechaintestnet"),33111),
-		FNameId(TEXT("oasyshomeversetestnet"),40875),
-		FNameId(TEXT("avalanche-testnet"),43113),
-		FNameId(TEXT("polygonamoy"),80002),
-		FNameId(TEXT("basesepolia"),84532),
-		FNameId(TEXT("arbitrumsepolia"),421614),
-		FNameId(TEXT("sepolia"),11155111),
-		FNameId(TEXT("optimismsepolia"),11155420),
-		FNameId(TEXT("toytestnet"),21000000),
-		FNameId(TEXT("skalenebulagaminghubtestnet"),37084624),
-		FNameId(TEXT("blastsepolia"),168587773),
-		FNameId(TEXT("xaisepolia"),37714555429),
-		FNameId(TEXT("telos-testnet"), 41),
-		FNameId(TEXT("moonbase-alpha"),1287),
-		FNameId(TEXT("etherlink-testnet"),128123),
-		FNameId(TEXT("etherlink-shadownet-testnet"),127823),
-		FNameId(TEXT("monad-testnet"),10143),
-		FNameId(TEXT("somnia-testnet"),50312),
-		FNameId(TEXT("incentiv-testnet-v2"), 28802),
-		FNameId(TEXT("sandbox-testnet"), 6252),
-		FNameId(TEXT("arc-testnet"), 5042002)
-	};
-	
-	static inline TMap<ENetwork, int64> NetworkEnumToIdMap = {
-		{ENetwork::Ethereum, 1},
-		{ENetwork::Immutable, 13371},
-		{ENetwork::SkaleNebula, 1482601649},
-		{ENetwork::Optimism, 10},
-		{ENetwork::BNBSmartChain, 56},
-		{ENetwork::GnosisChain, 100},
-		{ENetwork::PolygonChain, 137},
-		{ENetwork::PolygonZkEVM, 1101},
-		{ENetwork::B3, 8333},
-		{ENetwork::Base, 8453},
-		{ENetwork::OasysHomeverse, 19011},
-		{ENetwork::APEChain, 33139},
-		{ENetwork::ArbitrumOne, 42161},
-		{ENetwork::ArbitrumNova, 42170},
-		{ENetwork::Avalanche, 43114},
-		{ENetwork::Blast, 81457},
-		{ENetwork::Xai, 660279},
-		{ENetwork::Soneium, 1868},
-		{ENetwork::Telos, 40},
-		{ENetwork::Moonbeam, 1284},
-		{ENetwork::Etherlink, 42793},
-		{ENetwork::XR1, 273},
-		{ENetwork::Somnia, 5031},
-		{ENetwork::Monad, 143},
-		{ENetwork::Incentiv, 24101},
-		
-		{ENetwork::ImmutableTestnet, 13473},
-		{ENetwork::BNBSmartChainTestnet, 97},
-		{ENetwork::SoneiumMinatoTestnet, 1946},
-		{ENetwork::B3Sepolia, 1993},
-		{ENetwork::XRSepolia, 2730},
-		{ENetwork::APEChainTestnet, 33111},
-		{ENetwork::OasysHomeverseTestnet, 40875},
-		{ENetwork::AvalancheTestnet, 43113},
-		{ENetwork::PolygonAmoy, 80002},
-		{ENetwork::BaseSepolia, 84532},
-		{ENetwork::ArbitrumSepolia, 421614},
-		{ENetwork::Sepolia, 11155111},
-		{ENetwork::OptimismSepolia, 11155420},
-		{ENetwork::TOYTestnet, 21000000},
-		{ENetwork::SKALENebulaGamingHubTestnet, 37084624},
-		{ENetwork::BlastSepolia, 168587773},
-		{ENetwork::XaiSepolia, 37714555429},
-		{ENetwork::TelosTestnet, 41},
-		{ENetwork::MoonbaseAlpha, 1287},
-		{ENetwork::EtherlinkTestnet, 128123},
-		{ENetwork::EtherlinkShadownetTestnet, 127823},
-		{ENetwork::MonadTestnet, 10143},
-		{ENetwork::SomniaTestnet, 50312},
-		{ENetwork::IncentivTestnetV2, 28802},
-		{ENetwork::SandboxTestnet, 6252},
-		{ENetwork::ArcTestnet, 5042002}
-	};
-
-	static inline TMap<ENetwork, FString> NetworkEnumToNameMap = {
-		{ENetwork::Ethereum, TEXT("Ethereum")},
-		{ENetwork::Immutable, TEXT("Immutable")},
-		{ENetwork::SkaleNebula, TEXT("SKALE Nebula")},
-		{ENetwork::Optimism, TEXT("Optimism")},
-		{ENetwork::BNBSmartChain, TEXT("BNB Smart Chain")},
-		{ENetwork::GnosisChain, TEXT("Gnosis Chain")},
-		{ENetwork::PolygonChain, TEXT("Polygon")},
-		{ENetwork::PolygonZkEVM, TEXT("Polygon zkEVM")},
-		{ENetwork::B3, TEXT("B3")},
-		{ENetwork::Base, TEXT("Base (Coinbase)")},
-		{ENetwork::OasysHomeverse, TEXT("Oasys Homeverse")},
-		{ENetwork::APEChain, TEXT("APE Chain")},
-		{ENetwork::ArbitrumOne, TEXT("Arbitrum One")},
-		{ENetwork::ArbitrumNova, TEXT("Arbitrum Nova")},
-		{ENetwork::Avalanche, TEXT("Avalanche")},
-		{ENetwork::Blast, TEXT("Blast")},
-		{ENetwork::Xai, TEXT("Xai")},
-		{ENetwork::Soneium, TEXT("Soneium")},
-		{ENetwork::Telos, TEXT("Telos")},
-		{ENetwork::Moonbeam, TEXT("Moonbeam")},
-		{ENetwork::Etherlink, TEXT("Etherlink")},
-		{ENetwork::XR1, TEXT("XR1")},
-		{ENetwork::Somnia, TEXT("Somnia")},
-		{ENetwork::Monad, TEXT("Monad")},
-		{ENetwork::Incentiv, TEXT("Incentiv")},
-		
-		{ENetwork::ImmutableTestnet, TEXT("Immutable Testnet")},
-		{ENetwork::BNBSmartChainTestnet, TEXT("BNB Smart Chain Testnet")},
-		{ENetwork::SoneiumMinatoTestnet, TEXT("Soneium Minato Testnet")},
-		{ENetwork::B3Sepolia, TEXT("B3 Sepolia")},
-		{ENetwork::XRSepolia, TEXT("XR Sepolia")},
-		{ENetwork::APEChainTestnet, TEXT("APE Chain Testnet")},
-		{ENetwork::OasysHomeverseTestnet, TEXT("Oasys Homeverse Testnet")},
-		{ENetwork::AvalancheTestnet, TEXT("Avalanche Testnet")},
-		{ENetwork::PolygonAmoy, TEXT("Polygon Amoy")},
-		{ENetwork::BaseSepolia, TEXT("Base Sepolia")},
-		{ENetwork::ArbitrumSepolia, TEXT("Arbitrum Sepolia")},
-		{ENetwork::Sepolia, TEXT("Sepolia")},
-		{ENetwork::OptimismSepolia, TEXT("Optimism Sepolia")},
-		{ENetwork::TOYTestnet, TEXT("TOY Testnet")},
-		{ENetwork::SKALENebulaGamingHubTestnet, TEXT("SKALE Nebula Gaming Hub Testnet")},
-		{ENetwork::BlastSepolia, TEXT("Blast Sepolia")},
-		{ENetwork::XaiSepolia, TEXT("Xai Sepolia")},
-		{ENetwork::TelosTestnet, TEXT("Telos Testnet")},
-		{ENetwork::MoonbaseAlpha, TEXT("Moonbase Alpha")},
-		{ENetwork::EtherlinkTestnet, TEXT("Etherlink Testnet")},
-		{ENetwork::EtherlinkShadownetTestnet, TEXT("Etherlink Shadownet Testnet")},
-		{ENetwork::MonadTestnet, TEXT("Monad Testnet")},
-		{ENetwork::SomniaTestnet, TEXT("Somnia Testnet")},
-		{ENetwork::IncentivTestnetV2, TEXT("Incentiv Testnet v2")},
-		{ENetwork::SandboxTestnet, TEXT("Sandbox Testnet")},
-		{ENetwork::ArcTestnet, TEXT("Arc Testnet")}
-	};
-
 public:
-	
-	/**
-	 * Pass in a network Id and receive the name associated with that Id
-	 * @param NetworkIdIn The Id associated with the Network Name
-	 * @return The matching network name, OR an empty FString if nothing was found
-	 */
-	static FString GetNetworkName(const int64 NetworkIdIn);
-
-	static FString GetNetworkName(const ENetwork NetworkIn);
-
-
-	static FString GetNetworkNameForUrl(const int64 NetworkIdIn);
-
-	static bool IsNetworkIdSupported(const int64 NetworkIdIn);
-
-	/**
-	 * Gets the associated Network Id with the given Network Name
-	 * @param NetworkNameIn The network's name
-	 * @return The associated Id, if none was found returns -1
-	 */
-	static int64 GetNetworkId(const FString& NetworkNameIn);
-
-	static int64 GetNetworkId(const ENetwork& Network);
-
-	/**
-	 * Gets all networks in the system
-	 * @return a TArray of all networks
-	 */
-	static TArray<FIdNamePair> GetAllNetworks();
-
-	/**
-	 * Gets all Network Names supported by sequence
-	 * @return A list of all network names in the system
-	 */
-	static TArray<FString> GetAllNetworkNames();
-
-	/**
-	 * Gets a list of all network Ids support by sequence
-	 * @return A list of all network ids in the system
-	 */
-	static TArray<int64> GetAllNetworkIds();
+	static void OpenExternalBrowser(const FString& Url);
 	
 	/*
 	* Used to get the amount that users can read,
@@ -427,6 +108,7 @@ public:
 		FString Ret;
 		FJsonObjectConverter::UStructToJsonObjectString<T>(StructVar, Ret, 0, 0);
 		StringReplace(&Ret, "\n", "");
+		StringReplace(&Ret, "\"None\"", "null");
 		return Ret;
 	}
 
@@ -502,6 +184,90 @@ public:
 		return Ret;
 	}
 
+	static bool ParseJsonStringToObjectArray(const FString& JsonString, TArray<TSharedPtr<FJsonValue>>& OutArray)
+	{
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonString);
+		
+		if (FJsonSerializer::Deserialize(Reader, OutArray) && OutArray.Num() > 0)
+		{
+			return true;
+		}
+		
+		OutArray.Empty();
+		return false;
+	}
+
+	static FString DecodeBase64ToString(const FString& Base64Input)
+	{
+		TArray<uint8> Bytes;
+		if (FBase64::Decode(Base64Input, Bytes))
+		{
+			FString Out;
+			FUTF8ToTCHAR Converter(reinterpret_cast<const ANSICHAR*>(Bytes.GetData()), Bytes.Num());
+			Out = FString(Converter.Length(), Converter.Get());
+			return Out;
+		}
+
+		return FString();
+	}
+
+	static FString JsonArrayToString(const TArray<TSharedPtr<FJsonValue>>& JsonValues)
+	{
+		FString OutputString;
+		const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+
+		FJsonSerializer::Serialize(JsonValues, Writer);
+		return OutputString;
+	}
+
+	static TSharedPtr<FJsonValue> ParseJsonValue(const FString& JsonString)
+	{
+		TSharedPtr<FJsonValue> JsonValue;
+		const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonString);
+
+		if (!FJsonSerializer::Deserialize(Reader, JsonValue))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse JSON value: %s"), *JsonString);
+			return nullptr;
+		}
+
+		return JsonValue;
+	}
+
+	static FString JsonValueToString(const TSharedPtr<FJsonValue>& JsonValue)
+	{
+		if (!JsonValue.IsValid())
+		{
+			return TEXT("null");
+		}
+
+		switch (JsonValue->Type)
+		{
+		case EJson::String:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::String"));
+			return JsonValue->AsString();
+
+		case EJson::Number:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Number"));
+			return FString::SanitizeFloat(JsonValue->AsNumber());
+
+		case EJson::Boolean:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Boolean"));
+			return JsonValue->AsBool() ? TEXT("true") : TEXT("false");
+
+		case EJson::Array:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Array"));
+			return USequenceSupport::JsonArrayToString(JsonValue->AsArray());
+
+		case EJson::Object:
+			UE_LOG(LogTemp, Display, TEXT("JsonValue->Type is EJson::Object"));
+			return USequenceSupport::JsonToString(JsonValue->AsObject());
+
+		default:
+			return "";
+		}
+	}
+
 	static FString StringListToSimpleString(TArray<FString> StringData);
 
 	//for maintaining valid json for args in RPC calls
@@ -549,6 +315,21 @@ public:
 	 * @return Decoded data as an unnamed JSON array of values.
 	 */
 	static FString DecodeFunctionResult(const FString& Abi, const FString& EncodedData);
+
+	/**
+	 * Encode the given big integer into a byte array.
+	 * @param Value The BigInteger value as a string type.
+	 * @return The encoded byte array.
+	 */
+	static TArray<uint8> EncodeBigInteger(const FString& Value);
+
+	static TArray<uint8> EncodeAndHashTypedData(const FString& DomainJson);
+
+	static bool BigIntToBytes(const FString& ValueString, int32 Size, TArray<uint8>& OutBytes, FString& OutError);
+
+	static bool RecoverEthPubAndAddress(const TArray<uint8>& Signature, const TArray<uint8>& AttestationHash, TArray<uint8>& OutPubKey, TArray<uint8>& OutAddress);
+
+	static TArray<uint8> EncodeTwoAddresses(const FString& A, const FString& B);
 	
 private:
 	/*

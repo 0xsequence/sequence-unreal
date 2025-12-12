@@ -14,7 +14,7 @@
 
             dependencies {
             implementation "androidx.appcompat:appcompat:1.2.0"
-            implementation "androidx.browser:browser:1.0.0"
+            implementation "androidx.browser:browser:1.7.0"
     implementation "androidx.credentials:credentials:1.2.0"
     implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
     implementation "com.google.android.libraries.identity.googleid:googleid:1.1.0" 
@@ -26,7 +26,8 @@
     <proguardAdditions>
         <insert>    
 -if class androidx.credentials.CredentialManager
--keep class androidx.credentials.playservices.** { *; }        
+-keep class androidx.credentials.playservices.** { *; } 
+-keep class com.Plugins.SequencePlugin.** { *; }
         </insert>    
     </proguardAdditions>    
         

@@ -5,11 +5,12 @@
 #include "IndexerEndToEndTests/Helpers/IndexerRequestsTestData.h"
 #include "Helpers/BatchTestBuilder.h" // Include the BatchTestBuilder header
 #include "Helpers/IndexerRequestsTestData.h"
+#include "Util/ChainCollection.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIndexerPingTest, "SequencePlugin.EndToEnd.IndexerTests.PingTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /* Latent command used to poll off main thread to see if our pings are done */
-DEFINE_LATENT_AUTOMATION_COMMAND_THREE_PARAMETER(FIsDone, const UIndexerRequestsTestData *, IndexerRequestsTestData, FAutomationTestBase *, PingTest, const TArray<int64>*, FailedNetworks);
+DEFINE_LATENT_AUTOMATION_COMMAND_THREE_PARAMETER(FIsDone, const UIndexerRequestsTestData *, IndexerRequestsTestData, FAutomationTestBase *, PingTest, const TArray<FString>*, FailedNetworks);
 
 /* Latent command used to batch process pings w/o exceeding network threading limits */
 DEFINE_LATENT_AUTOMATION_COMMAND_FIVE_PARAMETER(FProcessPingBatch, const int32, WatchIndex, const int32, FinishIndex, const UIndexerRequestsTestData *, IndexerRequestsTestData, const TSuccessCallback<bool>, SuccessCallback, const FFailureCallback, FailureCallback);
@@ -21,11 +22,11 @@ bool FProcessPingBatch::Update()
         return false;
     }
 
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     
     for (int i = WatchIndex; i <= FinishIndex; i++)
     {
-        UE_LOG(LogTemp, Display, TEXT("Index: %d, Pinging Network: %lld"), i, Networks[i]);
+        UE_LOG(LogTemp, Display, TEXT("Index: %d, Pinging Network: %s"), i, *Networks[i]);
         IndexerRequestsTestData->GetIndexer()->Ping(Networks[i], SuccessCallback, FailureCallback);
     }
     
@@ -46,10 +47,10 @@ bool FIsDone::Update()
     else
     {
         FString FailedNetworksStr;
-        for (const int64& NetworkId : *FailedNetworks)
+        for (const FString& NetworkId : *FailedNetworks)
         {
-            const FString NetworkName = USequenceSupport::GetNetworkName(NetworkId);
-            FailedNetworksStr += FString::Printf(TEXT("%s (%lld), "), *NetworkName, NetworkId);
+            const FString NetworkName = FChainCollection::GetNetworkName(NetworkId);
+            FailedNetworksStr += FString::Printf(TEXT("%s (%s), "), *NetworkName, *NetworkId);
         }
         PingTest->AddError(FString::Printf(TEXT("Ping failed for networks: %s"), *FailedNetworksStr));
     }
@@ -65,11 +66,11 @@ void FIndexerPingTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FStr
 
 bool FIndexerPingTest::RunTest(const FString& Parameters)
 {
-    const TArray<int64> Networks = USequenceSupport::GetAllNetworkIds();
+    const TArray<FString> Networks = FChainCollection::GetAllNetworkIds();
     UIndexerRequestsTestData* IndexerRequestsTestData = UIndexerRequestsTestData::Make(Networks.Num());
     
     // Create a shared pointer to track failed networks
-    TArray<int64>* FailedNetworks = new TArray<int64>();
+    TArray<FString>* FailedNetworks = new TArray<FString>();
 
     const TSuccessCallback<bool> GenericSuccess = [this, IndexerRequestsTestData](const bool bSuccess)
     {
@@ -84,9 +85,9 @@ bool FIndexerPingTest::RunTest(const FString& Parameters)
         FailedNetworks->Add(Networks[CurrentIndex]);
         
         const FString Message = "Ping Failure";
-        AddError(FString::Printf(TEXT("%s for network %lld: %s. Remaining pings: %d"), 
+        AddError(FString::Printf(TEXT("%s for network %s: %s. Remaining pings: %d"), 
             *Message, 
-            Networks[CurrentIndex],
+            *Networks[CurrentIndex],
             *Error.Message, 
             IndexerRequestsTestData->DecrementPendingRequests()));
         IndexerRequestsTestData->RequestFailed();

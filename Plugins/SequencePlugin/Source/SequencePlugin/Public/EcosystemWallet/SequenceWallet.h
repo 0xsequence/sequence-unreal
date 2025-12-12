@@ -1,0 +1,39 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "WalletInfo.h"
+#include "Permissions/Permissions.h"
+#include "Relayer/Models/FeeOptionsResponse.h"
+#include "Transactions/Transaction.h"
+#include "UObject/Object.h"
+#include "Util/Async.h"
+#include "SequenceWallet.generated.h"
+
+class UEcosystemClient;
+class FSessionStorage;
+class FWalletState;
+
+UCLASS()
+class SEQUENCEPLUGIN_API USequenceWallet : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	USequenceWallet();
+
+	void AddSession(const TScriptInterface<IPermissions>& Permissions, TSuccessCallback<bool> OnSuccess, const FFailureCallback& OnFailure);
+	void SignMessage(const FString& Message, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
+	void GetFeeOptions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FFeeOptionsResponse> OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransaction(const TScriptInterface<ISeqTransactionBase>& Transaction, const FFeeOption& FeeOption, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
+	void SendTransactionWithoutPermissions(const TScriptInterface<ISeqTransactionBase>& Transaction, TSuccessCallback<FString> OnSuccess, const FFailureCallback& OnFailure);
+	
+	void ClearSessions();
+	FWalletInfo GetWalletInfo();
+	bool CheckIfWalletExists();
+
+private:
+	UPROPERTY()
+	UEcosystemClient* Client = nullptr;
+	
+	TSharedPtr<FWalletState> WalletState;
+};

@@ -32,7 +32,8 @@ public class SequencePlugin : ModuleRules
                 new string[] 
                 {
 					"Engine",
-					"Launch"                    
+					"Launch",
+					"ApplicationCore"
                 }
             );
             AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(ModuleDirectory, "SequencePlugin_UPL_Android.xml"));
@@ -58,7 +59,7 @@ public class SequencePlugin : ModuleRules
 				"Projects",
                 "Json",
                 "JsonUtilities",
-				"ApplicationCore", "WebBrowser", "EngineSettings"
+				"ApplicationCore", "WebBrowser", "EngineSettings", "HTTPServer", "WebBrowserWidget", "UMG", "ExternalSource"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -141,8 +142,9 @@ public class SequencePlugin : ModuleRules
 	public void AddEthAbiLibraries()
 	{
 		string EthAbiDirectory = Path.Combine(PluginDirectory, "Source/SequencePlugin/Public/EthAbi/");
-
+		
 		PublicSystemLibraryPaths.Add(EthAbiDirectory);
+		//PublicAdditionalLibraries.Add(Path.Combine(EthAbiDirectory, "libethabi_bridge.a"));
 
         if (Target.Platform == UnrealTargetPlatform.Win64)
         {
@@ -173,7 +175,6 @@ public class SequencePlugin : ModuleRules
         {
             string libDir = Path.Combine(EthAbiDirectory, "android");
             PublicAdditionalLibraries.Add(Path.Combine(libDir, "arm64", "libethabi_bridge.a"));
-            PublicAdditionalLibraries.Add(Path.Combine(libDir, "x86", "libethabi_bridge.a"));
         }
 	}
 }//namespace

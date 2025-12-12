@@ -1,0 +1,44 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Provider.h"
+#include "KeyMachine/KeyMachine.h"
+#include "KeyMachine/Models/ConfigUpdatesResponse.h"
+#include "KeyMachine/Models/DeployHashResponse.h"
+#include "EcosystemWallet/Primitives/Config/SeqConfig.h"
+#include "EcosystemWallet/Primitives/Sessions/SessionsTopology.h"
+#include "UObject/Object.h"
+
+class SEQUENCEPLUGIN_API FWalletState
+{
+public:
+	FString Address = "";
+	FString ImageHash = "";
+	FString SessionsImageHash = "";
+	FString DeployHash = "";
+	bool IsDeployed = false;
+	FString Nonce = "0";
+	FDeployHashContext DeployContext = FDeployHashContext();
+	TArray<FConfigUpdate> ConfigUpdates;
+	TSharedPtr<FSeqConfig> Config;
+	TSharedPtr<FSessionsTopology> SessionsTopology;
+
+	FWalletState();
+	
+	void UpdateState(const FString& InAddress, const TFunction<void()>& OnSuccess, const TFunction<void(FString)>& OnFailure);
+
+private:
+	UKeyMachine* KeyMachine;
+
+	UProvider* Provider = nullptr;
+
+	int32 UpdateProgress = 0;
+
+	void UpdateDeployContext(const TFunction<void()>& Callback);
+	void UpdateDeployedState(const TFunction<void()>& Callback);
+	void UpdateNonce(const TFunction<void()>& Callback);
+	void UpdateConfig(const FString& InImageHash, const TFunction<void()>& Callback);
+	void UpdateSessionsTopology(const FString& InImageHash, const TFunction<void()>& Callback);
+	void GetImplementation(const TFunction<void(FString)>& Callback);
+	void GetOnchainImageHash(const TFunction<void(FString)>& Callback);
+};

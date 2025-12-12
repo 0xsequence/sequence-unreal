@@ -34,7 +34,7 @@ void FIndexerGetTokenSuppliesMapTest::GetTests(TArray<FString>& OutBeautifiedNam
 
 bool FIndexerGetTokenSuppliesMapTest::RunTest(const FString& Parameters)
 {
-    const int64 PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
+    const FString PolygonNetworkId = IndexerEndToEndTestsCommon::PolygonNetworkId;
     UIndexerRequestsTestData* IndexerRequestsTestData = UIndexerRequestsTestData::Make(1);
 
     const FString UsdcAddress = IndexerEndToEndTestsCommon::TestContractAddress_USDC;

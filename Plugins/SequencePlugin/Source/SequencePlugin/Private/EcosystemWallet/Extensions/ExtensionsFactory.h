@@ -1,0 +1,37 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "ExtensionsData.h"
+
+class SEQUENCEPLUGIN_API FExtensionsFactory
+{
+public:
+	inline static const FExtensionsData Rc4 {
+		TEXT("0x00000000000018A77519fcCCa060c2537c9D6d3F"), // Factory
+		TEXT("0x0000000000003DF093bc4257E6dCE45D937EF161"), // Stage1
+		TEXT("0x10bE1Abf3cD0918bb1079ECc6b8220c177F34088"), // Stage2
+		TEXT("0x6041600e3d396021805130553df33d3d36153402601f57363d3d373d363d30545af43d82803e903d91601f57fd5bf3"), // CreationCode
+		TEXT("0x00000000000030Bcc832F7d657f50D6Be35C92b3"), // Sessions
+		TArray<FString> {
+			TEXT("0x18002Fc09deF9A47437cc64e270843dE094f5984"),
+			TEXT("0xF6Bc87F5F2edAdb66737E32D37b46423901dfEF1")
+		} // Guard
+	};
+	
+	inline static const FExtensionsData Rc5 {
+		TEXT("0x00000000000018A77519fcCCa060c2537c9D6d3F"), // Factory
+		TEXT("0x0000000000001f3C39d61698ab21131a12134454"), // Stage1
+		TEXT("0xD0ae8eF93b7DA4eabb32Ec4d81b7a501DCa04D4C"), // Stage2
+		TEXT("0x6041600e3d396021805130553df33d3d36153402601f57363d3d373d363d30545af43d82803e903d91601f57fd5bf3"), // CreationCode
+		TEXT("0x00000000000030Bcc832F7d657f50D6Be35C92b3"), // Sessions
+		TArray<FString> {
+			TEXT("0x18002Fc09deF9A47437cc64e270843dE094f5984"),
+			TEXT("0xF6Bc87F5F2edAdb66737E32D37b46423901dfEF1")
+		} // Guard
+	};
+
+	static const FExtensionsData& GetCurrent()
+	{
+		return Rc5;
+	}
+};

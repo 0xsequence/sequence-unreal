@@ -1,11 +1,18 @@
 #include "Subsystems/SequenceUtilityBP.h"
+#include "EcosystemWallet/Transactions/CallDataTransaction.h"
+#include "EcosystemWallet/Transactions/TransactionBatch.h"
 #include "Engine/Engine.h"
 #include "Util/Log.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Sequence/Transactions.h"
-#include "Types/BinaryData.h"
+#include "Util/ChainCollection.h"
 
 USequenceUtilityBP::USequenceUtilityBP() { }
+
+void USequenceUtilityBP::OpenExternalBrowser(const FString& Url)
+{
+	USequenceSupport::OpenExternalBrowser(Url);
+}
 
 UTransactions* USequenceUtilityBP::ConstructSingleERC20Transaction(const FString& ContractAddress, const FString& RecipientAddress, const FString& Value)
 {
@@ -51,6 +58,22 @@ UTransactions* USequenceUtilityBP::ConstructSingleERC1155Transaction(const FStri
 	return Transactions;
 }
 
+TScriptInterface<ISeqTransactionBase> USequenceUtilityBP::ConvertToEcosystemWalletTransaction(const FRawTransaction& RawTransaction)
+{
+	return UCallDataTransaction::CreateCallDataTransaction(RawTransaction.to, RawTransaction.value, RawTransaction.data);
+}
+
+TScriptInterface<ISeqTransactionBase> USequenceUtilityBP::ConvertToEcosystemWalletTransactions(const TArray<FRawTransaction>& RawTransactions)
+{
+	TArray<TScriptInterface<ISeqTransactionBase>> ConvertedTransactions;
+	for (FRawTransaction RawTransaction : RawTransactions)
+	{
+		ConvertedTransactions.Add(ConvertToEcosystemWalletTransaction(RawTransaction));
+	}
+	
+	return UTransactionBatch::CreateTransactionBatch(ConvertedTransactions);
+}
+
 void USequenceUtilityBP::ClipboardCopy(const FString& Text)
 {
 	TArray<TCHAR> CharArray = Text.GetCharArray();
@@ -68,39 +91,34 @@ int64 USequenceUtilityBP::GetTransactionReadableAmountIntDecimals(float Amount, 
 	return USequenceSupport::GetSystemReadableAmount(Amount,Decimals);
 }
 
-int64 USequenceUtilityBP::GetNetworkIdFromName(const FString& NetworkNameIn)
+FString USequenceUtilityBP::GetNetworkIdFromName(const FString& NetworkNameIn)
 {
-	return USequenceSupport::GetNetworkId(NetworkNameIn);
+	return FChainCollection::GetNetworkId(NetworkNameIn);
 }
 
-int64 USequenceUtilityBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
+FString USequenceUtilityBP::GetNetworkIdFromNetworkEnum(const ENetwork& NetworkEnumIn)
 {
-	return USequenceSupport::GetNetworkId(NetworkEnumIn);
+	return FChainCollection::GetNetworkId(NetworkEnumIn);
 }
 
-FString USequenceUtilityBP::GetNetworkNameFromId(const int64 NetworkIdIn)
+FString USequenceUtilityBP::GetNetworkNameFromId(const FString NetworkIdIn)
 {
-	return USequenceSupport::GetNetworkName(NetworkIdIn);
+	return FChainCollection::GetNetworkName(NetworkIdIn);
 }
 
 FString USequenceUtilityBP::GetNetworkNameFromEnum(const ENetwork NetworkIn)
 {
-	return USequenceSupport::GetNetworkName(NetworkIn);
-}
-
-TArray<FIdNamePair> USequenceUtilityBP::GetAllNetworks()
-{
-	return USequenceSupport::GetAllNetworks();
+	return FChainCollection::GetNetworkName(NetworkIn);
 }
 
 TArray<FString> USequenceUtilityBP::GetAllNetworkNames()
 {
-	return USequenceSupport::GetAllNetworkNames();
+	return FChainCollection::GetAllNetworkNames();
 }
 
-TArray<int64> USequenceUtilityBP::GetAllNetworkIds()
+TArray<FString> USequenceUtilityBP::GetAllNetworkIds()
 {
-	return USequenceSupport::GetAllNetworkIds();
+	return FChainCollection::GetAllNetworkIds();
 }
 
 FString USequenceUtilityBP::EncodeFunctionData(const FString& FunctionSignature, const FString& Values)

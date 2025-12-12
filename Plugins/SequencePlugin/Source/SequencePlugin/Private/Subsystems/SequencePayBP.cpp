@@ -50,7 +50,7 @@ void USequencePayBP::GetSupportedSwapChains(FOnGetSupportedSwapChains OnSuccess,
 	this->Pay->GetSupportedSwapChains(OnApiSuccess, OnApiFailure);
 }
 
-void USequencePayBP::GetSupportedSwapTokens(const TArray<int64>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure)
+void USequencePayBP::GetSupportedSwapTokens(const TArray<FString>& ChainIds, FOnGetSupportedSwapTokens OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<FSeqGetLifiTokensResponse> OnApiSuccess = [this, OnSuccess](const FSeqGetLifiTokensResponse& Response)
 	{

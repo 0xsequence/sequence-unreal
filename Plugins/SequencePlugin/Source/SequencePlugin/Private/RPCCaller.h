@@ -7,6 +7,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "ResponseSignatureValidator.h"
+#include "EcosystemWallet/Authentication/RedirectHandler/MobileRedirectHandler.h"
 #include "RPCCaller.generated.h"
 
 template<typename T> using Extractor = TFunction<TResult<T> (FString)>;

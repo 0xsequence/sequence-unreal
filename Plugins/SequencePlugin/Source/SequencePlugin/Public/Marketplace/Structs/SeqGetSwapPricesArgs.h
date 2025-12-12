@@ -14,7 +14,7 @@ public:
     static FString GetArgs() { return ""; }
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "chainId"))
-    int64 ChainId;
+    FString ChainId;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "0xSequence", meta = (JsonFieldName = "toTokenAddress"))
     FString ToTokenAddress;
