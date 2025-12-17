@@ -1,21 +1,26 @@
-![header](https://github.com/user-attachments/assets/2db8f2e9-bf37-4417-9501-5234cc031c50)
+![header](https://github.com/user-attachments/assets/08e33327-61e4-4e22-a3ab-74d9f0f4483d)
 
 # Sequence Unreal SDK
 
-The Sequence Unreal Embedded Wallet SDK provides full Sequence Embedded Wallet and Indexer integration for your Unreal Framework games.
+The Sequence Unreal SDK provides full support for Sequence's Ecosystem Wallet, Embedded Wallet, Indexer, and Marketplace for your Unreal Engine games.
 
-[![Docs](https://img.shields.io/badge/Documentation-7334f8)](https://docs.sequence.xyz/sdk/unreal/introduction)
-[![Boilerplate](https://img.shields.io/badge/Get%20started%20using%20our%20Boilerplate%20Project-7334f8)](https://github.com/0xsequence/unreal-embedded-wallet-boilerplate)
+[![Docs](https://img.shields.io/badge/Documentation-7334f8)](https://docs.sequence.xyz/sdk/unreal/overview)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap%20your%20Game-7334f8)]([https://docs.sequence.xyz/sdk/unreal/overview](https://docs.sequence.xyz/sdk/unreal/bootstrap))
 
-![Intro](https://docs.sequence.xyz/img/unreal/unreal_intro.gif)
+# Demos
+
+Check out our public demos on your device!
+
+[![iOS](https://img.shields.io/badge/iOS-7334f8)](https://testflight.apple.com/join/YsMCKkd6)
+[![Android](https://img.shields.io/badge/Android-7334f8)](https://play.google.com/store/apps/details?id=app.sequence.unrealsdkdemo)
 
 ## Supported Platforms
 
-- Unreal Engine 5.2 or later
-- PC Standalone
-- Mac Standalone
-- Android
-- iOS
+![Unreal](https://img.shields.io/badge/Unreal%20Engine%205%20.4%20or%20later-6c5d8c)
+![Mac](https://img.shields.io/badge/Mac-6c5d8c)
+![Windows](https://img.shields.io/badge/Windows-6c5d8c)
+![Android](https://img.shields.io/badge/Android-6c5d8c)
+![iOS](https://img.shields.io/badge/iOS-6c5d8c)
 
 ## Boilerplates
 
