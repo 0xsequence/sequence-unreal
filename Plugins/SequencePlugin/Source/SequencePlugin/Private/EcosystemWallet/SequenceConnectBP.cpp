@@ -8,6 +8,21 @@ USequenceConnectBP::USequenceConnectBP()
 	this->SequenceConnect = NewObject<USequenceConnect>();
 }
 
+void USequenceConnectBP::GetEcosystemConfig(FOnEcosystemConfig OnSuccess, FOnFailure OnFailure)
+{
+	const TSuccessCallback<FEcosystemConfig> SuccessCallback = [this, OnSuccess](const FEcosystemConfig& Config)
+	{
+		OnSuccess.ExecuteIfBound(Config);
+	};
+	
+	const FFailureCallback FailureCallback = [OnFailure](const FSequenceError& Error)
+	{
+		OnFailure.ExecuteIfBound(Error.Message);	
+	};
+	
+	this->SequenceConnect->GetEcosystemConfig(SuccessCallback, FailureCallback);
+}
+
 void USequenceConnectBP::SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure)
 {
 	const TSuccessCallback<bool> SuccessCallback = [this, OnSuccess](bool Result)
