@@ -13,6 +13,7 @@ class SEQUENCEPLUGIN_API UHttpHandler : public UObject
 public:
 	void SetRequestUrl(const FString& Url);
 	void SendPostRequest(const FString& Endpoint, const FString& Payload, TSuccessCallback<FString> OnSuccess, TFunction<void(FString)> OnFailure) const;
+	void SendGetRequest(const FString& Endpoint, TSuccessCallback<FString> OnSuccess, TFunction<void(FString)> OnFailure) const;
 
 private:
 	FString RequestUrl;

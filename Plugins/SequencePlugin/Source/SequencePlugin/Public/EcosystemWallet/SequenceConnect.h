@@ -2,6 +2,7 @@
 
 #include "Util/Async.h"
 #include "CoreMinimal.h"
+#include "EcosystemConfig.h"
 #include "Permissions/Permissions.h"
 #include "SequenceConnect.generated.h"
 
@@ -15,6 +16,7 @@ class SEQUENCEPLUGIN_API USequenceConnect : public UObject
 public:
 	USequenceConnect();
 	
+	void GetEcosystemConfig(const TSuccessCallback<FEcosystemConfig>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignInWithGoogle(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);
 	void SignInWithApple(const TScriptInterface<IPermissions>& Permissions, const TSuccessCallback<bool>& OnSuccess, const FFailureCallback& OnFailure);

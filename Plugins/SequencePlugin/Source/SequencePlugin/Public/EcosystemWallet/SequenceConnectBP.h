@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SequenceConnect.h"
+#include "EcosystemConfig.h"
 #include "Permissions/Permissions.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SequenceConnectBP.generated.h"
@@ -13,7 +14,7 @@ class SEQUENCEPLUGIN_API USequenceConnectBP : public UGameInstanceSubsystem
 
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSession);
-	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnEcosystemConfig, FEcosystemConfig, Config);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFailure, const FString&, Error);
 	DECLARE_DYNAMIC_DELEGATE(FOnSuccess);
 	
@@ -21,6 +22,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "0xSequence SDK - Events")
 	FOnSession OnSessionCreated;
+
+	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
+	void GetEcosystemConfig(FOnEcosystemConfig OnSuccess, FOnFailure OnFailure);
 
 	UFUNCTION(BlueprintCallable, Category="0xSequence SDK - Ecosystem Wallet")
 	void SignInWithEmail(const FString& Email, const TScriptInterface<IPermissions> Permissions, FOnSuccess OnSuccess, FOnFailure OnFailure);
