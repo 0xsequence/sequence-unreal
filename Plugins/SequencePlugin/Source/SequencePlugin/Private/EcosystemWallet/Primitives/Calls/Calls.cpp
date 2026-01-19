@@ -18,8 +18,8 @@ TArray<uint8> FCalls::Encode()
 
 TArray<uint8> FCalls::Hash(const FString& Wallet, const FBigInt& ChainId) const
 {
-	FCalls Calls = FCalls(this->Calls, this->Space, this->Nonce);
-	FString DomainJson = FCallTypedDataFactory::FromCalls(Wallet, ChainId, MakeShared<FCalls>(Calls));
+	FCalls NewCalls = FCalls(this->Calls, this->Space, this->Nonce);
+	FString DomainJson = FCallTypedDataFactory::FromCalls(Wallet, ChainId, MakeShared<FCalls>(NewCalls));
 	DomainJson = DomainJson.Replace(TEXT("\n"), TEXT(""));
 	DomainJson = DomainJson.Replace(TEXT("\t"), TEXT(""));
 	

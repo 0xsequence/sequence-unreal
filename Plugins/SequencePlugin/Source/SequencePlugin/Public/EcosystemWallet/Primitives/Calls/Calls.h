@@ -9,8 +9,8 @@ struct SEQUENCEPLUGIN_API FCalls
 	FCalls()
 		: Calls(TArray<FCall>()), Space(FBigInt("0")), Nonce(FBigInt("0")) { }
 	
-	explicit FCalls(const TArray<FCall>& Calls, const FBigInt& Space, const FBigInt& Nonce)
-		: Calls(Calls), Space(Space), Nonce(Nonce) { }
+	explicit FCalls(const TArray<FCall>& InCalls, const FBigInt& InSpace, const FBigInt& InNonce)
+		: Calls(InCalls), Space(InSpace), Nonce(InNonce) { }
 
 	TArray<uint8> Encode();
 
